@@ -1,0 +1,11 @@
+{
+	"ImportPath": "github.com/kgilpin/secretless-pg",
+	"GoVersion": "go1.5",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "eb3733d160e74a9c7e442f435eb3bea458e1d19f"
+		}
+	]
+}

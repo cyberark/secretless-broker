@@ -1,0 +1,56 @@
+version: '2.1'
+services:
+  pg:
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+
+  conjur:
+    image: cyberark/conjur:0.1.0-stable
+    command: server -a dev
+    environment:
+      DATABASE_URL: postgres://postgres@pg/postgres
+      CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
+    volumes:
+      - .:/work
+    depends_on:
+      - pg
+
+  cli5:
+    image: conjurinc/cli5
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+    volumes:
+      - .:/work
+    depends_on:
+      - conjur
+
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - conjur
+    volumes:
+      - .:/go/src/github.com/kgilpin/secretless-pg
+    depends_on:
+      - pg
+
+  proxy_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    entrypoint: bash
+    depends_on:
+      - conjur
+    volumes:
+      - .:/go/src/github.com/kgilpin/secretless-pg
+    depends_on:
+      - pg
+
+  psql:
+    image: postgres:9.3
+    entrypoint: bash
+    depends_on:
+      - pg

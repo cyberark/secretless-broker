@@ -1,0 +1,19 @@
+- !user alice
+
+- !host myapp
+
+- !policy
+  id: pg
+  body:
+  - !variable url
+  - !variable username
+  - !variable password
+
+  - !webservice
+
+- !permit
+  roles:
+    - !user alice
+    - !host myapp
+  privileges: [ conjur ]
+  resource: !webservice pg

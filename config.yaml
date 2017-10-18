@@ -1,0 +1,10 @@
+address: localhost:15432
+username: conjur
+password: conjur
+authorized_users:
+  alice: alice
+backend:
+  address: localhost:5432
+  database: kgilpin
+  username: conjur
+  password: conjur

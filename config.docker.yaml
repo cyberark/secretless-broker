@@ -1,0 +1,8 @@
+address: 0.0.0.0:5432
+authorized_users:
+  alice: alice
+backend:
+  address: pg:5432
+  database: postgres
+  username: conjur
+  password: conjur

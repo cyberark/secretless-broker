@@ -1,0 +1,4 @@
+FROM postgres:9.3
+
+COPY example/pg_hba.conf /etc/
+COPY example/pg_hba.sh /docker-entrypoint-initdb.d/

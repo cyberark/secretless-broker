@@ -1,4 +1,4 @@
-- !user alice
+- !user bob
 
 - !host myapp
 
@@ -13,7 +13,7 @@
 
 - !permit
   roles:
-    - !user alice
+    - !user bob
     - !host myapp
-  privileges: [ conjur ]
+  privileges: [ execute ]
   resource: !webservice pg

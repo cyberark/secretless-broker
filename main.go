@@ -2,6 +2,8 @@ package main
 
 import (
   "net"
+  "net/http"
+  "strings"
   "log"
   "fmt"
   "bytes"
@@ -9,6 +11,7 @@ import (
   "time"
   "flag"
 
+  "github.com/cyberark/conjur-api-go/conjurapi"
   "github.com/kgilpin/secretless-pg/protocol"
   "github.com/kgilpin/secretless-pg/connect"
   "github.com/kgilpin/secretless-pg/config"
@@ -50,8 +53,7 @@ func initialize(client net.Conn) (map[string] string, error) {
   return options, nil
 }
 
-func authenticate(username string, expectedPassword string, configuration config.Config, client net.Conn) error {
-
+func promptForPassword(client net.Conn) ([]byte, error) {
   message := protocol.NewMessageBuffer([]byte{})
 
   /* Set the message type */
@@ -70,37 +72,86 @@ func authenticate(username string, expectedPassword string, configuration config
   _, err := connect.Send(client, message.Bytes())
 
   if err != nil {
-    return err
+    return nil, err
   }
 
   response := make([]byte, 4096)
 
   _, err = client.Read(response)
   if err != nil {
-    return err
+    return nil, err
   }
 
   message = protocol.NewMessageBuffer(response)
 
   code, err := message.ReadByte()
   if err != nil {
-    return err
+    return nil, err
   }
   if code != protocol.PasswordMessageType {
-    return fmt.Errorf("Expected message %d in response to password prompt, got %d", protocol.PasswordMessageType, code)
+    return nil, fmt.Errorf("Expected message %d in response to password prompt, got %d", protocol.PasswordMessageType, code)
   }
 
   length, err := message.ReadInt32()
   if err != nil {
-    return err
+    return nil, err
   }
 
   password, err := message.ReadBytes(int(length))
   if err != nil {
-    return err
+    return nil, err
   }
 
   password = bytes.Trim(password, "\x00")
+  return password, nil
+}
+
+func authenticateWithConjur(resource string, client net.Conn) error {
+  password, err := promptForPassword(client)
+  if ( err != nil ) {
+    return err
+  }
+
+  conjur_config := conjurapi.LoadConfig()
+
+  httpClient := &http.Client{Timeout: time.Second * 10}
+
+  resourceTokens := strings.Split(resource, ":")
+
+  checkURL := fmt.Sprintf("%s/resources/%s?check=true&privilege=execute", conjur_config.ApplianceURL, strings.Join(resourceTokens, "/"))
+  req, err := http.NewRequest(
+    "GET",
+    checkURL,
+    nil,
+  )
+  if ( err != nil ) {
+    return err    
+  }
+
+  req.Header.Set(
+    "Authorization",
+    fmt.Sprintf("Token token=\"%s\"", password),
+  )
+
+  resp, err := httpClient.Do(req)
+  if err != nil {
+    return err
+  }
+
+  if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+    log.Printf("User is authorized to 'execute' %s", resource)
+    return nil
+  } else {
+    log.Printf("Permission check failed with HTTP status %d", resp.StatusCode)
+    return fmt.Errorf("Permission denied")
+  }
+}
+
+func authenticateWithPassword(username string, expectedPassword string, client net.Conn) error {
+  password, err := promptForPassword(client)
+  if ( err != nil ) {
+    return err
+  }
 
   valid := (string(password) == expectedPassword)
 
@@ -202,19 +253,24 @@ func HandleConnection(configuration config.Config, client net.Conn) {
     return
   }
   password, ok := configuration.AuthorizedUsers[username]
-  if !ok {
-    log.Printf("Password for '%s' not found in configuration", username)
-    return
+  var authenticationError error
+  if ok {
+    // There's a statically configured password
+    authenticationError = authenticateWithPassword(username, password, client)
+  } else {
+    log.Printf("Password for '%s' not found in static configuration. Attempting Conjur authorization.", username)
+    // Authenticate and authorize with Conjur
+    authenticationError = authenticateWithConjur(configuration.Authorization.Resource, client)
   }
 
-  err = authenticate(username, password, configuration, client)
-  if err != nil {
-    if options["application_name"] == "psql" {
+  if authenticationError != nil {
+    if options["application_name"] == "psql" && authenticationError == io.EOF {
       log.Printf("Got %s from psql, this is normal", err)
     } else {
-      log.Printf("Authentication error : %s", err)
+      sqlError := protocol.Error{Severity: protocol.ErrorSeverityFatal, Code: "28P01", Message: "Conjur authentication failed"}
+      errorMessage := sqlError.GetMessage()
+      connect.Send(client, errorMessage)
     }
-
     return
   }
 

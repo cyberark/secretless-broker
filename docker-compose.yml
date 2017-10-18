@@ -50,7 +50,12 @@ services:
       - pg
 
   psql:
-    image: postgres:9.3
+    build:
+      context: .
+      dockerfile: Dockerfile.psql
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
     entrypoint: bash
     depends_on:
       - pg

@@ -1,6 +1,4 @@
 address: localhost:15432
-username: conjur
-password: conjur
 authorized_users:
   alice: alice
 backend:

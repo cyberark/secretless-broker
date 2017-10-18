@@ -14,10 +14,13 @@ type BackendConfig struct {
   Options  map[string] string  
 }
 
+type Authorization struct {
+  Resource string
+}
+
 type Config struct {
   Address  string
-  Username string
-  Password string
+  Authorization Authorization
   AuthorizedUsers map[string] string  `yaml:"authorized_users"`
   Backend  BackendConfig `yaml:"backend"`
 }

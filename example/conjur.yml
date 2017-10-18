@@ -1,5 +1,7 @@
 - !user bob
 
+- !user charles
+
 - !host myapp
 
 - !policy

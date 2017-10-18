@@ -27,13 +27,12 @@ services:
       - conjur
 
   proxy:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    build: .
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
     depends_on:
       - conjur
-    volumes:
-      - .:/go/src/github.com/kgilpin/secretless-pg
     depends_on:
       - pg
 
@@ -42,6 +41,9 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     entrypoint: bash
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
     depends_on:
       - conjur
     volumes:

@@ -7,11 +7,25 @@
 - !policy
   id: pg
   body:
-  - !variable url
-  - !variable username
-  - !variable password
+  - &variables
+    - !variable url
+    - !variable username
+    - !variable password
+
+  - !layer
 
   - !webservice
+
+  - !host
+
+  - !permit
+    role: !layer
+    privilege: [ read, execute ]
+    resources: *variables
+
+  - !grant
+    role: !layer
+    member: !host
 
 - !permit
   roles:

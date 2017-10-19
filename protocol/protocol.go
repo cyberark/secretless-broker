@@ -88,6 +88,7 @@ func GetStartupMessageLength(message []byte) int32 {
 
 	return messageLength
 }
+
 /*
  * Get the message length of the provided message.
  *

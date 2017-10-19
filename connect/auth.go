@@ -18,11 +18,11 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/binary"
-	"log"
 	"fmt"
+	"log"
 	"net"
 
-  "github.com/kgilpin/secretless-pg/protocol"
+	"github.com/kgilpin/secretless-pg/protocol"
 )
 
 /*
@@ -119,7 +119,6 @@ func handleAuthClearText(password string, connection net.Conn) ([]byte, bool) {
 		log.Printf("Error: %s", err.Error())
 	}
 
-
 	message, length, err := Receive(connection)
 
 	if err != nil {
@@ -129,4 +128,3 @@ func handleAuthClearText(password string, connection net.Conn) ([]byte, bool) {
 
 	return message[:length], protocol.IsAuthenticationOk(message)
 }
-

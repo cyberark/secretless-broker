@@ -5,6 +5,5 @@ authorization:
   resource: dev:webservice:pg
 backend:
   address: pg:5432
-  database: postgres
   username: conjur
   password: conjur

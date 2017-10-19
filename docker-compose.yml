@@ -11,6 +11,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres@pg/postgres
       CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
+      RAILS_ENV: development
     volumes:
       - .:/work
     depends_on:
@@ -31,6 +32,8 @@ services:
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: host/pg
+      CONJUR_AUTHN_API_KEY: 
     depends_on:
       - conjur
     depends_on:

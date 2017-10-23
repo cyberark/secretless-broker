@@ -4,6 +4,7 @@ MAINTAINER Conjur Inc.
 RUN go get -u github.com/jstemmer/go-junit-report
 RUN go get github.com/tools/godep
 RUN go get github.com/smartystreets/goconvey
+RUN go get golang.org/x/tools/cmd/goimports
 RUN apt-get update && apt-get install -y vim jq curl postgresql-client
 
 COPY . .

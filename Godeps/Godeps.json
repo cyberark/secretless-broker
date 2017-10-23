@@ -4,6 +4,30 @@
 	"GodepVersion": "v79",
 	"Deps": [
 		{
+			"ImportPath": "github.com/bgentry/go-netrc/netrc",
+			"Rev": "9fd32a8b3d3d3f9d43c341bfe098430e07609480"
+		},
+		{
+			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi",
+			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
+		},
+		{
+			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi/authn",
+			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
+		},
+		{
+			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi/wrapper",
+			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
+		},
+		{
+			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi/wrapper_v4",
+			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v1",
+			"Rev": "9f9df34309c04878acc86042b16630b0f696e1de"
+		},
+		{
 			"ImportPath": "gopkg.in/yaml.v2",
 			"Rev": "eb3733d160e74a9c7e442f435eb3bea458e1d19f"
 		}

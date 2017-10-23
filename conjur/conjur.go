@@ -2,12 +2,12 @@ package conjur
 
 import (
 	"encoding/base64"
-	"net/url"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 

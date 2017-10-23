@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"time"
 
 	"github.com/kgilpin/secretless-pg/config"
 	"github.com/kgilpin/secretless-pg/connect"
@@ -23,12 +22,12 @@ type ClientOptions struct {
 }
 
 type Handler struct {
-	Config        config.Config
-	Client        net.Conn
-	Backend       net.Conn
-	ClientOptions ClientOptions
+	Config            config.Config
+	Client            net.Conn
+	Backend           net.Conn
+	ClientOptions     ClientOptions
 	BackendConnection BackendConnection
-	BackendConfig config.BackendConfig
+	BackendConfig     config.BackendConfig
 }
 
 func stream(source, dest net.Conn) {
@@ -49,7 +48,6 @@ func stream(source, dest net.Conn) {
 				log.Printf("Error reading from %s : %s", source.RemoteAddr(), err)
 			}
 		}
-		time.Sleep(500 * time.Millisecond)
 	}
 }
 

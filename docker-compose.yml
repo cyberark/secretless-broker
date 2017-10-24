@@ -17,8 +17,10 @@ services:
     depends_on:
       - pg
 
-  cli5:
-    image: conjurinc/cli5
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev

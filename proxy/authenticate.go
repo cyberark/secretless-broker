@@ -126,7 +126,7 @@ func (self *Handler) Authenticate() (bool, error, error) {
 			} else {
 				msg = "Conjur authorization failed"
 			}
-			return true, fmt.Errorf(msg, nil), nil
+			return true, fmt.Errorf(msg), nil
 		}
 	}
 

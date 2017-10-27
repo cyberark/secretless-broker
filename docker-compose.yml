@@ -29,7 +29,7 @@ services:
     depends_on:
       - conjur
 
-  proxy:
+  proxy_conjur:
     build: .
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
@@ -40,6 +40,19 @@ services:
       - conjur
     depends_on:
       - pg
+    volumes:
+      - ./config.conjur.yaml:/config.yaml
+
+  proxy_static:
+    build: .
+    volumes:
+      - ./config.static.yaml:/config.yaml
+
+  proxy_socket:
+    build: .
+    volumes:
+      - ./config.socket.yaml:/config.yaml
+      - ./run/postgresql/:/var/run/postgresql
 
   proxy_dev:
     build:

@@ -20,11 +20,11 @@ type BackendConnection interface {
  * A Backend connection which is configured through static YAML metadata.
  */
 type StaticBackendConnection struct {
-	Config config.Config
+	BackendConfig config.BackendConfig
 }
 
 func (self StaticBackendConnection) Configure() (*config.BackendConfig, error) {
-	return &self.Config.Backend, nil
+	return &self.BackendConfig, nil
 }
 
 /**
@@ -38,6 +38,13 @@ func (self ConjurBackendConnection) Configure() (*config.BackendConfig, error) {
 	var err error
 	var token *string
 	var url string
+
+	if HostUsername == "" {
+		return nil, fmt.Errorf("CONJUR_AUTHN_LOGIN is not specified")
+	}
+	if HostAPIKey == "" {
+		return nil, fmt.Errorf("CONJUR_AUTHN_API_KEY is not specified")
+	}
 
 	if token, err = conjur.Authenticate(HostUsername, HostAPIKey); err != nil {
 		return nil, err

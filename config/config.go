@@ -15,19 +15,20 @@ type BackendConfig struct {
 }
 
 type Authorization struct {
+	None     bool
 	Resource string
+	Users    map[string]string `yaml:"authorized_users"`
 }
 
 type Config struct {
 	Address         string
+	Socket          string
 	Authorization   Authorization
-	AuthorizedUsers map[string]string `yaml:"authorized_users"`
 	Backend         BackendConfig     `yaml:"backend"`
 }
 
 func Configure(fileName string) Config {
-	config := Config{Address: "localhost:5432"}
-	config.Backend = BackendConfig{}
+	config := Config{}
 
 	buffer, err := ioutil.ReadFile(fileName)
 	if err != nil {

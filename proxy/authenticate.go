@@ -13,6 +13,28 @@ import (
 	"github.com/kgilpin/secretless-pg/protocol"
 )
 
+/**
+ * Authenticate and authorize a client.
+ */
+type Authorizer interface {
+	/**
+	* Return authenticationError, otherError
+	*/
+	Authorize(clientPassword []byte) (error, error)
+}
+
+type SuccessAuthorizer struct {
+}
+
+type StaticAuthorizer struct {
+	User string
+	AuthorizedUsers map[string]string
+}
+
+type ConjurAuthorizer struct {
+	Resource string
+}
+
 func promptForPassword(client net.Conn) ([]byte, error) {
 	message := protocol.NewMessageBuffer([]byte{})
 
@@ -66,22 +88,37 @@ func promptForPassword(client net.Conn) ([]byte, error) {
 	return password, nil
 }
 
-func authorizeWithConjur(resource, token string) error {
-	allowed, err := conjur.CheckPermission(resource, token)
-	if allowed {
-		return nil
+func (self SuccessAuthorizer) Authorize(clientPassword []byte) (error, error) {
+	return nil, nil
+}
+
+func (self StaticAuthorizer) Authorize(clientPassword []byte) (error, error) {
+	log.Printf("Authenticating %s from static password configuration", self.User)
+
+	expectedPassword := self.AuthorizedUsers[self.User]
+
+	valid := expectedPassword != "" && (string(clientPassword) == expectedPassword)
+	if valid {
+		log.Print("Password is valid")
+		return nil, nil
 	} else {
-		return err
+		return fmt.Errorf("Login failed"), nil
 	}
 }
 
-func authenticateWithPassword(password, expectedPassword string) error {
-	valid := (string(password) == expectedPassword)
-	if valid {
-		log.Print("Password is valid")
-		return nil
+func (self ConjurAuthorizer) Authorize(clientPassword []byte) (error, error) {
+	token, err := base64.StdEncoding.DecodeString(string(clientPassword))
+	if err != nil {
+		return nil, err
+	}
+	allowed, err := conjur.CheckPermission(self.Resource, string(token))
+	if err != nil {
+		return nil, err
+	}	
+	if allowed {
+		return nil, nil
 	} else {
-		return fmt.Errorf("Password is invalid")
+		return fmt.Errorf("Conjur authorization failed"), nil
 	}
 }
 
@@ -91,52 +128,35 @@ func authenticateWithPassword(password, expectedPassword string) error {
  * return abort bool, authenticationError err, err bool
  */
 func (self *Handler) Authenticate() (bool, error, error) {
-	var err error
+	var authenticationError, err error
 	var clientPassword []byte
+	var authorizer Authorizer
 
-	// Authenticate and authorize with Conjur
-	if clientPassword, err = promptForPassword(self.Client); err != nil {
-		return true, nil, err
-	}
-
-	staticPassword, staticAuth := self.Config.AuthorizedUsers[self.ClientOptions.User]
-	var authenticationError error
-	if staticAuth {
-		// There's a statically configured password
-		authenticationError = authenticateWithPassword(string(clientPassword), staticPassword)
+	if self.Config.Authorization.None {
+		authorizer = SuccessAuthorizer{}
 	} else {
-		log.Printf("Password for '%s' not found in static configuration. Attempting Conjur authorization.", self.ClientOptions.User)
-
-		token, err := base64.StdEncoding.DecodeString(string(clientPassword))
-		if err != nil {
-			return true, nil, err
-		}
-		authenticationError = authorizeWithConjur(self.Config.Authorization.Resource, string(token))
-	}
-
-	if authenticationError != nil {
-		if self.ClientOptions.Options["application_name"] == "psql" && authenticationError == io.EOF {
-			log.Printf("Got %s from psql, this is normal", err)
-			return true, nil, nil
-		} else {
-			log.Print(authenticationError)
-			var msg string
-			if staticAuth {
-				msg = "Login failed"
+		if clientPassword, err = promptForPassword(self.Client); err != nil {
+			if self.ClientOptions.Options["application_name"] == "psql" && err == io.EOF {
+				log.Printf("Got %s from psql, this is normal", err)
+				return true, nil, nil
 			} else {
-				msg = "Conjur authorization failed"
+				return true, nil, err
 			}
-			return true, fmt.Errorf(msg), nil
+		}
+
+		if self.Config.Authorization.Resource != "" {
+			authorizer = ConjurAuthorizer{self.Config.Authorization.Resource}
+		} else {
+			authorizer = StaticAuthorizer{self.ClientOptions.User, self.Config.Authorization.Users}
 		}
 	}
 
-	var backendConnection BackendConnection
-	if staticAuth {
-		backendConnection = StaticBackendConnection{self.Config}
-	} else {
-		backendConnection = ConjurBackendConnection{Resource: self.Config.Authorization.Resource}
+	authenticationError, err = authorizer.Authorize(clientPassword)
+	if err != nil {
+		return true, nil, err
+	} else if authenticationError != nil {
+		return true, authenticationError, nil
 	}
-	self.BackendConnection = backendConnection
 
 	return false, nil, nil
 }

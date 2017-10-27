@@ -86,6 +86,8 @@ func CheckPermission(resource string, token string) (bool, error) {
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		log.Printf("User is authorized to 'execute' %s", resource)
 		return true, nil
+	} else if resp.StatusCode == 404 || resp.StatusCode == 403 {
+		return false, nil
 	} else {
 		return false, fmt.Errorf("Permission check failed with HTTP status %d", resp.StatusCode)
 	}

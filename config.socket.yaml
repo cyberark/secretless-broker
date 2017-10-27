@@ -1,0 +1,7 @@
+socket: ./run/postgresql/.s.PGSQL.5432
+authorization:
+  none: true
+backend:
+  address: pg:5432
+  username: conjur
+  password: conjur

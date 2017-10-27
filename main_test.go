@@ -16,15 +16,20 @@ var AdminAPIKey = os.Getenv("CONJUR_AUTHN_API_KEY")
 var Host = os.Getenv("TEST_PROXY_HOST")
 var Port = os.Getenv("TEST_PROXY_PORT")
 
-func psql(user string, environment []string) (string, error) {
-	if Host == "" {
-		Host = "proxy"
-	}
+func psql(host string, user string, environment []string) (string, error) {
 	if Port == "" {
 		Port = "5432"
 	}
 
-	args := []string{"-h", Host, "-p", Port, "-U", user, "-c", "select count(*) from conjur.test", "sslmode=disable dbname=postgres"}
+	args := []string{"-h", host, "-p", Port}
+	if user != "" {
+		args = append(args, "-U")
+		args = append(args, user)
+	}
+	args = append(args, "-c")
+	args = append(args, "select count(*) from conjur.test")
+	args = append(args, "sslmode=disable dbname=postgres")
+
 	cmd := exec.Command("psql", args...)
 	env := os.Environ()
 	for _, v := range environment {
@@ -35,10 +40,29 @@ func psql(user string, environment []string) (string, error) {
 	return string(cmdOut), err
 }
 
+func TestUnixSocketPasswordLogin(t *testing.T) {
+	log.Print("Connect via Unix socket without authentication")
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), "", []string{})
+
+	if err != nil {
+		t.Fatal(cmdOut)
+	}
+
+	if !strings.Contains(cmdOut, "1 row") {
+		t.Fatalf("Expected to find '1 row' in : %s", cmdOut)
+	}
+}
+
 func TestStaticPasswordLogin(t *testing.T) {
 	log.Print("Provide a statically configured password")
 
-	cmdOut, err := psql("alice", []string{"PGPASSWORD=alice"})
+	cmdOut, err := psql("proxy_static", "alice", []string{"PGPASSWORD=alice"})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -52,7 +76,7 @@ func TestStaticPasswordLogin(t *testing.T) {
 func TestStaticPasswordLoginFailed(t *testing.T) {
 	log.Print("Provide the wrong value for a statically configured password")
 
-	cmdOut, err := psql("alice", []string{"PGPASSWORD=foobar"})
+	cmdOut, err := psql("proxy_static", "alice", []string{"PGPASSWORD=foobar"})
 
 	if err == nil {
 		t.Fatalf("Expected failed login : %s", cmdOut)
@@ -92,7 +116,7 @@ func TestConjurLogin(t *testing.T) {
 
 	userToken64 := base64.StdEncoding.EncodeToString([]byte(*userToken))
 
-	cmdOut, err := psql("bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("proxy_conjur", "bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -129,7 +153,7 @@ func TestConjurUnauthorized(t *testing.T) {
 
 	userToken64 := base64.StdEncoding.EncodeToString([]byte(*userToken))
 
-	cmdOut, err := psql("charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("proxy_conjur", "charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err == nil {
 		t.Fatal(cmdOut)

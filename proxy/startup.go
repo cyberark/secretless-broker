@@ -66,6 +66,6 @@ func (self *Handler) Startup() error {
 	/* Now read the startup parameters */
 	startup := protocol.NewMessageBuffer(message[8:length])
 
-	self.ClientOptions = ClientOptions{}
+	self.ClientOptions = &ClientOptions{}
 	return self.ClientOptions.Parse(startup)
 }

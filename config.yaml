@@ -1,7 +1,0 @@
-address: localhost:15432
-authorized_users:
-  alice: alice
-backend:
-  address: localhost:5432
-  username: conjur
-  password: conjur

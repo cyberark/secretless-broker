@@ -5,6 +5,9 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/kgilpin/secretless-pg/config"
 	"github.com/kgilpin/secretless-pg/connect"
@@ -25,9 +28,9 @@ type Handler struct {
 	Config            config.Config
 	Client            net.Conn
 	Backend           net.Conn
-	ClientOptions     ClientOptions
-	BackendConnection BackendConnection
-	BackendConfig     config.BackendConfig
+	ClientOptions     *ClientOptions
+	BackendConnection *BackendConnection
+	BackendConfig     *config.BackendConfig
 }
 
 func stream(source, dest net.Conn) {
@@ -134,11 +137,19 @@ func (self *Handler) Run() {
 		return
 	}
 
-	if backendConfig, err = self.BackendConnection.Configure(); err != nil {
+	var backendConnection BackendConnection
+	if self.Config.Authorization.Resource != "" {
+		backendConnection = ConjurBackendConnection{Resource: self.Config.Authorization.Resource}
+	} else {
+		backendConnection = StaticBackendConnection{self.Config.Backend}		
+	}
+	self.BackendConnection = &backendConnection
+
+	if backendConfig, err = (*self.BackendConnection).Configure(); err != nil {
 		self.Abort(err)
 		return
 	}
-	self.BackendConfig = *backendConfig
+	self.BackendConfig = backendConfig
 
 	if err = self.ConnectToBackend(); err != nil {
 		self.Abort(err)
@@ -149,7 +160,29 @@ func (self *Handler) Run() {
 }
 
 func (self *Proxy) Run() {
-	proxyListener, err := net.Listen("tcp", self.Config.Address)
+	var proxyListener net.Listener
+	var err error
+
+	log.Printf(self.Config.Address)
+	if self.Config.Address != "" {
+		proxyListener, err = net.Listen("tcp", self.Config.Address)
+	} else {
+		proxyListener, err = net.Listen("unix", self.Config.Socket)
+
+		// https://stackoverflow.com/questions/16681944/how-to-reliably-unlink-a-unix-domain-socket-in-go-programming-language
+		// Handle common process-killing signals so we can gracefully shut down:
+		sigc := make(chan os.Signal, 1)
+		signal.Notify(sigc, os.Interrupt, os.Kill, syscall.SIGTERM)
+		go func(c chan os.Signal) {
+	    // Wait for a SIGINT or SIGKILL:
+	    sig := <-c
+	    log.Printf("Caught signal %s: shutting down.", sig)
+	    // Stop listening (and unlink the socket if unix type):
+	    proxyListener.Close()
+	    // And we're done:
+	    os.Exit(0)
+		}(sigc)		
+	}
 	if err == nil {
 		log.Printf("Server listening on: %s", proxyListener.Addr())
 		for {

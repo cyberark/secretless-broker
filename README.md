@@ -88,6 +88,32 @@ Keep in mind that *all* of the following must be in place for `myapp` to connect
 * `host:pg` has `execute` permission on the Variables which store the Posgtres parameters.
 * The Postgres variables are loaded with valid connection data.
 
+# Development
+
+A development environment is provided in the `docker-compose.yml`. 
+
+First build it using `docker-compose build`. Then run Conjur with `docker-compose up -d pg conjur`. 
+
+Obtain the admin API key with `docker-compose logs conjur`, then start a Conjur client container with `docker-compose run --rm client`.
+
+Once in the client, login as `admin` and load the policy and populate the variables by running `./example/conjur.sh`. 
+
+In a new shell, `export CONJUR_AUTHN_API_KEY=<API key of dev:host:pg>`, then start the proxy container with `docker-compose up proxy`.
+
+In another new shell, enter a `proy-dev` container with `docker-compose run --rm proxy-dev bash`. Then `export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>`. Now you are ready to run the tests:
+
+```
+$ godep restore
+...
+$ go test
+2017/10/27 14:17:07 Provide a statically configured password
+2017/10/27 14:17:07 Provide the wrong value for a statically configured password
+2017/10/27 14:17:07 Provide a Conjur access token as the password
+2017/10/27 14:17:07 Provide a Conjur access token for an unauthorized user
+PASS
+ok    github.com/kgilpin/secretless-pg  0.318s
+```
+
 # Performance
 
 Using Secretless reduces the transaction throughput by 28-30% on Postgresql. Once the connection to the backend database is established, the proxy runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:

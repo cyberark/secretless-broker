@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	log.Println("Secretless-Postgres Starting...")
+	log.Println("Secretless starting up...")
 
 	configFile := flag.String("config", "config.yaml", "Configuration file name")
 	flag.Parse()

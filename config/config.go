@@ -23,11 +23,21 @@ type Authorization struct {
 	Passwords map[string]string
 }
 
-type Config struct {
+type ListenerConfig struct {
 	Address         string
 	Socket          string
 	Authorization   Authorization
 	Backend         []Variable
+}
+
+type Listener struct {
+	Name   string
+	Type   string
+	Config ListenerConfig `yaml:"configuration"`
+}
+
+type Config struct {
+	Listeners []Listener
 }
 
 func Configure(fileName string) Config {

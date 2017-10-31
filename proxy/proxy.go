@@ -18,13 +18,13 @@ type Proxy struct {
 	Config config.Config
 }
 
-type ClientOptions struct {
+type PGClientOptions struct {
 	User     string
 	Database string
 	Options  map[string]string
 }
 
-type BackendConfig struct {
+type PGBackendConfig struct {
 	Address  string
 	Username string
 	Password string
@@ -32,12 +32,16 @@ type BackendConfig struct {
 	Options  map[string]string
 }
 
-type Handler struct {
-	Config            config.Config
+type Handler interface {
+	Run()
+}
+
+type PGHandler struct {
+	Config            config.ListenerConfig
 	Client            net.Conn
 	Backend           net.Conn
-	ClientOptions     *ClientOptions
-	BackendConfig     *BackendConfig
+	ClientOptions     *PGClientOptions
+	BackendConfig     *PGBackendConfig
 }
 
 func stream(source, dest net.Conn) {
@@ -61,14 +65,14 @@ func stream(source, dest net.Conn) {
 	}
 }
 
-func (self *Handler) Pipe() {
+func (self *PGHandler) Pipe() {
 	log.Printf("Connecting client %s to backend %s", self.Client.RemoteAddr(), self.Backend.RemoteAddr())
 
 	go stream(self.Client, self.Backend)
 	go stream(self.Backend, self.Client)
 }
 
-func (self *Handler) ConnectToBackend() error {
+func (self *PGHandler) ConnectToBackend() error {
 	var connection net.Conn
 	var err error
 
@@ -102,7 +106,7 @@ func (self *Handler) ConnectToBackend() error {
 	return nil
 }
 
-func (self *Handler) Abort(err error) {
+func (self *PGHandler) Abort(err error) {
 	pgError := protocol.Error{
 		Severity: protocol.ErrorSeverityFatal,
 		Code:     protocol.ErrorCodeInternalError,
@@ -112,7 +116,7 @@ func (self *Handler) Abort(err error) {
 	return
 }
 
-func (self *Handler) Run() {
+func (self *PGHandler) Run() {
 	var authenticationError, err error
 	var abort bool
 
@@ -156,15 +160,16 @@ func (self *Handler) Run() {
 	self.Pipe()
 }
 
-func (self *Proxy) Run() {
+func (self *Proxy) Listen(listenerConfig config.Listener) {
 	var proxyListener net.Listener
 	var err error
 
-	log.Printf(self.Config.Address)
-	if self.Config.Address != "" {
-		proxyListener, err = net.Listen("tcp", self.Config.Address)
+	config := listenerConfig.Config
+
+	if config.Address != "" {
+		proxyListener, err = net.Listen("tcp", config.Address)
 	} else {
-		proxyListener, err = net.Listen("unix", self.Config.Socket)
+		proxyListener, err = net.Listen("unix", config.Socket)
 
 		// https://stackoverflow.com/questions/16681944/how-to-reliably-unlink-a-unix-domain-socket-in-go-programming-language
 		// Handle common process-killing signals so we can gracefully shut down:
@@ -181,7 +186,7 @@ func (self *Proxy) Run() {
 		}(sigc)		
 	}
 	if err == nil {
-		log.Printf("Server listening on: %s", proxyListener.Addr())
+		log.Printf("%s listener '%s' listening at: %s", listenerConfig.Type, listenerConfig.Name, proxyListener.Addr())
 		for {
 			var client net.Conn
 
@@ -190,10 +195,25 @@ func (self *Proxy) Run() {
 				continue
 			}
 
-			handler := Handler{Config: self.Config, Client: client}
+			var handler Handler
+
+			switch listenerConfig.Type {
+			case "postgresql": 
+				handler = &PGHandler{Config: config, Client: client}
+			default:
+				log.Printf("Unrecognized listener type : %s", listenerConfig.Type)
+				continue
+			}
+
 			go handler.Run()
 		}
 	} else {
 		log.Fatal(err)
+	}
+}
+
+func (self *Proxy) Run() {
+	for _, config := range self.Config.Listeners {
+		self.Listen(config)
 	}
 }

@@ -1,11 +1,15 @@
-address: 0.0.0.0:5432
-authorization:
-  passwords:
-    alice: alice
-backend:
-  - name: address
-    value: pg:5432
-  - name: username
-    value: conjur
-  - name: password
-    value: conjur
+listeners:
+  - name: pg
+    type: postgresql
+    configuration:
+      address: 0.0.0.0:5432
+      authorization:
+        passwords:
+          alice: alice
+      backend:
+        - name: address
+          value: pg:5432
+        - name: username
+          value: conjur
+        - name: password
+          value: conjur

@@ -127,7 +127,7 @@ func (self ConjurAuthorizer) Authorize(clientPassword []byte) (error, error) {
  *
  * return abort bool, authenticationError err, err bool
  */
-func (self *Handler) Authenticate() (bool, error, error) {
+func (self *PGHandler) Authenticate() (bool, error, error) {
 	var authenticationError, err error
 	var clientPassword []byte
 	var authorizer Authorizer

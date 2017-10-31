@@ -119,7 +119,7 @@ func TestConjurLogin(t *testing.T) {
 
 	userToken64 := base64.StdEncoding.EncodeToString([]byte(*userToken))
 
-	cmdOut, err := psql("proxy_conjur", "bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("proxy_conjur_remote", "bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -156,7 +156,7 @@ func TestConjurUnauthorized(t *testing.T) {
 
 	userToken64 := base64.StdEncoding.EncodeToString([]byte(*userToken))
 
-	cmdOut, err := psql("proxy_conjur", "charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("proxy_conjur_remote", "charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err == nil {
 		t.Fatal(cmdOut)
@@ -167,5 +167,23 @@ func TestConjurUnauthorized(t *testing.T) {
 	}
 	if !strings.Contains(cmdOut, "Conjur authorization failed") {
 		t.Fatalf("Expected to find 'Conjur authorization failed' in : %s", cmdOut)
+	}
+}
+
+func TestConjurLocal(t *testing.T) {
+	log.Print("Proxy requires no authorization and will obtain its own Conjur access token")
+
+	var (
+		err        error
+	)
+
+	cmdOut, err := psql("proxy_conjur_local", "", []string{})
+
+	if err != nil {
+		t.Fatal(cmdOut)
+	}
+
+	if !strings.Contains(cmdOut, "1 row") {
+		t.Fatalf("Expected to find '1 row' in : %s", cmdOut)
 	}
 }

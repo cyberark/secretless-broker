@@ -1,0 +1,17 @@
+listeners:
+  - name: pg
+    type: postgresql
+    configuration:
+      address: 0.0.0.0:5432
+      authorization:
+        none: true
+      backend:
+        - name: address
+          value_from:
+            conjur: dev:variable:pg/url
+        - name: username
+          value_from:
+            conjur: dev:variable:pg/username
+        - name: password
+          value_from:
+            conjur: dev:variable:pg/password

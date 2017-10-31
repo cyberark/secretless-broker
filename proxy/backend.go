@@ -67,8 +67,8 @@ func (self FileVariable) Value() (string, error) {
 	}
 }
 
-func (self *Handler) ConfigureBackend() error {
-	result := BackendConfig{Options: make(map[string]string)}
+func (self *PGHandler) ConfigureBackend() error {
+	result := PGBackendConfig{Options: make(map[string]string)}
 
 	for _, v := range self.Config.Backend {
 		var variable Variable

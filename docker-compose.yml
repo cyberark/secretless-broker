@@ -29,7 +29,7 @@ services:
     depends_on:
       - conjur
 
-  proxy_conjur:
+  proxy_conjur_local:
     build: .
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
@@ -41,7 +41,21 @@ services:
     depends_on:
       - pg
     volumes:
-      - ./config.conjur.yaml:/config.yaml
+      - ./config.conjur_local.yaml:/config.yaml
+
+  proxy_conjur_remote:
+    build: .
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: host/pg
+      CONJUR_AUTHN_API_KEY: 
+    depends_on:
+      - conjur
+    depends_on:
+      - pg
+    volumes:
+      - ./config.conjur_remote.yaml:/config.yaml
 
   proxy_static:
     build: .

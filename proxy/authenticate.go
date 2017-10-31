@@ -144,10 +144,10 @@ func (self *Handler) Authenticate() (bool, error, error) {
 			}
 		}
 
-		if self.Config.Authorization.Resource != "" {
-			authorizer = ConjurAuthorizer{self.Config.Authorization.Resource}
+		if self.Config.Authorization.Conjur != "" {
+			authorizer = ConjurAuthorizer{self.Config.Authorization.Conjur}
 		} else {
-			authorizer = StaticAuthorizer{self.ClientOptions.User, self.Config.Authorization.Users}
+			authorizer = StaticAuthorizer{self.ClientOptions.User, self.Config.Authorization.Passwords}
 		}
 	}
 

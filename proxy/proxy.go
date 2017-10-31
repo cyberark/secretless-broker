@@ -24,13 +24,20 @@ type ClientOptions struct {
 	Options  map[string]string
 }
 
+type BackendConfig struct {
+	Address  string
+	Username string
+	Password string
+	Database string
+	Options  map[string]string
+}
+
 type Handler struct {
 	Config            config.Config
 	Client            net.Conn
 	Backend           net.Conn
 	ClientOptions     *ClientOptions
-	BackendConnection *BackendConnection
-	BackendConfig     *config.BackendConfig
+	BackendConfig     *BackendConfig
 }
 
 func stream(source, dest net.Conn) {
@@ -108,7 +115,6 @@ func (self *Handler) Abort(err error) {
 func (self *Handler) Run() {
 	var authenticationError, err error
 	var abort bool
-	var backendConfig *config.BackendConfig
 
 	if err = self.Startup(); err != nil {
 		self.Abort(err)
@@ -137,19 +143,10 @@ func (self *Handler) Run() {
 		return
 	}
 
-	var backendConnection BackendConnection
-	if self.Config.Authorization.Resource != "" {
-		backendConnection = ConjurBackendConnection{Resource: self.Config.Authorization.Resource}
-	} else {
-		backendConnection = StaticBackendConnection{self.Config.Backend}		
-	}
-	self.BackendConnection = &backendConnection
-
-	if backendConfig, err = (*self.BackendConnection).Configure(); err != nil {
+	if err := self.ConfigureBackend(); err != nil {
 		self.Abort(err)
 		return
 	}
-	self.BackendConfig = backendConfig
 
 	if err = self.ConnectToBackend(); err != nil {
 		self.Abort(err)

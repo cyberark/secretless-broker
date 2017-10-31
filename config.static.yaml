@@ -1,8 +1,11 @@
 address: 0.0.0.0:5432
 authorization:
-  authorized_users:
+  passwords:
     alice: alice
 backend:
-  address: pg:5432
-  username: conjur
-  password: conjur
+  - name: address
+    value: pg:5432
+  - name: username
+    value: conjur
+  - name: password
+    value: conjur

@@ -17,6 +17,9 @@ var Host = os.Getenv("TEST_PROXY_HOST")
 var Port = os.Getenv("TEST_PROXY_PORT")
 
 func psql(host string, user string, environment []string) (string, error) {
+	if Host != "" {
+		host = Host
+	}
 	if Port == "" {
 		Port = "5432"
 	}

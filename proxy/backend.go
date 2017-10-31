@@ -3,73 +3,107 @@ package proxy
 import (
 	"fmt"
 	"os"
+	"io/ioutil"
 	"strings"
 
-	"github.com/kgilpin/secretless-pg/config"
 	"github.com/kgilpin/secretless-pg/conjur"
 )
 
 var HostUsername = os.Getenv("CONJUR_AUTHN_LOGIN")
 var HostAPIKey = os.Getenv("CONJUR_AUTHN_API_KEY")
 
-type BackendConnection interface {
-	Configure() (*config.BackendConfig, error)
+type Variable interface {
+	Value() (string, error)
 }
 
 /**
- * A Backend connection which is configured through static YAML metadata.
+ * A variable which is provided as a Value literal.
  */
-type StaticBackendConnection struct {
-	BackendConfig config.BackendConfig
+type ValueVariable struct {
+	Literal string
 }
 
-func (self StaticBackendConnection) Configure() (*config.BackendConfig, error) {
-	return &self.BackendConfig, nil
+func (self ValueVariable) Value() (string, error) {
+	return self.Literal, nil
 }
 
 /**
- * A Backend connection which is configured via Conjur resources.
+ * A variable which is provided as a Conjur resource id.
  */
-type ConjurBackendConnection struct {
+type ConjurVariable struct {
 	Resource string
 }
 
-func (self ConjurBackendConnection) Configure() (*config.BackendConfig, error) {
+func (self ConjurVariable) Value() (string, error) {
 	var err error
 	var token *string
-	var url string
 
 	if HostUsername == "" {
-		return nil, fmt.Errorf("CONJUR_AUTHN_LOGIN is not specified")
+		return "", fmt.Errorf("CONJUR_AUTHN_LOGIN is not specified")
 	}
 	if HostAPIKey == "" {
-		return nil, fmt.Errorf("CONJUR_AUTHN_API_KEY is not specified")
+		return "", fmt.Errorf("CONJUR_AUTHN_API_KEY is not specified")
 	}
 
 	if token, err = conjur.Authenticate(HostUsername, HostAPIKey); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	configuration := config.BackendConfig{}
-	resourceTokens := strings.SplitN(self.Resource, ":", 3)
-	baseName := strings.Join([]string{resourceTokens[0], "variable", resourceTokens[2]}, "/")
-	if configuration.Username, err = conjur.Secret(fmt.Sprintf("%s/username", baseName), *token); err != nil {
-		return nil, err
+	return conjur.Secret(self.Resource, *token)
+}
+
+/**
+ * A variable which is provided as a file name.
+ */
+type FileVariable struct {
+	File string
+}
+
+func (self FileVariable) Value() (string, error) {
+	if bytes, err := ioutil.ReadFile(self.File); err != nil {
+		return "", err
+	} else {
+		return string(bytes), nil
 	}
-	if configuration.Password, err = conjur.Secret(fmt.Sprintf("%s/password", baseName), *token); err != nil {
-		return nil, err
-	}
-	if url, err = conjur.Secret(fmt.Sprintf("%s/url", baseName), *token); err != nil {
-		return nil, err
+}
+
+func (self *Handler) ConfigureBackend() error {
+	result := BackendConfig{Options: make(map[string]string)}
+
+	for _, v := range self.Config.Backend {
+		var variable Variable
+
+		if v.Value != "" {
+			variable = ValueVariable{v.Value}
+		} else if v.ValueFrom.Conjur != "" {
+			variable = ConjurVariable{v.ValueFrom.Conjur}
+		} else if v.ValueFrom.File != "" {
+			variable = FileVariable{v.ValueFrom.File}
+		}
+		if variable != nil {
+			if value, err := variable.Value(); err != nil {
+				return err
+			} else {
+				switch v.Name {
+				case "address":
+					// Form of url is : 'dbcluster.myorg.com:5432/reports'
+					tokens := strings.SplitN(value, "/", 2)
+					result.Address = tokens[0]
+					if len(tokens) == 2 {
+						result.Database = tokens[1]
+					}
+				case "username":
+					result.Username =value
+				case "password":
+					result.Password = value
+				default:
+					result.Options[v.Name] = value
+				}
+			}
+		}
 	}
 
-	// Form of url is : 'dbcluster.myorg.com:5432/reports'
-	tokens := strings.SplitN(url, "/", 2)
-	configuration.Address = tokens[0]
-	if len(tokens) == 2 {
-		configuration.Database = tokens[1]
-	}
-	configuration.Options = make(map[string]string)
+	self.BackendConfig = &result
 
-	return &configuration, nil
+	return nil
 }

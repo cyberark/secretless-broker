@@ -6,25 +6,28 @@ import (
 	"log"
 )
 
-type BackendConfig struct {
-	Address  string
-	Username string
-	Password string
-	Database string
-	Options  map[string]string
+type ValueFrom struct {
+	Conjur string
+	File   string
+}
+
+type Variable struct {
+	Name  string
+	Value string
+	ValueFrom ValueFrom `yaml:"value_from"`
 }
 
 type Authorization struct {
-	None     bool
-	Resource string
-	Users    map[string]string `yaml:"authorized_users"`
+	None      bool
+	Conjur    string
+	Passwords map[string]string
 }
 
 type Config struct {
 	Address         string
 	Socket          string
 	Authorization   Authorization
-	Backend         BackendConfig     `yaml:"backend"`
+	Backend         []Variable
 }
 
 func Configure(fileName string) Config {

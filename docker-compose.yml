@@ -29,12 +29,12 @@ services:
     depends_on:
       - conjur
 
-  proxy_conjur_local:
+  secretless_conjur_local:
     build: .
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
-      CONJUR_AUTHN_LOGIN: host/pg
+      CONJUR_AUTHN_LOGIN: host/secretless
       CONJUR_AUTHN_API_KEY: 
     depends_on:
       - conjur
@@ -43,12 +43,12 @@ services:
     volumes:
       - ./config.conjur_local.yaml:/config.yaml
 
-  proxy_conjur_remote:
+  secretless_conjur_remote:
     build: .
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
-      CONJUR_AUTHN_LOGIN: host/pg
+      CONJUR_AUTHN_LOGIN: host/secretless
       CONJUR_AUTHN_API_KEY: 
     depends_on:
       - conjur
@@ -57,18 +57,18 @@ services:
     volumes:
       - ./config.conjur_remote.yaml:/config.yaml
 
-  proxy_static:
+  secretless_static:
     build: .
     volumes:
       - ./config.static.yaml:/config.yaml
 
-  proxy_socket:
+  secretless_socket:
     build: .
     volumes:
       - ./config.socket.yaml:/config.yaml
-      - ./run/postgresql/:/var/run/postgresql
+      - ./run/postgresql/:/var/run/postgresql/
 
-  proxy_dev:
+  secretless_dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -79,7 +79,7 @@ services:
     depends_on:
       - conjur
     volumes:
-      - .:/go/src/github.com/kgilpin/secretless-pg
+      - .:/go/src/github.com/kgilpin/secretless
     depends_on:
       - pg
 

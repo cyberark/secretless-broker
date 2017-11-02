@@ -9,8 +9,4 @@ RUN apt-get update && apt-get install -y vim jq curl postgresql-client postgresq
 
 COPY . .
 
-WORKDIR /go/src/github.com/kgilpin/secretless-pg
-
-EXPOSE 5432
-
-ENTRYPOINT [ "./bin/linux/amd64/secretless-pg", "-config", "config.docker.yaml" ]
+WORKDIR /go/src/github.com/kgilpin/secretless

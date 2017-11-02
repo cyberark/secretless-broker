@@ -7,9 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/kgilpin/secretless-pg/config"
-	"github.com/kgilpin/secretless-pg/proxy/pg"
-	"github.com/kgilpin/secretless-pg/proxy/http"
+	"github.com/kgilpin/secretless/config"
+	"github.com/kgilpin/secretless/proxy/pg"
+	"github.com/kgilpin/secretless/proxy/http"
+	"github.com/kgilpin/secretless/proxy/http/authenticator"
 )
 
 type Proxy struct {
@@ -28,8 +29,13 @@ func (self *Proxy) ServePG(config config.ListenerConfig, l net.Listener) {
 	}
 }
 
-func (self *Proxy) ServeHTTP(config config.ListenerConfig, l net.Listener) {
-	handler := &http.HTTPHandler{Config: config}
+func (self *Proxy) ServeAWSHTTP(config config.ListenerConfig, l net.Listener) {
+	handler := &http.HTTPHandler{Config: config, Authenticator: authenticator.AWSAuthenticator{config}}
+	go handler.Run(l)
+}
+
+func (self *Proxy) ServeConjurHTTP(config config.ListenerConfig, l net.Listener) {
+	handler := &http.HTTPHandler{Config: config, Authenticator: authenticator.ConjurAuthenticator{config}}
 	go handler.Run(l)
 }
 
@@ -65,7 +71,9 @@ func (self *Proxy) Listen(listenerConfig config.Listener) {
 		case "postgresql": 
 			self.ServePG(config, proxyListener)
 		case "aws": 
-			self.ServeHTTP(config, proxyListener)
+			self.ServeAWSHTTP(config, proxyListener)
+		case "conjur": 
+			self.ServeConjurHTTP(config, proxyListener)
 		default:
 			log.Printf("Unrecognized listener type : %s", listenerConfig.Type)
 			return

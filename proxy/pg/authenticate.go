@@ -8,9 +8,9 @@ import (
 	"log"
 	"net"
 
-	"github.com/kgilpin/secretless-pg/conjur"
-	"github.com/kgilpin/secretless-pg/connect"
-	"github.com/kgilpin/secretless-pg/protocol"
+	"github.com/kgilpin/secretless/conjur"
+	"github.com/kgilpin/secretless/connect"
+	"github.com/kgilpin/secretless/protocol"
 )
 
 /**
@@ -111,7 +111,7 @@ func (self ConjurAuthorizer) Authorize(clientPassword []byte) (error, error) {
 	if err != nil {
 		return nil, err
 	}
-	allowed, err := conjur.CheckPermission(self.Resource, string(token))
+	allowed, err := conjur.CheckPermission(self.Resource, conjur.AccessToken{Token: string(token)})
 	if err != nil {
 		return nil, err
 	}	

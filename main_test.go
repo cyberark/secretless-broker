@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kgilpin/secretless-pg/conjur"
+	"github.com/kgilpin/secretless/conjur"
 )
 
 var AdminAPIKey = os.Getenv("CONJUR_AUTHN_API_KEY")
@@ -65,7 +65,7 @@ func TestUnixSocketPasswordLogin(t *testing.T) {
 func TestStaticPasswordLogin(t *testing.T) {
 	log.Print("Provide a statically configured password")
 
-	cmdOut, err := psql("proxy_static", "alice", []string{"PGPASSWORD=alice"})
+	cmdOut, err := psql("secretless_static", "alice", []string{"PGPASSWORD=alice"})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -79,7 +79,7 @@ func TestStaticPasswordLogin(t *testing.T) {
 func TestStaticPasswordLoginFailed(t *testing.T) {
 	log.Print("Provide the wrong value for a statically configured password")
 
-	cmdOut, err := psql("proxy_static", "alice", []string{"PGPASSWORD=foobar"})
+	cmdOut, err := psql("secretless_static", "alice", []string{"PGPASSWORD=foobar"})
 
 	if err == nil {
 		t.Fatalf("Expected failed login : %s", cmdOut)
@@ -101,9 +101,9 @@ func TestConjurLogin(t *testing.T) {
 	}
 
 	var (
-		adminToken *string
-		userAPIKey *string
-		userToken  *string
+		adminToken *conjur.AccessToken
+		userAPIKey string
+		userToken  *conjur.AccessToken
 		err        error
 	)
 
@@ -111,15 +111,15 @@ func TestConjurLogin(t *testing.T) {
 		t.Fatalf("Failed to authenticate as 'admin' : %s", err)
 	}
 	if userAPIKey, err = conjur.RotateAPIKey("bob", *adminToken); err != nil {
-		t.Fatalf("Failed to rotate API key of user 'bob'", err)
+		t.Fatalf("Failed to rotate API key of user 'bob' : %s", err)
 	}
-	if userToken, err = conjur.Authenticate("bob", *userAPIKey); err != nil {
+	if userToken, err = conjur.Authenticate("bob", userAPIKey); err != nil {
 		t.Fatalf("Failed to authenticate as 'bob' : %s", err)
 	}
 
-	userToken64 := base64.StdEncoding.EncodeToString([]byte(*userToken))
+	userToken64 := base64.StdEncoding.EncodeToString([]byte(userToken.Token))
 
-	cmdOut, err := psql("proxy_conjur_remote", "bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("secretless_conjur_remote", "bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -138,9 +138,9 @@ func TestConjurUnauthorized(t *testing.T) {
 	}
 
 	var (
-		adminToken *string
-		userAPIKey *string
-		userToken  *string
+		adminToken *conjur.AccessToken
+		userAPIKey string
+		userToken  *conjur.AccessToken
 		err        error
 	)
 
@@ -148,15 +148,15 @@ func TestConjurUnauthorized(t *testing.T) {
 		t.Fatalf("Failed to authenticate as 'admin' : %s", err)
 	}
 	if userAPIKey, err = conjur.RotateAPIKey("charles", *adminToken); err != nil {
-		t.Fatalf("Failed to rotate API key of user 'charles'", err)
+		t.Fatalf("Failed to rotate API key of user 'charles' : %s", err)
 	}
-	if userToken, err = conjur.Authenticate("charles", *userAPIKey); err != nil {
+	if userToken, err = conjur.Authenticate("charles", userAPIKey); err != nil {
 		t.Fatalf("Failed to authenticate as 'charles' : %s", err)
 	}
 
-	userToken64 := base64.StdEncoding.EncodeToString([]byte(*userToken))
+	userToken64 := base64.StdEncoding.EncodeToString([]byte(userToken.Token))
 
-	cmdOut, err := psql("proxy_conjur_remote", "charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("secretless_conjur_remote", "charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err == nil {
 		t.Fatal(cmdOut)
@@ -177,7 +177,7 @@ func TestConjurLocal(t *testing.T) {
 		err        error
 	)
 
-	cmdOut, err := psql("proxy_conjur_local", "", []string{})
+	cmdOut, err := psql("secretless_conjur_local", "", []string{})
 
 	if err != nil {
 		t.Fatal(cmdOut)

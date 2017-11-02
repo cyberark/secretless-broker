@@ -22,7 +22,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/kgilpin/secretless-pg/protocol"
+	"github.com/kgilpin/secretless/protocol"
 )
 
 /*

@@ -6,9 +6,9 @@ import (
   "log"
   "net"
 
-  "github.com/kgilpin/secretless-pg/config"
-  "github.com/kgilpin/secretless-pg/connect"
-  "github.com/kgilpin/secretless-pg/protocol"
+  "github.com/kgilpin/secretless/config"
+  "github.com/kgilpin/secretless/connect"
+  "github.com/kgilpin/secretless/protocol"
 )
 
 type PGClientOptions struct {

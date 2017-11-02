@@ -1,22 +1,22 @@
 package http
 
 import (
-  "bytes"
   "io"
-  "io/ioutil"
   "log"
   "net"
   "net/http"
-  "time"
 
-  "github.com/kgilpin/secretless-pg/config"
-  "github.com/aws/aws-sdk-go/aws/signer/v4"
-  "github.com/aws/aws-sdk-go/aws/credentials"
+  "github.com/kgilpin/secretless/config"
 )
 
+type Authenticator interface {
+  Authenticate(*http.Request) error
+}
+
 type HTTPHandler struct {
-  Config    config.ListenerConfig
-  Transport *http.Transport
+  Config        config.ListenerConfig
+  Transport     *http.Transport
+  Authenticator Authenticator
 }
 
 // Attribution: https://github.com/elazarl/goproxy/blob/de25c6ed252fdc01e23dae49d6a86742bd790b12/proxy.go#L74
@@ -50,9 +50,7 @@ func removeProxyHeaders(r *http.Request) {
   //   options that are desired for that particular connection and MUST NOT
   //   be communicated by proxies over further connections.
   r.Header.Del("Connection")
-
-  // AWS specific
-  r.Header.Del("X-Amz-Date")
+  r.Header.Del("Authenticate")
   r.Header.Del("Authorization")
 }
 
@@ -75,36 +73,9 @@ func (self *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
     removeProxyHeaders(r)
 
-    // TODO: We won't want to sign this when the original request is not signed either. See "AnonymousCredentials"
-    // TODO: support credentials from an IAM Role
-
-    var accessKeyId, secretAccessKey string
-    accessToken := ""
-    for _, v := range self.Config.Backend {
-      name := v.Name
-      value := v.Value
-      if name == "access_key_id" && value != "" {
-        accessKeyId = value
-      }
-      if name == "secret_access_key" && value != "" {
-        secretAccessKey = value
-      }
-    }
-
-    creds := credentials.NewStaticCredentials(accessKeyId, secretAccessKey, accessToken)
-
-    bodyBytes, err := ioutil.ReadAll(r.Body)
-    if err != nil {
+    if err = self.Authenticator.Authenticate(r); err != nil {
       http.Error(w, err.Error(), 500)
       return
-    }
-
-    signer := v4.NewSigner(creds)
-    if v4header, err := signer.Sign(r, bytes.NewReader(bodyBytes), "ec2", "us-east-1", time.Now()); err != nil {
-      http.Error(w, err.Error(), 500)
-      return
-    } else {
-      log.Printf("Signed headers: %v", v4header)
     }
 
     resp, err := self.Transport.RoundTrip(r)
@@ -121,7 +92,7 @@ func (self *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     _, err = io.Copy(w, resp.Body)
     if err := resp.Body.Close(); err != nil {
       log.Printf("Can't close response body %v", err)
-    }    
+    }
   }
 }
 

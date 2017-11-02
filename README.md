@@ -1,27 +1,27 @@
 # Secretless
 
-Secretless is a proxy which replaces the native backend authentication of a backend service with Conjur authentication and authorization. The proxied backend can be a database, HTTP web service, or any other service which uses a TCP protocol. 
+Secretless is a multiplexing server which relieves client applications of the need to directly handle secrets to backend services. The backend service can be a database, HTTP web service, or any other service which uses a TCP protocol. 
 
-To provide Secretless access to a backend, a "provider" implements the protocol of the service, replacing the authentication handshake with a scheme based on Conjur access tokens. The client does not need or use a real password to the backend. Rather, it obtains a Conjur access token and uses it as the password. The Secretless provider passes the access token to Conjur and verifies that the client is both authenticated and authorized to access the backend service, which is modeled as a Conjur Webservice. If authentication and authorization is successful, the provider uses a URL, username and password stored in Conjur Variables to obtain a connection to the actual backend. This backend connection is then hooked up to the client, and data is shuttled back and forth between them as fast as possible. 
+To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it authenticates to the Secretless server. If Secretless decides that the client is both authenticated and authorized to access the backend service, the provider obtains credentials to the Backend service from Conjur Variables. These credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and backend. 
 
-# Justification
+# Why Secretless?
 
-Exposing plaintext database passwords to client code is hazardous from both a security and operational standpoint. First, by providing the password to the client, the client becomes part of the database threat surface. If the application is compromised, then the attacker has a good chance of obtaining the password and being able to establish direct connections to the database. To mitigate the severity of this problem, database passwords are (or should be) rotated on a regular basis. However, rotation introduces the operational problem of keeping the applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords.
+Exposing plaintext secrets to clients (both users and machines) is hazardous from both a security and operational standpoint. First, by providing a secret to a client, the client becomes part of the threat surface. If the client is compromised, then the attacker has a good chance of obtaining the plaintext secrets and being able to establish direct connections to backend resources. To mitigate the severity of this problem, important secrets are (or should be) rotated (changed) on a regular basis. However, rotation introduces the operational problem of keeping applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords.
 
-When the client connects to the database through a Secretless proxy, we address both of these concerns.
+When the client connects to a backend resource through Secretles:
 
-* The client does not have direct access to the password, and therefore cannot reveal it.
-* The Secretless proxy is responsible for establishing connections to the backend, and can handle password rotation in a way that's transparent to the client.
+* **The client is not part of the threat surface** The client does not have direct access to the password, and therefore cannot reveal it.
+* **The client does not have to handle changing secrets** Secretless is responsible for establishing connections to the backend, and can handle secrets rotation in a way that's transparent to the client.
 
 # Example
 
-In this example, we setup a client to connect to Postgresql through a Secretless proxy. 
+In this example, we setup a client to connect to Postgresql through Secretless. 
 
-First, a Conjur policy creates the Host identity, the `pg` Webservice and the Variables which store the connection info:
+First, a Conjur policy creates a `secretless` Host identity along with Variables which store the database connection parameters:
 
 ```
-# This is the client
-- !host myapp
+# The Secretless server
+- !host secretless
 
 - !policy
   id: pg
@@ -32,23 +32,18 @@ First, a Conjur policy creates the Host identity, the `pg` Webservice and the Va
     - !variable username
     - !variable password
 
-  # Guards connections to the backend
-  - !webservice
-
-  # An identity which is used by the proxy
-  - !host
+  - !group secrets-users
 
   # Permit the proxy to read the connection parameters
   - !permit
-    role: !host
+    role: !group secrets-users
     privilege: [ read, execute ]
     resources: *variables
 
-# Permit the client to connect to the database
-- !permit
-  role: !host myapp
-  privileges: [ execute ]
-  resource: !webservice pg
+# Permit Secretless to read the pg variables
+- !grant
+  role: !group pg/secrets-users
+  member: !host secretless
 ```
 
 Load this policy in the normal manner, e.g. `conjur policy load --replace root conjur.yml`.
@@ -61,46 +56,78 @@ $ conjur variable values add pg/password conjur
 $ conjur variable values add pg/url pg:5432
 ```
 
-Now run Postgres on port 5432 in a container called `pg`, and run the Proxy in a container called `proxy`, also on port 5432. The `proxy` container needs environment variables `CONJUR_AUTHN_LOGIN=host/pg` and `CONJUR_AUTHN_API_KEY=<api key of host/pg>`.
+Now run Postgres on port 5432 in a container called `pg`, and run the Secretless in a container called `secretless`, also on port 5432. The `secretless` container needs environment variables `CONJUR_AUTHN_LOGIN=host/secretless` and `CONJUR_AUTHN_API_KEY=<api key of host/secretless>`.
 
-The client (`myapp`) will connect to Postgres through the proxy, using `psql`. Of course, `myapp` doesn't have a Postgres password, so it will use a Conjur access token. You can obtain one like this:
-
-```
-$ token=$(conjur authn authenticate -H | base64 -w0)
-```
-
-Then use it as the password:
+The client container will establish a `psql` connection to Postgresql, connecting through Secretless. Secretless will listen on the standard Postgresql Unix domain socket `/var/run/postgresql/.s.PGSQL.5432`. The client container and Secretless share the socket via Docker volume share:
 
 ```
-$ PGPASSWORD="$token" psql -U host/pg -h proxy
+$ psql
 psql (9.4.13, server 9.3.19)
 Type "help" for help.
 
 postgres=>
 ```
 
-In the `proxy` log, you can see the proxy authenticating the client with Conjur and then establishing the connection to `pg:5432` using the username and password obtained from Conjur. 
-
-Keep in mind that *all* of the following must be in place for `myapp` to connect to Postgres:
-
-* The proxy is running.
-* `host:myapp` has `execute` permission on `webservice:pg`.
-* `host:pg` has `execute` permission on the Variables which store the Posgtres parameters.
-* The Postgres variables are loaded with valid connection data.
+In the `secretless` log, you can see Secretless establishing the connection to `pg:5432` using the username and password obtained from Conjur Variables. 
 
 # Development
 
 A development environment is provided in the `docker-compose.yml`. 
 
-First build it using `docker-compose build`. Then run Conjur with `docker-compose up -d pg conjur`. 
+First build it using `docker-compose build`. Then run Conjur with `docker-compose up -d pg conjur` and obtain the admin API key:
 
-Obtain the admin API key with `docker-compose logs conjur`, then start a Conjur client container with `docker-compose run --rm client`.
+```sh-session
+$ docker-compose logs conjur | grep "API key"
+conjur_1                    | API key for admin: 2jm5tvn2fmbmme14mfyg83z529kk1vj9x5h25e4m7djx1j7k376nejn
+```
 
-Once in the client, login as `admin` and load the policy and populate the variables by running `./example/conjur.sh`. 
+Then start a Conjur client container with `docker-compose run --rm client`.
 
-In a new shell, `export CONJUR_AUTHN_API_KEY=<API key of dev:host:pg>`, then start the proxy container with `docker-compose up proxy`.
+Once in the client, login as `admin` and load the policy and populate the variables:
 
-In another new shell, enter a `proy-dev` container with `docker-compose run --rm proxy-dev bash`. Then `export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>`. Now you are ready to run the tests:
+```sh-session
+root@c88091df1304:/# cd ./work/
+root@c88091df1304:/# cd ./work/
+root@c88091df1304:/work# ./example/conjur.sh
++ conjur policy load root example/conjur.yml
+Loaded policy 'root'
+{
+  "created_roles": {
+    ...
+    "dev:host:secretless": {
+      "id": "dev:host:secretless",
+      "api_key": "14y15dx20p3pxg3z99ffw26qqhx01pky7tz2y8jvt3cvxy2c3ebed5y"
+    }
+  },
+  "version": 1
+}
++ conjur variable values add pg/username conjur
+Value added
++ conjur variable values add pg/password conjur
+Value added
++ conjur variable values add pg/url pg:5432
+Value added
+```
+
+In a new shell, run a `secretless_dev` container with `docker-compose run --rm secretless_dev`. Once in the container, build the Linux binary `./bin/linux/amd64/secretless`:
+
+```sh-session
+root@91353a15ccb1:/go/src/github.com/kgilpin/secretless# ./build.sh
++ godep restore
++ go install
++ mkdir -p bin/linux/amd64
++ cp /go/bin/secretless bin/linux/amd64
+```
+
+Back in the host shell, build the rest of the container images:
+
+```sh-session
+$ docker-compose build
+```
+
+Now, `export CONJUR_AUTHN_API_KEY=<API key of dev:host:secretless>`, then start the Secretless containers with `docker-compose up`.
+
+Then `export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>`. Now you are ready to run the tests:
 
 ```
 $ godep restore
@@ -111,26 +138,24 @@ $ go test
 2017/10/27 14:17:07 Provide a Conjur access token as the password
 2017/10/27 14:17:07 Provide a Conjur access token for an unauthorized user
 PASS
-ok    github.com/kgilpin/secretless-pg  0.318s
+ok    github.com/kgilpin/secretless  0.318s
 ```
 
 # Performance
 
-Using Secretless reduces the transaction throughput by 28-30% on Postgresql. Once the connection to the backend database is established, the proxy runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:
+Using Secretless reduces the transaction throughput by 28-30% on Postgresql. Once the connection to the backend database is established, Secretless runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:
 
 ```
     go stream(self.Client, self.Backend)
     go stream(self.Backend, self.Client)
 ```
 
-So I am not sure if it can be optimized any further.
-
-Here is some performance data created by running [pgbench](https://www.postgresql.org/docs/9.5/static/pgbench.html) in a Dockerized environment with the client, proxy and database running on a single machine (2017 MacBook Pro with 4-core Intel Core i7 @ 2.9GHz).
+Here is some performance data created by running [pgbench](https://www.postgresql.org/docs/9.5/static/pgbench.html) in a Dockerized environment with the client, Secretless and database running on a single machine (2017 MacBook Pro with 4-core Intel Core i7 @ 2.9GHz).
 
 Directly to the database:
 
 ```
-root@566b7c06abcf:/go/src/github.com/kgilpin/secretless-pg# PGPASSWORD=conjur PGSSLMODE=disable pgbench -h pg -U conjur -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGPASSWORD=conjur PGSSLMODE=disable pgbench -h pg -U conjur -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -147,7 +172,7 @@ tps = 1337.527786 (excluding connections establishing)
 Through the `secretless` proxy:
 
 ```
-root@566b7c06abcf:/go/src/github.com/kgilpin/secretless-pg# PGPASSWORD=alice PGSSLMODE=disable pgbench -h 172.18.0.9 -U alice -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGPASSWORD=alice PGSSLMODE=disable pgbench -h 172.18.0.9 -U alice -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1

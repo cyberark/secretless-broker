@@ -7,9 +7,21 @@ listeners:
         none: true
       backend:
         - name: access_key_id
-          value: AKIAJADDJE4Q4JVX3HAA
+          value_from:
+            environment: AWS_ACCESS_KEY_ID
         - name: secret_access_key
-          value: r2HYaI9PnaAGVVguk9GKFN61lSQ+M+8oYj/MTG98
+          value_from:
+            environment: AWS_SECRET_ACCESS_KEY
+
+  - name: conjur-master-v2
+    type: conjur
+    configuration:
+      address: 0.0.0.0:81
+      authorization:
+        none: true
+      backend:
+        - name: appliance_url
+          value: 
 
   - name: pg
     type: postgresql

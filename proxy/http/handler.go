@@ -7,10 +7,11 @@ import (
   "net/http"
 
   "github.com/kgilpin/secretless/config"
+  "github.com/kgilpin/secretless/variable"
 )
 
 type Authenticator interface {
-  Authenticate(*http.Request) error
+  Authenticate(map[string]string, *http.Request) error
 }
 
 type HTTPHandler struct {
@@ -73,10 +74,15 @@ func (self *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
     removeProxyHeaders(r)
 
-    if err = self.Authenticator.Authenticate(r); err != nil {
+	  if backendVariables, err := variable.Resolve(self.Config.Backend); err != nil {
       http.Error(w, err.Error(), 500)
-      return
-    }
+	    return
+	  } else {
+	    if err = self.Authenticator.Authenticate(*backendVariables, r); err != nil {
+	      http.Error(w, err.Error(), 500)
+	      return
+	    }
+	  }
 
     resp, err := self.Transport.RoundTrip(r)
     if err != nil {

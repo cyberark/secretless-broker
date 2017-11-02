@@ -10,7 +10,6 @@ import (
   "time"
 
   "github.com/kgilpin/secretless/config"
-  "github.com/kgilpin/secretless/variable"
 
   "github.com/aws/aws-sdk-go/aws"
   "github.com/aws/aws-sdk-go/aws/credentials"
@@ -21,27 +20,21 @@ type AWSAuthenticator struct {
   Config config.ListenerConfig
 }
 
-func (self AWSAuthenticator) Authenticate(r *http.Request) error {
+func (self AWSAuthenticator) Authenticate(values map[string]string, r *http.Request) error {
   // TODO: We won't want to sign this when the original request is not signed either. See "AnonymousCredentials"
   // TODO: support credentials from an IAM Role
 
   var accessKeyId, secretAccessKey, accessToken string
 
-  if valuesPtr, err := variable.Resolve(self.Config.Backend); err != nil {
-    return err
-  } else {
-    values := *valuesPtr
-
-    accessKeyId = values["access_key_id"]
-    if accessKeyId == "" {
-      return fmt.Errorf("AWS connection parameter 'access_key_id' is not available")
-    }
-    secretAccessKey = values["secret_access_key"]
-    if secretAccessKey == "" {
-      return fmt.Errorf("AWS connection parameter 'secret_access_key' is not available")
-    }
-    accessToken = values["access_token"]
+  accessKeyId = values["access_key_id"]
+  if accessKeyId == "" {
+    return fmt.Errorf("AWS connection parameter 'access_key_id' is not available")
   }
+  secretAccessKey = values["secret_access_key"]
+  if secretAccessKey == "" {
+    return fmt.Errorf("AWS connection parameter 'secret_access_key' is not available")
+  }
+  accessToken = values["access_token"]
 
   creds := credentials.NewStaticCredentials(accessKeyId, secretAccessKey, accessToken)
 

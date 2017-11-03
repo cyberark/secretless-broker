@@ -36,6 +36,8 @@ services:
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_LOGIN: host/secretless
       CONJUR_AUTHN_API_KEY: 
+      AWS_ACCESS_KEY_ID: 
+      AWS_SECRET_ACCESS_KEY: 
     depends_on:
       - conjur
     depends_on:
@@ -76,6 +78,8 @@ services:
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
+      AWS_ACCESS_KEY_ID: 
+      AWS_SECRET_ACCESS_KEY: 
     depends_on:
       - conjur
     volumes:

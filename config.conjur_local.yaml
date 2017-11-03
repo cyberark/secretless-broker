@@ -5,6 +5,7 @@ listeners:
       address: 0.0.0.0:80
       authorization:
         none: true
+      debug: true
       backend:
         - name: access_key_id
           value_from:

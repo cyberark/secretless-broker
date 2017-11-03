@@ -32,29 +32,6 @@ func copyHeaders(dst, src http.Header) {
   }
 }
 
-// Attribution: https://github.com/elazarl/goproxy/blob/de25c6ed252fdc01e23dae49d6a86742bd790b12/proxy.go#L74
-func removeProxyHeaders(r *http.Request) {
-  r.RequestURI = "" // this must be reset when serving a request with the client
-  log.Printf("Sending request %v %v", r.Method, r.URL.String())
-  // If no Accept-Encoding header exists, Transport will add the headers it can accept
-  // and would wrap the response body with the relevant reader.
-  r.Header.Del("Accept-Encoding")
-  // curl can add that, see
-  // https://jdebp.eu./FGA/web-proxy-connection-header.html
-  r.Header.Del("Proxy-Connection")
-  r.Header.Del("Proxy-Authenticate")
-  r.Header.Del("Proxy-Authorization")
-  // Connection, Authenticate and Authorization are single hop Header:
-  // http://www.w3.org/Protocols/rfc2616/rfc2616.txt
-  // 14.10 Connection
-  //   The Connection general-header field allows the sender to specify
-  //   options that are desired for that particular connection and MUST NOT
-  //   be communicated by proxies over further connections.
-  r.Header.Del("Connection")
-  r.Header.Del("Authenticate")
-  r.Header.Del("Authorization")
-}
-
 // Standard net/http function. Shouldn't be used directly, http.Serve will use it.
 func (self *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
   //r.Header["X-Forwarded-For"] = w.RemoteAddr()
@@ -65,14 +42,15 @@ func (self *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     var err error
 
     log.Printf("Got request %v %v %v %v", r.URL.Path, r.Host, r.Method, r.URL.String())
-    log.Printf("Request headers: %v", r.Header)
 
     if !r.URL.IsAbs() {
       http.Error(w, "This is a proxy server. Does not respond to non-proxy requests.", 500)
       return
     }
 
-    removeProxyHeaders(r)
+	  r.Header.Del("Proxy-Connection")
+	  r.Header.Del("Proxy-Authenticate")
+	  r.Header.Del("Proxy-Authorization")
 
 	  if backendVariables, err := variable.Resolve(self.Config.Backend); err != nil {
       http.Error(w, err.Error(), 500)
@@ -83,6 +61,12 @@ func (self *HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	      return
 	    }
 	  }
+
+	  if self.Config.Debug {
+	    log.Printf("Header after authentication processing: %v", r.Header)
+	  }
+
+	  r.RequestURI = "" // this must be reset when serving a request with the client
 
     resp, err := self.Transport.RoundTrip(r)
     if err != nil {

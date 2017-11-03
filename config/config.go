@@ -29,6 +29,7 @@ type ListenerConfig struct {
   Address       string
   Socket        string
   Authorization Authorization
+  Debug         bool
   Backend       []Variable
 }
 

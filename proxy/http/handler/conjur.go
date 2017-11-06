@@ -1,4 +1,4 @@
-package authenticator
+package handler
 
 import (
   "encoding/base64"
@@ -14,11 +14,15 @@ import (
 var HostUsername = os.Getenv("CONJUR_AUTHN_LOGIN")
 var HostAPIKey = os.Getenv("CONJUR_AUTHN_apiKey")
 
-type ConjurAuthenticator struct {
-  Config config.ListenerConfig
+type ConjurHandler struct {
+  Config config.Handler
 }
 
-func (self ConjurAuthenticator) Authenticate(values map[string]string, r *http.Request) error {
+func (self ConjurHandler) Configuration() *config.Handler {
+  return &self.Config
+}
+
+func (self ConjurHandler) Authenticate(values map[string]string, r *http.Request) error {
 	username := values["username"]
 	if username == "" {
 		return fmt.Errorf("Conjur connection parameter 'username' is not available")

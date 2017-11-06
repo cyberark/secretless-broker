@@ -11,13 +11,13 @@ import (
   "github.com/kgilpin/secretless/protocol"
 )
 
-type PGClientOptions struct {
+type ClientOptions struct {
   User     string
   Database string
   Options  map[string]string
 }
 
-type PGBackendConfig struct {
+type BackendConfig struct {
   Address  string
   Username string
   Password string
@@ -25,12 +25,12 @@ type PGBackendConfig struct {
   Options  map[string]string
 }
 
-type PGHandler struct {
-  Config            config.ListenerConfig
+type Handler struct {
+  Config            config.Handler
   Client            net.Conn
   Backend           net.Conn
-  ClientOptions     *PGClientOptions
-  BackendConfig     *PGBackendConfig
+  ClientOptions     *ClientOptions
+  BackendConfig     *BackendConfig
 }
 
 func stream(source, dest net.Conn) {
@@ -54,14 +54,14 @@ func stream(source, dest net.Conn) {
   }
 }
 
-func (self *PGHandler) Pipe() {
+func (self *Handler) Pipe() {
   log.Printf("Connecting client %s to backend %s", self.Client.RemoteAddr(), self.Backend.RemoteAddr())
 
   go stream(self.Client, self.Backend)
   go stream(self.Backend, self.Client)
 }
 
-func (self *PGHandler) ConnectToBackend() error {
+func (self *Handler) ConnectToBackend() error {
   var connection net.Conn
   var err error
 
@@ -95,7 +95,7 @@ func (self *PGHandler) ConnectToBackend() error {
   return nil
 }
 
-func (self *PGHandler) Abort(err error) {
+func (self *Handler) Abort(err error) {
   pgError := protocol.Error{
     Severity: protocol.ErrorSeverityFatal,
     Code:     protocol.ErrorCodeInternalError,
@@ -105,7 +105,7 @@ func (self *PGHandler) Abort(err error) {
   return
 }
 
-func (self *PGHandler) Run() {
+func (self *Handler) Run() {
   var authenticationError, err error
   var abort bool
 

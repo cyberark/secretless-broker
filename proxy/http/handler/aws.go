@@ -1,4 +1,4 @@
-package authenticator
+package handler
 
 import (
   "bytes"
@@ -16,8 +16,8 @@ import (
   "github.com/aws/aws-sdk-go/aws/signer/v4"
 )
 
-type AWSAuthenticator struct {
-  Config config.ListenerConfig
+type AWSHandler struct {
+  Config config.Handler
 }
 
 // AWS4-HMAC-SHA256 Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
@@ -33,7 +33,11 @@ const (
   emptyStringSHA256 = `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
 )
 
-func (self AWSAuthenticator) Authenticate(values map[string]string, r *http.Request) error {
+func (self AWSHandler) Configuration() *config.Handler {
+  return &self.Config
+}
+
+func (self AWSHandler) Authenticate(values map[string]string, r *http.Request) error {
   var err error
   var amzDate time.Time
 

@@ -3,6 +3,7 @@ package config
 import (
   "io/ioutil"
   "log"
+  "regexp"
 
   "gopkg.in/yaml.v2"
 )
@@ -25,25 +26,32 @@ type Authorization struct {
   Passwords map[string]string
 }
 
-type ListenerConfig struct {
-  Address       string
-  Socket        string
-  Authorization Authorization
-  Debug         bool
-  Backend       []Variable
+type Listener struct {
+  Name     string
+  Protocol string
+  Address  string
+  Socket   string
 }
 
-type Listener struct {
-  Name   string
-  Type   string
-  Config ListenerConfig `yaml:"configuration"`
+type Handler struct {
+  Name          string
+  Type          string
+  Listener      string
+  Authorization Authorization
+  Debug         bool
+  Match         []string
+  Patterns      []*regexp.Regexp
+  Backend       []Variable
 }
 
 type Config struct {
   Listeners []Listener
+  Handlers  []Handler
 }
 
 func Configure(fileName string) Config {
+	var err error
+
   config := Config{}
 
   buffer, err := ioutil.ReadFile(fileName)
@@ -53,6 +61,19 @@ func Configure(fileName string) Config {
   err = yaml.Unmarshal(buffer, &config)
   if err != nil {
     log.Fatalf("Unable to load config file %s : %s", fileName, err)
+  }
+
+  for i := range config.Handlers {
+  	handler := &config.Handlers[i]
+	  handler.Patterns = make([]*regexp.Regexp, len(handler.Match))
+	  for i, pattern := range handler.Match {
+	  	pattern, err := regexp.Compile(pattern)
+	  	if err != nil {
+	  		panic(err.Error())
+	  	} else {
+	  		handler.Patterns[i] = pattern
+	  	}
+	  }
   }
 
   return config

@@ -1,17 +1,21 @@
 listeners:
   - name: pg
+    protocol: pg
+    address: 0.0.0.0:5432
+
+handlers:
+  - name: pg
     type: postgresql
-    configuration:
-      address: 0.0.0.0:5432
-      authorization:
-        conjur: dev:webservice:pg
-      backend:
-        - name: address
-          value_from:
-            conjur: dev:variable:pg/url
-        - name: username
-          value_from:
-            conjur: dev:variable:pg/username
-        - name: password
-          value_from:
-            conjur: dev:variable:pg/password
+    listener: pg
+    authorization:
+      conjur: dev:webservice:pg
+    backend:
+      - name: address
+        value_from:
+          conjur: dev:variable:pg/url
+      - name: username
+        value_from:
+          conjur: dev:variable:pg/username
+      - name: password
+        value_from:
+          conjur: dev:variable:pg/password

@@ -6,8 +6,8 @@ import (
   "github.com/kgilpin/secretless/variable"
 )
 
-func (self *PGHandler) ConfigureBackend() error {
-  result := PGBackendConfig{Options: make(map[string]string)}
+func (self *Handler) ConfigureBackend() error {
+  result := BackendConfig{Options: make(map[string]string)}
 
   if valuesPtr, err := variable.Resolve(self.Config.Backend); err != nil {
     return err

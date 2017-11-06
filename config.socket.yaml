@@ -1,14 +1,18 @@
 listeners:
   - name: pg
+    protocol: pg
+    socket: ./run/postgresql/.s.PGSQL.5432
+
+handlers:
+  - name: pg
     type: postgresql
-    configuration:
-      socket: ./run/postgresql/.s.PGSQL.5432
-      authorization:
-        none: true
-      backend:
-        - name: address
-          value: pg:5432
-        - name: username
-          value: conjur
-        - name: password
-          value: conjur
+    listener: pg
+    authorization:
+      none: true
+    backend:
+      - name: address
+        value: pg:5432
+      - name: username
+        value: conjur
+      - name: password
+        value: conjur

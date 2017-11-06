@@ -12,7 +12,7 @@ import (
  * Parse client options from the buffer and store the required parameters.
  * If an error is reported here, it should be propagated as Fatal to the client.
  */
-func (self *PGClientOptions) Parse(message *protocol.MessageBuffer) error {
+func (self *ClientOptions) Parse(message *protocol.MessageBuffer) error {
 	self.Options = make(map[string]string)
 	for {
 		param, err := message.ReadString()
@@ -44,7 +44,7 @@ func (self *PGClientOptions) Parse(message *protocol.MessageBuffer) error {
  * Perform the startup handshake with the client and obtain the client options.
  * If an error is reported here, it should be propagated as Fatal to the client.
  */
-func (self *PGHandler) Startup() error {
+func (self *Handler) Startup() error {
 	log.Printf("Handling connection %v", self.Client)
 
 	/* Get the self.Client startup message. */
@@ -66,6 +66,6 @@ func (self *PGHandler) Startup() error {
 	/* Now read the startup parameters */
 	startup := protocol.NewMessageBuffer(message[8:length])
 
-	self.ClientOptions = &PGClientOptions{}
+	self.ClientOptions = &ClientOptions{}
 	return self.ClientOptions.Parse(startup)
 }

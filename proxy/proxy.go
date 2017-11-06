@@ -1,54 +1,35 @@
 package proxy
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/kgilpin/secretless/config"
 	"github.com/kgilpin/secretless/proxy/pg"
 	"github.com/kgilpin/secretless/proxy/http"
-	"github.com/kgilpin/secretless/proxy/http/authenticator"
 )
+
+type Listener interface {
+	Listen()
+}
 
 type Proxy struct {
 	Config config.Config
 }
 
-func (self *Proxy) ServePG(config config.ListenerConfig, l net.Listener) {
-	for {
-		if client, err := l.Accept(); err != nil {
-			log.Println(err)
-			continue
-		} else {
-			handler := &pg.PGHandler{Config: config, Client: client}
-			go handler.Run()			
-		}
-	}
-}
-
-func (self *Proxy) ServeAWSHTTP(config config.ListenerConfig, l net.Listener) {
-	handler := &http.HTTPHandler{Config: config, Authenticator: authenticator.AWSAuthenticator{config}}
-	go handler.Run(l)
-}
-
-func (self *Proxy) ServeConjurHTTP(config config.ListenerConfig, l net.Listener) {
-	handler := &http.HTTPHandler{Config: config, Authenticator: authenticator.ConjurAuthenticator{config}}
-	go handler.Run(l)
-}
-
-func (self *Proxy) Listen(listenerConfig config.Listener) {
-	var proxyListener net.Listener
+func (self *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
+	var l net.Listener
 	var err error
 
-	config := listenerConfig.Config
-
-	if config.Address != "" {
-		proxyListener, err = net.Listen("tcp", config.Address)
+	if listenerConfig.Address != "" {
+		l, err = net.Listen("tcp", listenerConfig.Address)
 	} else {
-		proxyListener, err = net.Listen("unix", config.Socket)
+		l, err = net.Listen("unix", listenerConfig.Socket)
 
 		// https://stackoverflow.com/questions/16681944/how-to-reliably-unlink-a-unix-domain-socket-in-go-programming-language
 		// Handle common process-killing signals so we can gracefully shut down:
@@ -59,32 +40,42 @@ func (self *Proxy) Listen(listenerConfig config.Listener) {
 	    sig := <-c
 	    log.Printf("Caught signal %s: shutting down.", sig)
 	    // Stop listening (and unlink the socket if unix type):
-	    proxyListener.Close()
+	    l.Close()
 	    // And we're done:
 	    os.Exit(0)
 		}(sigc)		
 	}
 	if err == nil {
-		log.Printf("%s listener '%s' listening at: %s", listenerConfig.Type, listenerConfig.Name, proxyListener.Addr())
+		log.Printf("%s listener '%s' listening at: %s", listenerConfig.Protocol, listenerConfig.Name, l.Addr())
 
-		switch listenerConfig.Type {
-		case "postgresql": 
-			self.ServePG(config, proxyListener)
-		case "aws": 
-			self.ServeAWSHTTP(config, proxyListener)
-		case "conjur": 
-			self.ServeConjurHTTP(config, proxyListener)
-		default:
-			log.Printf("Unrecognized listener type : %s", listenerConfig.Type)
-			return
+		protocol := listenerConfig.Protocol
+		if protocol == "" {
+			protocol = listenerConfig.Name
 		}
+
+		var listener Listener
+		switch protocol {
+		case "pg": 
+			listener = &pg.Listener{Config: listenerConfig, Listener: l, Handlers: self.Config.Handlers}
+		case "http": 
+			listener = &http.Listener{Config: listenerConfig, Listener: l, Handlers: self.Config.Handlers}
+		default:
+			panic(fmt.Sprintf("Unrecognized protocol '%s' on listener '%s'", protocol, listenerConfig.Name))			
+		}
+		go func() {
+				defer wg.Done()
+				listener.Listen()
+			}()
 	} else {
 		log.Fatal(err)
 	}
 }
 
 func (self *Proxy) Run() {
+	var wg sync.WaitGroup
+	wg.Add(len(self.Config.Listeners))
 	for _, config := range self.Config.Listeners {
-		self.Listen(config)
+		self.Listen(config, wg)
 	}
+	wg.Wait()
 }

@@ -10,6 +10,7 @@
 
 - !policy
   id: pg
+  owner: !group ops
   body:
   - &pg_variables
     - !variable url
@@ -22,25 +23,6 @@
     role: !layer
     privilege: [ read, execute ]
     resources: *pg_variables
-
-  - !grant
-    role: !layer
-    member: !host /myapp
-
-- !policy
-  id: aws
-  body:
-  - &aws_variables
-    - !variable access_key_id
-    - !variable secret_access_key
-    - !variable region
-
-  - !layer
-
-  - !permit
-    role: !layer
-    privilege: [ read, execute ]
-    resources: *aws_variables
 
   - !grant
     role: !layer

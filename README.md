@@ -192,4 +192,41 @@ tps = 959.835445 (including connections establishing)
 tps = 962.082570 (excluding connections establishing)
 ```
 
+Here is a set of test results running directly against an RDS Postgresql:
+
+```
+root@2a33637a9cb5:/work# pgbench -h demo1.cb5uzm0ycqol.us-east-1.rds.amazonaws.com -p 5432 -U alice -T 10 -c 12 -j 12 postgres
+Password:
+starting vacuum...end.
+transaction type: TPC-B (sort of)
+scaling factor: 1
+query mode: simple
+number of clients: 12
+number of threads: 12
+duration: 10 s
+number of transactions actually processed: 197
+latency average: 657.775 ms
+tps = 18.243307 (including connections establishing)
+tps = 18.542609 (excluding connections establishing)
+```
+
+And to RDS through Secretless:
+
+```
+root@2a33637a9cb5:/work# pgbench -U alice -T 10 -c 12 -j 12 postgres
+starting vacuum...end.
+transaction type: TPC-B (sort of)
+scaling factor: 1
+query mode: simple
+number of clients: 12
+number of threads: 12
+duration: 10 s
+number of transactions actually processed: 153
+latency average: 824.491 ms
+tps = 14.554441 (including connections establishing)
+tps = 15.822442 (excluding connections establishing)
+```
+
+14% fewer tps (excluding establishing connections) via Secretless. Establishing connections takes a relatively long time because the credentials are being looked up in Conjur. These can be cached in Secretless as a future optimization.
+
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios. 

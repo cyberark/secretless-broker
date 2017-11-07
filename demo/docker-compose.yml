@@ -29,7 +29,7 @@ services:
       dockerfile: Dockerfile
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
-      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_LOGIN: alice
       CONJUR_AUTHN_API_KEY: 
       AWS_ACCESS_KEY_ID: 
       AWS_SECRET_ACCESS_KEY: 
@@ -37,7 +37,7 @@ services:
       - conjur
     volumes:
       - ./run/postgresql/:/var/run/postgresql/
-      - ./config.admin.yaml:/config.yaml
+      - ./secretless.admin.yml:/config.yaml
 
   admin:
     build:
@@ -47,10 +47,11 @@ services:
       http_proxy: http://admin_secretless:80
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
-      CONJUR_AUTHN_TOKEN: "eyJkYXRhIjoiYWRtaW4ifQ=="
+      CONJUR_AUTHN_TOKEN: "eyJkYXRhIjoiZHVtbXkifQo="
     volumes:
       - ./run/postgresql/:/var/run/postgresql/
       - .:/work
+      - ./aws:/root/.aws:ro
     depends_on:
       - admin_secretless
 
@@ -66,7 +67,7 @@ services:
       - conjur
     volumes:
       - ./run/postgresql/:/var/run/postgresql/
-      - ./config.myapp.yaml:/config.yaml
+      - ./secretless.myapp.yml:/config.yaml
 
   myapp:
     build:

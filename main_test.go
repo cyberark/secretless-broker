@@ -14,17 +14,21 @@ import (
 
 var AdminAPIKey = os.Getenv("CONJUR_AUTHN_API_KEY")
 var Host = os.Getenv("TEST_PROXY_HOST")
-var Port = os.Getenv("TEST_PROXY_PORT")
 
-func psql(host string, user string, environment []string) (string, error) {
-	if Host != "" {
-		host = Host
-	}
-	if Port == "" {
-		Port = "5432"
+func psql(host string, port int, user string, environment []string) (string, error) {
+	if host == "" {
+		if Host != "" {
+			host = Host
+		} else {
+			host = "secretless_test"
+		}
 	}
 
-	args := []string{"-h", host, "-p", Port}
+	args := []string{ "-h", host }
+	if port != 0 {
+		args = append(args, "-p")
+		args = append(args, fmt.Sprintf("%d", port))
+	}
 	if user != "" {
 		args = append(args, "-U")
 		args = append(args, user)
@@ -32,6 +36,8 @@ func psql(host string, user string, environment []string) (string, error) {
 	args = append(args, "-c")
 	args = append(args, "select count(*) from conjur.test")
 	args = append(args, "sslmode=disable dbname=postgres")
+
+	log.Println(strings.Join(append([]string{"psql"}, args...), " "))
 
 	cmd := exec.Command("psql", args...)
 	env := os.Environ()
@@ -51,7 +57,7 @@ func TestUnixSocketPasswordLogin(t *testing.T) {
 		panic(err)
 	}
 
-	cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), "", []string{})
+	cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), 0, "", []string{})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -63,9 +69,9 @@ func TestUnixSocketPasswordLogin(t *testing.T) {
 }
 
 func TestStaticPasswordLogin(t *testing.T) {
-	log.Print("Provide a statically configured password")
+	log.Print("Use a statically configured password")
 
-	cmdOut, err := psql("secretless_static", "alice", []string{"PGPASSWORD=alice"})
+	cmdOut, err := psql("", 5433, "alice", []string{"PGPASSWORD=alice"})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -79,7 +85,7 @@ func TestStaticPasswordLogin(t *testing.T) {
 func TestStaticPasswordLoginFailed(t *testing.T) {
 	log.Print("Provide the wrong value for a statically configured password")
 
-	cmdOut, err := psql("secretless_static", "alice", []string{"PGPASSWORD=foobar"})
+	cmdOut, err := psql("", 5433, "alice", []string{"PGPASSWORD=foobar"})
 
 	if err == nil {
 		t.Fatalf("Expected failed login : %s", cmdOut)
@@ -119,7 +125,7 @@ func TestConjurLogin(t *testing.T) {
 
 	userToken64 := base64.StdEncoding.EncodeToString([]byte(userToken.Token))
 
-	cmdOut, err := psql("secretless_conjur_remote", "bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("", 0, "bob", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err != nil {
 		t.Fatal(cmdOut)
@@ -156,7 +162,7 @@ func TestConjurUnauthorized(t *testing.T) {
 
 	userToken64 := base64.StdEncoding.EncodeToString([]byte(userToken.Token))
 
-	cmdOut, err := psql("secretless_conjur_remote", "charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
+	cmdOut, err := psql("", 5434, "charles", []string{fmt.Sprintf("PGPASSWORD=%s", userToken64)})
 
 	if err == nil {
 		t.Fatal(cmdOut)
@@ -174,10 +180,10 @@ func TestConjurLocal(t *testing.T) {
 	log.Print("Proxy requires no authorization and will obtain its own Conjur access token")
 
 	var (
-		err        error
+		err error
 	)
 
-	cmdOut, err := psql("secretless_conjur_local", "", []string{})
+	cmdOut, err := psql("", 0, "", []string{})
 
 	if err != nil {
 		t.Fatal(cmdOut)

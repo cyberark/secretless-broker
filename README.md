@@ -125,14 +125,20 @@ Back in the host shell, build the rest of the container images:
 $ docker-compose build
 ```
 
-Now, `export CONJUR_AUTHN_API_KEY=<API key of dev:host:secretless>`, then start the Secretless containers with `docker-compose up`.
+Still in the host shell, start the `secretless_test` container:
 
-Then `export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>`. Now you are ready to run the tests:
+```sh-session
+$ export CONJUR_AUTHN_API_KEY=<API key of dev:host:secretless>
+$ docker-compose up secretless_test
+```
+
+Back in the `secretless_dev` container, you are ready to run the tests:
 
 ```
-$ godep restore
+# export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>
+# godep restore
 ...
-$ go test
+# go test
 2017/10/27 14:17:07 Provide a statically configured password
 2017/10/27 14:17:07 Provide the wrong value for a statically configured password
 2017/10/27 14:17:07 Provide a Conjur access token as the password

@@ -29,7 +29,7 @@ services:
     depends_on:
       - conjur
 
-  secretless_conjur_local:
+  secretless_test:
     build: .
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
@@ -43,31 +43,7 @@ services:
     depends_on:
       - pg
     volumes:
-      - ./config.conjur_local.yaml:/config.yaml
-
-  secretless_conjur_remote:
-    build: .
-    environment:
-      CONJUR_APPLIANCE_URL: http://conjur
-      CONJUR_ACCOUNT: dev
-      CONJUR_AUTHN_LOGIN: host/secretless
-      CONJUR_AUTHN_API_KEY: 
-    depends_on:
-      - conjur
-    depends_on:
-      - pg
-    volumes:
-      - ./config.conjur_remote.yaml:/config.yaml
-
-  secretless_static:
-    build: .
-    volumes:
-      - ./config.static.yaml:/config.yaml
-
-  secretless_socket:
-    build: .
-    volumes:
-      - ./config.socket.yaml:/config.yaml
+      - ./config.conjur_test.yaml:/config.yaml
       - ./run/postgresql/:/var/run/postgresql/
 
   secretless_dev:

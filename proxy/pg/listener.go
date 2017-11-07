@@ -1,10 +1,13 @@
 package pg
 
 import (
+  "fmt"
   "log"
   "net"
 
   "github.com/kgilpin/secretless/config"
+  "github.com/kgilpin/secretless/connect"
+  "github.com/kgilpin/secretless/protocol"
 )
 
 type Listener struct {
@@ -20,6 +23,7 @@ func (self *Listener) Listen() {
       continue
     } else {
       // Serve the first Handler which is attached to this listener
+      var selectedHandler *config.Handler
       for _, handler := range self.Handlers {
         listener := handler.Listener
         if listener == "" {
@@ -27,9 +31,21 @@ func (self *Listener) Listen() {
         }
 
         if listener == self.Config.Name {
-          handler := &Handler{Config: handler, Client: client}
-          handler.Run()
+          selectedHandler = &handler
+          break
         }
+      }
+
+      if selectedHandler != nil {
+        handler := &Handler{Config: *selectedHandler, Client: client}
+        handler.Run()        
+      } else {
+        pgError := protocol.Error{
+          Severity: protocol.ErrorSeverityFatal,
+          Code:     protocol.ErrorCodeInternalError,
+          Message:  fmt.Sprintf("No handler found for listener %s", self.Config.Name),
+        }
+        connect.Send(client, pgError.GetMessage())
       }
     }
   }

@@ -1,4 +1,5 @@
 vendor
 secretless
 Godeps/_workspace
-
+demo/tmp
+demo/run

@@ -1,0 +1,81 @@
+version: '2.1'
+services:
+  pg:
+    image: postgres:9.4
+
+  conjur:
+    image: cyberark/conjur:0.1.0-stable
+    command: server -a dev
+    environment:
+      DATABASE_URL: postgres://postgres@pg/postgres
+      CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
+    depends_on:
+      - pg
+
+
+  cli5:
+    image: conjurinc/cli5
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+    depends_on:
+      - conjur
+    volumes:
+      - .:/work
+
+  admin_secretless:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY: 
+      AWS_ACCESS_KEY_ID: 
+      AWS_SECRET_ACCESS_KEY: 
+    depends_on:
+      - conjur
+    volumes:
+      - ./run/postgresql/:/var/run/postgresql/
+      - ./config.admin.yaml:/config.yaml
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      http_proxy: http://admin_secretless:80
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_TOKEN: "eyJkYXRhIjoiYWRtaW4ifQ=="
+    volumes:
+      - ./run/postgresql/:/var/run/postgresql/
+      - .:/work
+    depends_on:
+      - admin_secretless
+
+  myapp_secretless:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_AUTHN_LOGIN: host/myapp
+      CONJUR_AUTHN_API_KEY: 
+    depends_on:
+      - conjur
+    volumes:
+      - ./run/postgresql/:/var/run/postgresql/
+      - ./config.myapp.yaml:/config.yaml
+
+  myapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      http_proxy: http://myapp_secretless:80
+    volumes:
+      - .:/work
+      - ./run/postgresql/:/var/run/postgresql/
+    depends_on:
+      - conjur

@@ -1,0 +1,47 @@
+- !user alice
+
+- !host myapp
+
+- !group ops
+
+- !grant
+  role: !group ops
+  member: !user alice
+
+- !policy
+  id: pg
+  body:
+  - &pg_variables
+    - !variable url
+    - !variable username
+    - !variable password
+
+  - !layer
+
+  - !permit
+    role: !layer
+    privilege: [ read, execute ]
+    resources: *pg_variables
+
+  - !grant
+    role: !layer
+    member: !host /myapp
+
+- !policy
+  id: aws
+  body:
+  - &aws_variables
+    - !variable access_key_id
+    - !variable secret_access_key
+    - !variable region
+
+  - !layer
+
+  - !permit
+    role: !layer
+    privilege: [ read, execute ]
+    resources: *aws_variables
+
+  - !grant
+    role: !layer
+    member: !host /myapp

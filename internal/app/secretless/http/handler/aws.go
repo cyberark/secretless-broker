@@ -9,7 +9,7 @@ import (
   "strings"
   "time"
 
-  "github.com/kgilpin/secretless/config"
+  "github.com/kgilpin/secretless/pkg/secretless/config"
 
   "github.com/aws/aws-sdk-go/aws"
   "github.com/aws/aws-sdk-go/aws/credentials"

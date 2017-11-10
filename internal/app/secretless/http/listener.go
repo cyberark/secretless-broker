@@ -6,9 +6,9 @@ import (
   "net"
   "net/http"
 
-  "github.com/kgilpin/secretless/config"
-  "github.com/kgilpin/secretless/variable"
-  handlerImpl "github.com/kgilpin/secretless/proxy/http/handler"
+  "github.com/kgilpin/secretless/pkg/secretless/config"
+  "github.com/kgilpin/secretless/internal/app/secretless/variable"
+  handlerImpl "github.com/kgilpin/secretless/internal/app/secretless/http/handler"
 )
 
 type Handler interface {

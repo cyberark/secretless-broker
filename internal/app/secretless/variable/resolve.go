@@ -1,7 +1,7 @@
 package variable
 
 import (
-  "github.com/kgilpin/secretless/config"
+  "github.com/kgilpin/secretless/pkg/secretless/config"
 )
 
 func Resolve(variables []config.Variable) (*map[string]string, error) {

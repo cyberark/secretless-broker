@@ -6,9 +6,9 @@ import (
   "log"
   "net"
 
-  "github.com/kgilpin/secretless/config"
-  "github.com/kgilpin/secretless/connect"
-  "github.com/kgilpin/secretless/protocol"
+  "github.com/kgilpin/secretless/pkg/secretless/config"
+  "github.com/kgilpin/secretless/internal/app/secretless/pg/connect"
+  "github.com/kgilpin/secretless/internal/app/secretless/pg/protocol"
 )
 
 type ClientOptions struct {

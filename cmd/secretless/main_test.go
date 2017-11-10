@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kgilpin/secretless/conjur"
+	"github.com/kgilpin/secretless/internal/app/secretless/conjur"
 )
 
 var AdminAPIKey = os.Getenv("CONJUR_AUTHN_API_KEY")
@@ -57,7 +57,7 @@ func TestUnixSocketPasswordLogin(t *testing.T) {
 		panic(err)
 	}
 
-	cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), 0, "", []string{})
+	cmdOut, err := psql(fmt.Sprintf("%s/../../run/postgresql", cwd), 0, "", []string{})
 
 	if err != nil {
 		t.Fatal(cmdOut)

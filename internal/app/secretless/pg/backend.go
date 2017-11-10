@@ -3,7 +3,7 @@ package pg
 import (
   "strings"
 
-  "github.com/kgilpin/secretless/variable"
+  "github.com/kgilpin/secretless/internal/app/secretless/variable"
 )
 
 func (self *Handler) ConfigureBackend() error {

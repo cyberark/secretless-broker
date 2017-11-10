@@ -1,4 +1,4 @@
-package proxy
+package secretless
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/kgilpin/secretless/config"
-	"github.com/kgilpin/secretless/proxy/pg"
-	"github.com/kgilpin/secretless/proxy/http"
+	"github.com/kgilpin/secretless/pkg/secretless/config"
+	"github.com/kgilpin/secretless/internal/app/secretless/pg"
+	"github.com/kgilpin/secretless/internal/app/secretless/http"
 )
 
 type Listener interface {

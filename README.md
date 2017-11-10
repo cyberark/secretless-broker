@@ -230,3 +230,13 @@ tps = 15.822442 (excluding connections establishing)
 14% fewer tps (excluding establishing connections) via Secretless. Establishing connections takes a relatively long time because the credentials are being looked up in Conjur. These can be cached in Secretless as a future optimization.
 
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios. 
+
+# Continuous Integration
+
+In the project root directory there is a Makefile. Run `make all` to build and test Secretless. Binaries are built to the `./bin` directory.
+
+The `./build` directory contains CI scripts:
+
+* **build.sh** Builds the Go binaries. Expects to run in a Linux environment. 
+* **test.sh** Runs the test suite. Expects to run in an environment with `docker-compose` available, and expects Go binaries to be built. 
+* **test_in_container.sh** A helper script which you probably won't run directly.

@@ -4,7 +4,7 @@ import (
   "io/ioutil"
   "os"
 
-  "github.com/kgilpin/secretless/conjur"
+  "github.com/kgilpin/secretless/internal/app/secretless/conjur"
 )
 
 type Variable interface {

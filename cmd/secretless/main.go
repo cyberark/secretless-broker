@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kgilpin/secretless/config"
-	"github.com/kgilpin/secretless/proxy"
+	"github.com/kgilpin/secretless/pkg/secretless/config"
+	"github.com/kgilpin/secretless/internal/app/secretless"
 )
 
 func main() {
@@ -16,6 +16,6 @@ func main() {
 
 	configuration := config.Configure(*configFile)
 	log.Printf("Loaded configuration : %v", configuration)
-	p := proxy.Proxy{Config: configuration}
+	p := secretless.Proxy{Config: configuration}
 	p.Run()
 }

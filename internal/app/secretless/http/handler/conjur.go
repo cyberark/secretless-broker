@@ -6,8 +6,8 @@ import (
   "net/http"
   "os"
 
-  "github.com/kgilpin/secretless/config"
-  "github.com/kgilpin/secretless/conjur"
+  "github.com/kgilpin/secretless/pkg/secretless/config"
+  "github.com/kgilpin/secretless/internal/app/secretless/conjur"
 )
 
 // TODO: cleanup redundancy with pg/backend

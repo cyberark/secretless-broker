@@ -8,10 +8,16 @@ import (
   "gopkg.in/yaml.v2"
 )
 
+type Keychain struct {
+  Service  string
+  Username string
+}
+
 type ValueFrom struct {
   Conjur      string
   Environment string
   File        string
+  Keychain    Keychain
 }
 
 type Variable struct {

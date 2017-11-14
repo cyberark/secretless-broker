@@ -71,11 +71,11 @@ func Username() (string, error) {
   }
 }
 
-func APIKey() (string, error) {
-  if result := os.Getenv("CONJUR_AUTHN_API_KEY"); result == "" {
+func APIKey() (apiKey string, err error) {
+  if apiKey = os.Getenv("CONJUR_AUTHN_API_KEY"); apiKey == "" {
     return "", fmt.Errorf("CONJUR_AUTHN_API_KEY is not specified")
   } else {
-    return result, nil
+    return
   }
 }
 

@@ -12,6 +12,8 @@ services:
       DATABASE_URL: postgres://postgres@pg/postgres
       CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
       RAILS_ENV: development
+    ports:
+      - 80
     volumes:
       - .:/work
     depends_on:

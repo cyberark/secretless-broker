@@ -1,0 +1,21 @@
+listeners:
+  - name: http_8180
+    protocol: http
+    address: 127.0.0.1:8180
+
+handlers:
+  - name: conjur
+    listener: http_8180
+    debug: true
+    authorization:
+      none: true
+    match:
+      - ^http\:\/\/localhost\:32771\/
+    backend:
+      - name: username
+        value: admin
+      - name: api_key
+        value_from:
+          keychain:
+            service:  Conjur Local
+            username: admin

@@ -42,7 +42,7 @@ func (self *Listener) LookupHandler(r *http.Request) Handler {
       log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
       if pattern.MatchString(r.URL.String()) {
         if handler.Debug {
-          log.Printf("Using handler '%s' for request %s", handler.Name, pattern, r.URL.String())
+          log.Printf("Using handler '%s' for request %s", handler.Name, r.URL.String())
         }
         // Construct the return object
         serviceType := handler.Type
@@ -88,6 +88,9 @@ func (self *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), 500)
         return
       } else {
+        if handler.Configuration().Debug {
+          log.Printf("Backend connection parameters: %s", backendVariables)
+        }
         if err = handler.Authenticate(*backendVariables, r); err != nil {
           http.Error(w, err.Error(), 500)
           return

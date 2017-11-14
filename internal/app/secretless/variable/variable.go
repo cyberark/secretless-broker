@@ -2,9 +2,11 @@ package variable
 
 import (
   "io/ioutil"
+  "log"
   "os"
 
   "github.com/kgilpin/secretless/internal/app/secretless/conjur"
+  "github.com/kgilpin/secretless/internal/pkg/keychain"
 )
 
 type Variable interface {
@@ -41,6 +43,7 @@ type ConjurVariable struct {
 }
 
 func (self ConjurVariable) Value() (string, error) {
+  // TODO: If there is a Conjur handler, use it to authenticate the request.
   return conjur.Secret(self.Resource, conjur.AccessToken{UseDefault: true})
 }
 
@@ -58,3 +61,17 @@ func (self FileVariable) Value() (string, error) {
     return string(bytes), nil
   }
 }
+
+/**
+ * A variable which is provided by cross-platform "Keychain" access.
+ */
+type KeychainVariable struct {
+  Service string
+  Username string
+}
+
+func (self KeychainVariable) Value() (string, error) {
+  log.Printf("Loading API key from username '%s' in OS keychain service '%s'", self.Username, self.Service)
+  return keychain.GetGenericPassword(self.Service, self.Username)
+}
+

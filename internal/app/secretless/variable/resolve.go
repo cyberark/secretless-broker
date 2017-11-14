@@ -18,6 +18,8 @@ func Resolve(variables []config.Variable) (*map[string]string, error) {
       variable = EnvironmentVariable{v.ValueFrom.Environment}
     } else if v.ValueFrom.File != "" {
       variable = FileVariable{v.ValueFrom.File}
+    } else if v.ValueFrom.Keychain.Service != "" {
+      variable = KeychainVariable{v.ValueFrom.Keychain.Service, v.ValueFrom.Keychain.Username}
     }
     if variable != nil {
       if value, err := variable.Value(); err != nil {

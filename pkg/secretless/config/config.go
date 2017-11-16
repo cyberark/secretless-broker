@@ -8,28 +8,36 @@ import (
   "gopkg.in/yaml.v2"
 )
 
-type Keychain struct {
+type KeychainValue struct {
   Service  string
   Username string
 }
 
 type ValueFrom struct {
-  Conjur      string
+  Literal     string
   Environment string
   File        string
-  Keychain    Keychain
+  Keychain    KeychainValue `yaml:"keychain"`
+  Provider    string
+  Id          string
 }
 
 type Variable struct {
-  Name      string
-  Value     string
-  ValueFrom ValueFrom `yaml:"value_from"`
+  Name   string
+  Value  ValueFrom `yaml:"value"`
 }
 
 type Authorization struct {
   None      bool
   Conjur    string
   Passwords map[string]string
+}
+
+type Provider struct {
+  Name          string
+  Type          string
+  Configuration []Variable
+  Credentials   []Variable  
 }
 
 type Listener struct {
@@ -47,10 +55,11 @@ type Handler struct {
   Debug         bool
   Match         []string
   Patterns      []*regexp.Regexp
-  Backend       []Variable
+  Credentials   []Variable
 }
 
 type Config struct {
+  Providers []Provider
   Listeners []Listener
   Handlers  []Handler
 }

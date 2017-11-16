@@ -5,8 +5,8 @@ import (
   "log"
   "os"
 
-  "github.com/kgilpin/secretless/internal/app/secretless/conjur"
   "github.com/kgilpin/secretless/internal/pkg/keychain"
+  "github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
 type Variable interface {
@@ -36,15 +36,19 @@ func (self EnvironmentVariable) Value() (string, error) {
 }
 
 /**
- * A variable which is provided as a Conjur resource id.
+ * A variable which is provided by a configured provider.
  */
-type ConjurVariable struct {
-  Resource string
+type ProviderVariable struct {
+  Provider provider.Provider
+  Id       string
 }
 
-func (self ConjurVariable) Value() (string, error) {
-  // TODO: If there is a Conjur handler, use it to authenticate the request.
-  return conjur.Secret(self.Resource, conjur.AccessToken{UseDefault: true})
+func (self ProviderVariable) Value() (string, error) {
+  value, err := self.Provider.Value(self.Id)
+  if err != nil {
+    return "", nil
+  }
+  return string(value), nil
 }
 
 /**

@@ -3,6 +3,25 @@ listeners:
     protocol: http
     address: 127.0.0.1:8180
 
+providers:
+  - name: conjur
+    configuration:
+      - name: url
+        value:
+          environment: CONJUR_APPLIANCE_URL
+      - name: account
+        value:
+          environment: CONJUR_ACCOUNT
+    credentials:
+      - name: username
+        value:
+          literal: admin
+      - name: apiKey
+        value:
+          keychain:
+            service:  Conjur Local
+            username: admin
+
 handlers:
   - name: conjur
     listener: http_8180
@@ -10,12 +29,9 @@ handlers:
     authorization:
       none: true
     match:
-      - ^http\:\/\/localhost\:32771\/
-    backend:
-      - name: username
-        value: admin
-      - name: api_key
-        value_from:
-          keychain:
-            service:  Conjur Local
-            username: admin
+      - ^http\:\/\/localhost\:32776\/
+    credentials:
+      - name: accessToken
+        value:
+          provider: conjur
+          id: accessToken

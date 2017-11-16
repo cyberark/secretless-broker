@@ -1,3 +1,20 @@
+providers:
+  - name: conjur
+    configuration:
+      - name: url
+        value:
+          environment: CONJUR_APPLIANCE_URL
+      - name: account
+        value:
+          environment: CONJUR_ACCOUNT
+    credentials:
+      - name: username
+        value:
+          environment: CONJUR_AUTHN_LOGIN
+      - name: apiKey
+        value:
+          environment: CONJUR_AUTHN_API_KEY
+
 listeners:
   - name: http_default
     protocol: http
@@ -19,6 +36,7 @@ listeners:
     protocol: pg
     socket: ./run/postgresql/.s.PGSQL.5432
 
+
 handlers:
   - name: aws_via_environment
     type: aws
@@ -28,64 +46,80 @@ handlers:
     debug: true
     authorization:
       none: true
-    backend:
+    credentials:
       - name: access_key_id
-        value_from:
+        value:
           environment: AWS_ACCESS_KEY_ID
       - name: secret_access_key
-        value_from:
+        value:
           environment: AWS_SECRET_ACCESS_KEY
 
   - name: pg_via_socket
     listener: pg_socket_default
     authorization:
       none: true
-    backend:
+    debug: true
+    credentials:
       - name: address
-        value: pg:5432
+        value:
+          literal: pg:5432
       - name: username
-        value: conjur
+        value:
+          literal: conjur
       - name: password
-        value: conjur
+        value:
+          literal: conjur
 
   - name: pg_via_conjur
     listener: pg_tcp_default
     authorization:
       none: true
-    backend:
+    debug: true
+    credentials:
       - name: address
-        value_from:
-          conjur: dev:variable:pg/url
+        value:
+          provider: conjur
+          id: variable:pg/url
       - name: username
-        value_from:
-          conjur: dev:variable:pg/username
+        value:
+          provider: conjur
+          id: variable:pg/username
       - name: password
-        value_from:
-          conjur: dev:variable:pg/password
+        value:
+          provider: conjur
+          id: variable:pg/password
 
   - name: pg_via_static
     listener: pg_tcp_5433
     authorization:
       passwords:
         alice: alice
-    backend:
+    debug: true
+    credentials:
       - name: address
-        value: pg:5432
+        value:
+          literal: pg:5432
       - name: username
-        value: conjur
+        value:
+          literal: conjur
       - name: password
-        value: conjur
+        value:
+          literal: conjur
 
   - name: pg_remote_with_conjur_auth
     listener: pg_tcp_5434
     authorization:
       conjur: dev:webservice:pg
-    backend:
+    debug: true
+    credentials:
       - name: address
-        value: pg:5432
+        value:
+          literal: pg:5432
       - name: username
-        value: conjur
+        value:
+          literal: conjur
       - name: password
-        value: conjur
+        value:
+          literal: conjur
 
 

@@ -12,6 +12,8 @@ import (
 	"github.com/kgilpin/secretless/pkg/secretless/config"
 	"github.com/kgilpin/secretless/internal/app/secretless/pg"
 	"github.com/kgilpin/secretless/internal/app/secretless/http"
+	"github.com/kgilpin/secretless/internal/app/secretless/variable"
+	"github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
 type Listener interface {
@@ -19,7 +21,8 @@ type Listener interface {
 }
 
 type Proxy struct {
-	Config config.Config
+	Config    config.Config
+	Providers []provider.Provider
 }
 
 func (self *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
@@ -56,9 +59,9 @@ func (self *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 		var listener Listener
 		switch protocol {
 		case "pg": 
-			listener = &pg.Listener{Config: listenerConfig, Listener: l, Handlers: self.Config.Handlers}
+			listener = &pg.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
 		case "http": 
-			listener = &http.Listener{Config: listenerConfig, Listener: l, Handlers: self.Config.Handlers}
+			listener = &http.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
 		default:
 			panic(fmt.Sprintf("Unrecognized protocol '%s' on listener '%s'", protocol, listenerConfig.Name))			
 		}
@@ -71,7 +74,42 @@ func (self *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 	}
 }
 
+func loadProvider(providerConfig config.Provider) (provider.Provider, error) {
+	pt := providerConfig.Type
+	if pt == "" {
+		pt = providerConfig.Name 
+	}
+	switch pt {
+	case "conjur":
+		// TODO: at this time, providers can't load configuration or credentials from each other
+    configuration, err := variable.Resolve([]provider.Provider{}, providerConfig.Configuration)
+    if err != nil {
+    	return nil, err
+    }
+    credentials, err := variable.Resolve([]provider.Provider{}, providerConfig.Credentials)
+    if err != nil {
+    	return nil, err
+    }
+
+		return provider.NewConjurProvider(providerConfig.Name, *configuration, *credentials)
+	default:
+		return nil, fmt.Errorf("Unrecognized provider type '%s'", pt)
+	}
+}
+
 func (self *Proxy) Run() {
+	var err error
+
+	self.Providers = make([]provider.Provider, len(self.Config.Providers))
+
+	for i := range self.Config.Providers {
+		self.Providers[i], err = loadProvider(self.Config.Providers[i])
+		if err != nil {
+			panic(fmt.Sprintf("Unable to load provider '%s' : %s", self.Config.Providers[i].Name, err.Error()))
+		}
+		log.Printf("Loaded provider '%s'", self.Providers[i].Name())
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(len(self.Config.Listeners))
 	for _, config := range self.Config.Listeners {

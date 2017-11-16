@@ -9,6 +9,7 @@ import (
   "github.com/kgilpin/secretless/pkg/secretless/config"
   "github.com/kgilpin/secretless/internal/app/secretless/variable"
   handlerImpl "github.com/kgilpin/secretless/internal/app/secretless/http/handler"
+  "github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
 type Handler interface {
@@ -21,6 +22,7 @@ type Listener struct {
   Config    config.Listener
   Transport http.Transport
   Handlers  []config.Handler
+  Providers []provider.Provider
   Listener  net.Listener
 }
 
@@ -84,7 +86,7 @@ func (self *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     handler := self.LookupHandler(r)
 
     if handler != nil {
-      if backendVariables, err := variable.Resolve(handler.Configuration().Backend); err != nil {
+      if backendVariables, err := variable.Resolve(self.Providers, handler.Configuration().Credentials); err != nil {
         http.Error(w, err.Error(), 500)
         return
       } else {

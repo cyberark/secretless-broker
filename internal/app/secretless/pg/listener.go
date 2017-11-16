@@ -8,12 +8,14 @@ import (
   "github.com/kgilpin/secretless/pkg/secretless/config"
   "github.com/kgilpin/secretless/internal/app/secretless/pg/connect"
   "github.com/kgilpin/secretless/internal/app/secretless/pg/protocol"
+  "github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
 type Listener struct {
-  Config   config.Listener
-  Handlers []config.Handler
-  Listener net.Listener
+  Config    config.Listener
+  Handlers  []config.Handler
+  Providers []provider.Provider
+  Listener  net.Listener
 }
 
 func (self *Listener) Listen() {
@@ -37,7 +39,7 @@ func (self *Listener) Listen() {
       }
 
       if selectedHandler != nil {
-        handler := &Handler{Config: *selectedHandler, Client: client}
+        handler := &Handler{Providers: self.Providers, Config: *selectedHandler, Client: client}
         handler.Run()        
       } else {
         pgError := protocol.Error{

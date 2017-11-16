@@ -9,6 +9,7 @@ import (
   "github.com/kgilpin/secretless/pkg/secretless/config"
   "github.com/kgilpin/secretless/internal/app/secretless/pg/connect"
   "github.com/kgilpin/secretless/internal/app/secretless/pg/protocol"
+  "github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
 type ClientOptions struct {
@@ -29,8 +30,9 @@ type Handler struct {
   Config            config.Handler
   Client            net.Conn
   Backend           net.Conn
+  Providers         []provider.Provider
   ClientOptions     *ClientOptions
-  BackendConfig     *BackendConfig
+  BackendConfig     *BackendConfig  
 }
 
 func stream(source, dest net.Conn) {

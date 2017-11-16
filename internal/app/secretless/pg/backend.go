@@ -9,7 +9,7 @@ import (
 func (self *Handler) ConfigureBackend() error {
   result := BackendConfig{Options: make(map[string]string)}
 
-  if valuesPtr, err := variable.Resolve(self.Config.Backend); err != nil {
+  if valuesPtr, err := variable.Resolve(self.Providers, self.Config.Credentials); err != nil {
     return err
   } else {
   	values := *valuesPtr

@@ -2,6 +2,7 @@ package pg
 
 import (
   "strings"
+  "log"
 
   "github.com/kgilpin/secretless/internal/app/secretless/variable"
 )
@@ -12,7 +13,10 @@ func (self *Handler) ConfigureBackend() error {
   if valuesPtr, err := variable.Resolve(self.Providers, self.Config.Credentials); err != nil {
     return err
   } else {
-  	values := *valuesPtr
+    values := *valuesPtr
+    if self.Config.Debug {
+      log.Printf("PG backend connection parameters: %s", values)
+    }
     if address := values["address"]; address != "" {
       // Form of url is : 'dbcluster.myorg.com:5432/reports'
       tokens := strings.SplitN(address, "/", 2)

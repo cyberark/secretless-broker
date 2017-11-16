@@ -91,7 +91,7 @@ func (self *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
       } else {
         if handler.Configuration().Debug {
-          log.Printf("Backend connection parameters: %s", backendVariables)
+          log.Printf("%s backend connection parameters: %s", handler.Configuration().Name, backendVariables)
         }
         if err = handler.Authenticate(*backendVariables, r); err != nil {
           http.Error(w, err.Error(), 500)

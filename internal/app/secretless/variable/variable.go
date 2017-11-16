@@ -46,7 +46,7 @@ type ProviderVariable struct {
 func (self ProviderVariable) Value() (string, error) {
   value, err := self.Provider.Value(self.Id)
   if err != nil {
-    return "", nil
+    return "", err
   }
   return string(value), nil
 }

@@ -2,7 +2,6 @@ package variable
 
 import (
   "fmt"
-  "log"
 
   "github.com/kgilpin/secretless/pkg/secretless/config"
   "github.com/kgilpin/secretless/internal/pkg/provider"

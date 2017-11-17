@@ -22,6 +22,11 @@ func (self ConjurHandler) Authenticate(values map[string]string, r *http.Request
 		return fmt.Errorf("Conjur credential 'accessToken' is not available")
 	}
 
+  forceSSL, ok := values["forceSSL"]
+  if ok && forceSSL == "true" {
+    r.URL.Scheme = "https"
+  }
   r.Header.Set("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString([]byte(accessToken))))
+
   return nil
 }

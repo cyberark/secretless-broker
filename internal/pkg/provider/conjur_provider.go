@@ -30,6 +30,12 @@ func NewConjurProvider(name string, configuration, credentials map[string]string
         config.ApplianceURL = v
       case "account":
         config.Account = v
+      case "certFile":
+        config.SSLCertPath = v
+      case "version":
+        if v == "4" {
+          config.V4 = true
+        }
       /* todo: the others, e.g. SSL */
       default:
         log.Printf("Unrecognized configuration setting '%s' for Conjur provider %s", k, name)

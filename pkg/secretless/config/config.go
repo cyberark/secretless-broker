@@ -41,10 +41,11 @@ type Provider struct {
 }
 
 type Listener struct {
-  Name     string
-  Protocol string
-  Address  string
-  Socket   string
+  Name        string
+  Protocol    string
+  Address     string
+  Socket      string
+  CACertFiles []string `yaml:"caCertFiles"`
 }
 
 type Handler struct {

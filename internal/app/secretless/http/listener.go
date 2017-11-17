@@ -1,10 +1,14 @@
 package http
 
 import (
+  "fmt"
   "io"
+  "io/ioutil"
   "log"
   "net"
   "net/http"
+  "crypto/tls"
+  "crypto/x509"
 
   "github.com/kgilpin/secretless/pkg/secretless/config"
   "github.com/kgilpin/secretless/internal/app/secretless/variable"
@@ -20,7 +24,7 @@ type Handler interface {
 
 type Listener struct {
   Config    config.Listener
-  Transport http.Transport
+  Transport *http.Transport
   Handlers  []config.Handler
   Providers []provider.Provider
   Listener  net.Listener
@@ -101,12 +105,21 @@ func (self *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     }
 
     r.RequestURI = "" // this must be reset when serving a request with the client
+
+    if handler.Configuration().Debug {
+      log.Printf("Sending request %v", r)
+    }
+
     resp, err := self.Transport.RoundTrip(r)
+
     if err != nil {
       http.Error(w, err.Error(), 500)
       return
     }
-    log.Printf("Received response %v", resp.Status)
+
+    if handler.Configuration().Debug {
+      log.Printf("Received response %v", resp.Status)
+    }
 
     copyHeaders(w.Header(), resp.Header)
 
@@ -119,6 +132,15 @@ func (self *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
   }
 }
 func (self *Listener) Listen() {
-  self.Transport = http.Transport{}
+  caCertPool := x509.NewCertPool()
+  for _, fname := range self.Config.CACertFiles {
+    severCert, err := ioutil.ReadFile(fname)
+    if err != nil {
+        panic(fmt.Sprintf("Could not load CA certificate file %s : %s", fname, err))
+    }
+    caCertPool.AppendCertsFromPEM(severCert)
+  }
+
+  self.Transport = &http.Transport{ TLSClientConfig: &tls.Config{ RootCAs: caCertPool } }
   http.Serve(self.Listener, self)
 }

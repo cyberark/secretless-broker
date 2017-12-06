@@ -1,23 +1,16 @@
 package ssh
 
 import (
-	"io"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 
-	"github.com/gliderlabs/ssh"
+	"golang.org/x/crypto/ssh"
 
 	"github.com/kgilpin/secretless/internal/pkg/provider"
 	"github.com/kgilpin/secretless/pkg/secretless/config"
 )
-
-func alwaysPasswordHandler(ctx ssh.Context, password string) bool {
-	return true
-}
-
-func alwaysPublicKeyHandler(ctx ssh.Context, key ssh.PublicKey) bool {
-	return true
-}
 
 type Listener struct {
 	Config    config.Listener
@@ -27,12 +20,49 @@ type Listener struct {
 }
 
 func (self *Listener) Listen() {
-	server := &ssh.Server{
-		PasswordHandler:  alwaysPasswordHandler,
-		PublicKeyHandler: alwaysPublicKeyHandler,
+	serverConfig := &ssh.ServerConfig{
+    PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
+	    return nil, nil
+    },
+    PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
+    	return nil, fmt.Errorf("Public key authentication is not supported")
+    },
 	}
 
-	ssh.Handle(func(s ssh.Session) {
+	privateBytes, err := ioutil.ReadFile("./tmp/id_rsa")
+	if err != nil {
+	    log.Fatal("Failed to load private key: ", err)
+	}
+
+	private, err := ssh.ParsePrivateKey(privateBytes)
+	if err != nil {
+	    log.Fatal("Failed to parse private key: ", err)
+	}
+
+	serverConfig.AddHostKey(private)
+
+	for {
+		nConn, err := self.Listener.Accept()
+		if err != nil {
+			log.Printf("Failed to accept incoming connection: ", err)
+			return
+		}
+
+		// https://godoc.org/golang.org/x/crypto/ssh#NewServerConn
+		conn, chans, reqs, err := ssh.NewServerConn(nConn, serverConfig)
+		if err != nil {
+		    log.Printf("Failed to handshake: %s", err)
+		    return
+		}
+		log.Printf("New connection accepted for user %s from %s", conn.User(), conn.RemoteAddr())
+
+		// The incoming Request channel must be serviced.
+		go func() {
+			  for req := range reqs {
+			  	log.Printf("Global SSH request : %s", req)
+				}		
+			}()
+		
 		// Serve the first Handler which is attached to this listener
 		var selectedHandler *config.Handler
 		for _, handler := range self.Handlers {
@@ -48,13 +78,10 @@ func (self *Listener) Listen() {
 		}
 
 		if selectedHandler != nil {
-			handler := &Handler{Providers: self.Providers, Config: *selectedHandler, Session: s}
+			handler := &Handler{Providers: self.Providers, Config: *selectedHandler, Channels: chans}
 			handler.Run()
 		} else {
-			io.WriteString(s, "No SSH handler is available for this connection!\n")
+			log.Printf("No SSH handler is available for this connection!")
 		}
-
-	})
-
-	log.Fatal(server.Serve(self.Listener))
+	}
 }

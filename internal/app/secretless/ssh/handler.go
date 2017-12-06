@@ -4,9 +4,7 @@ import (
   "io"
   "log"
 
-  raw_ssh "golang.org/x/crypto/ssh"
-
-  "github.com/gliderlabs/ssh"
+  "golang.org/x/crypto/ssh"
 
   "github.com/kgilpin/secretless/internal/app/secretless/variable"
   "github.com/kgilpin/secretless/internal/pkg/provider"
@@ -16,13 +14,13 @@ import (
 type ServerConfig struct {
   Network       string
   Address       string
-  ClientConfig  raw_ssh.ClientConfig
+  ClientConfig  ssh.ClientConfig
 }
 
 type Handler struct {
   Providers []provider.Provider
   Config    config.Handler
-  Session   ssh.Session
+  Channels  <-chan ssh.NewChannel
 }
 
 func (self *Handler) serverConfig() (config ServerConfig, err error) {
@@ -49,25 +47,25 @@ func (self *Handler) serverConfig() (config ServerConfig, err error) {
   }
 
   if hostKeyStr, ok := values["hostKey"]; ok {
-    var hostKey raw_ssh.PublicKey
-    if hostKey, err = raw_ssh.ParsePublicKey([]byte(hostKeyStr)); err != nil {
+    var hostKey ssh.PublicKey
+    if hostKey, err = ssh.ParsePublicKey([]byte(hostKeyStr)); err != nil {
       log.Printf("Unable to parse public key: %v", err)
       return
     }
-    config.ClientConfig.HostKeyCallback = raw_ssh.FixedHostKey(hostKey)
+    config.ClientConfig.HostKeyCallback = ssh.FixedHostKey(hostKey)
   } else {
     log.Printf("No hostKey specified; I will accept any host key!")
-    config.ClientConfig.HostKeyCallback = raw_ssh.InsecureIgnoreHostKey()
+    config.ClientConfig.HostKeyCallback = ssh.InsecureIgnoreHostKey()
   }
 
   if privateKeyStr, ok := values["privateKey"]; ok {
-    var signer raw_ssh.Signer
-    if signer, err = raw_ssh.ParsePrivateKey([]byte(privateKeyStr)); err != nil {
+    var signer ssh.Signer
+    if signer, err = ssh.ParsePrivateKey([]byte(privateKeyStr)); err != nil {
       log.Printf("Unable to parse private key: %v", err)
       return
     }
-    config.ClientConfig.Auth = []raw_ssh.AuthMethod{
-      raw_ssh.PublicKeys(signer),
+    config.ClientConfig.Auth = []ssh.AuthMethod{
+      ssh.PublicKeys(signer),
     }
   }
 
@@ -77,27 +75,99 @@ func (self *Handler) serverConfig() (config ServerConfig, err error) {
 func (self *Handler) Run() {
   var err error
   var serverConfig ServerConfig
+  var server ssh.Conn
 
   if serverConfig, err = self.serverConfig(); err != nil {
     return
   }
 
-  if client, err := raw_ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {
+  if server, err = ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {
     log.Printf("Failed to dial SSH backend '%s': %s", serverConfig.Address, err)
     return
   }
 
-  io.WriteString(self.Session, "Connected!\n")
+  // Service the incoming Channel channel.
+  for newChannel := range self.Channels {
+    serverChannel, serverRequests, err := server.OpenChannel(newChannel.ChannelType(), newChannel.ExtraData())
+    if err != nil {
+      sshError := err.(*ssh.OpenChannelError)
+      if err := newChannel.Reject(sshError.Reason, sshError.Message); err != nil {
+        log.Printf("Failed to send new channel rejection : %s", err)
+      }
+      return
+    }
 
-  // Each ClientConn can support multiple interactive sessions,
-  // represented by a Session.
-  session, err := client.NewSession()
-  if err != nil {
-      log.Fatal("Failed to create session: ", err)
+    clientChannel, clientRequests, err := newChannel.Accept()
+    if err != nil {
+      log.Printf("Failed to accept client channel : %s", err)
+      serverChannel.Close()
+      return
+    }
+
+    go func() {
+      for clientRequest := range clientRequests {
+        log.Printf("Client request : %s", clientRequest)
+        ok, err := serverChannel.SendRequest(clientRequest.Type, clientRequest.WantReply, clientRequest.Payload)
+        if err != nil {
+          log.Printf("Failed to send client request to server channel : %s", err)
+        }
+        if clientRequest.WantReply {
+          log.Printf("Server reply is %s", ok)
+        }
+      }
+    }()
+
+    go func() {
+      for serverRequest := range serverRequests {
+        log.Printf("Server request : %s", serverRequest)
+        ok, err := clientChannel.SendRequest(serverRequest.Type, serverRequest.WantReply, serverRequest.Payload)
+        if err != nil {
+          log.Printf("Failed to send server request to client channel : %s", err)
+        }
+        if serverRequest.WantReply {
+          log.Printf("Client reply is %s", ok)
+        }
+      }    
+    }()
+  
+    go func() {
+      for {
+        data := make([]byte, 1000)
+        len, err := clientChannel.Read(data)
+        log.Printf("Read %s bytes from client channel, error is : %s", len, err)
+        if err == io.EOF {
+          serverChannel.Close()
+          return
+        }
+        _, err = serverChannel.Write(data[0:len])
+        if err != nil {
+          log.Printf("Error writing %s bytes to server channel : %s", len, err)
+        }
+      }
+      }()
+
+    go func() {
+      for {
+        data := make([]byte, 1000)
+        len, err := serverChannel.Read(data)
+        log.Printf("Read %s bytes from server channel, error is : %s", len, err)
+        if err == io.EOF {
+          clientChannel.Close()
+          return
+        }
+        _, err = clientChannel.Write(data[0:len])
+        if err != nil {
+          log.Printf("Error writing %s bytes to client channel : %s", len, err)
+        }
+      }
+      }()
+
+
+    // Move the data from the client to the server
+
+    // Move the server responses to the client
+
+    // clientChannel.Close()
+    // serverChannel.Close()
   }
-  defer session.Close()
-
-  go io.Copy(self.Session.Stdin, session.Stdin)
-  go io.Copy(session.Stdout, self.Session.Stdout)
-  go io.Copy(session.Stderr, self.Session.Stderr)
 }

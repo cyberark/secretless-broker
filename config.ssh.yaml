@@ -1,0 +1,19 @@
+listeners:
+  - name: ssh_2222
+    protocol: ssh
+    address: 127.0.0.1:2222
+
+handlers:
+  - name: ssh
+    listener: ssh_2222
+    debug: true
+    credentials:
+      - name: privateKey
+        value:
+          file: ./tmp/id_rsa
+      - name: user
+        value:
+          literal: root
+      - name: address
+        value:
+          literal: "localhost:32770"

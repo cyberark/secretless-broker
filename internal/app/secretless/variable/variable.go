@@ -78,4 +78,3 @@ func (self KeychainVariable) Value() (string, error) {
   log.Printf("Loading API key from username '%s' in OS keychain service '%s'", self.Username, self.Service)
   return keychain.GetGenericPassword(self.Service, self.Username)
 }
-

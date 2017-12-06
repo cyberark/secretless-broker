@@ -2,7 +2,14 @@
 	"ImportPath": "github.com/kgilpin/secretless",
 	"GoVersion": "go1.5",
 	"GodepVersion": "v79",
+	"Packages": [
+		"./cmd/secretless"
+	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/anmitsu/go-shlex",
+			"Rev": "648efa622239a2f6ff949fed78ee37b48d499ba4"
+		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
 			"Comment": "v1.12.20-3-g8c6a611",
@@ -74,6 +81,11 @@
 			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
 		},
 		{
+			"ImportPath": "github.com/gliderlabs/ssh",
+			"Comment": "v0.1.0-28-g3d95f1a",
+			"Rev": "3d95f1a04b0e599e90f3493a39350ecb90ce6686"
+		},
+		{
 			"ImportPath": "github.com/go-ini/ini",
 			"Comment": "v1.30.3",
 			"Rev": "f280b3ba517bf5fc98922624f21fb0e7a92adaec"
@@ -82,6 +94,22 @@
 			"ImportPath": "github.com/jmespath/go-jmespath",
 			"Comment": "0.2.2-14-gbd40a43",
 			"Rev": "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519",
+			"Rev": "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ed25519/internal/edwards25519",
+			"Rev": "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",

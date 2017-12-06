@@ -7,7 +7,8 @@ services:
 
   conjur:
     image: cyberark/conjur:0.1.0-stable
-    command: server -a dev
+    command: server
+# -a dev
     environment:
       DATABASE_URL: postgres://postgres@pg/postgres
       CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
@@ -18,6 +19,13 @@ services:
       - .:/work
     depends_on:
       - pg
+
+  ssh_host:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh_host
+    ports:
+      - 22
 
   client:
     build:

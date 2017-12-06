@@ -14,6 +14,7 @@ import (
 	"github.com/kgilpin/secretless/internal/app/secretless/http"
 	"github.com/kgilpin/secretless/internal/app/secretless/variable"
 	"github.com/kgilpin/secretless/internal/app/secretless/ssh"
+	"github.com/kgilpin/secretless/internal/app/secretless/sshagent"
 	"github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
@@ -65,6 +66,8 @@ func (self *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 			listener = &http.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
 		case "ssh": 
 			listener = &ssh.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
+		case "ssh-agent": 
+			listener = &sshagent.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
 		default:
 			panic(fmt.Sprintf("Unrecognized protocol '%s' on listener '%s'", protocol, listenerConfig.Name))			
 		}

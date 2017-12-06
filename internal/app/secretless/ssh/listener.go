@@ -81,7 +81,7 @@ func (self *Listener) Listen() {
 			handler := &Handler{Providers: self.Providers, Config: *selectedHandler, Channels: chans}
 			handler.Run()
 		} else {
-			log.Printf("No SSH handler is available for this connection!")
+			log.Printf("No ssh handler is available for this connection!")
 		}
 	}
 }

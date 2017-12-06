@@ -106,36 +106,36 @@ func (self *Handler) Run() {
 
     go func() {
       for clientRequest := range clientRequests {
-        log.Printf("Client request : %s", clientRequest)
+        log.Printf("Client request : %s", clientRequest.Type)
         ok, err := serverChannel.SendRequest(clientRequest.Type, clientRequest.WantReply, clientRequest.Payload)
         if err != nil {
           log.Printf("Failed to send client request to server channel : %s", err)
         }
         if clientRequest.WantReply {
-          log.Printf("Server reply is %s", ok)
+          log.Printf("Server reply is %v", ok)
         }
       }
     }()
 
     go func() {
       for serverRequest := range serverRequests {
-        log.Printf("Server request : %s", serverRequest)
+        log.Printf("Server request : %s", serverRequest.Type)
         ok, err := clientChannel.SendRequest(serverRequest.Type, serverRequest.WantReply, serverRequest.Payload)
         if err != nil {
           log.Printf("Failed to send server request to client channel : %s", err)
         }
         if serverRequest.WantReply {
-          log.Printf("Client reply is %s", ok)
+          log.Printf("Client reply is %v", ok)
         }
       }    
     }()
   
     go func() {
       for {
-        data := make([]byte, 1000)
+        data := make([]byte, 1024)
         len, err := clientChannel.Read(data)
-        log.Printf("Read %s bytes from client channel, error is : %s", len, err)
         if err == io.EOF {
+          log.Printf("Client channel is closed")
           serverChannel.Close()
           return
         }
@@ -148,10 +148,10 @@ func (self *Handler) Run() {
 
     go func() {
       for {
-        data := make([]byte, 1000)
+        data := make([]byte, 1024)
         len, err := serverChannel.Read(data)
-        log.Printf("Read %s bytes from server channel, error is : %s", len, err)
         if err == io.EOF {
+          log.Printf("Server channel is closed")
           clientChannel.Close()
           return
         }

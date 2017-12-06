@@ -17,7 +17,6 @@ type ValueFrom struct {
   Literal     string
   Environment string
   File        string
-  Prompt      string
   Keychain    KeychainValue `yaml:"keychain"`
   Provider    string
   Id          string

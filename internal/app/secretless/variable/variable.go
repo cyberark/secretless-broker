@@ -75,6 +75,6 @@ type KeychainVariable struct {
 }
 
 func (self KeychainVariable) Value() (string, error) {
-  log.Printf("Loading API key from username '%s' in OS keychain service '%s'", self.Username, self.Service)
+  log.Printf("Loading secret data from OS keychain password '%s/%s'", self.Service, self.Username)
   return keychain.GetGenericPassword(self.Service, self.Username)
 }

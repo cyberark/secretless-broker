@@ -74,11 +74,64 @@ In the `secretless` log, you can see Secretless establishing the connection to `
 
 A development environment is provided in the `docker-compose.yml`. 
 
-First build it using `docker-compose build`. Then run Conjur with `docker-compose up -d pg conjur` and obtain the admin API key:
+## Building
+
+### Linux
+
+From the `./build` directory, run:
 
 ```sh-session
-$ docker-compose logs conjur | grep "API key"
-conjur_1                    | API key for admin: 2jm5tvn2fmbmme14mfyg83z529kk1vj9x5h25e4m7djx1j7k376nejn
+$ docker-compose run --rm build ./build/build.sh
+...
+$ ls ../bin/linux/amd64
+secretless
+```
+
+## Testing
+
+After building, enter a `./test` directory and build the containers:
+
+```sh-session
+$ docker-compose build
+```
+
+
+
+Back in the host shell, build the rest of the container images:
+
+Still in the host shell, start the `secretless_test` container:
+
+```sh-session
+$ export CONJUR_AUTHN_API_KEY=<API key of dev:host:secretless>
+$ docker-compose up secretless_test
+```
+
+Back in the `secretless_dev` container, you are ready to run the tests:
+
+```
+# export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>
+# godep restore
+...
+# go test
+2017/10/27 14:17:07 Provide a statically configured password
+2017/10/27 14:17:07 Provide the wrong value for a statically configured password
+2017/10/27 14:17:07 Provide a Conjur access token as the password
+2017/10/27 14:17:07 Provide a Conjur access token for an unauthorized user
+PASS
+ok    github.com/kgilpin/secretless  0.318s
+```
+
+## Working With Conjur
+
+Run the Conjur service with `docker-compose up -d pg conjur`.
+
+Then create the "dev" account in Conjur, and obtain the Conjur API key for the "admin" user:
+
+```sh-session
+$ docker-compose exec conjur conjurctl account create dev
+...
+$ docker-compose exec conjur rake "role:retrieve-key[dev:user:admin]"
+1k8mjr4105fzsn2zacnp02v8wr4v1p8q2fn1gja7t13gc3frt3zb1myx
 ```
 
 Then start a Conjur client container with `docker-compose run --rm client`.
@@ -109,42 +162,15 @@ Value added
 Value added
 ```
 
-In a new shell, run a `secretless_dev` container with `docker-compose run --rm secretless_dev`. Once in the container, build the Linux binary `./bin/linux/amd64/secretless`:
+## Working with HashiCorp Vault
+
+Run the Vault service with `docker-compose up -d vault`.
+
+Then obtain the "Root Token":
 
 ```sh-session
-root@91353a15ccb1:/go/src/github.com/kgilpin/secretless# ./build.sh
-+ godep restore
-+ go install
-+ mkdir -p bin/linux/amd64
-+ cp /go/bin/secretless bin/linux/amd64
-```
-
-Back in the host shell, build the rest of the container images:
-
-```sh-session
-$ docker-compose build
-```
-
-Still in the host shell, start the `secretless_test` container:
-
-```sh-session
-$ export CONJUR_AUTHN_API_KEY=<API key of dev:host:secretless>
-$ docker-compose up secretless_test
-```
-
-Back in the `secretless_dev` container, you are ready to run the tests:
-
-```
-# export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>
-# godep restore
-...
-# go test
-2017/10/27 14:17:07 Provide a statically configured password
-2017/10/27 14:17:07 Provide the wrong value for a statically configured password
-2017/10/27 14:17:07 Provide a Conjur access token as the password
-2017/10/27 14:17:07 Provide a Conjur access token for an unauthorized user
-PASS
-ok    github.com/kgilpin/secretless  0.318s
+$ docker-compose logs vault | grep "Root Token"
+vault_1            | Root Token: 6f975be0-5576-560d-e21a-ddabd8cee071
 ```
 
 # Performance

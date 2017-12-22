@@ -8,7 +8,6 @@ services:
   conjur:
     image: cyberark/conjur:0.1.0-stable
     command: server
-# -a dev
     environment:
       DATABASE_URL: postgres://postgres@pg/postgres
       CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
@@ -19,6 +18,13 @@ services:
       - .:/work
     depends_on:
       - pg
+
+  vault:
+    image: vault
+    environment:
+      SKIP_SETCAP: "true"
+    ports:
+      - 80:8200
 
   ssh_host:
     build:

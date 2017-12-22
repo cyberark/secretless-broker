@@ -1,0 +1,6 @@
+version: '2.1'
+services:
+  build:
+    build: .
+    volumes:
+      - ..:/go/src/github.com/kgilpin/secretless

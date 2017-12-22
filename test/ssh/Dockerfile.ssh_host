@@ -1,7 +1,7 @@
 FROM phusion/baseimage
 
-COPY ./tmp/id_rsa.pub /tmp/id_rsa.pub
-RUN cat /tmp/id_rsa.pub >> /root/.ssh/authorized_keys
+COPY ./id_insecure.pub /tmp/id_insecure.pub
+RUN cat /tmp/id_insecure.pub >> /root/.ssh/authorized_keys
 
 RUN rm -f /etc/service/sshd/down
 

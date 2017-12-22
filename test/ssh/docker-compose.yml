@@ -1,0 +1,23 @@
+version: '2.1'
+services:
+  ssh_host:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh_host
+    ports:
+      - 22
+
+  secretless:
+    build:
+      context: ../..
+    volumes:
+      - ./secretless.yml:/config.yaml
+      - ./run:/run/ssh-agent
+      - ./id_insecure:/root/id_insecure:ro
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - ./run:/run/ssh-agent

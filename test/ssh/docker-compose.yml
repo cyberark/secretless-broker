@@ -14,10 +14,15 @@ services:
       - ./secretless.yml:/config.yaml
       - ./run:/run/ssh-agent
       - ./id_insecure:/root/id_insecure:ro
+    depends_on:
+      - ssh_host
 
   test:
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile.dev
     volumes:
       - ./run:/run/ssh-agent
+    depends_on:
+      - secretless
+      - ssh_host

@@ -7,10 +7,6 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/anmitsu/go-shlex",
-			"Rev": "648efa622239a2f6ff949fed78ee37b48d499ba4"
-		},
-		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
 			"Comment": "v1.12.20-3-g8c6a611",
 			"Rev": "8c6a611084ff32c030aeb61554c5b987b4cdf4eb"
@@ -66,24 +62,19 @@
 		},
 		{
 			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi",
-			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
+			"Rev": "f4c71654e6147bc96f66d6c42fbbedfb8fb1e0db"
 		},
 		{
 			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi/authn",
-			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
+			"Rev": "f4c71654e6147bc96f66d6c42fbbedfb8fb1e0db"
 		},
 		{
 			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi/wrapper",
-			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
+			"Rev": "f4c71654e6147bc96f66d6c42fbbedfb8fb1e0db"
 		},
 		{
 			"ImportPath": "github.com/cyberark/conjur-api-go/conjurapi/wrapper_v4",
-			"Rev": "7bce508a924d514743cb1bf62e8521252e328aef"
-		},
-		{
-			"ImportPath": "github.com/gliderlabs/ssh",
-			"Comment": "v0.1.0-28-g3d95f1a",
-			"Rev": "3d95f1a04b0e599e90f3493a39350ecb90ce6686"
+			"Rev": "f4c71654e6147bc96f66d6c42fbbedfb8fb1e0db"
 		},
 		{
 			"ImportPath": "github.com/go-ini/ini",
@@ -109,6 +100,10 @@
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/agent",
 			"Rev": "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
 		},
 		{

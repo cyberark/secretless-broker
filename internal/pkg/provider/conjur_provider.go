@@ -88,10 +88,10 @@ func (self ConjurProvider) Value(id string) ([]byte, error) {
   tokens := strings.SplitN(id, ":", 3)
   switch len(tokens) {
   case 1:
-    return nil, fmt.Errorf("%s does not know how to provide a value for '%s'", self.Name, id)
+    return nil, fmt.Errorf("%s does not know how to provide a value for '%s'", self.Name(), id)
   case 2:
     if tokens[0] != "variable" {
-      return nil, fmt.Errorf("%s does not know how to provide a value for '%s'", self.Name, id)
+      return nil, fmt.Errorf("%s does not know how to provide a value for '%s'", self.Name(), id)
     }
     // TODO: change this to pass the full id, once the API client knows how to handle one.
     // tokens = []string{ conjur.Config.Account, tokens[0], tokens[1] }

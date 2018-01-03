@@ -1,0 +1,4 @@
+FROM secretless-dev
+
+RUN curl -Ls -o /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py && python /tmp/get-pip.py
+RUN pip install awscli

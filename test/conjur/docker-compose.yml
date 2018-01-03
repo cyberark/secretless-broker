@@ -1,0 +1,47 @@
+version: '2.1'
+services:
+  pg:
+    image: postgres:9.4
+
+  conjur:
+    image: cyberark/conjur:0.2.0-stable
+    command: server -a dev -f /work/conjur.yml
+    environment:
+      DATABASE_URL: postgres://postgres@pg/postgres
+      CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
+      RAILS_ENV: development
+    ports:
+      - 80
+    volumes:
+      - .:/work
+    depends_on:
+      - pg
+
+  secretless:
+    build:
+      context: ../..
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY:
+    depends_on:
+      - conjur
+    volumes:
+      - ./secretless.yml:/config.yaml
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_TOKEN: e30K
+      TEST_CONJUR_AUTHN_API_KEY:
+      http_proxy: http://secretless:80
+    depends_on:
+      - conjur
+      - secretless
+    volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless

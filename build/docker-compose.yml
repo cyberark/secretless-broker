@@ -1,6 +1,16 @@
 version: '2.1'
 services:
-  build:
-    build: .
+  secretless:
+    image: secretless
+    build:
+      context: ..
     volumes:
-      - ..:/go/src/github.com/kgilpin/secretless
+      - .:/go/src/github.com/kgilpin/secretless
+
+  secretless_dev:
+    image: secretless-dev
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/go/src/github.com/kgilpin/secretless

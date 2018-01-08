@@ -1,9 +1,9 @@
 #!/bin/bash -ex
 
-godep restore
+dep ensure
 
 echo "Building for linux + amd64"
-env GOOS=linux GOARCH=amd64 go install ./cmd/secretless
-
 mkdir -p bin/linux/amd64
-cp $GOPATH/bin/secretless bin/linux/amd64
+env GOOS=linux GOARCH=amd64 go build -o bin/linux/amd64/secretless ./cmd/secretless
+
+docker-compose -f build/docker-compose.yml build

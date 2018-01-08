@@ -18,8 +18,7 @@ services:
       - pg
 
   secretless:
-    build:
-      context: ../..
+    image: secretless
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
@@ -38,7 +37,6 @@ services:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_TOKEN: e30K
-      TEST_CONJUR_AUTHN_API_KEY:
       http_proxy: http://secretless:80
     depends_on:
       - conjur

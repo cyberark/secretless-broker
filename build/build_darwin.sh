@@ -1,9 +1,7 @@
 #!/bin/bash -ex
 
-godep restore
+dep ensure
 
 echo "Building for darwin + amd64"
-env GOOS=darwin GOARCH=amd64 go install ./cmd/secretless
-
 mkdir -p bin/darwin/amd64
-cp $GOPATH/bin/secretless bin/darwin/amd64
+env GOOS=darwin GOARCH=amd64 go build -o bin/darwin/amd64/secretless ./cmd/secretless

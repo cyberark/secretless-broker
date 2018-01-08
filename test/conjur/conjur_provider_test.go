@@ -1,65 +1,91 @@
 package main
 
 import (
-  "encoding/json"
-  "os"
-  "testing"
+	"encoding/json"
+	"io/ioutil"
+	"os"
+	"testing"
 
-  . "github.com/smartystreets/goconvey/convey"
+	. "github.com/smartystreets/goconvey/convey"
+	yaml "gopkg.in/yaml.v1"
 
-  "github.com/kgilpin/secretless/internal/pkg/provider"
+	"github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
-
 func TestProvider(t *testing.T) {
-  var err error
+	var err error
 
-  name := "conjur"
+	// Utility to load the config that is stored by test.sh
+	// This provides a means for running a native Go environment with
+	// Conjur running in a container.
+	type ConjurConfig struct {
+		URL     string
+		Account string
+		APIKey  string `yaml:"api_key"`
+	}
 
-  configuration := make(map[string]string)
-  configuration["url"] = "http://conjur"
-  configuration["account"] = "dev"
+	name := "conjur"
 
-  credentials := make(map[string]string)
-  credentials["username"] = "admin"
-  credentials["apiKey"] = os.Getenv("TEST_CONJUR_AUTHN_API_KEY")
+	conjurConfig := ConjurConfig{}
+	buf, err := ioutil.ReadFile("./tmp/.conjurrc")
+	if err != nil {
+		panic(err)
+	}
+	err = yaml.Unmarshal(buf, &conjurConfig)
+	if err != nil {
+		panic(err)
+	}
 
-  provider, err := provider.NewConjurProvider(name, configuration, credentials)
-  if err != nil {
-    t.Fatal(err)
-  }
+	url := os.Getenv("CONJUR_APPLIANCE_URL")
 
-  Convey("Has the expected provider name", t, func() {
-    So(provider.Name(), ShouldEqual, "conjur")
-  })
+	configuration := make(map[string]string)
+	if url != "" {
+		configuration["url"] = url
+	} else {
+		configuration["url"] = conjurConfig.URL
+	}
+	configuration["account"] = conjurConfig.Account
 
-  Convey("Can provide an access token", t, func() {
-    value, err := provider.Value("accessToken")
-    So(err, ShouldBeNil)
+	credentials := make(map[string]string)
+	credentials["username"] = "admin"
+	credentials["apiKey"] = conjurConfig.APIKey
 
-    token := make(map[string]string)
-    err = json.Unmarshal(value, &token)
-    So(err, ShouldBeNil)
-    So(token["protected"], ShouldNotBeNil)
-    So(token["payload"], ShouldNotBeNil)
-  })
+	provider, err := provider.NewConjurProvider(name, configuration, credentials)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-  Convey("Cannot provide an unknown value", t, func() {
-    _, err = provider.Value("foobar")
-    So(err, ShouldNotBeNil)
-    So(err.Error(), ShouldEqual, "conjur does not know how to provide a value for 'foobar'")
-  })
+	Convey("Has the expected provider name", t, func() {
+		So(provider.Name(), ShouldEqual, "conjur")
+	})
 
-  Convey("Cannot provide an unloaded secret", t, func() {
-    _, err = provider.Value("variable:foobar")
-    So(err, ShouldNotBeNil)
-    So(err.Error(), ShouldEqual, "404: Variable 'foobar' not found")
-  })
+	Convey("Can provide an access token", t, func() {
+		value, err := provider.Value("accessToken")
+		So(err, ShouldBeNil)
 
-  Convey("Can provide a secret", t, func() {
-    value, err := provider.Value("variable:db/password")
-    So(err, ShouldBeNil)
+		token := make(map[string]string)
+		err = json.Unmarshal(value, &token)
+		So(err, ShouldBeNil)
+		So(token["protected"], ShouldNotBeNil)
+		So(token["payload"], ShouldNotBeNil)
+	})
 
-    So(string(value), ShouldEqual, "secret")
-  })
+	Convey("Can provide a secret", t, func() {
+		value, err := provider.Value("variable:db/password")
+		So(err, ShouldBeNil)
+
+		So(string(value), ShouldEqual, "secret")
+	})
+
+	Convey("Cannot provide an unknown value", t, func() {
+		_, err = provider.Value("foobar")
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "conjur does not know how to provide a value for 'foobar'")
+	})
+
+	Convey("Cannot provide an unloaded secret", t, func() {
+		_, err = provider.Value("variable:foobar")
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "Variable 'foobar' not found in account 'dev'")
+	})
 }

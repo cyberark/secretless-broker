@@ -1,27 +1,80 @@
 # Secretless
 
-Secretless is a multiplexing server which relieves client applications of the need to directly handle secrets to backend services. The backend service can be a database, HTTP web service, or any other service which uses a TCP protocol. 
+Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service. 
 
-To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it authenticates to the Secretless server. If Secretless decides that the client is both authenticated and authorized to access the backend service, the provider obtains credentials to the Backend service from Conjur Variables. These credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and backend. 
+To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the Backend service from a secrets vault such as Conjur, a keychain service, or text files. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend. 
 
 # Why Secretless?
 
 Exposing plaintext secrets to clients (both users and machines) is hazardous from both a security and operational standpoint. First, by providing a secret to a client, the client becomes part of the threat surface. If the client is compromised, then the attacker has a good chance of obtaining the plaintext secrets and being able to establish direct connections to backend resources. To mitigate the severity of this problem, important secrets are (or should be) rotated (changed) on a regular basis. However, rotation introduces the operational problem of keeping applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords.
 
-When the client connects to a backend resource through Secretles:
+When the client connects to a backend resource through Secretless:
 
 * **The client is not part of the threat surface** The client does not have direct access to the password, and therefore cannot reveal it.
+* **The client does not have to know how to properly manage secrets** Handling secrets safely is very difficult. When every application needs to know how to handle secrets, accidents happen. Secretless centralizes the client-side management of secrets into one code base.
 * **The client does not have to handle changing secrets** Secretless is responsible for establishing connections to the backend, and can handle secrets rotation in a way that's transparent to the client.
 
-# Example
+# Getting Started
 
-In this example, we setup a client to connect to Postgresql through Secretless. 
+For now, you'll need to build Secretless in order to use it. 
 
-First, a Conjur policy creates a `secretless` Host identity along with Variables which store the database connection parameters:
+Clone `https://github.com/conjurinc/secretless` and then build it:
+
+```sh-session
+$ dep ensure
+$ go build ./cmd/secretless
+```
+
+Next, create a configuration file written in YAML which tells Secretless:
+
+* Which ports and sockets to listen on.
+* Which secrets providers to use and how to configure them.
+* Which handlers to use for inbound requests.
+
+For example [demo/secretless.myapp.yml](demo/secretless.myapp.yml).
+
+Now run `secretless`:
+
+```sh-session
+$ ./secretless -config demo/secretless.myapp.yml
+```
+
+Secretless is listening on the ports and sockets that you requested. Now you need to ensure that when your client code connects to a backend service, the connection is routed through Secretless.
+
+This typically happens in one of two ways:
+
+1) Use a Unix domain socket which Secretless is listening on.
+2) Use Secretless to proxy a TCP protocol.
+3) Use Secretless as an HTTP forward proxy.
+
+In all cases, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost so that only clients on the same machine can access Secretless.
+
+## Unix Domain Socket
+
+When Secretless is managing a backend service that supports Unix domain socket connections, it's best to have the client establish the connection directly to the Unix socket.
+
+For example, Postgresql clients can connect to the Postgresql server on a Unix domain socket (default: `/var/run/postgresql/.s.PGSQL.5432`). Configure Secretless to listen on this socket, and configure the client with the database URL `/var/run/postgresql`.
+
+## TCP Protocol
+
+Alternatively, Secretless can listen on a TCP port, and the client can connect to that port. 
+
+To use the Postgresql example again, the Postgresql server listens by default on port 5432. Configure Secretless to listen on port 5432, and configure the client with the database URL `localhost:5432`.
+
+## HTTP Forward Proxy
+
+To configure Secretless to broker web service connections, configure Secretless with a TCP listener on a well-known port such as `1080`. 
+
+Then set the environment variable `http_proxy=localhost:1080` in the client environment. Ensure that the client sends HTTP and not HTTPS requests (TLS can be added by Secretless). 
+
+# Detailed Example
+
+Here's how to setup a client to connect to a database (Postgresql) through Secretless. 
+
+First, store database connection parameters in a vault (we'll use Conjur):
 
 ```
-# The Secretless server
-- !host secretless
+- !host myapp
 
 - !policy
   id: pg
@@ -40,10 +93,10 @@ First, a Conjur policy creates a `secretless` Host identity along with Variables
     privilege: [ read, execute ]
     resources: *variables
 
-# Permit Secretless to read the pg variables
+# Permit the application to read the pg variables
 - !grant
   role: !group pg/secrets-users
-  member: !host secretless
+  member: !host myapp
 ```
 
 Load this policy in the normal manner, e.g. `conjur policy load --replace root conjur.yml`.
@@ -56,7 +109,7 @@ $ conjur variable values add pg/password conjur
 $ conjur variable values add pg/url pg:5432
 ```
 
-Now run Postgres on port 5432 in a container called `pg`, and run the Secretless in a container called `secretless`, also on port 5432. The `secretless` container needs environment variables `CONJUR_AUTHN_LOGIN=host/secretless` and `CONJUR_AUTHN_API_KEY=<api key of host/secretless>`.
+Now run Postgres on port 5432 in a container called `pg`, and run the Secretless in a container called `secretless`, also on port 5432. The `secretless` container needs environment variables `CONJUR_AUTHN_LOGIN=host/myapp` and `CONJUR_AUTHN_API_KEY=<api key of host/secretless>`.
 
 The client container will establish a `psql` connection to Postgresql, connecting through Secretless. Secretless will listen on the standard Postgresql Unix domain socket `/var/run/postgresql/.s.PGSQL.5432`. The client container and Secretless share the socket via Docker volume share:
 
@@ -70,107 +123,26 @@ postgres=>
 
 In the `secretless` log, you can see Secretless establishing the connection to `pg:5432` using the username and password obtained from Conjur Variables. 
 
-# Development
+# Testing
 
-A development environment is provided in the `docker-compose.yml`. 
+You'll need Docker to run the test cases.
 
-## Building
-
-### Linux
-
-From the `./build` directory, run:
+Build the project by running:
 
 ```sh-session
-$ docker-compose run --rm build ./build/build.sh
-...
-$ ls ../bin/linux/amd64
-secretless
+$ ./build/build.sh
 ```
 
-## Testing
-
-After building, enter a `./test` directory and build the containers:
+Or on OS X:
 
 ```sh-session
-$ docker-compose build
+$ ./build/build_darwin.sh
 ```
 
-
-
-Back in the host shell, build the rest of the container images:
-
-Still in the host shell, start the `secretless_test` container:
+Then run the test cases:
 
 ```sh-session
-$ export CONJUR_AUTHN_API_KEY=<API key of dev:host:secretless>
-$ docker-compose up secretless_test
-```
-
-Back in the `secretless_dev` container, you are ready to run the tests:
-
-```
-# export CONJUR_AUTHN_API_KEY=<API key of dev:user:admin>
-# godep restore
-...
-# go test
-2017/10/27 14:17:07 Provide a statically configured password
-2017/10/27 14:17:07 Provide the wrong value for a statically configured password
-2017/10/27 14:17:07 Provide a Conjur access token as the password
-2017/10/27 14:17:07 Provide a Conjur access token for an unauthorized user
-PASS
-ok    github.com/kgilpin/secretless  0.318s
-```
-
-## Working With Conjur
-
-Run the Conjur service with `docker-compose up -d pg conjur`.
-
-Then create the "dev" account in Conjur, and obtain the Conjur API key for the "admin" user:
-
-```sh-session
-$ docker-compose exec conjur conjurctl account create dev
-...
-$ docker-compose exec conjur rake "role:retrieve-key[dev:user:admin]"
-1k8mjr4105fzsn2zacnp02v8wr4v1p8q2fn1gja7t13gc3frt3zb1myx
-```
-
-Then start a Conjur client container with `docker-compose run --rm client`.
-
-Once in the client, login as `admin` and load the policy and populate the variables:
-
-```sh-session
-root@c88091df1304:/# cd ./work/
-root@c88091df1304:/# cd ./work/
-root@c88091df1304:/work# ./example/conjur.sh
-+ conjur policy load root example/conjur.yml
-Loaded policy 'root'
-{
-  "created_roles": {
-    ...
-    "dev:host:secretless": {
-      "id": "dev:host:secretless",
-      "api_key": "14y15dx20p3pxg3z99ffw26qqhx01pky7tz2y8jvt3cvxy2c3ebed5y"
-    }
-  },
-  "version": 1
-}
-+ conjur variable values add pg/username conjur
-Value added
-+ conjur variable values add pg/password conjur
-Value added
-+ conjur variable values add pg/url pg:5432
-Value added
-```
-
-## Working with HashiCorp Vault
-
-Run the Vault service with `docker-compose up -d vault`.
-
-Then obtain the "Root Token":
-
-```sh-session
-$ docker-compose logs vault | grep "Root Token"
-vault_1            | Root Token: 6f975be0-5576-560d-e21a-ddabd8cee071
+$ ./build/test.sh
 ```
 
 # Performance
@@ -264,5 +236,5 @@ In the project root directory there is a Makefile. Run `make all` to build and t
 The `./build` directory contains CI scripts:
 
 * **build.sh** Builds the Go binaries. Expects to run in a Linux environment. 
-* **test.sh** Runs the test suite. Expects to run in an environment with `docker-compose` available, and expects Go binaries to be built. 
-* **test_in_container.sh** A helper script which you probably won't run directly.
+* **test.sh** Runs the test suite. Expects to run in an environment with `docker-compose` available, and expects Go binaries to be built.
+* **test\_in_container.sh** A helper script which you probably won't run directly.

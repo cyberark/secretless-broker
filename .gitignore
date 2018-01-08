@@ -3,7 +3,5 @@ vendor
 /showpw
 /bin/darwin/amd64/secretless
 /bin/linux/amd64/secretless
-Godeps/_workspace
-tmp
 demo/tmp
 demo/run

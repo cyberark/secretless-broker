@@ -39,15 +39,15 @@ Now run `secretless`:
 $ ./secretless -config demo/secretless.myapp.yml
 ```
 
-Secretless is listening on the ports and sockets that you requested. Now you need to ensure that when your client code connects to a backend service, the connection is routed through Secretless.
+Secretless is listening on the ports and sockets that you requested. 
 
-This typically happens in one of two ways:
+Now you need to ensure that when your client code connects to a backend service, the connection is routed through Secretless. The client connects to Secretless in one of the following ways:
 
-1) Use a Unix domain socket which Secretless is listening on.
-2) Use Secretless to proxy a TCP protocol.
-3) Use Secretless as an HTTP forward proxy.
+1) Secretless serves the backend protocol on a Unix domain socket.
+2) Secretless serves the backend protocol on a TCP socket.
+3) Secretless serves as an HTTP forward proxy.
 
-In all cases, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost so that only clients on the same machine can access Secretless.
+In all cases, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost.
 
 ## Unix Domain Socket
 
@@ -109,7 +109,7 @@ $ conjur variable values add pg/password conjur
 $ conjur variable values add pg/url pg:5432
 ```
 
-Now run Postgres on port 5432 in a container called `pg`, and run the Secretless in a container called `secretless`, also on port 5432. The `secretless` container needs environment variables `CONJUR_AUTHN_LOGIN=host/myapp` and `CONJUR_AUTHN_API_KEY=<api key of host/secretless>`.
+Now run Postgres on port 5432 in a container called `pg`, and run the Secretless in a container called `secretless`, also on port 5432. The `secretless` container needs environment variables `CONJUR_AUTHN_LOGIN=host/myapp` and `CONJUR_AUTHN_API_KEY=<api key of host/myapp>`.
 
 The client container will establish a `psql` connection to Postgresql, connecting through Secretless. Secretless will listen on the standard Postgresql Unix domain socket `/var/run/postgresql/.s.PGSQL.5432`. The client container and Secretless share the socket via Docker volume share:
 

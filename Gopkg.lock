@@ -3,8 +3,9 @@
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
-  packages = ["aws","aws/awserr","aws/awsutil","aws/client/metadata","aws/credentials","aws/endpoints","aws/request","aws/signer/v4","internal/shareddefaults","private/protocol/rest"]
-  revision = "8c6a611084ff32c030aeb61554c5b987b4cdf4eb"
+  packages = ["aws","aws/awserr","aws/awsutil","aws/client/metadata","aws/credentials","aws/endpoints","aws/request","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/rest"]
+  revision = "00aba4fd6bb87ab518ee0857fea017804f40a6da"
+  version = "v1.12.58"
 
 [[projects]]
   branch = "master"
@@ -13,16 +14,16 @@
   revision = "9fd32a8b3d3d3f9d43c341bfe098430e07609480"
 
 [[projects]]
-  branch = "feature/router"
   name = "github.com/cyberark/conjur-api-go"
   packages = ["conjurapi","conjurapi/authn","conjurapi/response"]
-  revision = "382b085aba7998e0eecfc9d1092cf30c2b832bb7"
+  revision = "f1ab305f73250ebe61fb4f03792a6c55355bade1"
+  version = "v0.3.0"
 
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "f280b3ba517bf5fc98922624f21fb0e7a92adaec"
-  version = "v1.30.3"
+  revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
+  version = "v1.32.0"
 
 [[projects]]
   branch = "master"
@@ -54,9 +55,10 @@
   version = "1.6.3"
 
 [[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = ["curve25519","ed25519","ed25519/internal/edwards25519","ssh","ssh/agent"]
-  revision = "9419663f5a44be8b34ca85f08abc5fe1be11f8a3"
+  revision = "0fcca4842a8d74bfddc2c96a073bd2a4d2a7a2e8"
 
 [[projects]]
   branch = "v1"
@@ -65,13 +67,14 @@
   revision = "9f9df34309c04878acc86042b16630b0f696e1de"
 
 [[projects]]
+  branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "eb3733d160e74a9c7e442f435eb3bea458e1d19f"
+  revision = "d670f9405373e636a5a2765eea47fac0c9bc91a4"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "09b24b68a4d8bc7634afbaf97da2dce7fdeea4cba71cd682ef68e1e21e4f4215"
+  inputs-digest = "a89db079ecec40660c4865f1bd205f8a2d519edbc6e6103f65bcd28340682b11"
   solver-name = "gps-cdcl"
   solver-version = 1

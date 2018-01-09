@@ -25,7 +25,7 @@
   name = "github.com/aws/aws-sdk-go"
 
 [[constraint]]
-  branch = "feature/router"
+  branch = "master"
   name = "github.com/cyberark/conjur-api-go"
 
 [[constraint]]

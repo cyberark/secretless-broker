@@ -1,3 +1,15 @@
+- [Secretless](#secretless)
+- [Why Secretless?](#why-secretless)
+- [Quick Start](#quick-start)
+- [Configuring Secretless](#configuring-secretless)
+  - [Listeners](#listeners)
+  - [Providers](#providers)
+  - [Handlers](#handlers)
+- [Client Application Configuration](#client-application-configuration)
+- [Testing](#testing)
+- [Performance](#performance)
+- [Continuous Integration](#continuous-integration)
+
 # Secretless
 
 Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service. 
@@ -14,114 +26,214 @@ When the client connects to a backend resource through Secretless:
 * **The client does not have to know how to properly manage secrets** Handling secrets safely is very difficult. When every application needs to know how to handle secrets, accidents happen. Secretless centralizes the client-side management of secrets into one code base.
 * **The client does not have to handle changing secrets** Secretless is responsible for establishing connections to the backend, and can handle secrets rotation in a way that's transparent to the client.
 
-# Getting Started
+# Quick Start
 
-For now, you'll need to build Secretless in order to use it. 
+**Prerequisites**
 
-Clone `https://github.com/conjurinc/secretless` and then build it:
+* Docker
+
+At this time, you'll need to build Secretless in order to use it. 
+
+Clone `https://github.com/conjurinc/secretless` and then run `go build`:
 
 ```sh-session
 $ dep ensure
 $ go build ./cmd/secretless
 ```
 
-Next, create a configuration file written in YAML which tells Secretless:
+This will build a Docker image called `secretless` that you'll use in a minute.
 
-* Which ports and sockets to listen on.
-* Which secrets providers to use and how to configure them.
-* Which handlers to use for inbound requests.
-
-For example [demo/secretless.myapp.yml](demo/secretless.myapp.yml).
-
-Now run `secretless`:
+Now navigate to the directory `doc/quick`:
 
 ```sh-session
-$ ./secretless -config demo/secretless.myapp.yml
+$ cd doc/quick
 ```
 
-Secretless is listening on the ports and sockets that you requested. 
+You will use Secretless to connect a client to a Postgresql database, without the client knowing the database password.
 
-Now you need to ensure that when your client code connects to a backend service, the connection is routed through Secretless. The client connects to Secretless in one of the following ways:
+Start by running a Postgresql server using `docker-compose`:
 
-1) Secretless serves the backend protocol on a Unix domain socket.
-2) Secretless serves the backend protocol on a TCP socket.
-3) Secretless serves as an HTTP forward proxy.
+```sh-session
+$ docker-compose up -d pg
+Creating network "quick_default" with the default driver
+Creating quick_pg_1 ...
+Creating quick_pg_1 ... done
+```
 
-In all cases, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost.
+Verify that Postgresql is running and accepting connections on port 5432:
 
-## Unix Domain Socket
+```
+$ docker-compose ps
+   Name                 Command              State            Ports
+----------------------------------------------------------------------------
+quick_pg_1   docker-entrypoint.sh postgres   Up      5432/tcp
+```
+
+Now you can test a normal connection to Postgresql in which the client knows the password. Start a `psql` container:
+
+```sh-session
+$ docker-compose run --rm psql
+Starting quick_psql_1 ... done
+root@f6683931b82c:/#
+```
+
+Now connect to Postgresql using the username "test" and password "test" (type `\q` to quit):
+
+```sh-session
+root@f6683931b82c:/# PGPASSWORD=test PGUSER=test PGPORT=5432 PGHOST=pg PGDATABASE=postgres psql
+psql (9.5.10, server 9.3.20)
+Type "help" for help.
+
+postgres=> \q
+```
+
+Fine, this is the normal way of connecting to Postgresql. Now let's see how to connect a client to the database without knowing the password. 
+
+You'll use a YAML file to tell Secretless the following information:
+
+* Listen on Unix socket `/run/postgresql/s.PGSQL.5432` for client connections.
+* Route client connections on that socket to the `pg` handler.
+* The `pg` handler should obtain the database address, username and password from environment variables.
+
+Here's what this [secretless.yml](doc/quick/secretless.yml) looks like:
+
+```yaml
+listeners:
+  - name: pg
+    socket: ./run/postgresql/.s.PGSQL.5432
+
+handlers:
+  - name: pg
+    listener: pg
+    authorization:
+      none: true
+    credentials:
+      - name: address
+        value:
+          environment: PG_ADDRESS
+      - name: username
+        value:
+          environment: PG_USER
+      - name: password
+        value:
+          environment: PG_PASSWORD
+```
+
+In real world scenarios, the credentials (secrets) can be obtained from a secrets vault or operating system keychain.
+
+Run `secretless` using `docker-compose`:
+
+```sh-session
+$ docker-compose up -d secretless
+quick_pg_1 is up-to-date
+Creating quick_secretless_1 ...
+Creating quick_secretless_1 ... done
+```
+
+Verify that it's up and listening:
+
+```sh-session
+$ docker-compose logs secretless
+Attaching to quick_secretless_1
+secretless_1  | 2018/01/09 20:37:15 Secretless starting up...
+secretless_1  | 2018/01/09 20:37:15 Loaded configuration : {[] [{pg   ./run/postgresql/.s.PGSQL.5432 []}] [{pg  pg {false  map[]} false [] [] []}]}
+secretless_1  | 2018/01/09 20:37:15  listener 'pg' listening at: ./run/postgresql/.s.PGSQL.5432
+```
+
+Now start another `psql` container:
+
+```sh-session
+$ docker-compose run --rm psql
+Starting quick_pg_1 ... done
+root@2fdd8fa01ef2:/#
+```
+
+In the directory `/run/postgresql/` you'll see a socket file where Secretless is listening:
+
+```sh-session
+root@2fdd8fa01ef2:/# ls -al /run/postgresql/
+total 4
+drwxr-xr-x 4 root root  136 Jan  9 20:37 .
+drwxr-xr-x 1 root root 4096 Jan  9 20:38 ..
+-rw-r--r-- 1 root root    0 Jan  9 20:19 .keep
+srwxrwxrwx 1 root root    0 Jan  9 20:37 .s.PGSQL.5432
+```
+
+This is the default location of the Postgresql server socket. Keep in mind, it's not actually Postgresql that's listening on this socket, it's Secretless.
+
+You can now establish a secretless connection to Postgresql:
+
+```sh-session
+root@ae57550f7e95:/# psql postgres
+psql (9.5.10, server 9.3.20)
+Type "help" for help.
+
+postgres=> 
+```
+
+Issue the SQL command `select * from test` to list the rows in the `test` table:
+
+```sh-session
+postgres=> select * from test;
+ id
+----
+  1
+  2
+(2 rows)
+```
+
+That's it! You connected a client through Secretless to Postgresql. 
+
+Note that a real-world deployment would differ from this setup in the following ways:
+
+* The backend service (e.g. Postgresql) would be running remotely on the network.
+* The backend service credentials would be stored in a secrets vault.
+* `secretless.yml` would configure the authentication credentials to the vault.
+* `secretless.yml` might contain listeners and handlers for other backend services, such as SSH and/or HTTP web services.
+
+# Configuring Secretless
+
+The Secretless configuration file is composed of three sections:
+
+* `listeners` A list of protocol listeners, each one on a Unix socket or TCP port.
+* `providers` A list of secrets providers.
+* `handlers` When a new connection is received by a Listener, it's routed to a Handler for processing. The Handler is configured to obtain the backend connection credentials from one or more Providers. 
+
+## Listeners
+
+You can configure the following kinds of Secretless *Listeners*:
+
+1) `unix` Secretless serves the backend protocol on a Unix domain socket.
+2) `tcp` Secretless serves the backend protocol on a TCP socket.
 
 When Secretless is managing a backend service that supports Unix domain socket connections, it's best to have the client establish the connection directly to the Unix socket.
 
 For example, Postgresql clients can connect to the Postgresql server on a Unix domain socket (default: `/var/run/postgresql/.s.PGSQL.5432`). Configure Secretless to listen on this socket, and configure the client with the database URL `/var/run/postgresql`.
 
-## TCP Protocol
-
 Alternatively, Secretless can listen on a TCP port, and the client can connect to that port. 
 
 To use the Postgresql example again, the Postgresql server listens by default on port 5432. Configure Secretless to listen on port 5432, and configure the client with the database URL `localhost:5432`.
-
-## HTTP Forward Proxy
 
 To configure Secretless to broker web service connections, configure Secretless with a TCP listener on a well-known port such as `1080`. 
 
 Then set the environment variable `http_proxy=localhost:1080` in the client environment. Ensure that the client sends HTTP and not HTTPS requests (TLS can be added by Secretless). 
 
-# Detailed Example
+## Providers
 
-Here's how to setup a client to connect to a database (Postgresql) through Secretless. 
+TODO
 
-First, store database connection parameters in a vault (we'll use Conjur):
+## Handlers
 
-```
-- !host myapp
+TODO
 
-- !policy
-  id: pg
-  body:
-  # Connection parameters to the pg backend
-  - &variables
-    - !variable url
-    - !variable username
-    - !variable password
+# Client Application Configuration
 
-  - !group secrets-users
+You need to ensure that when your client code connects to a backend service, the connection is routed through Secretless. The way that you do this depends on what kind of backend the client is connecting to: Postgresql database, HTTP web service, etc. Generally, there are two strategies:
 
-  # Permit the proxy to read the connection parameters
-  - !permit
-    role: !group secrets-users
-    privilege: [ read, execute ]
-    resources: *variables
+1) **Connection URL** Connections to the backend service are established by a connection URL. For example, Postgresql supports connection URLs such as `postgres://user@password:hostname:port/database`. `host:port` can also be a path to a Unix socket, and it can be omitted to use the default Postgresql socket `/var/run/postgresql/.s.PGSQL.5432`.
+2) **Proxy** HTTP services support an environment variable or configuration setting `http_proxy=<url>` which will cause outbound traffic to route through the proxy URL on its way to the destination. Secretless can operate as an HTTP forward proxy, in which case it will place the proper authorization header on the outbound request. It can also optionally forward the connection using HTTPS. The client should always use plain `http://` URLs, otherwise Secretless cannot read the network traffic because it will encrypted.  
 
-# Permit the application to read the pg variables
-- !grant
-  role: !group pg/secrets-users
-  member: !host myapp
-```
-
-Load this policy in the normal manner, e.g. `conjur policy load --replace root conjur.yml`.
-
-Next, load the connection parameters:
-
-```
-$ conjur variable values add pg/username conjur
-$ conjur variable values add pg/password conjur
-$ conjur variable values add pg/url pg:5432
-```
-
-Now run Postgres on port 5432 in a container called `pg`, and run the Secretless in a container called `secretless`, also on port 5432. The `secretless` container needs environment variables `CONJUR_AUTHN_LOGIN=host/myapp` and `CONJUR_AUTHN_API_KEY=<api key of host/myapp>`.
-
-The client container will establish a `psql` connection to Postgresql, connecting through Secretless. Secretless will listen on the standard Postgresql Unix domain socket `/var/run/postgresql/.s.PGSQL.5432`. The client container and Secretless share the socket via Docker volume share:
-
-```
-$ psql
-psql (9.4.13, server 9.3.19)
-Type "help" for help.
-
-postgres=>
-```
-
-In the `secretless` log, you can see Secretless establishing the connection to `pg:5432` using the username and password obtained from Conjur Variables. 
+In all cases, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost.
 
 # Testing
 
@@ -231,10 +343,14 @@ Changing the `-c` (number of clients) and `-j` (number of threads) didn't have m
 
 # Continuous Integration
 
-In the project root directory there is a Makefile. Run `make all` to build and test Secretless. Binaries are built to the `./bin` directory.
+**Prerequisites**
 
-The `./build` directory contains CI scripts:
+* Docker
+* Linux or OS X environment
+
+The [./build](build) directory contains CI scripts:
 
 * **build.sh** Builds the Go binaries. Expects to run in a Linux environment. 
-* **test.sh** Runs the test suite. Expects to run in an environment with `docker-compose` available, and expects Go binaries to be built.
-* **test\_in_container.sh** A helper script which you probably won't run directly.
+* **build_darwin.sh** Builds the Go binaries. Expects to run in an OS X environment. 
+* **test.sh** Tests Secretless by looping through each of the `./test/*` subdirectories. Expects the project to have been already built.
+

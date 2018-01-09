@@ -1,0 +1,27 @@
+version: '2.1'
+services:
+  pg:
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+
+  psql:
+    build:
+      context: .
+      dockerfile: Dockerfile.psql
+    depends_on:
+      - pg
+    volumes:
+      - ./run/postgresql:/var/run/postgresql/
+
+  secretless:
+    image: secretless
+    environment:
+      PG_ADDRESS: pg:5432
+      PG_USER: test
+      PG_PASSWORD: test
+    depends_on:
+      - pg
+    volumes:
+      - ./secretless.yml:/config.yaml
+      - ./run/postgresql:/var/run/postgresql/

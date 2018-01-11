@@ -6,6 +6,10 @@ services:
       dockerfile: Dockerfile.pg
     ports:
       - 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 30s
 
   secretless:
     build:
@@ -13,7 +17,8 @@ services:
     environment:
       PG_PASSWORD: test
     depends_on:
-      - pg
+      pg:
+        condition: service_healthy
     volumes:
       - ./secretless.yml:/config.yaml
       - ./run/postgresql/:/run/postgresql/

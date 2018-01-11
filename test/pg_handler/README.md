@@ -1,5 +1,22 @@
 # pg_handler Development
 
+## Quick Test (Laptop environment)
+
+Run Postgres in Docker:
+
+```sh-session
+$ docker-compose up -d pg
+```
+
+Run Secretless locally and execute tests:
+
+```sh-session
+$ ./run_dev_test.sh
+...
+ok      github.com/kgilpin/secretless/test/pg_handler   0.048s
+2018/01/11 15:06:56 Caught signal terminated: shutting down.
+```
+
 ## Local Environment (Laptop)
 
 These instructions show how to develop Secretless on you local machine. This way you can use niceties such as IDE features.
@@ -20,16 +37,11 @@ $ docker-compose port pg 5432
 Now you can run `secretless` in a terminal:
 
 ```sh-session
-$ PG_ADDRESS=localhost:32771 \
-  PG_PASSWORD=test \
-  ../../bin/darwin/amd64/secretless \
-  -config secretless.dev.yml
+$ ./run_dev.sh
 ...
 2018/01/10 16:33:09 pg listener 'pg_tcp' listening at: [::]:15432
 2018/01/10 16:33:09 pg listener 'pg_socket' listening at: ./run/postgresql/.s.PGSQL.5432
 ```
-
-Change `PG_ADDRESS` if you are not using the Docker-hosted Postgresql server.
 
 Now run a client in another terminal.
 

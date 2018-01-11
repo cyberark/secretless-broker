@@ -3,24 +3,16 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
-var AdminAPIKey = os.Getenv("CONJUR_AUTHN_API_KEY")
-var Host = os.Getenv("TEST_PROXY_HOST")
-
 func psql(host string, port int, user string, environment []string) (string, error) {
-	if host == "" {
-		if Host != "" {
-			host = Host
-		} else {
-			host = "secretless_test"
-		}
-	}
-
 	args := []string{"-h", host}
 	if port != 0 {
 		args = append(args, "-p")
@@ -45,21 +37,46 @@ func psql(host string, port int, user string, environment []string) (string, err
 	cmdOut, err := cmd.CombinedOutput()
 	return string(cmdOut), err
 }
-func TestUnixSocketConnection(t *testing.T) {
-	log.Print("Connect via Unix socket without authentication")
+func TestPGHandler(t *testing.T) {
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
+	Convey("Connect over a Unix socket", t, func() {
+		cwd, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
 
-	cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), 0, "", []string{})
+		cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), 0, "", []string{})
 
-	if err != nil {
-		t.Fatal(cmdOut)
-	}
+		if err != nil {
+			t.Fatal(cmdOut)
+		}
 
-	if !strings.Contains(cmdOut, "1 row") {
-		t.Fatalf("Expected to find '1 row' in : %s", cmdOut)
-	}
+		if !strings.Contains(cmdOut, "1 row") {
+			t.Fatalf("Expected to find '1 row' in : %s", cmdOut)
+		}
+	})
+	Convey("Connect over TCP", t, func() {
+		// Secretless will either be secretless:5432 (in Docker) or
+		// localhost:<mapped-port> (on the local machine)
+		var host string
+		var port int
+		_, err := net.LookupIP("pg")
+		if err == nil {
+			host = "secretless"
+			port = 5432
+		} else {
+			host = "localhost"
+			port = 15432
+		}
+
+		cmdOut, err := psql(host, port, "", []string{})
+
+		if err != nil {
+			t.Fatal(cmdOut)
+		}
+
+		if !strings.Contains(cmdOut, "1 row") {
+			t.Fatalf("Expected to find '1 row' in : %s", cmdOut)
+		}
+	})
 }

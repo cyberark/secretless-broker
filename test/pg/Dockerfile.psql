@@ -1,7 +1,0 @@
-FROM ubuntu:16.04
-
-RUN apt-get update && apt-get install -y vim jq curl postgresql-client software-properties-common build-essential
-RUN apt-add-repository ppa:brightbox/ruby-ng
-RUN apt-get update
-RUN apt-get install -y ruby2.4 ruby2.4-dev
-RUN gem install -N conjur-cli -v 6.0

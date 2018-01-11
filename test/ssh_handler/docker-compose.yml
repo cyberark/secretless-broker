@@ -20,8 +20,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    working_dir: /go/src/github.com/kgilpin/secretless/test/ssh_handler
+    command: ssh -o StrictHostKeyChecking=no ssh_host cat /root/.ssh/authorized_keys
+    environment:
+      SSH_AUTH_SOCK: /run/ssh-agent/.agent
     volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless
       - ./run:/run/ssh-agent
     depends_on:
       - secretless
       - ssh_host
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless

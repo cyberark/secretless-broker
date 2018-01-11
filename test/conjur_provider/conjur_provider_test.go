@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -24,10 +25,16 @@ func TestProvider(t *testing.T) {
 		APIKey  string `yaml:"api_key"`
 	}
 
+	conjurrcFile := "./tmp/.conjurrc"
 	name := "conjur"
 
+	_, err = os.Stat(conjurrcFile)
+	if os.IsNotExist(err) {
+		panic(fmt.Sprintf("conjurrc file %s does not exist; run ./start.sh to create it", conjurrcFile))
+	}
+
 	conjurConfig := ConjurConfig{}
-	buf, err := ioutil.ReadFile("./tmp/.conjurrc")
+	buf, err := ioutil.ReadFile(conjurrcFile)
 	if err != nil {
 		panic(err)
 	}

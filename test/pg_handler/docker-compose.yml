@@ -1,0 +1,38 @@
+version: '2.1'
+services:
+  pg:
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+    ports:
+      - 5432
+
+  secretless:
+    build:
+      context: ../..
+    environment:
+      PG_PASSWORD: test
+    depends_on:
+      - pg
+    volumes:
+      - ./secretless.yml:/config.yaml
+      - ./run/postgresql/:/run/postgresql/
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: go test ./test/pg_handler
+    volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless
+    depends_on:
+      - secretless
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      PG_PASSWORD: test
+    volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless

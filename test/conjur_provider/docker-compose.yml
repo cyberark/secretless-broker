@@ -33,13 +33,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    command: env http_proxy=http://secretless:80 go test ./test/conjur_provider
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_TOKEN: e30K
-      http_proxy: http://secretless:80
+    volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless
     depends_on:
       - conjur
       - secretless
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
     volumes:
       - ../..:/go/src/github.com/kgilpin/secretless

@@ -8,3 +8,7 @@ RUN go get golang.org/x/tools/cmd/goimports
 RUN apt-get update && apt-get install -y vim jq curl less
 
 WORKDIR /go/src/github.com/kgilpin/secretless
+
+COPY . .
+
+RUN dep ensure

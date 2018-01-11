@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 )
 
+// ConjurProvider provides data values from the Conjur vault.
 type ConjurProvider struct {
 	name   string
 	conjur *conjurapi.Client
@@ -23,6 +23,15 @@ func hasField(field string, params *map[string]string) (ok bool) {
 	return
 }
 
+// NewConjurProvider constructs a ConjurProvider. The configuration may include the following
+// keys:
+//  * url (required)
+//  * account (required)
+//  * version (optional; 4 or 5)
+//  * certFile (optional)
+//  * username (optional; requires apiKey)
+//  * apiKey (optional; requires username)
+//  * tokenFile (optional; username and apiKey are not required if this is present)
 func NewConjurProvider(name string, configuration, credentials map[string]string) (provider Provider, err error) {
 	config := conjurapi.Config{}
 	for k, v := range configuration {
@@ -60,31 +69,24 @@ func NewConjurProvider(name string, configuration, credentials map[string]string
 		return
 	}
 
-	/*
-	  } else if hasField("token", credentials) {
-	    token := credentials["token"]
-	    conjur = conjurapi.NewClientFromToken(config, token)
-	  }
-	*/
-
 	provider = &ConjurProvider{name: name, conjur: conjur, username: username, apiKey: apiKey}
 
 	return
 }
 
+// Name returns the name of the provider
 func (p ConjurProvider) Name() string {
 	return p.name
 }
 
+// Value obtains a value by ID. The recognized IDs are:
+//	* "accessToken"
+// 	* Any Conjur variable ID
 func (p ConjurProvider) Value(id string) ([]byte, error) {
 	if id == "accessToken" {
 		if p.username != "" && p.apiKey != "" {
 			// TODO: Use a cached access token from the client, once it's exposed
-			secretResponse, err := p.conjur.Authenticate(authn.LoginPair{p.username, p.apiKey})
-			if err != nil {
-				return nil, err
-			}
-			return ioutil.ReadAll(secretResponse)
+			return p.conjur.Authenticate(authn.LoginPair{p.username, p.apiKey})
 		}
 		return nil, fmt.Errorf("Sorry, can't currently provide an accessToken unless username and apiKey credentials are provided")
 	}
@@ -102,9 +104,5 @@ func (p ConjurProvider) Value(id string) ([]byte, error) {
 		tokens = []string{tokens[1]}
 	}
 
-	secretResponse, err := p.conjur.RetrieveSecret(strings.Join(tokens, ":"))
-	if err != nil {
-		return nil, err
-	}
-	return conjurapi.ReadResponseBody(secretResponse)
+	return p.conjur.RetrieveSecret(strings.Join(tokens, ":"))
 }

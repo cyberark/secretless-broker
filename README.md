@@ -259,7 +259,7 @@ $ ./build/test.sh
 
 # Performance
 
-Using Secretless reduces the transaction throughput by 28-30% on Postgresql. Once the connection to the backend database is established, Secretless runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:
+Using Secretless reduces the transaction throughput by about 25% on Postgresql. Once the connection to the backend database is established, Secretless runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:
 
 ```
     go stream(self.Client, self.Backend)
@@ -271,7 +271,7 @@ Here is some performance data created by running [pgbench](https://www.postgresq
 Directly to the database:
 
 ```
-root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGPASSWORD=conjur PGSSLMODE=disable pgbench -h pg -U conjur -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -279,16 +279,16 @@ query mode: simple
 number of clients: 12
 number of threads: 12
 duration: 10 s
-number of transactions actually processed: 13371
-latency average: 8.988 ms
-tps = 1335.119350 (including connections establishing)
-tps = 1337.527786 (excluding connections establishing)
+number of transactions actually processed: 14434
+latency average: 8.327 ms
+tps = 1441.077559 (including connections establishing)
+tps = 1443.230144 (excluding connections establishing)
 ```
 
 Through the `secretless` proxy:
 
 ```
-root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGPASSWORD=alice PGSSLMODE=disable pgbench -h 172.18.0.9 -U alice -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -296,10 +296,10 @@ query mode: simple
 number of clients: 12
 number of threads: 12
 duration: 10 s
-number of transactions actually processed: 9622
-latency average: 12.502 ms
-tps = 959.835445 (including connections establishing)
-tps = 962.082570 (excluding connections establishing)
+number of transactions actually processed: 10695
+latency average: 11.237 ms
+tps = 1067.933129 (including connections establishing)
+tps = 1075.661082 (excluding connections establishing)
 ```
 
 Here is a set of test results running directly against an RDS Postgresql:
@@ -337,7 +337,7 @@ tps = 14.554441 (including connections establishing)
 tps = 15.822442 (excluding connections establishing)
 ```
 
-14% fewer tps (excluding establishing connections) via Secretless. Establishing connections takes a relatively long time because the credentials are being looked up in Conjur. These can be cached in Secretless as a future optimization.
+14% fewer tps (excluding establishing connections) via Secretless.
 
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios. 
 

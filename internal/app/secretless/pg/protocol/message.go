@@ -46,31 +46,12 @@ func NewMessageBuffer(message []byte) *MessageBuffer {
 // ReadInt32 reads an int32 from the message buffer.
 //
 // This function will read the next 4 available bytes from the message buffer
-// and return them as an int32. If an error occurs then 0 and the error are
-// returned.
-func (message *MessageBuffer) ReadInt32() (int32, error) {
-	value := make([]byte, 4)
-
-	if _, err := message.buffer.Read(value); err != nil {
-		return 0, err
-	}
-
-	return int32(binary.BigEndian.Uint32(value)), nil
-}
-
-// ReadInt16 reads an int16 from the message buffer.
+// and return them as an int32.
 //
-// This function will read the next 2 available bytes from the message buffer
-// and return them as an int16. If an error occurs then 0 and the error are
-// returned.
-func (message *MessageBuffer) ReadInt16() (int16, error) {
-	value := make([]byte, 2)
-
-	if _, err := message.buffer.Read(value); err != nil {
-		return 0, err
-	}
-
-	return int16(binary.BigEndian.Uint16(value)), nil
+// panic on error.
+func (message *MessageBuffer) ReadInt32() (value int32, err error) {
+	err = binary.Read(message.buffer, binary.BigEndian, &value)
+	return
 }
 
 // ReadByte reads a byte from the message buffer.
@@ -79,20 +60,6 @@ func (message *MessageBuffer) ReadInt16() (int16, error) {
 // buffer.
 func (message *MessageBuffer) ReadByte() (byte, error) {
 	return message.buffer.ReadByte()
-}
-
-// ReadBytes reads a variable size byte array defined by count from the message
-// buffer.
-//
-// This function will read and return the number of bytes as specified by count.
-func (message *MessageBuffer) ReadBytes(count int) ([]byte, error) {
-	value := make([]byte, count)
-
-	if _, err := message.buffer.Read(value); err != nil {
-		return nil, err
-	}
-
-	return value, nil
 }
 
 // ReadString reads a string from the message buffer.
@@ -109,27 +76,10 @@ func (message *MessageBuffer) WriteByte(value byte) error {
 	return message.buffer.WriteByte(value)
 }
 
-// WriteBytes writes a variable size byte array specified by 'value' to the
-// message buffer.
-//
-// This function will return the number of bytes written, if the buffer is not
-// large enough to hold the value then an error is returned.
-func (message *MessageBuffer) WriteBytes(value []byte) (int, error) {
-	return message.buffer.Write(value)
-}
-
-// WriteInt16 will write a 2 byte int16 to the message buffer.
-func (message *MessageBuffer) WriteInt16(value int16) (int, error) {
-	x := make([]byte, 2)
-	binary.BigEndian.PutUint16(x, uint16(value))
-	return message.WriteBytes(x)
-}
-
 // WriteInt32 will write a 4 byte int32 to the message buffer.
-func (message *MessageBuffer) WriteInt32(value int32) (int, error) {
-	x := make([]byte, 4)
-	binary.BigEndian.PutUint32(x, uint32(value))
-	return message.WriteBytes(x)
+func (message *MessageBuffer) WriteInt32(value int32) (err error) {
+	err = binary.Write(message.buffer, binary.BigEndian, value)
+	return
 }
 
 // WriteString will write a NULL terminated string to the buffer.  It is
@@ -157,14 +107,4 @@ func (message *MessageBuffer) ResetLength(offset int) {
 // the 'unread' portion of the buffer.
 func (message *MessageBuffer) Bytes() []byte {
 	return message.buffer.Bytes()
-}
-
-// Reset resets the buffer to empty.
-func (message *MessageBuffer) Reset() {
-	message.buffer.Reset()
-}
-
-// Seek moves the current position of the buffer.
-func (message *MessageBuffer) Seek(pos int) {
-	message.buffer.Next(pos)
 }

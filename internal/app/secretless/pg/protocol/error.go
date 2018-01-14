@@ -31,49 +31,32 @@ const (
 
 /* PG Error Message Field Identifiers */
 const (
-	ErrorFieldSeverity         byte = 'S'
-	ErrorFieldCode             byte = 'C'
-	ErrorFieldMessage          byte = 'M'
-	ErrorFieldMessageDetail    byte = 'D'
-	ErrorFieldMessageHint      byte = 'H'
-	ErrorFieldPosition         byte = 'P'
-	ErrorFieldInternalPosition byte = 'p'
-	ErrorFieldInternalQuery    byte = 'q'
-	ErrorFieldWhere            byte = 'W'
-	ErrorFieldSchemaName       byte = 's'
-	ErrorFieldTableName        byte = 't'
-	ErrorFieldColumnName       byte = 'c'
-	ErrorFieldDataTypeName     byte = 'd'
-	ErrorFieldConstraintName   byte = 'n'
-	ErrorFieldFile             byte = 'F'
-	ErrorFieldLine             byte = 'L'
-	ErrorFieldRoutine          byte = 'R'
+	ErrorFieldSeverity      byte = 'S'
+	ErrorFieldCode          byte = 'C'
+	ErrorFieldMessage       byte = 'M'
+	ErrorFieldMessageDetail byte = 'D'
+	ErrorFieldMessageHint   byte = 'H'
 )
 
+const (
+	// ErrorCodeInternalError indicates an unspecified internal error.
+	ErrorCodeInternalError = "XX000"
+)
+
+// Error is a Postgresql processing error.
 type Error struct {
-	Severity         string
-	Code             string
-	Message          string
-	Detail           string
-	Hint             string
-	Position         string
-	InternalPosition string
-	InternalQuery    string
-	Where            string
-	SchemaName       string
-	TableName        string
-	ColumnName       string
-	DataTypeName     string
-	Constraint       string
-	File             string
-	Line             string
-	Routine          string
+	Severity string
+	Code     string
+	Message  string
+	Detail   string
+	Hint     string
 }
 
 func (e *Error) Error() string {
 	return fmt.Sprintf("pg: %s: %s", e.Severity, e.Message)
 }
 
+// GetMessage formats an Error into a protocol message.
 func (e *Error) GetMessage() []byte {
 	msg := NewMessageBuffer([]byte{})
 

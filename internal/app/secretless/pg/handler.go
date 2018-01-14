@@ -1,152 +1,101 @@
 package pg
 
 import (
-  "fmt"
-  "io"
-  "log"
-  "net"
+	"log"
+	"net"
 
-  "github.com/kgilpin/secretless/pkg/secretless/config"
-  "github.com/kgilpin/secretless/internal/app/secretless/pg/connect"
-  "github.com/kgilpin/secretless/internal/app/secretless/pg/protocol"
-  "github.com/kgilpin/secretless/internal/pkg/provider"
+	"github.com/kgilpin/secretless/internal/app/secretless/pg/protocol"
+	"github.com/kgilpin/secretless/internal/pkg/provider"
+	"github.com/kgilpin/secretless/pkg/secretless/config"
 )
 
+// ClientOptions stores the option that were specified by the connection client.
+// The User and Database are required. Other options are stored in a map.
 type ClientOptions struct {
-  User     string
-  Database string
-  Options  map[string]string
+	// TODO: remove this when custom authorization is removed.
+	User string
+	// TODO: override the database address with this setting.
+	Database string
+	Options  map[string]string
 }
 
+// BackendConfig stores the connection info to the real backend database.
 type BackendConfig struct {
-  Address  string
-  Username string
-  Password string
-  Database string
-  Options  map[string]string
+	Address  string
+	Username string
+	Password string
+	Database string
+	Options  map[string]string
 }
 
+// Handler connects a client to a backend. It uses the handler Config and Providers to
+// establish the BackendConfig, which is used to make the Backend connection. Then the data
+// is transferred bidirectionally between the Client and Backend.
 type Handler struct {
-  Config            config.Handler
-  Client            net.Conn
-  Backend           net.Conn
-  Providers         []provider.Provider
-  ClientOptions     *ClientOptions
-  BackendConfig     *BackendConfig  
+	Config        config.Handler
+	Client        net.Conn
+	Backend       net.Conn
+	Providers     []provider.Provider
+	ClientOptions *ClientOptions
+	BackendConfig *BackendConfig
+}
+
+func (h *Handler) abort(err error) {
+	pgError := protocol.Error{
+		Severity: protocol.ErrorSeverityFatal,
+		Code:     protocol.ErrorCodeInternalError,
+		Message:  err.Error(),
+	}
+	h.Client.Write(pgError.GetMessage())
 }
 
 func stream(source, dest net.Conn) {
-  for {
-    if message, length, err := connect.Receive(source); err == nil {
-      _, err = connect.Send(dest, message[:length])
-      if err != nil {
-        log.Printf("Error sending to %s : %s", dest.RemoteAddr(), err)
-        if err == io.EOF {
-          return
-        }
-      }
-    } else {
-      if err == io.EOF {
-        log.Printf("Connection closed from %s", source.RemoteAddr())
-        return
-      } else {
-        log.Printf("Error reading from %s : %s", source.RemoteAddr(), err)
-      }
-    }
-  }
+	buffer := make([]byte, 4096)
+
+	var length int
+	var err error
+
+	for {
+		length, err = source.Read(buffer)
+		if err != nil {
+			return
+		}
+		_, err = dest.Write(buffer[:length])
+		if err != nil {
+			return
+		}
+	}
 }
 
-func (self *Handler) Pipe() {
-  log.Printf("Connecting client %s to backend %s", self.Client.RemoteAddr(), self.Backend.RemoteAddr())
+// Pipe performs continuous bidirectional transfer of data between the client and backend.
+func (h *Handler) Pipe() {
+	if h.Config.Debug {
+		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
+	}
 
-  go stream(self.Client, self.Backend)
-  go stream(self.Backend, self.Client)
+	go stream(h.Client, h.Backend)
+	go stream(h.Backend, h.Client)
 }
 
-func (self *Handler) ConnectToBackend() error {
-  var connection net.Conn
-  var err error
+// Run processes the startup message, configures the backend connection, connects to the backend,
+// and pipes the data between the client and the backend.
+func (h *Handler) Run() {
+	var err error
 
-  if connection, err = connect.Connect(self.BackendConfig.Address); err != nil {
-    return err
-  }
+	if err = h.Startup(); err != nil {
+		h.abort(err)
+		return
+	}
 
-  log.Print("Sending startup message")
-  startupMessage := protocol.CreateStartupMessage(self.BackendConfig.Username, self.ClientOptions.Database, self.BackendConfig.Options)
+	if err := h.ConfigureBackend(); err != nil {
+		h.abort(err)
+		return
+	}
 
-  connection.Write(startupMessage)
+	if err = h.ConnectToBackend(); err != nil {
+		h.abort(err)
+		return
+	}
 
-  response := make([]byte, 4096)
-  connection.Read(response)
-
-  log.Print("Authenticating")
-  message, authenticated := connect.HandleAuthenticationRequest(self.BackendConfig.Username, self.BackendConfig.Password, connection, response)
-
-  if !authenticated {
-    return fmt.Errorf("Authentication failed")
-  }
-
-  log.Printf("Successfully connected to '%s'", self.BackendConfig.Address)
-
-  if _, err = connect.Send(self.Client, message); err != nil {
-    return err
-  }
-
-  self.Backend = connection
-
-  return nil
-}
-
-func (self *Handler) Abort(err error) {
-  pgError := protocol.Error{
-    Severity: protocol.ErrorSeverityFatal,
-    Code:     protocol.ErrorCodeInternalError,
-    Message:  err.Error(),
-  }
-  connect.Send(self.Client, pgError.GetMessage())
-  return
-}
-
-func (self *Handler) Run() {
-  var authenticationError, err error
-  var abort bool
-
-  if err = self.Startup(); err != nil {
-    self.Abort(err)
-    return
-  }
-
-  abort, authenticationError, err = self.Authenticate()
-
-  if authenticationError != nil {
-    pgError := protocol.Error{
-      Severity: protocol.ErrorSeverityFatal,
-      Code:     protocol.ErrorCodeInvalidPassword,
-      Message:  authenticationError.Error(),
-    }
-    connect.Send(self.Client, pgError.GetMessage())
-    return
-  }
-
-  if err != nil {
-    self.Abort(err)
-    return
-  }
-
-  /* Benign abort condidition in authentication */
-  if abort {
-    return
-  }
-
-  if err := self.ConfigureBackend(); err != nil {
-    self.Abort(err)
-    return
-  }
-
-  if err = self.ConnectToBackend(); err != nil {
-    self.Abort(err)
-    return
-  }
-
-  self.Pipe()
+	h.Pipe()
 }

@@ -15,8 +15,8 @@ limitations under the License.
 package protocol
 
 import (
-	"bytes"
 	"encoding/binary"
+	"io"
 )
 
 /* PostgreSQL Protocol Version/Code constants */
@@ -57,85 +57,38 @@ const (
 	AuthenticationSSPI        int32 = 9
 )
 
-func GetVersion(message []byte) int32 {
-	var code int32
-
-	reader := bytes.NewReader(message[4:8])
-	binary.Read(reader, binary.BigEndian, &code)
-
-	return code
+// ReadStartupMessage reads the startup message. The startup message is the same as a regular
+// message except it does not begin with a message type byte.
+func ReadStartupMessage(client io.Reader) ([]byte, error) {
+	return readMessage(client)
 }
 
-/*
- * Get the message type the provided message.
- *
- * message - the message
- */
-func GetMessageType(message []byte) byte {
-	return message[0]
+// ReadMessage accepts an incoming message. The first byte is the message type, the second int32
+// is the message length, and the rest of the bytes are the message body.
+func ReadMessage(client io.Reader) (messageType byte, message []byte, err error) {
+	var messageTypeBytes = make([]byte, 1)
+	if err = binary.Read(client, binary.BigEndian, &messageTypeBytes); err != nil {
+		return
+	}
+	messageType = messageTypeBytes[0]
+
+	message, err = readMessage(client)
+
+	return
 }
 
-/*
- * Get the message length of the startup message.
- *
- * message - the message
- */
-func GetStartupMessageLength(message []byte) int32 {
+func readMessage(client io.Reader) (message []byte, err error) {
 	var messageLength int32
 
-	reader := bytes.NewReader(message[0:4])
-	binary.Read(reader, binary.BigEndian, &messageLength)
-
-	return messageLength
-}
-
-/*
- * Get the message length of the provided message.
- *
- * message - the message
- */
-func GetMessageLength(message []byte) int32 {
-	var messageLength int32
-
-	reader := bytes.NewReader(message[1:5])
-	binary.Read(reader, binary.BigEndian, &messageLength)
-
-	return messageLength
-}
-
-/* IsAuthenticationOk
- *
- * Check an Authentication Message to determine if it is an AuthenticationOK
- * message.
- */
-func IsAuthenticationOk(message []byte) bool {
-	/*
-	 * If the message type is not an Authentication message, then short circuit
-	 * and return false.
-	 */
-	if GetMessageType(message) != AuthenticationMessageType {
-		return false
+	if err = binary.Read(client, binary.BigEndian, &messageLength); err != nil {
+		return
 	}
 
-	var messageValue int32
+	// Build a buffer of the appropriate size and fill it
+	message = make([]byte, messageLength-4)
+	if _, err = io.ReadFull(client, message); err != nil {
+		return
+	}
 
-	// Get the message length.
-	messageLength := GetMessageLength(message)
-
-	// Get the message value.
-	reader := bytes.NewReader(message[5:9])
-	binary.Read(reader, binary.BigEndian, &messageValue)
-
-	return (messageLength == 8 && messageValue == AuthenticationOk)
-}
-
-func GetTerminateMessage() []byte {
-	var buffer []byte
-	buffer = append(buffer, 'X')
-
-	//make msg len 1 for now
-	x := make([]byte, 4)
-	binary.BigEndian.PutUint32(x, uint32(4))
-	buffer = append(buffer, x...)
-	return buffer
+	return
 }

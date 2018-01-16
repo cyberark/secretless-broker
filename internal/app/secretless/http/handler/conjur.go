@@ -1,32 +1,42 @@
 package handler
 
 import (
-  "encoding/base64"
-  "fmt"
-  "net/http"
+	"encoding/base64"
+	"fmt"
+	"net/http"
+	"strconv"
 
-  "github.com/kgilpin/secretless/pkg/secretless/config"
+	"github.com/kgilpin/secretless/pkg/secretless/config"
 )
 
+// ConjurHandler applies Conjur authentication to the HTTP Authorization header.
 type ConjurHandler struct {
-  Config config.Handler
+	Config config.Handler
 }
 
-func (self ConjurHandler) Configuration() *config.Handler {
-  return &self.Config
+// Configuration provides the handler configuration.
+func (h ConjurHandler) Configuration() *config.Handler {
+	return &h.Config
 }
 
-func (self ConjurHandler) Authenticate(values map[string]string, r *http.Request) error {
-	accessToken := values["accessToken"]
-	if accessToken == "" {
+// Authenticate applies the "accessToken" credential to the Authorization header, following the
+// Conjur format:
+//   Token token="<base64(accessToken)>"
+func (h ConjurHandler) Authenticate(values map[string]string, r *http.Request) error {
+	var ok bool
+
+	accessToken, ok := values["accessToken"]
+	if !ok {
 		return fmt.Errorf("Conjur credential 'accessToken' is not available")
 	}
 
-  forceSSL, ok := values["forceSSL"]
-  if ok && forceSSL == "true" {
-    r.URL.Scheme = "https"
-  }
-  r.Header.Set("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString([]byte(accessToken))))
+	forceSSLStr, ok := values["forceSSL"]
+	forceSSL, err := strconv.ParseBool(forceSSLStr)
+	if ok && err == nil && forceSSL {
+		r.URL.Scheme = "https"
+	}
 
-  return nil
+	r.Header.Set("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString([]byte(accessToken))))
+
+	return nil
 }

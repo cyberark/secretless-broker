@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
 )
 
+// AWSHandler applies AWS signature authentication to the HTTP Authorization header.
 type AWSHandler struct {
 	Config config.Handler
 }
@@ -33,11 +34,14 @@ const (
 	emptyStringSHA256 = `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
 )
 
-func (self AWSHandler) Configuration() *config.Handler {
-	return &self.Config
+// Configuration provides the handler configuration.
+func (h AWSHandler) Configuration() *config.Handler {
+	return &h.Config
 }
 
-func (self AWSHandler) Authenticate(values map[string]string, r *http.Request) error {
+// Authenticate applies the "access_key_id", "secret_access_key" and optional "access_token" credentials
+// to the Authorization header, following the AWS signature format.
+func (h AWSHandler) Authenticate(values map[string]string, r *http.Request) error {
 	var err error
 	var amzDate time.Time
 
@@ -58,11 +62,11 @@ func (self AWSHandler) Authenticate(values map[string]string, r *http.Request) e
 		return err
 	}
 
-	var accessKeyId, secretAccessKey, accessToken string
+	var accessKeyID, secretAccessKey, accessToken string
 	var header string
 
-	accessKeyId = values["access_key_id"]
-	if accessKeyId == "" {
+	accessKeyID = values["access_key_id"]
+	if accessKeyID == "" {
 		return fmt.Errorf("AWS connection parameter 'access_key_id' is not available")
 	}
 	secretAccessKey = values["secret_access_key"]
@@ -71,7 +75,7 @@ func (self AWSHandler) Authenticate(values map[string]string, r *http.Request) e
 	}
 	accessToken = values["access_token"]
 
-	creds := credentials.NewStaticCredentials(accessKeyId, secretAccessKey, accessToken)
+	creds := credentials.NewStaticCredentials(accessKeyID, secretAccessKey, accessToken)
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -100,7 +104,7 @@ func (self AWSHandler) Authenticate(values map[string]string, r *http.Request) e
 	serviceName := matches[2]
 
 	signer := v4.NewSigner(creds)
-	if self.Config.Debug {
+	if h.Config.Debug {
 		signer.Debug = aws.LogDebugWithSigning
 		signer.Logger = aws.NewDefaultLogger()
 	}

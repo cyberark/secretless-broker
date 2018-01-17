@@ -1,4 +1,4 @@
-# pg_handler Development
+# Postgresql Handler Development
 
 ## Quick Test (Laptop environment)
 
@@ -19,19 +19,12 @@ ok      github.com/kgilpin/secretless/test/pg_handler   0.048s
 
 ## Local Environment (Laptop)
 
-These instructions show how to develop Secretless on you local machine. This way you can use niceties such as IDE features.
+These instructions show how to develop the Secretless PG handler on you local machine. This way you can use niceties such as IDE features.
 
 First you'll need a Postgres server. You can run one natively, or using Docker:
 
 ```sh-session
 $ docker-compose up -d pg
-```
-
-Then find out the port number:
-
-```sh-session
-$ docker-compose port pg 5432
-0.0.0.0:32771
 ```
 
 Now you can run `secretless` in a terminal:

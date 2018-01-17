@@ -4,7 +4,7 @@ services:
     image: postgres:9.4
 
   conjur:
-    image: cyberark/conjur:0.2.0-stable
+    image: cyberark/conjur:0.3.0-stable
     command: server -a dev -f /work/conjur.yml
     environment:
       DATABASE_URL: postgres://postgres@pg/postgres
@@ -33,7 +33,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: env http_proxy=http://secretless:80 go test ./test/conjur_provider
+    command: env http_proxy=http://secretless:80 go test ./test/conjur
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev

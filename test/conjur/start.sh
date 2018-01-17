@@ -2,28 +2,13 @@
 
 docker-compose build
 docker-compose up -d conjur
-
-function wait_for_conjur() {
-  for _ in $(seq 20); do
-    if ! docker-compose exec conjur curl -o /dev/null -fs -X OPTIONS http://localhost > /dev/null; then
-      echo .
-      sleep 2
-    else
-      break
-    fi
-  done
-
-  # Fail if the server isn't up yet
-  docker-compose exec conjur curl -o /dev/null -fs -X OPTIONS http://localhost > /dev/null
-}
-
-wait_for_conjur
+docker-compose exec conjur conjurctl wait
 
 admin_api_key=$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
 export CONJUR_AUTHN_API_KEY=$admin_api_key
 
 conjur_host_port=$(docker-compose port conjur 80)
-conjur_port=$(echo "$conjur_host_port" | go run parse_port.go)
+conjur_port=$(echo "$conjur_host_port" | go run ../util/parse_port.go)
 
 rm -rf tmp
 mkdir -p tmp

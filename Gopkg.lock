@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
   packages = ["aws","aws/awserr","aws/awsutil","aws/client/metadata","aws/credentials","aws/endpoints","aws/request","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/rest"]
-  revision = "00aba4fd6bb87ab518ee0857fea017804f40a6da"
-  version = "v1.12.58"
+  revision = "c13a879e75646fe750d21bcb05bf2cabea9791c1"
+  version = "v1.12.65"
 
 [[projects]]
   branch = "master"
@@ -14,10 +14,22 @@
   revision = "9fd32a8b3d3d3f9d43c341bfe098430e07609480"
 
 [[projects]]
+  name = "github.com/codegangsta/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
   name = "github.com/cyberark/conjur-api-go"
   packages = ["conjurapi","conjurapi/authn","conjurapi/response"]
   revision = "f1ab305f73250ebe61fb4f03792a6c55355bade1"
   version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/cyberark/summon"
+  packages = ["secretsyml"]
+  revision = "07326408eaedc574fa14bbf140e8edfe89ef345f"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -29,7 +41,7 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "444abdf920945de5d4a977b572bcc6c674d1e4eb"
+  revision = "9b73d051070fd9cbd1843f376fe094fc1e74ce3e"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -41,6 +53,12 @@
   packages = ["."]
   revision = "77f18212c9c7edc9bd6a33d383a7b545ce62f064"
   version = "v4.2.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -58,7 +76,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["curve25519","ed25519","ed25519/internal/edwards25519","ssh","ssh/agent"]
-  revision = "0fcca4842a8d74bfddc2c96a073bd2a4d2a7a2e8"
+  revision = "13931e22f9e72ea58bb73048bc752b48c6d4d4ac"
 
 [[projects]]
   branch = "v1"
@@ -75,6 +93,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d7f58a17e9dca7eb0dc98663fd420101a70d9a1a389fda7d3e0ce0f707af0554"
+  inputs-digest = "bbbe5a52dd199bc32d1ef504c8b041a4b9d6b9492354e1cbc3e662c4945c13cf"
   solver-name = "gps-cdcl"
   solver-version = 1

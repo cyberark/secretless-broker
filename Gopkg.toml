@@ -29,6 +29,10 @@
   name = "github.com/cyberark/conjur-api-go"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/cyberark/summon"
+
+[[constraint]]
   name = "github.com/smartystreets/goconvey"
   version = "1.6.3"
 

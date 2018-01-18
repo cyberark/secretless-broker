@@ -4,7 +4,7 @@ Start Conjur and load the policies:
 
 1. `$ docker-compose build`
 2. `$ docker-compose up -d pg conjur`
-3. `$ docker-compose logs conjur` to get the Admin API Key
+3. `$ docker-compose exec conjur conjurctl role retrieve-key dev:user:admin` to get the Admin API Key
 4. `$ docker-compose run --rm cli5`
 5. `cli5:/work# conjur authn login admin`
 5. `cli5:/work# conjur policy load root policy/conjur.yml`

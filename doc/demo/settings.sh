@@ -8,9 +8,10 @@ rds_endpoint_url=http://rds.amazonaws.com
 function find_db_endpoint() {
   db_instance_id=$(cat tmp/db_instance.json | jq -r .DBInstance.DBInstanceIdentifier)
 
-  local endpoint=$(aws rds describe-db-instances \
+  endpoint=$(aws rds describe-db-instances \
     --db-instance-identifier $db_instance_id \
     --endpoint-url $rds_endpoint_url | jq -r .DBInstances[0].Endpoint.Address)
+  local endpoint
 
   if [[ "$endpoint" = "null" ]]; then
     printf '.'

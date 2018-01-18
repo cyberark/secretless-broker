@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+# shellcheck disable=SC1091
 source ./settings.sh
 
 db_instance_id=$1
@@ -30,7 +31,6 @@ aws rds create-db-instance \
   --master-user-password $password \
   --allocated-storage 10 \
   --db-subnet-group-name $db_subnet_group_name | tee tmp/db_instance.json
-
 
 db_arn=$(cat tmp/db_instance.json | jq -r .DBInstance.DBInstanceArn)
 

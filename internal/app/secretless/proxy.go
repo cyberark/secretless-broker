@@ -18,16 +18,19 @@ import (
 	"github.com/kgilpin/secretless/pkg/secretless/config"
 )
 
+// Listener is an interface for listening in an abstract way.
 type Listener interface {
 	Listen()
 }
 
+// Proxy is the main struct of Secretless.
 type Proxy struct {
 	Config    config.Config
 	Providers []provider.Provider
 }
 
-func (self *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
+// Listen runs the listen loop for a specific Listener.
+func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 	var l net.Listener
 	var err error
 
@@ -61,13 +64,13 @@ func (self *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 		var listener Listener
 		switch protocol {
 		case "pg":
-			listener = &pg.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
+			listener = &pg.Listener{Config: listenerConfig, Listener: l, Providers: p.Providers, Handlers: p.Config.Handlers}
 		case "http":
-			listener = &http.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
+			listener = &http.Listener{Config: listenerConfig, Listener: l, Providers: p.Providers, Handlers: p.Config.Handlers}
 		case "ssh":
-			listener = &ssh.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
+			listener = &ssh.Listener{Config: listenerConfig, Listener: l, Providers: p.Providers, Handlers: p.Config.Handlers}
 		case "ssh-agent":
-			listener = &sshagent.Listener{Config: listenerConfig, Listener: l, Providers: self.Providers, Handlers: self.Config.Handlers}
+			listener = &sshagent.Listener{Config: listenerConfig, Listener: l, Providers: p.Providers, Handlers: p.Config.Handlers}
 		default:
 			panic(fmt.Sprintf("Unrecognized protocol '%s' on listener '%s'", protocol, listenerConfig.Name))
 		}
@@ -86,44 +89,47 @@ func LoadProvider(providerConfig config.Provider) (provider.Provider, error) {
 	if pt == "" {
 		pt = providerConfig.Name
 	}
+
+	// TODO: at this time, providers can't load configuration or credentials from each other
+	configuration, err := variable.Resolve([]provider.Provider{}, providerConfig.Configuration)
+	if err != nil {
+		return nil, err
+	}
+	credentials, err := variable.Resolve([]provider.Provider{}, providerConfig.Credentials)
+	if err != nil {
+		return nil, err
+	}
+
 	switch pt {
 	case "environment":
 		return provider.NewEnvironmentProvider(providerConfig.Name)
 	case "conjur":
-		// TODO: at this time, providers can't load configuration or credentials from each other
-		configuration, err := variable.Resolve([]provider.Provider{}, providerConfig.Configuration)
-		if err != nil {
-			return nil, err
-		}
-		credentials, err := variable.Resolve([]provider.Provider{}, providerConfig.Credentials)
-		if err != nil {
-			return nil, err
-		}
-
 		return provider.NewConjurProvider(providerConfig.Name, *configuration, *credentials)
+	case "vault":
+		return provider.NewVaultProvider(providerConfig.Name, *configuration, *credentials)
 	default:
 		return nil, fmt.Errorf("Unrecognized provider type '%s'", pt)
 	}
 }
 
-// Run is the main entrypoint to the secretless program.
-func (self *Proxy) Run() {
+// Run is the main loop for Secretless.
+func (p *Proxy) Run() {
 	var err error
 
-	self.Providers = make([]provider.Provider, len(self.Config.Providers))
+	p.Providers = make([]provider.Provider, len(p.Config.Providers))
 
-	for i := range self.Config.Providers {
-		self.Providers[i], err = LoadProvider(self.Config.Providers[i])
+	for i := range p.Config.Providers {
+		p.Providers[i], err = LoadProvider(p.Config.Providers[i])
 		if err != nil {
-			panic(fmt.Sprintf("Unable to load provider '%s' : %s", self.Config.Providers[i].Name, err.Error()))
+			panic(fmt.Sprintf("Unable to load provider '%s' : %s", p.Config.Providers[i].Name, err.Error()))
 		}
-		log.Printf("Loaded provider '%s'", self.Providers[i].Name())
+		log.Printf("Loaded provider '%s'", p.Providers[i].Name())
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(len(self.Config.Listeners))
-	for _, config := range self.Config.Listeners {
-		self.Listen(config, wg)
+	wg.Add(len(p.Config.Listeners))
+	for _, config := range p.Config.Listeners {
+		p.Listen(config, wg)
 	}
 	wg.Wait()
 }

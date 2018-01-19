@@ -23,12 +23,14 @@ func hasField(field string, params *map[string]string) (ok bool) {
 	return
 }
 
-// NewConjurProvider constructs a ConjurProvider. The configuration may include the following
+// NewConjurProvider constructs a ConjurProvider. configuration may include the following
 // keys:
 //  * url (required)
 //  * account (required)
 //  * version (optional; 4 or 5)
 //  * certFile (optional)
+//
+// credentials may contain the following:
 //  * username (optional; requires apiKey)
 //  * apiKey (optional; requires username)
 //  * tokenFile (optional; username and apiKey are not required if this is present)

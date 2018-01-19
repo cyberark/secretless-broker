@@ -1,0 +1,23 @@
+version: '2.1'
+services:
+  vault:
+    image: vault
+    ports:
+      - 8200
+    volumes:
+      - .:/work
+
+  test:
+    image: secretless-dev
+    command: go test ./test/vault_provider
+    environment:
+      VAULT_ADDR: http://vault:8200
+    volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless
+    depends_on:
+      - vault
+
+  dev:
+    image: secretless-dev
+    volumes:
+      - ../..:/go/src/github.com/kgilpin/secretless

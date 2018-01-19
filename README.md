@@ -43,10 +43,10 @@ $ go build ./cmd/secretless
 
 This will build a Docker image called `secretless` that you'll use in a minute.
 
-Now navigate to the directory `doc/quick`:
+Now navigate to the directory `doc/quick-demo`:
 
 ```sh-session
-$ cd doc/quick
+$ cd doc/quick-demo
 ```
 
 You will use Secretless to connect a client to a Postgresql database, without the client knowing the database password.

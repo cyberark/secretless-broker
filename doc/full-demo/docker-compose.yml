@@ -42,7 +42,6 @@ services:
     ports:
       - 80
     volumes:
-      - ./src/myapp:/go/src/myapp
       - pg_socket:/run/postgresql
     depends_on:
       - myapp_secretless
@@ -54,8 +53,9 @@ services:
   myapp_tls:
     build:
       context: src/proxy_tls
+    command: "proxy_tls.pem /root/proxy_tls.key myapp"
     volumes:
-      - ./src/proxy_tls:/go/src/proxy_tls
+      - ./secrets/proxy_tls.key:/root/proxy_tls.key
     depends_on:
       - myapp
 

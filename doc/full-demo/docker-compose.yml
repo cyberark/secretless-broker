@@ -1,0 +1,64 @@
+version: '3'
+services:
+  pg:
+    build:
+      context: src/pg
+
+  ansible_secretless:
+    image: secretless
+    volumes:
+      - ./secrets/id_insecure:/root/id_insecure
+      - ./src/ansible/secretless.yml:/config.yaml
+      - ssh_agent:/run/ssh-agent
+    depends_on:
+      - pg
+
+  ansible:
+    build:
+      context: src/ansible
+    environment:
+      SSH_AUTH_SOCK: /run/ssh-agent/.agent
+    volumes:
+      - ssh_agent:/run/ssh-agent
+      - ./src/ansible/hosts:/etc/ansible/hosts
+      - ./src/ansible/pg:/ansible/pg
+    depends_on:
+      - pg
+      - ansible_secretless
+
+  myapp_secretless:
+    image: secretless
+    environment:
+      DB_PASSWORD:
+    volumes:
+      - ./src/myapp/secretless.yml:/config.yaml
+      - pg_socket:/run/postgresql
+    depends_on:
+      - pg
+
+  myapp:
+    build:
+      context: src/myapp
+    ports:
+      - 80
+    volumes:
+      - ./src/myapp:/go/src/myapp
+      - pg_socket:/run/postgresql
+    depends_on:
+      - myapp_secretless
+
+  client:
+    build:
+      context: src/client
+
+  myapp_tls:
+    build:
+      context: src/proxy_tls
+    volumes:
+      - ./src/proxy_tls:/go/src/proxy_tls
+    depends_on:
+      - myapp
+
+volumes:
+  pg_socket:
+  ssh_agent:

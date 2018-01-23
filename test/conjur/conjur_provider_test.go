@@ -6,7 +6,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/kgilpin/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/internal/pkg/provider"
 )
 
 // TestConjur_Provider tests the ability of the ConjurProvider to provide a Conjur accessToken

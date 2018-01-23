@@ -4,7 +4,7 @@ import (
   "log"
   "os"
 
-  "github.com/kgilpin/secretless/internal/pkg/keychain"
+  "github.com/conjurinc/secretless/internal/pkg/keychain"
 )
 
 func main() {

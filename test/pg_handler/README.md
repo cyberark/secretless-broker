@@ -13,7 +13,7 @@ Run Secretless locally and execute tests:
 ```sh-session
 $ ./run_dev_test.sh
 ...
-ok      github.com/kgilpin/secretless/test/pg_handler   0.048s
+ok      github.com/conjurinc/secretless/test/pg_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
 ```
 

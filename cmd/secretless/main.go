@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kgilpin/secretless/pkg/secretless/config"
-	"github.com/kgilpin/secretless/internal/app/secretless"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/internal/app/secretless"
 )
 
 func main() {

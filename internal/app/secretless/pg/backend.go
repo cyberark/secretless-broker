@@ -5,8 +5,8 @@ import (
 	"net"
 	"strings"
 
-	"github.com/kgilpin/secretless/internal/app/secretless/pg/protocol"
-	"github.com/kgilpin/secretless/internal/app/secretless/variable"
+	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 )
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the

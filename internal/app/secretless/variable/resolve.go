@@ -3,8 +3,8 @@ package variable
 import (
   "fmt"
 
-  "github.com/kgilpin/secretless/pkg/secretless/config"
-  "github.com/kgilpin/secretless/internal/pkg/provider"
+  "github.com/conjurinc/secretless/pkg/secretless/config"
+  "github.com/conjurinc/secretless/internal/pkg/provider"
 )
 
 func Resolve(providers []provider.Provider, variables []config.Variable) (*map[string]string, error) {

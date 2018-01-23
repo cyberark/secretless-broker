@@ -23,7 +23,7 @@ func findProvider(providers []provider.Provider, secretSpec secretsyml.SecretSpe
 	if len(providers) == 1 {
 		return providers[0], nil
 	}
-	return nil, fmt.Errorf("findProviders is not implemented for multiple providers")
+	return nil, fmt.Errorf("Exactly 1 provider is required, got %d providers", len(providers))
 }
 
 // buildEnvironment builds the environment strings from the map of secrets values, along with the

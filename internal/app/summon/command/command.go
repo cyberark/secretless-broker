@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/kgilpin/secretless/internal/app/secretless"
 	"github.com/kgilpin/secretless/internal/pkg/provider"
 	"github.com/kgilpin/secretless/pkg/secretless/config"
+	yaml "gopkg.in/yaml.v1"
 )
 
 // The code in this file operates at the CLI level; it reads CLI arguments and will exit the process.
@@ -25,6 +27,7 @@ type Options struct {
 	Subs        map[string]string
 	ConfigFile  string
 	Environment string
+	Debug       bool
 }
 
 // VERSION is the semantic version.
@@ -57,6 +60,7 @@ var Action = func(c *cli.Context) {
 		YamlInline:  c.String("yaml"),
 		ConfigFile:  c.String("config"),
 		Subs:        convertSubsToMap(c.StringSlice("D")),
+		Debug:       c.Bool("debug"),
 	}
 
 	var err error
@@ -83,17 +87,26 @@ var Action = func(c *cli.Context) {
 func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err error) {
 	subcommand = &Subcommand{Args: options.Args}
 
+	var c config.Config
+
 	if options.ConfigFile != "" {
-		config := config.Configure(options.ConfigFile)
-		providers := make([]provider.Provider, len(config.Providers))
-		for i := range config.Providers {
-			if providers[i], err = secretless.LoadProvider(config.Providers[i]); err != nil {
-				err = fmt.Errorf("Unable to load provider '%s' : %s", config.Providers[i].Name, err.Error())
-				return
-			}
-		}
-		subcommand.Providers = providers
+		c = config.Configure(options.ConfigFile)
 	}
+
+	if options.Debug {
+		configStr, _ := yaml.Marshal(c)
+		log.Printf("Loaded configuration : %s", configStr)
+	}
+
+	providers := make([]provider.Provider, len(c.Providers))
+	for i := range c.Providers {
+		if providers[i], err = secretless.LoadProvider(c.Providers[i]); err != nil {
+			err = fmt.Errorf("Unable to load provider '%s' : %s", c.Providers[i].Name, err.Error())
+			return
+		}
+	}
+
+	subcommand.Providers = providers
 
 	var secrets secretsyml.SecretsMap
 

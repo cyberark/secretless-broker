@@ -11,9 +11,9 @@ var Flags = []cli.Flag{
 		Usage: "Specify section/environment to parse from secrets.yaml",
 	},
 	cli.StringFlag{
-		Name:  "c",
+		Name:  "config, c",
 		Value: "config.yaml",
-		Usage: "Path to config.yaml",
+		Usage: "Path to the provider configuration file",
 	},
 	cli.StringFlag{
 		Name:  "f",
@@ -28,5 +28,9 @@ var Flags = []cli.Flag{
 	cli.StringFlag{
 		Name:  "yaml",
 		Usage: "secrets.yml as a literal string",
+	},
+	cli.BoolFlag{
+		Name:  "debug, d",
+		Usage: "Print debug info during program execution",
 	},
 }

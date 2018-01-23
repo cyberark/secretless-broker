@@ -23,7 +23,6 @@
   vars:
     dbname: myapp
     dbuser: myapp
-    dbpassword: secret
 
   tasks:
   - name: ensure database is created

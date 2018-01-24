@@ -9,7 +9,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	yaml "gopkg.in/yaml.v1"
 
-	"github.com/kgilpin/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/internal/pkg/provider"
 )
 
 func TestProvider(t *testing.T) {

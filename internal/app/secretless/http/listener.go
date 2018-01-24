@@ -10,10 +10,10 @@ import (
   "crypto/tls"
   "crypto/x509"
 
-  "github.com/kgilpin/secretless/pkg/secretless/config"
-  "github.com/kgilpin/secretless/internal/app/secretless/variable"
-  handlerImpl "github.com/kgilpin/secretless/internal/app/secretless/http/handler"
-  "github.com/kgilpin/secretless/internal/pkg/provider"
+  "github.com/conjurinc/secretless/pkg/secretless/config"
+  "github.com/conjurinc/secretless/internal/app/secretless/variable"
+  handlerImpl "github.com/conjurinc/secretless/internal/app/secretless/http/handler"
+  "github.com/conjurinc/secretless/internal/pkg/provider"
 )
 
 type Handler interface {

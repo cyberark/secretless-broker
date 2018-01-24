@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/kgilpin/secretless/internal/app/secretless/pg/protocol"
-	"github.com/kgilpin/secretless/internal/pkg/provider"
-	"github.com/kgilpin/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
+	"github.com/conjurinc/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 // Listener listens for and handles new connections.

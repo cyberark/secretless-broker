@@ -4,7 +4,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/kgilpin/secretless/internal/pkg/keychain"
+	"github.com/conjurinc/secretless/internal/pkg/keychain"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

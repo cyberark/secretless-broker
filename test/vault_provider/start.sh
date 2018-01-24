@@ -28,7 +28,7 @@ function vault_cmd() {
 }
 
 vault_host_port=$(docker-compose port vault 8200)
-vault_port=$(echo "$vault_host_port" | go run ../conjur_provider/parse_port.go)
+vault_port=$(echo "$vault_host_port" | go run ../util/parse_port.go)
 
 rm -rf tmp
 mkdir -p tmp

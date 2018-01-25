@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kgilpin/secretless/internal/app/secretless"
-	"github.com/kgilpin/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/internal/app/secretless"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 	yaml "gopkg.in/yaml.v1"
 )
 

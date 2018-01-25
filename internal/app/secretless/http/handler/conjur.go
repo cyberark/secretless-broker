@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/kgilpin/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 // ConjurHandler applies Conjur authentication to the HTTP Authorization header.

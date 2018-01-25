@@ -9,13 +9,13 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/kgilpin/secretless/internal/app/secretless/http"
-	"github.com/kgilpin/secretless/internal/app/secretless/pg"
-	"github.com/kgilpin/secretless/internal/app/secretless/ssh"
-	"github.com/kgilpin/secretless/internal/app/secretless/sshagent"
-	"github.com/kgilpin/secretless/internal/app/secretless/variable"
-	"github.com/kgilpin/secretless/internal/pkg/provider"
-	"github.com/kgilpin/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/internal/app/secretless/http"
+	"github.com/conjurinc/secretless/internal/app/secretless/pg"
+	"github.com/conjurinc/secretless/internal/app/secretless/ssh"
+	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
+	"github.com/conjurinc/secretless/internal/app/secretless/variable"
+	"github.com/conjurinc/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 // Listener is an interface for listening in an abstract way.

@@ -29,7 +29,7 @@ services:
       dockerfile: Dockerfile.dev
     command: go test ./test/pg_handler
     volumes:
-      - ../..:/go/src/github.com/kgilpin/secretless
+      - ../..:/go/src/github.com/conjurinc/secretless
     depends_on:
       - secretless
 
@@ -40,4 +40,4 @@ services:
     environment:
       PG_PASSWORD: test
     volumes:
-      - ../..:/go/src/github.com/kgilpin/secretless
+      - ../..:/go/src/github.com/conjurinc/secretless

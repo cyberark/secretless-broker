@@ -24,7 +24,8 @@ type VaultProvider struct {
 //   * client_key
 //   * token
 func NewVaultProvider(name string, configuration, credentials map[string]string) (provider Provider, err error) {
-	config := vault.Config{}
+	config := vault.DefaultConfig()
+
 	var tls bool
 	var token string
 	tlsConfig := vault.TLSConfig{}
@@ -69,7 +70,7 @@ func NewVaultProvider(name string, configuration, credentials map[string]string)
 
 	var client *vault.Client
 
-	if client, err = vault.NewClient(&config); err != nil {
+	if client, err = vault.NewClient(config); err != nil {
 		return
 	}
 	client.SetToken(token)

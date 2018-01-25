@@ -5,8 +5,8 @@ import (
   "log"
   "os"
 
-  "github.com/kgilpin/secretless/internal/pkg/keychain"
-  "github.com/kgilpin/secretless/internal/pkg/provider"
+  "github.com/conjurinc/secretless/internal/pkg/keychain"
+  "github.com/conjurinc/secretless/internal/pkg/provider"
 )
 
 type Variable interface {

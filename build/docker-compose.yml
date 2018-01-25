@@ -5,7 +5,7 @@ services:
     build:
       context: ..
     volumes:
-      - .:/go/src/github.com/kgilpin/secretless
+      - .:/go/src/github.com/conjurinc/secretless
 
   secretless_dev:
     image: secretless-dev
@@ -13,4 +13,4 @@ services:
       context: ..
       dockerfile: Dockerfile.dev
     volumes:
-      - .:/go/src/github.com/kgilpin/secretless
+      - .:/go/src/github.com/conjurinc/secretless

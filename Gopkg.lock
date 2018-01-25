@@ -2,10 +2,10 @@
 
 
 [[projects]]
+  branch = "master"
   name = "github.com/aws/aws-sdk-go"
   packages = ["aws","aws/awserr","aws/awsutil","aws/client/metadata","aws/credentials","aws/endpoints","aws/request","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/rest"]
-  revision = "00aba4fd6bb87ab518ee0857fea017804f40a6da"
-  version = "v1.12.58"
+  revision = "ac0ef4d494dafa4d97ff83254182deecd7c83bcd"
 
 [[projects]]
   branch = "master"
@@ -20,6 +20,12 @@
   version = "v0.3.0"
 
 [[projects]]
+  name = "github.com/fatih/structs"
+  packages = ["."]
+  revision = "a720dfa8df582c51dee1b36feabb906bde1588bd"
+  version = "v1.0"
+
+[[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
   revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
@@ -27,9 +33,51 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  revision = "553a641470496b2327abcac10b36396bd98e45c9"
+
+[[projects]]
+  branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
   revision = "444abdf920945de5d4a977b572bcc6c674d1e4eb"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/errwrap"
+  packages = ["."]
+  revision = "7554cd9344cec97297fa6649b055a8c98c2a1e55"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/go-cleanhttp"
+  packages = ["."]
+  revision = "d5fe4b57a186c716b0e00b8c301cbd9b4182694d"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/go-multierror"
+  packages = ["."]
+  revision = "b7773ae218740a7be65057fc60b366a49b538a44"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/go-rootcerts"
+  packages = ["."]
+  revision = "6bb64b370b90e7ef1fa532be9e591a81c3493e00"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/hcl"
+  packages = [".","hcl/ast","hcl/parser","hcl/scanner","hcl/strconv","hcl/token","json/parser","json/scanner","json/token"]
+  revision = "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/vault"
+  packages = ["api","helper/compressutil","helper/jsonutil","helper/parseutil"]
+  revision = "bb45c063711817f61b3dae009e27724d75f2818c"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -41,6 +89,24 @@
   packages = ["."]
   revision = "77f18212c9c7edc9bd6a33d383a7b545ce62f064"
   version = "v4.2.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  revision = "b4575eea38cca1123ec2dc90c26529b5c5acfcff"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/sethgrid/pester"
+  packages = ["."]
+  revision = "760f8913c0483b776294e1bee43f1d687527127b"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -58,7 +124,19 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["curve25519","ed25519","ed25519/internal/edwards25519","ssh","ssh/agent"]
-  revision = "0fcca4842a8d74bfddc2c96a073bd2a4d2a7a2e8"
+  revision = "13931e22f9e72ea58bb73048bc752b48c6d4d4ac"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["http2","http2/hpack","idna","lex/httplex"]
+  revision = "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/text"
+  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  revision = "e19ae1496984b1c655b8044a65c0300a3c878dd3"
 
 [[projects]]
   branch = "v1"
@@ -75,6 +153,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d7f58a17e9dca7eb0dc98663fd420101a70d9a1a389fda7d3e0ce0f707af0554"
+  inputs-digest = "a973b8ed4bde5b41ea356b1f37830ffe91f13106b1fec1d241766733922c400a"
   solver-name = "gps-cdcl"
   solver-version = 1

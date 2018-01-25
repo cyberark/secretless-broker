@@ -22,17 +22,15 @@
 
 
 [[constraint]]
-  name = "github.com/aws/aws-sdk-go"
-
-[[constraint]]
   branch = "master"
-  name = "github.com/cyberark/conjur-api-go"
+  name = "github.com/aws/aws-sdk-go"
 
 [[constraint]]
   name = "github.com/smartystreets/goconvey"
   version = "1.6.3"
 
 [[constraint]]
+  branch = "master"
   name = "golang.org/x/crypto"
 
 [[constraint]]
@@ -40,4 +38,13 @@
   name = "gopkg.in/yaml.v1"
 
 [[constraint]]
+  branch = "v2"
   name = "gopkg.in/yaml.v2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cyberark/conjur-api-go"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/hashicorp/vault"

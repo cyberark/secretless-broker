@@ -6,9 +6,9 @@ import (
 
   "golang.org/x/crypto/ssh"
 
-  "github.com/kgilpin/secretless/internal/app/secretless/variable"
-  "github.com/kgilpin/secretless/internal/pkg/provider"
-  "github.com/kgilpin/secretless/pkg/secretless/config"
+  "github.com/conjurinc/secretless/internal/app/secretless/variable"
+  "github.com/conjurinc/secretless/internal/pkg/provider"
+  "github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 type ServerConfig struct {

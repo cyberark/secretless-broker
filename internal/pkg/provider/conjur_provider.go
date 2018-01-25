@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
@@ -35,7 +36,8 @@ func hasField(field string, params *map[string]string) (ok bool) {
 //  * apiKey (optional; requires username)
 //  * tokenFile (optional; username and apiKey are not required if this is present)
 func NewConjurProvider(name string, configuration, credentials map[string]string) (provider Provider, err error) {
-	config := conjurapi.Config{}
+	config := conjurapi.LoadConfig()
+
 	for k, v := range configuration {
 		switch k {
 		case "url":
@@ -55,13 +57,25 @@ func NewConjurProvider(name string, configuration, credentials map[string]string
 	}
 
 	var conjur *conjurapi.Client
-	var username, apiKey string
-	if hasField("username", &credentials) && hasField("apiKey", &credentials) {
+	var username, apiKey, tokenFile string
+
+	username = os.Getenv("CONJUR_AUTHN_LOGIN")
+	apiKey = os.Getenv("CONJUR_AUTHN_API_KEY")
+	tokenFile = os.Getenv("CONJUR_AUTHN_TOKEN_FILE")
+
+	if hasField("username", &credentials) {
 		username = credentials["username"]
+	}
+	if hasField("apiKey", &credentials) {
 		apiKey = credentials["apiKey"]
+	}
+	if hasField("tokenFile", &credentials) {
+		tokenFile = credentials["tokenFile"]
+	}
+
+	if username != "" && apiKey != "" {
 		conjur, err = conjurapi.NewClientFromKey(config, authn.LoginPair{username, apiKey})
-	} else if hasField("tokenFile", &credentials) {
-		tokenFile := credentials["tokenFile"]
+	} else if tokenFile != "" {
 		conjur, err = conjurapi.NewClientFromTokenFile(config, tokenFile)
 	} else {
 		err = fmt.Errorf("Unable to construct a Conjur API client from the provided credentials")

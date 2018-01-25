@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2'
 services:
   vault:
     image: vault
@@ -9,7 +9,7 @@ services:
 
   test:
     image: secretless-dev
-    command: go test ./test/vault_provider
+    command: go test -v ./test/vault_provider
     environment:
       VAULT_ADDR: http://vault:8200
     volumes:

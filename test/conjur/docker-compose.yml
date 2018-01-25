@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2'
 services:
   pg:
     image: postgres:9.4
@@ -33,7 +33,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: env http_proxy=http://secretless:80 go test ./test/conjur
+    command: env http_proxy=http://secretless:80 go test -v ./test/conjur
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev

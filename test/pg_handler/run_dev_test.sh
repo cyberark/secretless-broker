@@ -12,6 +12,6 @@ cd -
 
 sleep 2
 
-go test .
+go test -v .
 
 kill "$!"

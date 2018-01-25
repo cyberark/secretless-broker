@@ -59,6 +59,7 @@ services:
 
   myapp_secretless:
     image: secretless
+    command: "-debug"
     environment:
       CONJUR_AUTHN_API_KEY:
     volumes:

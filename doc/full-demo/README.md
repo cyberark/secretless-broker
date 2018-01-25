@@ -2,14 +2,11 @@
 
 ## Overview
 
-The purpose of this demo is to show how to use Secretless and Summon2 comprehensively to securely deploy a variety
-of applications in a vault-independent way.
+The purpose of this demo is to show how to use Secretless and Summon2 comprehensively to securely deploy a variety of applications in a vault-independent way.
 
 ## Secretless vs Summon2
 
-Secretless and Summon2 are two different approaches to delivering the secrets needed by an application. 
-Secretless is a more secure option, since it hides the secrets from the application code completely. However,
-Secretless cannot be used in all cases. For example:
+Secretless and Summon2 are two different approaches to delivering the secrets needed by an application. Secretless is a more secure option, since it hides the secrets from the application code completely. However, Secretless cannot be used in all cases. For example:
 
 * If an application requires secrets to be present on disk and the application code cannot be modified. Examples: `nginx` with SSL certificates. `postgresql` server with SSL client authentication.
 * If the application needs to connect to a backend service that is not yet implemented in Secretless. For example, a client application which connects to a database, and the database protocol is not implemented in Secretless.
@@ -17,6 +14,39 @@ Secretless cannot be used in all cases. For example:
 ## Vault-Independence
 
 Secretless and Summon2 give organizations the flexibility to securely deliver secrets from any vault to applications and infrastructure. In addition, Secretless and Summon2 can utilize multiple vaults simultaneously, and can switch seamlessly between vaults. 
+
+## Building and Running
+
+First you need to build the project, from the top-level project directory:
+
+```sh-session
+secretless $ ./build/build.sh
+```
+
+Then from this directory, build each scenario:
+
+```sh-session
+full-demo $ ./build.sh
+```
+
+Next, enter the scenario directory. For example, "plaintext":
+
+```sh-session
+full-demo $ cd plaintext
+plaintext $ 
+```
+
+In this directory you'll find a sequence of shell scripts. Run each script in sequence.
+
+```sh-session
+plaintext $ ./1_build_pg.sh
+...
+```
+
+```sh-session
+plaintext $ ./2_build_myapp.sh
+...
+```
 
 ## Demo Components
 
@@ -54,7 +84,7 @@ This app expects two environment variables: `SSL_CERT_FILE` and `SSL_KEY_FILE`. 
 
 `proxy_tls` runs a TLS listener and provides reverse proxying and SSL termination to the specified "host:port".
 
-## Plaintext operation
+## Secrets in Plaintext
 
 ### Ansible
 
@@ -71,7 +101,7 @@ This app expects two environment variables: `SSL_CERT_FILE` and `SSL_KEY_FILE`. 
 * **SSL_CERT_FILE** The certificate is built into the container.
 * **SSL_KEY_FILE** Provided as a volume-mounted file `/proxy_tls.key`.
 
-## Conjur operation
+## Secrets in Conjur
 
 ### Ansible
 

@@ -1,7 +1,5 @@
 #!/bin/bash -ex
 
-docker-compose pull conjur
-
 docker-compose up -d conjur
 docker-compose exec conjur conjurctl wait
 

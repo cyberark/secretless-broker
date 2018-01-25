@@ -7,8 +7,8 @@ import (
 
 	"github.com/cyberark/summon/secretsyml"
 
-	"github.com/kgilpin/secretless/internal/app/summon/command"
-	"github.com/kgilpin/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/internal/app/summon/command"
+	"github.com/conjurinc/secretless/internal/pkg/provider"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

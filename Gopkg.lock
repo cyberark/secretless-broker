@@ -104,6 +104,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/lib/pq"
+  packages = [".","oid"]
+  revision = "19c8e9ad00952ce0c64489b60e8df88bb16dd514"
+
+[[projects]]
+  branch = "master"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
@@ -165,6 +171,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c2d6755ca3556702f094e3fd9ec49e6a8a00e86b5a1307314154b1dffae8e74e"
+  inputs-digest = "3665bbb234dc0953fde19e598dc9ba77b53ecea007e2a46d18e03ddd04733ce9"
   solver-name = "gps-cdcl"
   solver-version = 1

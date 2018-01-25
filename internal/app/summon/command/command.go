@@ -10,10 +10,10 @@ import (
 	"syscall"
 
 	"github.com/codegangsta/cli"
+	"github.com/conjurinc/secretless/internal/app/secretless"
+	"github.com/conjurinc/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/cyberark/summon/secretsyml"
-	"github.com/kgilpin/secretless/internal/app/secretless"
-	"github.com/kgilpin/secretless/internal/pkg/provider"
-	"github.com/kgilpin/secretless/pkg/secretless/config"
 	yaml "gopkg.in/yaml.v1"
 )
 

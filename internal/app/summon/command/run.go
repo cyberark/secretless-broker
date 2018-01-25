@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/cyberark/summon/secretsyml"
-	"github.com/kgilpin/secretless/internal/pkg/provider"
 )
 
 // Subcommand defines the input needed to run Summon.

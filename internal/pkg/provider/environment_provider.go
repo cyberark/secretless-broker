@@ -23,9 +23,7 @@ func (p EnvironmentProvider) Name() string {
 	return p.name
 }
 
-// Value obtains a value by ID. The recognized IDs are:
-//	* "accessToken"
-// 	* Any Environment variable ID
+// Value obtains a value by ID. Any environment is a recognized ID.
 func (p EnvironmentProvider) Value(id string) (result []byte, err error) {
 	var found bool
 	envVar, found := os.LookupEnv(id)

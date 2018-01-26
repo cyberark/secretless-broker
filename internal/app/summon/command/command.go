@@ -9,10 +9,10 @@ import (
 	"syscall"
 
 	"github.com/codegangsta/cli"
-	"github.com/cyberark/summon/secretsyml"
 	"github.com/conjurinc/secretless/internal/app/secretless"
 	"github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/cyberark/summon/secretsyml"
 )
 
 // The code in this file operates at the CLI level; it reads CLI arguments and will exit the process.
@@ -68,12 +68,12 @@ var Action = func(c *cli.Context) {
 		os.Exit(127)
 	}
 
-	out, err = subcommand.Run()
+	err = subcommand.Run()
 
 	code, err := returnStatusOfError(err)
 
 	if err != nil {
-		fmt.Println(out + ": " + err.Error())
+		fmt.Println("Error in sub-command: " + err.Error())
 		os.Exit(127)
 	}
 
@@ -126,6 +126,7 @@ func convertSubsToMap(subs []string) map[string]string {
 }
 
 // TODO: I am not sure what this is for
+// It was brought over from the Summon code base.
 func returnStatusOfError(err error) (int, error) {
 	if eerr, ok := err.(*exec.ExitError); ok {
 		if ws, ok := eerr.Sys().(syscall.WaitStatus); ok {

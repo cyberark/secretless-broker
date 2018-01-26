@@ -8,14 +8,17 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+// DEVSHM is the location of a memory-mapped directory on Linux.
 const DEVSHM = "/dev/shm"
 
+// TempFactory creates new temp files, using heuristics to choose as secure a location
+// as possible.
 type TempFactory struct {
 	path  string
 	files []string
 }
 
-// Create a new temporary file factory.
+// NewTempFactory creates a new temporary file factory.
 // defer Cleanup() if you want the files removed.
 func NewTempFactory(path string) TempFactory {
 	if path == "" {
@@ -24,9 +27,9 @@ func NewTempFactory(path string) TempFactory {
 	return TempFactory{path: path}
 }
 
-// Default temporary file path
-// Returns /dev/shm if it is a directory, otherwise home dir of current user
-// Else returns the system default
+// DefaultTempPath is the path for temporary files.
+// Returns DEVSHM if it exists and is a directory. The home dir of current user
+// is the next preferred option. The final option is the OS temp dir.
 func DefaultTempPath() string {
 	fi, err := os.Stat(DEVSHM)
 	if err == nil && fi.Mode().IsDir() {
@@ -40,7 +43,7 @@ func DefaultTempPath() string {
 	return os.TempDir()
 }
 
-// Create a temp file with given value. Returns the path.
+// Push creates a temp file with given value. Returns the path.
 func (tf *TempFactory) Push(value string) string {
 	f, _ := ioutil.TempFile(tf.path, ".summon")
 	defer f.Close()
@@ -51,7 +54,7 @@ func (tf *TempFactory) Push(value string) string {
 	return name
 }
 
-// Remove the temporary files created with this factory.
+// Cleanup removes the temporary files created with this factory.
 func (tf *TempFactory) Cleanup() {
 	for _, file := range tf.files {
 		os.Remove(file)

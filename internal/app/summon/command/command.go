@@ -61,7 +61,6 @@ var Action = func(c *cli.Context) {
 
 	var err error
 	var subcommand *Subcommand
-	var out string
 
 	if subcommand, err = parseCommandArgsToSubcommand(commandArgs); err != nil {
 		fmt.Println(err.Error())

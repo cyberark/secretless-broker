@@ -1,7 +1,6 @@
 package command
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -66,8 +65,6 @@ func resolveVariables(providers []provider.Provider, secretsMap secretsyml.Secre
 //
 // It returns the command error, if any.
 func runSubcommand(command []string, env []string) (err error) {
-	var stdOut bytes.Buffer
-
 	runner := exec.Command(command[0], command[1:]...)
 	runner.Stdin = os.Stdin
 	runner.Stdout = os.Stdout

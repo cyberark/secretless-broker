@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 
@@ -15,6 +16,10 @@ type Subcommand struct {
 	Providers   []provider.Provider
 	SecretsMap  secretsyml.SecretsMap
 	TempFactory *TempFactory
+
+	// Set this to an io.Writer to capture stdout from the child process.
+	// By default, the child process stdout goes to this process' stdout.
+	Stdout io.Writer
 }
 
 func findProvider(providers []provider.Provider, secretSpec secretsyml.SecretSpec) (provider.Provider, error) {
@@ -64,10 +69,15 @@ func resolveVariables(providers []provider.Provider, secretsMap secretsyml.Secre
 // are also written to this process' stdout and stderr.
 //
 // It returns the command error, if any.
-func runSubcommand(command []string, env []string) (err error) {
+func (sc *Subcommand) runSubcommand(env []string) (err error) {
+	command := sc.Args
 	runner := exec.Command(command[0], command[1:]...)
 	runner.Stdin = os.Stdin
-	runner.Stdout = os.Stdout
+	if sc.Stdout != nil {
+		runner.Stdout = sc.Stdout
+	} else {
+		runner.Stdout = os.Stdout
+	}
 	runner.Stderr = os.Stderr
 	runner.Env = env
 
@@ -105,6 +115,6 @@ func (sc *Subcommand) Run() (err error) {
 		return
 	}
 
-	err = runSubcommand(sc.Args, append(os.Environ(), env...))
+	err = sc.runSubcommand(append(os.Environ(), env...))
 	return
 }

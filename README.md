@@ -271,7 +271,7 @@ Here is some performance data created by running [pgbench](https://www.postgresq
 Directly to the database:
 
 ```
-root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/conjurinc/secretless# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -288,7 +288,7 @@ tps = 1443.230144 (excluding connections establishing)
 Through the `secretless` proxy:
 
 ```
-root@566b7c06abcf:/go/src/github.com/kgilpin/secretless# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/conjurinc/secretless# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1

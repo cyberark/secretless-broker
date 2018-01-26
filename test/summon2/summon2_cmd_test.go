@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kgilpin/secretless/internal/app/summon/command"
+	"github.com/conjurinc/secretless/internal/app/summon/command"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

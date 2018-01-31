@@ -62,6 +62,7 @@ var Action = func(c *cli.Context) error {
 		return err
 	}
 
+	subcommand.Stdout = c.App.Writer
 	return subcommand.Run()
 }
 

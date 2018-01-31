@@ -97,14 +97,9 @@ func formatForEnv(key string, value string, spec secretsyml.SecretSpec, tempFact
 	return fmt.Sprintf("%s=%s", key, value)
 }
 
-func subcommandError(err error) error {
-	return fmt.Errorf("Error in sub-command: %s", err.Error())
-}
-
 // Run encapsulates the logic of Action without cli Context for easier testing
-func (sc *Subcommand) Run() (error) {
+func (sc *Subcommand) Run() (err error) {
 	var env []string
-	var err error
 	var secrets map[string]string
 
 	if sc.TempFactory == nil {
@@ -114,10 +109,10 @@ func (sc *Subcommand) Run() (error) {
 	defer sc.TempFactory.Cleanup()
 
 	if secrets, err = resolveVariables(sc.Providers, sc.SecretsMap); err != nil {
-		return subcommandError(err)
+		return
 	}
 	if env, err = buildEnvironment(secrets, sc.SecretsMap, sc.TempFactory); err != nil {
-		return subcommandError(err)
+		return
 	}
 
 	return sc.runSubcommand(append(os.Environ(), env...))

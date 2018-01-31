@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"strings"
 	"testing"
@@ -9,6 +8,8 @@ import (
 	"github.com/conjurinc/secretless/internal/app/summon/command"
 
 	. "github.com/smartystreets/goconvey/convey"
+	"os"
+	"io"
 )
 
 // TestSummon2_Run tests Summon at the CLI level, including argument parsing etc.
@@ -19,15 +20,21 @@ func TestSummon2_Cmd(t *testing.T) {
 		secretsDescriptor := `
 DB_PASSWORD: literal-password
 `
+		oldStdout := os.Stdout
+		r, w, _ := os.Pipe()
+		os.Stdout = w
+
 		args := []string{"summon2", "--yaml", secretsDescriptor, "env"}
+		err = command.RunCLI(args, nil)
 
-		var buffer bytes.Buffer
-		writer := bufio.NewWriter(&buffer)
+		w.Close()
+		os.Stdout = oldStdout
 
-		err = command.RunCLI(args, writer)
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		r.Close()
 
-		writer.Flush()
-		output := string(buffer.Bytes())
+		output := string(buf.Bytes())
 		lines := strings.Split(output, "\n")
 
 		So(err, ShouldBeNil)

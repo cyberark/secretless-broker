@@ -5,11 +5,32 @@ import (
 	"os"
 
 	"github.com/conjurinc/secretless/internal/app/summon/command"
+	"os/exec"
+	"syscall"
 )
 
 func main() {
 	if err := command.RunCLI(os.Args, os.Stdout); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(-1)
+		code, err := returnStatusOfError(err)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(127)
+		}
+
+		os.Exit(code)
 	}
+}
+
+// TODO: I am not sure what this is for
+// It was brought over from the Summon code base.
+func returnStatusOfError(err error) (int, error) {
+	if eerr, ok := err.(*exec.ExitError); ok {
+		if ws, ok := eerr.Sys().(syscall.WaitStatus); ok {
+			if ws.Exited() {
+				return ws.ExitStatus(), nil
+			}
+		}
+	}
+	return 0, err
 }

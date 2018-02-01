@@ -115,6 +115,5 @@ func (sc *Subcommand) Run() (err error) {
 		return
 	}
 
-	err = sc.runSubcommand(append(os.Environ(), env...))
-	return
+	return sc.runSubcommand(append(os.Environ(), env...))
 }

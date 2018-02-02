@@ -83,7 +83,8 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 	}
 }
 
-func loadProvider(providerConfig config.Provider) (provider.Provider, error) {
+// LoadProvider loads a provider from its configuration.
+func LoadProvider(providerConfig config.Provider) (provider.Provider, error) {
 	pt := providerConfig.Type
 	if pt == "" {
 		pt = providerConfig.Name
@@ -109,6 +110,8 @@ func loadProvider(providerConfig config.Provider) (provider.Provider, error) {
 	}
 
 	switch pt {
+	case "environment":
+		return provider.NewEnvironmentProvider(providerConfig.Name)
 	case "vault":
 		return provider.NewVaultProvider(providerConfig.Name, *configuration, *credentials)
 	case "conjur":
@@ -118,14 +121,14 @@ func loadProvider(providerConfig config.Provider) (provider.Provider, error) {
 	}
 }
 
-// Run is the main loop for Secretless.
+// Run is the main entrypoint to the secretless program.
 func (p *Proxy) Run() {
 	var err error
 
 	p.Providers = make([]provider.Provider, len(p.Config.Providers))
 
 	for i := range p.Config.Providers {
-		p.Providers[i], err = loadProvider(p.Config.Providers[i])
+		p.Providers[i], err = LoadProvider(p.Config.Providers[i])
 		if err != nil {
 			panic(fmt.Sprintf("Unable to load provider '%s' : %s", p.Config.Providers[i].Name, err.Error()))
 		}

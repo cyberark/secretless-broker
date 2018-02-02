@@ -14,10 +14,22 @@
   revision = "9fd32a8b3d3d3f9d43c341bfe098430e07609480"
 
 [[projects]]
+  name = "github.com/codegangsta/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
   name = "github.com/cyberark/conjur-api-go"
   packages = ["conjurapi","conjurapi/authn","conjurapi/response"]
   revision = "f1ab305f73250ebe61fb4f03792a6c55355bade1"
   version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/cyberark/summon"
+  packages = ["secretsyml"]
+  revision = "07326408eaedc574fa14bbf140e8edfe89ef345f"
 
 [[projects]]
   name = "github.com/fatih/structs"
@@ -153,6 +165,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a973b8ed4bde5b41ea356b1f37830ffe91f13106b1fec1d241766733922c400a"
+  inputs-digest = "c2d6755ca3556702f094e3fd9ec49e6a8a00e86b5a1307314154b1dffae8e74e"
   solver-name = "gps-cdcl"
   solver-version = 1

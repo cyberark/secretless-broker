@@ -6,7 +6,7 @@ exit_status="0"
 for dir in */; do
   cd "$dir"
   if [[ -f start.sh ]]; then
-    ./stop.sh || true
+    [[ ! -f ./stop.sh ]] || ./stop.sh || true
     ./start.sh
     set +e
     ./test.sh
@@ -15,7 +15,7 @@ for dir in */; do
       exit_status="$last_status"
     fi
     set -e
-    ./stop.sh
+    [[ ! -f ./stop.sh ]] || ./stop.sh
   fi
   cd ..
 done

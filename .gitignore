@@ -1,9 +1,10 @@
 debug
+debug.*
 /vendor
 /doc/godoc
 /secretless
 /showpw
 run
 tmp
-/bin/darwin/amd64/secretless
-/bin/linux/amd64/secretless
+/bin/**/secretless
+/bin/**/summon2

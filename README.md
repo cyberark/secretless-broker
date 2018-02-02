@@ -30,23 +30,40 @@ When the client connects to a backend resource through Secretless:
 
 **Prerequisites**
 
-* Docker
+* **Docker** You need Docker to run the examples and the tests.
+
+## Walkthrough
 
 At this time, you'll need to build Secretless in order to use it. 
 
-Clone `https://github.com/conjurinc/secretless` and then run `go build`:
+First, clone `https://github.com/conjurinc/secretless`. If you're new to Go, be aware that Go is very selective about
+where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
+is `~/go`. Projects should be checked out to `$GOPATH/src`. This is required by Go in order for dependencies to resolve
+properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless`.
+
+Now you can build Secretless. First fetch all the dependencies:
 
 ```sh-session
-$ dep ensure
-$ go build ./cmd/secretless
+~ $ cd $GOPATH/src/github.com/conjurinc/secretless
+secretless $ dep ensure
 ```
 
-This will build a Docker image called `secretless` that you'll use in a minute.
+Now build for your platform. On Linux:
+
+```sh-session
+secretless $ ./build/build.sh
+```
+
+On OS X:
+
+```sh-session
+secretless $ ./build/build_darwin.sh
+```
 
 Now navigate to the directory `doc/quick`:
 
 ```sh-session
-$ cd doc/quick
+secretless $ cd doc/quick
 ```
 
 You will use Secretless to connect a client to a Postgresql database, without the client knowing the database password.
@@ -237,7 +254,9 @@ In all cases, the operating system provides security between the client and Secr
 
 # Testing
 
-You'll need Docker to run the test cases.
+**Prerequisites**
+
+* **Docker** You need Docker to run the tests.
 
 Build the project by running:
 
@@ -340,17 +359,4 @@ tps = 15.822442 (excluding connections establishing)
 14% fewer tps (excluding establishing connections) via Secretless.
 
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios. 
-
-# Continuous Integration
-
-**Prerequisites**
-
-* Docker
-* Linux or OS X environment
-
-The [./build](build) directory contains CI scripts:
-
-* **build.sh** Builds the Go binaries. Expects to run in a Linux environment. 
-* **build_darwin.sh** Builds the Go binaries. Expects to run in an OS X environment. 
-* **test.sh** Tests Secretless by looping through each of the `./test/*` subdirectories. Expects the project to have been already built.
 

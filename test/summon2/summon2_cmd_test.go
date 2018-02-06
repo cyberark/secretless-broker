@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"strings"
 	"testing"
@@ -9,9 +8,10 @@ import (
 	"github.com/conjurinc/secretless/internal/app/summon/command"
 
 	. "github.com/smartystreets/goconvey/convey"
+	"bufio"
 )
 
-// TestSummon2_Run tests Summon at the level, including argument parsing etc.
+// TestSummon2_Run tests Summon at the CLI level, including argument parsing etc.
 func TestSummon2_Cmd(t *testing.T) {
 	var err error
 

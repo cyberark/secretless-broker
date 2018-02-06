@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/aws/aws-sdk-go"
   packages = ["aws","aws/awserr","aws/awsutil","aws/client/metadata","aws/credentials","aws/endpoints","aws/request","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/rest"]
-  revision = "42f4ce615286af6026c8aac43a7af02457358ef6"
+  revision = "ac0ef4d494dafa4d97ff83254182deecd7c83bcd"
 
 [[projects]]
   branch = "master"
@@ -53,7 +53,7 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "178c176a91fe05e3e6c58fa5c989bad19e6cdcb3"
+  revision = "444abdf920945de5d4a977b572bcc6c674d1e4eb"
 
 [[projects]]
   branch = "master"
@@ -89,7 +89,7 @@
   branch = "master"
   name = "github.com/hashicorp/vault"
   packages = ["api","helper/compressutil","helper/jsonutil","helper/parseutil"]
-  revision = "1e78dfb8ac6560f7f688202d180a4443ab7ee0ca"
+  revision = "bb45c063711817f61b3dae009e27724d75f2818c"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"

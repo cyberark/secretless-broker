@@ -83,8 +83,14 @@ func (p VaultProvider) Name() string {
 	return p.name
 }
 
-// Value obtains a value by ID. The recognized IDs are:
-//	* TODO
+// Value obtains a value by id. Any secret which is stored in the vault is recognized.
+// The datatype returned by Vault is interface{}, which makes it somewhat complex to obtain
+// a specific data item from a Vault secret. Currently, the secret data in Vault is required
+// to be a Map which contains a "password" entry.
+//
+// This restriction/convention will be revisited and revised soon.
+//
+// See https://github.com/conjurinc/secretless/issues/6
 func (p VaultProvider) Value(id string) (value []byte, err error) {
 	var secret *vault.Secret
 	if secret, err = p.client.Logical().Read(id); err != nil {

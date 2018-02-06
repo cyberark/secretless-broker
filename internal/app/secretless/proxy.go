@@ -90,7 +90,18 @@ func LoadProvider(providerConfig config.Provider) (provider.Provider, error) {
 		pt = providerConfig.Name
 	}
 
-	// TODO: at this time, providers can't load configuration or credentials from each other
+	// At this time, providers can't load configuration or credentials from each other
+	//
+	// This is a weird artifact of the fact that some "providers" (Environment, Keychain) aren't
+	// currently implemented as Providers. In a future commit, the provider-ish code in
+	// variable.go will be converted into Providers and then this section here will be reconciled
+	// with that.
+	//
+	// The first argument here is an empty array because currently, providers can't use other
+	// providers to resolve their configuration and credential data. This may be revisited in
+	// the future as well.
+	//
+	// See https://github.com/conjurinc/secretless/issues/5
 	configuration, err := variable.Resolve([]provider.Provider{}, providerConfig.Configuration)
 	if err != nil {
 		return nil, err
@@ -112,7 +123,7 @@ func LoadProvider(providerConfig config.Provider) (provider.Provider, error) {
 	}
 }
 
-// Run is the main loop for Secretless.
+// Run is the main entrypoint to the secretless program.
 func (p *Proxy) Run() {
 	var err error
 

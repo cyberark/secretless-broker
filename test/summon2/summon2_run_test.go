@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -50,17 +52,24 @@ func makeEmptySecretsMap() (secretsMap secretsyml.SecretsMap) {
 	return
 }
 
+func captureStdoutFromSubcommand(sc *command.Subcommand) *bytes.Buffer {
+	var b bytes.Buffer
+	sc.Stdout = bufio.NewWriter(&b)
+	return &b
+}
+
 // TestSummon2_Run tests the Command.Run capability. This is a lower level than the CLI.
 func TestSummon2_Run(t *testing.T) {
-	var stdout string
+	var stdout *bytes.Buffer
 	var err error
 
 	Convey("Provides secrets to a subprocess environment", t, func() {
 		providers := []provider.Provider{makePasswordProvider()}
 		subcommand := command.Subcommand{Args: []string{"env"}, Providers: providers, SecretsMap: makeDBPasswordSecretsMap()}
+		stdout = captureStdoutFromSubcommand(&subcommand)
 
-		stdout, err = subcommand.Run()
-		lines := strings.Split(stdout, "\n")
+		err = subcommand.Run()
+		lines := strings.Split(string(stdout.Bytes()), "\n")
 
 		So(err, ShouldBeNil)
 		So(lines, ShouldContain, "DB_PASSWORD=secret")
@@ -73,9 +82,10 @@ func TestSummon2_Run(t *testing.T) {
 
 		providers := []provider.Provider{makeEmptyProvider()}
 		subcommand := command.Subcommand{Args: []string{"env"}, Providers: providers, SecretsMap: secretsMap}
+		stdout = captureStdoutFromSubcommand(&subcommand)
 
-		stdout, err = subcommand.Run()
-		lines := strings.Split(stdout, "\n")
+		err = subcommand.Run()
+		lines := strings.Split(string(stdout.Bytes()), "\n")
 
 		So(err, ShouldBeNil)
 		So(lines, ShouldContain, "DB_PASSWORD=literal-secret")
@@ -85,9 +95,8 @@ func TestSummon2_Run(t *testing.T) {
 		providers := []provider.Provider{makeEmptyProvider()}
 		subcommand := command.Subcommand{Args: []string{"env"}, Providers: providers, SecretsMap: makeDBPasswordSecretsMap()}
 
-		stdout, err = subcommand.Run()
+		err = subcommand.Run()
 
-		So(stdout, ShouldEqual, "")
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, "Value 'db/password' not found in MapProvider")
 	})
@@ -96,9 +105,8 @@ func TestSummon2_Run(t *testing.T) {
 		providers := []provider.Provider{makeEmptyProvider()}
 		subcommand := command.Subcommand{Args: []string{"foobar"}, Providers: providers, SecretsMap: makeEmptySecretsMap()}
 
-		stdout, err = subcommand.Run()
+		err = subcommand.Run()
 
-		So(stdout, ShouldEqual, "")
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, `exec: "foobar": executable file not found in $PATH`)
 	})

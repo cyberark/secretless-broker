@@ -1,3 +1,4 @@
+# 2.1 required for healthcheck
 version: '2.1'
 services:
   pg:
@@ -27,7 +28,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: go test ./test/pg_handler
+    command: go test -v ./test/pg_handler
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
     depends_on:

@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
-	"os/exec"
 	"strings"
-	"syscall"
 
 	"github.com/codegangsta/cli"
 	"github.com/conjurinc/secretless/internal/app/secretless"
@@ -47,10 +44,9 @@ func RunCLI(args []string, writer io.Writer) error {
 }
 
 // Action is the main entry point for the CLI command.
-var Action = func(c *cli.Context) {
+var Action = func(c *cli.Context) error {
 	if !c.Args().Present() {
-		fmt.Println("Enter a subprocess to run!")
-		os.Exit(127)
+		return fmt.Errorf("Enter a subprocess to run!")
 	}
 
 	commandArgs := &Options{
@@ -65,23 +61,13 @@ var Action = func(c *cli.Context) {
 
 	var err error
 	var subcommand *Subcommand
-	var out string
 
 	if subcommand, err = parseCommandArgsToSubcommand(commandArgs); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(127)
+		return err
 	}
 
-	out, err = subcommand.Run()
-
-	code, err := returnStatusOfError(err)
-
-	if err != nil {
-		fmt.Println(out + ": " + err.Error())
-		os.Exit(127)
-	}
-
-	os.Exit(code)
+	subcommand.Stdout = c.App.Writer
+	return subcommand.Run()
 }
 
 func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err error) {
@@ -136,16 +122,4 @@ func convertSubsToMap(subs []string) map[string]string {
 		out[key] = val
 	}
 	return out
-}
-
-// TODO: I am not sure what this is for
-func returnStatusOfError(err error) (int, error) {
-	if eerr, ok := err.(*exec.ExitError); ok {
-		if ws, ok := eerr.Sys().(syscall.WaitStatus); ok {
-			if ws.Exited() {
-				return ws.ExitStatus(), nil
-			}
-		}
-	}
-	return 0, err
 }

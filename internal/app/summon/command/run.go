@@ -1,7 +1,6 @@
 package command
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -17,6 +16,10 @@ type Subcommand struct {
 	Providers   []provider.Provider
 	SecretsMap  secretsyml.SecretsMap
 	TempFactory *TempFactory
+
+	// Set this to an io.Writer to capture stdout from the child process.
+	// By default, the child process stdout goes to this process' stdout.
+	Stdout io.Writer
 }
 
 func findProvider(providers []provider.Provider, secretSpec secretsyml.SecretSpec) (provider.Provider, error) {
@@ -62,21 +65,23 @@ func resolveVariables(providers []provider.Provider, secretsMap secretsyml.Secre
 }
 
 // runSubcommand executes a command with arguments in the context
-// of an environment populated with secret values.
-//
-// It returns the command stdout, and sderr if any. The command stdout and stderr
+// of an environment populated with secret values. The command stdout and stderr
 // are also written to this process' stdout and stderr.
-func runSubcommand(command []string, env []string) (stdout string, err error) {
-	var stdOut bytes.Buffer
-
+//
+// It returns the command error, if any.
+func (sc *Subcommand) runSubcommand(env []string) (err error) {
+	command := sc.Args
 	runner := exec.Command(command[0], command[1:]...)
 	runner.Stdin = os.Stdin
-	runner.Stdout = io.MultiWriter(os.Stdout, &stdOut)
+	if sc.Stdout != nil {
+		runner.Stdout = sc.Stdout
+	} else {
+		runner.Stdout = os.Stdout
+	}
 	runner.Stderr = os.Stderr
 	runner.Env = env
 
 	err = runner.Run()
-	stdout = stdOut.String()
 
 	return
 }
@@ -93,7 +98,7 @@ func formatForEnv(key string, value string, spec secretsyml.SecretSpec, tempFact
 }
 
 // Run encapsulates the logic of Action without cli Context for easier testing
-func (sc *Subcommand) Run() (stdout string, err error) {
+func (sc *Subcommand) Run() (err error) {
 	var env []string
 	var secrets map[string]string
 
@@ -110,6 +115,5 @@ func (sc *Subcommand) Run() (stdout string, err error) {
 		return
 	}
 
-	stdout, err = runSubcommand(sc.Args, append(os.Environ(), env...))
-	return
+	return sc.runSubcommand(append(os.Environ(), env...))
 }

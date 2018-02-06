@@ -58,10 +58,10 @@ type Config struct {
 	Handlers  []Handler
 }
 
-func Configure(fileName string) Config {
+// Configure loads Config data from the specified filename. The file must
+// exist, or the program with panic.
+func Configure(fileName string) (config Config) {
 	var err error
-
-	config := Config{}
 
 	buffer, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -85,5 +85,5 @@ func Configure(fileName string) Config {
 		}
 	}
 
-	return config
+	return
 }

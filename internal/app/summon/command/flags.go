@@ -12,7 +12,6 @@ var Flags = []cli.Flag{
 	},
 	cli.StringFlag{
 		Name:  "config, c",
-		Value: "config.yaml",
 		Usage: "Path to the provider configuration file",
 	},
 	cli.StringFlag{

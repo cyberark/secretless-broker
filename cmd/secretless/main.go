@@ -16,7 +16,11 @@ func main() {
 	debugSwitch := flag.Bool("debug", false, "Print debug information")
 	flag.Parse()
 
-	configuration := config.Configure(*configFile)
+	var configuration config.Config
+	if *configFile != "" {
+		configuration = config.Configure(*configFile)
+	}
+
 	if *debugSwitch {
 		configStr, _ := yaml.Marshal(configuration)
 		log.Printf("Loaded configuration : %s", configStr)
@@ -24,6 +28,7 @@ func main() {
 			handler.Debug = true
 		}
 	}
+
 	p := secretless.Proxy{Config: configuration}
 	p.Run()
 }

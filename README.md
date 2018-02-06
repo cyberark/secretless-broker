@@ -1,6 +1,7 @@
 - [Secretless](#secretless)
 - [Why Secretless?](#why-secretless)
 - [Quick Start](#quick-start)
+  - [Walkthrough](#walkthrough)
 - [Configuring Secretless](#configuring-secretless)
   - [Listeners](#listeners)
   - [Providers](#providers)
@@ -8,7 +9,6 @@
 - [Client Application Configuration](#client-application-configuration)
 - [Testing](#testing)
 - [Performance](#performance)
-- [Continuous Integration](#continuous-integration)
 
 # Secretless
 
@@ -60,7 +60,7 @@ On OS X:
 secretless $ ./build/build_darwin.sh
 ```
 
-Now navigate to the directory `doc/quick`:
+Now navigate to the directory `doc/quick-demo`:
 
 ```sh-session
 secretless $ cd doc/quick

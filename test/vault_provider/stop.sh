@@ -1,1 +1,1 @@
-../conjur/stop.sh
+../util/stop.sh

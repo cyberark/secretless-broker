@@ -90,6 +90,8 @@ func LoadProvider(providerConfig config.Provider) (provider.Provider, error) {
 		pt = providerConfig.Name
 	}
 
+	// At this time, providers can't load configuration or credentials from each other
+	//
 	// This is a weird artifact of the fact that some "providers" (Environment, Keychain) aren't
 	// currently implemented as Providers. In a future commit, the provider-ish code in
 	// variable.go will be converted into Providers and then this section here will be reconciled
@@ -112,10 +114,10 @@ func LoadProvider(providerConfig config.Provider) (provider.Provider, error) {
 	switch pt {
 	case "environment":
 		return provider.NewEnvironmentProvider(providerConfig.Name)
-	case "vault":
-		return provider.NewVaultProvider(providerConfig.Name, *configuration, *credentials)
 	case "conjur":
 		return provider.NewConjurProvider(providerConfig.Name, *configuration, *credentials)
+	case "vault":
+		return provider.NewVaultProvider(providerConfig.Name, *configuration, *credentials)
 	default:
 		return nil, fmt.Errorf("Unrecognized provider type '%s'", pt)
 	}

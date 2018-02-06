@@ -1,6 +1,6 @@
 debug
 debug.*
-/vendor
+vendor
 /doc/godoc
 /secretless
 /showpw
@@ -8,3 +8,6 @@ run
 tmp
 /bin/**/secretless
 /bin/**/summon2
+*.retry
+doc/**/proxy_tls
+doc/**/myapp

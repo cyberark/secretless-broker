@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/conjurinc/secretless/internal/app/summon/command"
 	"os/exec"
 	"syscall"
+
+	"github.com/conjurinc/secretless/internal/app/summon/command"
 )
 
 func main() {

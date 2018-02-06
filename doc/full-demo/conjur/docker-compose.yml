@@ -1,0 +1,106 @@
+version: '3'
+services:
+  conjur_pg:
+    image: postgres:9.5
+
+  conjur:
+    image: cyberark/conjur:0.3.0-stable
+    command: server -a dev -f /policy.yml
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres@conjur_pg/postgres
+      CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
+    volumes:
+      - ./conjur-policy.yml:/policy.yml
+    depends_on:
+      - conjur_pg
+
+  conjur_client:
+    image: conjurinc/cli5
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY:
+    depends_on:
+      - conjur
+
+  pg:
+    build:
+      context: ../src/pg
+
+  ansible_secretless:
+    image: secretless
+    command: "-debug"
+    environment:
+      CONJUR_AUTHN_API_KEY:
+    volumes:
+      - ./secretless_ansible.yml:/config.yaml
+      - ssh_agent:/run/ssh-agent
+    depends_on:
+      - conjur
+      - pg
+
+  ansible:
+    build:
+      context: ../src/ansible
+    entrypoint: [ "/summon2", "-config", "/config.yaml", "-f", "/secrets.yml" ]
+    environment:
+      SSH_AUTH_SOCK: /run/ssh-agent/.agent
+      CONJUR_AUTHN_API_KEY:
+    volumes:
+      - ssh_agent:/run/ssh-agent
+      - ../../../bin/linux/amd64/summon2:/summon2
+      - ./secretless_ansible.yml:/config.yaml
+      - ./ansible_secrets.yml:/secrets.yml
+    depends_on:
+      - pg
+      - ansible_secretless
+
+  myapp_secretless:
+    image: secretless
+    command: "-debug"
+    environment:
+      CONJUR_AUTHN_API_KEY:
+    volumes:
+      - ./secretless_myapp.yml:/config.yaml
+      - pg_socket:/run/postgresql
+    depends_on:
+      - conjur
+      - pg
+
+  myapp:
+    build:
+      context: ../src/myapp
+    environment:
+      DB_HOST: /var/run/postgresql
+    ports:
+      - 80
+    volumes:
+      - pg_socket:/run/postgresql
+    depends_on:
+      - myapp_secretless
+
+  client:
+    build:
+      context: ../src/client
+
+  myapp_tls:
+    build:
+      context: ../src/proxy_tls
+    entrypoint: [ "/summon2", "-config", "/config.yaml", "-f", "/secrets.yml" ]
+    environment:
+      SSL_CERT_FILE: ./proxy_tls.pem
+      CONJUR_AUTHN_API_KEY:
+    command: "./proxy_tls myapp"
+    volumes:
+      - ../../../bin/linux/amd64/summon2:/summon2
+      - ./secretless_myapp_tls.yml:/config.yaml
+      - ./myapp_tls_secrets.yml:/secrets.yml
+    depends_on:
+      - conjur
+      - myapp
+
+volumes:
+  pg_socket:
+  ssh_agent:

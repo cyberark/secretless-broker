@@ -33,6 +33,9 @@ services:
     image: secretless
     command: "-debug"
     environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: host/ansible
       CONJUR_AUTHN_API_KEY:
     volumes:
       - ./secretless_ansible.yml:/config.yaml
@@ -44,14 +47,17 @@ services:
   ansible:
     build:
       context: ../src/ansible
-    entrypoint: [ "/summon2", "-config", "/config.yaml", "-f", "/secrets.yml" ]
+    entrypoint: [ "/summon2", "-f", "/secrets.yml" ]
     environment:
       SSH_AUTH_SOCK: /run/ssh-agent/.agent
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: host/ansible
       CONJUR_AUTHN_API_KEY:
+      SUMMON_PROVIDER: conjur
     volumes:
       - ssh_agent:/run/ssh-agent
       - ../../../bin/linux/amd64/summon2:/summon2
-      - ./secretless_ansible.yml:/config.yaml
       - ./ansible_secrets.yml:/secrets.yml
     depends_on:
       - pg
@@ -61,6 +67,9 @@ services:
     image: secretless
     command: "-debug"
     environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: host/myapp
       CONJUR_AUTHN_API_KEY:
     volumes:
       - ./secretless_myapp.yml:/config.yaml
@@ -88,14 +97,17 @@ services:
   myapp_tls:
     build:
       context: ../src/proxy_tls
-    entrypoint: [ "/summon2", "-config", "/config.yaml", "-f", "/secrets.yml" ]
+    entrypoint: [ "/summon2", "-f", "/secrets.yml" ]
     environment:
-      SSL_CERT_FILE: ./proxy_tls.pem
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: host/myapp_tls
       CONJUR_AUTHN_API_KEY:
+      SUMMON_PROVIDER: conjur
+      SSL_CERT_FILE: ./proxy_tls.pem
     command: "./proxy_tls myapp"
     volumes:
       - ../../../bin/linux/amd64/summon2:/summon2
-      - ./secretless_myapp_tls.yml:/config.yaml
       - ./myapp_tls_secrets.yml:/secrets.yml
     depends_on:
       - conjur

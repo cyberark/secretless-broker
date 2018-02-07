@@ -1,47 +1,28 @@
 package variable
 
 import (
-  "fmt"
-
-  "github.com/conjurinc/secretless/pkg/secretless/config"
-  "github.com/conjurinc/secretless/internal/pkg/provider"
+	providerPkg "github.com/conjurinc/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
-func Resolve(providers []provider.Provider, variables []config.Variable) (*map[string]string, error) {
-  result := make(map[string]string)
+// Resolve accepts an list of Providers and a list of Variables and
+// attempts to obtain the value of each Variable from the appropriate Provider.
+func Resolve(variables []config.Variable) (result map[string][]byte, err error) {
+	result = make(map[string][]byte)
 
-  for _, v := range variables {
-    var variable Variable
+	for _, v := range variables {
+		var provider providerPkg.Provider
+		var value []byte
 
-    if v.Value.Literal != "" {
-      variable = ValueVariable{v.Value.Literal}
-    } else if v.Value.Provider != "" {
-      var provider provider.Provider
-      for i := range providers {
-        if providers[i].Name() == v.Value.Provider {
-          provider = providers[i]
-          break
-        }
-      }
-      if provider == nil {
-        return nil, fmt.Errorf("Provider '%s' not found", v.Value.Provider)
-      }
-      variable = ProviderVariable{provider, v.Value.Id}
-    } else if v.Value.Environment != "" {
-      variable = EnvironmentVariable{v.Value.Environment}
-    } else if v.Value.File != "" {
-      variable = FileVariable{v.Value.File}
-    } else if v.Value.Keychain.Service != "" {
-      variable = KeychainVariable{v.Value.Keychain.Service, v.Value.Keychain.Username}
-    }
-    if variable != nil {
-      if value, err := variable.Value(); err != nil {
-        return nil, err
-      } else {
-        result[v.Name] = value
-      }
-    }
-  }
+		if provider, err = providerPkg.GetProvider(v.Provider); err != nil {
+			return
+		}
 
-  return &result, nil
+		if value, err = provider.Value(v.ID); err != nil {
+			return
+		}
+		result[v.Name] = value
+	}
+
+	return
 }

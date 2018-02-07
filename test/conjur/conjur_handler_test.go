@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/cyberark/conjur-api-go/conjurapi/response"
 
+	_ "github.com/joho/godotenv/autoload"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 // TestConjur_Handler verifies that Conjur API requests which are proxied through the Secretless
 // handler do not require authentication credentials.
 func TestConjur_Handler(t *testing.T) {
-	conjurConfig := LoadTestConjurConfig()
-
 	Convey("Can fetch a variable value", t, func() {
-		variableURL := fmt.Sprintf("%s/secrets/%s/variable/db/password", conjurConfig.URL, conjurConfig.Account)
+		variableURL := fmt.Sprintf("%s/secrets/%s/variable/db/password", os.Getenv("CONJUR_APPLIANCE_URL"), os.Getenv("CONJUR_ACCOUNT"))
 
 		req, err := http.NewRequest(
 			"GET",

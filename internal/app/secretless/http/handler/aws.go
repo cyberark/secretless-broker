@@ -41,7 +41,7 @@ func (h AWSHandler) Configuration() *config.Handler {
 
 // Authenticate applies the "access_key_id", "secret_access_key" and optional "access_token" credentials
 // to the Authorization header, following the AWS signature format.
-func (h AWSHandler) Authenticate(values map[string]string, r *http.Request) error {
+func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) error {
 	var err error
 	var amzDate time.Time
 
@@ -62,20 +62,20 @@ func (h AWSHandler) Authenticate(values map[string]string, r *http.Request) erro
 		return err
 	}
 
-	var accessKeyID, secretAccessKey, accessToken string
+	var accessKeyID, secretAccessKey, accessToken []byte
 	var header string
 
 	accessKeyID = values["access_key_id"]
-	if accessKeyID == "" {
+	if accessKeyID == nil {
 		return fmt.Errorf("AWS connection parameter 'access_key_id' is not available")
 	}
 	secretAccessKey = values["secret_access_key"]
-	if secretAccessKey == "" {
+	if secretAccessKey == nil {
 		return fmt.Errorf("AWS connection parameter 'secret_access_key' is not available")
 	}
 	accessToken = values["access_token"]
 
-	creds := credentials.NewStaticCredentials(accessKeyID, secretAccessKey, accessToken)
+	creds := credentials.NewStaticCredentials(string(accessKeyID), string(secretAccessKey), string(accessToken))
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {

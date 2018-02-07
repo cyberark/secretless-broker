@@ -5,7 +5,6 @@ import (
 	"net"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
-	"github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
@@ -35,7 +34,6 @@ type Handler struct {
 	Config        config.Handler
 	Client        net.Conn
 	Backend       net.Conn
-	Providers     []provider.Provider
 	ClientOptions *ClientOptions
 	BackendConfig *BackendConfig
 }

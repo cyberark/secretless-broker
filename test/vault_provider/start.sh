@@ -33,10 +33,10 @@ vault_port=$(echo "$vault_host_port" | go run ../util/parse_port.go)
 rm -rf tmp
 mkdir -p tmp
 
-cat <<VAULTRC > tmp/.vaultrc
-address: http://localhost:$vault_port
-token: $root_token
-VAULTRC
+cat <<ENV > .env
+VAULT_ADDR=http://localhost:$vault_port
+VAULT_TOKEN=$root_token
+ENV
 
 vault_cmd mount kv
 vault_cmd write kv/db/password 'password=secret'

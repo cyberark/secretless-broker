@@ -8,28 +8,28 @@ import (
 var Flags = []cli.Flag{
 	cli.StringFlag{
 		Name:  "e, environment",
-		Usage: "Specify section/environment to parse from secrets.yaml",
+		Usage: "Specify section/environment to parse from secrets.yaml.",
 	},
 	cli.StringFlag{
-		Name:  "config, c",
-		Usage: "Path to the provider configuration file",
+		Name:  "provider, p",
+		Usage: "Name of the provider to use. May also be specified via SUMMON_PROVIDER environment variable.",
 	},
 	cli.StringFlag{
 		Name:  "f",
 		Value: "secrets.yml",
-		Usage: "Path to secrets.yml",
+		Usage: "Path to secrets.yml.",
 	},
 	cli.StringSliceFlag{
 		Name:  "D",
 		Value: &cli.StringSlice{},
-		Usage: "var=value causes substitution of value to $var",
+		Usage: "var=value causes substitution of value to $var.",
 	},
 	cli.StringFlag{
 		Name:  "yaml",
-		Usage: "secrets.yml as a literal string",
+		Usage: "secrets.yml as a literal string.",
 	},
 	cli.BoolFlag{
 		Name:  "debug, d",
-		Usage: "Print debug info during program execution",
+		Usage: "Print debug info during program execution. . May also be specified via SUMMON_DEBUG=true environment variable.",
 	},
 }

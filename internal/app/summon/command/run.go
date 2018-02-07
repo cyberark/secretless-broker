@@ -6,27 +6,20 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/conjurinc/secretless/internal/pkg/provider"
+	providerpkg "github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/cyberark/summon/secretsyml"
 )
 
 // Subcommand defines the input needed to run Summon.
 type Subcommand struct {
 	Args        []string
-	Providers   []provider.Provider
 	SecretsMap  secretsyml.SecretsMap
 	TempFactory *TempFactory
+	Provider    providerpkg.Provider
 
 	// Set this to an io.Writer to capture stdout from the child process.
 	// By default, the child process stdout goes to this process' stdout.
 	Stdout io.Writer
-}
-
-func findProvider(providers []provider.Provider, secretSpec secretsyml.SecretSpec) (provider.Provider, error) {
-	if len(providers) == 1 {
-		return providers[0], nil
-	}
-	return nil, fmt.Errorf("Exactly 1 provider is required, got %d providers", len(providers))
 }
 
 // buildEnvironment builds the environment strings from the map of secrets values, along with the
@@ -41,15 +34,11 @@ func buildEnvironment(secrets map[string]string, secretsMap secretsyml.SecretsMa
 }
 
 // resolveVariables obtains the value of each requested secret.
-func resolveVariables(providers []provider.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
+func resolveVariables(provider providerpkg.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
 	result = make(map[string]string)
 	for key, spec := range secretsMap {
 		var value string
 		if spec.IsVar() {
-			var provider provider.Provider
-			if provider, err = findProvider(providers, spec); err != nil {
-				return
-			}
 			var valueBytes []byte
 			if valueBytes, err = provider.Value(spec.Path); err != nil {
 				return
@@ -108,7 +97,7 @@ func (sc *Subcommand) Run() (err error) {
 	}
 	defer sc.TempFactory.Cleanup()
 
-	if secrets, err = resolveVariables(sc.Providers, sc.SecretsMap); err != nil {
+	if secrets, err = resolveVariables(sc.Provider, sc.SecretsMap); err != nil {
 		return
 	}
 	if env, err = buildEnvironment(secrets, sc.SecretsMap, sc.TempFactory); err != nil {

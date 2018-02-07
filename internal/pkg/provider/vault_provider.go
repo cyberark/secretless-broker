@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"log"
 
 	vault "github.com/hashicorp/vault/api"
 )
@@ -13,69 +12,18 @@ type VaultProvider struct {
 	client *vault.Client
 }
 
-// NewVaultProvider constructs a VaultProvider. configuration may include the following
-// keys:
-//   * address
-//   * ca_cert
-//   * client_cert
-//   * tls_server_name
-//
-// credentials must contain the following:
-//   * client_key
-//   * token
-func NewVaultProvider(name string, configuration, credentials map[string]string) (provider Provider, err error) {
+// NewVaultProvider constructs a VaultProvider. The API client is configured from
+// environment variables.
+func NewVaultProvider(name string) (provider Provider, err error) {
 	config := vault.DefaultConfig()
 
-	var tls bool
-	var token string
-	tlsConfig := vault.TLSConfig{}
-	for k, v := range configuration {
-		switch k {
-		case "address":
-			config.Address = v
-		case "ca_cert":
-			tls = true
-			tlsConfig.CACert = v
-		case "client_cert":
-			tls = true
-			tlsConfig.ClientCert = v
-		case "tls_server_name":
-			tls = true
-			tlsConfig.TLSServerName = v
-		default:
-			log.Printf("Unrecognized configuration setting '%s' for Hashicorp Vault provider %s", k, name)
-		}
-	}
-
-	for k, v := range credentials {
-		switch k {
-		case "client_key":
-			tls = true
-			tlsConfig.ClientKey = v
-		case "token":
-			token = v
-		default:
-			log.Printf("Unrecognized credential '%s' for Hashicorp Vault provider %s", k, name)
-		}
-	}
-
-	if tls {
-		config.ConfigureTLS(&tlsConfig)
-	}
-
-	if token == "" {
-		err = fmt.Errorf("Hashicorp Vault provider requires 'token' credential")
-		return
-	}
-
 	var client *vault.Client
-
 	if client, err = vault.NewClient(config); err != nil {
 		return
 	}
-	client.SetToken(token)
 
-	return VaultProvider{name: name, client: client}, nil
+	provider = VaultProvider{name: name, client: client}
+	return
 }
 
 // Name returns the name of the provider

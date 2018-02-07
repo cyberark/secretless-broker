@@ -1,11 +1,11 @@
 // +build linux
 
-package keychain
+package keychain_provider
 
 import (
-  "fmt"
+	"fmt"
 )
 
 func GetGenericPassword(service, account string) (string, error) {
-  return "", fmt.Errorf("No keychain provider for Linux (yet)")
+	return "", fmt.Errorf("No keychain provider for Linux (yet)")
 }

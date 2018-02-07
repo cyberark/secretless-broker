@@ -14,34 +14,39 @@ import (
 func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{Options: make(map[string]string)}
 
-	var valuesPtr *map[string]string
-
-	if valuesPtr, err = variable.Resolve(h.Providers, h.Config.Credentials); err != nil {
+	var values map[string][]byte
+	if values, err = variable.Resolve(h.Config.Credentials); err != nil {
 		return
 	}
 
-	values := *valuesPtr
 	if h.Config.Debug {
 		log.Printf("PG backend connection parameters: %s", values)
 	}
 
-	if address := values["address"]; address != "" {
+	if address := values["address"]; address != nil {
 		// Form of url is : 'dbcluster.myorg.com:5432/reports'
-		tokens := strings.SplitN(address, "/", 2)
+		tokens := strings.SplitN(string(address), "/", 2)
 		result.Address = tokens[0]
 		if len(tokens) == 2 {
 			result.Database = tokens[1]
 		}
 	}
 
-	result.Username = values["username"]
-	result.Password = values["password"]
+	if values["username"] != nil {
+		result.Username = string(values["username"])
+	}
+	if values["password"] != nil {
+		result.Password = string(values["password"])
+	}
 
 	delete(values, "address")
 	delete(values, "username")
 	delete(values, "password")
 
-	result.Options = values
+	result.Options = make(map[string]string)
+	for k, v := range values {
+		result.Options[k] = string(v)
+	}
 
 	h.BackendConfig = &result
 

@@ -4,8 +4,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/conjurinc/secretless/internal/pkg/keychain"
-
+	"github.com/conjurinc/secretless/internal/pkg/provider/keychain_provider"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -30,7 +29,7 @@ func TestKeychainProvider(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		Convey("The secret value can be obtained", func() {
-			obtainedPassword, err := keychain.GetGenericPassword(service, account)
+			obtainedPassword, err := keychain_provider.GetGenericPassword(service, account)
 			So(err, ShouldBeNil)
 			So(obtainedPassword, ShouldEqual, secret)
 		})

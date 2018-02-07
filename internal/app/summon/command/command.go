@@ -3,15 +3,12 @@ package command
 import (
 	"fmt"
 	"io"
-	"log"
+	"os"
 	"strings"
 
 	"github.com/codegangsta/cli"
-	"github.com/conjurinc/secretless/internal/app/secretless"
-	"github.com/conjurinc/secretless/internal/pkg/provider"
-	"github.com/conjurinc/secretless/pkg/secretless/config"
+	providerpkg "github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/cyberark/summon/secretsyml"
-	yaml "gopkg.in/yaml.v1"
 )
 
 // The code in this file operates at the CLI level; it reads CLI arguments and will exit the process.
@@ -21,8 +18,8 @@ type Options struct {
 	Args        []string
 	Filepath    string
 	YamlInline  string
+	Provider    string
 	Subs        map[string]string
-	ConfigFile  string
 	Environment string
 	Debug       bool
 }
@@ -46,7 +43,7 @@ func RunCLI(args []string, writer io.Writer) error {
 // Action is the main entry point for the CLI command.
 var Action = func(c *cli.Context) error {
 	if !c.Args().Present() {
-		return fmt.Errorf("Enter a subprocess to run!")
+		return fmt.Errorf("Enter a subprocess to run")
 	}
 
 	commandArgs := &Options{
@@ -54,9 +51,16 @@ var Action = func(c *cli.Context) error {
 		Environment: c.String("environment"),
 		Filepath:    c.String("f"),
 		YamlInline:  c.String("yaml"),
-		ConfigFile:  c.String("config"),
+		Provider:    c.String("provider"),
 		Subs:        convertSubsToMap(c.StringSlice("D")),
 		Debug:       c.Bool("debug"),
+	}
+	if !commandArgs.Debug {
+		commandArgs.Debug = (os.Getenv("SUMMON_DEBUG") == "true")
+	}
+
+	if commandArgs.Provider == "" {
+		commandArgs.Provider = os.Getenv("SUMMON_PROVIDER")
 	}
 
 	var err error
@@ -73,26 +77,14 @@ var Action = func(c *cli.Context) error {
 func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err error) {
 	subcommand = &Subcommand{Args: options.Args}
 
-	var c config.Config
-
-	if options.ConfigFile != "" {
-		c = config.Configure(options.ConfigFile)
+	if options.Provider == "" {
+		err = fmt.Errorf("Provider option is required as a command argument (-provider or -p) or environment variable SUMMON_PROVIDER")
+		return
 	}
 
-	if options.Debug {
-		configStr, _ := yaml.Marshal(c)
-		log.Printf("Loaded configuration : %s", configStr)
+	if subcommand.Provider, err = providerpkg.GetProvider(options.Provider); err != nil {
+		return
 	}
-
-	providers := make([]provider.Provider, len(c.Providers))
-	for i := range c.Providers {
-		if providers[i], err = secretless.LoadProvider(c.Providers[i]); err != nil {
-			err = fmt.Errorf("Unable to load provider '%s' : %s", c.Providers[i].Name, err.Error())
-			return
-		}
-	}
-
-	subcommand.Providers = providers
 
 	var secrets secretsyml.SecretsMap
 

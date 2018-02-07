@@ -13,6 +13,7 @@ type EnvironmentProvider struct {
 // NewEnvironmentProvider constructs a EnvironmentProvider.
 // No configuration or credentials are required.
 func NewEnvironmentProvider(name string) (provider Provider, err error) {
+
 	provider = &EnvironmentProvider{name: name}
 
 	return

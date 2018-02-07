@@ -8,32 +8,18 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type KeychainValue struct {
-	Service  string
-	Username string
-}
-
-type ValueFrom struct {
-	Literal     string
-	Environment string
-	File        string
-	Keychain    KeychainValue `yaml:"keychain"`
-	Provider    string
-	Id          string
-}
-
+// Variable is a named secret.
 type Variable struct {
-	Name  string
-	Value ValueFrom `yaml:"value"`
+	// Name is the name by which the variable will be used by the client.
+	Name string
+	// Provider is the provider name.
+	Provider string
+	// Value is the identifier of the secret that the Provider will load.
+	ID string
 }
 
-type Provider struct {
-	Name          string
-	Type          string
-	Configuration []Variable
-	Credentials   []Variable
-}
-
+// Listener listens on a port on socket for inbound connections, which are
+// handed off to Handlers.
 type Listener struct {
 	Name        string
 	Protocol    string
@@ -42,6 +28,8 @@ type Listener struct {
 	CACertFiles []string `yaml:"caCertFiles"`
 }
 
+// Handler processes an inbound message and connects to a specified backend
+// using Credentials which it fetches from a provider.
 type Handler struct {
 	Name        string
 	Type        string
@@ -52,8 +40,9 @@ type Handler struct {
 	Credentials []Variable
 }
 
+// Config is the main configuration structure for Secretless.
+// It lists and configures the protocol listeners and handlers.
 type Config struct {
-	Providers []Provider
 	Listeners []Listener
 	Handlers  []Handler
 }

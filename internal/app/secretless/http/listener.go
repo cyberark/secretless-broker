@@ -112,12 +112,17 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp, err := l.Transport.RoundTrip(r)
 
 	if err != nil {
+		if handler.Configuration().Debug {
+			log.Printf("Error: %v", err)
+		}
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
+	// Note: resp is likely nil if err is non-nil, so don't access it until you get here.
+
 	if handler.Configuration().Debug {
-		log.Printf("Received response %v", resp.Status)
+		log.Printf("Received response status: %d", resp.Status)
 	}
 
 	copyHeaders(w.Header(), resp.Header)
@@ -131,7 +136,11 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (l *Listener) Listen() {
-	caCertPool := x509.NewCertPool()
+	caCertPool, err := x509.SystemCertPool()
+	if err != nil {
+		log.Printf("Error '%s' loading system cert pool; will use an empty cert pool", err)
+		caCertPool = x509.NewCertPool()
+	}
 	for _, fname := range l.Config.CACertFiles {
 		severCert, err := ioutil.ReadFile(fname)
 		if err != nil {

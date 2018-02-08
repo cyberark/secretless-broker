@@ -20,16 +20,26 @@ Bring up the `admin` container. Via secretless, use it to create an RDS database
 8. `admin:/work# ./wait_for_db_instance.sh`
 9. `admin:/work# ./store_db_password.sh $password`
 
-Now bring up the `myapp` container with its Secretless provider. 
+Now bring up "myapp" Secretless provider. 
 
 1. `$  export CONJUR_AUTHN_API_KEY=<api key for host/myapp>`
 2. `$ docker-compose up myapp_secretless`
 
-Connect to the database and print the data in `test.t`:
+And the "myapp" application:
+
+```
+$ docker-compose run --rm --no-deps myapp
+```
+
+Connect to the database, load the table `test.t`, then use `psql` to interact with the database engine:
 
 ```sh-session
-$ dc run --rm --no-deps myapp
-root@a976f9ea6901:/# psql postgres
+root@a976f9ea6901:/# cd work
+root@a976f9ea6901:/work/# cat data.sql | psql postgres
+CREATE SCHEMA
+CREATE TABLE
+INSERT 0 2
+root@a976f9ea6901:/work/# psql postgres
 psql (9.5.9, server 9.6.3)
 
 postgres=> \dn;
@@ -47,3 +57,7 @@ postgres=> select * from test.t ;
   2
 (2 rows)
 ```
+
+Now you can delete the database:
+
+1. `admin:/work# ./delete_db_instance.sh`

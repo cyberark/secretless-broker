@@ -28,6 +28,7 @@ services:
     image: secretless
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_LOGIN: alice
       CONJUR_AUTHN_API_KEY: 
       AWS_ACCESS_KEY_ID: 
@@ -35,7 +36,7 @@ services:
     depends_on:
       - conjur
     volumes:
-      - ./run/postgresql/:/var/run/postgresql/
+      - pg_admin:/var/run/postgresql/
       - ./secretless.admin.yml:/config.yaml
 
   admin:
@@ -48,7 +49,7 @@ services:
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_TOKEN: "eyJkYXRhIjoiZHVtbXkifQo="
     volumes:
-      - ./run/postgresql/:/var/run/postgresql/
+      - pg_admin:/var/run/postgresql/
       - .:/work
       - ./aws:/root/.aws:ro
     depends_on:
@@ -58,12 +59,13 @@ services:
     image: secretless
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_LOGIN: host/myapp
       CONJUR_AUTHN_API_KEY: 
     depends_on:
       - conjur
     volumes:
-      - ./run/postgresql/:/var/run/postgresql/
+      - pg_myapp:/var/run/postgresql/
       - ./secretless.myapp.yml:/config.yaml
 
   myapp:
@@ -74,6 +76,10 @@ services:
       http_proxy: http://myapp_secretless:80
     volumes:
       - .:/work
-      - ./run/postgresql/:/var/run/postgresql/
+      - pg_myapp:/var/run/postgresql/
     depends_on:
       - conjur
+
+volumes:
+  pg_admin:
+  pg_myapp:

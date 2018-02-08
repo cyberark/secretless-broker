@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash -e
+
+set -o pipefail
 
 # shellcheck disable=SC1091
 source ./settings.sh
@@ -21,16 +23,16 @@ echo "Creating RDS database with admin user '$db_username' and admin password $p
 
 export http_proxy
 
-aws rds create-db-instance \
-  --db-instance-identifier $db_instance_id \
+db_info=$(aws rds create-db-instance \
+  --db-instance-identifier "$db_instance_id" \
   --db-instance-class db.t2.micro \
   --engine postgres \
   --publicly-accessible \
-  --endpoint-url $rds_endpoint_url \
-  --master-username $db_username \
-  --master-user-password $password \
+  --endpoint-url "$rds_endpoint_url" \
+  --master-username "$db_username" \
+  --master-user-password "$password" \
   --allocated-storage 10 \
-  --db-subnet-group-name $db_subnet_group_name | tee tmp/db_instance.json
+  --db-subnet-group-name "$db_subnet_group_name")
 
-db_arn=$(cat tmp/db_instance.json | jq -r .DBInstance.DBInstanceArn)
-
+echo "$db_info" > tmp/db_instance.json
+db_arn=$(jq -r .DBInstance.DBInstanceArn < tmp/db_instance.json)

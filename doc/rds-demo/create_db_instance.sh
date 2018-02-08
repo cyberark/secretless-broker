@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # shellcheck disable=SC1091
 source ./settings.sh

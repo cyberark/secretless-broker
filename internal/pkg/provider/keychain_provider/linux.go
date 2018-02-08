@@ -6,6 +6,6 @@ import (
 	"fmt"
 )
 
-func GetGenericPassword(service, account string) (string, error) {
-	return "", fmt.Errorf("No keychain provider for Linux (yet)")
+func GetGenericPassword(service, account string) ([]byte, error) {
+	return nil, fmt.Errorf("No keychain provider for Linux (yet)")
 }

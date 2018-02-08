@@ -25,7 +25,7 @@ func release(ref C.CFTypeRef) {
 	C.CFRelease(ref)
 }
 
-func GetGenericPassword(service, account string) (string, error) {
+func GetGenericPassword(service, account string) ([]byte, error) {
 	service_c := C.CString(service)
 	account_c := C.CString(account)
 
@@ -74,7 +74,7 @@ func GetGenericPassword(service, account string) (string, error) {
 			C.CFShow(C.CFTypeRef(errorMessage_cf))
 			message = fmt.Sprintf("An unknown error occurred : %d", int(errCode))
 		}
-		return "", fmt.Errorf(message)
+		return nil, fmt.Errorf(message)
 	}
 
 	defer release(C.CFTypeRef(resultsRef))
@@ -82,5 +82,5 @@ func GetGenericPassword(service, account string) (string, error) {
 	cfData := C.CFDataRef(resultsRef)
 	bytes := C.GoBytes(unsafe.Pointer(C.CFDataGetBytePtr(cfData)), C.int(C.CFDataGetLength(cfData)))
 
-	return string(bytes), nil
+	return bytes, nil
 }

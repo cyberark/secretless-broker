@@ -53,6 +53,8 @@ func newProvider(name string) (provider NewProvider, err error) {
 		provider = NewConjurProvider
 	case "vault":
 		provider = NewVaultProvider
+	case "keychain":
+		provider = NewKeychainProvider
 	default:
 		err = fmt.Errorf("Unrecognized provider type '%s'", name)
 	}

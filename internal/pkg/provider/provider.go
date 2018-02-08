@@ -43,7 +43,7 @@ func GetProvider(name string) (provider Provider, err error) {
 
 func newProvider(name string) (provider NewProvider, err error) {
 	switch name {
-	case "env":
+	case "env", "environment":
 		provider = NewEnvironmentProvider
 	case "literal":
 		provider = NewLiteralProvider

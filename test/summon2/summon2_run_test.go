@@ -64,8 +64,8 @@ func TestSummon2_Run(t *testing.T) {
 	var err error
 
 	Convey("Provides secrets to a subprocess environment", t, func() {
-		providers := []provider.Provider{makePasswordProvider()}
-		subcommand := command.Subcommand{Args: []string{"env"}, Providers: providers, SecretsMap: makeDBPasswordSecretsMap()}
+		provider := makePasswordProvider()
+		subcommand := command.Subcommand{Args: []string{"env"}, Provider: provider, SecretsMap: makeDBPasswordSecretsMap()}
 		stdout = captureStdoutFromSubcommand(&subcommand)
 
 		err = subcommand.Run()
@@ -80,8 +80,8 @@ func TestSummon2_Run(t *testing.T) {
 		spec := secretsyml.SecretSpec{Path: "literal-secret", Tags: []secretsyml.YamlTag{secretsyml.Literal}}
 		secretsMap["DB_PASSWORD"] = spec
 
-		providers := []provider.Provider{makeEmptyProvider()}
-		subcommand := command.Subcommand{Args: []string{"env"}, Providers: providers, SecretsMap: secretsMap}
+		provider := makeEmptyProvider()
+		subcommand := command.Subcommand{Args: []string{"env"}, Provider: provider, SecretsMap: secretsMap}
 		stdout = captureStdoutFromSubcommand(&subcommand)
 
 		err = subcommand.Run()
@@ -92,8 +92,8 @@ func TestSummon2_Run(t *testing.T) {
 	})
 
 	Convey("Reports an error when the secrets cannot be found", t, func() {
-		providers := []provider.Provider{makeEmptyProvider()}
-		subcommand := command.Subcommand{Args: []string{"env"}, Providers: providers, SecretsMap: makeDBPasswordSecretsMap()}
+		provider := makeEmptyProvider()
+		subcommand := command.Subcommand{Args: []string{"env"}, Provider: provider, SecretsMap: makeDBPasswordSecretsMap()}
 
 		err = subcommand.Run()
 
@@ -102,8 +102,8 @@ func TestSummon2_Run(t *testing.T) {
 	})
 
 	Convey("Reports an error when the subprocess command is invalid", t, func() {
-		providers := []provider.Provider{makeEmptyProvider()}
-		subcommand := command.Subcommand{Args: []string{"foobar"}, Providers: providers, SecretsMap: makeEmptySecretsMap()}
+		provider := makeEmptyProvider()
+		subcommand := command.Subcommand{Args: []string{"foobar"}, Provider: provider, SecretsMap: makeEmptySecretsMap()}
 
 		err = subcommand.Run()
 

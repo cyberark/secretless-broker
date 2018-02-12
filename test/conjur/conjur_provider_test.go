@@ -7,23 +7,15 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/conjurinc/secretless/internal/pkg/provider"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 // TestConjur_Provider tests the ability of the ConjurProvider to provide a Conjur accessToken
 // as well as secret values.
 func TestConjur_Provider(t *testing.T) {
 	name := "conjur"
-	conjurConfig := LoadTestConjurConfig()
 
-	configuration := make(map[string]string)
-	configuration["url"] = conjurConfig.URL
-	configuration["account"] = conjurConfig.Account
-
-	credentials := make(map[string]string)
-	credentials["username"] = "admin"
-	credentials["apiKey"] = conjurConfig.APIKey
-
-	provider, err := provider.NewConjurProvider(name, configuration, credentials)
+	provider, err := provider.NewConjurProvider(name)
 	if err != nil {
 		t.Fatal(err)
 	}

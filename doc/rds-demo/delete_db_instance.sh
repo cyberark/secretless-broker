@@ -7,7 +7,7 @@ if [[ ! -f tmp/db_instance.json ]]; then
   exit 1
 fi
 
-db_instance_id=$(cat tmp/db_instance.json | jq -r .DBInstance.DBInstanceIdentifier)
+db_instance_id=$(jq -r .DBInstance.DBInstanceIdentifier < tmp/db_instance.json)
 
 echo "Deleting RDS database $db_instance_id"
 

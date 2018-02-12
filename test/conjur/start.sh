@@ -13,11 +13,12 @@ conjur_port=$(echo "$conjur_host_port" | go run ../util/parse_port.go)
 rm -rf tmp
 mkdir -p tmp
 
-cat <<CONJURRC > tmp/.conjurrc
-url: http://localhost:$conjur_port
-account: dev
-api_key: $admin_api_key
-CONJURRC
+cat <<ENV > .env
+CONJUR_APPLIANCE_URL=http://localhost:$conjur_port
+CONJUR_ACCOUNT=dev
+CONJUR_AUTHN_LOGIN=admin
+CONJUR_AUTHN_API_KEY=$admin_api_key
+ENV
 
 docker-compose up -d secretless
 

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 source ./settings.sh
 
@@ -16,4 +16,3 @@ while ! find_db_endpoint; do
 done
 
 echo "Database is available at $db_endpoint"
-

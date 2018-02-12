@@ -4,7 +4,6 @@
   - [Walkthrough](#walkthrough)
 - [Configuring Secretless](#configuring-secretless)
   - [Listeners](#listeners)
-  - [Providers](#providers)
   - [Handlers](#handlers)
 - [Client Application Configuration](#client-application-configuration)
 - [Testing](#testing)
@@ -83,7 +82,7 @@ Verify that Postgresql is running and accepting connections on port 5432:
 $ docker-compose ps
    Name                 Command              State            Ports
 ----------------------------------------------------------------------------
-quick_pg_1   docker-entrypoint.sh postgres   Up      5432/tcp
+quick_pg_1   docker-entrypoint.sdh postgres   Up      5432/tcp
 ```
 
 Now you can test a normal connection to Postgresql in which the client knows the password. Start a `psql` container:
@@ -122,18 +121,16 @@ listeners:
 handlers:
   - name: pg
     listener: pg
-    authorization:
-      none: true
     credentials:
       - name: address
-        value:
-          environment: PG_ADDRESS
+        provider: env
+        id: PG_ADDRESS
       - name: username
-        value:
-          environment: PG_USER
+        provider: env
+        id: PG_USER
       - name: password
-        value:
-          environment: PG_PASSWORD
+        provider: env
+        id: PG_PASSWORD
 ```
 
 In real world scenarios, the credentials (secrets) can be obtained from a secrets vault or operating system keychain.
@@ -213,7 +210,6 @@ Note that a real-world deployment would differ from this setup in the following 
 The Secretless configuration file is composed of three sections:
 
 * `listeners` A list of protocol listeners, each one on a Unix socket or TCP port.
-* `providers` A list of secrets providers.
 * `handlers` When a new connection is received by a Listener, it's routed to a Handler for processing. The Handler is configured to obtain the backend connection credentials from one or more Providers. 
 
 ## Listeners
@@ -234,10 +230,6 @@ To use the Postgresql example again, the Postgresql server listens by default on
 To configure Secretless to broker web service connections, configure Secretless with a TCP listener on a well-known port such as `1080`. 
 
 Then set the environment variable `http_proxy=localhost:1080` in the client environment. Ensure that the client sends HTTP and not HTTPS requests (TLS can be added by Secretless). 
-
-## Providers
-
-TODO
 
 ## Handlers
 

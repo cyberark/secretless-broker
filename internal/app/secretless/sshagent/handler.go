@@ -11,19 +11,16 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
-	"github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 type Handler struct {
-	Providers  []provider.Provider
 	Config     config.Handler
 	Connection net.Conn
 }
 
-func parseKey(pemStr string) (rawkey interface{}, err error) {
-	pemBytes := []byte(pemStr)
-	block, _ := pem.Decode(pemBytes)
+func parseKey(pemStr []byte) (rawkey interface{}, err error) {
+	block, _ := pem.Decode(pemStr)
 	if block == nil {
 		err = fmt.Errorf("Failed to decode PEM block")
 		return
@@ -42,13 +39,12 @@ func parseKey(pemStr string) (rawkey interface{}, err error) {
 
 // LoadKeys loads the keys configured for this keyring handler.
 func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
-	var valuesPtr *map[string]string
+	var values map[string][]byte
 
-	if valuesPtr, err = variable.Resolve(h.Providers, h.Config.Credentials); err != nil {
+	if values, err = variable.Resolve(h.Config.Credentials); err != nil {
 		return
 	}
 
-	values := *valuesPtr
 	if h.Config.Debug {
 		log.Printf("ssh-agent credential values : %s", values)
 	}
@@ -68,18 +64,18 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 		}
 	}
 	if comment, ok := values["comment"]; ok {
-		key.Comment = comment
+		key.Comment = string(comment)
 	}
 	if lifetime, ok := values["lifetime"]; ok {
 		var lt uint64
-		lt, err = strconv.ParseUint(lifetime, 10, 32)
+		lt, err = strconv.ParseUint(string(lifetime), 10, 32)
 		if err != nil {
 			return
 		}
 		key.LifetimeSecs = uint32(lt)
 	}
 	if confirm, ok := values["confirm"]; ok {
-		key.ConfirmBeforeUse, err = strconv.ParseBool(confirm)
+		key.ConfirmBeforeUse, err = strconv.ParseBool(string(confirm))
 		if err != nil {
 			return
 		}

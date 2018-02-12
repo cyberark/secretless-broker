@@ -22,7 +22,7 @@ func (h ConjurHandler) Configuration() *config.Handler {
 // Authenticate applies the "accessToken" credential to the Authorization header, following the
 // Conjur format:
 //   Token token="<base64(accessToken)>"
-func (h ConjurHandler) Authenticate(values map[string]string, r *http.Request) error {
+func (h ConjurHandler) Authenticate(values map[string][]byte, r *http.Request) error {
 	var ok bool
 
 	accessToken, ok := values["accessToken"]
@@ -31,12 +31,12 @@ func (h ConjurHandler) Authenticate(values map[string]string, r *http.Request) e
 	}
 
 	forceSSLStr, ok := values["forceSSL"]
-	forceSSL, err := strconv.ParseBool(forceSSLStr)
+	forceSSL, err := strconv.ParseBool(string(forceSSLStr))
 	if ok && err == nil && forceSSL {
 		r.URL.Scheme = "https"
 	}
 
-	r.Header.Set("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString([]byte(accessToken))))
+	r.Header.Set("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString(accessToken)))
 
 	return nil
 }

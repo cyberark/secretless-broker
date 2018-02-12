@@ -7,7 +7,7 @@ These instructions show how to develop the Secretless Conjur Handler and Provide
 First you'll need a Conjur server. It's easy to bring one up using the provided `docker-compose.yml`:
 
 ```sh-session
-$ docker-compose up -d pg conjur
+$ docker-compose up -d conjur
 ```
 
 Next, run `secretless` in a terminal:

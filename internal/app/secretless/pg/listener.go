@@ -5,16 +5,14 @@ import (
 	"net"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
-	"github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 // Listener listens for and handles new connections.
 type Listener struct {
-	Config    config.Listener
-	Handlers  []config.Handler
-	Providers []provider.Provider
-	Listener  net.Listener
+	Config   config.Listener
+	Handlers []config.Handler
+	Listener net.Listener
 }
 
 // Listen listens on the port or socket and attaches new connections to the handler.
@@ -41,7 +39,7 @@ func (l *Listener) Listen() {
 		}
 
 		if selectedHandler != nil {
-			handler := &Handler{Providers: l.Providers, Config: *selectedHandler, Client: client}
+			handler := &Handler{Config: *selectedHandler, Client: client}
 			handler.Run()
 		} else {
 			pgError := protocol.Error{

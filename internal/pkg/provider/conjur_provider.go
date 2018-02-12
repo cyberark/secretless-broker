@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -24,37 +23,10 @@ func hasField(field string, params *map[string]string) (ok bool) {
 	return
 }
 
-// NewConjurProvider constructs a ConjurProvider. configuration may include the following
-// keys:
-//  * url (required)
-//  * account (required)
-//  * version (optional; 4 or 5)
-//  * certFile (optional)
-//
-// credentials may contain the following:
-//  * username (optional; requires apiKey)
-//  * apiKey (optional; requires username)
-//  * tokenFile (optional; username and apiKey are not required if this is present)
-func NewConjurProvider(name string, configuration, credentials map[string]string) (provider Provider, err error) {
+// NewConjurProvider constructs a ConjurProvider. The API client is configured from
+// environment variables.
+func NewConjurProvider(name string) (provider Provider, err error) {
 	config := conjurapi.LoadConfig()
-
-	for k, v := range configuration {
-		switch k {
-		case "url":
-			config.ApplianceURL = v
-		case "account":
-			config.Account = v
-		case "certFile":
-			config.SSLCertPath = v
-		case "version":
-			if v == "4" {
-				config.V4 = true
-			}
-		/* todo: the others, e.g. SSL */
-		default:
-			log.Printf("Unrecognized configuration setting '%s' for Conjur provider %s", k, name)
-		}
-	}
 
 	var conjur *conjurapi.Client
 	var username, apiKey, tokenFile string
@@ -63,22 +35,12 @@ func NewConjurProvider(name string, configuration, credentials map[string]string
 	apiKey = os.Getenv("CONJUR_AUTHN_API_KEY")
 	tokenFile = os.Getenv("CONJUR_AUTHN_TOKEN_FILE")
 
-	if hasField("username", &credentials) {
-		username = credentials["username"]
-	}
-	if hasField("apiKey", &credentials) {
-		apiKey = credentials["apiKey"]
-	}
-	if hasField("tokenFile", &credentials) {
-		tokenFile = credentials["tokenFile"]
-	}
-
 	if username != "" && apiKey != "" {
 		conjur, err = conjurapi.NewClientFromKey(config, authn.LoginPair{username, apiKey})
 	} else if tokenFile != "" {
 		conjur, err = conjurapi.NewClientFromTokenFile(config, tokenFile)
 	} else {
-		err = fmt.Errorf("Unable to construct a Conjur API client from the provided credentials")
+		err = fmt.Errorf("Unable to construct a Conjur API client from the available credentials")
 	}
 
 	if err != nil {

@@ -1,19 +1,20 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
+# shellcheck disable=SC2034
 db_username=alice
-db_subnet_group_name=default-vpc-eb2d9893
-
+db_subnet_group_name=default
 rds_endpoint_url=http://rds.amazonaws.com
 
 function find_db_endpoint() {
-  db_instance_id=$(cat tmp/db_instance.json | jq -r .DBInstance.DBInstanceIdentifier)
-
-  endpoint=$(aws rds describe-db-instances \
-    --db-instance-identifier $db_instance_id \
-    --endpoint-url $rds_endpoint_url | jq -r .DBInstances[0].Endpoint.Address)
+  local db_instance_id
   local endpoint
 
-  if [[ "$endpoint" = "null" ]]; then
+  db_instance_id=$(jq -r .DBInstance.DBInstanceIdentifier < tmp/db_instance.json)
+  endpoint=$(aws rds describe-db-instances \
+    --db-instance-identifier "$db_instance_id" \
+    --endpoint-url "$rds_endpoint_url" | jq -r .DBInstances[0].Endpoint.Address)
+
+  if [[ "$endpoint" = "null" || "$endpoint" == "" ]]; then
     printf '.'
     return 3
   else

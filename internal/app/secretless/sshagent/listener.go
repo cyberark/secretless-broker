@@ -17,16 +17,16 @@ type Listener struct {
 	Listener  net.Listener
 }
 
-func (self *Listener) Listen() {
+func (l *Listener) Listen() {
 	// Serve the first Handler which is attached to this listener
 	var selectedHandler *config.Handler
-	for _, handler := range self.Handlers {
+	for _, handler := range l.Handlers {
 		listener := handler.Listener
 		if listener == "" {
 			listener = handler.Name
 		}
 
-		if listener == self.Config.Name {
+		if listener == l.Config.Name {
 			selectedHandler = &handler
 			break
 		}
@@ -38,14 +38,14 @@ func (self *Listener) Listen() {
 
 	keyring := agent.NewKeyring()
 
-	handler := &Handler{Providers: self.Providers, Config: *selectedHandler}
+	handler := &Handler{Config: *selectedHandler}
 	if err := handler.LoadKeys(keyring); err != nil {
 		log.Printf("Failed to load ssh-agent handler keys: ", err)
 		return
 	}
 
 	for {
-		nConn, err := self.Listener.Accept()
+		nConn, err := l.Listener.Accept()
 		if err != nil {
 			log.Printf("Failed to accept incoming connection: ", err)
 			return

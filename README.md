@@ -1,3 +1,11 @@
+***
+
+**Status**: Preview
+
+Secretless is currently a technology preview, suitable for demo and evaluation purposes.
+
+***
+
 - [Secretless](#secretless)
 - [Why Secretless?](#why-secretless)
 - [Quick Start](#quick-start)

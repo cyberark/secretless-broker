@@ -7,6 +7,15 @@ services:
     volumes:
       - .:/work
 
+  summon_test:
+    image: secretless
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN:
+    working_dir: /go/src/github.com/conjurinc/secretless
+    volumes:
+      - ../..:/go/src/github.com/conjurinc/secretless
+
   test:
     image: secretless-dev
     command: go test -v ./test/vault_provider

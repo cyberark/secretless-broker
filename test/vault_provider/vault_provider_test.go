@@ -9,7 +9,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-func TestProvider(t *testing.T) {
+func TestVault_Provider(t *testing.T) {
 	var err error
 
 	name := "vault"

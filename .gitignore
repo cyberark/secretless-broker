@@ -1,3 +1,4 @@
+.env
 debug
 debug.*
 vendor

@@ -13,6 +13,7 @@ import (
 type ConjurProvider struct {
 	name   string
 	conjur *conjurapi.Client
+	config conjurapi.Config
 
 	username string
 	apiKey   string
@@ -47,7 +48,7 @@ func NewConjurProvider(name string) (provider Provider, err error) {
 		return
 	}
 
-	provider = &ConjurProvider{name: name, conjur: conjur, username: username, apiKey: apiKey}
+	provider = &ConjurProvider{name: name, conjur: conjur, config: config, username: username, apiKey: apiKey}
 
 	return
 }
@@ -72,14 +73,9 @@ func (p ConjurProvider) Value(id string) ([]byte, error) {
 	tokens := strings.SplitN(id, ":", 3)
 	switch len(tokens) {
 	case 1:
-		return nil, fmt.Errorf("%s does not know how to provide a value for '%s'", p.Name(), id)
+		tokens = []string{p.config.Account, "variable", tokens[0]}
 	case 2:
-		if tokens[0] != "variable" {
-			return nil, fmt.Errorf("%s does not know how to provide a value for '%s'", p.Name(), id)
-		}
-		// TODO: change this to pass the full id, once the API client knows how to handle one.
-		// tokens = []string{ conjur.Config.Account, tokens[0], tokens[1] }
-		tokens = []string{tokens[1]}
+		tokens = []string{p.config.Account, tokens[0], tokens[1]}
 	}
 
 	return p.conjur.RetrieveSecret(strings.Join(tokens, ":"))

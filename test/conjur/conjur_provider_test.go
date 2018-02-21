@@ -35,8 +35,22 @@ func TestConjur_Provider(t *testing.T) {
 		So(token["payload"], ShouldNotBeNil)
 	})
 
-	Convey("Can provide a secret", t, func() {
+	Convey("Can provide a secret to a fully qualified variable", t, func() {
+		value, err := provider.Value("dev:variable:db/password")
+		So(err, ShouldBeNil)
+
+		So(string(value), ShouldEqual, "secret")
+	})
+
+	Convey("Can provide the default Conjur account name", t, func() {
 		value, err := provider.Value("variable:db/password")
+		So(err, ShouldBeNil)
+
+		So(string(value), ShouldEqual, "secret")
+	})
+
+	Convey("Can provide the default Conjur account name and resource type", t, func() {
+		value, err := provider.Value("db/password")
 		So(err, ShouldBeNil)
 
 		So(string(value), ShouldEqual, "secret")
@@ -44,12 +58,6 @@ func TestConjur_Provider(t *testing.T) {
 
 	Convey("Cannot provide an unknown value", t, func() {
 		_, err = provider.Value("foobar")
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "conjur does not know how to provide a value for 'foobar'")
-	})
-
-	Convey("Cannot provide an unloaded secret", t, func() {
-		_, err = provider.Value("variable:foobar")
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, "Variable 'foobar' not found in account 'dev'")
 	})

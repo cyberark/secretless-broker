@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"strings"
 
 	vault "github.com/hashicorp/vault/api"
 )
@@ -31,15 +32,28 @@ func (p VaultProvider) Name() string {
 	return p.name
 }
 
+// VaultDefaultField is the default value returned by the provider from the
+// hash returned by the Vault.
+const VaultDefaultField = "value"
+
+// parseVaultID returns the secret id and field name.
+func parseVaultID(id string) (string, string) {
+	tokens := strings.SplitN(id, "#", 2)
+	switch len(tokens) {
+	case 1:
+		return tokens[0], VaultDefaultField
+	default:
+		return tokens[0], tokens[1]
+	}
+}
+
 // Value obtains a value by id. Any secret which is stored in the vault is recognized.
-// The datatype returned by Vault is interface{}, which makes it somewhat complex to obtain
-// a specific data item from a Vault secret. Currently, the secret data in Vault is required
-// to be a Map which contains a "password" entry.
-//
-// This restriction/convention will be revisited and revised soon.
-//
-// See https://github.com/conjurinc/secretless/issues/6
+// The datatype returned by Vault is map[string]interface{}. Therefore this provider needs
+// to know which field to return from the map. By default, it returns the 'value'.
+// An alternative field can be obtained by appending '#fieldName' to the id argument.
 func (p VaultProvider) Value(id string) (value []byte, err error) {
+	id, fieldName := parseVaultID(id)
+
 	var secret *vault.Secret
 	if secret, err = p.client.Logical().Read(id); err != nil {
 		return
@@ -49,11 +63,12 @@ func (p VaultProvider) Value(id string) (value []byte, err error) {
 		err = fmt.Errorf("HashiCorp Vault provider could not find a secret called '%s'", id)
 		return
 	}
+
 	var ok bool
 	var valueObj interface{}
-	valueObj, ok = secret.Data["password"]
+	valueObj, ok = secret.Data[fieldName]
 	if !ok {
-		err = fmt.Errorf("HashiCorp Vault provider expects the secret '%s' to contain a 'password' field", id)
+		err = fmt.Errorf("HashiCorp Vault provider expects the secret '%s' to contain field '%s'", id, fieldName)
 		return
 	}
 
@@ -63,7 +78,7 @@ func (p VaultProvider) Value(id string) (value []byte, err error) {
 	case []byte:
 		value = v
 	default:
-		err = fmt.Errorf("HashiCorp Vault provider expects the 'password' to be a string or byte[], got %T", v)
+		err = fmt.Errorf("HashiCorp Vault provider expects the secret to be a string or byte[], got %T", v)
 	}
 	return
 }

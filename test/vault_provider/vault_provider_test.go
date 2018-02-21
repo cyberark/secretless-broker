@@ -9,7 +9,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-func TestProvider(t *testing.T) {
+func TestVault_Provider(t *testing.T) {
 	var err error
 
 	name := "vault"
@@ -31,8 +31,14 @@ func TestProvider(t *testing.T) {
 	})
 
 	Convey("Can provide a secret", t, func() {
-		value, err := provider.Value("kv/db/password")
+		value, err := provider.Value("kv/db/password#password")
 		So(err, ShouldBeNil)
-		So(string(value), ShouldEqual, "secret")
+		So(string(value), ShouldEqual, "db-secret")
+	})
+
+	Convey("Can provide a secret with default field name", t, func() {
+		value, err := provider.Value("kv/web/password")
+		So(err, ShouldBeNil)
+		So(string(value), ShouldEqual, "web-secret")
 	})
 }

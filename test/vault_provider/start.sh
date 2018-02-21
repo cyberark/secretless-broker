@@ -20,7 +20,7 @@ function wait_for_vault() {
 
 wait_for_vault
 
-root_token=$(docker-compose logs vault | grep "Root Token:" | tail -n 1 |  cut -c 33-)
+root_token=$(docker-compose logs vault | grep "Root Token:" | tail -n 1 | go run ../util/parse_root_token.go)
 
 function vault_cmd() {
   docker-compose run --rm -T -e VAULT_ADDR=http://vault:8200 -e VAULT_TOKEN="$root_token" --entrypoint vault vault \
@@ -39,5 +39,6 @@ VAULT_TOKEN=$root_token
 ENV
 
 vault_cmd mount kv
-vault_cmd write kv/db/password 'password=secret'
-vault_cmd write kv/frontend/admin-password 'password=secret'
+vault_cmd write kv/db/password 'password=db-secret'
+vault_cmd write kv/frontend/admin-password 'password=frontend-secret'
+vault_cmd write kv/web/password 'value=web-secret'

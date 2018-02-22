@@ -9,12 +9,20 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type Listener struct {
 	Config   config.Listener
 	Handlers []config.Handler
 	Listener net.Listener
+}
+
+// Validate verifies the completeness and correctness of the Listener.
+func (l Listener) Validate() error {
+	return validation.ValidateStruct(&l,
+		validation.Field(&l.Handlers, validation.Required),
+	)
 }
 
 func (l *Listener) Listen() {
@@ -62,24 +70,11 @@ func (l *Listener) Listen() {
 		}()
 
 		// Serve the first Handler which is attached to this listener
-		var selectedHandler *config.Handler
-		for _, handler := range l.Handlers {
-			listener := handler.Listener
-			if listener == "" {
-				listener = handler.Name
-			}
-
-			if listener == l.Config.Name {
-				selectedHandler = &handler
-				break
-			}
+		if len(l.Handlers) == 0 {
+			log.Panicf("No ssh-agent handler is available")
 		}
 
-		if selectedHandler != nil {
-			handler := &Handler{Config: *selectedHandler, Channels: chans}
-			handler.Run()
-		} else {
-			log.Printf("No ssh handler is available for this connection!")
-		}
+		handler := &Handler{Config: l.Handlers[0], Channels: chans}
+		handler.Run()
 	}
 }

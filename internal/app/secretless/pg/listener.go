@@ -6,6 +6,7 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 // Listener listens for and handles new connections.
@@ -13,6 +14,13 @@ type Listener struct {
 	Config   config.Listener
 	Handlers []config.Handler
 	Listener net.Listener
+}
+
+// Validate verifies the completeness and correctness of the Listener.
+func (l Listener) Validate() error {
+	return validation.ValidateStruct(&l,
+		validation.Field(&l.Handlers, validation.Required),
+	)
 }
 
 // Listen listens on the port or socket and attaches new connections to the handler.
@@ -25,21 +33,8 @@ func (l *Listener) Listen() {
 		}
 
 		// Serve the first Handler which is attached to this listener
-		var selectedHandler *config.Handler
-		for _, handler := range l.Handlers {
-			listener := handler.Listener
-			if listener == "" {
-				listener = handler.Name
-			}
-
-			if listener == l.Config.Name {
-				selectedHandler = &handler
-				break
-			}
-		}
-
-		if selectedHandler != nil {
-			handler := &Handler{Config: *selectedHandler, Client: client}
+		if len(l.Handlers) > 0 {
+			handler := &Handler{Config: l.Handlers[0], Client: client}
 			handler.Run()
 		} else {
 			pgError := protocol.Error{

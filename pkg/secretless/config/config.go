@@ -1,11 +1,15 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"regexp"
+	"strconv"
 
-	"gopkg.in/yaml.v2"
+	"github.com/go-ozzo/ozzo-validation"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Variable is a named secret.
@@ -31,13 +35,13 @@ type Listener struct {
 // Handler processes an inbound message and connects to a specified backend
 // using Credentials which it fetches from a provider.
 type Handler struct {
-	Name        string
-	Type        string
-	Listener    string
-	Debug       bool
-	Match       []string
-	Patterns    []*regexp.Regexp
-	Credentials []Variable
+	Name         string
+	Type         string
+	ListenerName string `yaml:"listener"`
+	Debug        bool
+	Match        []string `yaml:"match"`
+	Patterns     []*regexp.Regexp
+	Credentials  []Variable
 }
 
 // Config is the main configuration structure for Secretless.
@@ -47,31 +51,158 @@ type Config struct {
 	Handlers  []Handler
 }
 
-// Configure loads Config data from the specified filename. The file must
-// exist, or the program with panic.
-func Configure(fileName string) (config Config) {
-	var err error
-
-	buffer, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Fatalf("Unable to read config file %s: %s", fileName, err)
+func parseConfigFile(buffer []byte, config *Config) (err error) {
+	if err = yaml.UnmarshalStrict(buffer, &config); err != nil {
+		return err
 	}
-	err = yaml.Unmarshal(buffer, &config)
-	if err != nil {
-		log.Fatalf("Unable to load config file %s : %s", fileName, err)
+	return
+}
+
+// Validate verifies the completeness and correctness of the Handler.
+func (h Handler) Validate() (err error) {
+	err = validation.ValidateStruct(&h,
+		validation.Field(&h.Name, validation.Required),
+	)
+
+	return
+}
+
+// SelectHandlers selects the Handlers that are configured
+// to use this Listener.
+func (l Listener) SelectHandlers(handlers []Handler) []Handler {
+	var result []Handler
+	for _, h := range handlers {
+		if h.listenerName() == l.Name {
+			result = append(result, h)
+		}
+	}
+	return result
+}
+
+// Validate verifies the completeness and correctness of the Listener.
+func (l Listener) Validate() (err error) {
+	err = validation.ValidateStruct(&l,
+		validation.Field(&l.Name, validation.Required),
+		validation.Field(&l.Protocol, validation.Required, validation.In("pg", "http", "ssh", "ssh-agent")),
+	)
+
+	return
+}
+
+// Listener looks up the handler's listener in the list of available listeners.
+// The Validate method ensures that the the listener used by this handler does exist,
+// so if the listener is not found, then we panic.
+func (h Handler) Listener(listeners []Listener) *Listener {
+	listenerName := h.listenerName()
+	for _, l := range listeners {
+		if l.Name == listenerName {
+			return &l
+		}
+	}
+	log.Panicf("Handler '%s' uses listener '%s' but it does not exist", h.Name, listenerName)
+	return nil
+}
+
+func (h Handler) listenerName() string {
+	if h.ListenerName != "" {
+		return h.ListenerName
+	}
+	return h.Name
+}
+
+type handlerHasListener struct {
+	listenerNames map[string]Listener
+}
+
+func (hhl handlerHasListener) Validate(value interface{}) error {
+	hs := value.([]Handler)
+	errors := validation.Errors{}
+	for i, h := range hs {
+		_, ok := hhl.listenerNames[h.listenerName()]
+		if !ok {
+			errors[strconv.Itoa(i)] = fmt.Errorf("has no associated listener")
+		}
+	}
+	return errors.Filter()
+}
+
+type addressOrSocket struct {
+}
+
+func (hhl addressOrSocket) Validate(value interface{}) error {
+	ls := value.([]Listener)
+	errors := validation.Errors{}
+	for i, l := range ls {
+		if l.Address == "" && l.Socket == "" {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have an Address or Socket")
+		}
+	}
+	return errors.Filter()
+}
+
+// Validate verifies the completeness and correctness of the Config.
+func (c Config) Validate() (err error) {
+	listenerNames := make(map[string]Listener)
+	for _, l := range c.Listeners {
+		listenerNames[l.Name] = l
+	}
+
+	hasListener := handlerHasListener{listenerNames: listenerNames}
+
+	err = validation.ValidateStruct(&c,
+		validation.Field(&c.Handlers, validation.Required, hasListener),
+		validation.Field(&c.Listeners, validation.Required, addressOrSocket{}),
+		validation.Field(&c.Handlers),
+		validation.Field(&c.Listeners),
+	)
+
+	return
+}
+
+// LoadFromFile loads a configuration file into a Config object.
+func LoadFromFile(fileName string) (config Config, err error) {
+	var buffer []byte
+	if buffer, err = ioutil.ReadFile(fileName); err != nil {
+		err = fmt.Errorf("Error reading config file '%s': '%s'", fileName, err)
+		return
+	}
+	return Load(buffer)
+}
+
+// Load parses a YAML string into a Config object.
+func Load(data []byte) (config Config, err error) {
+	if err = parseConfigFile(data, &config); err != nil {
+		err = fmt.Errorf("Unable to parse configuration: '%s'", err)
+		return
+	}
+
+	for i := range config.Listeners {
+		l := &config.Listeners[i]
+		if l.Protocol == "" {
+			l.Protocol = l.Name
+		}
 	}
 
 	for i := range config.Handlers {
-		handler := &config.Handlers[i]
-		handler.Patterns = make([]*regexp.Regexp, len(handler.Match))
-		for i, pattern := range handler.Match {
+		h := &config.Handlers[i]
+		if h.Type == "" {
+			h.Type = h.Name
+		}
+
+		h.Patterns = make([]*regexp.Regexp, len(h.Match))
+		for i, pattern := range h.Match {
 			pattern, err := regexp.Compile(pattern)
 			if err != nil {
 				panic(err.Error())
 			} else {
-				handler.Patterns[i] = pattern
+				h.Patterns[i] = pattern
 			}
 		}
+	}
+
+	if err = config.Validate(); err != nil {
+		err = fmt.Errorf("Configuration is not valid: %s", err)
+		return
 	}
 
 	return

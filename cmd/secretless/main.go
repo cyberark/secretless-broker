@@ -12,13 +12,14 @@ import (
 func main() {
 	log.Println("Secretless starting up...")
 
-	configFile := flag.String("config", "config.yaml", "Configuration file name")
-	debugSwitch := flag.Bool("debug", false, "Print debug information")
+	configFile := flag.String("f", "secretless.yml", "Location of the configuration file.")
+	debugSwitch := flag.Bool("debug", false, "Enable debug logging.")
 	flag.Parse()
 
+	var err error
 	var configuration config.Config
-	if *configFile != "" {
-		configuration = config.Configure(*configFile)
+	if configuration, err = config.LoadFromFile(*configFile); err != nil {
+		log.Fatal(err)
 	}
 
 	if *debugSwitch {

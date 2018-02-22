@@ -71,7 +71,7 @@ func (l *Listener) Listen() {
 
 		// Serve the first Handler which is attached to this listener
 		if len(l.Handlers) == 0 {
-			log.Panicf("No ssh-agent handler is available")
+			log.Panicf("No ssh handler is available")
 		}
 
 		handler := &Handler{Config: l.Handlers[0], Channels: chans}

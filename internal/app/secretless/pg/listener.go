@@ -3,6 +3,7 @@ package pg
 import (
 	"fmt"
 	"net"
+	"strconv"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
@@ -16,10 +17,33 @@ type Listener struct {
 	Listener net.Listener
 }
 
+// HandlerHasCredentials validates that a handler has all necessary credentials.
+type handlerHasCredentials struct {
+}
+
+// Validate checks that a handler has all necessary credentials.
+func (hhc handlerHasCredentials) Validate(value interface{}) error {
+	hs := value.([]config.Handler)
+	errors := validation.Errors{}
+	for i, h := range hs {
+		if !h.HasCredential("address") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'address'")
+		}
+		if !h.HasCredential("username") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'username'")
+		}
+		if !h.HasCredential("password") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'password'")
+		}
+	}
+	return errors.Filter()
+}
+
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Handlers, validation.Required),
+		validation.Field(&l.Handlers, handlerHasCredentials{}),
 	)
 }
 

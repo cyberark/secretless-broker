@@ -39,7 +39,7 @@ func (h AWSHandler) Configuration() *config.Handler {
 	return &h.Config
 }
 
-// Authenticate applies the "access_key_id", "secret_access_key" and optional "access_token" credentials
+// Authenticate applies the "accessKeyId", "secretAccessKey" and optional "accessToken" credentials
 // to the Authorization header, following the AWS signature format.
 func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) error {
 	var err error
@@ -65,15 +65,15 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	var accessKeyID, secretAccessKey, accessToken []byte
 	var header string
 
-	accessKeyID = values["access_key_id"]
+	accessKeyID = values["accessKeyID"]
 	if accessKeyID == nil {
-		return fmt.Errorf("AWS connection parameter 'access_key_id' is not available")
+		return fmt.Errorf("AWS connection parameter 'accessKeyId' is not available")
 	}
-	secretAccessKey = values["secret_access_key"]
+	secretAccessKey = values["secretAccessKey"]
 	if secretAccessKey == nil {
-		return fmt.Errorf("AWS connection parameter 'secret_access_key' is not available")
+		return fmt.Errorf("AWS connection parameter 'secretAccessKey' is not available")
 	}
-	accessToken = values["access_token"]
+	accessToken = values["accessToken"]
 
 	creds := credentials.NewStaticCredentials(string(accessKeyID), string(secretAccessKey), string(accessToken))
 

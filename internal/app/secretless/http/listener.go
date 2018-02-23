@@ -3,11 +3,13 @@ package http
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 
 	handlerImpl "github.com/conjurinc/secretless/internal/app/secretless/http/handler"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
@@ -28,10 +30,36 @@ type Listener struct {
 	Listener  net.Listener
 }
 
+// HandlerHasCredentials validates that a handler has all necessary credentials.
+type handlerHasCredentials struct {
+}
+
+// Validate checks that a handler has all necessary credentials.
+func (hhc handlerHasCredentials) Validate(value interface{}) error {
+	hs := value.([]config.Handler)
+	errors := validation.Errors{}
+	for i, h := range hs {
+		if h.Type == "aws" {
+			if !h.HasCredential("accessKeyId") {
+				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessKeyId'")
+			}
+			if !h.HasCredential("secretAccessKey") {
+				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'secretAccessKey'")
+			}
+		} else if h.Type == "conjur" {
+			if !h.HasCredential("accessToken") {
+				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessToken'")
+			}
+		}
+	}
+	return errors.Filter()
+}
+
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Handlers, validation.Required),
+		validation.Field(&l.Handlers, handlerHasCredentials{}),
 	)
 }
 

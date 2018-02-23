@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"strconv"
 
 	"golang.org/x/crypto/ssh"
 
@@ -12,19 +13,44 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
+// Listener accepts SSH connections and MITMs them using a Handler.
+//
+// NOTE: This MITM approach to SSH is experimental. The ssh-agent approach is
+// better validated and probably better all-around.
 type Listener struct {
 	Config   config.Listener
 	Handlers []config.Handler
 	Listener net.Listener
 }
 
+// HandlerHasCredentials validates that a handler has all necessary credentials.
+type handlerHasCredentials struct {
+}
+
+// Validate checks that a handler has all necessary credentials.
+func (hhc handlerHasCredentials) Validate(value interface{}) error {
+	hs := value.([]config.Handler)
+	errors := validation.Errors{}
+	for i, h := range hs {
+		if !h.HasCredential("address") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'address'")
+		}
+		if !h.HasCredential("privateKey") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'privateKey'")
+		}
+	}
+	return errors.Filter()
+}
+
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Handlers, validation.Required),
+		validation.Field(&l.Handlers, handlerHasCredentials{}),
 	)
 }
 
+// Listen accepts SSH connections and MITMs them using a Handler.
 func (l *Listener) Listen() {
 	serverConfig := &ssh.ServerConfig{
 		PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {

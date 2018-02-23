@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"regexp"
 	"strconv"
 
@@ -51,6 +50,16 @@ type Config struct {
 	Handlers  []Handler
 }
 
+// HasCredential indicates whether a Handler has the specified credential.
+func (h Handler) HasCredential(credentialName string) bool {
+	for _, c := range h.Credentials {
+		if c.Name == credentialName {
+			return true
+		}
+	}
+	return false
+}
+
 func parseConfigFile(buffer []byte, config *Config) (err error) {
 	if err = yaml.UnmarshalStrict(buffer, &config); err != nil {
 		return err
@@ -72,7 +81,7 @@ func (h Handler) Validate() (err error) {
 func (l Listener) SelectHandlers(handlers []Handler) []Handler {
 	var result []Handler
 	for _, h := range handlers {
-		if h.listenerName() == l.Name {
+		if h.ListenerName == l.Name {
 			result = append(result, h)
 		}
 	}
@@ -89,27 +98,6 @@ func (l Listener) Validate() (err error) {
 	return
 }
 
-// Listener looks up the handler's listener in the list of available listeners.
-// The Validate method ensures that the the listener used by this handler does exist,
-// so if the listener is not found, then we panic.
-func (h Handler) Listener(listeners []Listener) *Listener {
-	listenerName := h.listenerName()
-	for _, l := range listeners {
-		if l.Name == listenerName {
-			return &l
-		}
-	}
-	log.Panicf("Handler '%s' uses listener '%s' but it does not exist", h.Name, listenerName)
-	return nil
-}
-
-func (h Handler) listenerName() string {
-	if h.ListenerName != "" {
-		return h.ListenerName
-	}
-	return h.Name
-}
-
 type handlerHasListener struct {
 	listenerNames map[string]Listener
 }
@@ -118,7 +106,7 @@ func (hhl handlerHasListener) Validate(value interface{}) error {
 	hs := value.([]Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
-		_, ok := hhl.listenerNames[h.listenerName()]
+		_, ok := hhl.listenerNames[h.ListenerName]
 		if !ok {
 			errors[strconv.Itoa(i)] = fmt.Errorf("has no associated listener")
 		}
@@ -187,6 +175,9 @@ func Load(data []byte) (config Config, err error) {
 		h := &config.Handlers[i]
 		if h.Type == "" {
 			h.Type = h.Name
+		}
+		if h.ListenerName == "" {
+			h.ListenerName = h.Name
 		}
 
 		h.Patterns = make([]*regexp.Regexp, len(h.Match))

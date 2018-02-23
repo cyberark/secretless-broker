@@ -30,6 +30,8 @@ type BackendConfig struct {
 // Handler connects a client to a backend. It uses the handler Config and Providers to
 // establish the BackendConfig, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
+//
+// Handler requires "address", "username" and "password" credentials.
 type Handler struct {
 	Config        config.Handler
 	Client        net.Conn

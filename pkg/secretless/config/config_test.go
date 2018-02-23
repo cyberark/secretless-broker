@@ -20,15 +20,21 @@ func Test_Config(t *testing.T) {
 
 	Convey("Compiles the handler match expressions into patterns", t, func() {
 		yaml := `
+listeners:
+  - name: conjur
+    protocol: http
+    address: 0.0.0.0:1080
+
 handlers:
-	- name: conjur
-	  match: ".*"
+  - name: conjur
+    match: [ ".*" ]
 `
 		pattern, err := regexp.Compile(".*")
 		So(err, ShouldBeNil)
 
 		config, err := Load([]byte(yaml))
-		So(config.Handlers[0].Patterns[0], ShouldEqual, pattern)
+		So(err, ShouldBeNil)
+		So(config.Handlers[0].Patterns[0].String(), ShouldEqual, pattern.String())
 	})
 
 	Convey("Loads a realistic configuration without errors", t, func() {

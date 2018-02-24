@@ -21,7 +21,7 @@ services:
       pg:
         condition: service_healthy
     volumes:
-      - ./secretless.yml:/config.yaml
+      - ./secretless.yml:/secretless.yml
       - ./run/postgresql/:/run/postgresql/
 
   test:

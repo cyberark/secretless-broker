@@ -1,7 +1,6 @@
 package secretless
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -19,6 +18,8 @@ import (
 // Listener is an interface for listening in an abstract way.
 type Listener interface {
 	Listen()
+
+	Validate() error
 }
 
 // Proxy is the main struct of Secretless.
@@ -50,34 +51,35 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 			os.Exit(0)
 		}(sigc)
 	}
-	if err == nil {
-		log.Printf("%s listener '%s' listening at: %s", listenerConfig.Protocol, listenerConfig.Name, l.Addr())
-
-		protocol := listenerConfig.Protocol
-		if protocol == "" {
-			protocol = listenerConfig.Name
-		}
-
-		var listener Listener
-		switch protocol {
-		case "pg":
-			listener = &pg.Listener{Config: listenerConfig, Listener: l, Handlers: p.Config.Handlers}
-		case "http":
-			listener = &http.Listener{Config: listenerConfig, Listener: l, Handlers: p.Config.Handlers}
-		case "ssh":
-			listener = &ssh.Listener{Config: listenerConfig, Listener: l, Handlers: p.Config.Handlers}
-		case "ssh-agent":
-			listener = &sshagent.Listener{Config: listenerConfig, Listener: l, Handlers: p.Config.Handlers}
-		default:
-			panic(fmt.Sprintf("Unrecognized protocol '%s' on listener '%s'", protocol, listenerConfig.Name))
-		}
-		go func() {
-			defer wg.Done()
-			listener.Listen()
-		}()
-	} else {
+	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Printf("%s listener '%s' listening at: %s", listenerConfig.Protocol, listenerConfig.Name, l.Addr())
+
+	var listener Listener
+	switch listenerConfig.Protocol {
+	case "pg":
+		listener = &pg.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
+	case "http":
+		listener = &http.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
+	case "ssh":
+		listener = &ssh.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
+	case "ssh-agent":
+		listener = &sshagent.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
+	default:
+		log.Panicf("Unrecognized protocol '%s' on listener '%s'", listenerConfig.Protocol, listenerConfig.Name)
+	}
+
+	err = listener.Validate()
+	if err != nil {
+		log.Fatalf("Listener '%s' is invalid : %s", listenerConfig.Name, err)
+	}
+
+	go func() {
+		defer wg.Done()
+		listener.Listen()
+	}()
 }
 
 // Run is the main entrypoint to the secretless program.

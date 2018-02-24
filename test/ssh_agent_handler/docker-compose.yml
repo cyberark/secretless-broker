@@ -10,7 +10,7 @@ services:
   secretless:
     image: secretless
     volumes:
-      - ./secretless.yml:/config.yaml
+      - ./secretless.yml:/secretless.yml
       - ./run:/run/ssh-agent
       - ./id_insecure:/root/id_insecure:ro
     depends_on:

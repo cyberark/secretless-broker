@@ -158,12 +158,5 @@ func (h *Handler) Run() {
 				}
 			}
 		}()
-
-		// Move the data from the client to the server
-
-		// Move the server responses to the client
-
-		// clientChannel.Close()
-		// serverChannel.Close()
 	}
 }

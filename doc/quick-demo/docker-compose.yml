@@ -23,5 +23,5 @@ services:
     depends_on:
       - pg
     volumes:
-      - ./secretless.yml:/config.yaml
+      - ./secretless.yml:/secretless.yml
       - ./run/postgresql:/var/run/postgresql/

@@ -14,6 +14,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
+// Handler implements an ssh-agent which holds a single key.
 type Handler struct {
 	Config     config.Handler
 	Connection net.Conn
@@ -37,7 +38,10 @@ func parseKey(pemStr []byte) (rawkey interface{}, err error) {
 	return
 }
 
-// LoadKeys loads the keys configured for this keyring handler.
+// LoadKeys loads the key configured for this ssh-agent.
+//
+// The Handler Credentials should provide a key as "rsa" or "ecdsa".
+// "comment", "lifetime", and "confirm" are optional parameters.
 func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	var values map[string][]byte
 
@@ -63,6 +67,9 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 			return
 		}
 	}
+
+	// TODO: comment, lifetime and confirm aren't credentials.
+	// Maybe Handler needs a mechanism for these types of non-secret configuration options.
 	if comment, ok := values["comment"]; ok {
 		key.Comment = string(comment)
 	}

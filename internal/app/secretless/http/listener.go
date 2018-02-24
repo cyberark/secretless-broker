@@ -9,10 +9,12 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 
 	handlerImpl "github.com/conjurinc/secretless/internal/app/secretless/http/handler"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type Handler interface {
@@ -26,6 +28,39 @@ type Listener struct {
 	Transport *http.Transport
 	Handlers  []config.Handler
 	Listener  net.Listener
+}
+
+// HandlerHasCredentials validates that a handler has all necessary credentials.
+type handlerHasCredentials struct {
+}
+
+// Validate checks that a handler has all necessary credentials.
+func (hhc handlerHasCredentials) Validate(value interface{}) error {
+	hs := value.([]config.Handler)
+	errors := validation.Errors{}
+	for i, h := range hs {
+		if h.Type == "aws" {
+			if !h.HasCredential("accessKeyId") {
+				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessKeyId'")
+			}
+			if !h.HasCredential("secretAccessKey") {
+				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'secretAccessKey'")
+			}
+		} else if h.Type == "conjur" {
+			if !h.HasCredential("accessToken") {
+				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessToken'")
+			}
+		}
+	}
+	return errors.Filter()
+}
+
+// Validate verifies the completeness and correctness of the Listener.
+func (l Listener) Validate() error {
+	return validation.ValidateStruct(&l,
+		validation.Field(&l.Handlers, validation.Required),
+		validation.Field(&l.Handlers, handlerHasCredentials{}),
+	)
 }
 
 // Attribution: https://github.com/elazarl/goproxy/blob/de25c6ed252fdc01e23dae49d6a86742bd790b12/proxy.go#L74
@@ -49,15 +84,13 @@ func (l *Listener) LookupHandler(r *http.Request) Handler {
 					log.Printf("Using handler '%s' for request %s", handler.Name, r.URL.String())
 				}
 				// Construct the return object
-				serviceType := handler.Type
-				if serviceType == "" {
-					serviceType = handler.Name
-				}
-				switch serviceType {
+				switch handler.Type {
 				case "aws":
 					return handlerImpl.AWSHandler{handler}
 				case "conjur":
 					return handlerImpl.ConjurHandler{handler}
+				default:
+					log.Panicf("Service type '%s' of handler '%s' is not recognized", handler.Type, handler.Name)
 				}
 			}
 		}
@@ -144,7 +177,7 @@ func (l *Listener) Listen() {
 	for _, fname := range l.Config.CACertFiles {
 		severCert, err := ioutil.ReadFile(fname)
 		if err != nil {
-			panic(fmt.Sprintf("Could not load CA certificate file %s : %s", fname, err))
+			log.Panicf("Could not load CA certificate file %s : %s", fname, err)
 		}
 		caCertPool.AppendCertsFromPEM(severCert)
 	}

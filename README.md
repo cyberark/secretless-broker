@@ -70,7 +70,7 @@ secretless $ ./build/build_darwin.sh
 Now navigate to the directory `doc/quick-demo`:
 
 ```sh-session
-secretless $ cd doc/quick
+secretless $ cd doc/quick-demo
 ```
 
 You will use Secretless to connect a client to a Postgresql database, without the client knowing the database password.

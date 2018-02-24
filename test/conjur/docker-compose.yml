@@ -27,7 +27,7 @@ services:
     depends_on:
       - conjur
     volumes:
-      - ./secretless.yml:/config.yaml
+      - ./secretless.yml:/secretless.yml
 
   test:
     build:

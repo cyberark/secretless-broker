@@ -20,10 +20,10 @@
   version = "v1.20.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/cyberark/conjur-api-go"
   packages = ["conjurapi","conjurapi/authn","conjurapi/response"]
-  revision = "f1ab305f73250ebe61fb4f03792a6c55355bade1"
-  version = "v0.3.0"
+  revision = "94b5cadf8f906f0bd92638d1f5c5ffe8f060d862"
 
 [[projects]]
   branch = "master"
@@ -42,6 +42,12 @@
   packages = ["."]
   revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
   version = "v1.32.0"
+
+[[projects]]
+  name = "github.com/go-ozzo/ozzo-validation"
+  packages = ["."]
+  revision = "85dcd8368eba387e65a03488b003e233994e87e9"
+  version = "v3.3"
 
 [[projects]]
   branch = "master"
@@ -177,6 +183,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fb7870c7fdc451e9200408ae600ca4a6ba1e84e5590ac93590bc60ef263330a7"
+  inputs-digest = "ba4c10a992f58e37628f7b8ad632255e45ade7d0b78334c00b3b6ef4b6e0638a"
   solver-name = "gps-cdcl"
   solver-version = 1

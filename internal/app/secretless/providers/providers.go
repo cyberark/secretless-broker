@@ -1,6 +1,7 @@
 package providers
 
 import (
+	awsProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/awssecrets"
 	conjurProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/conjur"
 	envProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/env"
 	fileProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/file"
@@ -14,6 +15,7 @@ import (
 
 // ProviderFactories contains the list of built-in provider factories
 var ProviderFactories = map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error){
+	"aws":        awsProvider.ProviderFactory,
 	"conjur":     conjurProvider.ProviderFactory,
 	"env":        envProvider.ProviderFactory,
 	"file":       fileProvider.ProviderFactory,

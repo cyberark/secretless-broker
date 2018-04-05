@@ -3,6 +3,7 @@ package awssecrets
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -22,7 +23,9 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 	// shared configuration such as region, endpoint, and credentials. A
 	// Session should be shared where possible to take advantage of
 	// configuration and credential caching.
-	sess, err := session.NewSession()
+	sess, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: Could not create AWS Secrets provider: %s", err)
 	}
@@ -47,7 +50,7 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 	client := p.Client
 
 	req, resp := client.GetSecretValueRequest(&secretsmanager.GetSecretValueInput{
-		SecretId: &id,
+		SecretId: aws.String(id),
 	})
 
 	err := req.Send()

@@ -3,7 +3,8 @@
 # Builds secretless binaries
 # usage: ./build/build.sh [OPTIONAL LIST OS] [OPTIONAL LIST ARCH]
 # If OS/arch arguments are unspecified, builds binaries for all supported 
-# operating systems and architectures
+# operating systems and architectures. Set KEEP_ALIVE=1 to keep the build
+# container running after this script exits.
 set -ex
 
 on_error () {

@@ -17,13 +17,14 @@ on_exit () {
 }
 trap on_exit EXIT
 
+readonly GOLANG_VERSION="1.9"
 readonly SUPPORTED_BUILD_OS="windows darwin linux"
 readonly SUPPORTED_BUILD_ARCH="386 amd64"
 readonly REPOSITORY="github.com/conjurinc/secretless"
 readonly CONTAINER_ID="$(docker run \
   -v "$(pwd):/go/src/${REPOSITORY}" \
   -itd \
-  golang:1.9 \
+  golang:${GOLANG_VERSION} \
   bash
 )"
 

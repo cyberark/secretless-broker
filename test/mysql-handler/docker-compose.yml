@@ -22,7 +22,7 @@ services:
       MYSQL_PORT: 3306
       MYSQL_USER: test
       MYSQL_PASSWORD: test
-    command: ["./test/mysql-handler/wait-for-mysql.sh", "./secretless"]
+    command: ["./test/mysql-handler/wait-for-mysql", "./secretless"]
     volumes:
       - ./secretless.yml:/secretless.yml
       - ./run/mysql:/var/lib/mysql

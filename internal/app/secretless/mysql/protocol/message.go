@@ -21,14 +21,7 @@ import (
 	"strings"
 )
 
-/* PostgreSQL message length offset constants. */
-const (
-	PGMessageLengthOffsetStartup int = 0
-	PGMessageLengthOffset        int = 1
-)
-
-// MessageBuffer is a variable-sized byte buffer used to read and write
-// PostgreSQL Frontend and Backend messages.
+// MessageBuffer is a variable-sized byte buffer used to read and write msgs
 //
 // A separate instance of a MessageBuffer should be use for reading and writing.
 type MessageBuffer struct {
@@ -90,7 +83,6 @@ func (message *MessageBuffer) WriteString(value string) (int, error) {
 
 // ResetLength will reset the message length for the message.
 //
-// offset should be one of the PGMessageLengthOffset* constants.
 func (message *MessageBuffer) ResetLength(offset int) {
 	/* Get the contents of the buffer. */
 	b := message.buffer.Bytes()

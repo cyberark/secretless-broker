@@ -4,7 +4,6 @@ import (
 	"log"
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
@@ -25,12 +24,7 @@ func (h *Handler) ConfigureBackend() (err error) {
 	}
 
 	if host := values["host"]; host != nil {
-		// Form of url is : 'dbcluster.myorg.com:5432/reports'
-		tokens := strings.SplitN(string(host), "/", 2)
-		result.Host = tokens[0]
-		if len(tokens) == 2 {
-			result.Database = tokens[1]
-		}
+		result.Host = string(values["host"])
 	}
 
 	if values["port"] != nil {
@@ -46,10 +40,15 @@ func (h *Handler) ConfigureBackend() (err error) {
 		result.Password = string(values["password"])
 	}
 
+	if values["schema"] != nil {
+		result.Schema = string(values["schema"])
+	}
+
 	delete(values, "host")
 	delete(values, "port")
 	delete(values, "username")
 	delete(values, "password")
+	delete(values, "schema")
 
 	result.Options = make(map[string]string)
 	for k, v := range values {
@@ -72,26 +71,57 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	if h.Config.Debug {
-		log.Print("Sending startup message")
+		log.Print("Processing handshake")
 	}
-	startupMessage := protocol.CreateStartupMessage(h.BackendConfig.Username, h.ClientOptions.Database, h.BackendConfig.Options)
 
-	connection.Write(startupMessage)
+	//backendHandshake, clientHandshake, err := protocol.ProcessHandshake(h.Client, connection)
+	//if err != nil {
+	//	return
+	//}
 
-	if h.Config.Debug {
-		log.Print("Authenticating to the backend")
-	}
-	if err = protocol.HandleAuthenticationRequest(h.BackendConfig.Username, h.BackendConfig.Password, connection); err != nil {
+	// read server handshake
+	packet, err := protocol.ProxyPacket(connection, h.Client)
+	if err != nil {
 		return
 	}
+
+	serverHandshake, err := protocol.DecodeHandshakeV10(packet)
+	if err != nil {
+		return
+	}
+
+	// read client response
+	packet, err = protocol.ProxyPacket(h.Client, connection)
+	if err != nil {
+		return
+	}
+
+	clientHandshake, err := protocol.DecodeHandshakeResponse41(packet)
+	if err != nil {
+		return
+	}
+
+	log.Print(serverHandshake)
+	log.Print(clientHandshake)
+
+	//startupMessage := protocol.CreateStartupMessage(h.BackendConfig.Username, h.ClientOptions.Schema, h.BackendConfig.Options)
+
+	//connection.Write(startupMessage)
+
+	//if h.Config.Debug {
+	//	log.Print("Authenticating to the backend")
+	//}
+	//if err = protocol.HandleAuthenticationRequest(h.BackendConfig.Username, h.BackendConfig.Password, connection); err != nil {
+	//	return
+	//}
 
 	if h.Config.Debug {
 		log.Printf("Successfully connected to '%s:%d'", h.BackendConfig.Host, h.BackendConfig.Port)
 	}
 
-	if _, err = h.Client.Write(protocol.CreateAuthenticationOKMessage()); err != nil {
-		return
-	}
+	//if _, err = h.Client.Write(protocol.CreateAuthenticationOKMessage()); err != nil {
+	//	return
+	//}
 
 	h.Backend = connection
 

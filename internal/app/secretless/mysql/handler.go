@@ -14,8 +14,10 @@ type ClientOptions struct {
 	// TODO: remove this when custom authorization is removed.
 	User string
 	// TODO: override the database address with this setting.
-	Database string
-	Options  map[string]string
+	Host    string
+	Port    uint
+	Schema  string
+	Options map[string]string
 }
 
 // BackendConfig stores the connection info to the real backend database.
@@ -24,7 +26,7 @@ type BackendConfig struct {
 	Port     uint
 	Username string
 	Password string
-	Database string
+	Schema   string
 	Options  map[string]string
 }
 
@@ -43,8 +45,8 @@ type Handler struct {
 
 func (h *Handler) abort(err error) {
 	mysqlError := protocol.Error{
-		Severity: protocol.ErrorSeverityFatal,
-		Code:     protocol.ErrorCodeInternalError,
+		Code:     protocol.CR_UNKNOWN_ERROR,
+		SQLSTATE: protocol.ErrorCodeInternalError,
 		Message:  err.Error(),
 	}
 	h.Client.Write(mysqlError.GetMessage())
@@ -80,15 +82,16 @@ func (h *Handler) Pipe() {
 
 // Run processes the startup message, configures the backend connection, connects to the backend,
 // and pipes the data between the client and the backend.
+// TODO update description for mysql
 func (h *Handler) Run() {
 	var err error
 
-	if err = h.Startup(); err != nil {
-		h.abort(err)
-		return
-	}
+	//if err = h.Startup(); err != nil {
+	//	h.abort(err)
+	//	return
+	//}
 
-	if err := h.ConfigureBackend(); err != nil {
+	if err = h.ConfigureBackend(); err != nil {
 		h.abort(err)
 		return
 	}

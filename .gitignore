@@ -1,6 +1,7 @@
 .env
 debug
 debug.*
+.vscode/
 vendor
 /doc/godoc
 /secretless

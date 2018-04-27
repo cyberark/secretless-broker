@@ -65,8 +65,8 @@ func (l *Listener) Listen() {
 			handler.Run()
 		} else {
 			mysqlError := protocol.Error{
-				Severity: protocol.ErrorSeverityFatal,
-				Code:     protocol.ErrorCodeInternalError,
+				Code:     protocol.CR_UNKNOWN_ERROR,
+				SQLSTATE: protocol.ErrorCodeInternalError,
 				Message:  fmt.Sprintf("No handler found for listener %s", l.Config.Name),
 			}
 			client.Write(mysqlError.GetMessage())

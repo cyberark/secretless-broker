@@ -6,7 +6,7 @@ import (
 
 /* MySQL Error Codes */
 const (
-	CR_UNKNOWN_ERROR = "2000"
+	CRUnknownError = "2000"
 )
 
 const (

@@ -3,8 +3,7 @@ package mysql
 import (
 	"fmt"
 	"log"
-
-	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
+	"strconv"
 )
 
 // newClientOptions builds a ClientOptions from an options map.
@@ -18,11 +17,21 @@ func newClientOptions(options map[string]string) (co *ClientOptions, err error) 
 		err = fmt.Errorf("No 'user' found in connect options")
 		return
 	}
-	co.Database, ok = co.Options["database"]
+
+	co.Host, ok = co.Options["host"]
 	if !ok {
-		err = fmt.Errorf("No 'database' found in connect options")
+		err = fmt.Errorf("No 'host' found in connect options")
 		return
 	}
+
+	portString, ok := co.Options["port"]
+	if !ok {
+		err = fmt.Errorf("No 'port' found in connect options")
+		return
+	}
+	port64, err := strconv.ParseUint(string(portString), 10, 64)
+	co.Port = uint(port64)
+
 	return
 }
 
@@ -32,31 +41,31 @@ func (h *Handler) Startup() (err error) {
 		log.Printf("Handling connection %v", h.Client)
 	}
 
-	var messageBytes []byte
-	if messageBytes, err = protocol.ReadStartupMessage(h.Client); err != nil {
-		return
-	}
+	//var messageBytes []byte
+	//if messageBytes, err = protocol.ReadStartupMessage(h.Client); err != nil {
+	//	return
+	//}
 
-	var version int32
-	var options map[string]string
-	if version, options, err = protocol.ParseStartupMessage(messageBytes); err != nil {
-		return
-	}
+	//var version int32
+	//var options map[string]string
+	//if version, options, err = protocol.ParseStartupMessage(messageBytes); err != nil {
+	//	return
+	//}
 
-	if h.Config.Debug {
-		log.Printf("h.Client version : %v, (SSL mode: %v)", version, version == protocol.SSLRequestCode)
-	}
+	//if h.Config.Debug {
+	//	log.Printf("h.Client version : %v, (SSL mode: %v)", version, version == protocol.SSLRequestCode)
+	//}
 
 	// Handle the case where the startup message was an SSL request.
-	if version == protocol.SSLRequestCode {
-		err = fmt.Errorf("SSL not supported")
-		return
-	}
+	//if version == protocol.SSLRequestCode {
+	//	err = fmt.Errorf("SSL not supported")
+	//	return
+	//}
 
-	h.ClientOptions, err = newClientOptions(options)
-	if err != nil {
-		return
-	}
+	//h.ClientOptions, err = newClientOptions(options)
+	//if err != nil {
+	//	return
+	//}
 
 	return
 }

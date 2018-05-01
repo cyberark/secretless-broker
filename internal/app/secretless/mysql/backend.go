@@ -91,18 +91,30 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// read client response
-	packet, err = protocol.ProxyPacket(h.Client, connection)
+	// TODO intercept client response and add appropriate auth
+	interceptedClientPacket, err := protocol.ReadPacket(h.Client)
 	if err != nil {
 		return
 	}
 
-	clientHandshake, err := protocol.DecodeHandshakeResponse41(packet)
+	interceptedClientHandshake, err := protocol.DecodeHandshakeResponse41(interceptedClientPacket)
 	if err != nil {
 		return
 	}
 
-	log.Print(serverHandshake)
-	log.Print(clientHandshake)
+	clientPacket, err := protocol.GetHandshakeResponse41Packet(interceptedClientHandshake, serverHandshake, h.BackendConfig.Username, h.BackendConfig.Password)
+	if err != nil {
+		return
+	}
+
+	if _, err = protocol.WritePacket(clientPacket, connection); err != nil {
+		return
+	}
+
+	// TODO
+	//	if err := protocol.writeOK(); err != nil {
+	//		return
+	//	}
 
 	//startupMessage := protocol.CreateStartupMessage(h.BackendConfig.Username, h.ClientOptions.Schema, h.BackendConfig.Options)
 

@@ -45,7 +45,7 @@ type Handler struct {
 
 func (h *Handler) abort(err error) {
 	mysqlError := protocol.Error{
-		Code:     protocol.CR_UNKNOWN_ERROR,
+		Code:     protocol.CRUnknownError,
 		SQLSTATE: protocol.ErrorCodeInternalError,
 		Message:  err.Error(),
 	}

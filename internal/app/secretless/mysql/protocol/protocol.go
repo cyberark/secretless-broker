@@ -26,6 +26,7 @@ package protocol
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -95,6 +96,7 @@ type HandshakeV10 struct {
 	ConnectionID       uint32
 	ServerCapabilities uint32
 	AuthPlugin         string
+	Salt               []byte
 }
 
 // DecodeHandshakeV10 decodes initial handshake request from server.
@@ -152,8 +154,16 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 	connectionID := binary.LittleEndian.Uint32(connectionIDBuf)
 
-	// Skip AuthPluginData and filler (always 0x00)
-	if _, err := r.Seek(9, io.SeekCurrent); err != nil {
+	// Read AuthPluginDataPart1
+	var salt []byte
+	salt8 := make([]byte, 8)
+	if _, err := r.Read(salt8); err != nil {
+		return nil, err
+	}
+	copy(salt, salt8)
+
+	// Skip filler
+	if _, err := r.ReadByte(); err != nil {
 		return nil, err
 	}
 
@@ -180,6 +190,7 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	serverCapabilitiesBuf = append(serverCapabilitiesBuf, serverCapabilitiesHigherBuf...)
 	serverCapabilities := binary.LittleEndian.Uint32(serverCapabilitiesBuf)
 
+	// Get length of AuthnPluginDataPart2
 	var authPluginDataLength byte
 	if serverCapabilities&clientPluginAuth != 0 {
 		var err error
@@ -194,12 +205,20 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		return nil, err
 	}
 
+	// Get AuthnPluginDataPart2
 	if serverCapabilities&clientSecureConnection != 0 {
-		skip := int64(math.Max(13, float64(authPluginDataLength)-8))
-		// Skip reserved (all 0x00)
-		if _, err := r.Seek(skip, io.SeekCurrent); err != nil {
+		read := int64(math.Max(13, float64(authPluginDataLength)-8))
+
+		salt2 := make([]byte, read)
+		if _, err := r.Read(salt2); err != nil {
 			return nil, err
 		}
+
+		// the last byte has to be 0, and is not part of the data
+		if salt2[read-1] != 0 {
+			return nil, errors.New("Malformed packet")
+		}
+		copy(salt[8:], salt2[:read-1])
 	}
 
 	var authPlugin string
@@ -213,6 +232,7 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		ConnectionID:       connectionID,
 		ServerCapabilities: serverCapabilities,
 		AuthPlugin:         authPlugin,
+		Salt:               salt,
 	}, nil
 }
 
@@ -220,10 +240,11 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 // if the server announced it in its initial handshake packet.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeResponse41
 type HandshakeResponse41 struct {
-	ClientCapabilities uint32
-	ClientCharset      byte
-	Username           string
-	Database           string
+	CapabilityFlags uint32
+	ClientCharset   uint8
+	Username        string
+	Auth            string
+	Database        string
 }
 
 // DecodeHandshakeResponse41 decodes handshake response packet send by client.
@@ -242,7 +263,12 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	if _, err := r.Read(clientCapabilitiesBuf); err != nil {
 		return nil, err
 	}
-	clientCapabilities := binary.LittleEndian.Uint32(clientCapabilitiesBuf)
+	capabilityFlags := binary.LittleEndian.Uint32(clientCapabilitiesBuf)
+
+	// check that the server is using protocol 4.1
+	if capabilityFlags&clientProtocol41 == 0 {
+		return nil, errors.New("Protocol mismatch")
+	}
 
 	// Skip MaxPacketSize
 	if _, err := r.Seek(4, io.SeekCurrent); err != nil {
@@ -255,31 +281,52 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		return nil, err
 	}
 
-	// Read Username
-	username := ""
-	for {
-		userchar, err := r.ReadByte()
-		if err != nil {
-			return nil, err
-		} else if userchar == 0 {
-			break
-		} else {
-			username += string(userchar)
-		}
+	// Skip 23 byte buffer
+	if _, err := r.Seek(23, io.SeekCurrent); err != nil {
+		return nil, err
 	}
 
+	// Read Username
+	username := ReadNullTerminatedString(r)
+
 	// Read Auth
-	var authLength int64
-	if authLength, err := r.ReadByte(); err != nil {
-		return nil, err
-	}
-	if auth, err := r.Seek(authLength, io.SeekCurrent); err != nil {
-		return nil, err
+	var auth string
+	if capabilityFlags&clientSecureConnection > 0 {
+		authLengthByte, err := r.ReadByte()
+		if err != nil {
+			return nil, err
+		}
+		authLength := int64(authLengthByte)
+		authBytes, err := r.Seek(authLength, io.SeekCurrent)
+		if err != nil {
+			return nil, err
+		}
+		auth = string(authBytes)
+	} else {
+		auth = ReadNullTerminatedString(r)
 	}
 
 	// Read Database
+	var database string
+	if capabilityFlags&clientConnectWithDB > 0 {
+		database = ReadNullTerminatedString(r)
+	}
 
-	return &HandshakeResponse41{clientCapabilities, charset}, nil
+	return &HandshakeResponse41{capabilityFlags, charset, username, auth, database}, nil
+}
+
+// GetHandshakeResponse41Packet takes in a HandshakeResponse41 parsed
+// from the client and updates it with the data from the BackendConfig
+func GetHandshakeResponse41Packet(clientHandshake HandshakeResponse41, serverHandshake HandshakeV10, username string, password string) (packet []byte, err error) {
+
+	var buf bytes.Buffer
+
+	authResponse, err := NativePassword(password, serverHandshake.Salt)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 // QueryRequest represents COM_QUERY or COM_STMT_PREPARE command sent by client to server.
@@ -650,4 +697,31 @@ func CheckPacketLength(expected int, packet []byte) error {
 	}
 
 	return nil
+}
+
+// https://dev.mysql.com/doc/internals/en/secure-password-authentication.html#packet-Authentication::Native41
+// Calculates native password expected by server in HandshakeResponse41
+// SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
+func NativePassword(password string, salt []byte) (nativePassword []byte, err error) {
+
+	sha1 := sha1.New()
+	sha1.Write([]byte(password))
+	passwordSHA1 := sha1.Sum(nil)
+
+	sha1.Reset()
+	sha1.Write(passwordSHA1)
+	passwordSHA1SHA1 := sha1.Sum(nil)
+
+	sha1.Reset()
+	sha1.Write(salt)
+	sha1.Write(passwordSHA1SHA1)
+	randomSHA1 := sha1.Sum(nil)
+
+	// nativePassword = passwordSHA1 ^ randomSHA1
+	nativePassword = make([]byte, len(randomSHA1))
+	for i := range randomSHA1 {
+		nativePassword[i] = passwordSHA1[i] ^ randomSHA1[i]
+	}
+
+	return
 }

@@ -25,10 +25,10 @@ SOFTWARE.
 package protocol
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 	"net"
-	"bytes"
 )
 
 //...
@@ -183,7 +183,7 @@ func ReadResponse(conn net.Conn, deprecateEof bool) ([]byte, byte, error) {
 
 		data = append(data, pkt...)
 
-		if pkt[4] == responseEof {
+		if pkt[4] == responseEOF {
 			break
 		}
 	}

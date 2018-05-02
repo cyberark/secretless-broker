@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"bytes"
 	"fmt"
 )
 
@@ -44,4 +45,56 @@ func (e *Error) GetMessage() []byte {
 	//msg.ResetLength(PGMessageLengthOffset)
 
 	return msg.Bytes()
+}
+
+// ParseError takes in stream and returns error
+func ParseError(data []byte) (e *Error) {
+	e = &Error{}
+
+	buf := bytes.NewBuffer(data)
+	if _, err := buf.ReadByte(); err != nil {
+		e.Code = "2027"
+		e.SQLSTATE = "CR_MALFORMED_PACKET"
+		e.Message = "Malformed packet"
+		return
+	}
+
+	// read error code
+	codeBuf := make([]byte, 2)
+	if _, err := buf.Read(codeBuf); err != nil {
+		e.Code = "2027"
+		e.SQLSTATE = "CR_MALFORMED_PACKET"
+		e.Message = "Malformed packet"
+		return
+	}
+	e.Code = string(codeBuf)
+
+	// read sql state
+	if _, err := buf.ReadByte(); err != nil {
+		e.Code = "2027"
+		e.SQLSTATE = "CR_MALFORMED_PACKET"
+		e.Message = "Malformed packet"
+		return
+	}
+
+	sqlStateBuf := make([]byte, 5)
+	if _, err := buf.Read(sqlStateBuf); err != nil {
+		e.Code = "2027"
+		e.SQLSTATE = "CR_MALFORMED_PACKET"
+		e.Message = "Malformed packet"
+		return
+	}
+	e.SQLSTATE = string(sqlStateBuf)
+
+	// read error message
+	messageBuf := make([]byte, buf.Len())
+	if _, err := buf.Read(messageBuf); err != nil {
+		e.Code = "2027"
+		e.SQLSTATE = "CR_MALFORMED_PACKET"
+		e.Message = "Malformed packet"
+		return
+	}
+	e.Message = string(messageBuf)
+
+	return
 }

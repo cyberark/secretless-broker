@@ -91,7 +91,6 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// read client response
-	// TODO intercept client response and add appropriate auth
 	interceptedClientPacket, err := protocol.ReadPacket(h.Client)
 	if err != nil {
 		return
@@ -111,21 +110,16 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	// TODO
-	//	if err := protocol.writeOK(); err != nil {
-	//		return
-	//	}
+	// handle errors
+	packet, err = protocol.ProxyPacket(connection, h.Client)
+	if err != nil {
+		return
+	}
 
-	//startupMessage := protocol.CreateStartupMessage(h.BackendConfig.Username, h.ClientOptions.Schema, h.BackendConfig.Options)
-
-	//connection.Write(startupMessage)
-
-	//if h.Config.Debug {
-	//	log.Print("Authenticating to the backend")
-	//}
-	//if err = protocol.HandleAuthenticationRequest(h.BackendConfig.Username, h.BackendConfig.Password, connection); err != nil {
-	//	return
-	//}
+	if packet[4] == protocol.ResponseErr {
+		err := protocol.ParseError(packet)
+		return
+	}
 
 	if h.Config.Debug {
 		log.Printf("Successfully connected to '%s:%d'", h.BackendConfig.Host, h.BackendConfig.Port)

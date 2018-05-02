@@ -25,7 +25,7 @@ SOFTWARE.
 package protocol
 
 const (
-	responseEof         = 0xfe
+	responseEOF         = 0xfe
 	responseOk          = 0x00
 	responsePrepareOk   = 0x00
 	ResponseErr         = 0xff
@@ -41,11 +41,13 @@ const (
 	responseResultset = 0xbb
 
 	// MySQL connection state constants
-	ConnStateStarted  = 0xf4
-	ConnStateFinished = 0xf5
+	connStateStarted  = 0xf4
+	connStateFinished = 0xf5
 
 	// Digits after comma
 	doubleDecodePrecision = 6
+
+	defaultAuthPluginName = "mysql_native_password"
 )
 
 const (

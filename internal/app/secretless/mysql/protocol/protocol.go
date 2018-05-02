@@ -312,12 +312,21 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		database = ReadNullTerminatedString(r)
 	}
 
+	// check whether the auth method was specified
+	if capabilityFlags&clientPluginAuth > 0 {
+		authPluginName := ReadNullTerminatedString(r)
+
+		if authPluginName != defaultAuthPluginName {
+			return nil, errors.New("Error in server handshake")
+		}
+	}
+
 	return &HandshakeResponse41{capabilityFlags, charset, username, auth, database}, nil
 }
 
 // GetHandshakeResponse41Packet takes in a HandshakeResponse41 parsed
 // from the client and updates it with the data from the BackendConfig
-func GetHandshakeResponse41Packet(clientHandshake HandshakeResponse41, serverHandshake HandshakeV10, username string, password string) (packet []byte, err error) {
+func GetHandshakeResponse41Packet(clientHandshake *HandshakeResponse41, serverHandshake *HandshakeV10, username string, password string) (packet []byte, err error) {
 
 	var buf bytes.Buffer
 
@@ -325,6 +334,48 @@ func GetHandshakeResponse41Packet(clientHandshake HandshakeResponse41, serverHan
 	if err != nil {
 		return
 	}
+
+	// write the capability flags
+	capabilityFlagsBuf := make([]byte, 4)
+	binary.LittleEndian.PutUint32(capabilityFlagsBuf, clientHandshake.CapabilityFlags)
+	buf.Write(capabilityFlagsBuf)
+
+	// write 4 zero bytes for max packet size
+	maxPacketSizeBuf := make([]byte, 4)
+	binary.LittleEndian.PutUint32(maxPacketSizeBuf, 0)
+	buf.Write(maxPacketSizeBuf)
+
+	// write 1 byte char set
+	buf.WriteByte(clientHandshake.ClientCharset)
+
+	// write string[23] reserved (all zero)
+	for i := 0; i < 23; i++ {
+		buf.WriteByte(0)
+	}
+
+	// write string username
+	buf.WriteString(username)
+	buf.WriteByte(0)
+
+	// write auth
+	if clientHandshake.CapabilityFlags&clientSecureConnection > 0 {
+		buf.WriteByte(uint8(len(authResponse)))
+		buf.Write(authResponse)
+	} else {
+		buf.Write(authResponse)
+		buf.WriteByte(0)
+	}
+
+	buf.WriteString(defaultAuthPluginName)
+	buf.WriteByte(0)
+
+	// write database
+
+	// write auth plugin name
+
+	// write 1 zero byte
+
+	packet = buf.Bytes()
 
 	return
 }

@@ -132,8 +132,6 @@ type HandshakeV10 struct {
 //		string[NUL] AuthPluginName
 // }
 func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
-	// TODO: Add length check
-
 	r := bytes.NewReader(packet)
 
 	// Skip packet header
@@ -160,7 +158,7 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	if _, err := r.Read(salt8); err != nil {
 		return nil, err
 	}
-	copy(salt, salt8)
+	salt = append(salt, salt8...)
 
 	// Skip filler
 	if _, err := r.ReadByte(); err != nil {
@@ -191,11 +189,16 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	serverCapabilities := binary.LittleEndian.Uint32(serverCapabilitiesBuf)
 
 	// Get length of AuthnPluginDataPart2
+	// or read in empty byte if not included
 	var authPluginDataLength byte
-	if serverCapabilities&clientPluginAuth != 0 {
+	if serverCapabilities&clientPluginAuth > 0 {
 		var err error
 		authPluginDataLength, err = r.ReadByte()
 		if err != nil {
+			return nil, err
+		}
+	} else {
+		if _, err := r.ReadByte(); err != nil {
 			return nil, err
 		}
 	}
@@ -206,19 +209,23 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	// Get AuthnPluginDataPart2
+	var numBytes int
 	if serverCapabilities&clientSecureConnection != 0 {
-		read := int64(math.Max(13, float64(authPluginDataLength)-8))
+		numBytes = int(authPluginDataLength) - 8
+		if numBytes < 0 || numBytes > 13 {
+			numBytes = 13
+		}
 
-		salt2 := make([]byte, read)
+		salt2 := make([]byte, numBytes)
 		if _, err := r.Read(salt2); err != nil {
 			return nil, err
 		}
 
 		// the last byte has to be 0, and is not part of the data
-		if salt2[read-1] != 0 {
+		if salt2[numBytes-1] != 0 {
 			return nil, errors.New("Malformed packet")
 		}
-		copy(salt[8:], salt2[:read-1])
+		salt = append(salt, salt2[:numBytes-1]...)
 	}
 
 	var authPlugin string

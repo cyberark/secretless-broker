@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"plugin"
 	"strings"
-)
+	"sync"
 
-type PluginManager struct {
-	Plugins []*Plugin
-}
+	"github.com/conjurinc/secretless/pkg/secretless"
+)
 
 var _SupportedFileSuffixes = []string{".so"}
 
@@ -25,6 +25,23 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 		}
 	}
 	return hasSupportedSuffix
+}
+
+type PluginManager struct {
+	Plugins []*Plugin
+}
+
+var _singleton *PluginManager
+var _once sync.Once
+
+func GetManager() *PluginManager {
+	_once.Do(func() {
+		_singleton = &PluginManager{
+			Plugins: make([]*Plugin, 0),
+		}
+	})
+
+	return _singleton
 }
 
 // LoadPlugins loads all shared object files in `path`
@@ -46,12 +63,6 @@ func (m *PluginManager) LoadPlugins(path string) error {
 		}
 
 		loadedPlugin := &Plugin{}
-		loadedPlugin._funcPluginLoad, err = p.Lookup("PluginLoad")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
 		loadedPlugin._funcInitialize, err = p.Lookup("Initialize")
 		if err != nil {
 			log.Println(err)
@@ -109,5 +120,53 @@ func (m *PluginManager) LoadPlugins(path string) error {
 		m.Plugins = append(m.Plugins, loadedPlugin)
 	}
 
+	m.Initialize()
+
 	return nil
+}
+
+func (m *PluginManager) Initialize() {
+	for _, plugin := range m.Plugins {
+		plugin.Initialize()
+	}
+}
+func (m *PluginManager) CreateListener(l secretless.Listener) {
+	for _, plugin := range m.Plugins {
+		plugin.CreateListener(l)
+	}
+}
+func (m *PluginManager) NewConnection(c net.Conn) {
+	for _, plugin := range m.Plugins {
+		plugin.NewConnection(c)
+	}
+}
+func (m *PluginManager) CloseConnection(c net.Conn) {
+	for _, plugin := range m.Plugins {
+		plugin.CloseConnection(c)
+	}
+}
+func (m *PluginManager) CreateHandler(l secretless.Listener, h secretless.Handler) {
+	for _, plugin := range m.Plugins {
+		plugin.CreateHandler(l, h)
+	}
+}
+func (m *PluginManager) DestroyHandler(h secretless.Handler) {
+	for _, plugin := range m.Plugins {
+		plugin.DestroyHandler(h)
+	}
+}
+func (m *PluginManager) ResolveVariable(p secretless.Provider, id string, value []byte) {
+	for _, plugin := range m.Plugins {
+		plugin.ResolveVariable(p, id, value)
+	}
+}
+func (m *PluginManager) ClientData(buf []byte) {
+	for _, plugin := range m.Plugins {
+		plugin.ClientData(buf)
+	}
+}
+func (m *PluginManager) ServerData(buf []byte) {
+	for _, plugin := range m.Plugins {
+		plugin.ServerData(buf)
+	}
 }

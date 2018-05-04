@@ -8,7 +8,6 @@ import (
 )
 
 type Plugin struct {
-	_funcPluginLoad      plugin.Symbol
 	_funcInitialize      plugin.Symbol
 	_funcCreateListener  plugin.Symbol
 	_funcNewConnection   plugin.Symbol
@@ -20,14 +19,11 @@ type Plugin struct {
 	_funcServerData      plugin.Symbol
 }
 
-func (p *Plugin) PluginLoad() {
-	p._funcPluginLoad.(func())()
-}
 func (p *Plugin) Initialize() {
 	p._funcInitialize.(func())()
 }
-func (p *Plugin) CreateListener(l *secretless.Listener) {
-	p._funcCreateListener.(func(*secretless.Listener))(l)
+func (p *Plugin) CreateListener(l secretless.Listener) {
+	p._funcCreateListener.(func(secretless.Listener))(l)
 }
 func (p *Plugin) NewConnection(c net.Conn) {
 	p._funcNewConnection.(func(net.Conn))(c)
@@ -35,14 +31,14 @@ func (p *Plugin) NewConnection(c net.Conn) {
 func (p *Plugin) CloseConnection(c net.Conn) {
 	p._funcCloseConnection.(func(net.Conn))(c)
 }
-func (p *Plugin) CreateHandler(l *secretless.Listener, h *secretless.Handler) {
-	p._funcCreateHandler.(func(*secretless.Listener, *secretless.Handler))(l, h)
+func (p *Plugin) CreateHandler(l secretless.Listener, h secretless.Handler) {
+	p._funcCreateHandler.(func(secretless.Listener, secretless.Handler))(l, h)
 }
-func (p *Plugin) DestroyHandler(h *secretless.Handler) {
-	p._funcDestroyHandler.(func(*secretless.Handler))(h)
+func (p *Plugin) DestroyHandler(h secretless.Handler) {
+	p._funcDestroyHandler.(func(secretless.Handler))(h)
 }
-func (p *Plugin) ResolveVariable(p *Provider, id string, value string) {
-	p._funcResolveVariable.(func(*Provider, string, string))(p, id, value)
+func (p *Plugin) ResolveVariable(provider secretless.Provider, id string, value []byte) {
+	p._funcResolveVariable.(func(secretless.Provider, string, []byte))(provider, id, value)
 }
 func (p *Plugin) ClientData(buf []byte) {
 	p._funcClientData.(func([]byte))(buf)

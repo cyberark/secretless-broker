@@ -16,7 +16,7 @@ type Plugin interface {
 	Initialize()
 
 	// CreateListener is called for every listener created by Proxy
-	CreateListener(*secretless.Listener)
+	CreateListener(secretless.Listener)
 
 	// NewConnection is called for each new client connection before being
 	// passed to a handler
@@ -26,13 +26,13 @@ type Plugin interface {
 	CloseConnection(net.Conn)
 
 	// CreateHandler is called after listener creates a new handler
-	CreateHandler(*secretless.Listener, *secretless.Handler)
+	CreateHandler(secretless.Listener, secretless.Handler)
 
 	// DestroyHandler is called before a handler is removed
-	DestroyHandler(*secretless.Handler)
+	DestroyHandler(secretless.Handler)
 
 	// ResolveVariable is called when a provider resolves a variable
-	ResolveVariable(p *secretless.Provider, id string, value string)
+	ResolveVariable(p secretless.Provider, id string, value []byte])
 
 	// ClientData is called for each inbound packet from clients
 	ClientData([]byte)

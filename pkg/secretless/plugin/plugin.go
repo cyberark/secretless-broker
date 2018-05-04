@@ -9,9 +9,6 @@ import (
 // Plugin is an interface to be implemented by secretless plugins compiled as
 // shared object files.
 type Plugin interface {
-	// PluginLoad is called once the plugin has been loaded
-	PluginLoad()
-
 	// Initialize is called before proxy initialization
 	Initialize()
 

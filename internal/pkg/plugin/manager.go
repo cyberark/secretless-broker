@@ -53,6 +53,7 @@ func (m *PluginManager) LoadPlugins(path string) error {
 	}
 
 	for _, file := range files {
+
 		if !_IsDynamicLibrary(file) {
 			continue
 		}
@@ -63,14 +64,18 @@ func (m *PluginManager) LoadPlugins(path string) error {
 			continue
 		}
 
-		symbol, err := p.Lookup("Plugin")
+		getPlugin, err := p.Lookup("GetPlugin")
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		if loadedPlugin, ok := symbol.(pluginPkg.Plugin); ok {
-			m.Plugins = append(m.Plugins, loadedPlugin)
+		if getPluginFunc, ok := getPlugin.(func() pluginPkg.Plugin); ok {
+			loadedPlugin := getPluginFunc()
+			m.Plugins = append(m.Plugins, loadedPlugin.(pluginPkg.Plugin))
+		} else {
+			log.Printf("Failed to load plugin %s\n", file.Name())
+			continue
 		}
 	}
 

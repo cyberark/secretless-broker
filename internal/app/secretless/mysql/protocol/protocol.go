@@ -29,6 +29,7 @@ import (
 	"crypto/sha1"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"math"
 	"strconv"
@@ -73,7 +74,7 @@ func DecodeOkResponse(packet []byte) (*OkResponse, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header
-	if err := SkipPacketHeader(r); err != nil {
+	if _, err := SkipPacketHeader(r); err != nil {
 		return nil, err
 	}
 
@@ -135,7 +136,7 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header
-	if err := SkipPacketHeader(r); err != nil {
+	if _, err := SkipPacketHeader(r); err != nil {
 		return nil, err
 	}
 
@@ -228,6 +229,8 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		salt = append(salt, salt2[:numBytes-1]...)
 	}
 
+	fmt.Printf("salt: %v\n", salt)
+
 	var authPlugin string
 	if serverCapabilities&clientPluginAuth != 0 {
 		authPlugin = ReadNullTerminatedString(r)
@@ -247,11 +250,14 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 // if the server announced it in its initial handshake packet.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeResponse41
 type HandshakeResponse41 struct {
+	Header          []byte
 	CapabilityFlags uint32
+	MaxPacketSize   uint32
 	ClientCharset   uint8
 	Username        string
-	Auth            string
+	Auth            []byte
 	Database        string
+	ConnectAttrs    []byte
 }
 
 // DecodeHandshakeResponse41 decodes handshake response packet send by client.
@@ -260,8 +266,9 @@ type HandshakeResponse41 struct {
 func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	r := bytes.NewReader(packet)
 
-	// Skip packet header
-	if err := SkipPacketHeader(r); err != nil {
+	// Skip packet header (but save in struct)
+	header, err := SkipPacketHeader(r)
+	if err != nil {
 		return nil, err
 	}
 
@@ -272,15 +279,17 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	}
 	capabilityFlags := binary.LittleEndian.Uint32(clientCapabilitiesBuf)
 
-	// check that the server is using protocol 4.1
+	// Check that the server is using protocol 4.1
 	if capabilityFlags&clientProtocol41 == 0 {
 		return nil, errors.New("Protocol mismatch")
 	}
 
-	// Skip MaxPacketSize
-	if _, err := r.Seek(4, io.SeekCurrent); err != nil {
+	// Read MaxPacketSize
+	maxPacketSizeBuf := make([]byte, 4)
+	if _, err := r.Read(maxPacketSizeBuf); err != nil {
 		return nil, err
 	}
+	maxPacketSize := binary.LittleEndian.Uint32(maxPacketSizeBuf)
 
 	// Read Charset
 	charset, err := r.ReadByte()
@@ -297,21 +306,23 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	username := ReadNullTerminatedString(r)
 
 	// Read Auth
-	var auth string
+	var auth []byte
 	if capabilityFlags&clientSecureConnection > 0 {
 		authLengthByte, err := r.ReadByte()
 		if err != nil {
 			return nil, err
 		}
 		authLength := int64(authLengthByte)
-		authBytes, err := r.Seek(authLength, io.SeekCurrent)
-		if err != nil {
+
+		auth = make([]byte, authLength)
+		if _, err := r.Read(auth); err != nil {
 			return nil, err
 		}
-		auth = string(authBytes)
 	} else {
-		auth = ReadNullTerminatedString(r)
+		auth = ReadNullTerminatedBytes(r)
 	}
+
+	fmt.Printf("orig client auth: %v\n", auth)
 
 	// Read Database
 	var database string
@@ -328,7 +339,16 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		}
 	}
 
-	return &HandshakeResponse41{capabilityFlags, charset, username, auth, database}, nil
+	var connectAttrs []byte
+	if capabilityFlags&clientConnectAttrs > 0 {
+		remainingByteLen := r.Len()
+		connectAttrs = make([]byte, remainingByteLen)
+		if _, err := r.Read(connectAttrs); err != nil {
+			return nil, err
+		}
+	}
+
+	return &HandshakeResponse41{header, capabilityFlags, maxPacketSize, charset, username, auth, database, connectAttrs}, nil
 }
 
 // GetHandshakeResponse41Packet takes in a HandshakeResponse41 parsed
@@ -342,14 +362,19 @@ func GetHandshakeResponse41Packet(clientHandshake *HandshakeResponse41, serverHa
 		return
 	}
 
+	fmt.Printf("new client auth: %v\n", authResponse)
+
+	// write the header (same as the original)
+	buf.Write(clientHandshake.Header)
+
 	// write the capability flags
 	capabilityFlagsBuf := make([]byte, 4)
 	binary.LittleEndian.PutUint32(capabilityFlagsBuf, clientHandshake.CapabilityFlags)
 	buf.Write(capabilityFlagsBuf)
 
-	// write 4 zero bytes for max packet size
+	// write max packet size
 	maxPacketSizeBuf := make([]byte, 4)
-	binary.LittleEndian.PutUint32(maxPacketSizeBuf, 0)
+	binary.LittleEndian.PutUint32(maxPacketSizeBuf, clientHandshake.MaxPacketSize)
 	buf.Write(maxPacketSizeBuf)
 
 	// write 1 byte char set
@@ -373,14 +398,15 @@ func GetHandshakeResponse41Packet(clientHandshake *HandshakeResponse41, serverHa
 		buf.WriteByte(0)
 	}
 
+	// write database (if set)
+	// TODO
+
+	// write auth plugin name
 	buf.WriteString(defaultAuthPluginName)
 	buf.WriteByte(0)
 
-	// write database
-
-	// write auth plugin name
-
-	// write 1 zero byte
+	// write connection attrs (if set)
+	// TODO
 
 	packet = buf.Bytes()
 
@@ -509,7 +535,7 @@ func DecodeComStmtExecuteRequest(packet []byte, paramsCount uint16) (*ComStmtExe
 	r := bytes.NewReader(packet)
 
 	// Skip packet header
-	if err := SkipPacketHeader(r); err != nil {
+	if _, err := SkipPacketHeader(r); err != nil {
 		return nil, err
 	}
 
@@ -739,13 +765,28 @@ func ReadNullTerminatedString(r *bytes.Reader) string {
 	}
 }
 
+// ReadNullTerminatedBytes reads bytes from reader until 0x00 byte
+func ReadNullTerminatedBytes(r *bytes.Reader) (str []byte) {
+	for {
+		//TODO: Check for error
+		b, _ := r.ReadByte()
+		if b == 0x00 {
+			return
+		} else {
+			str = append(str, b)
+		}
+	}
+}
+
 // SkipPacketHeader rewinds reader to packet payload
-func SkipPacketHeader(r *bytes.Reader) error {
-	if _, err := r.Seek(4, io.SeekStart); err != nil {
-		return err
+func SkipPacketHeader(r *bytes.Reader) (s []byte, e error) {
+	s = make([]byte, 4)
+
+	if _, e = r.Read(s); e != nil {
+		return nil, e
 	}
 
-	return nil
+	return
 }
 
 // CheckPacketLength checks if packet length meets expected value
@@ -757,8 +798,8 @@ func CheckPacketLength(expected int, packet []byte) error {
 	return nil
 }
 
+// NativePassword calculates native password expected by server in HandshakeResponse41
 // https://dev.mysql.com/doc/internals/en/secure-password-authentication.html#packet-Authentication::Native41
-// Calculates native password expected by server in HandshakeResponse41
 // SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
 func NativePassword(password string, salt []byte) (nativePassword []byte, err error) {
 
@@ -768,11 +809,11 @@ func NativePassword(password string, salt []byte) (nativePassword []byte, err er
 
 	sha1.Reset()
 	sha1.Write(passwordSHA1)
-	passwordSHA1SHA1 := sha1.Sum(nil)
+	hash := sha1.Sum(nil)
 
 	sha1.Reset()
 	sha1.Write(salt)
-	sha1.Write(passwordSHA1SHA1)
+	sha1.Write(hash)
 	randomSHA1 := sha1.Sum(nil)
 
 	// nativePassword = passwordSHA1 ^ randomSHA1

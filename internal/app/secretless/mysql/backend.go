@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -74,21 +75,30 @@ func (h *Handler) ConnectToBackend() (err error) {
 		log.Print("Processing handshake")
 	}
 
-	//backendHandshake, clientHandshake, err := protocol.ProcessHandshake(h.Client, connection)
-	//if err != nil {
-	//	return
-	//}
-
-	// read server handshake
+	// Proxy initial packet from server
 	packet, err := protocol.ProxyPacket(connection, h.Client)
 	if err != nil {
 		return
 	}
 
+	// temp intercept of server packet
+	// read server handshake
+	//if _, err = protocol.ReadPacket(connection); err != nil {
+	//	return
+	//}
+	//packet := []byte{74, 0, 0, 0, 10, 53, 46, 55, 46, 50, 49, 0, 195, 0, 2, 0, 115, 25, 43, 86, 114, 6, 120, 13, 0, 255, 255, 8, 2, 0, 255, 193, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52, 58, 27, 90, 29, 55, 50, 55, 4, 51, 3, 73, 0, 109, 121, 115, 113, 108, 95, 110, 97, 116, 105, 118, 101, 95, 112, 97, 115, 115, 119, 111, 114, 100, 0}
+	//if _, err = protocol.WritePacket(packet, h.Client); err != nil {
+	//	return
+	//}
+
+	fmt.Printf("initial server packet: %v\n", packet)
+
 	serverHandshake, err := protocol.DecodeHandshakeV10(packet)
 	if err != nil {
 		return
 	}
+
+	fmt.Printf("parsed server packet: %v\n", serverHandshake)
 
 	// read client response
 	interceptedClientPacket, err := protocol.ReadPacket(h.Client)
@@ -96,15 +106,21 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
+	fmt.Printf("initial client packet: %v\n", interceptedClientPacket)
+
 	interceptedClientHandshake, err := protocol.DecodeHandshakeResponse41(interceptedClientPacket)
 	if err != nil {
 		return
 	}
 
+	fmt.Printf("parsed client packet: %v\n", interceptedClientHandshake)
+
 	clientPacket, err := protocol.GetHandshakeResponse41Packet(interceptedClientHandshake, serverHandshake, h.BackendConfig.Username, h.BackendConfig.Password)
 	if err != nil {
 		return
 	}
+
+	fmt.Printf("updated client packet: %v\n", clientPacket)
 
 	if _, err = protocol.WritePacket(clientPacket, connection); err != nil {
 		return
@@ -116,8 +132,10 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
+	fmt.Printf("server OK response packet: %v\n", packet)
+
 	if packet[4] == protocol.ResponseErr {
-		err := protocol.ParseError(packet)
+		err = protocol.ParseError(packet)
 		return
 	}
 

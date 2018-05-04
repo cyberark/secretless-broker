@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/conjurinc/secretless/internal/pkg/provider/keychain_provider"
+	"github.com/conjurinc/secretless/pkg/secretless"
 )
 
 // KeychainProvider obtains a secret from an OS keychain.
@@ -14,7 +15,7 @@ type KeychainProvider struct {
 
 // NewKeychainProvider constructs a KeychainProvider.
 // No configuration or credentials are required.
-func NewKeychainProvider(name string) (provider Provider, err error) {
+func NewKeychainProvider(name string) (provider secretless.Provider, err error) {
 	provider = &KeychainProvider{name: name}
 
 	return

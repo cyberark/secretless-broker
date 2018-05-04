@@ -185,3 +185,23 @@ func (l *Listener) Listen() {
 	l.Transport = &http.Transport{TLSClientConfig: &tls.Config{RootCAs: caCertPool}}
 	http.Serve(l.Listener, l)
 }
+
+// GetConfig implements secretless.Listener
+func (l *Listener) GetConfig() config.Listener {
+	return l.Config
+}
+
+// GetListener implements secretless.Listener
+func (l *Listener) GetListener() net.Listener {
+	return l.Listener
+}
+
+// GetHandlers implements secretless.Listener
+func (l *Listener) GetHandlers() []Handler {
+	return nil
+}
+
+// GetConnections implements secretless.Listener
+func (l *Listener) GetConnections() []net.Conn {
+	return nil
+}

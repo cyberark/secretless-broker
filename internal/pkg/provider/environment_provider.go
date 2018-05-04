@@ -3,6 +3,8 @@ package provider
 import (
 	"fmt"
 	"os"
+
+	"github.com/conjurinc/secretless/pkg/secretless"
 )
 
 // EnvironmentProvider provides data values from the process environment.
@@ -12,7 +14,7 @@ type EnvironmentProvider struct {
 
 // NewEnvironmentProvider constructs a EnvironmentProvider.
 // No configuration or credentials are required.
-func NewEnvironmentProvider(name string) (provider Provider, err error) {
+func NewEnvironmentProvider(name string) (provider secretless.Provider, err error) {
 
 	provider = &EnvironmentProvider{name: name}
 

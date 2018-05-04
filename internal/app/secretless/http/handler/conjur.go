@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/base64"
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 
@@ -38,5 +39,20 @@ func (h ConjurHandler) Authenticate(values map[string][]byte, r *http.Request) e
 
 	r.Header.Set("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString(accessToken)))
 
+	return nil
+}
+
+// GetConfig implements secretless.Handler
+func (h *ConjurHandler) GetConfig() config.Handler {
+	return h.Config
+}
+
+// GetClientConnection implements secretless.Handler
+func (h *ConjurHandler) GetClientConnection() net.Conn {
+	return nil
+}
+
+// GetBackendConnection implements secretless.Handler
+func (h *ConjurHandler) GetBackendConnection() net.Conn {
 	return nil
 }

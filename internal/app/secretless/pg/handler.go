@@ -99,3 +99,18 @@ func (h *Handler) Run() {
 
 	h.Pipe()
 }
+
+// GetConfig implements secretless.Handler
+func (h *Handler) GetConfig() config.Handler {
+	return h.Config
+}
+
+// GetClientConnection implements secretless.Handler
+func (h *Handler) GetClientConnection() net.Conn {
+	return h.Client
+}
+
+// GetBackendConnection implements secretless.Handler
+func (h *Handler) GetBackendConnection() net.Conn {
+	return h.Backend
+}

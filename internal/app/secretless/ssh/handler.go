@@ -3,6 +3,7 @@ package ssh
 import (
 	"io"
 	"log"
+	"net"
 
 	"golang.org/x/crypto/ssh"
 
@@ -159,4 +160,19 @@ func (h *Handler) Run() {
 			}
 		}()
 	}
+}
+
+// GetConfig implements secretless.Handler
+func (h *Handler) GetConfig() config.Handler {
+	return h.Config
+}
+
+// GetClientConnection implements secretless.Handler
+func (h *Handler) GetClientConnection() net.Conn {
+	return nil
+}
+
+// GetBackendConnection implements secretless.Handler
+func (h *Handler) GetBackendConnection() net.Conn {
+	return nil
 }

@@ -95,3 +95,18 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	err = keyring.Add(key)
 	return
 }
+
+// GetConfig implements secretless.Handler
+func (h *Handler) GetConfig() config.Handler {
+	return h.Config
+}
+
+// GetClientConnection implements secretless.Handler
+func (h *Handler) GetClientConnection() net.Conn {
+	return h.Connection
+}
+
+// GetBackendConnection implements secretless.Handler
+func (h *Handler) GetBackendConnection() net.Conn {
+	return nil
+}

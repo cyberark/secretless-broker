@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 )
@@ -26,7 +27,7 @@ func hasField(field string, params *map[string]string) (ok bool) {
 
 // NewConjurProvider constructs a ConjurProvider. The API client is configured from
 // environment variables.
-func NewConjurProvider(name string) (provider Provider, err error) {
+func NewConjurProvider(name string) (provider secretless.Provider, err error) {
 	config := conjurapi.LoadConfig()
 
 	var conjur *conjurapi.Client

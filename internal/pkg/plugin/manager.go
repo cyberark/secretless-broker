@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/conjurinc/secretless/pkg/secretless"
+	pluginPkg "github.com/conjurinc/secretless/pkg/secretless/plugin"
 )
 
 var _SupportedFileSuffixes = []string{".so"}
@@ -28,7 +29,7 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 }
 
 type PluginManager struct {
-	Plugins []*Plugin
+	Plugins []pluginPkg.Plugin
 }
 
 var _singleton *PluginManager
@@ -37,7 +38,7 @@ var _once sync.Once
 func GetManager() *PluginManager {
 	_once.Do(func() {
 		_singleton = &PluginManager{
-			Plugins: make([]*Plugin, 0),
+			Plugins: make([]pluginPkg.Plugin, 0),
 		}
 	})
 
@@ -62,62 +63,15 @@ func (m *PluginManager) LoadPlugins(path string) error {
 			continue
 		}
 
-		loadedPlugin := &Plugin{}
-		loadedPlugin._funcInitialize, err = p.Lookup("Initialize")
+		symbol, err := p.Lookup("Plugin")
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		loadedPlugin._funcCreateListener, err = p.Lookup("CreateListener")
-		if err != nil {
-			log.Println(err)
-			continue
+		if loadedPlugin, ok := symbol.(pluginPkg.Plugin); ok {
+			m.Plugins = append(m.Plugins, loadedPlugin)
 		}
-
-		loadedPlugin._funcNewConnection, err = p.Lookup("NewConnection")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		loadedPlugin._funcCloseConnection, err = p.Lookup("CloseConnection")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		loadedPlugin._funcCreateHandler, err = p.Lookup("CreateHandler")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		loadedPlugin._funcDestroyHandler, err = p.Lookup("DestroyHandler")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		loadedPlugin._funcResolveVariable, err = p.Lookup("ResolveVariable")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		loadedPlugin._funcClientData, err = p.Lookup("ClientData")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		loadedPlugin._funcServerData, err = p.Lookup("ServerData")
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		m.Plugins = append(m.Plugins, loadedPlugin)
 	}
 
 	m.Initialize()

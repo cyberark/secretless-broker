@@ -12,11 +12,14 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/pg"
 	"github.com/conjurinc/secretless/internal/app/secretless/ssh"
 	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
+	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 // Listener is an interface for listening in an abstract way.
 type Listener interface {
+	secretless.Listener
+
 	Listen()
 
 	Validate() error

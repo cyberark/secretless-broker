@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
+	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
@@ -83,7 +84,7 @@ func (l *Listener) GetListener() net.Listener {
 }
 
 // GetHandlers implements secretless.Listener
-func (l *Listener) GetHandlers() []Handler {
+func (l *Listener) GetHandlers() []secretless.Handler {
 	return nil
 }
 

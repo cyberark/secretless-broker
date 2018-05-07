@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -75,7 +76,7 @@ func (l *Listener) Listen() {
 	serverConfig.AddHostKey(private)
 
 	for {
-		nConn, err := secretless.Accept(l)
+		nConn, err := util.Accept(l)
 		if err != nil {
 			log.Printf("Failed to accept incoming connection: ", err)
 			return

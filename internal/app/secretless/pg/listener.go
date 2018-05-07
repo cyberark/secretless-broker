@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
+	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -53,7 +54,7 @@ func (l *Listener) Listen() {
 	for {
 		var client net.Conn
 		var err error
-		if client, err = secretless.Accept(l); err != nil {
+		if client, err = util.Accept(l); err != nil {
 			continue
 		}
 

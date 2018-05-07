@@ -94,9 +94,9 @@ func (m *PluginManager) CreateListener(l secretless.Listener) {
 		plugin.CreateListener(l)
 	}
 }
-func (m *PluginManager) NewConnection(c net.Conn) {
+func (m *PluginManager) NewConnection(l secretless.Listener, c net.Conn) {
 	for _, plugin := range m.Plugins {
-		plugin.NewConnection(c)
+		plugin.NewConnection(l, c)
 	}
 }
 func (m *PluginManager) CloseConnection(c net.Conn) {

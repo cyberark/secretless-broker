@@ -53,6 +53,8 @@ type OkResponse struct {
 	PacketType   byte
 	AffectedRows uint64
 	LastInsertID uint64
+	StatusFlags  uint16
+	Warnings     uint16
 }
 
 // DecodeOkResponse decodes OK_Packet from server.
@@ -78,15 +80,47 @@ func DecodeOkResponse(packet []byte) (*OkResponse, error) {
 		return nil, err
 	}
 
-	// Skip packet type
-	if _, err := r.Seek(1, io.SeekCurrent); err != nil {
+	// Read header, validate OK
+	packetType, err := r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+	if packetType != responseOk {
+		return nil, errors.New("Malformed packet")
+	}
+
+	// Read affected rows (expected value: 0 for auth)
+	affectedRows, err := ReadLenEncodedInteger(r)
+	if err != nil {
 		return nil, err
 	}
 
-	affectedRows, _ := ReadLenEncodedInteger(r)
-	lastInsertID, _ := ReadLenEncodedInteger(r)
+	// Read last insert ID (expected value: 0 for auth)
+	lastInsertID, err := ReadLenEncodedInteger(r)
+	if err != nil {
+		return nil, err
+	}
 
-	return &OkResponse{packet[4], affectedRows, lastInsertID}, nil
+	// Read status flags
+	statusBuf := make([]byte, 2)
+	if _, err := r.Read(statusBuf); err != nil {
+		return nil, err
+	}
+	status := binary.LittleEndian.Uint16(statusBuf)
+
+	// Read warnings
+	warningsBuf := make([]byte, 2)
+	if _, err := r.Read(warningsBuf); err != nil {
+		return nil, err
+	}
+	warnings := binary.LittleEndian.Uint16(warningsBuf)
+
+	return &OkResponse{
+		PacketType:   packetType,
+		AffectedRows: affectedRows,
+		LastInsertID: lastInsertID,
+		StatusFlags:  status,
+		Warnings:     warnings}, nil
 }
 
 // HandshakeV10 represents sever's initial handshake packet
@@ -257,7 +291,7 @@ type HandshakeResponse41 struct {
 	Username        string
 	Auth            []byte
 	Database        string
-	ConnectAttrs    []byte
+	PacketTail      []byte
 }
 
 // DecodeHandshakeResponse41 decodes handshake response packet send by client.
@@ -339,16 +373,25 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		}
 	}
 
-	var connectAttrs []byte
-	if capabilityFlags&clientConnectAttrs > 0 {
-		remainingByteLen := r.Len()
-		connectAttrs = make([]byte, remainingByteLen)
-		if _, err := r.Read(connectAttrs); err != nil {
+	// get the rest of the packet
+	var packetTail []byte
+	remainingByteLen := r.Len()
+	if remainingByteLen > 0 {
+		packetTail = make([]byte, remainingByteLen)
+		if _, err := r.Read(packetTail); err != nil {
 			return nil, err
 		}
 	}
 
-	return &HandshakeResponse41{header, capabilityFlags, maxPacketSize, charset, username, auth, database, connectAttrs}, nil
+	return &HandshakeResponse41{
+		Header:          header,
+		CapabilityFlags: capabilityFlags,
+		MaxPacketSize:   maxPacketSize,
+		ClientCharset:   charset,
+		Username:        username,
+		Auth:            auth,
+		Database:        database,
+		PacketTail:      packetTail}, nil
 }
 
 // GetHandshakeResponse41Packet takes in a HandshakeResponse41 parsed
@@ -399,14 +442,19 @@ func GetHandshakeResponse41Packet(clientHandshake *HandshakeResponse41, serverHa
 	}
 
 	// write database (if set)
-	// TODO
+	if clientHandshake.CapabilityFlags&clientConnectWithDB > 0 {
+		buf.WriteString(clientHandshake.Database)
+		buf.WriteByte(0)
+	}
 
 	// write auth plugin name
 	buf.WriteString(defaultAuthPluginName)
 	buf.WriteByte(0)
 
-	// write connection attrs (if set)
-	// TODO
+	// write tail of packet (if set)
+	if len(clientHandshake.PacketTail) > 0 {
+		buf.Write(clientHandshake.PacketTail)
+	}
 
 	packet = buf.Bytes()
 
@@ -680,52 +728,47 @@ func GetLenEncodedIntegerSize(firstByte byte) byte {
 
 // ReadLenEncodedInteger returns parsed length-encoded integer and it's offset.
 // See https://mariadb.com/kb/en/mariadb/protocol-data-types/#length-encoded-integers
-func ReadLenEncodedInteger(r *bytes.Reader) (value uint64, offset uint64) {
+func ReadLenEncodedInteger(r *bytes.Reader) (value uint64, err error) {
 	firstLenEncIntByte, err := r.ReadByte()
 	if err != nil {
-		return 0, 0
+		return
 	}
 
 	switch firstLenEncIntByte {
 	case 0xfb:
 		value = 0
-		offset = 1
 
 	case 0xfc:
 		data := make([]byte, 2)
 		_, err = r.Read(data)
 		if err != nil {
-			return 0, 0
+			return
 		}
 		value = uint64(data[0]) | uint64(data[1])<<8
-		offset = 3
 
 	case 0xfd:
 		data := make([]byte, 3)
 		_, err = r.Read(data)
 		if err != nil {
-			return 0, 0
+			return
 		}
 		value = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16
-		offset = 4
 
 	case 0xfe:
 		data := make([]byte, 8)
 		_, err = r.Read(data)
 		if err != nil {
-			return 0, 0
+			return
 		}
 		value = uint64(data[0]) | uint64(data[1])<<8 | uint64(data[2])<<16 |
 			uint64(data[3])<<24 | uint64(data[4])<<32 | uint64(data[5])<<40 |
 			uint64(data[6])<<48 | uint64(data[7])<<56
-		offset = 9
 
 	default:
 		value = uint64(firstLenEncIntByte)
-		offset = 1
 	}
 
-	return value, offset
+	return value, err
 }
 
 // ReadLenEncodedString returns parsed length-encoded string and it's length.

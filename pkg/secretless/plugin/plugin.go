@@ -17,7 +17,7 @@ type Plugin interface {
 
 	// NewConnection is called for each new client connection before being
 	// passed to a handler
-	NewConnection(net.Conn)
+	NewConnection(secretless.Listener, net.Conn)
 
 	// CloseConnect is called when a client connection is closed
 	CloseConnection(net.Conn)

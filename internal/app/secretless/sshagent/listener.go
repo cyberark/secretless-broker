@@ -61,7 +61,7 @@ func (l *Listener) Listen() {
 	}
 
 	for {
-		nConn, err := l.Listener.Accept()
+		nConn, err := secretless.Accept(l)
 		if err != nil {
 			log.Printf("Failed to accept incoming connection: ", err)
 			return

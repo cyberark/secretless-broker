@@ -53,7 +53,7 @@ func (l *Listener) Listen() {
 	for {
 		var client net.Conn
 		var err error
-		if client, err = l.Listener.Accept(); err != nil {
+		if client, err = secretless.Accept(l); err != nil {
 			continue
 		}
 

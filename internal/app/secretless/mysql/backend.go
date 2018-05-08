@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -41,15 +40,10 @@ func (h *Handler) ConfigureBackend() (err error) {
 		result.Password = string(values["password"])
 	}
 
-	if values["schema"] != nil {
-		result.Schema = string(values["schema"])
-	}
-
 	delete(values, "host")
 	delete(values, "port")
 	delete(values, "username")
 	delete(values, "password")
-	delete(values, "schema")
 
 	result.Options = make(map[string]string)
 	for k, v := range values {
@@ -75,7 +69,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		log.Print("Processing handshake")
 	}
 
-	// Proxy initial packet from server
+	// Proxy initial packet from server to client
 	// TODO can we skip this step and still compute client packet?
 	// how can we check the client accepts the protocol if we do?
 	packet, err := protocol.ProxyPacket(backend, h.Client)
@@ -83,51 +77,36 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	// temp intercept of server packet
-	// read server handshake
-	//if _, err = protocol.ReadPacket(backend); err != nil {
-	//	return
-	//}
-	//packet := []byte{74, 0, 0, 0, 10, 53, 46, 55, 46, 50, 49, 0, 195, 0, 2, 0, 115, 25, 43, 86, 114, 6, 120, 13, 0, 255, 255, 8, 2, 0, 255, 193, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52, 58, 27, 90, 29, 55, 50, 55, 4, 51, 3, 73, 0, 109, 121, 115, 113, 108, 95, 110, 97, 116, 105, 118, 101, 95, 112, 97, 115, 115, 119, 111, 114, 100, 0}
-	//if _, err = protocol.WritePacket(packet, h.Client); err != nil {
-	//	return
-	//}
-
-	fmt.Printf("initial server packet: %v\n", packet)
-
-	// Decode server packet
-	serverHandshake, err := protocol.DecodeHandshakeV10(packet)
+	// Unpack server packet
+	serverHandshake, err := protocol.UnpackHandshakeV10(packet)
 	if err != nil {
 		return
 	}
-
-	fmt.Printf("parsed server packet: %v\n", serverHandshake)
 
 	// Intercept response from client
-	interceptedClientPacket, err := protocol.ReadPacket(h.Client)
+	handshakeResponsePacket, err := protocol.ReadPacket(h.Client)
 	if err != nil {
 		return
 	}
-
-	fmt.Printf("initial client packet: %v\n", interceptedClientPacket)
 
 	// Parse intercepted client response
-	interceptedClientHandshake, err := protocol.DecodeHandshakeResponse41(interceptedClientPacket)
+	handshakeResponse, err := protocol.UnpackHandshakeResponse41(handshakeResponsePacket)
 	if err != nil {
 		return
 	}
 
-	fmt.Printf("parsed client packet: %v\n", interceptedClientHandshake)
+	// Inject credentials into client response
+	if err = protocol.InjectCredentials(handshakeResponse, serverHandshake.Salt, h.BackendConfig.Username, h.BackendConfig.Password); err != nil {
+		return
+	}
 
-	// Write client response with injected configuration
-	clientPacket, err := protocol.GetHandshakeResponse41Packet(interceptedClientHandshake, serverHandshake, h.BackendConfig.Username, h.BackendConfig.Password)
+	// Pack client response with injected configuration
+	clientPacket, err := protocol.PackHandshakeResponse41(handshakeResponse)
 	if err != nil {
 		return
 	}
 
-	fmt.Printf("updated client packet: %v\n", clientPacket)
-
-	// Send client response packet to server
+	// Send configured client response packet to server
 	if _, err = protocol.WritePacket(clientPacket, backend); err != nil {
 		return
 	}
@@ -138,30 +117,19 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	OKResponse, err := protocol.DecodeOkResponse(packet)
+	OKResponse, err := protocol.UnpackOkResponse(packet)
 	if err != nil {
 		return
 	}
-
-	fmt.Printf("server OK response: %v\n", OKResponse)
 
 	// Proxy OK packet to client
 	if _, err = protocol.WritePacket(packet, h.Client); err != nil {
 		return
 	}
 
-	//	if packet[4] == protocol.ResponseErr {
-	//		err = protocol.ParseError(packet)
-	//		return
-	//	}
-
 	if h.Config.Debug {
 		log.Printf("Successfully connected to '%s:%d'", h.BackendConfig.Host, h.BackendConfig.Port)
 	}
-
-	//if _, err = h.Client.Write(protocol.CreateAuthenticationOKMessage()); err != nil {
-	//	return
-	//}
 
 	h.Backend = backend
 

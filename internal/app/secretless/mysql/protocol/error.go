@@ -27,7 +27,6 @@ func (e *Error) Error() string {
 }
 
 // GetMessage formats an Error into a protocol message.
-// TODO update for MySQL
 func (e *Error) GetMessage() []byte {
 	msg := NewMessageBuffer([]byte{})
 
@@ -41,8 +40,6 @@ func (e *Error) GetMessage() []byte {
 	msg.WriteString(e.Message)
 
 	msg.WriteByte(0x00) // null terminate the message
-
-	//msg.ResetLength(PGMessageLengthOffset)
 
 	return msg.Bytes()
 }

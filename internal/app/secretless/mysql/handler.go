@@ -8,25 +8,13 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
-// ClientOptions stores the option that were specified by the connection client.
-// The User and Database are required. Other options are stored in a map.
-type ClientOptions struct {
-	// TODO: remove this when custom authorization is removed.
-	User string
-	// TODO: override the database address with this setting.
-	Host    string
-	Port    uint
-	Schema  string
-	Options map[string]string
-}
-
 // BackendConfig stores the connection info to the real backend database.
+// These values are pulled from the handler credentials config
 type BackendConfig struct {
 	Host     string
 	Port     uint
 	Username string
 	Password string
-	Schema   string
 	Options  map[string]string
 }
 
@@ -39,7 +27,6 @@ type Handler struct {
 	Config        config.Handler
 	Client        net.Conn
 	Backend       net.Conn
-	ClientOptions *ClientOptions
 	BackendConfig *BackendConfig
 }
 
@@ -80,16 +67,11 @@ func (h *Handler) Pipe() {
 	go stream(h.Backend, h.Client)
 }
 
-// Run processes the startup message, configures the backend connection, connects to the backend,
-// and pipes the data between the client and the backend.
-// TODO update description for mysql
+// Run configures the backend connection info, connects to the backend to
+// complete the connection phase, and pipes the data between the client and
+// the backend
 func (h *Handler) Run() {
 	var err error
-
-	//if err = h.Startup(); err != nil {
-	//	h.abort(err)
-	//	return
-	//}
 
 	if err = h.ConfigureBackend(); err != nil {
 		h.abort(err)

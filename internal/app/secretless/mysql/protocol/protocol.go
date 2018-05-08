@@ -43,7 +43,7 @@ type ErrResponse struct {
 	Message string
 }
 
-func DecodeErrResponse(packet []byte) (*ErrResponse, error) {
+func UnpackErrResponse(packet []byte) (*ErrResponse, error) {
 	return nil, nil
 }
 
@@ -57,7 +57,7 @@ type OkResponse struct {
 	Warnings     uint16
 }
 
-// DecodeOkResponse decodes OK_Packet from server.
+// UnpackOkResponse decodes OK_Packet from server.
 // Part of basic packet structure shown below.
 //
 // int<3> PacketLength
@@ -66,7 +66,7 @@ type OkResponse struct {
 // int<lenenc> AffectedRows
 // int<lenenc> LastInsertID
 // ... more ...
-func DecodeOkResponse(packet []byte) (*OkResponse, error) {
+func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 
 	// Min packet length = header(4 bytes) + PacketType(1 byte)
 	if err := CheckPacketLength(5, packet); err != nil {
@@ -134,7 +134,7 @@ type HandshakeV10 struct {
 	Salt               []byte
 }
 
-// DecodeHandshakeV10 decodes initial handshake request from server.
+// UnpackHandshakeV10 decodes initial handshake request from server.
 // Basic packet structure shown below.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeV10
 //
@@ -166,7 +166,7 @@ type HandshakeV10 struct {
 // {
 //		string[NUL] AuthPluginName
 // }
-func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
+func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header
@@ -263,8 +263,6 @@ func DecodeHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		salt = append(salt, salt2[:numBytes-1]...)
 	}
 
-	fmt.Printf("salt: %v\n", salt)
-
 	var authPlugin string
 	if serverCapabilities&clientPluginAuth != 0 {
 		authPlugin = ReadNullTerminatedString(r)
@@ -289,15 +287,15 @@ type HandshakeResponse41 struct {
 	MaxPacketSize   uint32
 	ClientCharset   uint8
 	Username        string
-	Auth            []byte
+	AuthResponse    []byte
 	Database        string
 	PacketTail      []byte
 }
 
-// DecodeHandshakeResponse41 decodes handshake response packet send by client.
+// UnpackHandshakeResponse41 decodes handshake response packet send by client.
 // TODO: Add packet struct comment
 // TODO: Add packet length check
-func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
+func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header (but save in struct)
@@ -356,8 +354,6 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		auth = ReadNullTerminatedBytes(r)
 	}
 
-	fmt.Printf("orig client auth: %v\n", auth)
-
 	// Read Database
 	var database string
 	if capabilityFlags&clientConnectWithDB > 0 {
@@ -389,23 +385,33 @@ func DecodeHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		MaxPacketSize:   maxPacketSize,
 		ClientCharset:   charset,
 		Username:        username,
-		Auth:            auth,
+		AuthResponse:    auth,
 		Database:        database,
 		PacketTail:      packetTail}, nil
 }
 
-// GetHandshakeResponse41Packet takes in a HandshakeResponse41 parsed
-// from the client and updates it with the data from the BackendConfig
-func GetHandshakeResponse41Packet(clientHandshake *HandshakeResponse41, serverHandshake *HandshakeV10, username string, password string) (packet []byte, err error) {
+// InjectCredentials takes in a HandshakeResponse41 from the client, the
+// salt from the server, and a username / password, and uses the salt
+// from the server handshake to inject the username / password credentials into
+// the client handshake response
+func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, username string, password string) (err error) {
 
-	var buf bytes.Buffer
-
-	authResponse, err := NativePassword(password, serverHandshake.Salt)
+	authResponse, err := NativePassword(password, salt)
 	if err != nil {
 		return
 	}
 
-	fmt.Printf("new client auth: %v\n", authResponse)
+	clientHandshake.Username = username
+	clientHandshake.AuthResponse = authResponse
+
+	return
+}
+
+// PackHandshakeResponse41 takes in a HandshakeResponse41 object and
+// returns a handshake response packet
+func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byte, err error) {
+
+	var buf bytes.Buffer
 
 	// write the header (same as the original)
 	buf.Write(clientHandshake.Header)
@@ -429,15 +435,15 @@ func GetHandshakeResponse41Packet(clientHandshake *HandshakeResponse41, serverHa
 	}
 
 	// write string username
-	buf.WriteString(username)
+	buf.WriteString(clientHandshake.Username)
 	buf.WriteByte(0)
 
 	// write auth
 	if clientHandshake.CapabilityFlags&clientSecureConnection > 0 {
-		buf.WriteByte(uint8(len(authResponse)))
-		buf.Write(authResponse)
+		buf.WriteByte(uint8(len(clientHandshake.AuthResponse)))
+		buf.Write(clientHandshake.AuthResponse)
 	} else {
-		buf.Write(authResponse)
+		buf.Write(clientHandshake.AuthResponse)
 		buf.WriteByte(0)
 	}
 
@@ -466,7 +472,7 @@ type QueryRequest struct {
 	Query string // SQL query value
 }
 
-// DecodeQueryRequest decodes COM_QUERY and COM_STMT_PREPARE requests from client.
+// UnpackQueryRequest decodes COM_QUERY and COM_STMT_PREPARE requests from client.
 // Basic packet structure shown below.
 // See https://mariadb.com/kb/en/mariadb/com_query/ and https://mariadb.com/kb/en/mariadb/com_stmt_prepare/
 //
@@ -474,7 +480,7 @@ type QueryRequest struct {
 // int<1> PacketNumber
 // int<1> Command COM_QUERY (0x03) or COM_STMT_PREPARE (0x16)
 // string<EOF> SQLStatement
-func DecodeQueryRequest(packet []byte) (*QueryRequest, error) {
+func UnpackQueryRequest(packet []byte) (*QueryRequest, error) {
 
 	// Min packet length = header(4 bytes) + command(1 byte) + SQLStatement(at least 1 byte)
 	if len(packet) < 6 {
@@ -495,7 +501,7 @@ type ComStmtPrepareOkResponse struct {
 	ParametersNum uint16 // Num of prepared parameters
 }
 
-// DecodeComStmtPrepareOkResponse decodes COM_STMT_PREPARE_OK response from MySQL server.
+// UnpackComStmtPrepareOkResponse decodes COM_STMT_PREPARE_OK response from MySQL server.
 // Basic packet structure shown below.
 // See https://mariadb.com/kb/en/mariadb/com_stmt_prepare/#COM_STMT_PREPARE_OK
 //
@@ -507,7 +513,7 @@ type ComStmtPrepareOkResponse struct {
 // int<2> NumberOfParameters
 // string<1> <not used>
 // int<2> NumberOfWarnings
-func DecodeComStmtPrepareOkResponse(packet []byte) (*ComStmtPrepareOkResponse, error) {
+func UnpackComStmtPrepareOkResponse(packet []byte) (*ComStmtPrepareOkResponse, error) {
 
 	// Min packet length = header(4 bytes) + command(1 byte) + statementID(4 bytes)
 	// + number of columns (2 bytes) + number of parameters (2 bytes)
@@ -540,7 +546,7 @@ type PreparedParameter struct {
 	Value     string // String value of any prepared parameter passed with COM_STMT_EXECUTE request
 }
 
-// DecodeComStmtExecuteRequest decodes COM_STMT_EXECUTE packet sent by MySQL client.
+// UnpackComStmtExecuteRequest decodes COM_STMT_EXECUTE packet sent by MySQL client.
 // Basic packet structure shown below.
 // See https://mariadb.com/kb/en/mariadb/com_stmt_execute/
 //
@@ -567,7 +573,7 @@ type PreparedParameter struct {
 // 			byte<n> BinaryParameterValue
 //		}
 // }
-func DecodeComStmtExecuteRequest(packet []byte, paramsCount uint16) (*ComStmtExecuteRequest, error) {
+func UnpackComStmtExecuteRequest(packet []byte, paramsCount uint16) (*ComStmtExecuteRequest, error) {
 
 	// Min packet length = header(4 bytes) + command(1 byte) + statementID(4 bytes)
 	// + flags(1 byte) + iteration count(4 bytes)

@@ -10,7 +10,7 @@ import (
 // shared object files.
 type Plugin interface {
 	// Initialize is called before proxy initialization
-	Initialize()
+	Initialize() error
 
 	// CreateListener is called for every listener created by Proxy
 	CreateListener(secretless.Listener)

@@ -72,6 +72,13 @@ func (m *PluginManager) LoadPlugins(path string) error {
 
 		if getPluginFunc, ok := getPlugin.(func() pluginPkg.Plugin); ok {
 			loadedPlugin := getPluginFunc()
+
+			err = loadedPlugin.Initialize()
+			if err != nil {
+				log.Printf("%s: %s\n", file.Name(), err.Error())
+				continue
+			}
+
 			m.Plugins = append(m.Plugins, loadedPlugin.(pluginPkg.Plugin))
 		} else {
 			log.Printf("Failed to load plugin %s\n", file.Name())
@@ -84,11 +91,13 @@ func (m *PluginManager) LoadPlugins(path string) error {
 	return nil
 }
 
-func (m *PluginManager) Initialize() {
+func (m *PluginManager) Initialize() error {
 	for _, plugin := range m.Plugins {
 		plugin.Initialize()
 	}
+	return nil
 }
+
 func (m *PluginManager) CreateListener(l secretless.Listener) {
 	for _, plugin := range m.Plugins {
 		plugin.CreateListener(l)

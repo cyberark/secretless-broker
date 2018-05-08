@@ -46,15 +46,10 @@ func TestPGHandler(t *testing.T) {
 		}
 
 		cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), 0, "", []string{})
-
-		if err != nil {
-			t.Fatal(cmdOut)
-		}
-
-		if !strings.Contains(cmdOut, "1 row") {
-			t.Fatalf("Expected to find '1 row' in : %s", cmdOut)
-		}
+		So(err, ShouldBeNil)
+		So(cmdOut, ShouldContainSubstring, "1 row")
 	})
+
 	Convey("Connect over TCP", t, func() {
 		// Secretless will either be secretless:5432 (in Docker) or
 		// localhost:<mapped-port> (on the local machine)
@@ -71,12 +66,7 @@ func TestPGHandler(t *testing.T) {
 
 		cmdOut, err := psql(host, port, "", []string{})
 
-		if err != nil {
-			t.Fatal(cmdOut)
-		}
-
-		if !strings.Contains(cmdOut, "1 row") {
-			t.Fatalf("Expected to find '1 row' in : %s", cmdOut)
-		}
+		So(err, ShouldBeNil)
+		So(cmdOut, ShouldContainSubstring, "1 row")
 	})
 }

@@ -86,8 +86,6 @@ func (m *PluginManager) LoadPlugins(path string) error {
 		}
 	}
 
-	m.Initialize()
-
 	return nil
 }
 

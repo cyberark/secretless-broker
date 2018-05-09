@@ -41,7 +41,7 @@ func TestMySQLHandler(t *testing.T) {
 
 	Convey("Connect over a UNIX socket", t, func() {
 		cwd, err := os.Getwd()
-		if err != nil
+		if err != nil {
 			panic(err)
 		}
 

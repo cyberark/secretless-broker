@@ -1,6 +1,0 @@
-#!/bin/bash -ex
-
-docker-compose build
-docker-compose up -d mysql secretless
-
-sleep 2

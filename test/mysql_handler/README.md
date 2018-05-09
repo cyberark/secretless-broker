@@ -39,7 +39,12 @@ mysql -u testuser --socket=run/mysql/mysql.sock
 
 Once logged in, you should be able to `SELECT * FROM testdb.test` and see the rows that were added to the sample table.
 
-Note: this assumes you have a MySQL client installed locally on your machine. A decent one is [mysqlsh](https://dev.mysql.com/doc/refman/5.7/en/mysqlsh.html).
+Note: this assumes you have a MySQL client installed locally on your machine. A decent one is [mysqlsh](https://dev.mysql.com/doc/refman/5.7/en/mysqlsh.html); if you use `mysqlsh`, you will need to create an executable `mysql` file in your `PATH` that contains the following in order to be able to run `run_dev_test.sh` locally:
+```
+#!/bin/bash -ex
+
+mysqlsh --sql "$@"
+```
 
 ## MySQL Handler Development
 

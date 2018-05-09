@@ -3,11 +3,14 @@ set -e
 
 cmd="$@"
 
-until docker-compose exec mysql mysqladmin -psecurerootpass status; do
-#PGPASSWORD=$POSTGRES_PASSWORD psql -h "$host" -U "postgres" -c '\q'; do
-  >&2 echo "MySQL is unavailable - sleeping"
-  sleep 1
-done
+echo "Waiting for MySQL to start"
+docker-compose exec -T mysql bash -c "
+  while ! mysqladmin -psecurerootpass status > /dev/null 2>&1;
+    do
+      >&2 echo "."
+      sleep 1
+  done
+  "
 
->&2 echo "MySQL is up - executing command"
+>&2 echo "MySQL is up - continuing "
 exec $cmd

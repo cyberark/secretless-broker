@@ -1,6 +1,78 @@
 # MySQL Handler Development
 
-## Quick Test (Laptop Environment)
+## Usage / known limitations
+
+- The MySQL handler is currently limited to connections via websocket
+- When connecting to a MySQL database via the Secretless client, the MySQL handler currently _requires_ that you submit the actual username you will be using to connect to the MySQL server with your connection request
+- MySQL clients usually require a password to be included with a connection request; any non-empty value may be entered when connecting via the Secretless client. The Secretless MySQL handler will remove this dummy value and inject the correct password value it retrieves according to its configuration.
+
+### To use the Secretless MySQL handler:
+#### Start your MySQL server
+From this directory, call
+```
+docker-compose up -d mysql
+```
+This will automatically start a MySQL server in a Docker container at `localhost:$(docker-compose port mysql 3306)`.
+
+It will also configure the MySQL server as follows:
+- Create a `testuser` user (with password `testpass`)
+- Authorize the `testuser` user to connect to the database server from any IP and access any schema
+- Create a table `test` in the `testdb` schema and add two rows
+
+#### Start and configure secretless
+From the root project directory, build the secretless binaries for your platform:
+```
+platform=$(go run test/print_platform.go)
+./build/build.sh $platform amd64
+```
+
+From this directory, start secretless:
+```
+./run_dev.sh
+```
+
+#### Log in to the MySQL server via the Secretless MySQL handler
+In another terminal, navigate to the `test/mysql_handler` directory and send a MySQL request via websocket:
+```
+mysql -u testuser --socket=run/mysql/mysql.sock
+```
+
+Once logged in, you should be able to `SELECT * FROM testdb.test` and see the rows that were added to the sample table.
+
+Note: this assumes you have a MySQL client installed locally on your machine. A decent one is [mysqlsh](https://dev.mysql.com/doc/refman/5.7/en/mysqlsh.html).
+
+## MySQL Handler Development
+
+The easiest way to do Secretless development is to use the VS Code debugger. As above, you will want to start up your MySQL server container before beginning development. To configure the Secretless server, you can provide VS Code with a `launch.json` file for debugging by copying the sample file below to `.vscode/launch.json`, replacing `[YOUR MYSQL PORT]` with the actual exposed port of your MySQL Docker container.
+
+Sample `launch.json`:
+```
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MySQL Handler",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "remotePath": "",
+      "port": 2345,
+      "host": "127.0.0.1",
+      "program": "${workspaceFolder}/cmd/secretless/",
+      "env": { "MYSQL_HOST": "localhost", "MYSQL_PORT": "[YOUR MYSQL PORT]", "MYSQL_PASSWORD": "testpass" },
+      "args": [ "-f", "/Users/gjennings/go/src/github.com/conjurinc/secretless/test/mysql_handler/secretless.dev.yml"],
+      "showLog": true
+    }
+  ]
+}
+```
+
+Once you start the debugger (which will automatically start Secretless with the dev MySQL Handler configuration), you can send requests to the MySQL server via a client as above.
+
+## Running the test suite
 
 Run MySQL in Docker:
 ```sh-session
@@ -14,57 +86,3 @@ $ ./run_dev_test
 ok      github.com/conjurinc/secretless/test/mysql_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
 ```
-
-## Local Environment (Laptop)
-
-These instructions show how to develop the Secretless MySQL handler on your local machine.
-
-First you'll need a MySQL server. You can run one natively, or using Docker:
-
-```sh-session
-$ docker-compose up -d mysql
-```
-
-Now you can run `secretless` in a terminal:
-
-```sh-session
-$ ./run_dev
-...
-2018/01/10 16:33:09 mysql listener 'mysql_tcp' listening at: [::]:13306
-2018/01/10 16:33:09 mysql listener 'mysql_socket' listening at: ./run/mysql/.s.MYSQL.3306
-```
-
-Now run a client in another terminal.
-
-Connect over a Unix socket:
-
-## Connecting to MySQL Without Secretless
-
-You can test a normal connection to MySQL in which the client knows the password. Start a `dev` container:
-
-```sh-session
-$ docker-compose run --rm dev
-Starting quickdemo_mysql_1 ... done
-root@7be0ff91e64e:/#
-```
-
-Now connect to MySQL using the username "test" and password "test" (type `\q` to quit):
-
-```sh-session
-root@7be0ff91e64e:/# mysql -utest -ptest -hmysql -P3306
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 4
-Server version: 5.7.21 MySQL Community Server (GPL)
-
-Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> \q
-```
-
-This is the normal way of connecting to MySQL. 

@@ -3,7 +3,6 @@ package main
 import (
         "fmt"
         "log"
-        "net"
         "os"
         "os/exec"
         "strings"
@@ -12,8 +11,12 @@ import (
         . "github.com/smartystreets/goconvey/convey"
 )
 
-func mysql(host string, port int, user string, environment []string) (string, error) {
-	args := []string{"-h", host}
+func mysql(host string, port int, user string, environment []string, options map[string]string) (string, error) {
+	args := []string{}
+	if host != "" {
+		args = append(args, "-h")
+		args = append(args, host)
+	}
 	if port != 0 {
 		args = append(args, "-P")
 		args = append(args, fmt.Sprintf("%d", port))
@@ -22,8 +25,16 @@ func mysql(host string, port int, user string, environment []string) (string, er
 		args = append(args, "-u")
 		args = append(args, user)
 	}
+	for k, v := range options {
+		if v != "" {
+			args = append(args, fmt.Sprintf("%s=%s", k, v))
+		} else {
+			args = append(args, k)
+		}
+	}
+	args = append(args, "--dbpassword=wrongpassword")
 	args = append(args, "-e")
-	args = append(args, "select count(*) from test.test")
+	args = append(args, "select count(*) from testdb.test")
 
 	log.Println(strings.Join(append([]string{"mysql"}, args...), " "))
 
@@ -40,17 +51,19 @@ func mysql(host string, port int, user string, environment []string) (string, er
 func TestMySQLHandler(t *testing.T) {
 
 	Convey("Connect over a UNIX socket", t, func() {
-		cwd, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
 
-		cmdOut, err := mysql(fmt.Sprintf("%s/run/mysql", cwd), 0, "", []string{})
+		options := make(map[string]string)
+		options["--socket"] = "run/mysql/mysql.sock"
+
+		options["--sql"] = ""
+
+		cmdOut, err := mysql("", 0, "testuser", []string{}, options)
 
 		So(err, ShouldBeNil)
-		So(cmdOut, ShouldContainSubstring, "1 row")
+		So(cmdOut, ShouldContainSubstring, "2")
 	})
-
+/*
+	// This is not currently implemented
 	Convey("Connect over TCP", t, func() {
 		// Secretless will either be secretless:3306 (in Docker) or
 		// localhost:<mapped-port> (on the local machine)
@@ -70,4 +83,5 @@ func TestMySQLHandler(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(cmdOut, ShouldContainSubstring, "1 row")
 	})
+*/
 }

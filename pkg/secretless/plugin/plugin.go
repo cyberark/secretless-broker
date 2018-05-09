@@ -32,8 +32,8 @@ type Plugin interface {
 	ResolveVariable(p secretless.Provider, id string, value []byte)
 
 	// ClientData is called for each inbound packet from clients
-	ClientData([]byte)
+	ClientData(net.Conn, []byte)
 
 	// ServerData is called for each inbound packet from the backend
-	ServerData([]byte)
+	ServerData(net.Conn, []byte)
 }

@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
+	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
@@ -49,7 +50,7 @@ func (h *Handler) abort(err error) {
 	h.Client.Write(pgError.GetMessage())
 }
 
-func stream(source, dest net.Conn) {
+func stream(source, dest net.Conn, callback func(net.Conn, []byte)) {
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -60,10 +61,13 @@ func stream(source, dest net.Conn) {
 		if err != nil {
 			return
 		}
+
 		_, err = dest.Write(buffer[:length])
 		if err != nil {
 			return
 		}
+
+		callback(source, buffer[:length])
 	}
 }
 
@@ -73,8 +77,8 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.Client, h.Backend)
-	go stream(h.Backend, h.Client)
+	go stream(h.Client, h.Backend, plugin.GetManager().ClientData)
+	go stream(h.Backend, h.Client, plugin.GetManager().ServerData)
 }
 
 // Run processes the startup message, configures the backend connection, connects to the backend,

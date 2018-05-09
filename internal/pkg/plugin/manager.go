@@ -126,13 +126,13 @@ func (m *PluginManager) ResolveVariable(p secretless.Provider, id string, value 
 		plugin.ResolveVariable(p, id, value)
 	}
 }
-func (m *PluginManager) ClientData(buf []byte) {
+func (m *PluginManager) ClientData(c net.Conn, buf []byte) {
 	for _, plugin := range m.Plugins {
-		plugin.ClientData(buf)
+		plugin.ClientData(c, buf)
 	}
 }
-func (m *PluginManager) ServerData(buf []byte) {
+func (m *PluginManager) ServerData(c net.Conn, buf []byte) {
 	for _, plugin := range m.Plugins {
-		plugin.ServerData(buf)
+		plugin.ServerData(c, buf)
 	}
 }

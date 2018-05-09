@@ -50,7 +50,7 @@ func (h *Handler) abort(err error) {
 	h.Client.Write(pgError.GetMessage())
 }
 
-func stream(source, dest net.Conn, callback func(net.Conn, []byte)) {
+func stream(source, dest net.Conn, callback func([]byte)) {
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -67,7 +67,7 @@ func stream(source, dest net.Conn, callback func(net.Conn, []byte)) {
 			return
 		}
 
-		callback(source, buffer[:length])
+		callback(buffer[:length])
 	}
 }
 
@@ -77,8 +77,8 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.Client, h.Backend, plugin.GetManager().ClientData)
-	go stream(h.Backend, h.Client, plugin.GetManager().ServerData)
+	go stream(h.Client, h.Backend, func(b []byte) { plugin.GetManager().ClientData(h.Client, b) })
+	go stream(h.Backend, h.Client, func(b []byte) { plugin.GetManager().ServerData(h.Client, b) })
 }
 
 // Run processes the startup message, configures the backend connection, connects to the backend,

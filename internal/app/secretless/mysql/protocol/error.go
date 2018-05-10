@@ -51,46 +51,31 @@ func ParseError(data []byte) (e *Error) {
 
 	buf := bytes.NewBuffer(data)
 	if _, err := buf.ReadByte(); err != nil {
-		e.Code = malformedPacket
-		e.SQLSTATE = "CR_MALFORMED_PACKET"
-		e.Message = "Malformed packet"
-		return
+		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
 	}
 
 	// read error code
 	codeBuf := make([]byte, 2)
 	if _, err := buf.Read(codeBuf); err != nil {
-		e.Code = malformedPacket
-		e.SQLSTATE = "CR_MALFORMED_PACKET"
-		e.Message = "Malformed packet"
-		return
+		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
 	}
 	e.Code = string(codeBuf)
 
 	// read sql state
 	if _, err := buf.ReadByte(); err != nil {
-		e.Code = malformedPacket
-		e.SQLSTATE = "CR_MALFORMED_PACKET"
-		e.Message = "Malformed packet"
-		return
+		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
 	}
 
 	sqlStateBuf := make([]byte, 5)
 	if _, err := buf.Read(sqlStateBuf); err != nil {
-		e.Code = malformedPacket
-		e.SQLSTATE = "CR_MALFORMED_PACKET"
-		e.Message = "Malformed packet"
-		return
+		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
 	}
 	e.SQLSTATE = string(sqlStateBuf)
 
 	// read error message
 	messageBuf := make([]byte, buf.Len())
 	if _, err := buf.Read(messageBuf); err != nil {
-		e.Code = malformedPacket
-		e.SQLSTATE = "CR_MALFORMED_PACKET"
-		e.Message = "Malformed packet"
-		return
+		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
 	}
 	e.Message = string(messageBuf)
 

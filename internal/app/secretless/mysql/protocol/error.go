@@ -7,7 +7,8 @@ import (
 
 /* MySQL Error Codes */
 const (
-	CRUnknownError = "2000"
+	CRUnknownError  = "2000"
+	malformedPacket = "2027"
 )
 
 const (
@@ -50,7 +51,7 @@ func ParseError(data []byte) (e *Error) {
 
 	buf := bytes.NewBuffer(data)
 	if _, err := buf.ReadByte(); err != nil {
-		e.Code = "2027"
+		e.Code = malformedPacket
 		e.SQLSTATE = "CR_MALFORMED_PACKET"
 		e.Message = "Malformed packet"
 		return
@@ -59,7 +60,7 @@ func ParseError(data []byte) (e *Error) {
 	// read error code
 	codeBuf := make([]byte, 2)
 	if _, err := buf.Read(codeBuf); err != nil {
-		e.Code = "2027"
+		e.Code = malformedPacket
 		e.SQLSTATE = "CR_MALFORMED_PACKET"
 		e.Message = "Malformed packet"
 		return
@@ -68,7 +69,7 @@ func ParseError(data []byte) (e *Error) {
 
 	// read sql state
 	if _, err := buf.ReadByte(); err != nil {
-		e.Code = "2027"
+		e.Code = malformedPacket
 		e.SQLSTATE = "CR_MALFORMED_PACKET"
 		e.Message = "Malformed packet"
 		return
@@ -76,7 +77,7 @@ func ParseError(data []byte) (e *Error) {
 
 	sqlStateBuf := make([]byte, 5)
 	if _, err := buf.Read(sqlStateBuf); err != nil {
-		e.Code = "2027"
+		e.Code = malformedPacket
 		e.SQLSTATE = "CR_MALFORMED_PACKET"
 		e.Message = "Malformed packet"
 		return
@@ -86,7 +87,7 @@ func ParseError(data []byte) (e *Error) {
 	// read error message
 	messageBuf := make([]byte, buf.Len())
 	if _, err := buf.Read(messageBuf); err != nil {
-		e.Code = "2027"
+		e.Code = malformedPacket
 		e.SQLSTATE = "CR_MALFORMED_PACKET"
 		e.Message = "Malformed packet"
 		return

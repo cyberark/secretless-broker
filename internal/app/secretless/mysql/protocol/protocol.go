@@ -29,7 +29,6 @@ import (
 	"crypto/sha1"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"math"
 	"strconv"
@@ -287,6 +286,7 @@ type HandshakeResponse41 struct {
 	MaxPacketSize   uint32
 	ClientCharset   uint8
 	Username        string
+	AuthLength      int64
 	AuthResponse    []byte
 	Database        string
 	PacketTail      []byte
@@ -339,12 +339,13 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 
 	// Read Auth
 	var auth []byte
+	var authLength int64
 	if capabilityFlags&clientSecureConnection > 0 {
 		authLengthByte, err := r.ReadByte()
 		if err != nil {
 			return nil, err
 		}
-		authLength := int64(authLengthByte)
+		authLength = int64(authLengthByte)
 
 		auth = make([]byte, authLength)
 		if _, err := r.Read(auth); err != nil {
@@ -385,6 +386,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		MaxPacketSize:   maxPacketSize,
 		ClientCharset:   charset,
 		Username:        username,
+		AuthLength:      authLength,
 		AuthResponse:    auth,
 		Database:        database,
 		PacketTail:      packetTail}, nil
@@ -440,8 +442,12 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byt
 
 	// write auth
 	if clientHandshake.CapabilityFlags&clientSecureConnection > 0 {
-		buf.WriteByte(uint8(len(clientHandshake.AuthResponse)))
-		buf.Write(clientHandshake.AuthResponse)
+		if clientHandshake.AuthLength > 0 {
+			buf.WriteByte(uint8(len(clientHandshake.AuthResponse)))
+			buf.Write(clientHandshake.AuthResponse)
+		} else {
+			buf.WriteByte(0)
+		}
 	} else {
 		buf.Write(clientHandshake.AuthResponse)
 		buf.WriteByte(0)

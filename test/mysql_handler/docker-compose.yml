@@ -19,13 +19,12 @@ services:
       context: ../..
     environment:
       MYSQL_HOST: mysql
-      MYSQL_PORT:
+      MYSQL_PORT: 3306
       MYSQL_USER: testuser
       MYSQL_PASSWORD: testpass
     volumes:
       - ./secretless.yml:/secretless.yml
-      - ./run/mysql:/run/mysql
-#      - ../../:/go/src/github.com/conjurinc/secretless
+      - mysql-socket:/run/mysql
 
   test:
     build:
@@ -34,6 +33,7 @@ services:
     command: go test -v ./test/mysql_handler
     volumes:
       - ../../:/go/src/github.com/conjurinc/secretless
+      - mysql-socket:/go/src/github.com/conjurinc/secretless/test/mysql_handler/run/mysql
     depends_on:
       - secretless
 
@@ -48,3 +48,7 @@ services:
       MYSQL_PASSWORD: testpass
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
+      - mysql-socket:/run/mysql
+
+volumes:
+  mysql-socket:

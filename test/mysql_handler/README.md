@@ -2,7 +2,7 @@
 
 ## Usage / known limitations
 
-- The MySQL handler is currently limited to connections via websocket
+- The MySQL handler is currently limited to connections via Unix domain socket 
 - When connecting to a MySQL database via the Secretless client, the MySQL handler currently _requires_ that you submit the actual username you will be using to connect to the MySQL server with your connection request
 - MySQL clients usually require a password to be included with a connection request; any non-empty value may be entered when connecting via the Secretless client. The Secretless MySQL handler will remove this dummy value and inject the correct password value it retrieves according to its configuration.
 
@@ -32,7 +32,7 @@ From this directory, start secretless:
 ```
 
 #### Log in to the MySQL server via the Secretless MySQL handler
-In another terminal, navigate to the `test/mysql_handler` directory and send a MySQL request via websocket:
+In another terminal, navigate to the `test/mysql_handler` directory and send a MySQL request via Unix socket:
 ```
 mysql -u testuser --socket=run/mysql/mysql.sock
 ```

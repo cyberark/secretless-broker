@@ -117,7 +117,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	OKResponse, err := protocol.UnpackOkResponse(packet)
+	_, err = protocol.UnpackOkResponse(packet)
 	if err != nil {
 		return
 	}

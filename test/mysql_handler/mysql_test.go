@@ -32,7 +32,7 @@ func mysql(host string, port int, user string, environment []string, options map
 			args = append(args, k)
 		}
 	}
-	args = append(args, "--dbpassword=wrongpassword")
+	args = append(args, "--password=wrongpassword")
 	args = append(args, "-e")
 	args = append(args, "select count(*) from testdb.test")
 
@@ -55,9 +55,10 @@ func TestMySQLHandler(t *testing.T) {
 		options := make(map[string]string)
 		options["--socket"] = "run/mysql/mysql.sock"
 
-		options["--sql"] = ""
-
 		cmdOut, err := mysql("", 0, "testuser", []string{}, options)
+
+		fmt.Printf("err: %v\n", err)
+		fmt.Printf("cmdOut: %v\n", cmdOut)
 
 		So(err, ShouldBeNil)
 		So(cmdOut, ShouldContainSubstring, "2")

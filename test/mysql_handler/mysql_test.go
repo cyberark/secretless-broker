@@ -50,7 +50,7 @@ func mysql(host string, port int, user string, environment []string, options map
 
 func TestMySQLHandler(t *testing.T) {
 
-	Convey("Connect over a UNIX socket", t, func() {
+	Convey("Connect over a UNIX socket w/username", t, func() {
 
 		options := make(map[string]string)
 		options["--socket"] = "run/mysql/mysql.sock"
@@ -63,6 +63,37 @@ func TestMySQLHandler(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(cmdOut, ShouldContainSubstring, "2")
 	})
+
+	Convey("Connect over a UNIX socket w/invalid username", t, func() {
+
+		options := make(map[string]string)
+                options["--socket"] = "run/mysql/mysql.sock"
+
+                cmdOut, err := mysql("", 0, "dummy", []string{}, options)
+
+                fmt.Printf("err: %v\n", err)
+                fmt.Printf("cmdOut: %v\n", cmdOut)
+
+                So(err, ShouldBeNil)
+                So(cmdOut, ShouldContainSubstring, "2")
+
+	})
+
+	Convey("Connect over a UNIX socket w/o username", t, func() {
+
+                options := make(map[string]string)
+                options["--socket"] = "run/mysql/mysql.sock"
+
+                cmdOut, err := mysql("", 0, "", []string{}, options)
+
+                fmt.Printf("err: %v\n", err)
+                fmt.Printf("cmdOut: %v\n", cmdOut)
+
+                So(err, ShouldBeNil)
+                So(cmdOut, ShouldContainSubstring, "2")
+
+        })
+
 /*
 	// This is not currently implemented
 	Convey("Connect over TCP", t, func() {

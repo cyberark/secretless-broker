@@ -4,8 +4,6 @@ project_dir=$PWD
 rm -f $project_dir/test/junit.output
 touch $project_dir/test/junit.output
 
-go get -u github.com/jstemmer/go-junit-report
-
 cd test
 
 exit_status="0"
@@ -27,6 +25,11 @@ for dir in */; do
 done
 
 rm -f $project_dir/test/junit.xml
-cat $project_dir/test/junit.output | go-junit-report > $project_dir/test/junit.xml
+docker run --rm \
+  -v $project_dir/test/:/go/src/github.com/conjurinc/secretless/test/output/ \
+  secretless-dev bash -c "
+    go get -u github.com/jstemmer/go-junit-report
+    cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml
+  "
 
 exit $exit_status

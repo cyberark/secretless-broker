@@ -3,8 +3,6 @@
 ## Usage / known limitations
 
 - The MySQL handler is currently limited to connections via Unix domain socket 
-- When connecting to a MySQL database via the Secretless client, the MySQL handler currently _requires_ that you submit the actual username you will be using to connect to the MySQL server with your connection request
-- MySQL clients usually require a password to be included with a connection request; any non-empty value may be entered when connecting via the Secretless client. The Secretless MySQL handler will remove this dummy value and inject the correct password value it retrieves according to its configuration.
 
 ### To use the Secretless MySQL handler:
 #### Start your MySQL server
@@ -79,6 +77,7 @@ Once you start the debugger (which will automatically start Secretless with the 
 
 ## Running the test suite
 
+#### Run the tests locally
 Run MySQL in Docker:
 ```sh-session
 $ docker-compose up -d mysql
@@ -90,4 +89,15 @@ $ ./run_dev_test
 ...
 ok      github.com/conjurinc/secretless/test/mysql_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
+```
+
+
+#### Run the tests in Docker
+Make sure you have built updated Secretless binaries for Linux and updated Docker images before running the test suite.
+
+To run the test suite in Docker, run:
+```
+./stop.sh   # Remove all existing project containers
+./start.sh  # Stand up MySQL and Secretless servers
+./test.sh   # Run tests in a test container
 ```

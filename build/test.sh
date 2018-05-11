@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 project_dir=$PWD
+rm -f $project_dir/test/junit.output
 touch $project_dir/test/junit.output
 
 go get -u github.com/jstemmer/go-junit-report
@@ -25,6 +26,7 @@ for dir in */; do
   cd ..
 done
 
+rm -f $project_dir/test/junit.xml
 cat $project_dir/test/junit.output | go-junit-report > $project_dir/test/junit.xml
 
 exit $exit_status

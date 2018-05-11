@@ -403,7 +403,17 @@ func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, userna
 		return
 	}
 
+	// Reset the payload length for the packet
+	payloadLengthDiff := uint32(len(username) - len(clientHandshake.Username))
+	payloadLengthDiff += uint32(len(authResponse) - int(clientHandshake.AuthLength))
+
+	clientHandshake.Header, err = UpdateHeaderPayloadLength(clientHandshake.Header, payloadLengthDiff)
+	if err != nil {
+		return
+	}
+
 	clientHandshake.Username = username
+	clientHandshake.AuthLength = int64(len(authResponse))
 	clientHandshake.AuthResponse = authResponse
 
 	return
@@ -876,6 +886,39 @@ func NativePassword(password string, salt []byte) (nativePassword []byte, err er
 	for i := range randomSHA1 {
 		nativePassword[i] = passwordSHA1[i] ^ randomSHA1[i]
 	}
+
+	return
+}
+
+// UpdateHeaderPayloadLength takes in a 4 byte header and a difference
+// in length, and returns a new header
+func UpdateHeaderPayloadLength(origHeader []byte, diff uint32) (header []byte, err error) {
+
+	initialPayloadLength, err := ReadUint24(origHeader[0:3])
+	if err != nil {
+		return nil, err
+	}
+	updatedPayloadLength := initialPayloadLength + diff
+	header = append(WriteUint24(updatedPayloadLength), origHeader[3])
+
+	return
+}
+
+// ReadUint24 takes in a byte slice and returns a uint32
+func ReadUint24(b []byte) (uint32, error) {
+	if len(b) < 3 {
+		return 0, errors.New("Invalid packet")
+	}
+
+	return uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16, nil
+}
+
+// WriteUint24 takes in a uint32 and returns a byte slice
+func WriteUint24(u uint32) (b []byte) {
+	b = make([]byte, 3)
+	b[0] = byte(u)
+	b[1] = byte(u >> 8)
+	b[2] = byte(u >> 16)
 
 	return
 }

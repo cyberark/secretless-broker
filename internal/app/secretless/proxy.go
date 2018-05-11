@@ -12,6 +12,7 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/pg"
 	"github.com/conjurinc/secretless/internal/app/secretless/ssh"
 	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
+	"github.com/conjurinc/secretless/internal/app/secretless/mysql"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
@@ -67,6 +68,8 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 		listener = &ssh.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
 	case "ssh-agent":
 		listener = &sshagent.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
+	case "mysql":
+		listener = &mysql.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
 	default:
 		log.Panicf("Unrecognized protocol '%s' on listener '%s'", listenerConfig.Protocol, listenerConfig.Name)
 	}

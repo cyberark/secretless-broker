@@ -94,7 +94,7 @@ ok      github.com/conjurinc/secretless/test/mysql_handler   0.048s
 
 
 #### Run the tests in Docker
-Make sure you have built updated Secretless binaries for your platform and updated Docker images before running the test suite.
+Make sure you have built updated Secretless binaries for Linux and updated Docker images before running the test suite.
 
 To run the test suite in Docker, run:
 ```

@@ -405,12 +405,15 @@ func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, userna
 
 	// Reset the payload length for the packet
 	payloadLengthDiff := uint32(len(username) - len(clientHandshake.Username))
+	payloadLengthDiff += uint32(len(authResponse) - int(clientHandshake.AuthLength))
+
 	clientHandshake.Header, err = UpdateHeaderPayloadLength(clientHandshake.Header, payloadLengthDiff)
 	if err != nil {
 		return
 	}
 
 	clientHandshake.Username = username
+	clientHandshake.AuthLength = int64(len(authResponse))
 	clientHandshake.AuthResponse = authResponse
 
 	return

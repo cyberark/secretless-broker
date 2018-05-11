@@ -3,7 +3,6 @@
 ## Usage / known limitations
 
 - The MySQL handler is currently limited to connections via Unix domain socket 
-- MySQL clients usually require a password to be included with a connection request; any non-empty value may be entered when connecting via the Secretless client. The Secretless MySQL handler will remove this dummy value and inject the correct password value it retrieves according to its configuration.
 
 ### To use the Secretless MySQL handler:
 #### Start your MySQL server

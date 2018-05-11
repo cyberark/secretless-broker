@@ -6,14 +6,9 @@ function finish {
 }
 trap finish EXIT
 
-platform=$(go run ../print_platform.go)
-
-pushd ../..
-  go build -o "bin/$platform/amd64/secretless" ./cmd/secretless
-popd
-
 ./run_dev.sh &
 
-sleep 2
+# wait for secretless / handler to be ready
+while [ ! -S $PWD/run/mysql/mysql.sock ]; do sleep 1; done 2> /dev/null
 
 go test -v .

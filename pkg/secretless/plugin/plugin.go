@@ -4,13 +4,14 @@ import (
 	"net"
 
 	"github.com/conjurinc/secretless/pkg/secretless"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
 // Plugin is an interface to be implemented by secretless plugins compiled as
 // shared object files.
 type Plugin interface {
 	// Initialize is called before proxy initialization
-	Initialize() error
+	Initialize(config.Config) error
 
 	// CreateListener is called for every listener created by Proxy
 	CreateListener(secretless.Listener)

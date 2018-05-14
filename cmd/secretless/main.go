@@ -32,7 +32,7 @@ func main() {
 		}
 	}
 
-	err = plugin.GetManager().LoadPlugins(*pluginDir)
+	err = plugin.GetManager().LoadPlugins(*pluginDir, configuration)
 	if err != nil {
 		log.Println(err)
 	}

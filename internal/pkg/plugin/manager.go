@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/conjurinc/secretless/pkg/secretless"
+	"github.com/conjurinc/secretless/pkg/secretless/config"
 	pluginPkg "github.com/conjurinc/secretless/pkg/secretless/plugin"
 )
 
@@ -46,7 +47,7 @@ func GetManager() *PluginManager {
 }
 
 // LoadPlugins loads all shared object files in `path`
-func (m *PluginManager) LoadPlugins(path string) error {
+func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
@@ -73,7 +74,7 @@ func (m *PluginManager) LoadPlugins(path string) error {
 		if getPluginFunc, ok := getPlugin.(func() pluginPkg.Plugin); ok {
 			loadedPlugin := getPluginFunc()
 
-			err = loadedPlugin.Initialize()
+			err = loadedPlugin.Initialize(config)
 			if err != nil {
 				log.Printf("%s: %s\n", file.Name(), err.Error())
 				continue
@@ -89,9 +90,9 @@ func (m *PluginManager) LoadPlugins(path string) error {
 	return nil
 }
 
-func (m *PluginManager) Initialize() error {
+func (m *PluginManager) Initialize(c config.Config) error {
 	for _, plugin := range m.Plugins {
-		plugin.Initialize()
+		plugin.Initialize(c)
 	}
 	return nil
 }

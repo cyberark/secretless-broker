@@ -128,6 +128,14 @@ func (hhl addressOrSocket) Validate(value interface{}) error {
 	return errors.Filter()
 }
 
+func (c Config) String() string {
+	out, err := yaml.Marshal(c)
+	if err != nil {
+		return ""
+	}
+	return string(out)
+}
+
 // Validate verifies the completeness and correctness of the Config.
 func (c Config) Validate() (err error) {
 	listenerNames := make(map[string]Listener)

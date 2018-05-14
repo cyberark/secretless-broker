@@ -41,10 +41,13 @@ Note: this assumes you have a MySQL client installed locally on your machine. A 
 ```
 #!/bin/bash -ex
 
-mysqlsh --sql "$@"
+mysqlsh --sql --ssl-mode=DISABLED "$@"
 ```
+This will run the MySQL shell as a client in SQL mode with SSL disabled.
 
 ## MySQL Handler Development
+
+### Using VS Code
 
 The easiest way to do Secretless development is to use the VS Code debugger. As above, you will want to start up your MySQL server container before beginning development. To configure the Secretless server, you can provide VS Code with a `launch.json` file for debugging by copying the sample file below to `.vscode/launch.json`, replacing `[YOUR MYSQL PORT]` with the actual exposed port of your MySQL Docker container.
 
@@ -74,6 +77,21 @@ Sample `launch.json`:
 ```
 
 Once you start the debugger (which will automatically start Secretless with the dev MySQL Handler configuration), you can send requests to the MySQL server via a client as above.
+
+### Using Docker
+
+You can also run:
+```
+cd test/mysql_handler/
+./start.sh
+docker-compose run --rm dev
+```
+
+Then, to connect with MySQL you can run either
+`mysql -h secretless -P 3306`
+to connect via TCP (SSL mode is disabled by default), or
+`mysql --socket=/run/mysql/mysql.sock`
+to connect via Unix socket.
 
 ## Running the test suite
 

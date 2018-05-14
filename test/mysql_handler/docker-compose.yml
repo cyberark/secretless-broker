@@ -41,11 +41,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    environment:
-      MYSQL_HOST: mysql
-      MYSQL_PORT:
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: testpass
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
       - mysql-socket:/run/mysql

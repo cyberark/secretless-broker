@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -84,26 +85,81 @@ func TestMySQLHandler(t *testing.T) {
 		})
 	})
 
-	/*
-		// This is not currently implemented
-		Convey("Connect over TCP", t, func() {
-			// Secretless will either be secretless:3306 (in Docker) or
-			// localhost:<mapped-port> (on the local machine)
-			var host string
-			var port int
-			_, err := net.LookupIP("mysql")
-			if err == nil {
-				host = "secretless"
-				port = 3306
-			} else {
-				host = "localhost"
-				port = 13306
-			}
+	Convey("Connect over TCP", t, func() {
 
-			cmdOut, err := mysql(host, port, "", []string{})
+		Convey("Without SSL", func() {
 
-			So(err, ShouldBeNil)
-			So(cmdOut, ShouldContainSubstring, "1 row")
+			Convey("With username, wrong password", func() {
+
+				// Secretless will either be secretless:3306 (in Docker) or
+				// localhost:<mapped-port> (on the local machine)
+				var host string
+				var port int
+				options := make(map[string]string)
+				_, err := net.LookupIP("secretless")
+				if err == nil {
+					host = "secretless"
+					port = 3306
+				} else {
+					host = "localhost"
+					port = 13306
+				}
+
+				options["--password"] = "wrongpassword"
+
+				cmdOut, err := mysql(host, port, "testuser", []string{}, options)
+
+				So(err, ShouldBeNil)
+				So(cmdOut, ShouldContainSubstring, "2")
+			})
+
+			Convey("With wrong username, wrong password", func() {
+
+				// Secretless will either be secretless:3306 (in Docker) or
+				// localhost:<mapped-port> (on the local machine)
+				var host string
+				var port int
+				options := make(map[string]string)
+				_, err := net.LookupIP("secretless")
+				if err == nil {
+					host = "secretless"
+					port = 3306
+				} else {
+					host = "localhost"
+					port = 13306
+				}
+
+				options["--password"] = "wrongpassword"
+
+				cmdOut, err := mysql(host, port, "notatestuser", []string{}, options)
+
+				So(err, ShouldBeNil)
+				So(cmdOut, ShouldContainSubstring, "2")
+			})
+
+			Convey("With empty username, empty password", func() {
+
+				// Secretless will either be secretless:3306 (in Docker) or
+				// localhost:<mapped-port> (on the local machine)
+				var host string
+				var port int
+				options := make(map[string]string)
+				_, err := net.LookupIP("secretless")
+				if err == nil {
+					host = "secretless"
+					port = 3306
+				} else {
+					host = "localhost"
+					port = 13306
+				}
+
+				options["--password"] = ""
+
+				cmdOut, err := mysql(host, port, "", []string{}, options)
+
+				So(err, ShouldBeNil)
+				So(cmdOut, ShouldContainSubstring, "2")
+			})
 		})
-	*/
+	})
 }

@@ -1,5 +1,5 @@
-# 2.1 required for healthcheck
-version: '2.1'
+version: '3.0'
+
 services:
   pg:
     build:
@@ -17,12 +17,9 @@ services:
       context: ../..
     environment:
       PG_PASSWORD: test
-    depends_on:
-      pg:
-        condition: service_healthy
     volumes:
       - ./secretless.yml:/secretless.yml
-      - ./run/postgresql/:/run/postgresql/
+      - pg-socket:/run/postgresql
 
   test:
     build:
@@ -31,6 +28,7 @@ services:
     command: go test -v ./test/pg_handler
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
+      - pg-socket:/go/src/github.com/conjurinc/secretless/test/pg_handler/run/postgresql
     depends_on:
       - secretless
 
@@ -42,3 +40,7 @@ services:
       PG_PASSWORD: test
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
+      - pg-socket:/go/src/github.com/conjurinc/secretless/test/pg_handler/run/postgresql
+
+volumes:
+  pg-socket:

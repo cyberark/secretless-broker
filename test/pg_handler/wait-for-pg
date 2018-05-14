@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+cmd="$@"
+
+echo "Waiting for pg to start"
+docker-compose exec -T pg bash -c "
+  while ! pg_isready -U postgres > /dev/null 2>&1;
+    do
+      >&2 echo "."
+      sleep 1
+  done
+  "
+
+>&2 echo "pg is up - continuing "
+exec $cmd

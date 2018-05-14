@@ -231,7 +231,6 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "context",
     "http2",
     "http2/hpack",
     "idna",
@@ -275,6 +274,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5ceac51ab47d7c51dc5b393ccd23eb228972be2b9901f98da151bac523e75d12"
+  inputs-digest = "c3246c7d7f1e3b5840ac6d6985b68a6f696cd80fca7186f4de9f1f408ddf34bc"
   solver-name = "gps-cdcl"
   solver-version = 1

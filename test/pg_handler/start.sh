@@ -1,6 +1,11 @@
 #!/bin/bash -ex
 
 docker-compose build
-docker-compose up -d pg secretless
+docker-compose up -d pg
+
+./wait-for-pg
+
+# start secretless once pg is running
+docker-compose up -d secretless
 
 sleep 2

@@ -13,3 +13,4 @@ tmp
 *.retry
 doc/**/proxy_tls
 doc/**/myapp
+test/junit.*

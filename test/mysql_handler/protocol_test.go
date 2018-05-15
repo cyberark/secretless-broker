@@ -26,6 +26,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"testing"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
@@ -100,14 +101,11 @@ func TestDecodeOkResponse(t *testing.T) {
 func TestDecodeHandshakeV10(t *testing.T) {
 
 	type DecodeHandshakeV10Assert struct {
-		Packet             []byte
-		HasError           bool
-		Error              error
-		ProtocolVersion    byte
-		ServerVersion      string
-		ConnectionID       uint32
-		AuthPlugin         string
-		ServerCapabilities map[uint32]bool
+		Packet   []byte
+		HasError bool
+		Error    error
+		protocol.HandshakeV10
+		CapabilitiesMap map[uint32]bool
 	}
 
 	testData := []*DecodeHandshakeV10Assert{
@@ -121,10 +119,15 @@ func TestDecodeHandshakeV10(t *testing.T) {
 			},
 			false,
 			nil,
-			byte(10),
-			"5.5.56",
-			uint32(1630),
-			"mysql_native_password",
+			protocol.HandshakeV10{
+				ProtocolVersion:    byte(10),
+				ServerVersion:      "5.5.56",
+				ConnectionID:       uint32(1630),
+				AuthPlugin:         "mysql_native_password",
+				ServerCapabilities: binary.LittleEndian.Uint32([]byte{255, 247, 15, 128}),
+				Salt: []byte{0x48, 0x6a, 0x5b, 0x6a, 0x24, 0x71, 0x30, 0x3a, 0x6f, 0x43, 0x40, 0x56, 0x6e, 0x4b,
+					0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a},
+			},
 			map[uint32]bool{
 				protocol.ClientLongPassword: true, protocol.ClientFoundRows: true, protocol.ClientLongFlag: true,
 				protocol.ClientConnectWithDB: true, protocol.ClientNoSchema: true, protocol.ClientCompress: true, protocol.ClientODBC: true,
@@ -132,8 +135,7 @@ func TestDecodeHandshakeV10(t *testing.T) {
 				protocol.ClientSSL: false, protocol.ClientIgnoreSIGPIPE: true, protocol.ClientTransactions: true, protocol.ClientMultiStatements: true,
 				protocol.ClientMultiResults: true, protocol.ClientPSMultiResults: true, protocol.ClientPluginAuth: true, protocol.ClientConnectAttrs: false,
 				protocol.ClientPluginAuthLenEncClientData: false, protocol.ClientCanHandleExpiredPasswords: false,
-				protocol.ClientSessionTrack: false, protocol.ClientDeprecateEOF: false,
-			},
+				protocol.ClientSessionTrack: false, protocol.ClientDeprecateEOF: false},
 		},
 		{
 			[]byte{
@@ -145,10 +147,15 @@ func TestDecodeHandshakeV10(t *testing.T) {
 			},
 			false,
 			nil,
-			byte(10),
-			"5.7.18",
-			uint32(15),
-			"mysql_native_password",
+			protocol.HandshakeV10{
+				ProtocolVersion:    byte(10),
+				ServerVersion:      "5.7.18",
+				ConnectionID:       uint32(15),
+				AuthPlugin:         "mysql_native_password",
+				ServerCapabilities: binary.LittleEndian.Uint32([]byte{255, 255, 255, 193}),
+				Salt: []byte{0x15, 0x12, 0x4b, 0x1f, 0x70, 0x2b, 0x33, 0x55, 0x01, 0x30, 0x0d,
+					0x0a, 0x28, 0x06, 0x4a, 0x12, 0x5e, 0x45, 0x18, 0x05},
+			},
 			map[uint32]bool{
 				protocol.ClientLongPassword: true, protocol.ClientFoundRows: true, protocol.ClientLongFlag: true,
 				protocol.ClientConnectWithDB: true, protocol.ClientNoSchema: true, protocol.ClientCompress: true, protocol.ClientODBC: true,
@@ -156,8 +163,7 @@ func TestDecodeHandshakeV10(t *testing.T) {
 				protocol.ClientSSL: true, protocol.ClientIgnoreSIGPIPE: true, protocol.ClientTransactions: true, protocol.ClientMultiStatements: true,
 				protocol.ClientMultiResults: true, protocol.ClientPSMultiResults: true, protocol.ClientPluginAuth: true, protocol.ClientConnectAttrs: true,
 				protocol.ClientPluginAuthLenEncClientData: true, protocol.ClientCanHandleExpiredPasswords: true,
-				protocol.ClientSessionTrack: true, protocol.ClientDeprecateEOF: true,
-			},
+				protocol.ClientSessionTrack: true, protocol.ClientDeprecateEOF: true},
 		},
 	}
 
@@ -167,12 +173,14 @@ func TestDecodeHandshakeV10(t *testing.T) {
 		if err != nil {
 			assert.Equal(t, asserted.Error, err)
 		} else {
-			assert.Equal(t, asserted.ProtocolVersion, decoded.ProtocolVersion)
-			assert.Equal(t, asserted.ServerVersion, decoded.ServerVersion)
-			assert.Equal(t, asserted.ConnectionID, decoded.ConnectionID)
-			assert.Equal(t, asserted.AuthPlugin, decoded.AuthPlugin)
+			assert.Equal(t, asserted.HandshakeV10.ProtocolVersion, decoded.ProtocolVersion)
+			assert.Equal(t, asserted.HandshakeV10.ServerVersion, decoded.ServerVersion)
+			assert.Equal(t, asserted.HandshakeV10.ConnectionID, decoded.ConnectionID)
+			assert.Equal(t, asserted.HandshakeV10.AuthPlugin, decoded.AuthPlugin)
+			assert.Equal(t, asserted.HandshakeV10.Salt, decoded.Salt)
+			assert.Equal(t, asserted.HandshakeV10.ServerCapabilities, decoded.ServerCapabilities)
 
-			for flag, isSet := range asserted.ServerCapabilities {
+			for flag, isSet := range asserted.CapabilitiesMap {
 				if isSet {
 					assert.True(t, decoded.ServerCapabilities&flag > 0)
 					if decoded.ServerCapabilities&flag == 0 {

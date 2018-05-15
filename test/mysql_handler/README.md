@@ -32,19 +32,29 @@ From this directory, start secretless:
 #### Log in to the MySQL server via the Secretless MySQL handler
 In another terminal, navigate to the `test/mysql_handler` directory and send a MySQL request via Unix socket:
 ```
-mysql -u testuser --socket=run/mysql/mysql.sock
+mysql --socket=run/mysql/mysql.sock
 ```
+or via TCP:
+```
+mysql -h 0.0.0.0 -P 13306 --ssl-mode=DISABLED
+```
+You may be prompted for a password, but you don't need to enter one; just hit return to continue.
 
 Once logged in, you should be able to `SELECT * FROM testdb.test` and see the rows that were added to the sample table.
 
-Note: this assumes you have a MySQL client installed locally on your machine. A decent one is [mysqlsh](https://dev.mysql.com/doc/refman/5.7/en/mysqlsh.html); if you use `mysqlsh`, you will need to create an executable `mysql` file in your `PATH` that contains the following in order to be able to run `run_dev_test.sh` locally:
+Note: this assumes you have a MySQL client installed locally on your machine. In the examples above and when you run the test suite locally, it is assumed you use one like [mysqlsh](https://dev.mysql.com/doc/refman/5.7/en/mysqlsh.html), which assumes SSL connections when possible by default (and has an `--ssl-mode` flag you can use to disable SSL).
+
+If you use `mysqlsh`, you will need to create an executable `mysql` file in your `PATH` that contains the following in order to be able to run `run_dev_test.sh` locally:
 ```
 #!/bin/bash -ex
 
 mysqlsh --sql "$@"
 ```
+This will run the MySQL shell as a client in SQL mode.
 
 ## MySQL Handler Development
+
+### Using VS Code
 
 The easiest way to do Secretless development is to use the VS Code debugger. As above, you will want to start up your MySQL server container before beginning development. To configure the Secretless server, you can provide VS Code with a `launch.json` file for debugging by copying the sample file below to `.vscode/launch.json`, replacing `[YOUR MYSQL PORT]` with the actual exposed port of your MySQL Docker container.
 
@@ -73,7 +83,22 @@ Sample `launch.json`:
 }
 ```
 
-Once you start the debugger (which will automatically start Secretless with the dev MySQL Handler configuration), you can send requests to the MySQL server via a client as above.
+Once you start the debugger (which will automatically start Secretless with the dev MySQL Handler configuration), you can send requests to the MySQL server via a client as described above.
+
+### Using Docker
+
+You can also run:
+```
+cd test/mysql_handler/
+./start.sh
+docker-compose run --rm dev
+```
+
+Then, to connect with MySQL you can run either
+`mysql -h secretless -P 3306`
+to connect via TCP (SSL mode is disabled by default), or
+`mysql --socket=/run/mysql/mysql.sock`
+to connect via Unix socket.
 
 ## Running the test suite
 

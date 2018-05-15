@@ -34,9 +34,9 @@ import (
 	"strconv"
 )
 
-var errInvalidPacketLength = errors.New("Protocol: Invalid packet length")
-var errInvalidPacketType = errors.New("Protocol: Invalid packet type")
-var errFieldTypeNotImplementedYet = errors.New("Protocol: Required field type not implemented yet")
+var ErrInvalidPacketLength = errors.New("Protocol: Invalid packet length")
+var ErrInvalidPacketType = errors.New("Protocol: Invalid packet type")
+var ErrFieldTypeNotImplementedYet = errors.New("Protocol: Required field type not implemented yet")
 
 type ErrResponse struct {
 	Message string
@@ -225,7 +225,7 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	// Get length of AuthnPluginDataPart2
 	// or read in empty byte if not included
 	var authPluginDataLength byte
-	if serverCapabilities&clientPluginAuth > 0 {
+	if serverCapabilities&ClientPluginAuth > 0 {
 		var err error
 		authPluginDataLength, err = r.ReadByte()
 		if err != nil {
@@ -244,7 +244,7 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 
 	// Get AuthnPluginDataPart2
 	var numBytes int
-	if serverCapabilities&clientSecureConnection != 0 {
+	if serverCapabilities&ClientSecureConnection != 0 {
 		numBytes = int(authPluginDataLength) - 8
 		if numBytes < 0 || numBytes > 13 {
 			numBytes = 13
@@ -263,7 +263,7 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	var authPlugin string
-	if serverCapabilities&clientPluginAuth != 0 {
+	if serverCapabilities&ClientPluginAuth != 0 {
 		authPlugin = ReadNullTerminatedString(r)
 	}
 
@@ -312,7 +312,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	capabilityFlags := binary.LittleEndian.Uint32(clientCapabilitiesBuf)
 
 	// Check that the server is using protocol 4.1
-	if capabilityFlags&clientProtocol41 == 0 {
+	if capabilityFlags&ClientProtocol41 == 0 {
 		return nil, errors.New("Protocol mismatch")
 	}
 
@@ -340,7 +340,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	// Read Auth
 	var auth []byte
 	var authLength int64
-	if capabilityFlags&clientSecureConnection > 0 {
+	if capabilityFlags&ClientSecureConnection > 0 {
 		authLengthByte, err := r.ReadByte()
 		if err != nil {
 			return nil, err
@@ -357,12 +357,12 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 
 	// Read Database
 	var database string
-	if capabilityFlags&clientConnectWithDB > 0 {
+	if capabilityFlags&ClientConnectWithDB > 0 {
 		database = ReadNullTerminatedString(r)
 	}
 
 	// check whether the auth method was specified
-	if capabilityFlags&clientPluginAuth > 0 {
+	if capabilityFlags&ClientPluginAuth > 0 {
 		authPluginName := ReadNullTerminatedString(r)
 
 		if authPluginName != defaultAuthPluginName {
@@ -451,7 +451,7 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byt
 	buf.WriteByte(0)
 
 	// write auth
-	if clientHandshake.CapabilityFlags&clientSecureConnection > 0 {
+	if clientHandshake.CapabilityFlags&ClientSecureConnection > 0 {
 		if clientHandshake.AuthLength > 0 {
 			buf.WriteByte(uint8(len(clientHandshake.AuthResponse)))
 			buf.Write(clientHandshake.AuthResponse)
@@ -464,7 +464,7 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byt
 	}
 
 	// write database (if set)
-	if clientHandshake.CapabilityFlags&clientConnectWithDB > 0 {
+	if clientHandshake.CapabilityFlags&ClientConnectWithDB > 0 {
 		buf.WriteString(clientHandshake.Database)
 		buf.WriteByte(0)
 	}
@@ -500,12 +500,12 @@ func UnpackQueryRequest(packet []byte) (*QueryRequest, error) {
 
 	// Min packet length = header(4 bytes) + command(1 byte) + SQLStatement(at least 1 byte)
 	if len(packet) < 6 {
-		return nil, errInvalidPacketLength
+		return nil, ErrInvalidPacketLength
 	}
 
 	// Fifth byte is command
 	if packet[4] != ComQuery && packet[4] != ComStmtPrepare {
-		return nil, errInvalidPacketType
+		return nil, ErrInvalidPacketType
 	}
 
 	return &QueryRequest{ReadEOFLengthString(packet[5:])}, nil
@@ -535,12 +535,12 @@ func UnpackComStmtPrepareOkResponse(packet []byte) (*ComStmtPrepareOkResponse, e
 	// + number of columns (2 bytes) + number of parameters (2 bytes)
 	// + <not used> (1 byte) + number of warnings (2 bytes)
 	if len(packet) < 16 {
-		return nil, errInvalidPacketLength
+		return nil, ErrInvalidPacketLength
 	}
 
 	// Fifth byte is command
 	if packet[4] != responsePrepareOk {
-		return nil, errInvalidPacketType
+		return nil, ErrInvalidPacketType
 	}
 
 	statementID := binary.LittleEndian.Uint32(packet[5:9])
@@ -599,7 +599,7 @@ func UnpackComStmtExecuteRequest(packet []byte, paramsCount uint16) (*ComStmtExe
 
 	// Fifth byte is command
 	if packet[4] != ComStmtExecute {
-		return nil, errInvalidPacketType
+		return nil, ErrInvalidPacketType
 	}
 
 	r := bytes.NewReader(packet)
@@ -677,7 +677,7 @@ func UnpackComStmtExecuteRequest(packet []byte, paramsCount uint16) (*ComStmtExe
 
 			// Field with missing decoder
 			default:
-				return nil, errFieldTypeNotImplementedYet
+				return nil, ErrFieldTypeNotImplementedYet
 			}
 
 			// Return with first decoding error
@@ -857,7 +857,7 @@ func SkipPacketHeader(r *bytes.Reader) (s []byte, e error) {
 // CheckPacketLength checks if packet length meets expected value
 func CheckPacketLength(expected int, packet []byte) error {
 	if len(packet) < expected {
-		return errInvalidPacketLength
+		return ErrInvalidPacketLength
 	}
 
 	return nil

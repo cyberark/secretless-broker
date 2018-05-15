@@ -22,12 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package protocol
+package main
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDecodeOkResponse(t *testing.T) {
@@ -36,7 +38,7 @@ func TestDecodeOkResponse(t *testing.T) {
 		Packet   []byte
 		HasError bool
 		Error    error
-		OkResponse
+		protocol.OkResponse
 	}
 
 	testData := []*DecodeOkResponseAssert{
@@ -49,24 +51,39 @@ func TestDecodeOkResponse(t *testing.T) {
 			},
 			false,
 			nil,
-			OkResponse{0x00, uint64(1), uint64(0)},
+			protocol.OkResponse{
+				PacketType:   0x00,
+				AffectedRows: uint64(1),
+				LastInsertID: uint64(0),
+				StatusFlags:  uint16(34),
+				Warnings:     uint16(0)},
 		},
 		{
 			[]byte{0x07, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00},
 			false,
 			nil,
-			OkResponse{0x00, uint64(0), uint64(0)},
+			protocol.OkResponse{
+				PacketType:   0x00,
+				AffectedRows: uint64(0),
+				LastInsertID: uint64(0),
+				StatusFlags:  uint16(2),
+				Warnings:     uint16(0)},
 		},
 		{
 			[]byte{0x07, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, 0x02, 0x00, 0x00, 0x00},
 			false,
 			nil,
-			OkResponse{0x00, uint64(1), uint64(2)},
+			protocol.OkResponse{
+				PacketType:   0x00,
+				AffectedRows: uint64(1),
+				LastInsertID: uint64(2),
+				StatusFlags:  uint16(2),
+				Warnings:     uint16(0)},
 		},
 	}
 
 	for _, asserted := range testData {
-		decoded, err := DecodeOkResponse(asserted.Packet)
+		decoded, err := protocol.UnpackOkResponse(asserted.Packet)
 
 		assert.Nil(t, err)
 
@@ -74,6 +91,8 @@ func TestDecodeOkResponse(t *testing.T) {
 			assert.Equal(t, asserted.OkResponse.PacketType, decoded.PacketType)
 			assert.Equal(t, asserted.OkResponse.AffectedRows, decoded.AffectedRows)
 			assert.Equal(t, asserted.OkResponse.LastInsertID, decoded.LastInsertID)
+			assert.Equal(t, asserted.OkResponse.StatusFlags, decoded.StatusFlags)
+			assert.Equal(t, asserted.OkResponse.Warnings, decoded.Warnings)
 		}
 	}
 }
@@ -107,13 +126,13 @@ func TestDecodeHandshakeV10(t *testing.T) {
 			uint32(1630),
 			"mysql_native_password",
 			map[uint32]bool{
-				clientLongPassword: true, clientFoundRows: true, clientLongFlag: true,
-				clientConnectWithDB: true, clientNoSchema: true, clientCompress: true, clientODBC: true,
-				clientLocalFiles: true, clientIgnoreSpace: true, clientProtocol41: true, clientInteractive: true,
-				clientSSL: false, clientIgnoreSIGPIPE: true, clientTransactions: true, clientMultiStatements: true,
-				clientMultiResults: true, clientPSMultiResults: true, clientPluginAuth: true, clientConnectAttrs: false,
-				clientPluginAuthLenEncClientData: false, clientCanHandleExpiredPasswords: false,
-				clientSessionTrack: false, clientDeprecateEOF: false,
+				protocol.ClientLongPassword: true, protocol.ClientFoundRows: true, protocol.ClientLongFlag: true,
+				protocol.ClientConnectWithDB: true, protocol.ClientNoSchema: true, protocol.ClientCompress: true, protocol.ClientODBC: true,
+				protocol.ClientLocalFiles: true, protocol.ClientIgnoreSpace: true, protocol.ClientProtocol41: true, protocol.ClientInteractive: true,
+				protocol.ClientSSL: false, protocol.ClientIgnoreSIGPIPE: true, protocol.ClientTransactions: true, protocol.ClientMultiStatements: true,
+				protocol.ClientMultiResults: true, protocol.ClientPSMultiResults: true, protocol.ClientPluginAuth: true, protocol.ClientConnectAttrs: false,
+				protocol.ClientPluginAuthLenEncClientData: false, protocol.ClientCanHandleExpiredPasswords: false,
+				protocol.ClientSessionTrack: false, protocol.ClientDeprecateEOF: false,
 			},
 		},
 		{
@@ -131,19 +150,19 @@ func TestDecodeHandshakeV10(t *testing.T) {
 			uint32(15),
 			"mysql_native_password",
 			map[uint32]bool{
-				clientLongPassword: true, clientFoundRows: true, clientLongFlag: true,
-				clientConnectWithDB: true, clientNoSchema: true, clientCompress: true, clientODBC: true,
-				clientLocalFiles: true, clientIgnoreSpace: true, clientProtocol41: true, clientInteractive: true,
-				clientSSL: true, clientIgnoreSIGPIPE: true, clientTransactions: true, clientMultiStatements: true,
-				clientMultiResults: true, clientPSMultiResults: true, clientPluginAuth: true, clientConnectAttrs: true,
-				clientPluginAuthLenEncClientData: true, clientCanHandleExpiredPasswords: true,
-				clientSessionTrack: true, clientDeprecateEOF: true,
+				protocol.ClientLongPassword: true, protocol.ClientFoundRows: true, protocol.ClientLongFlag: true,
+				protocol.ClientConnectWithDB: true, protocol.ClientNoSchema: true, protocol.ClientCompress: true, protocol.ClientODBC: true,
+				protocol.ClientLocalFiles: true, protocol.ClientIgnoreSpace: true, protocol.ClientProtocol41: true, protocol.ClientInteractive: true,
+				protocol.ClientSSL: true, protocol.ClientIgnoreSIGPIPE: true, protocol.ClientTransactions: true, protocol.ClientMultiStatements: true,
+				protocol.ClientMultiResults: true, protocol.ClientPSMultiResults: true, protocol.ClientPluginAuth: true, protocol.ClientConnectAttrs: true,
+				protocol.ClientPluginAuthLenEncClientData: true, protocol.ClientCanHandleExpiredPasswords: true,
+				protocol.ClientSessionTrack: true, protocol.ClientDeprecateEOF: true,
 			},
 		},
 	}
 
 	for _, asserted := range testData {
-		decoded, err := DecodeHandshakeV10(asserted.Packet)
+		decoded, err := protocol.UnpackHandshakeV10(asserted.Packet)
 
 		if err != nil {
 			assert.Equal(t, asserted.Error, err)
@@ -190,7 +209,7 @@ func TestDecodeComStmtExecuteRequest(t *testing.T) {
 				0x50, 0x51, 0x52, 0x53, 0x54, 0x59, 0x57,
 			},
 			true,
-			errInvalidPacketType,
+			protocol.ErrInvalidPacketType,
 			0,
 			nil,
 		},
@@ -199,7 +218,7 @@ func TestDecodeComStmtExecuteRequest(t *testing.T) {
 			// Incorrect packet length
 			[]byte{0x43, 0x00, 0x00, 0x00, 0x17},
 			true,
-			errInvalidPacketLength,
+			protocol.ErrInvalidPacketLength,
 			0,
 			nil,
 		},
@@ -270,10 +289,10 @@ func TestDecodeComStmtExecuteRequest(t *testing.T) {
 	}
 
 	for _, asserted := range testData {
-		decoded, err := DecodeComStmtExecuteRequest(asserted.Packet, uint16(len(asserted.PreparedParameters)))
+		decoded, err := protocol.UnpackComStmtExecuteRequest(asserted.Packet, uint16(len(asserted.PreparedParameters)))
 
 		actualHasError := err != nil
-		if (asserted.HasError != actualHasError) {
+		if asserted.HasError != actualHasError {
 			t.Errorf("ID = %d expected(%t) and actual(%t) errors mismatch", asserted.Id, asserted.HasError, actualHasError)
 			if actualHasError {
 				t.Errorf("Actual error: %s", err.Error())
@@ -307,7 +326,7 @@ func TestDecodeQueryRequest(t *testing.T) {
 			[]byte{0x00, 0x00, 0x00, 0x00, 0x00},
 			"",
 			true,
-			errInvalidPacketLength,
+			protocol.ErrInvalidPacketLength,
 		},
 		{
 			// Correct COM_QUERY packet
@@ -327,12 +346,12 @@ func TestDecodeQueryRequest(t *testing.T) {
 			[]byte{0x4a, 0x00, 0x00, 0x00, 0x05, 0x73, 0x65, 0x6c, 0x65, 0x63, 0x74, 0x20, 0x64, 0x61, 0x74},
 			"",
 			true,
-			errInvalidPacketType,
+			protocol.ErrInvalidPacketType,
 		},
 	}
 
 	for _, asserted := range testData {
-		decoded, err := DecodeQueryRequest(asserted.Packet)
+		decoded, err := protocol.UnpackQueryRequest(asserted.Packet)
 
 		if err != nil {
 			assert.Equal(t, asserted.Error, err)
@@ -357,7 +376,7 @@ func TestDecodeComStmtPrepareOkResponse(t *testing.T) {
 			// Incorrect packet length
 			[]byte{0x0c, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x04},
 			true,
-			errInvalidPacketLength,
+			protocol.ErrInvalidPacketLength,
 			0,
 			0,
 		},
@@ -374,7 +393,7 @@ func TestDecodeComStmtPrepareOkResponse(t *testing.T) {
 	}
 
 	for _, asserted := range testData {
-		decoded, err := DecodeComStmtPrepareOkResponse(asserted.Packet)
+		decoded, err := protocol.UnpackComStmtPrepareOkResponse(asserted.Packet)
 
 		if err != nil {
 			assert.Equal(t, asserted.Error, err)
@@ -404,12 +423,12 @@ func TestReadEOFLengthString(t *testing.T) {
 		0x49, 0x43, 0x54, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53, 0x5f, 0x54, 0x41, 0x42, 0x4c, 0x45, 0x53, 0x27,
 	}
 
-	decoded := ReadEOFLengthString(encoded)
+	decoded := protocol.ReadEOFLengthString(encoded)
 
 	assert.Equal(t, expected, decoded)
 }
 
 func TestReadNullTerminatedString(t *testing.T) {
 	x := bytes.NewReader([]byte{0x35, 0x2e, 0x37, 0x2e, 0x31, 0x38, 0x00})
-	assert.Equal(t, "5.7.18", ReadNullTerminatedString(x))
+	assert.Equal(t, "5.7.18", protocol.ReadNullTerminatedString(x))
 }

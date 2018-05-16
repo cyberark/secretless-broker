@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+cmd="$@"
+
+echo "Waiting for MySQL to start"
+docker-compose exec -T mysql bash -c "
+  while ! mysqladmin -psecurerootpass status > /dev/null 2>&1;
+    do
+      >&2 echo "."
+      sleep 1
+  done
+  "
+
+>&2 echo "MySQL is up - continuing "
+exec $cmd

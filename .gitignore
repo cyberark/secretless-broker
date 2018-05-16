@@ -1,6 +1,7 @@
 .env
 debug
 debug.*
+.vscode/
 vendor
 /doc/godoc
 /secretless
@@ -12,3 +13,4 @@ tmp
 *.retry
 doc/**/proxy_tls
 doc/**/myapp
+test/junit.*

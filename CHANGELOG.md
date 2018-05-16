@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Added initial support for plugins
+
 ## [0.1.0] - 2018-05-15
 
 The first tagged version.

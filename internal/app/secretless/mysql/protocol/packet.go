@@ -40,8 +40,8 @@ type ConnSettings struct {
 
 //...
 func (h *ConnSettings) DeprecateEOFSet() bool {
-	return ((clientDeprecateEOF & h.ServerCapabilities) != 0) &&
-		((clientDeprecateEOF & h.ClientCapabilities) != 0)
+	return ((ClientDeprecateEOF & h.ServerCapabilities) != 0) &&
+		((ClientDeprecateEOF & h.ClientCapabilities) != 0)
 }
 
 // ProcessHandshake handles handshake between server and client.

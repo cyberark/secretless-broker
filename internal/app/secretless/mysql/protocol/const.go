@@ -83,29 +83,29 @@ const (
 
 // Capability flags
 const (
-	clientLongPassword uint32 = 1 << iota
-	clientFoundRows
-	clientLongFlag
-	clientConnectWithDB
-	clientNoSchema
-	clientCompress
-	clientODBC
-	clientLocalFiles
-	clientIgnoreSpace
-	clientProtocol41
-	clientInteractive
-	clientSSL
-	clientIgnoreSIGPIPE
-	clientTransactions
-	clientReserved
-	clientSecureConnection
-	clientMultiStatements
-	clientMultiResults
-	clientPSMultiResults
-	clientPluginAuth
-	clientConnectAttrs
-	clientPluginAuthLenEncClientData
-	clientCanHandleExpiredPasswords
-	clientSessionTrack
-	clientDeprecateEOF
+	ClientLongPassword uint32 = 1 << iota
+	ClientFoundRows
+	ClientLongFlag
+	ClientConnectWithDB
+	ClientNoSchema
+	ClientCompress
+	ClientODBC
+	ClientLocalFiles
+	ClientIgnoreSpace
+	ClientProtocol41
+	ClientInteractive
+	ClientSSL
+	ClientIgnoreSIGPIPE
+	ClientTransactions
+	ClientReserved
+	ClientSecureConnection
+	ClientMultiStatements
+	ClientMultiResults
+	ClientPSMultiResults
+	ClientPluginAuth
+	ClientConnectAttrs
+	ClientPluginAuthLenEncClientData
+	ClientCanHandleExpiredPasswords
+	ClientSessionTrack
+	ClientDeprecateEOF
 )

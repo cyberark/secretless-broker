@@ -1,5 +1,7 @@
 package provider
 
+import "github.com/conjurinc/secretless/pkg/secretless"
+
 // LiteralProvider provides the ID as the value.
 type LiteralProvider struct {
 	name string
@@ -7,7 +9,7 @@ type LiteralProvider struct {
 
 // NewLiteralProvider constructs a LiteralProvider.
 // No configuration or credentials are required.
-func NewLiteralProvider(name string) (provider Provider, err error) {
+func NewLiteralProvider(name string) (provider secretless.Provider, err error) {
 	provider = &LiteralProvider{name: name}
 
 	return

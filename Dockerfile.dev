@@ -1,4 +1,4 @@
-FROM golang:1.9-stretch
+FROM golang:1.10-stretch
 MAINTAINER Conjur Inc.
 
 RUN go get -u github.com/jstemmer/go-junit-report

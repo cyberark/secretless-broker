@@ -3,21 +3,17 @@ package provider
 import (
 	"fmt"
 	"sync"
+
+	"github.com/conjurinc/secretless/pkg/secretless"
 )
 
-// Provider is the interface used to obtain values from a secret vault backend.
-type Provider interface {
-	Name() string
-	Value(id string) ([]byte, error)
-}
-
 // NewProvider creates a named provider.
-type NewProvider func(name string) (Provider, error)
+type NewProvider func(name string) (secretless.Provider, error)
 
-var providers = make(map[string]Provider)
+var providers = make(map[string]secretless.Provider)
 
 // GetProvider finds or creates a named provider.
-func GetProvider(name string) (provider Provider, err error) {
+func GetProvider(name string) (provider secretless.Provider, err error) {
 	var mutex = &sync.Mutex{}
 
 	mutex.Lock()

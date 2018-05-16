@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -116,5 +117,20 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	r.URL.Scheme = "https"
 	r.Body = ioutil.NopCloser(bytes.NewReader(bodyBytes))
 
+	return nil
+}
+
+// GetConfig implements secretless.Handler
+func (h *AWSHandler) GetConfig() config.Handler {
+	return h.Config
+}
+
+// GetClientConnection implements secretless.Handler
+func (h *AWSHandler) GetClientConnection() net.Conn {
+	return nil
+}
+
+// GetBackendConnection implements secretless.Handler
+func (h *AWSHandler) GetBackendConnection() net.Conn {
 	return nil
 }

@@ -2,6 +2,8 @@ package provider
 
 import (
 	"io/ioutil"
+
+	"github.com/conjurinc/secretless/pkg/secretless"
 )
 
 // FileProvider reads the contents of the specified file.
@@ -11,7 +13,7 @@ type FileProvider struct {
 
 // NewFileProvider constructs a FileProvider.
 // No configuration or credentials are required.
-func NewFileProvider(name string) (provider Provider, err error) {
+func NewFileProvider(name string) (provider secretless.Provider, err error) {
 	provider = &FileProvider{name: name}
 
 	return

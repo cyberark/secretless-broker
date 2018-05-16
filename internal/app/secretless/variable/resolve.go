@@ -1,7 +1,9 @@
 package variable
 
 import (
+	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	providerPkg "github.com/conjurinc/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
@@ -11,7 +13,7 @@ func Resolve(variables []config.Variable) (result map[string][]byte, err error) 
 	result = make(map[string][]byte)
 
 	for _, v := range variables {
-		var provider providerPkg.Provider
+		var provider secretless.Provider
 		var value []byte
 
 		if provider, err = providerPkg.GetProvider(v.Provider); err != nil {
@@ -22,6 +24,8 @@ func Resolve(variables []config.Variable) (result map[string][]byte, err error) 
 			return
 		}
 		result[v.Name] = value
+
+		plugin.GetManager().ResolveVariable(provider, v.Name, value)
 	}
 
 	return

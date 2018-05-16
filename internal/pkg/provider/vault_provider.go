@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/conjurinc/secretless/pkg/secretless"
 	vault "github.com/hashicorp/vault/api"
 )
 
@@ -15,7 +16,7 @@ type VaultProvider struct {
 
 // NewVaultProvider constructs a VaultProvider. The API client is configured from
 // environment variables.
-func NewVaultProvider(name string) (provider Provider, err error) {
+func NewVaultProvider(name string) (provider secretless.Provider, err error) {
 	config := vault.DefaultConfig()
 
 	var client *vault.Client

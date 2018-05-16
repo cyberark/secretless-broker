@@ -9,6 +9,8 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/conjurinc/secretless/internal/pkg/util"
+	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
@@ -74,7 +76,7 @@ func (l *Listener) Listen() {
 	serverConfig.AddHostKey(private)
 
 	for {
-		nConn, err := l.Listener.Accept()
+		nConn, err := util.Accept(l)
 		if err != nil {
 			log.Printf("Failed to accept incoming connection: ", err)
 			return
@@ -103,4 +105,24 @@ func (l *Listener) Listen() {
 		handler := &Handler{Config: l.Handlers[0], Channels: chans}
 		handler.Run()
 	}
+}
+
+// GetConfig implements secretless.Listener
+func (l *Listener) GetConfig() config.Listener {
+	return l.Config
+}
+
+// GetListener implements secretless.Listener
+func (l *Listener) GetListener() net.Listener {
+	return l.Listener
+}
+
+// GetHandlers implements secretless.Listener
+func (l *Listener) GetHandlers() []secretless.Handler {
+	return nil
+}
+
+// GetConnections implements secretless.Listener
+func (l *Listener) GetConnections() []net.Conn {
+	return nil
 }

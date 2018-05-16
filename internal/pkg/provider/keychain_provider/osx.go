@@ -51,14 +51,14 @@ func GetGenericPassword(service, account string) ([]byte, error) {
 	values[0] = C.CFTypeRef(service_cf)
 	values[1] = C.CFTypeRef(account_cf)
 	values[2] = C.CFTypeRef(C.kSecClassGenericPassword)
-	values[3] = C.CFTypeRef(C.kCFBooleanTrue)
+	values[3] = C.CFTypeRef(unsafe.Pointer(C.kCFBooleanTrue))
 
 	keyCallbacks := (*C.CFDictionaryKeyCallBacks)(&C.kCFTypeDictionaryKeyCallBacks)
 	valCallbacks := (*C.CFDictionaryValueCallBacks)(&C.kCFTypeDictionaryValueCallBacks)
 
-	query_cf := C.CFDictionaryCreate(nil, (*unsafe.Pointer)(&keys[0]), (*unsafe.Pointer)(&values[0]), C.CFIndex(len(keys)), keyCallbacks, valCallbacks)
+	query_cf := C.CFDictionaryCreate(nil, (*unsafe.Pointer)(unsafe.Pointer(&keys[0])), (*unsafe.Pointer)(unsafe.Pointer(&values[0])), C.CFIndex(len(keys)), keyCallbacks, valCallbacks)
 
-	defer release(C.CFTypeRef(query_cf))
+	defer release(C.CFTypeRef(unsafe.Pointer(query_cf)))
 
 	var resultsRef C.CFTypeRef
 	errCode := C.SecItemCopyMatching(query_cf, &resultsRef)

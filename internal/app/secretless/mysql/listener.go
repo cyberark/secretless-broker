@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
+	"github.com/conjurinc/secretless/internal/pkg/util"
+	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
@@ -55,7 +57,7 @@ func (l *Listener) Listen() {
 	for {
 		var client net.Conn
 		var err error
-		if client, err = l.Listener.Accept(); err != nil {
+		if client, err = util.Accept(l); err != nil {
 			continue
 		}
 
@@ -72,4 +74,24 @@ func (l *Listener) Listen() {
 			client.Write(mysqlError.GetMessage())
 		}
 	}
+}
+
+// GetConfig implements secretless.Listener
+func (l *Listener) GetConfig() config.Listener {
+	return l.Config
+}
+
+// GetListener implements secretless.Listener
+func (l *Listener) GetListener() net.Listener {
+	return l.Listener
+}
+
+// GetHandlers implements secretless.Listener
+func (l *Listener) GetHandlers() []secretless.Handler {
+	return nil
+}
+
+// GetConnections implements secretless.Listener
+func (l *Listener) GetConnections() []net.Conn {
+	return nil
 }

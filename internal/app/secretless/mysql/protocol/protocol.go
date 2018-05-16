@@ -30,8 +30,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"math"
-	"strconv"
 )
 
 var ErrInvalidPacketLength = errors.New("Protocol: Invalid packet length")
@@ -75,7 +73,7 @@ func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header
-	if _, err := SkipPacketHeader(r); err != nil {
+	if _, err := GetPacketHeader(r); err != nil {
 		return nil, err
 	}
 
@@ -169,7 +167,7 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header
-	if _, err := SkipPacketHeader(r); err != nil {
+	if _, err := GetPacketHeader(r); err != nil {
 		return nil, err
 	}
 
@@ -299,7 +297,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header (but save in struct)
-	header, err := SkipPacketHeader(r)
+	header, err := GetPacketHeader(r)
 	if err != nil {
 		return nil, err
 	}
@@ -404,8 +402,8 @@ func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, userna
 	}
 
 	// Reset the payload length for the packet
-	payloadLengthDiff := uint32(len(username) - len(clientHandshake.Username))
-	payloadLengthDiff += uint32(len(authResponse) - int(clientHandshake.AuthLength))
+	payloadLengthDiff := int32(len(username) - len(clientHandshake.Username))
+	payloadLengthDiff += int32(len(authResponse) - int(clientHandshake.AuthLength))
 
 	clientHandshake.Header, err = UpdateHeaderPayloadLength(clientHandshake.Header, payloadLengthDiff)
 	if err != nil {
@@ -481,256 +479,6 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byt
 	packet = buf.Bytes()
 
 	return
-}
-
-// QueryRequest represents COM_QUERY or COM_STMT_PREPARE command sent by client to server.
-type QueryRequest struct {
-	Query string // SQL query value
-}
-
-// UnpackQueryRequest decodes COM_QUERY and COM_STMT_PREPARE requests from client.
-// Basic packet structure shown below.
-// See https://mariadb.com/kb/en/mariadb/com_query/ and https://mariadb.com/kb/en/mariadb/com_stmt_prepare/
-//
-// int<3> PacketLength
-// int<1> PacketNumber
-// int<1> Command COM_QUERY (0x03) or COM_STMT_PREPARE (0x16)
-// string<EOF> SQLStatement
-func UnpackQueryRequest(packet []byte) (*QueryRequest, error) {
-
-	// Min packet length = header(4 bytes) + command(1 byte) + SQLStatement(at least 1 byte)
-	if len(packet) < 6 {
-		return nil, ErrInvalidPacketLength
-	}
-
-	// Fifth byte is command
-	if packet[4] != ComQuery && packet[4] != ComStmtPrepare {
-		return nil, ErrInvalidPacketType
-	}
-
-	return &QueryRequest{ReadEOFLengthString(packet[5:])}, nil
-}
-
-// ComStmtPrepareOkResponse represents COM_STMT_PREPARE_OK response structure.
-type ComStmtPrepareOkResponse struct {
-	StatementID   uint32 // ID of prepared statement
-	ParametersNum uint16 // Num of prepared parameters
-}
-
-// UnpackComStmtPrepareOkResponse decodes COM_STMT_PREPARE_OK response from MySQL server.
-// Basic packet structure shown below.
-// See https://mariadb.com/kb/en/mariadb/com_stmt_prepare/#COM_STMT_PREPARE_OK
-//
-// int<3> PacketLength
-// int<1> PacketNumber
-// int<1> Command COM_STMT_PREPARE_OK (0x00)
-// int<4> StatementID
-// int<2> NumberOfColumns
-// int<2> NumberOfParameters
-// string<1> <not used>
-// int<2> NumberOfWarnings
-func UnpackComStmtPrepareOkResponse(packet []byte) (*ComStmtPrepareOkResponse, error) {
-
-	// Min packet length = header(4 bytes) + command(1 byte) + statementID(4 bytes)
-	// + number of columns (2 bytes) + number of parameters (2 bytes)
-	// + <not used> (1 byte) + number of warnings (2 bytes)
-	if len(packet) < 16 {
-		return nil, ErrInvalidPacketLength
-	}
-
-	// Fifth byte is command
-	if packet[4] != responsePrepareOk {
-		return nil, ErrInvalidPacketType
-	}
-
-	statementID := binary.LittleEndian.Uint32(packet[5:9])
-	parametersNum := binary.LittleEndian.Uint16(packet[11:13])
-
-	return &ComStmtPrepareOkResponse{StatementID: statementID, ParametersNum: parametersNum}, nil
-}
-
-// ComStmtExecuteRequest represents COM_STMT_EXECUTE request structure.
-type ComStmtExecuteRequest struct {
-	StatementID        uint32              // ID of prepared statement
-	PreparedParameters []PreparedParameter // Slice of prepared parameters
-}
-
-// PreparedParameter structure represents single prepared parameter structure for COM_STMT_EXECUTE request.
-type PreparedParameter struct {
-	FieldType byte   // Type of prepared parameter. See https://mariadb.com/kb/en/mariadb/resultset/#field-types
-	Flag      byte   // Unused
-	Value     string // String value of any prepared parameter passed with COM_STMT_EXECUTE request
-}
-
-// UnpackComStmtExecuteRequest decodes COM_STMT_EXECUTE packet sent by MySQL client.
-// Basic packet structure shown below.
-// See https://mariadb.com/kb/en/mariadb/com_stmt_execute/
-//
-// int<3> PacketLength
-// int<1> PacketNumber
-// int<1> COM_STMT_EXECUTE (0x17)
-// int<4> StatementID
-// int<1> Flags
-// int<4> IterationCount = 1
-// if (ParamCount > 0)
-// {
-// 		byte<(ParamCount + 7) / 8> NullBitmap
-// 		byte<1>: SendTypeToServer = 0 or 1
-// 		if (SendTypeToServer)
-//		{
-// 			Foreach parameter
-//			{
-// 				byte<1>: FieldType
-//				byte<1>: ParameterFlag
-//			}
-//		}
-// 		Foreach parameter
-//		{
-// 			byte<n> BinaryParameterValue
-//		}
-// }
-func UnpackComStmtExecuteRequest(packet []byte, paramsCount uint16) (*ComStmtExecuteRequest, error) {
-
-	// Min packet length = header(4 bytes) + command(1 byte) + statementID(4 bytes)
-	// + flags(1 byte) + iteration count(4 bytes)
-	if err := CheckPacketLength(14, packet); err != nil {
-		return nil, err
-	}
-
-	// Fifth byte is command
-	if packet[4] != ComStmtExecute {
-		return nil, ErrInvalidPacketType
-	}
-
-	r := bytes.NewReader(packet)
-
-	// Skip packet header
-	if _, err := SkipPacketHeader(r); err != nil {
-		return nil, err
-	}
-
-	// Skip to statementID position
-	if _, err := r.Seek(1, io.SeekCurrent); err != nil {
-		return nil, err
-	}
-
-	// Read StatementID
-	statementIDBuf := make([]byte, 4)
-	if _, err := r.Read(statementIDBuf); err != nil {
-		return nil, err
-	}
-	statementID := binary.LittleEndian.Uint32(statementIDBuf)
-
-	// Skip to NullBitmap position
-	if _, err := r.Seek(5, io.SeekCurrent); err != nil {
-		return nil, err
-	}
-
-	// Make buffer for n=paramsCount prepared parameters
-	parameters := make([]PreparedParameter, paramsCount)
-
-	if paramsCount > 0 {
-		nullBitmapLength := int64((paramsCount + 7) / 8)
-
-		// Skip to SendTypeToServer position
-		if _, err := r.Seek(nullBitmapLength, io.SeekCurrent); err != nil {
-			return nil, err
-		}
-
-		// Read SendTypeToServer
-		sendTypeToServer, err := r.ReadByte()
-		if err != nil {
-			return nil, err
-		}
-
-		if sendTypeToServer == 1 {
-			for index := range parameters {
-
-				// Read parameter FieldType and ParameterFlag
-				parameterMeta := make([]byte, 2)
-				if _, err := r.Read(parameterMeta); err != nil {
-					return nil, err
-				}
-
-				parameters[index].FieldType = parameterMeta[0]
-				parameters[index].Flag = parameterMeta[1]
-			}
-		}
-
-		var fieldDecoderError error
-		var fieldValue string
-
-		for index, parameter := range parameters {
-			switch parameter.FieldType {
-
-			// MYSQL_TYPE_VAR_STRING (length encoded string)
-			case fieldTypeString:
-				fieldValue, fieldDecoderError = DecodeFieldTypeString(r)
-
-			// MYSQL_TYPE_LONGLONG
-			case fieldTypeLongLong:
-				fieldValue, fieldDecoderError = DecodeFieldTypeLongLong(r)
-
-			// MYSQL_TYPE_DOUBLE
-			case fieldTypeDouble:
-				fieldValue, fieldDecoderError = DecodeFieldTypeDouble(r)
-
-			// Field with missing decoder
-			default:
-				return nil, ErrFieldTypeNotImplementedYet
-			}
-
-			// Return with first decoding error
-			if fieldDecoderError != nil {
-				return nil, fieldDecoderError
-			}
-
-			parameters[index].Value = fieldValue
-			fieldValue = ""
-		}
-	}
-
-	return &ComStmtExecuteRequest{StatementID: statementID, PreparedParameters: parameters}, nil
-}
-
-// DecodeFieldTypeString decodes MYSQL_TYPE_VAR_STRING field (length-encoded string)
-// See https://mariadb.com/kb/en/mariadb/resultset/#field-types
-func DecodeFieldTypeString(r *bytes.Reader) (string, error) {
-	str, _, err := ReadLenEncodedString(r)
-
-	// io.EOF is ok since reader may be empty already because of empty prepared parameter value
-	if err != nil && err != io.EOF {
-		return "", err
-	}
-
-	return str, nil
-}
-
-// DecodeFieldTypeLongLong decodes MYSQL_TYPE_LONGLONG field
-// See https://mariadb.com/kb/en/mariadb/resultset/#field-types
-func DecodeFieldTypeLongLong(r *bytes.Reader) (string, error) {
-	var bigIntValue int64
-
-	if err := binary.Read(r, binary.LittleEndian, &bigIntValue); err != nil {
-		return "", nil
-	}
-
-	return strconv.FormatInt(bigIntValue, 10), nil
-}
-
-// DecodeFieldTypeDouble decodes MYSQL_TYPE_DOUBLE field
-// See https://mariadb.com/kb/en/mariadb/resultset/#field-types
-func DecodeFieldTypeDouble(r *bytes.Reader) (string, error) {
-	// Read 8 bytes required for float64
-	doubleLengthBuf := make([]byte, 8)
-	if _, err := r.Read(doubleLengthBuf); err != nil {
-		return "", err
-	}
-
-	doubleBits := binary.LittleEndian.Uint64(doubleLengthBuf)
-	doubleValue := math.Float64frombits(doubleBits)
-
-	return strconv.FormatFloat(doubleValue, 'f', doubleDecodePrecision, 64), nil
 }
 
 // GetLenEncodedIntegerSize returns bytes count for length encoded integer
@@ -843,8 +591,8 @@ func ReadNullTerminatedBytes(r *bytes.Reader) (str []byte) {
 	}
 }
 
-// SkipPacketHeader rewinds reader to packet payload
-func SkipPacketHeader(r *bytes.Reader) (s []byte, e error) {
+// GetPacketHeader rewinds reader to packet payload
+func GetPacketHeader(r *bytes.Reader) (s []byte, e error) {
 	s = make([]byte, 4)
 
 	if _, e = r.Read(s); e != nil {
@@ -892,14 +640,17 @@ func NativePassword(password string, salt []byte) (nativePassword []byte, err er
 
 // UpdateHeaderPayloadLength takes in a 4 byte header and a difference
 // in length, and returns a new header
-func UpdateHeaderPayloadLength(origHeader []byte, diff uint32) (header []byte, err error) {
+func UpdateHeaderPayloadLength(origHeader []byte, diff int32) (header []byte, err error) {
 
 	initialPayloadLength, err := ReadUint24(origHeader[0:3])
 	if err != nil {
 		return nil, err
 	}
-	updatedPayloadLength := initialPayloadLength + diff
-	header = append(WriteUint24(updatedPayloadLength), origHeader[3])
+	updatedPayloadLength := int32(initialPayloadLength) + diff
+	if updatedPayloadLength < 0 {
+		return nil, errors.New("Malformed packet")
+	}
+	header = append(WriteUint24(uint32(updatedPayloadLength)), origHeader[3])
 
 	return
 }

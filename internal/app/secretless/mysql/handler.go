@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
+	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
@@ -39,7 +40,7 @@ func (h *Handler) abort(err error) {
 	h.Client.Write(mysqlError.GetMessage())
 }
 
-func stream(source, dest net.Conn) {
+func stream(source, dest net.Conn, callback func([]byte)) {
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -50,10 +51,13 @@ func stream(source, dest net.Conn) {
 		if err != nil {
 			return
 		}
+
 		_, err = dest.Write(buffer[:length])
 		if err != nil {
 			return
 		}
+
+		callback(buffer[:length])
 	}
 }
 
@@ -63,8 +67,8 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.Client, h.Backend)
-	go stream(h.Backend, h.Client)
+	go stream(h.Client, h.Backend, func(b []byte) { plugin.GetManager().ClientData(h.Client, b) })
+	go stream(h.Backend, h.Client, func(b []byte) { plugin.GetManager().ClientData(h.Client, b) })
 }
 
 // Run configures the backend connection info, connects to the backend to
@@ -84,4 +88,19 @@ func (h *Handler) Run() {
 	}
 
 	h.Pipe()
+}
+
+// GetConfig implements secretless.Handler
+func (h *Handler) GetConfig() config.Handler {
+	return h.Config
+}
+
+// GetClientConnection implements secretless.Handler
+func (h *Handler) GetClientConnection() net.Conn {
+	return h.Client
+}
+
+// GetBackendConnection implements secretless.Handler
+func (h *Handler) GetBackendConnection() net.Conn {
+	return h.Backend
 }

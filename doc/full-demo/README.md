@@ -20,7 +20,7 @@ Secretless and Summon2 give organizations the flexibility to securely deliver se
 First you need to build the project, from the top-level project directory:
 
 ```sh-session
-secretless $ ./build/build.sh
+secretless $ ./build/build
 ```
 
 Then from this directory, build each scenario:

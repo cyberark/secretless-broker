@@ -2,15 +2,10 @@ version: '2.1'
 services:
   secretless:
     image: secretless
-    build:
-      context: ..
     volumes:
       - .:/go/src/github.com/conjurinc/secretless
 
   secretless_dev:
     image: secretless-dev
-    build:
-      context: ..
-      dockerfile: Dockerfile.dev
     volumes:
       - .:/go/src/github.com/conjurinc/secretless

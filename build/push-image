@@ -1,0 +1,9 @@
+#!/bin/bash -ex
+
+readonly VERSION="$(cat VERSION)"
+
+# tag images
+docker tag secretless:$VERSION registry2.itci.conjur.net/conjurinc/secretless:$VERSION
+
+# push images
+docker push registry2.itci.conjur.net/conjurinc/secretless:$VERSION

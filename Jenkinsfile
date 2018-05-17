@@ -25,7 +25,7 @@ pipeline {
 
     stage('Push images') {
       steps {
-        sh './build/push-image'
+        sh './build/publish'
       }
     }
   }

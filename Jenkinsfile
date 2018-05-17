@@ -24,6 +24,10 @@ pipeline {
     }
 
     stage('Push images') {
+      when {
+        branch 'master'
+      }
+
       steps {
         sh './build/publish'
       }

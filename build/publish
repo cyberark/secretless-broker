@@ -1,0 +1,13 @@
+#!/bin/bash -ex
+
+readonly VERSION="$(cat VERSION)"
+readonly IMAGE_NAME="secretless"
+readonly REGISTRY="${1:-registry2.itci.conjur.net}"
+
+# tag images
+docker tag "$IMAGE_NAME:$VERSION" "$REGISTRY/conjurinc/$IMAGE_NAME:$VERSION"
+docker tag "$IMAGE_NAME:$VERSION" "$REGISTRY/conjurinc/$IMAGE_NAME:latest"
+
+# push images
+docker push "$REGISTRY/conjurinc/$IMAGE_NAME:$VERSION"
+docker push "$REGISTRY/conjurinc/$IMAGE_NAME:latest"

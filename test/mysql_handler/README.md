@@ -21,7 +21,7 @@ It will also configure the MySQL server as follows:
 From the root project directory, build the secretless binaries for your platform:
 ```
 platform=$(go run test/print_platform.go)
-./build/build.sh $platform amd64
+./build/build $platform amd64
 ```
 
 From this directory, start secretless:

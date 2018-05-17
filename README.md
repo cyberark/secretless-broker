@@ -58,13 +58,13 @@ secretless $ dep ensure
 Now build for your platform. On Linux:
 
 ```sh-session
-secretless $ ./build/build.sh
+secretless $ ./build/build
 ```
 
 On OS X:
 
 ```sh-session
-secretless $ ./build/build_darwin.sh
+secretless $ ./build/build_darwin
 ```
 
 Now navigate to the directory `doc/quick-demo`:
@@ -261,19 +261,19 @@ In all cases, the operating system provides security between the client and Secr
 Build the project by running:
 
 ```sh-session
-$ ./build/build.sh
+$ ./build/build
 ```
 
 Or on OS X:
 
 ```sh-session
-$ ./build/build_darwin.sh
+$ ./build/build_darwin
 ```
 
 Then run the test cases:
 
 ```sh-session
-$ ./build/test.sh
+$ ./build/test
 ```
 
 # Performance

@@ -11,15 +11,25 @@ pipeline {
   stages {
     stage('Build Linux binaries & Docker images') {
       steps {
-        sh './build/build.sh'
+        sh './build/build'
       }
     }
 
     stage('Run tests') {
       steps {
-        sh './build/test.sh'
+        sh './build/test'
 
         junit 'test/*.xml'
+      }
+    }
+
+    stage('Push images') {
+      when {
+        branch 'master'
+      }
+
+      steps {
+        sh './build/publish'
       }
     }
   }

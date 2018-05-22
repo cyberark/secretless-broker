@@ -1,13 +1,18 @@
 FROM golang:1.10-stretch
 MAINTAINER Conjur Inc.
 
-RUN go get -u github.com/jstemmer/go-junit-report
-RUN go get -u github.com/golang/dep/cmd/dep
-RUN go get github.com/smartystreets/goconvey
-RUN go get golang.org/x/tools/cmd/goimports
-RUN apt-get update && apt-get install -y vim jq curl less
+RUN apt-get update && \
+    apt-get install -y curl \
+                       jq \
+                       less \
+                       vim
 
 WORKDIR /go/src/github.com/conjurinc/secretless
+
+RUN go get -u github.com/golang/dep/cmd/dep && \
+    go get -u github.com/jstemmer/go-junit-report && \
+    go get github.com/smartystreets/goconvey && \
+    go get golang.org/x/tools/cmd/goimports
 
 COPY . .
 

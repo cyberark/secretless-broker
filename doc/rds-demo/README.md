@@ -16,9 +16,9 @@ Bring up the `admin` container. Via secretless, use it to create an RDS database
 4. `$ docker-compose up -d admin_secretless`
 5. `$ docker-compose run --no-deps --rm admin`
 6. `admin:/work# password=$(openssl rand -hex 12)`
-7. `admin:/work# ./create_db_instance.sh testdb $password`
-8. `admin:/work# ./wait_for_db_instance.sh`
-9. `admin:/work# ./store_db_password.sh $password`
+7. `admin:/work# ./create_db_instance testdb $password`
+8. `admin:/work# ./wait_for_db_instance`
+9. `admin:/work# ./store_db_password $password`
 
 Now bring up "myapp" Secretless provider. 
 
@@ -60,4 +60,4 @@ postgres=> select * from test.t ;
 
 Now you can delete the database:
 
-1. `admin:/work# ./delete_db_instance.sh`
+1. `admin:/work# ./delete_db_instance`

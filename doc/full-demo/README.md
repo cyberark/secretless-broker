@@ -26,7 +26,7 @@ secretless $ ./build/build
 Then from this directory, build each scenario:
 
 ```sh-session
-full-demo $ ./build.sh
+full-demo $ ./build
 ```
 
 Next, enter the scenario directory. For example, "plaintext":
@@ -39,12 +39,12 @@ plaintext $
 In this directory you'll find a sequence of shell scripts. Run each script in sequence.
 
 ```sh-session
-plaintext $ ./1_build_pg.sh
+plaintext $ ./1_build_pg
 ...
 ```
 
 ```sh-session
-plaintext $ ./2_build_myapp.sh
+plaintext $ ./2_build_myapp
 ...
 ```
 

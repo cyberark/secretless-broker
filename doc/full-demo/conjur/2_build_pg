@@ -8,6 +8,7 @@ ansible_api_key=$(conjur_cli "$admin_api_key" host rotate_api_key -h ansible | t
 export CONJUR_AUTHN_API_KEY="$ansible_api_key"
 docker-compose up -d pg ansible_secretless
 
-docker-compose run --rm --no-deps \
+docker-compose run --rm \
+  --no-deps \
   -e CONJUR_AUTHN_API_KEY="$ansible_api_key" \
   ansible ansible-playbook postgresql.yml

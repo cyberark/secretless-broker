@@ -1,5 +1,3 @@
-#!/bin/bash -e
-
 # shellcheck disable=SC2034
 db_username=alice
 db_subnet_group_name=default

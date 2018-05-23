@@ -13,7 +13,7 @@ $ docker-compose up -d conjur
 Next, run `secretless` in a terminal:
 
 ```sh-session
-$ ./run_dev.sh
+$ ./run_dev
 2018/01/16 11:06:03 Secretless starting up...
 ...
 2018/01/16 11:06:03 Loaded provider 'conjur'

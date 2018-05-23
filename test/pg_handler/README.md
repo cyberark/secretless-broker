@@ -11,7 +11,7 @@ $ docker-compose up -d pg
 Run Secretless locally and execute tests:
 
 ```sh-session
-$ ./run_dev_test.sh
+$ ./run_dev_test
 ...
 ok      github.com/conjurinc/secretless/test/pg_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
@@ -30,7 +30,7 @@ $ docker-compose up -d pg
 Now you can run `secretless` in a terminal:
 
 ```sh-session
-$ ./run_dev.sh
+$ ./run_dev
 ...
 2018/01/10 16:33:09 pg listener 'pg_tcp' listening at: [::]:15432
 2018/01/10 16:33:09 pg listener 'pg_socket' listening at: ./run/postgresql/.s.PGSQL.5432

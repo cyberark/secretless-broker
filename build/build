@@ -20,7 +20,7 @@ trap on_exit EXIT
 
 readonly VERSION="$(cat VERSION)"
 readonly GOLANG_VERSION="1.10"
-readonly SUPPORTED_BUILD_OS="windows darwin linux"
+readonly SUPPORTED_BUILD_OS="linux"
 readonly SUPPORTED_BUILD_ARCH="amd64"
 readonly REPOSITORY="github.com/conjurinc/secretless"
 readonly CONTAINER_ID="$(docker run \

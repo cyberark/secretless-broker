@@ -21,4 +21,3 @@ aws rds delete-db-instance \
 rm tmp/db_instance.json
 
 echo "Deleted database $db_instance_id"
-

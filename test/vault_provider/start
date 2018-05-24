@@ -23,8 +23,13 @@ wait_for_vault
 root_token=$(docker-compose logs vault | grep "Root Token:" | tail -n 1 | awk '{print $NF}')
 
 function vault_cmd() {
-  docker-compose run --rm -T -e VAULT_ADDR=http://vault:8200 -e VAULT_TOKEN="$root_token" --entrypoint vault vault \
-    "$@"  
+  docker-compose run --rm \
+    -T \
+    -e VAULT_ADDR=http://vault:8200 \
+    -e VAULT_TOKEN="$root_token" \
+    --entrypoint vault \
+    vault \
+    "$@"
 }
 
 vault_host_port=$(docker-compose port vault 8200)

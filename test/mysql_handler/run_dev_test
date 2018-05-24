@@ -6,7 +6,7 @@ function finish {
 }
 trap finish EXIT
 
-./run_dev.sh &
+./run_dev &
 
 # wait for secretless / handler to be ready
 while [ ! -S $PWD/run/mysql/mysql.sock ]; do sleep 1; done 2> /dev/null

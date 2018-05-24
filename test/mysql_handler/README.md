@@ -26,7 +26,7 @@ platform=$(go run test/print_platform.go)
 
 From this directory, start secretless:
 ```
-./run_dev.sh
+./run_dev
 ```
 
 #### Log in to the MySQL server via the Secretless MySQL handler
@@ -44,7 +44,7 @@ Once logged in, you should be able to `SELECT * FROM testdb.test` and see the ro
 
 Note: this assumes you have a MySQL client installed locally on your machine. In the examples above and when you run the test suite locally, it is assumed you use one like [mysqlsh](https://dev.mysql.com/doc/refman/5.7/en/mysqlsh.html), which assumes SSL connections when possible by default (and has an `--ssl-mode` flag you can use to disable SSL).
 
-If you use `mysqlsh`, you will need to create an executable `mysql` file in your `PATH` that contains the following in order to be able to run `run_dev_test.sh` locally:
+If you use `mysqlsh`, you will need to create an executable `mysql` file in your `PATH` that contains the following in order to be able to run `run_dev_test` locally:
 ```
 #!/bin/bash -ex
 
@@ -90,7 +90,7 @@ Once you start the debugger (which will automatically start Secretless with the 
 You can also run:
 ```
 cd test/mysql_handler/
-./start.sh
+./start
 docker-compose run --rm dev
 ```
 
@@ -122,7 +122,7 @@ Make sure you have built updated Secretless binaries for Linux and updated Docke
 
 To run the test suite in Docker, run:
 ```
-./stop.sh   # Remove all existing project containers
-./start.sh  # Stand up MySQL and Secretless servers
-./test.sh   # Run tests in a test container
+./stop   # Remove all existing project containers
+./start  # Stand up MySQL and Secretless servers
+./test   # Run tests in a test container
 ```

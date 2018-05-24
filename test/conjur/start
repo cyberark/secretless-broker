@@ -33,4 +33,5 @@ docker-compose run \
   --rm \
   --no-deps \
   -e http_proxy=http://secretless:80 \
-  test conjur variable values add db/password secret
+  test \
+  conjur variable values add db/password secret

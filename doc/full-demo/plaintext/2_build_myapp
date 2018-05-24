@@ -10,7 +10,7 @@ export DB_HOST=pg
 echo "Creating the database schema for 'myapp' by providing it DB_HOST and DB_PASSWORD"
 
 docker-compose run --rm \
-  --entrypoint ./makedb.sh \
+  --entrypoint ./makedb \
   myapp
 
 echo "Running 'myapp', providing it DB_HOST and DB_PASSWORD"

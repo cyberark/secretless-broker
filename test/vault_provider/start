@@ -40,8 +40,10 @@ vault_port=$(docker run --rm \
   echo \"$vault_host_port\" | go run /util/parse_port.go
   ")
 
-rm -rf tmp
+# Remove files from tmp but avoid recreating the folder to
+# avoid cache busting
 mkdir -p tmp
+rm -rf tmp/*
 
 cat <<ENV > .env
 VAULT_ADDR=http://localhost:$vault_port

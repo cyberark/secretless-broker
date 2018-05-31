@@ -1,84 +1,35 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # Builds secretless binaries
-# usage: ./build/build [OPTIONAL LIST OS] [OPTIONAL LIST ARCH]
-# If OS/arch arguments are unspecified, builds binaries for all supported 
-# operating systems and architectures. Set KEEP_ALIVE=1 to keep the build
-# container running after this script exits.
+# usage: ./build/build
 set -ex
 
-on_error () {
-  docker rm -f "${CONTAINER_ID}" >/dev/null
-  trap - EXIT
-}
-trap on_error ERR
-
 on_exit () {
-  [ -n "${KEEP_ALIVE}" ] || docker rm -f "${CONTAINER_ID}" >/dev/null
-}
-trap on_exit EXIT
+  containers=$(docker container ls -aq --filter "label=builder=secretless-builder")
 
-readonly VERSION="$(cat VERSION)"
-readonly GOLANG_VERSION="1.10"
-readonly SUPPORTED_BUILD_OS="linux"
-readonly SUPPORTED_BUILD_ARCH="amd64"
-readonly REPOSITORY="github.com/conjurinc/secretless"
-readonly CONTAINER_ID="$(docker run \
-  -v "$(pwd):/go/src/${REPOSITORY}" \
-  -itd \
-  golang:${GOLANG_VERSION} \
-  bash
-)"
-
-BUILD_OS="${1:-${SUPPORTED_BUILD_OS}}"
-BUILD_ARCH="${2:-${SUPPORTED_BUILD_ARCH}}"
-
-
-docker exec "${CONTAINER_ID}" bash -exc "
-  cd /go/src/${REPOSITORY}
-  curl -s https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  dep ensure
-
-  failed_builds=()
-
-  for GOOS in ${BUILD_OS}; do
-    for GOARCH in ${BUILD_ARCH}; do
-      export GOOS
-      export GOARCH
-
-      export CGO_ENABLED=1
-
-      echo \"Building binaries for \${GOOS} \${GOARCH}\"
-      mkdir -p bin/\${GOOS}/\${GOARCH}
-
-      for app in secretless summon2; do
-        app_build=\"\${GOOS}/\${GOARCH}/\${app}\"
-        echo \" - Building \${app_build}...\"
-        if ! go build -o bin/\${app_build} ./cmd/\${app}; then
-          echo \"Error building \${app_build}!\" 2>&1
-          failed_builds+=(\$app_build)
-          break
-        fi
-
-        echo \"\${app_build} build success!\"
-      done
-    done
-  done
-
-  # Show all failed builds if we had any
-  if [ \${#failed_builds[@]} -ne 0 ]; then
-    echo \"Build failures:\"
-    for failed_build in \${failed_builds[@]}; do
-      echo \" - \${failed_build}\"
-    done
-
-    exit 1
+  if [ "${containers}" != "" ]; then
+    docker rm -f "${containers}" >/dev/null
   fi
-"
+}
+trap on_exit ERR INT QUIT EXIT
 
-echo "Building Docker images"
-docker build -t "secretless:${VERSION}" .
-docker tag "secretless:${VERSION}" "secretless:latest"
 
-docker build -t "secretless-dev:${VERSION}" -f Dockerfile.dev .
-docker tag "secretless-dev:${VERSION}" "secretless-dev:latest"
+VERSION=$(cat VERSION)
+
+DOCKER_FLAGS=""
+if [ "${KEEP_ALIVE}" != "" ]; then
+  DOCKER_FLAGS="${DOCKER_FLAGS} -rm=false"
+fi
+
+echo "Building Docker image"
+docker build -t "secretless:${VERSION}" \
+             -t "secretless:latest" \
+             $DOCKER_FLAGS \
+             .
+
+echo "Building Docker dev image"
+docker build -t "secretless-dev:${VERSION}" \
+             -t "secretless-dev:latest" \
+             -f Dockerfile.dev \
+             $DOCKER_FLAGS \
+             .

@@ -8,20 +8,37 @@ cd test
 
 exit_status="0"
 for dir in */; do
-  cd "$dir"
-  if [[ -f start ]]; then
-    [[ ! -f ./stop ]] || ./stop || true
-    ./start
-    set +e
-    ./test | tee -a $project_dir/test/junit.output
-    last_status="$?"
-    if [[ "$exit_status" -eq "0" && "$last_status" -ne "0" ]]; then
-      exit_status="$last_status"
+  pushd "$dir" 2>/dev/null
+    # Bail if the folder doesn't have a start script
+    if [[ ! -f start ]]; then
+      popd 2>/dev/null
+      continue
     fi
+
+    # Stop anything that might be running
+    if [[ -f ./stop ]]; then
+      ./stop || true
+    fi
+
+    # Start the needed prerequisites
+    ./start
+
+    # Run the tests
+    set +e
+      ./test | tee -a $project_dir/test/junit.output
+      last_status="$?"
+
+      # Only save first failure exit code
+      if [[ "$exit_status" -eq "0" && "$last_status" -ne "0" ]]; then
+        exit_status="$last_status"
+      fi
     set -e
-    [[ ! -f ./stop ]] || ./stop
-  fi
-  cd ..
+
+    # Clean up
+    if [[ -f ./stop ]]; then
+      ./stop
+    fi
+  popd
 done
 
 rm -f $project_dir/test/junit.xml

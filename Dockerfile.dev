@@ -14,6 +14,13 @@ RUN go get -u github.com/golang/dep/cmd/dep && \
     go get github.com/smartystreets/goconvey && \
     go get golang.org/x/tools/cmd/goimports
 
+COPY Gopkg.toml Gopkg.lock /go/src/github.com/conjurinc/secretless/
+
+RUN dep ensure --vendor-only
+
 COPY . .
 
-RUN dep ensure
+# Not strictly needed but we might as well do this step too since
+# the dev may want to run the binary
+RUN go build -o bin/$GOOS/$GOARCH/secretless ./cmd/secretless && \
+    go build -o bin/$GOOS/$GOARCH/summon2 ./cmd/summon2

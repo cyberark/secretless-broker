@@ -2,3 +2,7 @@
 secretless
 vendor
 doc/full-demo/myapp/myapp
+
+*.sw[po]
+
+test/junit.output

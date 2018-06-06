@@ -37,6 +37,8 @@ func main() {
 		log.Println(err)
 	}
 
+	plugin.GetManager().RegisterSignalHandlers()
+
 	p := secretless.Proxy{Config: configuration}
 	p.Run()
 }

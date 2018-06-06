@@ -6,9 +6,11 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"plugin"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
@@ -44,6 +46,29 @@ func GetManager() *PluginManager {
 	})
 
 	return _singleton
+}
+
+func (m *PluginManager) RegisterSignalHandlers() {
+	log.Println("Registering signal listeners...")
+	signalChannel := make(chan os.Signal, 1)
+	signal.Notify(signalChannel,
+		syscall.SIGABRT,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGQUIT,
+		syscall.SIGTERM,
+	)
+
+	go func() {
+		exitSignal := <-signalChannel
+		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
+
+		m.Shutdown()
+
+		log.Printf("Exiting...")
+		os.Exit(0)
+	}()
+	log.Println("Signal listeners registered")
 }
 
 // LoadPlugins loads all shared object files in `path`
@@ -135,5 +160,10 @@ func (m *PluginManager) ClientData(c net.Conn, buf []byte) {
 func (m *PluginManager) ServerData(c net.Conn, buf []byte) {
 	for _, plugin := range m.Plugins {
 		plugin.ServerData(c, buf)
+	}
+}
+func (m *PluginManager) Shutdown() {
+	for _, plugin := range m.Plugins {
+		plugin.Shutdown()
 	}
 }

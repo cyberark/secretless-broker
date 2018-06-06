@@ -9,10 +9,10 @@ import (
 	"syscall"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/http"
+	"github.com/conjurinc/secretless/internal/app/secretless/mysql"
 	"github.com/conjurinc/secretless/internal/app/secretless/pg"
 	"github.com/conjurinc/secretless/internal/app/secretless/ssh"
 	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
-	"github.com/conjurinc/secretless/internal/app/secretless/mysql"
 	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"

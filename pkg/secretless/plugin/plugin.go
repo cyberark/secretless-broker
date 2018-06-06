@@ -37,4 +37,7 @@ type Plugin interface {
 
 	// ServerData is called for each inbound packet from the backend
 	ServerData(net.Conn, []byte)
+
+	// Shutdown is called when secretless caught a signal to exit
+	Shutdown()
 }

@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -71,6 +72,24 @@ func (m *PluginManager) RegisterSignalHandlers() {
 	log.Println("Signal listeners registered")
 }
 
+// _IsSupportedPluginApiVersion returns a boolean indicating if we support
+// the interface API version that plugin is advertising
+// TODO: Support a list of supported versions
+func _IsSupportedPluginApiVersion(version string) bool {
+	return version == "0.0.1"
+}
+
+// LoadPlugin tries to load all internal plugin info strings
+func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
+	rawPluginInfo, err := pluginObj.Lookup("PluginInfo")
+	if err != nil {
+		return nil, err
+	}
+	pluginInfo := *rawPluginInfo.(*map[string]string)
+
+	return pluginInfo, nil
+}
+
 // LoadPlugins loads all shared object files in `path`
 func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 	files, err := ioutil.ReadDir(path)
@@ -79,18 +98,48 @@ func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 	}
 
 	for _, file := range files {
-
 		if !_IsDynamicLibrary(file) {
 			continue
 		}
 
-		p, err := plugin.Open(fmt.Sprintf("%s/%s", path, file.Name()))
+		// Load shared library object
+		pluginObj, err := plugin.Open(fmt.Sprintf("%s/%s", path, file.Name()))
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		getPlugin, err := p.Lookup("GetPlugin")
+		// Grab version of interface that the plugin is advertising
+		rawPluginApiVersion, err := pluginObj.Lookup("PluginApiVersion")
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		pluginApiVersion := *rawPluginApiVersion.(*string)
+
+		// Bail if plugin interface API is an unsupported version
+		log.Printf("Trying to load %s (API v%s)...", file.Name(), pluginApiVersion)
+		if !_IsSupportedPluginApiVersion(pluginApiVersion) {
+			log.Printf("ERROR! Plugin %s is using an unsupported API version! Skipping!", file.Name())
+			continue
+		}
+
+		// Get plugin info
+		pluginInfo, err := _GetPluginInfo(pluginObj)
+		if err != nil {
+			continue
+		}
+
+		// Print out the fields in the info object
+		formattedInfo, err := json.MarshalIndent(pluginInfo, "", "  ")
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Printf("%s info:", file.Name())
+		log.Println(string(formattedInfo))
+
+		getPlugin, err := pluginObj.Lookup("GetPlugin")
 		if err != nil {
 			log.Println(err)
 			continue

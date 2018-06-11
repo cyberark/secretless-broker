@@ -41,3 +41,19 @@ type Plugin interface {
 	// Shutdown is called when secretless caught a signal to exit
 	Shutdown()
 }
+
+// ----------------- V1 interfaces -----------------
+// Listener v1 interface
+// TODO: Move this to its own folder
+// TODO: Really define this interface
+type Listener_v1 = Plugin
+
+// Handler v1 interface
+// TODO: Move this to its own folder
+// TODO: Really define this interface
+type Handler_v1 = Plugin
+
+// Manager v1 interface
+// TODO: Move this to its own folder
+// TODO: Really define this interface
+type Manager_v1 = Plugin

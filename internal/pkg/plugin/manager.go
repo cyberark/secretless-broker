@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -71,6 +73,77 @@ func (m *PluginManager) RegisterSignalHandlers() {
 	log.Println("Signal listeners registered")
 }
 
+// _IsSupportedPluginApiVersion returns a boolean indicating if we support
+// the interface API version that plugin is advertising
+// TODO: Support a list of supported versions
+func _IsSupportedPluginApiVersion(version string) bool {
+	return version == "0.0.1"
+}
+
+// LoadPlugin tries to load all internal plugin info strings
+func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
+	rawPluginInfo, err := pluginObj.Lookup("PluginInfo")
+	if err != nil {
+		return nil, err
+	}
+	pluginInfo := *rawPluginInfo.(*map[string]string)
+
+	return pluginInfo, nil
+}
+
+// _LoadManagers appends all managers from the plugin to the pluginManager
+func _LoadManagers(pluginManager *PluginManager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	rawManagerPluginsFunc, err := pluginObj.Lookup("GetManagers")
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle different interface versions
+	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]pluginPkg.Manager_v1)
+	if !ok {
+		return errors.New("ERROR! Could not cast GetManagers to proper type!")
+	}
+	managerPlugins := managerPluginsFunc()
+
+	for managerPluginName, managerPlugin := range managerPlugins {
+		log.Printf("%s: Appending manager '%s'...", pluginName, managerPluginName)
+		err = managerPlugin.Initialize(config)
+		if err != nil {
+			log.Printf("%s: Failed to load manager '%s': %s\n", pluginName,
+				managerPluginName,
+				err.Error())
+			return err
+		}
+		log.Printf("%s: Appending manager '%s' OK!", pluginName, managerPluginName)
+
+		// TODO: Change this to appropriate type once "Plugin" type is split up
+		pluginManager.Plugins = append(pluginManager.Plugins,
+			managerPlugin.(pluginPkg.Plugin))
+	}
+
+	return nil
+}
+
+// _LoadHandlers appends all handlers from the plugin to the pluginManager
+func _LoadHandlers(pluginManager *PluginManager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	log.Println("WARN: Loading of handlers from a plugin is a NOOP at this time!")
+
+	return nil
+}
+
+// _LoadListeners appends all listeners from the plugin to the pluginManager
+func _LoadListeners(pluginManager *PluginManager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	log.Println("WARN: Loading of listeners from a plugin is a NOOP at this time!")
+
+	return nil
+}
+
 // LoadPlugins loads all shared object files in `path`
 func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 	files, err := ioutil.ReadDir(path)
@@ -79,36 +152,65 @@ func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 	}
 
 	for _, file := range files {
-
 		if !_IsDynamicLibrary(file) {
 			continue
 		}
 
-		p, err := plugin.Open(fmt.Sprintf("%s/%s", path, file.Name()))
+		// Load shared library object
+		pluginObj, err := plugin.Open(fmt.Sprintf("%s/%s", path, file.Name()))
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		getPlugin, err := p.Lookup("GetPlugin")
+		// Grab version of interface that the plugin is advertising
+		rawPluginApiVersion, err := pluginObj.Lookup("PluginApiVersion")
 		if err != nil {
 			log.Println(err)
 			continue
 		}
+		pluginApiVersion := *rawPluginApiVersion.(*string)
 
-		if getPluginFunc, ok := getPlugin.(func() pluginPkg.Plugin); ok {
-			loadedPlugin := getPluginFunc()
-
-			err = loadedPlugin.Initialize(config)
-			if err != nil {
-				log.Printf("%s: %s\n", file.Name(), err.Error())
-				continue
-			}
-
-			m.Plugins = append(m.Plugins, loadedPlugin.(pluginPkg.Plugin))
-		} else {
-			log.Printf("Failed to load plugin %s\n", file.Name())
+		// Bail if plugin interface API is an unsupported version
+		log.Printf("Trying to load %s (API v%s)...", file.Name(), pluginApiVersion)
+		if !_IsSupportedPluginApiVersion(pluginApiVersion) {
+			log.Printf("ERROR! Plugin %s is using an unsupported API version! Skipping!", file.Name())
 			continue
+		}
+
+		// Get plugin info
+		pluginInfo, err := _GetPluginInfo(pluginObj)
+		if err != nil {
+			continue
+		}
+
+		// Print out the fields in the info object
+		formattedInfo, err := json.MarshalIndent(pluginInfo, "", "  ")
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Printf("%s info:", file.Name())
+		log.Println(string(formattedInfo))
+
+		// Load managers
+		if err := _LoadManagers(m, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
+			log.Println(err)
+		}
+
+		// Load handlers
+		// TODO: Actually load handlers
+		if err := _LoadHandlers(m, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
+			log.Println(err)
+		}
+
+		// Load listeners
+		// TODO: Actually load listeners
+		if err := _LoadListeners(m, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
+			log.Println(err)
 		}
 	}
 

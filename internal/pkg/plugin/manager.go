@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -90,6 +91,59 @@ func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
 	return pluginInfo, nil
 }
 
+// _LoadManagers appends all managers from the plugin to the pluginManager
+func _LoadManagers(pluginManager *PluginManager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	rawManagerPluginsFunc, err := pluginObj.Lookup("GetManagers")
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle different interface versions
+	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]pluginPkg.Manager_v1)
+	if !ok {
+		return errors.New("ERROR! Could not cast GetManagers to proper type!")
+	}
+	managerPlugins := managerPluginsFunc()
+
+	for managerPluginName, managerPlugin := range managerPlugins {
+		log.Printf("%s: Appending manager '%s'...", pluginName, managerPluginName)
+		err = managerPlugin.Initialize(config)
+		if err != nil {
+			log.Printf("%s: Failed to load manager '%s': %s\n", pluginName,
+				managerPluginName,
+				err.Error())
+			return err
+		}
+		log.Printf("%s: Appending manager '%s' OK!", pluginName, managerPluginName)
+
+		// TODO: Change this to appropriate type once "Plugin" type is split up
+		pluginManager.Plugins = append(pluginManager.Plugins,
+			managerPlugin.(pluginPkg.Plugin))
+	}
+
+	return nil
+}
+
+// _LoadHandlers appends all handlers from the plugin to the pluginManager
+func _LoadHandlers(pluginManager *PluginManager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	log.Println("WARN: Loading of handlers from a plugin is a NOOP at this time!")
+
+	return nil
+}
+
+// _LoadListeners appends all listeners from the plugin to the pluginManager
+func _LoadListeners(pluginManager *PluginManager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	log.Println("WARN: Loading of listeners from a plugin is a NOOP at this time!")
+
+	return nil
+}
+
 // LoadPlugins loads all shared object files in `path`
 func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 	files, err := ioutil.ReadDir(path)
@@ -139,25 +193,24 @@ func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 		log.Printf("%s info:", file.Name())
 		log.Println(string(formattedInfo))
 
-		getPlugin, err := pluginObj.Lookup("GetPlugin")
-		if err != nil {
+		// Load managers
+		if err := _LoadManagers(m, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
 			log.Println(err)
-			continue
 		}
 
-		if getPluginFunc, ok := getPlugin.(func() pluginPkg.Plugin); ok {
-			loadedPlugin := getPluginFunc()
+		// Load handlers
+		// TODO: Actually load handlers
+		if err := _LoadHandlers(m, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
+			log.Println(err)
+		}
 
-			err = loadedPlugin.Initialize(config)
-			if err != nil {
-				log.Printf("%s: %s\n", file.Name(), err.Error())
-				continue
-			}
-
-			m.Plugins = append(m.Plugins, loadedPlugin.(pluginPkg.Plugin))
-		} else {
-			log.Printf("Failed to load plugin %s\n", file.Name())
-			continue
+		// Load listeners
+		// TODO: Actually load listeners
+		if err := _LoadListeners(m, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
+			log.Println(err)
 		}
 	}
 

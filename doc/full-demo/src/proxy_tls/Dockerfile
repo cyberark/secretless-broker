@@ -1,4 +1,4 @@
-FROM golang:1.8
+FROM golang:1.10.3
 
 WORKDIR /go/src/proxy_tls
 

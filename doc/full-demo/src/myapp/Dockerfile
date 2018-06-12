@@ -1,4 +1,4 @@
-FROM golang:1.8
+FROM golang:1.10.3
 
 RUN apt-get update && apt-get install -y vim curl jq postgresql-client
 

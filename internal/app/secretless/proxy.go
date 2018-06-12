@@ -14,13 +14,13 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/ssh"
 	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
 	"github.com/conjurinc/secretless/internal/pkg/plugin"
-	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/listener"
 )
 
 // Listener is an interface for listening in an abstract way.
 type Listener interface {
-	secretless.Listener
+	listener.Listener_v1
 
 	Listen()
 

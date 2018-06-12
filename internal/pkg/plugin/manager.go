@@ -16,6 +16,8 @@ import (
 
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/handler"
+	"github.com/conjurinc/secretless/pkg/secretless/listener"
 	pluginPkg "github.com/conjurinc/secretless/pkg/secretless/plugin"
 )
 
@@ -224,12 +226,12 @@ func (m *PluginManager) Initialize(c config.Config) error {
 	return nil
 }
 
-func (m *PluginManager) CreateListener(l secretless.Listener) {
+func (m *PluginManager) CreateListener(l listener.Listener_v1) {
 	for _, plugin := range m.Plugins {
 		plugin.CreateListener(l)
 	}
 }
-func (m *PluginManager) NewConnection(l secretless.Listener, c net.Conn) {
+func (m *PluginManager) NewConnection(l listener.Listener_v1, c net.Conn) {
 	for _, plugin := range m.Plugins {
 		plugin.NewConnection(l, c)
 	}
@@ -239,12 +241,12 @@ func (m *PluginManager) CloseConnection(c net.Conn) {
 		plugin.CloseConnection(c)
 	}
 }
-func (m *PluginManager) CreateHandler(h secretless.Handler, c net.Conn) {
+func (m *PluginManager) CreateHandler(h handler.Handler_v1, c net.Conn) {
 	for _, plugin := range m.Plugins {
 		plugin.CreateHandler(h, c)
 	}
 }
-func (m *PluginManager) DestroyHandler(h secretless.Handler) {
+func (m *PluginManager) DestroyHandler(h handler.Handler_v1) {
 	for _, plugin := range m.Plugins {
 		plugin.DestroyHandler(h)
 	}

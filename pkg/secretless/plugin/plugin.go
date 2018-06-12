@@ -5,6 +5,8 @@ import (
 
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/handler"
+	"github.com/conjurinc/secretless/pkg/secretless/listener"
 )
 
 // Plugin is an interface to be implemented by secretless plugins compiled as
@@ -14,20 +16,20 @@ type Plugin interface {
 	Initialize(config.Config) error
 
 	// CreateListener is called for every listener created by Proxy
-	CreateListener(secretless.Listener)
+	CreateListener(listener.Listener_v1)
 
 	// NewConnection is called for each new client connection before being
 	// passed to a handler
-	NewConnection(secretless.Listener, net.Conn)
+	NewConnection(listener.Listener_v1, net.Conn)
 
 	// CloseConnect is called when a client connection is closed
 	CloseConnection(net.Conn)
 
 	// CreateHandler is called after listener creates a new handler
-	CreateHandler(secretless.Handler, net.Conn)
+	CreateHandler(handler.Handler_v1, net.Conn)
 
 	// DestroyHandler is called before a handler is removed
-	DestroyHandler(secretless.Handler)
+	DestroyHandler(handler.Handler_v1)
 
 	// ResolveVariable is called when a provider resolves a variable
 	ResolveVariable(p secretless.Provider, id string, value []byte)
@@ -44,14 +46,10 @@ type Plugin interface {
 
 // ----------------- V1 interfaces -----------------
 // Listener v1 interface
-// TODO: Move this to its own folder
-// TODO: Really define this interface
-type Listener_v1 = Plugin
+type Listener_v1 = listener.Listener_v1
 
 // Handler v1 interface
-// TODO: Move this to its own folder
-// TODO: Really define this interface
-type Handler_v1 = Plugin
+type Handler_v1 = handler.Handler_v1
 
 // Manager v1 interface
 // TODO: Move this to its own folder

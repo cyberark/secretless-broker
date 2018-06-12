@@ -7,8 +7,8 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
 	"github.com/conjurinc/secretless/internal/pkg/util"
-	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/handler"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
@@ -87,7 +87,7 @@ func (l *Listener) GetListener() net.Listener {
 }
 
 // GetHandlers implements secretless.Listener
-func (l *Listener) GetHandlers() []secretless.Handler {
+func (l *Listener) GetHandlers() []handler.Handler_v1 {
 	return nil
 }
 

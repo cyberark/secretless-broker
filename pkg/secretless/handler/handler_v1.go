@@ -1,4 +1,4 @@
-package secretless
+package handler
 
 import (
 	"net"
@@ -7,7 +7,7 @@ import (
 )
 
 // Handler is an interface which takes a connection and connects it to a backend
-type Handler interface {
+type Handler_v1 interface {
 	GetConfig() config.Handler
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn

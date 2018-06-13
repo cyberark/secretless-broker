@@ -24,7 +24,7 @@ type Plugin interface {
 	CloseConnection(net.Conn)
 
 	// CreateHandler is called after listener creates a new handler
-	CreateHandler(secretless.Listener, secretless.Handler)
+	CreateHandler(secretless.Handler, net.Conn)
 
 	// DestroyHandler is called before a handler is removed
 	DestroyHandler(secretless.Handler)

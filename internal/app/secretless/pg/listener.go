@@ -10,6 +10,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/conjurinc/secretless/internal/pkg/plugin"
 )
 
 // Listener listens for and handles new connections.
@@ -61,6 +62,9 @@ func (l *Listener) Listen() {
 		// Serve the first Handler which is attached to this listener
 		if len(l.Handlers) > 0 {
 			handler := &Handler{Config: l.Handlers[0], Client: client}
+			// TODO: there's a better way to do this
+			plugin.GetManager().CreateHandler(handler, client)
+
 			handler.Run()
 		} else {
 			pgError := protocol.Error{

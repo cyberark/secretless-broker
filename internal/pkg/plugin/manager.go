@@ -239,9 +239,9 @@ func (m *PluginManager) CloseConnection(c net.Conn) {
 		plugin.CloseConnection(c)
 	}
 }
-func (m *PluginManager) CreateHandler(l secretless.Listener, h secretless.Handler) {
+func (m *PluginManager) CreateHandler(h secretless.Handler, c net.Conn) {
 	for _, plugin := range m.Plugins {
-		plugin.CreateHandler(l, h)
+		plugin.CreateHandler(h, c)
 	}
 }
 func (m *PluginManager) DestroyHandler(h secretless.Handler) {

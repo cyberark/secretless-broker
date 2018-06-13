@@ -16,7 +16,7 @@ import (
 
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	pluginPkg "github.com/conjurinc/secretless/pkg/secretless/plugin"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
 var _SupportedFileSuffixes = []string{".so"}
@@ -34,9 +34,9 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 }
 
 type PluginManager struct {
-	Listeners []pluginPkg.Listener_v1
-	Handlers  []pluginPkg.Handler_v1
-	Managers  []pluginPkg.Manager_v1
+	Listeners []plugin_v1.Listener
+	Handlers  []plugin_v1.Handler
+	Managers  []plugin_v1.Manager
 }
 
 var _singleton *PluginManager
@@ -45,9 +45,9 @@ var _once sync.Once
 func GetManager() *PluginManager {
 	_once.Do(func() {
 		_singleton = &PluginManager{
-			Listeners: make([]pluginPkg.Listener_v1, 0),
-			Handlers:  make([]pluginPkg.Handler_v1, 0),
-			Managers:  make([]pluginPkg.Manager_v1, 0),
+			Listeners: make([]plugin_v1.Listener, 0),
+			Handlers:  make([]plugin_v1.Handler, 0),
+			Managers:  make([]plugin_v1.Manager, 0),
 		}
 	})
 
@@ -81,7 +81,7 @@ func (m *PluginManager) RegisterSignalHandlers() {
 // the interface API version that plugin is advertising
 // TODO: Support a list of supported versions
 func _IsSupportedPluginApiVersion(version string) bool {
-	return version == "0.0.1"
+	return version == "0.0.2"
 }
 
 // LoadPlugin tries to load all internal plugin info strings
@@ -105,7 +105,7 @@ func _LoadManagers(pluginManager *PluginManager, config config.Config,
 	}
 
 	// TODO: Handle different interface versions
-	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]pluginPkg.Manager_v1)
+	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]plugin_v1.Manager)
 	if !ok {
 		return errors.New("ERROR! Could not cast GetManagers to proper type!")
 	}
@@ -123,7 +123,7 @@ func _LoadManagers(pluginManager *PluginManager, config config.Config,
 		log.Printf("%s: Appending manager '%s' OK!", pluginName, managerPluginName)
 
 		pluginManager.Managers = append(pluginManager.Managers,
-			managerPlugin.(pluginPkg.Manager_v1))
+			managerPlugin.(plugin_v1.Manager))
 	}
 
 	return nil
@@ -229,12 +229,12 @@ func (m *PluginManager) Initialize(c config.Config) error {
 	return nil
 }
 
-func (m *PluginManager) CreateListener(l pluginPkg.Listener_v1) {
+func (m *PluginManager) CreateListener(l plugin_v1.Listener) {
 	for _, managerPlugin := range m.Managers {
 		managerPlugin.CreateListener(l)
 	}
 }
-func (m *PluginManager) NewConnection(l pluginPkg.Listener_v1, c net.Conn) {
+func (m *PluginManager) NewConnection(l plugin_v1.Listener, c net.Conn) {
 	for _, managerPlugin := range m.Managers {
 		managerPlugin.NewConnection(l, c)
 	}
@@ -244,12 +244,12 @@ func (m *PluginManager) CloseConnection(c net.Conn) {
 		managerPlugin.CloseConnection(c)
 	}
 }
-func (m *PluginManager) CreateHandler(h pluginPkg.Handler_v1, c net.Conn) {
+func (m *PluginManager) CreateHandler(h plugin_v1.Handler, c net.Conn) {
 	for _, managerPlugin := range m.Managers {
 		managerPlugin.CreateHandler(h, c)
 	}
 }
-func (m *PluginManager) DestroyHandler(h pluginPkg.Handler_v1) {
+func (m *PluginManager) DestroyHandler(h plugin_v1.Handler) {
 	for _, managerPlugin := range m.Managers {
 		managerPlugin.DestroyHandler(h)
 	}

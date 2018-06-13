@@ -1,17 +1,16 @@
-package listener
+package plugin_v1
 
 import (
 	"net"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/handler"
 )
 
 // Listener is the interface which accepts client connections and passes them
 // to a handler
-type Listener_v1 interface {
+type Listener interface {
 	GetConfig() config.Listener
 	GetListener() net.Listener
-	GetHandlers() []handler.Handler_v1
+	GetHandlers() []Handler
 	GetConnections() []net.Conn
 }

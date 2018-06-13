@@ -15,12 +15,12 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
 	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/listener"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
 // Listener is an interface for listening in an abstract way.
 type Listener interface {
-	listener.Listener_v1
+	plugin_v1.Listener
 
 	Listen()
 

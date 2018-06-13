@@ -1,4 +1,4 @@
-package handler
+package plugin_v1
 
 import (
 	"net"
@@ -7,7 +7,7 @@ import (
 )
 
 // Handler is an interface which takes a connection and connects it to a backend
-type Handler_v1 interface {
+type Handler interface {
 	GetConfig() config.Handler
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn

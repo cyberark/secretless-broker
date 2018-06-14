@@ -1,4 +1,4 @@
-package secretless
+package plugin_v1
 
 import (
 	"net"

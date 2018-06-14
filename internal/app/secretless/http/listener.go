@@ -13,8 +13,8 @@ import (
 
 	handlerImpl "github.com/conjurinc/secretless/internal/app/secretless/http/handler"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
-	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
@@ -198,7 +198,7 @@ func (l *Listener) GetListener() net.Listener {
 }
 
 // GetHandlers implements secretless.Listener
-func (l *Listener) GetHandlers() []secretless.Handler {
+func (l *Listener) GetHandlers() []plugin_v1.Handler {
 	return nil
 }
 

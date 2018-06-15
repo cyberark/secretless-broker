@@ -16,9 +16,10 @@ import (
 
 // Listener accepts ssh-agent connections and delegates them to the Handler.
 type Listener struct {
-	Config   config.Listener
-	Handlers []config.Handler
-	Listener net.Listener
+	Config         config.Listener
+	HandlerConfigs []config.Handler
+	NetListener    net.Listener
+	EventNotifier  plugin_v1.EventNotifier
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -40,22 +41,25 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.Handlers, validation.Required),
-		validation.Field(&l.Handlers, handlerHasCredentials{}),
+		validation.Field(&l.HandlerConfigs, validation.Required),
+		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
 	)
 }
 
 // Listen listens on the ssh-agent socket and attaches new connections to the handler.
 func (l *Listener) Listen() {
 	// Serve the first Handler which is attached to this listener
-	if len(l.Handlers) == 0 {
+	if len(l.HandlerConfigs) == 0 {
 		log.Panicf("No ssh-agent handler is available")
 	}
 
-	selectedHandler := l.Handlers[0]
+	selectedHandler := l.HandlerConfigs[0]
 	keyring := agent.NewKeyring()
 
-	handler := &Handler{Config: selectedHandler}
+	handler := &Handler{
+		Config:        selectedHandler,
+		EventNotifier: l.EventNotifier,
+	}
 	if err := handler.LoadKeys(keyring); err != nil {
 		log.Printf("Failed to load ssh-agent handler keys: ", err)
 		return
@@ -74,22 +78,36 @@ func (l *Listener) Listen() {
 	}
 }
 
-// GetConfig implements secretless.Listener
+// GetConfig implements plugin_v1.Listener
 func (l *Listener) GetConfig() config.Listener {
 	return l.Config
 }
 
-// GetListener implements secretless.Listener
+// GetListener implements plugin_v1.Listener
 func (l *Listener) GetListener() net.Listener {
-	return l.Listener
+	return l.NetListener
 }
 
-// GetHandlers implements secretless.Listener
+// GetHandlers implements plugin_v1.Listener
 func (l *Listener) GetHandlers() []plugin_v1.Handler {
 	return nil
 }
 
-// GetConnections implements secretless.Listener
+// GetConnections implements plugin_v1.Listener
 func (l *Listener) GetConnections() []net.Conn {
 	return nil
+}
+
+// GetNotifier implements plugin_v1.Listener
+func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
+	return l.EventNotifier
+}
+
+func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
+	return &Listener{
+		Config:         options.ListenerConfig,
+		HandlerConfigs: options.HandlerConfigs,
+		NetListener:    options.NetListener,
+		EventNotifier:  options.EventNotifier,
+	}
 }

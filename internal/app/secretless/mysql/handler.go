@@ -5,8 +5,8 @@ import (
 	"net"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
-	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
 // BackendConfig stores the connection info to the real backend database.
@@ -25,10 +25,11 @@ type BackendConfig struct {
 //
 // Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
-	Config        config.Handler
-	Client        net.Conn
 	Backend       net.Conn
 	BackendConfig *BackendConfig
+	Client        net.Conn
+	Config        config.Handler
+	EventNotifier plugin_v1.EventNotifier
 }
 
 func (h *Handler) abort(err error) {
@@ -67,8 +68,8 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.Client, h.Backend, func(b []byte) { plugin.GetManager().ClientData(h.Client, b) })
-	go stream(h.Backend, h.Client, func(b []byte) { plugin.GetManager().ClientData(h.Client, b) })
+	go stream(h.Client, h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
+	go stream(h.Backend, h.Client, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
 }
 
 // Run configures the backend connection info, connects to the backend to

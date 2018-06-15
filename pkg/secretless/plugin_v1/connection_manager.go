@@ -7,9 +7,9 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
-// Manager is an interface to be implemented by plugins that want to
+// ConnectionManager is an interface to be implemented by plugins that want to
 // manage connections for handlers and listeners.
-type Manager interface {
+type ConnectionManager interface {
 	// Initialize is called before proxy initialization
 	Initialize(config.Config) error
 

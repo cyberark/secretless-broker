@@ -8,39 +8,26 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/http"
-	"github.com/conjurinc/secretless/internal/app/secretless/mysql"
-	"github.com/conjurinc/secretless/internal/app/secretless/pg"
-	"github.com/conjurinc/secretless/internal/app/secretless/ssh"
-	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
-	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
-// Listener is an interface for listening in an abstract way.
-type Listener interface {
-	plugin_v1.Listener
-
-	Listen()
-
-	Validate() error
-}
-
 // Proxy is the main struct of Secretless.
 type Proxy struct {
-	Config config.Config
+	Config            config.Config
+	EventNotifier     plugin_v1.EventNotifier
+	ListenerFactories map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
 }
 
 // Listen runs the listen loop for a specific Listener.
 func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
-	var l net.Listener
+	var netListener net.Listener
 	var err error
 
 	if listenerConfig.Address != "" {
-		l, err = net.Listen("tcp", listenerConfig.Address)
+		netListener, err = net.Listen("tcp", listenerConfig.Address)
 	} else {
-		l, err = net.Listen("unix", listenerConfig.Socket)
+		netListener, err = net.Listen("unix", listenerConfig.Socket)
 
 		// https://stackoverflow.com/questions/16681944/how-to-reliably-unlink-a-unix-domain-socket-in-go-programming-language
 		// Handle common process-killing signals so we can gracefully shut down:
@@ -51,7 +38,7 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 			sig := <-c
 			log.Printf("Caught signal %s: shutting down.", sig)
 			// Stop listening (and unlink the socket if unix type):
-			l.Close()
+			netListener.Close()
 			// And we're done:
 			os.Exit(0)
 		}(sigc)
@@ -60,30 +47,32 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 		log.Fatal(err)
 	}
 
-	log.Printf("%s listener '%s' listening at: %s", listenerConfig.Protocol, listenerConfig.Name, l.Addr())
+	log.Printf("%s listener '%s' listening at: %s",
+		listenerConfig.Protocol,
+		listenerConfig.Name,
+		netListener.Addr())
 
-	var listener Listener
-	switch listenerConfig.Protocol {
-	case "pg":
-		listener = &pg.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
-	case "http":
-		listener = &http.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
-	case "ssh":
-		listener = &ssh.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
-	case "ssh-agent":
-		listener = &sshagent.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
-	case "mysql":
-		listener = &mysql.Listener{Config: listenerConfig, Listener: l, Handlers: listenerConfig.SelectHandlers(p.Config.Handlers)}
-	default:
-		log.Panicf("Unrecognized protocol '%s' on listener '%s'", listenerConfig.Protocol, listenerConfig.Name)
+	options := plugin_v1.ListenerOptions{
+		EventNotifier:  p.EventNotifier,
+		ListenerConfig: listenerConfig,
+		HandlerConfigs: listenerConfig.SelectHandlers(p.Config.Handlers),
+		NetListener:    netListener,
 	}
+
+	// Ensure that we have this listener
+	if _, ok := p.ListenerFactories[listenerConfig.Protocol]; !ok {
+		log.Panicf("Unrecognized protocol '%s' on listener '%s'",
+			listenerConfig.Protocol, listenerConfig.Name)
+	}
+
+	listener := p.ListenerFactories[listenerConfig.Protocol](options)
 
 	err = listener.Validate()
 	if err != nil {
 		log.Fatalf("Listener '%s' is invalid : %s", listenerConfig.Name, err)
 	}
 
-	plugin.GetManager().CreateListener(listener)
+	p.EventNotifier.CreateListener(listener)
 
 	go func() {
 		defer wg.Done()

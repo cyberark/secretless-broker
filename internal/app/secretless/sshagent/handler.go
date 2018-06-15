@@ -12,12 +12,14 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
 // Handler implements an ssh-agent which holds a single key.
 type Handler struct {
-	Config     config.Handler
-	Connection net.Conn
+	Config        config.Handler
+	Connection    net.Conn
+	EventNotifier plugin_v1.EventNotifier
 }
 
 func parseKey(pemStr []byte) (rawkey interface{}, err error) {
@@ -45,7 +47,7 @@ func parseKey(pemStr []byte) (rawkey interface{}, err error) {
 func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	var values map[string][]byte
 
-	if values, err = variable.Resolve(h.Config.Credentials); err != nil {
+	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
 		return
 	}
 

@@ -15,7 +15,7 @@ func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{Options: make(map[string]string)}
 
 	var values map[string][]byte
-	if values, err = variable.Resolve(h.Config.Credentials); err != nil {
+	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
 		return
 	}
 

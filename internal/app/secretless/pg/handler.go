@@ -5,8 +5,8 @@ import (
 	"net"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
-	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
 // ClientOptions stores the option that were specified by the connection client.
@@ -34,11 +34,12 @@ type BackendConfig struct {
 //
 // Handler requires "address", "username" and "password" credentials.
 type Handler struct {
+	Backend       net.Conn
+	BackendConfig *BackendConfig
 	Config        config.Handler
 	Client        net.Conn
-	Backend       net.Conn
 	ClientOptions *ClientOptions
-	BackendConfig *BackendConfig
+	EventNotifier plugin_v1.EventNotifier
 }
 
 func (h *Handler) abort(err error) {
@@ -77,8 +78,8 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.Client, h.Backend, func(b []byte) { plugin.GetManager().ClientData(h.Client, b) })
-	go stream(h.Backend, h.Client, func(b []byte) { plugin.GetManager().ServerData(h.Client, b) })
+	go stream(h.Client, h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
+	go stream(h.Backend, h.Client, func(b []byte) { h.EventNotifier.ServerData(h.Client, b) })
 }
 
 // Run processes the startup message, configures the backend connection, connects to the backend,

@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 
-	"github.com/conjurinc/secretless/internal/app/secretless"
 	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	yaml "gopkg.in/yaml.v1"
@@ -32,13 +31,19 @@ func main() {
 		}
 	}
 
-	err = plugin.GetManager().LoadPlugins(*pluginDir, configuration)
+	log.Println("Loading internal plugins...")
+	err = plugin.GetManager().LoadInternalPlugins(configuration)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println("Loading external library plugins...")
+	err = plugin.GetManager().LoadLibraryPlugins(*pluginDir, configuration)
 	if err != nil {
 		log.Println(err)
 	}
 
 	plugin.GetManager().RegisterSignalHandlers()
 
-	p := secretless.Proxy{Config: configuration}
-	p.Run()
+	plugin.GetManager().Run(configuration)
 }

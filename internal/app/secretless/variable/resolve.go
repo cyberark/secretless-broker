@@ -1,15 +1,15 @@
 package variable
 
 import (
-	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	providerPkg "github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
 // Resolve accepts an list of Providers and a list of Variables and
 // attempts to obtain the value of each Variable from the appropriate Provider.
-func Resolve(variables []config.Variable) (result map[string][]byte, err error) {
+func Resolve(variables []config.Variable, eventNotifier plugin_v1.EventNotifier) (result map[string][]byte, err error) {
 	result = make(map[string][]byte)
 
 	for _, v := range variables {
@@ -25,7 +25,7 @@ func Resolve(variables []config.Variable) (result map[string][]byte, err error) 
 		}
 		result[v.Name] = value
 
-		plugin.GetManager().ResolveVariable(provider, v.Name, value)
+		eventNotifier.ResolveVariable(provider, v.Name, value)
 	}
 
 	return

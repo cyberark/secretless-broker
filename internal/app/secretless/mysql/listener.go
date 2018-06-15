@@ -14,9 +14,10 @@ import (
 
 // Listener listens for and handles new connections.
 type Listener struct {
-	Config   config.Listener
-	Handlers []config.Handler
-	Listener net.Listener
+	Config         config.Listener
+	HandlerConfigs []config.Handler
+	NetListener    net.Listener
+	EventNotifier  plugin_v1.EventNotifier
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -47,8 +48,8 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.Handlers, validation.Required),
-		validation.Field(&l.Handlers, handlerHasCredentials{}),
+		validation.Field(&l.HandlerConfigs, validation.Required),
+		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
 	)
 }
 
@@ -62,8 +63,12 @@ func (l *Listener) Listen() {
 		}
 
 		// Serve the first Handler which is attached to this listener
-		if len(l.Handlers) > 0 {
-			handler := &Handler{Config: l.Handlers[0], Client: client}
+		if len(l.HandlerConfigs) > 0 {
+			handler := &Handler{
+				Config:        l.HandlerConfigs[0],
+				Client:        client,
+				EventNotifier: l.EventNotifier,
+			}
 			handler.Run()
 		} else {
 			mysqlError := protocol.Error{
@@ -76,22 +81,36 @@ func (l *Listener) Listen() {
 	}
 }
 
-// GetConfig implements secretless.Listener
+// GetConfig implements plugin_v1.Listener
 func (l *Listener) GetConfig() config.Listener {
 	return l.Config
 }
 
-// GetListener implements secretless.Listener
+// GetListener implements plugin_v1.Listener
 func (l *Listener) GetListener() net.Listener {
-	return l.Listener
+	return l.NetListener
 }
 
-// GetHandlers implements secretless.Listener
+// GetHandlers implements plugin_v1.Listener
 func (l *Listener) GetHandlers() []plugin_v1.Handler {
 	return nil
 }
 
-// GetConnections implements secretless.Listener
+// GetConnections implements plugin_v1.Listener
 func (l *Listener) GetConnections() []net.Conn {
 	return nil
+}
+
+// GetNotifier implements plugin_v1.Listener
+func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
+	return l.EventNotifier
+}
+
+func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
+	return &Listener{
+		Config:         options.ListenerConfig,
+		HandlerConfigs: options.HandlerConfigs,
+		NetListener:    options.NetListener,
+		EventNotifier:  options.EventNotifier,
+	}
 }

@@ -92,7 +92,6 @@ func (l Listener) SelectHandlers(handlers []Handler) []Handler {
 func (l Listener) Validate() (err error) {
 	err = validation.ValidateStruct(&l,
 		validation.Field(&l.Name, validation.Required),
-		validation.Field(&l.Protocol, validation.Required, validation.In("pg", "http", "ssh", "ssh-agent", "mysql")),
 	)
 
 	return

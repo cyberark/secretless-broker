@@ -25,10 +25,11 @@ type Handler interface {
 }
 
 type Listener struct {
-	Config    config.Listener
-	Transport *http.Transport
-	Handlers  []config.Handler
-	Listener  net.Listener
+	Config         config.Listener
+	HandlerConfigs []config.Handler
+	NetListener    net.Listener
+	EventNotifier  plugin_v1.EventNotifier
+	Transport      *http.Transport
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -59,8 +60,8 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.Handlers, validation.Required),
-		validation.Field(&l.Handlers, handlerHasCredentials{}),
+		validation.Field(&l.HandlerConfigs, validation.Required),
+		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
 	)
 }
 
@@ -77,7 +78,7 @@ func copyHeaders(dst, src http.Header) {
 }
 
 func (l *Listener) LookupHandler(r *http.Request) Handler {
-	for _, handler := range l.Handlers {
+	for _, handler := range l.HandlerConfigs {
 		for _, pattern := range handler.Patterns {
 			log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
 			if pattern.MatchString(r.URL.String()) {
@@ -124,7 +125,7 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if handler != nil {
 		var backendVariables map[string][]byte
-		if backendVariables, err = variable.Resolve(handler.Configuration().Credentials); err != nil {
+		if backendVariables, err = variable.Resolve(handler.Configuration().Credentials, l.EventNotifier); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -184,25 +185,39 @@ func (l *Listener) Listen() {
 	}
 
 	l.Transport = &http.Transport{TLSClientConfig: &tls.Config{RootCAs: caCertPool}}
-	http.Serve(l.Listener, l)
+	http.Serve(l.NetListener, l)
 }
 
-// GetConfig implements secretless.Listener
+// GetConfig implements plugin_v1.Listener
 func (l *Listener) GetConfig() config.Listener {
 	return l.Config
 }
 
-// GetListener implements secretless.Listener
+// GetListener implements plugin_v1.Listener
 func (l *Listener) GetListener() net.Listener {
-	return l.Listener
+	return l.NetListener
 }
 
-// GetHandlers implements secretless.Listener
+// GetHandlers implements plugin_v1.Listener
 func (l *Listener) GetHandlers() []plugin_v1.Handler {
 	return nil
 }
 
-// GetConnections implements secretless.Listener
+// GetConnections implements plugin_v1.Listener
 func (l *Listener) GetConnections() []net.Conn {
 	return nil
+}
+
+// GetNotifier implements plugin_v1.Listener
+func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
+	return l.EventNotifier
+}
+
+func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
+	return &Listener{
+		Config:         options.ListenerConfig,
+		HandlerConfigs: options.HandlerConfigs,
+		NetListener:    options.NetListener,
+		EventNotifier:  options.EventNotifier,
+	}
 }

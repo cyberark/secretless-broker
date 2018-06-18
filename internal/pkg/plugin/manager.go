@@ -14,7 +14,8 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/conjurinc/secretless/pkg/secretless"
+	"github.com/conjurinc/secretless/internal/app/secretless"
+	secretlessPkg "github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
@@ -34,9 +35,10 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 }
 
 type PluginManager struct {
-	Listeners []plugin_v1.Listener
-	Handlers  []plugin_v1.Handler
-	Managers  []plugin_v1.Manager
+	ListenerFactories map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
+	Handlers          []plugin_v1.Handler
+	Managers          []plugin_v1.ConnectionManager
+	Proxy             secretless.Proxy
 }
 
 var _singleton *PluginManager
@@ -45,9 +47,9 @@ var _once sync.Once
 func GetManager() *PluginManager {
 	_once.Do(func() {
 		_singleton = &PluginManager{
-			Listeners: make([]plugin_v1.Listener, 0),
-			Handlers:  make([]plugin_v1.Handler, 0),
-			Managers:  make([]plugin_v1.Manager, 0),
+			ListenerFactories: make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
+			Handlers:          make([]plugin_v1.Handler, 0),
+			Managers:          make([]plugin_v1.ConnectionManager, 0),
 		}
 	})
 
@@ -81,7 +83,7 @@ func (m *PluginManager) RegisterSignalHandlers() {
 // the interface API version that plugin is advertising
 // TODO: Support a list of supported versions
 func _IsSupportedPluginApiVersion(version string) bool {
-	return version == "0.0.2"
+	return version == "0.0.3"
 }
 
 // LoadPlugin tries to load all internal plugin info strings
@@ -105,7 +107,7 @@ func _LoadManagers(pluginManager *PluginManager, config config.Config,
 	}
 
 	// TODO: Handle different interface versions
-	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]plugin_v1.Manager)
+	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]plugin_v1.ConnectionManager)
 	if !ok {
 		return errors.New("ERROR! Could not cast GetManagers to proper type!")
 	}
@@ -123,7 +125,7 @@ func _LoadManagers(pluginManager *PluginManager, config config.Config,
 		log.Printf("%s: Appending manager '%s' OK!", pluginName, managerPluginName)
 
 		pluginManager.Managers = append(pluginManager.Managers,
-			managerPlugin.(plugin_v1.Manager))
+			managerPlugin.(plugin_v1.ConnectionManager))
 	}
 
 	return nil
@@ -139,16 +141,59 @@ func _LoadHandlers(pluginManager *PluginManager, config config.Config,
 }
 
 // _LoadListeners appends all listeners from the plugin to the pluginManager
-func _LoadListeners(pluginManager *PluginManager, config config.Config,
+func _LoadListenersFromPlugin(pluginManager *PluginManager, config config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
 
-	log.Println("WARN: Loading of listeners from a plugin is a NOOP at this time!")
+	rawListenerPluginsFunc, err := pluginObj.Lookup("GetListeners")
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle different interface versions
+	listenerPluginsFunc, ok := rawListenerPluginsFunc.(func() map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener)
+	if !ok {
+		return errors.New("ERROR! Could not cast GetManagers to proper type!")
+	}
+	listenerPlugins := listenerPluginsFunc()
+	for listenerId, listenerFactory := range listenerPlugins {
+		pluginManager.ListenerFactories[listenerId] = listenerFactory
+		log.Printf("Listener factory '%s' added from plugin %s", listenerId, pluginName)
+	}
 
 	return nil
 }
 
-// LoadPlugins loads all shared object files in `path`
-func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
+// Run is the main wait loop once we load all the plugins
+func (pluginManager *PluginManager) Run(config config.Config) error {
+	pluginManager.Proxy = secretless.Proxy{
+		Config:            config,
+		ListenerFactories: pluginManager.ListenerFactories,
+		EventNotifier:     pluginManager,
+	}
+
+	pluginManager.Proxy.Run()
+
+	return nil
+}
+
+// LoadInternalPlugins loads all handlers/listeners/managers that are included in secretless by default
+func (pluginManager *PluginManager) LoadInternalPlugins(config config.Config) error {
+	log.Println("Enumerating internal plugins...")
+
+	for listenerId, listenerFactory := range secretless.InternalListeners {
+		pluginManager.ListenerFactories[listenerId] = listenerFactory
+		log.Printf("Listener factory '%s' added", listenerId)
+	}
+
+	// TODO: Add ability to load internal handlers (if supported)
+	// TODO: Add ability to load internal managers
+
+	log.Println("Completed loading internal plugins.")
+	return nil
+}
+
+// LoadLibraryPlugins loads all shared object files in `path`
+func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) error {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
@@ -210,8 +255,7 @@ func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 		}
 
 		// Load listeners
-		// TODO: Actually load listeners
-		if err := _LoadListeners(m, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadListenersFromPlugin(m, config, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
@@ -221,7 +265,6 @@ func (m *PluginManager) LoadPlugins(path string, config config.Config) error {
 }
 
 func (m *PluginManager) Initialize(c config.Config) error {
-	// TODO: Figure out if handlers/listeners need to initialize too
 	for _, managerPlugin := range m.Managers {
 		managerPlugin.Initialize(c)
 	}
@@ -254,7 +297,7 @@ func (m *PluginManager) DestroyHandler(h plugin_v1.Handler) {
 		managerPlugin.DestroyHandler(h)
 	}
 }
-func (m *PluginManager) ResolveVariable(p secretless.Provider, id string, value []byte) {
+func (m *PluginManager) ResolveVariable(p secretlessPkg.Provider, id string, value []byte) {
 	for _, managerPlugin := range m.Managers {
 		managerPlugin.ResolveVariable(p, id, value)
 	}

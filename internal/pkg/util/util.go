@@ -3,7 +3,6 @@ package util
 import (
 	"net"
 
-	"github.com/conjurinc/secretless/internal/pkg/plugin"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
@@ -12,7 +11,7 @@ import (
 func Accept(l plugin_v1.Listener) (net.Conn, error) {
 	conn, err := l.GetListener().Accept()
 	if conn != nil && err == nil {
-		plugin.GetManager().NewConnection(l, conn)
+		l.GetNotifier().NewConnection(l, conn)
 	}
 	return conn, err
 }

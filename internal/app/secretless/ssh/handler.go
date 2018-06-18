@@ -9,6 +9,7 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
 type ServerConfig struct {
@@ -18,8 +19,9 @@ type ServerConfig struct {
 }
 
 type Handler struct {
-	Config   config.Handler
-	Channels <-chan ssh.NewChannel
+	Config        config.Handler
+	Channels      <-chan ssh.NewChannel
+	EventNotifier plugin_v1.EventNotifier
 }
 
 func (h *Handler) serverConfig() (config ServerConfig, err error) {
@@ -27,7 +29,7 @@ func (h *Handler) serverConfig() (config ServerConfig, err error) {
 
 	log.Printf("%s", h.Config.Credentials)
 
-	if values, err = variable.Resolve(h.Config.Credentials); err != nil {
+	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
 		return
 	}
 

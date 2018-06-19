@@ -4,16 +4,11 @@ LABEL builder="secretless-builder"
 
 WORKDIR /go/src/github.com/conjurinc/secretless
 
-RUN apt-get update && \
-    apt-get install -y build-essential \
-                       g++ \
-                       git && \
-    wget -q -O /usr/local/bin/dep_install.sh \
-    https://raw.githubusercontent.com/golang/dep/master/install.sh && \
-    chmod +x /usr/local/bin/dep_install.sh && \
-    /usr/local/bin/dep_install.sh
+RUN curl -fsSL -o /usr/local/bin/dep \
+    https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 && \
+    chmod +x /usr/local/bin/dep
 
-COPY Gopkg.toml Gopkg.lock /go/src/github.com/conjurinc/secretless/
+COPY Gopkg.toml Gopkg.lock ./
 
 # TODO: Expand this with build args when we support other arches
 ENV GOOS=linux \

@@ -38,8 +38,6 @@ services:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_TOKEN: e30K
-    volumes:
-      - ../..:/go/src/github.com/conjurinc/secretless
     depends_on:
       - conjur
       - secretless

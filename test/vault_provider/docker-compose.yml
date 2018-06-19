@@ -12,8 +12,6 @@ services:
     command: go test -v ./test/vault_provider
     environment:
       VAULT_ADDR: http://vault:8200
-    volumes:
-      - ../..:/go/src/github.com/conjurinc/secretless
     depends_on:
       - vault
 

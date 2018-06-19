@@ -27,7 +27,6 @@ services:
       dockerfile: Dockerfile.dev
     command: go test -v ./test/pg_handler
     volumes:
-      - ../..:/go/src/github.com/conjurinc/secretless
       - pg-socket:/go/src/github.com/conjurinc/secretless/test/pg_handler/run/postgresql
     depends_on:
       - secretless

@@ -38,7 +38,7 @@ vault_host_port=$(docker-compose port vault 8200)
 vault_port=$(docker run --rm \
   -v $PWD/../util/:/util/ \
   -e vault_host_port=$vault_host_port \
-  golang:1.9-stretch bash -exc "
+  golang:1.10.3-stretch bash -exc "
   echo \"$vault_host_port\" | go run /util/parse_port.go
   ")
 

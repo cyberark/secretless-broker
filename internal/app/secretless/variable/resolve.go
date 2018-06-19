@@ -1,6 +1,8 @@
 package variable
 
 import (
+	"log"
+
 	providerPkg "github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
@@ -10,6 +12,14 @@ import (
 // Resolve accepts an list of Providers and a list of Variables and
 // attempts to obtain the value of each Variable from the appropriate Provider.
 func Resolve(variables []config.Variable, eventNotifier plugin_v1.EventNotifier) (result map[string][]byte, err error) {
+	if variables == nil {
+		log.Fatalln("ERROR! Variables not defined in Resolve call!")
+	}
+
+	if eventNotifier == nil {
+		log.Fatalln("ERROR! EventNotifier not defined in Resolve call!")
+	}
+
 	result = make(map[string][]byte)
 
 	for _, v := range variables {

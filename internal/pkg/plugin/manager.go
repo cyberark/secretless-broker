@@ -37,7 +37,7 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 type PluginManager struct {
 	ListenerFactories map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
 	Handlers          []plugin_v1.Handler
-	Managers          []plugin_v1.ConnectionManager
+	Managers          map[string]plugin_v1.ConnectionManager
 	Proxy             secretless.Proxy
 }
 
@@ -49,7 +49,7 @@ func GetManager() *PluginManager {
 		_singleton = &PluginManager{
 			ListenerFactories: make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
 			Handlers:          make([]plugin_v1.Handler, 0),
-			Managers:          make([]plugin_v1.ConnectionManager, 0),
+			Managers:          make(map[string]plugin_v1.ConnectionManager),
 		}
 	})
 
@@ -83,7 +83,7 @@ func (m *PluginManager) RegisterSignalHandlers() {
 // the interface API version that plugin is advertising
 // TODO: Support a list of supported versions
 func _IsSupportedPluginApiVersion(version string) bool {
-	return version == "0.0.3"
+	return version == "0.0.4"
 }
 
 // LoadPlugin tries to load all internal plugin info strings
@@ -107,25 +107,16 @@ func _LoadManagers(pluginManager *PluginManager, config config.Config,
 	}
 
 	// TODO: Handle different interface versions
-	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]plugin_v1.ConnectionManager)
+	managerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]func() plugin_v1.ConnectionManager)
 	if !ok {
 		return errors.New("ERROR! Could not cast GetManagers to proper type!")
 	}
 	managerPlugins := managerPluginsFunc()
 
-	for managerPluginName, managerPlugin := range managerPlugins {
-		log.Printf("%s: Appending manager '%s'...", pluginName, managerPluginName)
-		err = managerPlugin.Initialize(config)
-		if err != nil {
-			log.Printf("%s: Failed to load manager '%s': %s\n", pluginName,
-				managerPluginName,
-				err.Error())
-			return err
-		}
-		log.Printf("%s: Appending manager '%s' OK!", pluginName, managerPluginName)
-
-		pluginManager.Managers = append(pluginManager.Managers,
-			managerPlugin.(plugin_v1.ConnectionManager))
+	for managerId, managerPluginFactory := range managerPlugins {
+		managerPlugin := managerPluginFactory()
+		pluginManager.Managers[managerId] = managerPlugin
+		log.Printf("Manager '%s' added from plugin %s", managerId, pluginName)
 	}
 
 	return nil
@@ -152,7 +143,7 @@ func _LoadListenersFromPlugin(pluginManager *PluginManager, config config.Config
 	// TODO: Handle different interface versions
 	listenerPluginsFunc, ok := rawListenerPluginsFunc.(func() map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener)
 	if !ok {
-		return errors.New("ERROR! Could not cast GetManagers to proper type!")
+		return errors.New("ERROR! Could not cast GetListeners to proper type!")
 	}
 	listenerPlugins := listenerPluginsFunc()
 	for listenerId, listenerFactory := range listenerPlugins {
@@ -164,9 +155,11 @@ func _LoadListenersFromPlugin(pluginManager *PluginManager, config config.Config
 }
 
 // Run is the main wait loop once we load all the plugins
-func (pluginManager *PluginManager) Run(config config.Config) error {
+func (pluginManager *PluginManager) Run(configuration config.Config) error {
+	pluginManager.InitializeConnectionManagers(configuration)
+
 	pluginManager.Proxy = secretless.Proxy{
-		Config:            config,
+		Config:            configuration,
 		ListenerFactories: pluginManager.ListenerFactories,
 		EventNotifier:     pluginManager,
 	}
@@ -180,13 +173,17 @@ func (pluginManager *PluginManager) Run(config config.Config) error {
 func (pluginManager *PluginManager) LoadInternalPlugins(config config.Config) error {
 	log.Println("Enumerating internal plugins...")
 
+	for managerId, managerFactory := range secretless.InternalManagers {
+		pluginManager.Managers[managerId] = managerFactory()
+		log.Printf("Manager factory '%s' added.", managerId)
+	}
+
 	for listenerId, listenerFactory := range secretless.InternalListeners {
 		pluginManager.ListenerFactories[listenerId] = listenerFactory
-		log.Printf("Listener factory '%s' added", listenerId)
+		log.Printf("Listener factory '%s' added.", listenerId)
 	}
 
 	// TODO: Add ability to load internal handlers (if supported)
-	// TODO: Add ability to load internal managers
 
 	log.Println("Completed loading internal plugins.")
 	return nil
@@ -264,10 +261,21 @@ func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) er
 	return nil
 }
 
-func (m *PluginManager) Initialize(c config.Config) error {
-	for _, managerPlugin := range m.Managers {
-		managerPlugin.Initialize(c)
+func (m *PluginManager) InitializeConnectionManagers(c config.Config) error {
+	log.Println("Initializing managers...")
+	for managerId, managerPlugin := range m.Managers {
+		err := managerPlugin.Initialize(c)
+		if err != nil {
+			log.Printf("Failed to initialize manager '%s': %s\n", managerId, err.Error())
+
+			// TODO: Decide if manager initialization erroring is a fatal error.
+			//       For now we treat it as a non-fatal error.
+			delete(m.Managers, managerId)
+			continue
+		}
+		log.Printf("Manager '%s' initialized.", managerId)
 	}
+	log.Println("Initializing managers done.")
 
 	return nil
 }

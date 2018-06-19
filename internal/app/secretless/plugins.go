@@ -9,6 +9,8 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
+var InternalManagers = map[string]func() plugin_v1.ConnectionManager{}
+
 var InternalListeners = map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener{
 	"http":      http.ListenerFactory,
 	"mysql":     mysql.ListenerFactory,

@@ -6,10 +6,10 @@ import (
 )
 
 // Exports
-var PluginApiVersion = "0.0.3"
+var PluginApiVersion = "0.0.4"
 
 var PluginInfo = map[string]string{
-	"version":     "0.0.3",
+	"version":     "0.0.4",
 	"id":          "example-plugin",
 	"name":        "Example Plugin",
 	"description": "Example plugin to demonstrate plugin functionality",
@@ -25,8 +25,8 @@ func GetHandlers() map[string]func() plugin_v1.Handler {
 	return make(map[string]func() plugin_v1.Handler)
 }
 
-func GetManagers() map[string]plugin_v1.ConnectionManager {
-	return map[string]plugin_v1.ConnectionManager{
-		"example-plugin-manager": &example.ExampleManager{},
+func GetManagers() map[string]func() plugin_v1.ConnectionManager {
+	return map[string]func() plugin_v1.ConnectionManager{
+		"example-plugin-manager": example.ManagerFactory,
 	}
 }

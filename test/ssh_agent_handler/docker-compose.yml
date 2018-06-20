@@ -25,7 +25,6 @@ services:
     environment:
       SSH_AUTH_SOCK: /run/ssh-agent/.agent
     volumes:
-      - ../..:/go/src/github.com/conjurinc/secretless
       - ./run:/run/ssh-agent
     depends_on:
       - secretless

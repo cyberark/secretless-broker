@@ -32,7 +32,6 @@ services:
       dockerfile: Dockerfile.dev
     command: go test -v ./test/mysql_handler
     volumes:
-      - ../../:/go/src/github.com/conjurinc/secretless
       - mysql-socket:/go/src/github.com/conjurinc/secretless/test/mysql_handler/run/mysql
     depends_on:
       - secretless

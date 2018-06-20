@@ -1,3 +1,52 @@
 #!/bin/bash -ex
 
-docker-compose run --rm --no-deps test
+function fail() {
+  print_status "FAIL"
+  exit 1
+}
+
+function pass() {
+  print_status "PASS"
+}
+
+function print_status() {
+  set +x
+  echo "=== RUN TestSSHAgentHandler"
+  echo "--- $1: TestSSHAgentHandler ($(runtime).00s)"
+  echo "$1"
+
+  if [ "$1" = "FAIL" ]; then
+    echo "exit status 1"
+  fi
+
+  echo "$1    github.com/conjurinc/secretless/test/ssh_agent_handler  $(runtime).000s"
+}
+
+function runtime() {
+  end=`date +%s`
+  runtime=$((end-start))
+
+  echo "$runtime"
+}
+
+local_test=false
+while getopts :l opt; do
+    case $opt in
+        l) local_test=true ;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+docker_args=""
+if $local_test; then
+  docker_args="-v $(cd ../..; pwd):/go/src/github.com/conjurinc/secretless"
+fi
+
+start=`date +%s`
+docker-compose run \
+  --rm \
+  --no-deps \
+  $docker_args \
+  test || fail
+
+pass

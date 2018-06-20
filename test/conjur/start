@@ -11,7 +11,7 @@ conjur_host_port=$(docker-compose port conjur 80)
 conjur_port=$(docker run --rm \
   -v $PWD/../util/:/util/ \
   -e conjur_host_port=$conjur_host_port \
-  golang:1.9-stretch bash -c "
+  golang:1.10.3-stretch bash -exc "
   echo \"$conjur_host_port\" | go run /util/parse_port.go
   ")
 
@@ -27,7 +27,9 @@ CONJUR_AUTHN_LOGIN=admin
 CONJUR_AUTHN_API_KEY=$admin_api_key
 ENV
 
-docker-compose up -d secretless
+docker-compose up \
+  -d \
+  secretless
 
 sleep 2
 

@@ -9,12 +9,20 @@ RUN apt-get update && \
 
 WORKDIR /go/src/github.com/conjurinc/secretless
 
-RUN go get -u github.com/golang/dep/cmd/dep && \
-    go get -u github.com/jstemmer/go-junit-report && \
+RUN curl -fsSL -o /usr/local/bin/dep \
+    https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 && \
+    chmod +x /usr/local/bin/dep
+
+RUN go get -u github.com/jstemmer/go-junit-report && \
     go get github.com/smartystreets/goconvey && \
     go get golang.org/x/tools/cmd/goimports
 
-COPY Gopkg.toml Gopkg.lock /go/src/github.com/conjurinc/secretless/
+COPY Gopkg.toml Gopkg.lock ./
+
+# TODO: Expand this with build args when we support other arches
+ENV GOOS=linux \
+    GOARCH=amd64 \
+    CGO_ENABLED=1
 
 RUN dep ensure --vendor-only
 

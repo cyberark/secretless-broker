@@ -1,1 +1,5 @@
-../util/stop
+#!/bin/bash -ex
+
+rm -rf .env
+docker-compose down -v
+rm -rf run/postgresql/.s.PGSQL.5432

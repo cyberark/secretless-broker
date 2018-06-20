@@ -1,3 +1,4 @@
 #!/bin/bash -ex
 
 docker-compose down -v
+rm -rf run/.agent

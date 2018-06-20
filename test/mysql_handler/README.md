@@ -126,3 +126,9 @@ To run the test suite in Docker, run:
 ./start  # Stand up MySQL and Secretless servers
 ./test   # Run tests in a test container
 ```
+Make sure you build the project by running `./build/build` in the project root
+before running the tests so that the test container will be using updated
+code. If you want to run using your local changes, you can run `./test -l`
+instead, which will mount your local project directory as a volume in the
+test container, overwriting the project directory built into the container
+image.

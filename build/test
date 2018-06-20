@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
+
+set -exo pipefail
 
 project_dir=$PWD
 rm -f $project_dir/test/junit.output

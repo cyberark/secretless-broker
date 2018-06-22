@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"context"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -16,11 +17,14 @@ import (
 type Proxy struct {
 	Config            config.Config
 	EventNotifier     plugin_v1.EventNotifier
+	reloadCtx         context.Context
+	reloadCtxCancelFn context.CancelFunc
 	ListenerFactories map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
 }
 
 // Listen runs the listen loop for a specific Listener.
-func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
+func (p *Proxy) Listen(listenerConfig config.Listener, wg *sync.WaitGroup) {
+
 	var netListener net.Listener
 	var err error
 
@@ -46,6 +50,19 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	go func() {
+		for {
+			select {
+			case <-p.reloadCtx.Done():
+				log.Println("cleaning up", netListener.Addr())
+				// TODO: really this shouldn't be here. listener#Shutdown should clean up and allow listener#Listen to return below
+				netListener.Close()
+				wg.Done()
+				return // returning not to leak the goroutine
+			}
+		}
+	}()
 
 	log.Printf("%s listener '%s' listening at: %s",
 		listenerConfig.Protocol,
@@ -80,12 +97,23 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 	}()
 }
 
+func (p *Proxy) SoftReload(cfg config.Config) {
+	p.Config = cfg
+	p.reloadCtxCancelFn()
+}
 // Run is the main entrypoint to the secretless program.
 func (p *Proxy) Run() {
 	var wg sync.WaitGroup
 	wg.Add(len(p.Config.Listeners))
+	p.reloadCtx, p.reloadCtxCancelFn = context.WithCancel(context.Background())
+
 	for _, config := range p.Config.Listeners {
-		p.Listen(config, wg)
+		p.Listen(config, &wg)
 	}
 	wg.Wait()
+
+	select {
+	case <-p.reloadCtx.Done():
+		p.Run()
+	}
 }

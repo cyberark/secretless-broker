@@ -1,30 +1,21 @@
-package pg
+package mysql
 
 import (
 	"log"
 	"net"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/mysql/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
-// ClientOptions stores the option that were specified by the connection client.
-// The User and Database are required. Other options are stored in a map.
-type ClientOptions struct {
-	// TODO: remove this when custom authorization is removed.
-	User string
-	// TODO: override the database address with this setting.
-	Database string
-	Options  map[string]string
-}
-
 // BackendConfig stores the connection info to the real backend database.
+// These values are pulled from the handler credentials config
 type BackendConfig struct {
-	Address  string
+	Host     string
+	Port     uint
 	Username string
 	Password string
-	Database string
 	Options  map[string]string
 }
 
@@ -32,23 +23,22 @@ type BackendConfig struct {
 // establish the BackendConfig, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 //
-// Handler requires "address", "username" and "password" credentials.
+// Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
 	Backend       net.Conn
 	BackendConfig *BackendConfig
-	Config        config.Handler
 	Client        net.Conn
-	ClientOptions *ClientOptions
+	Config        config.Handler
 	EventNotifier plugin_v1.EventNotifier
 }
 
 func (h *Handler) abort(err error) {
-	pgError := protocol.Error{
-		Severity: protocol.ErrorSeverityFatal,
-		Code:     protocol.ErrorCodeInternalError,
+	mysqlError := protocol.Error{
+		Code:     protocol.CRUnknownError,
+		SQLSTATE: protocol.ErrorCodeInternalError,
 		Message:  err.Error(),
 	}
-	h.Client.Write(pgError.GetMessage())
+	h.Client.Write(mysqlError.GetMessage())
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -79,20 +69,16 @@ func (h *Handler) Pipe() {
 	}
 
 	go stream(h.Client, h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
-	go stream(h.Backend, h.Client, func(b []byte) { h.EventNotifier.ServerData(h.Client, b) })
+	go stream(h.Backend, h.Client, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
 }
 
-// Run processes the startup message, configures the backend connection, connects to the backend,
-// and pipes the data between the client and the backend.
+// Run configures the backend connection info, connects to the backend to
+// complete the connection phase, and pipes the data between the client and
+// the backend
 func (h *Handler) Run() {
 	var err error
 
-	if err = h.Startup(); err != nil {
-		h.abort(err)
-		return
-	}
-
-	if err := h.ConfigureBackend(); err != nil {
+	if err = h.ConfigureBackend(); err != nil {
 		h.abort(err)
 		return
 	}

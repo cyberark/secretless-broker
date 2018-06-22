@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/mysql/protocol"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 )
 

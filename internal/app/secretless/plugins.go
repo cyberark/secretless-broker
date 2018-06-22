@@ -1,11 +1,11 @@
 package secretless
 
 import (
-	"github.com/conjurinc/secretless/internal/app/secretless/http"
-	"github.com/conjurinc/secretless/internal/app/secretless/mysql"
-	"github.com/conjurinc/secretless/internal/app/secretless/pg"
-	"github.com/conjurinc/secretless/internal/app/secretless/ssh"
-	"github.com/conjurinc/secretless/internal/app/secretless/sshagent"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/http"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/mysql"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/ssh"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/sshagent"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 

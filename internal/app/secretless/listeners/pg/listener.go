@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg/protocol"
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"

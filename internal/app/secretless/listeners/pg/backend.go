@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/pg/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg/protocol"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 )
 

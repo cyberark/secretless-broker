@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"strconv"
 
-	handlerImpl "github.com/conjurinc/secretless/internal/app/secretless/http/handler"
+	handlerImpl "github.com/conjurinc/secretless/internal/app/secretless/listeners/http/handler"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"

@@ -1,11 +1,14 @@
 package ssh
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net"
+	"net/http"
 
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
@@ -19,7 +22,7 @@ type ServerConfig struct {
 }
 
 type Handler struct {
-	Config        config.Handler
+	HandlerConfig config.Handler
 	Channels      <-chan ssh.NewChannel
 	EventNotifier plugin_v1.EventNotifier
 }
@@ -27,13 +30,13 @@ type Handler struct {
 func (h *Handler) serverConfig() (config ServerConfig, err error) {
 	var values map[string][]byte
 
-	log.Printf("%s", h.Config.Credentials)
+	log.Printf("%s", h.GetConfig().Credentials)
 
-	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
+	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("SSH backend connection parameters: %s", values)
 	}
 
@@ -164,9 +167,14 @@ func (h *Handler) Run() {
 	}
 }
 
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
+	return errors.New("ssh handler does not use Authenticate!")
+}
+
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.Config
+	return h.GetConfig()
 }
 
 // GetClientConnection implements secretless.Handler
@@ -177,4 +185,22 @@ func (h *Handler) GetClientConnection() net.Conn {
 // GetBackendConnection implements secretless.Handler
 func (h *Handler) GetBackendConnection() net.Conn {
 	return nil
+}
+
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) LoadKeys(keyring agent.Agent) error {
+	return errors.New("ssh handler does not use LoadKeys!")
+}
+
+// HandlerFactory instantiates a handler given HandlerOptions
+func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
+	handler := &Handler{
+		Channels:      options.Channels,
+		EventNotifier: options.EventNotifier,
+		HandlerConfig: options.HandlerConfig,
+	}
+
+	handler.Run()
+
+	return handler
 }

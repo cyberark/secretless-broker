@@ -1,7 +1,8 @@
-package handler
+package http
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -10,7 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/crypto/ssh/agent"
+
 	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -19,7 +23,7 @@ import (
 
 // AWSHandler applies AWS signature authentication to the HTTP Authorization header.
 type AWSHandler struct {
-	Config config.Handler
+	HandlerConfig config.Handler
 }
 
 // AWS4-HMAC-SHA256 Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
@@ -34,11 +38,6 @@ const (
 	// emptyStringSHA256 is a SHA256 of an empty string
 	emptyStringSHA256 = `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
 )
-
-// Configuration provides the handler configuration.
-func (h AWSHandler) Configuration() *config.Handler {
-	return &h.Config
-}
 
 // Authenticate applies the "accessKeyId", "secretAccessKey" and optional "accessToken" credentials
 // to the Authorization header, following the AWS signature format.
@@ -105,7 +104,7 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	serviceName := matches[2]
 
 	signer := v4.NewSigner(creds)
-	if h.Config.Debug {
+	if h.HandlerConfig.Debug {
 		signer.Debug = aws.LogDebugWithSigning
 		signer.Logger = aws.NewDefaultLogger()
 	}
@@ -122,7 +121,7 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 
 // GetConfig implements secretless.Handler
 func (h *AWSHandler) GetConfig() config.Handler {
-	return h.Config
+	return h.HandlerConfig
 }
 
 // GetClientConnection implements secretless.Handler
@@ -133,4 +132,16 @@ func (h *AWSHandler) GetClientConnection() net.Conn {
 // GetBackendConnection implements secretless.Handler
 func (h *AWSHandler) GetBackendConnection() net.Conn {
 	return nil
+}
+
+// TODO: Remove this when interface is cleaned up
+func (h *AWSHandler) LoadKeys(keyring agent.Agent) (err error) {
+	return errors.New("http/aws handler does not use LoadKeys!")
+}
+
+// AWSHandlerFactory instantiates a handler given HandlerOptions
+func AWSHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
+	return &AWSHandler{
+		HandlerConfig: options.HandlerConfig,
+	}
 }

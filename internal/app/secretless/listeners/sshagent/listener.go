@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -56,10 +57,12 @@ func (l *Listener) Listen() {
 	selectedHandler := l.HandlerConfigs[0]
 	keyring := agent.NewKeyring()
 
-	handler := &Handler{
-		Config:        selectedHandler,
+	handlerOptions := plugin_v1.HandlerOptions{
+		HandlerConfig: selectedHandler,
 		EventNotifier: l.EventNotifier,
 	}
+
+	handler := handlers.HandlerFactories["sshagent"](handlerOptions)
 	if err := handler.LoadKeys(keyring); err != nil {
 		log.Printf("Failed to load ssh-agent handler keys: ", err)
 		return

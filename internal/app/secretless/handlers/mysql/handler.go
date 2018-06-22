@@ -1,10 +1,14 @@
 package mysql
 
 import (
+	"errors"
 	"log"
 	"net"
+	"net/http"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/mysql/protocol"
+	"golang.org/x/crypto/ssh/agent"
+
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
@@ -25,11 +29,11 @@ type BackendConfig struct {
 //
 // Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
-	Backend       net.Conn
-	BackendConfig *BackendConfig
-	Client        net.Conn
-	Config        config.Handler
-	EventNotifier plugin_v1.EventNotifier
+	Backend          net.Conn
+	BackendConfig    *BackendConfig
+	ClientConnection net.Conn
+	HandlerConfig    config.Handler
+	EventNotifier    plugin_v1.EventNotifier
 }
 
 func (h *Handler) abort(err error) {
@@ -38,7 +42,7 @@ func (h *Handler) abort(err error) {
 		SQLSTATE: protocol.ErrorCodeInternalError,
 		Message:  err.Error(),
 	}
-	h.Client.Write(mysqlError.GetMessage())
+	h.GetClientConnection().Write(mysqlError.GetMessage())
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -64,12 +68,12 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
-	if h.Config.Debug {
-		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
+	if h.GetConfig().Debug {
+		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.Client, h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
-	go stream(h.Backend, h.Client, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
+	go stream(h.GetClientConnection(), h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
+	go stream(h.Backend, h.GetClientConnection(), func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
 }
 
 // Run configures the backend connection info, connects to the backend to
@@ -91,17 +95,40 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
+	return errors.New("mysql listener does not use Authenticate!")
+}
+
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.Config
+	return h.HandlerConfig
 }
 
 // GetClientConnection implements secretless.Handler
 func (h *Handler) GetClientConnection() net.Conn {
-	return h.Client
+	return h.ClientConnection
 }
 
 // GetBackendConnection implements secretless.Handler
 func (h *Handler) GetBackendConnection() net.Conn {
 	return h.Backend
+}
+
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) LoadKeys(keyring agent.Agent) error {
+	return errors.New("mysql handler does not use LoadKeys!")
+}
+
+// HandlerFactory instantiates a handler given HandlerOptions
+func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
+	handler := &Handler{
+		ClientConnection: options.ClientConnection,
+		EventNotifier:    options.EventNotifier,
+		HandlerConfig:    options.HandlerConfig,
+	}
+
+	handler.Run()
+
+	return handler
 }

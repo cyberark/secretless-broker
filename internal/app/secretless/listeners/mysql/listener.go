@@ -5,7 +5,11 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/mysql/protocol"
+	// TODO: These errors should be abstracted out ideally
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql/protocol"
+
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
+
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -64,12 +68,13 @@ func (l *Listener) Listen() {
 
 		// Serve the first Handler which is attached to this listener
 		if len(l.HandlerConfigs) > 0 {
-			handler := &Handler{
-				Config:        l.HandlerConfigs[0],
-				Client:        client,
-				EventNotifier: l.EventNotifier,
+			handlerOptions := plugin_v1.HandlerOptions{
+				HandlerConfig:    l.HandlerConfigs[0],
+				ClientConnection: client,
+				EventNotifier:    l.EventNotifier,
 			}
-			handler.Run()
+
+			handlers.HandlerFactories["mysql"](handlerOptions)
 		} else {
 			mysqlError := protocol.Error{
 				Code:     protocol.CRUnknownError,

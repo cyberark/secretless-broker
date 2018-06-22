@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/mysql/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 )
 
@@ -15,11 +15,11 @@ func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{Options: make(map[string]string)}
 
 	var values map[string][]byte
-	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
+	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("MySQL backend connection parameters: %s", values)
 	}
 
@@ -65,14 +65,14 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Print("Processing handshake")
 	}
 
 	// Proxy initial packet from server to client
 	// TODO can we skip this step and still compute client packet?
 	// how can we check the client accepts the protocol if we do?
-	packet, err := protocol.ProxyPacket(backend, h.Client)
+	packet, err := protocol.ProxyPacket(backend, h.GetClientConnection())
 	if err != nil {
 		return
 	}
@@ -84,7 +84,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// Intercept response from client
-	handshakeResponsePacket, err := protocol.ReadPacket(h.Client)
+	handshakeResponsePacket, err := protocol.ReadPacket(h.GetClientConnection())
 	if err != nil {
 		return
 	}
@@ -123,11 +123,11 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// Proxy OK packet to client
-	if _, err = protocol.WritePacket(packet, h.Client); err != nil {
+	if _, err = protocol.WritePacket(packet, h.GetClientConnection()); err != nil {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("Successfully connected to '%s:%d'", h.BackendConfig.Host, h.BackendConfig.Port)
 	}
 

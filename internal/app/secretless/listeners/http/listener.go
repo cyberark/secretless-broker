@@ -11,18 +11,12 @@ import (
 	"net/http"
 	"strconv"
 
-	handlerImpl "github.com/conjurinc/secretless/internal/app/secretless/listeners/http/handler"
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
-
-type Handler interface {
-	Configuration() *config.Handler
-
-	Authenticate(map[string][]byte, *http.Request) error
-}
 
 type Listener struct {
 	Config         config.Listener
@@ -77,7 +71,7 @@ func copyHeaders(dst, src http.Header) {
 	}
 }
 
-func (l *Listener) LookupHandler(r *http.Request) Handler {
+func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 	for _, handler := range l.HandlerConfigs {
 		for _, pattern := range handler.Patterns {
 			log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
@@ -85,12 +79,17 @@ func (l *Listener) LookupHandler(r *http.Request) Handler {
 				if handler.Debug {
 					log.Printf("Using handler '%s' for request %s", handler.Name, r.URL.String())
 				}
+
+				handlerOptions := plugin_v1.HandlerOptions{
+					HandlerConfig: handler,
+				}
+
 				// Construct the return object
 				switch handler.Type {
 				case "aws":
-					return handlerImpl.AWSHandler{handler}
+					return handlers.HandlerFactories["http/aws"](handlerOptions)
 				case "conjur":
-					return handlerImpl.ConjurHandler{handler}
+					return handlers.HandlerFactories["http/conjur"](handlerOptions)
 				default:
 					log.Panicf("Service type '%s' of handler '%s' is not recognized", handler.Type, handler.Name)
 				}
@@ -125,12 +124,12 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if handler != nil {
 		var backendVariables map[string][]byte
-		if backendVariables, err = variable.Resolve(handler.Configuration().Credentials, l.EventNotifier); err != nil {
+		if backendVariables, err = variable.Resolve(handler.GetConfig().Credentials, l.EventNotifier); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		if handler.Configuration().Debug {
-			log.Printf("%s backend connection parameters: %s", handler.Configuration().Name, backendVariables)
+		if handler.GetConfig().Debug {
+			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, backendVariables)
 		}
 		if err = handler.Authenticate(backendVariables, r); err != nil {
 			http.Error(w, err.Error(), 500)
@@ -140,14 +139,14 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r.RequestURI = "" // this must be reset when serving a request with the client
 
-	if handler.Configuration().Debug {
+	if handler.GetConfig().Debug {
 		log.Printf("Sending request %v", r)
 	}
 
 	resp, err := l.Transport.RoundTrip(r)
 
 	if err != nil {
-		if handler.Configuration().Debug {
+		if handler.GetConfig().Debug {
 			log.Printf("Error: %v", err)
 		}
 		http.Error(w, err.Error(), 500)
@@ -156,7 +155,7 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Note: resp is likely nil if err is non-nil, so don't access it until you get here.
 
-	if handler.Configuration().Debug {
+	if handler.GetConfig().Debug {
 		log.Printf("Received response status: %d", resp.Status)
 	}
 

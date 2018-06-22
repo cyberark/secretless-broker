@@ -5,7 +5,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -61,15 +62,16 @@ func (l *Listener) Listen() {
 
 		// Serve the first Handler which is attached to this listener
 		if len(l.HandlerConfigs) > 0 {
-			handler := &Handler{
-				Config:        l.HandlerConfigs[0],
-				Client:        client,
-				EventNotifier: l.EventNotifier,
+			handlerOptions := plugin_v1.HandlerOptions{
+				HandlerConfig:    l.HandlerConfigs[0],
+				ClientConnection: client,
+				EventNotifier:    l.EventNotifier,
 			}
+
+			handler := handlers.HandlerFactories["pg"](handlerOptions)
+
 			// TODO: there's a better way to do this
 			l.EventNotifier.CreateHandler(handler, client)
-
-			handler.Run()
 		} else {
 			pgError := protocol.Error{
 				Severity: protocol.ErrorSeverityFatal,

@@ -1,10 +1,14 @@
 package pg
 
 import (
+	"errors"
 	"log"
 	"net"
+	"net/http"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg/protocol"
+	"golang.org/x/crypto/ssh/agent"
+
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
@@ -34,12 +38,12 @@ type BackendConfig struct {
 //
 // Handler requires "address", "username" and "password" credentials.
 type Handler struct {
-	Backend       net.Conn
-	BackendConfig *BackendConfig
-	Config        config.Handler
-	Client        net.Conn
-	ClientOptions *ClientOptions
-	EventNotifier plugin_v1.EventNotifier
+	Backend          net.Conn
+	BackendConfig    *BackendConfig
+	HandlerConfig    config.Handler
+	ClientConnection net.Conn
+	ClientOptions    *ClientOptions
+	EventNotifier    plugin_v1.EventNotifier
 }
 
 func (h *Handler) abort(err error) {
@@ -48,7 +52,7 @@ func (h *Handler) abort(err error) {
 		Code:     protocol.ErrorCodeInternalError,
 		Message:  err.Error(),
 	}
-	h.Client.Write(pgError.GetMessage())
+	h.ClientConnection.Write(pgError.GetMessage())
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -74,12 +78,16 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
-	if h.Config.Debug {
-		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
+	if h.HandlerConfig.Debug {
+		log.Printf("Connecting client %s to backend %s", h.ClientConnection.RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.Client, h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
-	go stream(h.Backend, h.Client, func(b []byte) { h.EventNotifier.ServerData(h.Client, b) })
+	go stream(h.ClientConnection, h.Backend, func(b []byte) {
+		h.EventNotifier.ClientData(h.ClientConnection, b)
+	})
+	go stream(h.Backend, h.ClientConnection, func(b []byte) {
+		h.EventNotifier.ServerData(h.ClientConnection, b)
+	})
 }
 
 // Run processes the startup message, configures the backend connection, connects to the backend,
@@ -105,17 +113,40 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
+	return errors.New("pg listener does not use Authenticate!")
+}
+
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.Config
+	return h.HandlerConfig
 }
 
 // GetClientConnection implements secretless.Handler
 func (h *Handler) GetClientConnection() net.Conn {
-	return h.Client
+	return h.ClientConnection
 }
 
 // GetBackendConnection implements secretless.Handler
 func (h *Handler) GetBackendConnection() net.Conn {
 	return h.Backend
+}
+
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) LoadKeys(keyring agent.Agent) error {
+	return errors.New("pg handler does not use LoadKeys!")
+}
+
+// HandlerFactory instantiates a handler given HandlerOptions
+func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
+	handler := &Handler{
+		ClientConnection: options.ClientConnection,
+		EventNotifier:    options.EventNotifier,
+		HandlerConfig:    options.HandlerConfig,
+	}
+
+	handler.Run()
+
+	return handler
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
 )
 
 // newClientOptions builds a ClientOptions from an options map.
@@ -28,12 +28,12 @@ func newClientOptions(options map[string]string) (co *ClientOptions, err error) 
 
 // Startup performs the startup handshake with the client and parses the ClientOptions.
 func (h *Handler) Startup() (err error) {
-	if h.Config.Debug {
-		log.Printf("Handling connection %v", h.Client)
+	if h.GetConfig().Debug {
+		log.Printf("Handling connection %v", h.GetClientConnection())
 	}
 
 	var messageBytes []byte
-	if messageBytes, err = protocol.ReadStartupMessage(h.Client); err != nil {
+	if messageBytes, err = protocol.ReadStartupMessage(h.GetClientConnection()); err != nil {
 		return
 	}
 
@@ -43,7 +43,7 @@ func (h *Handler) Startup() (err error) {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("h.Client version : %v, (SSL mode: %v)", version, version == protocol.SSLRequestCode)
 	}
 

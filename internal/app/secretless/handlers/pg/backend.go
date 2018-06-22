@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg/protocol"
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 )
 
@@ -15,11 +15,11 @@ func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{Options: make(map[string]string)}
 
 	var values map[string][]byte
-	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
+	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("PG backend connection parameters: %s", values)
 	}
 
@@ -61,25 +61,25 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Print("Sending startup message")
 	}
 	startupMessage := protocol.CreateStartupMessage(h.BackendConfig.Username, h.ClientOptions.Database, h.BackendConfig.Options)
 
 	connection.Write(startupMessage)
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Print("Authenticating to the backend")
 	}
 	if err = protocol.HandleAuthenticationRequest(h.BackendConfig.Username, h.BackendConfig.Password, connection); err != nil {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("Successfully connected to '%s'", h.BackendConfig.Address)
 	}
 
-	if _, err = h.Client.Write(protocol.CreateAuthenticationOKMessage()); err != nil {
+	if _, err = h.ClientConnection.Write(protocol.CreateAuthenticationOKMessage()); err != nil {
 		return
 	}
 

@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -104,12 +105,14 @@ func (l *Listener) Listen() {
 			log.Panicf("No ssh handler is available")
 		}
 
-		handler := &Handler{
-			Config:        l.HandlerConfigs[0],
-			Channels:      chans,
-			EventNotifier: l.EventNotifier,
+		handlerOptions := plugin_v1.HandlerOptions{
+			HandlerConfig:    l.HandlerConfigs[0],
+			Channels:         chans,
+			ClientConnection: nil,
+			EventNotifier:    l.EventNotifier,
 		}
-		handler.Run()
+
+		handlers.HandlerFactories["ssh"](handlerOptions)
 	}
 }
 

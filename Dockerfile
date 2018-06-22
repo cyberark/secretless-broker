@@ -32,7 +32,7 @@ WORKDIR /
 RUN mkdir -p /lib64 \
     && ln -fs /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
-ENTRYPOINT [ "./secretless" ]
+ENTRYPOINT [ "/usr/local/bin/secretless" ]
 
 COPY --from=secretless-builder /go/src/github.com/conjurinc/secretless/bin/linux/amd64/secretless \
-                               /go/src/github.com/conjurinc/secretless/bin/linux/amd64/summon2 /
+                               /go/src/github.com/conjurinc/secretless/bin/linux/amd64/summon2 /usr/local/bin/

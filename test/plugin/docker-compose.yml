@@ -1,0 +1,34 @@
+version: '3.0'
+
+services:
+  echo:
+    build:
+      context: ./echo/
+
+  secretless-with-plugin:
+    build:
+      context: .
+    environment:
+      - ECHO_HOST=echo
+    command: secretless -f /secretless.yml
+    volumes:
+      - ./secretless.yml:/secretless.yml
+    depends_on:
+      - echo
+
+  test:
+    image: secretless-dev
+    environment:
+      - SECRETLESS_HOST=secretless-with-plugin
+    command: go test -v ./test/plugin
+    volumes:
+      - ./secretless.yml:/secretless.yml
+    depends_on:
+      - secretless-with-plugin
+      - echo
+
+
+  dev:
+    image: secretless-dev
+    volumes:
+      - ../../:/go/src/github.com/conjurinc/secretless

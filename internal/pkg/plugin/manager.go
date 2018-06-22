@@ -23,15 +23,13 @@ import (
 var _SupportedFileSuffixes = []string{".so"}
 
 func _IsDynamicLibrary(file os.FileInfo) bool {
-	hasSupportedSuffix := false
 	fileName := file.Name()
 	for _, suffix := range _SupportedFileSuffixes {
 		if strings.HasSuffix(fileName, suffix) {
-			hasSupportedSuffix = true
-			break
+			return true
 		}
 	}
-	return hasSupportedSuffix
+	return false
 }
 
 type PluginManager struct {
@@ -97,8 +95,15 @@ func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
 	return pluginInfo, nil
 }
 
-// _LoadManagers appends all managers from the plugin to the pluginManager
-func _LoadManagers(pluginManager *PluginManager, config config.Config,
+// HandlerConfigUpdate
+func HandlerConfigUpdate(pluginManager *PluginManager) func(config.Config) error {
+	return func(c config.Config) error {
+		pluginManager.Proxy.SoftReload(c)
+		return nil
+	}
+}
+
+func _LoadManagers(pluginManager *PluginManager, cfg config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
 
 	rawManagerPluginsFunc, err := pluginObj.Lookup("GetManagers")
@@ -115,7 +120,7 @@ func _LoadManagers(pluginManager *PluginManager, config config.Config,
 
 	for managerPluginName, managerPlugin := range managerPlugins {
 		log.Printf("%s: Appending manager '%s'...", pluginName, managerPluginName)
-		err = managerPlugin.Initialize(config)
+		err = managerPlugin.Initialize(cfg, HandlerConfigUpdate(pluginManager))
 		if err != nil {
 			log.Printf("%s: Failed to load manager '%s': %s\n", pluginName,
 				managerPluginName,
@@ -266,7 +271,7 @@ func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) er
 
 func (m *PluginManager) Initialize(c config.Config) error {
 	for _, managerPlugin := range m.Managers {
-		managerPlugin.Initialize(c)
+		managerPlugin.Initialize(c, HandlerConfigUpdate(m))
 	}
 
 	return nil

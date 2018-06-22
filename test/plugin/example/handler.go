@@ -5,8 +5,11 @@ import (
 	"errors"
 	"log"
 	"net"
+	"net/http"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -23,11 +26,11 @@ type BackendConfig struct {
 // establish the BackendConfig, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 type Handler struct {
-	Backend       net.Conn
-	BackendConfig *BackendConfig
-	Client        net.Conn
-	Config        config.Handler
-	EventNotifier plugin_v1.EventNotifier
+	Backend          net.Conn
+	BackendConfig    *BackendConfig
+	ClientConnection net.Conn
+	HandlerConfig    config.Handler
+	EventNotifier    plugin_v1.EventNotifier
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -97,12 +100,16 @@ func streamWithTransform(source, dest net.Conn, callback func([]byte)) {
 
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
-	if h.Config.Debug {
-		log.Printf("Connecting client %s to backend %s", h.Client.RemoteAddr(), h.Backend.RemoteAddr())
+	if h.GetConfig().Debug {
+		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go streamWithTransform(h.Client, h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
-	go stream(h.Backend, h.Client, func(b []byte) { h.EventNotifier.ClientData(h.Client, b) })
+	go streamWithTransform(h.GetClientConnection(), h.Backend, func(b []byte) {
+		h.EventNotifier.ClientData(h.GetClientConnection(), b)
+	})
+	go stream(h.Backend, h.GetClientConnection(), func(b []byte) {
+		h.EventNotifier.ClientData(h.GetClientConnection(), b)
+	})
 }
 
 // Run configures the backend connection info, connects to the backend to
@@ -133,15 +140,38 @@ func (h *Handler) Run() {
 
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.Config
+	return h.HandlerConfig
+}
+
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
+	return errors.New("example listener does not use Authenticate!")
 }
 
 // GetClientConnection implements secretless.Handler
 func (h *Handler) GetClientConnection() net.Conn {
-	return nil
+	return h.ClientConnection
 }
 
 // GetBackendConnection implements secretless.Handler
 func (h *Handler) GetBackendConnection() net.Conn {
 	return nil
+}
+
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) LoadKeys(keyring agent.Agent) error {
+	return errors.New("example handler does not use LoadKeys!")
+}
+
+// HandlerFactory instantiates a handler given HandlerOptions
+func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
+	handler := &Handler{
+		ClientConnection: options.ClientConnection,
+		EventNotifier:    options.EventNotifier,
+		HandlerConfig:    options.HandlerConfig,
+	}
+
+	handler.Run()
+
+	return handler
 }

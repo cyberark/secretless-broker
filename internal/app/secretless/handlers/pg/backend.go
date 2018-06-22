@@ -79,7 +79,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		log.Printf("Successfully connected to '%s'", h.BackendConfig.Address)
 	}
 
-	if _, err = h.ClientConnection.Write(protocol.CreateAuthenticationOKMessage()); err != nil {
+	if _, err = h.GetClientConnection().Write(protocol.CreateAuthenticationOKMessage()); err != nil {
 		return
 	}
 

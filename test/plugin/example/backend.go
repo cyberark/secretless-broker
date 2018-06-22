@@ -9,7 +9,7 @@ import (
 )
 
 func (h *Handler) abort(err error) {
-	h.Client.Write([]byte("Error"))
+	h.GetClientConnection().Write([]byte("Error"))
 }
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
@@ -18,12 +18,12 @@ func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{}
 
 	var values map[string][]byte
-	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
+	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
 		log.Fatalf("FATAL! Could not resolve credentials!")
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("Example backend connection parameters: %s", values)
 	}
 
@@ -56,7 +56,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("Successfully connected to '%s:%d'", h.BackendConfig.Host, h.BackendConfig.Port)
 	}
 

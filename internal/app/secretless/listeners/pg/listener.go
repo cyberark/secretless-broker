@@ -5,8 +5,9 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
+	// TODO: Ideally this protocol-specific import shouldn't be needed
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
+
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -16,9 +17,10 @@ import (
 // Listener listens for and handles new connections.
 type Listener struct {
 	Config         config.Listener
+	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
-	EventNotifier  plugin_v1.EventNotifier
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -68,7 +70,7 @@ func (l *Listener) Listen() {
 				EventNotifier:    l.EventNotifier,
 			}
 
-			handler := handlers.HandlerFactories["pg"](handlerOptions)
+			handler := l.RunHandlerFunc("pg", handlerOptions)
 
 			// TODO: there's a better way to do this
 			l.EventNotifier.CreateHandler(handler, client)
@@ -111,8 +113,9 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,
+		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
-		EventNotifier:  options.EventNotifier,
+		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

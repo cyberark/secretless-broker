@@ -8,7 +8,6 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -18,9 +17,10 @@ import (
 // Listener accepts ssh-agent connections and delegates them to the Handler.
 type Listener struct {
 	Config         config.Listener
+	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
-	EventNotifier  plugin_v1.EventNotifier
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -62,7 +62,7 @@ func (l *Listener) Listen() {
 		EventNotifier: l.EventNotifier,
 	}
 
-	handler := handlers.HandlerFactories["sshagent"](handlerOptions)
+	handler := l.RunHandlerFunc("sshagent", handlerOptions)
 	if err := handler.LoadKeys(keyring); err != nil {
 		log.Printf("Failed to load ssh-agent handler keys: ", err)
 		return
@@ -109,8 +109,9 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,
+		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
-		EventNotifier:  options.EventNotifier,
+		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

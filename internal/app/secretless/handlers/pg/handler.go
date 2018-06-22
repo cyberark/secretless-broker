@@ -52,7 +52,7 @@ func (h *Handler) abort(err error) {
 		Code:     protocol.ErrorCodeInternalError,
 		Message:  err.Error(),
 	}
-	h.ClientConnection.Write(pgError.GetMessage())
+	h.GetClientConnection().Write(pgError.GetMessage())
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -78,15 +78,15 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
-	if h.HandlerConfig.Debug {
-		log.Printf("Connecting client %s to backend %s", h.ClientConnection.RemoteAddr(), h.Backend.RemoteAddr())
+	if h.GetConfig().Debug {
+		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.ClientConnection, h.Backend, func(b []byte) {
+	go stream(h.GetClientConnection(), h.Backend, func(b []byte) {
 		h.EventNotifier.ClientData(h.ClientConnection, b)
 	})
-	go stream(h.Backend, h.ClientConnection, func(b []byte) {
-		h.EventNotifier.ServerData(h.ClientConnection, b)
+	go stream(h.Backend, h.GetClientConnection(), func(b []byte) {
+		h.EventNotifier.ServerData(h.GetClientConnection(), b)
 	})
 }
 

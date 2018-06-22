@@ -104,7 +104,7 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	serviceName := matches[2]
 
 	signer := v4.NewSigner(creds)
-	if h.HandlerConfig.Debug {
+	if h.GetConfig().Debug {
 		signer.Debug = aws.LogDebugWithSigning
 		signer.Logger = aws.NewDefaultLogger()
 	}
@@ -135,7 +135,7 @@ func (h *AWSHandler) GetBackendConnection() net.Conn {
 }
 
 // TODO: Remove this when interface is cleaned up
-func (h *AWSHandler) LoadKeys(keyring agent.Agent) (err error) {
+func (h *AWSHandler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("http/aws handler does not use LoadKeys!")
 }
 

@@ -22,9 +22,9 @@ type ServerConfig struct {
 }
 
 type Handler struct {
-	HandlerConfig config.Handler
 	Channels      <-chan ssh.NewChannel
 	EventNotifier plugin_v1.EventNotifier
+	HandlerConfig config.Handler
 }
 
 func (h *Handler) serverConfig() (config ServerConfig, err error) {

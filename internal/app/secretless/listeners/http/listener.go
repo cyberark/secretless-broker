@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers"
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -20,9 +19,10 @@ import (
 
 type Listener struct {
 	Config         config.Listener
+	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
-	EventNotifier  plugin_v1.EventNotifier
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 	Transport      *http.Transport
 }
 
@@ -72,27 +72,19 @@ func copyHeaders(dst, src http.Header) {
 }
 
 func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
-	for _, handler := range l.HandlerConfigs {
-		for _, pattern := range handler.Patterns {
+	for _, handlerConfig := range l.HandlerConfigs {
+		for _, pattern := range handlerConfig.Patterns {
 			log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
 			if pattern.MatchString(r.URL.String()) {
-				if handler.Debug {
-					log.Printf("Using handler '%s' for request %s", handler.Name, r.URL.String())
+				if handlerConfig.Debug {
+					log.Printf("Using handler '%s' for request %s", handlerConfig.Name, r.URL.String())
 				}
 
 				handlerOptions := plugin_v1.HandlerOptions{
-					HandlerConfig: handler,
+					HandlerConfig: handlerConfig,
 				}
 
-				// Construct the return object
-				switch handler.Type {
-				case "aws":
-					return handlers.HandlerFactories["http/aws"](handlerOptions)
-				case "conjur":
-					return handlers.HandlerFactories["http/conjur"](handlerOptions)
-				default:
-					log.Panicf("Service type '%s' of handler '%s' is not recognized", handler.Type, handler.Name)
-				}
+				return l.RunHandlerFunc("http/"+handlerConfig.Type, handlerOptions)
 			}
 		}
 	}
@@ -215,8 +207,9 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,
+		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
-		EventNotifier:  options.EventNotifier,
+		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

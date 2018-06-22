@@ -19,9 +19,8 @@ import (
 
 // Handler implements an ssh-agent which holds a single key.
 type Handler struct {
-	HandlerConfig config.Handler
-	Connection    net.Conn
 	EventNotifier plugin_v1.EventNotifier
+	HandlerConfig config.Handler
 }
 
 func parseKey(pemStr []byte) (rawkey interface{}, err error) {
@@ -112,7 +111,7 @@ func (h *Handler) GetConfig() config.Handler {
 
 // GetClientConnection implements secretless.Handler
 func (h *Handler) GetClientConnection() net.Conn {
-	return h.Connection
+	return nil
 }
 
 // GetBackendConnection implements secretless.Handler

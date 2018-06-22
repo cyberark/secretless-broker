@@ -36,7 +36,7 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 
 type PluginManager struct {
 	ListenerFactories map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
-	Handlers          []plugin_v1.Handler
+	HandlerFactories  map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
 	Managers          map[string]plugin_v1.ConnectionManager
 	Proxy             secretless.Proxy
 }
@@ -48,7 +48,7 @@ func GetManager() *PluginManager {
 	_once.Do(func() {
 		_singleton = &PluginManager{
 			ListenerFactories: make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
-			Handlers:          make([]plugin_v1.Handler, 0),
+			HandlerFactories:  make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
 			Managers:          make(map[string]plugin_v1.ConnectionManager),
 		}
 	})
@@ -83,7 +83,7 @@ func (m *PluginManager) RegisterSignalHandlers() {
 // the interface API version that plugin is advertising
 // TODO: Support a list of supported versions
 func _IsSupportedPluginApiVersion(version string) bool {
-	return version == "0.0.4"
+	return version == "0.0.5"
 }
 
 // LoadPlugin tries to load all internal plugin info strings
@@ -122,16 +122,30 @@ func _LoadManagers(pluginManager *PluginManager, config config.Config,
 	return nil
 }
 
-// _LoadHandlers appends all handlers from the plugin to the pluginManager
-func _LoadHandlers(pluginManager *PluginManager, config config.Config,
+// _LoadHandlersFromPlugin appends all handlers from the plugin to the pluginManager
+func _LoadHandlersFromPlugin(pluginManager *PluginManager, config config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
 
-	log.Println("WARN: Loading of handlers from a plugin is a NOOP at this time!")
+	rawHandlerPluginsFunc, err := pluginObj.Lookup("GetHandlers")
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle different interface versions
+	handlerPluginsFunc, ok := rawHandlerPluginsFunc.(func() map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler)
+	if !ok {
+		return errors.New("ERROR! Could not cast GetcwHandlers to proper type!")
+	}
+	handlerPlugins := handlerPluginsFunc()
+	for handlerId, handlerFactory := range handlerPlugins {
+		pluginManager.HandlerFactories[handlerId] = handlerFactory
+		log.Printf("Handler factory '%s' added from plugin %s", handlerId, pluginName)
+	}
 
 	return nil
 }
 
-// _LoadListeners appends all listeners from the plugin to the pluginManager
+// _LoadListenersFromPlugin appends all listeners from the plugin to the pluginManager
 func _LoadListenersFromPlugin(pluginManager *PluginManager, config config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
 
@@ -154,14 +168,33 @@ func _LoadListenersFromPlugin(pluginManager *PluginManager, config config.Config
 	return nil
 }
 
+func (pluginManager *PluginManager) _RunHandler(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler {
+	// Ensure that we have this handler
+	if _, ok := pluginManager.HandlerFactories[id]; !ok {
+		log.Panicf("Error! Unrecognized handler id '%s'", id)
+	}
+
+	return pluginManager.HandlerFactories[id](options)
+}
+
+func (pluginManager *PluginManager) _RunListener(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener {
+	// Ensure that we have this listener
+	if _, ok := pluginManager.ListenerFactories[id]; !ok {
+		log.Panicf("Error! Unrecognized listener id '%s'")
+	}
+
+	return pluginManager.ListenerFactories[id](options)
+}
+
 // Run is the main wait loop once we load all the plugins
 func (pluginManager *PluginManager) Run(configuration config.Config) error {
 	pluginManager.InitializeConnectionManagers(configuration)
 
 	pluginManager.Proxy = secretless.Proxy{
-		Config:            configuration,
-		ListenerFactories: pluginManager.ListenerFactories,
-		EventNotifier:     pluginManager,
+		Config:          configuration,
+		EventNotifier:   pluginManager,
+		RunHandlerFunc:  pluginManager._RunHandler,
+		RunListenerFunc: pluginManager._RunListener,
 	}
 
 	pluginManager.Proxy.Run()
@@ -178,12 +211,15 @@ func (pluginManager *PluginManager) LoadInternalPlugins(config config.Config) er
 		log.Printf("Manager factory '%s' added.", managerId)
 	}
 
+	for handlerId, handlerFactory := range secretless.InternalHandlers {
+		pluginManager.HandlerFactories[handlerId] = handlerFactory
+		log.Printf("Handler factory '%s' added.", handlerId)
+	}
+
 	for listenerId, listenerFactory := range secretless.InternalListeners {
 		pluginManager.ListenerFactories[listenerId] = listenerFactory
 		log.Printf("Listener factory '%s' added.", listenerId)
 	}
-
-	// TODO: Add ability to load internal handlers (if supported)
 
 	log.Println("Completed loading internal plugins.")
 	return nil
@@ -245,8 +281,7 @@ func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) er
 		}
 
 		// Load handlers
-		// TODO: Actually load handlers
-		if err := _LoadHandlers(m, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadHandlersFromPlugin(m, config, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}

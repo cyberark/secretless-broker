@@ -1,0 +1,21 @@
+<div>
+	<ul class="sidebar-nav list-unstyled">
+	  {% for item in site.data.navigation.main %}
+	      {% if item.items[0] %}
+	        <ul>
+	          {% for entry in item.items %}
+	              <li class="parent-item"><a href="{{ entry.url }}">{{ entry.page }}</a>
+	                {% if entry.subitems[0] %}
+	                  <ul>
+	                  {% for subentry in entry.subitems %}
+	                      <li class="sub-item"><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
+	                  {% endfor %}
+	                  </ul>
+	                {% endif %}
+	              </li>
+	          {% endfor %}
+	        </ul>
+	      {% endif %}
+	    {% endfor %}
+	</ul>
+</div>

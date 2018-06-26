@@ -27,10 +27,22 @@ RUN go build -o dist/$GOOS/$GOARCH/secretless ./cmd/secretless && \
 FROM alpine:3.7 as secretless
 MAINTAINER CyberArk Software, Inc.
 
-WORKDIR /
+RUN mkdir -p /lib64 && \
+    ln -fs /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2 && \
+    # Add Limited user
+    apk update && \
+    apk add shadow && \
+    groupadd -r secretless && \
+    useradd -c "secretless runner account" \
+            -g secretless \
+            -m \
+            -r \
+            secretless && \
+    # Ensure plugin dir is owned by secretless user
+    mkdir -p /usr/local/lib/secretless && \
+    chown secretless:secretless /usr/local/lib/secretless
 
-RUN mkdir -p /lib64 \
-    && ln -fs /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+USER secretless
 
 ENTRYPOINT [ "/usr/local/bin/secretless" ]
 

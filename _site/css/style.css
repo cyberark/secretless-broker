@@ -74,16 +74,33 @@ p{
     margin-right: auto;
     width: 80%;
 }
+.about{
+	width: 10px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.guides{
+		width: 10px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.references{
+	width: 10px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
 .introduction{
 	margin-left: auto;
     margin-right: auto;
     width: 80%;
 
 }
-.subcard{
-	padding-top: 50px;
+.card{
+	padding-top: 100px;
 }
-
 .docs-heading{
 	color: #7b8A8E;
 	font-size: 2em;

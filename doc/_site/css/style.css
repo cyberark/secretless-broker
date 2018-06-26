@@ -1,0 +1,107 @@
+
+p{
+	font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+}
+.introduction-heading {
+	font-size: 1.5em;
+
+/*	background: black;
+	color: #FFFFFF;
+    width: 20%*/
+
+}
+
+.navbar-list > ul{
+	display: flex;
+	list-style: none;
+	justify-content: flex-end;
+	letter-spacing: 2px;
+}
+.navbar-list > ul > li{
+	margin: 10px;
+}
+.button{
+	margin: 30px;
+	font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    padding: 10px 50px 10px 50px;
+    background: #FFFFFF;
+    border: 1px solid #7b8A8E;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    color: #7b8A8E;
+    display: inline-block;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.4s;
+}
+.button:hover{
+	text-decoration: none;
+}
+.btnrow{
+	text-align: center;
+}
+.jumbotron-img{
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
+.introduction-info{
+
+}
+
+.center-block{
+    float: none;
+    display: block;
+    margin: 0 auto;
+    /* margin-left: auto; margin-right: auto; */
+}
+.about-subitem{
+	padding: 5px 5px 5px 5px;
+}
+.about-subitem .inner{
+	background-color: #eee;
+	padding: 10px;
+	border-bottom: 1px solid #7b8A8E;
+	border-right: 1px solid #7b8A8E;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+}
+.docs{
+	width: 10px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.about{
+	width: 10px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.guides{
+		width: 10px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.references{
+	width: 10px;
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.introduction{
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+
+}
+.card{
+	padding-top: 100px;
+}
+.docs-heading{
+	color: #7b8A8E;
+	font-size: 2em;
+}

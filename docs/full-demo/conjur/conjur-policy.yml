@@ -1,0 +1,51 @@
+- !policy
+  id: db
+  body:
+  - !variable password
+  - !variable ssh_key
+
+- !policy
+  id: ansible
+  body:
+  - !layer
+  - !host
+  - !grant
+    role: !layer
+    member: !host
+
+- !policy
+  id: myapp
+  body:
+  - !layer
+  - !host
+  - !grant
+    role: !layer
+    member: !host
+
+- !policy
+  id: myapp_tls
+  body:
+  - !variable ssl_key
+
+  - !layer
+  - !host
+  - !grant
+    role: !layer
+    member: !host
+
+- !permit
+  role: !layer ansible
+  privileges: [ read, execute ]
+  resources:
+    - !variable db/ssh_key
+    - !variable db/password
+
+- !permit
+  role: !layer myapp
+  privileges: [ read, execute ]
+  resource: !variable db/password
+
+- !permit
+  role: !layer myapp_tls
+  privileges: [ read, execute ]
+  resource: !variable myapp_tls/ssl_key

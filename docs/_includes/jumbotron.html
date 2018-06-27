@@ -1,0 +1,21 @@
+<div class="jumbotron">
+	<div class="container">
+		<!-- if calling page is index, navbar should be included -->
+		{% if page.id == "index" %}
+			{% include top_nav.html %}
+		{% endif %}
+		<div class="row">
+			<div class="col-md-2">
+			</div>
+			<div class="col-md-8 center-block">
+				<img class="jumbotron-img" src="/img/cybr_icon_sq.svg">
+				<div class="row btnrow">
+					<a class="button">Get Started</a>
+					<a class="button">Download</a>
+				</div>
+			</div>
+			<div class="col-md-2">
+			</div>
+		</div>
+	</div>
+</div>

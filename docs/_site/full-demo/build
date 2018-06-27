@@ -1,0 +1,10 @@
+#!/bin/bash -ex
+
+modules=( "plaintext"
+          "conjur" )
+
+for directory in ${modules[@]}; do
+  pushd $directory &>/dev/null
+    docker-compose build
+  popd &>/dev/null
+done

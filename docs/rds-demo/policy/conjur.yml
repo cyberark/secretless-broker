@@ -1,0 +1,29 @@
+- !user alice
+
+- !host myapp
+
+- !group ops
+
+- !grant
+  role: !group ops
+  member: !user alice
+
+- !policy
+  id: pg
+  owner: !group ops
+  body:
+  - &pg_variables
+    - !variable url
+    - !variable username
+    - !variable password
+
+  - !layer
+
+  - !permit
+    role: !layer
+    privilege: [ read, execute ]
+    resources: *pg_variables
+
+  - !grant
+    role: !layer
+    member: !host /myapp

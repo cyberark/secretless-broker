@@ -1,0 +1,42 @@
+version: '3'
+services:
+  pg:
+    build:
+      context: ../src/pg
+
+  ansible:
+    build:
+      context: ../src/ansible
+    volumes:
+      - ../secrets/id_insecure:/root/id_insecure:ro
+    depends_on:
+      - pg
+
+  myapp:
+    build:
+      context: ../src/myapp
+    ports:
+      - 80
+    environment:
+      DB_HOST:
+      DB_PASSWORD:
+
+  client:
+    build:
+      context: ../src/client
+
+  myapp_tls:
+    build:
+      context: ../src/proxy_tls
+    command: "myapp"
+    environment:
+      SSL_CERT_FILE: ./proxy_tls.pem
+      SSL_KEY_FILE: /proxy_tls.key
+    volumes:
+      - ../secrets/proxy_tls.key:/proxy_tls.key:ro
+    depends_on:
+      - myapp
+
+volumes:
+  pg_socket:
+  ssh_agent:

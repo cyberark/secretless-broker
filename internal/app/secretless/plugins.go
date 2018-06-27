@@ -8,4 +8,4 @@ import (
 
 var InternalHandlers = handlers.HandlerFactories
 var InternalListeners = listeners.ListenerFactories
-var InternalManagers = map[string]func() plugin_v1.ConnectionManager{}
+var InternalConnectionManagers = map[string]func() plugin_v1.ConnectionManager{}

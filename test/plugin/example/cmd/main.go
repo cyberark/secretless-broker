@@ -27,7 +27,7 @@ func GetHandlers() map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler {
 	}
 }
 
-func GetManagers() map[string]func() plugin_v1.ConnectionManager {
+func GetConnectionManagers() map[string]func() plugin_v1.ConnectionManager {
 	return map[string]func() plugin_v1.ConnectionManager{
 		"example-plugin-manager": example.ManagerFactory,
 	}

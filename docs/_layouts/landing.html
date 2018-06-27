@@ -12,19 +12,22 @@
 		
 		<div class="container">
 			<div class="card introduction" id="intro">
-				<p class="card-heading">Introduction to Secretless Code</p>
-				<div class="col-md-12">
+				
+				<div class="row sub-card">
+					<p class="card-heading">Introduction to Secretless Code</p>
 					<p>Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service.</p>
 					
 				</div>
-				<p class="card-heading">Why Secretless?</p>
-				<div class="col-md-12">
+				
+				<div class="row sub-card">
+					<p class="card-heading">Why Secretless?</p>
 					<p>Exposing plaintext secrets to clients (both users and machines) is hazardous from both a security and operational standpoint. First, by providing a secret to a client, the client becomes part of the threat surface. If the client is compromised, then the attacker has a good chance of obtaining the plaintext secrets and being able to establish direct connections to backend resources. To mitigate the severity of this problem, important secrets are (or should be) rotated (changed) on a regular basis. However, rotation introduces the operational problem of keeping applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords.</p>
 					
 				</div>
 
-				<p class="card-heading">How it Works</p>
-				<div class="col-md-12">
+				
+				<div class="row sub-card">
+					<p class="card-heading">How it Works</p>
 					<p>Our open-source Secretless Solution removes the direct contact between client and resource.</p>
 					<ul>
 						<li>The client requests a connection via the Connection Broker</li>
@@ -80,7 +83,7 @@
 					
 					<p> -->
 					<p class="card-documentation-heading">Building Secretless</p>
-						<ul>
+						<!-- <ul>
 							<p class="docs-subheading">Prerequisites</p>
 							<li>You will need <b>Docker</b> to run through the examples</li>
 							<li>Go</li>
@@ -118,7 +121,7 @@
 								<li>Route client connections on that socket to the pg handler</li>
 								<li>The pg handler should obtain the database address, username and password from environment variables</li>
 							</ul>
-
+ -->
 				</div>
 			</div>
 		</div>

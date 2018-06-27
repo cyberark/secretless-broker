@@ -1,36 +1,52 @@
 
 p{
-	font-family: 'Open Sans', sans-serif;
+	/*font-family: 'Open Sans', sans-serif;*/
+	font-family: "Source Sans Pro",sans-serif;
     font-size: 16px;
+    line-height: 1.5;
 }
 li{
-	font-family: 'Open Sans', sans-serif;
+	font-family: "Source Sans Pro",sans-serif;
     font-size: 16px;
+    line-height: 1.5;
     margin-left: 25px;
 }
 code{
 	margin-left: 25px;
 }
-.introduction-heading {
-	font-size: 1.5em;
-
-/*	background: black;
-	color: #FFFFFF;
-    width: 20%*/
+.navbar-list li{
+	font-size:14px;
+}
+.navbar-list a{
+	color: black;
+}
+.navbar-list a:hover{
+	text-decoration: none;
 
 }
-ul{
-
+.introduction-heading {
+	font-size: 1.5em;
+}
+.center-block{
+	top: 70px;
+	background-color: #fff;
+}
+#frame{
+	background-color: transparent;
 }
 .docs-subheading{
 	font-size: 18px;
 }
 .card-heading{
-	font-size:20px;
 	font-weight: bold;
-	/*font-family:'Encode Sans Condensed';*/
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 24px;
+	letter-spacing: 1px;
+	margin-left: 30px;
 }
-
+.sub-card{
+	margin-top:20px;
+}
 .navbar-list > ul{
 	display: flex;
 	list-style: none;
@@ -39,6 +55,9 @@ ul{
 }
 .navbar-list > ul > li{
 	margin: 10px;
+}
+.navbar .default{
+	margin-bottom: 0;
 }
 .button{
 	margin: 30px;
@@ -61,21 +80,17 @@ ul{
 	text-align: center;
 }
 .jumbotron-img{
+	width: 20%;
 	display: block;
     margin-left: auto;
-    margin-right: auto;
-    width: 50%;
+    margin-right: auto;   
 }
 
-.introduction-info{
-
-}
 
 .center-block{
     float: none;
     display: block;
     margin: 0 auto;
-    /* margin-left: auto; margin-right: auto; */
 }
 .about-subitem{
 	padding: 5px 5px 5px 5px;
@@ -121,7 +136,6 @@ ul{
 	margin-left: auto;
     margin-right: auto;
     width: 80%;
-
 }
 .card{
 	padding-top: 100px;

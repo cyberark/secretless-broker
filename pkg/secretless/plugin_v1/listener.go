@@ -17,11 +17,13 @@ type ListenerOptions struct {
 // Listener is the interface which accepts client connections and passes them
 // to a handler
 type Listener interface {
-	Validate() error
 	GetConfig() config.Listener
-	GetNotifier() EventNotifier
-	GetListener() net.Listener
-	GetHandlers() []Handler
 	GetConnections() []net.Conn
+	GetHandlers() []Handler
+	GetListener() net.Listener
+	GetName() string
+	GetNotifier() EventNotifier
 	Listen()
+	Validate() error
+	Shutdown() error
 }

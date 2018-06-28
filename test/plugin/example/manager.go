@@ -14,7 +14,7 @@ type ExampleManager struct {
 }
 
 // Initialize is called before proxy initialization
-func (manager *ExampleManager) Initialize(c config.Config) error {
+func (manager *ExampleManager) Initialize(c config.Config, configChangedFunc func(config.Config) error) error {
 	log.Println("Initialized manager event...")
 	return nil
 }

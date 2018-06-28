@@ -85,8 +85,54 @@ code{
     margin-left: auto;
     margin-right: auto;   
 }
+#jumbotron-subtext {
+	font-size: 16px;
+	text-align: center;
+	font-family: 'Open Sans', sans-serif;
+	margin-top:20px;
+}
 
+a {
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
 
+}
+hr{
+	position: relative;
+}
+.down {
+    background-color: #4CAF50;
+    color: white;
+    width: 35px;
+    height: 35px;
+    left: 50%;
+    top:50%;
+    /*bottom: -100px;*/
+    padding: 0;
+    position: absolute;
+    transform: translateX(-30%);
+}
+
+.round {
+    border-radius: 50%;
+}
+/*.test{
+	margin-left: 10px;
+}*/
+.inner p {
+	margin-left: 20px;
+}
+.inner-text{
+	margin-left: 0;
+}
+.fa{
+	font-size: 20px;
+	margin-top: 1px;
+}
+.introduction-img{
+	width: 450px;
+}
 .center-block{
     float: none;
     display: block;
@@ -96,11 +142,14 @@ code{
 	padding: 5px 5px 5px 5px;
 }
 .about-subitem .inner{
-	background-color: #eee;
-	padding: 10px;
-	border-bottom: 1px solid #7b8A8E;
-	border-right: 1px solid #7b8A8E;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    min-height: 200px;
+    padding: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    border: 1px solid #e2e2e2;
+    margin: 0 0 30px;
+}
+.in-line-frame{
+	display: flex;
 }
 .docs{
 	width: 10px;

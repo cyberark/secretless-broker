@@ -3,9 +3,11 @@ package sshagent
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"strconv"
 
 	"golang.org/x/crypto/ssh/agent"
@@ -17,9 +19,8 @@ import (
 
 // Handler implements an ssh-agent which holds a single key.
 type Handler struct {
-	Config        config.Handler
-	Connection    net.Conn
 	EventNotifier plugin_v1.EventNotifier
+	HandlerConfig config.Handler
 }
 
 func parseKey(pemStr []byte) (rawkey interface{}, err error) {
@@ -47,11 +48,11 @@ func parseKey(pemStr []byte) (rawkey interface{}, err error) {
 func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	var values map[string][]byte
 
-	if values, err = variable.Resolve(h.Config.Credentials, h.EventNotifier); err != nil {
+	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
 		return
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("ssh-agent credential values : %s", values)
 	}
 
@@ -90,7 +91,7 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 		}
 	}
 
-	if h.Config.Debug {
+	if h.GetConfig().Debug {
 		log.Printf("ssh-agent adding key : %s", key)
 	}
 
@@ -98,17 +99,30 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	return
 }
 
+// TODO: Remove this when interface is cleaned up
+func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
+	return errors.New("pg listener does not use Authenticate!")
+}
+
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.Config
+	return h.HandlerConfig
 }
 
 // GetClientConnection implements secretless.Handler
 func (h *Handler) GetClientConnection() net.Conn {
-	return h.Connection
+	return nil
 }
 
 // GetBackendConnection implements secretless.Handler
 func (h *Handler) GetBackendConnection() net.Conn {
 	return nil
+}
+
+// HandlerFactory instantiates a handler given HandlerOptions
+func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
+	return &Handler{
+		EventNotifier: options.EventNotifier,
+		HandlerConfig: options.HandlerConfig,
+	}
 }

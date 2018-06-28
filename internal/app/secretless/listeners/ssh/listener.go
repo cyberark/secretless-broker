@@ -1,9 +1,13 @@
-package example
+package ssh
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net"
 	"strconv"
+
+	"golang.org/x/crypto/ssh"
 
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
@@ -11,7 +15,11 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
-// Listener listens for and handles new connections.
+// Listener accepts SSH connections and MITMs them using a Handler.
+//
+// NOTE: This MITM approach to SSH is experimental. The ssh-agent approach is
+// better validated and probably better all-around.
+
 type Listener struct {
 	Config         config.Listener
 	EventNotifier  plugin_v1.EventNotifier
@@ -29,11 +37,11 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 	hs := value.([]config.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
-		if !h.HasCredential("host") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'host'")
+		if !h.HasCredential("address") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'address'")
 		}
-		if !h.HasCredential("port") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'port'")
+		if !h.HasCredential("privateKey") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'privateKey'")
 		}
 	}
 	return errors.Filter()
@@ -47,27 +55,64 @@ func (l Listener) Validate() error {
 	)
 }
 
-// Listen listens on the port or socket and attaches new connections to the handler.
+// Listen accepts SSH connections and MITMs them using a Handler.
 func (l *Listener) Listen() {
+	serverConfig := &ssh.ServerConfig{
+		PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
+			return nil, nil
+		},
+		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
+			return nil, fmt.Errorf("Public key authentication is not supported")
+		},
+	}
+
+	privateBytes, err := ioutil.ReadFile("./tmp/id_rsa")
+	if err != nil {
+		log.Fatal("Failed to load private key: ", err)
+	}
+
+	private, err := ssh.ParsePrivateKey(privateBytes)
+	if err != nil {
+		log.Fatal("Failed to parse private key: ", err)
+	}
+
+	serverConfig.AddHostKey(private)
+
 	for {
-		var client net.Conn
-		var err error
-		if client, err = util.Accept(l); err != nil {
-			continue
+		nConn, err := util.Accept(l)
+		if err != nil {
+			log.Printf("Failed to accept incoming connection: ", err)
+			return
 		}
+
+		// https://godoc.org/golang.org/x/crypto/ssh#NewServerConn
+		conn, chans, reqs, err := ssh.NewServerConn(nConn, serverConfig)
+		if err != nil {
+			log.Printf("Failed to handshake: %s", err)
+			return
+		}
+		log.Printf("New connection accepted for user %s from %s", conn.User(), conn.RemoteAddr())
+
+		// The incoming Request channel must be serviced.
+		go func() {
+			for req := range reqs {
+				log.Printf("Global SSH request : %s", req)
+			}
+		}()
 
 		// Serve the first Handler which is attached to this listener
-		if len(l.HandlerConfigs) > 0 {
-			options := plugin_v1.HandlerOptions{
-				ClientConnection: client,
-				HandlerConfig:    l.HandlerConfigs[0],
-				EventNotifier:    l.EventNotifier,
-			}
-
-			l.RunHandlerFunc("example-handler", options)
-		} else {
-			client.Write([]byte("Error - no handlers were defined!"))
+		if len(l.HandlerConfigs) == 0 {
+			log.Panicf("No ssh handler is available")
 		}
+
+		handlerOptions := plugin_v1.HandlerOptions{
+			HandlerConfig:    l.HandlerConfigs[0],
+			Channels:         chans,
+			ClientConnection: nil,
+			EventNotifier:    l.EventNotifier,
+		}
+
+		l.RunHandlerFunc("ssh", handlerOptions)
 	}
 }
 

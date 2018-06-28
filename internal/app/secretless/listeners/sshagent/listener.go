@@ -1,13 +1,12 @@
-package ssh
+package sshagent
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"strconv"
 
-	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
@@ -15,16 +14,13 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
-// Listener accepts SSH connections and MITMs them using a Handler.
-//
-// NOTE: This MITM approach to SSH is experimental. The ssh-agent approach is
-// better validated and probably better all-around.
-
+// Listener accepts ssh-agent connections and delegates them to the Handler.
 type Listener struct {
 	Config         config.Listener
+	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
-	EventNotifier  plugin_v1.EventNotifier
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -36,11 +32,8 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 	hs := value.([]config.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
-		if !h.HasCredential("address") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'address'")
-		}
-		if !h.HasCredential("privateKey") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'privateKey'")
+		if !h.HasCredential("rsa") && !h.HasCredential("ecdsa") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'rsa' or 'ecdsa'")
 		}
 	}
 	return errors.Filter()
@@ -54,28 +47,26 @@ func (l Listener) Validate() error {
 	)
 }
 
-// Listen accepts SSH connections and MITMs them using a Handler.
+// Listen listens on the ssh-agent socket and attaches new connections to the handler.
 func (l *Listener) Listen() {
-	serverConfig := &ssh.ServerConfig{
-		PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
-			return nil, nil
-		},
-		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
-			return nil, fmt.Errorf("Public key authentication is not supported")
-		},
+	// Serve the first Handler which is attached to this listener
+	if len(l.HandlerConfigs) == 0 {
+		log.Panicf("No ssh-agent handler is available")
 	}
 
-	privateBytes, err := ioutil.ReadFile("./tmp/id_rsa")
-	if err != nil {
-		log.Fatal("Failed to load private key: ", err)
+	selectedHandler := l.HandlerConfigs[0]
+	keyring := agent.NewKeyring()
+
+	handlerOptions := plugin_v1.HandlerOptions{
+		HandlerConfig: selectedHandler,
+		EventNotifier: l.EventNotifier,
 	}
 
-	private, err := ssh.ParsePrivateKey(privateBytes)
-	if err != nil {
-		log.Fatal("Failed to parse private key: ", err)
+	handler := l.RunHandlerFunc("sshagent", handlerOptions)
+	if err := handler.LoadKeys(keyring); err != nil {
+		log.Printf("Failed to load ssh-agent handler keys: ", err)
+		return
 	}
-
-	serverConfig.AddHostKey(private)
 
 	for {
 		nConn, err := util.Accept(l)
@@ -84,32 +75,9 @@ func (l *Listener) Listen() {
 			return
 		}
 
-		// https://godoc.org/golang.org/x/crypto/ssh#NewServerConn
-		conn, chans, reqs, err := ssh.NewServerConn(nConn, serverConfig)
-		if err != nil {
-			log.Printf("Failed to handshake: %s", err)
-			return
+		if err := agent.ServeAgent(keyring, nConn); err != nil {
+			log.Printf("Error serving agent : %s", err)
 		}
-		log.Printf("New connection accepted for user %s from %s", conn.User(), conn.RemoteAddr())
-
-		// The incoming Request channel must be serviced.
-		go func() {
-			for req := range reqs {
-				log.Printf("Global SSH request : %s", req)
-			}
-		}()
-
-		// Serve the first Handler which is attached to this listener
-		if len(l.HandlerConfigs) == 0 {
-			log.Panicf("No ssh handler is available")
-		}
-
-		handler := &Handler{
-			Config:        l.HandlerConfigs[0],
-			Channels:      chans,
-			EventNotifier: l.EventNotifier,
-		}
-		handler.Run()
 	}
 }
 
@@ -141,8 +109,9 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,
+		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
-		EventNotifier:  options.EventNotifier,
+		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

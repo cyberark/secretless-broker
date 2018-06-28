@@ -14,9 +14,10 @@ import (
 
 // Proxy is the main struct of Secretless.
 type Proxy struct {
-	Config            config.Config
-	EventNotifier     plugin_v1.EventNotifier
-	ListenerFactories map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
+	Config          config.Config
+	EventNotifier   plugin_v1.EventNotifier
+	RunListenerFunc func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
+	RunHandlerFunc  func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // Listen runs the listen loop for a specific Listener.
@@ -57,15 +58,10 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 		ListenerConfig: listenerConfig,
 		HandlerConfigs: listenerConfig.SelectHandlers(p.Config.Handlers),
 		NetListener:    netListener,
+		RunHandlerFunc: p.RunHandlerFunc,
 	}
 
-	// Ensure that we have this listener
-	if _, ok := p.ListenerFactories[listenerConfig.Protocol]; !ok {
-		log.Panicf("Unrecognized protocol '%s' on listener '%s'",
-			listenerConfig.Protocol, listenerConfig.Name)
-	}
-
-	listener := p.ListenerFactories[listenerConfig.Protocol](options)
+	listener := p.RunListenerFunc(listenerConfig.Protocol, options)
 
 	err = listener.Validate()
 	if err != nil {

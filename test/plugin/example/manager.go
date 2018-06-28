@@ -82,3 +82,7 @@ func (manager *ExampleManager) ServerData(c net.Conn, buf []byte) {
 func (manager *ExampleManager) Shutdown() {
 	log.Println("Shutdown manager event...")
 }
+
+func ManagerFactory() plugin_v1.ConnectionManager {
+	return &ExampleManager{}
+}

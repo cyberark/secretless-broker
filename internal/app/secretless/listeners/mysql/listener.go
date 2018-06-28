@@ -5,7 +5,9 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/mysql/protocol"
+	// TODO: These errors should be abstracted out ideally
+	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql/protocol"
+
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
@@ -15,9 +17,10 @@ import (
 // Listener listens for and handles new connections.
 type Listener struct {
 	Config         config.Listener
+	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
-	EventNotifier  plugin_v1.EventNotifier
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -64,12 +67,13 @@ func (l *Listener) Listen() {
 
 		// Serve the first Handler which is attached to this listener
 		if len(l.HandlerConfigs) > 0 {
-			handler := &Handler{
-				Config:        l.HandlerConfigs[0],
-				Client:        client,
-				EventNotifier: l.EventNotifier,
+			handlerOptions := plugin_v1.HandlerOptions{
+				HandlerConfig:    l.HandlerConfigs[0],
+				ClientConnection: client,
+				EventNotifier:    l.EventNotifier,
 			}
-			handler.Run()
+
+			l.RunHandlerFunc("mysql", handlerOptions)
 		} else {
 			mysqlError := protocol.Error{
 				Code:     protocol.CRUnknownError,
@@ -109,8 +113,9 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,
+		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
-		EventNotifier:  options.EventNotifier,
+		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

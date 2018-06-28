@@ -1,4 +1,4 @@
 #!/bin/bash
 
-# Provides an empty start so that ./build/test will run these tests
+# Provides an empty start so that ./bin/test will run these tests
 true

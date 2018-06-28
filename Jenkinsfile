@@ -11,13 +11,13 @@ pipeline {
   stages {
     stage('Build Linux binaries & Docker images') {
       steps {
-        sh './build/build'
+        sh './bin/build'
       }
     }
 
     stage('Run tests') {
       steps {
-        sh './build/test'
+        sh './bin/test'
 
         junit 'test/*.xml'
       }
@@ -29,7 +29,7 @@ pipeline {
       }
 
       steps {
-        sh './build/publish'
+        sh './bin/publish'
       }
     }
   }

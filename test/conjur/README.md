@@ -47,7 +47,7 @@ $ http_proxy=http://localhost:1080 curl -X POST --data secret http://localhost:3
 ## Testing your local changes
 
 You can test your local changes by re-building the Docker images (running
-`./build/build` in the project root) and then running the test suite as usual:
+`./bin/build` in the project root) and then running the test suite as usual:
 ```
 ./start
 ./test

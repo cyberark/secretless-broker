@@ -19,8 +19,8 @@ RUN dep ensure --vendor-only
 
 COPY . /go/src/github.com/conjurinc/secretless
 
-RUN go build -o bin/$GOOS/$GOARCH/secretless ./cmd/secretless && \
-    go build -o bin/$GOOS/$GOARCH/summon2 ./cmd/summon2
+RUN go build -o dist/$GOOS/$GOARCH/secretless ./cmd/secretless && \
+    go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2
 
 
 # =================== MAIN CONTAINER ===================
@@ -34,5 +34,5 @@ RUN mkdir -p /lib64 \
 
 ENTRYPOINT [ "/usr/local/bin/secretless" ]
 
-COPY --from=secretless-builder /go/src/github.com/conjurinc/secretless/bin/linux/amd64/secretless \
-                               /go/src/github.com/conjurinc/secretless/bin/linux/amd64/summon2 /usr/local/bin/
+COPY --from=secretless-builder /go/src/github.com/conjurinc/secretless/dist/linux/amd64/secretless \
+                               /go/src/github.com/conjurinc/secretless/dist/linux/amd64/summon2 /usr/local/bin/

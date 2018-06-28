@@ -57,7 +57,7 @@ services:
       SUMMON_PROVIDER: conjur
     volumes:
       - ssh_agent:/run/ssh-agent
-      - ../../../bin/linux/amd64/summon2:/summon2
+      - ../../../dist/linux/amd64/summon2:/summon2
       - ./ansible_secrets.yml:/secrets.yml
     depends_on:
       - pg
@@ -107,7 +107,7 @@ services:
       SSL_CERT_FILE: ./proxy_tls.pem
     command: "./proxy_tls myapp"
     volumes:
-      - ../../../bin/linux/amd64/summon2:/summon2
+      - ../../../dist/linux/amd64/summon2:/summon2
       - ./myapp_tls_secrets.yml:/secrets.yml
     depends_on:
       - conjur

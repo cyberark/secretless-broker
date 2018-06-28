@@ -8,8 +8,7 @@ vendor
 /showpw
 run
 tmp
-/bin/**/secretless
-/bin/**/summon2
+dist
 *.retry
 doc/**/proxy_tls
 doc/**/myapp

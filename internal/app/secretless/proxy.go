@@ -101,6 +101,11 @@ func (p *Proxy) Run() {
 	p.ListenerWaitGroup = sync.WaitGroup{}
 	// We loop until we get an exit signal (in which case we exit program)
 	for {
+		// TODO: Delegate logic of this `if` check to connection managers
+		if len(p.Config.Listeners) < 1 {
+			log.Fatalln("ERROR! No listeners specified in config!")
+		}
+
 		p.Listeners = make([]plugin_v1.Listener, 0)
 		log.Println("Starting all listeners and handlers...")
 		p.ListenerWaitGroup.Add(len(p.Config.Listeners))

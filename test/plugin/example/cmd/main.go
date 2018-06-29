@@ -6,10 +6,10 @@ import (
 )
 
 // Exports
-var PluginApiVersion = "0.0.5"
+var PluginApiVersion = "0.0.6"
 
 var PluginInfo = map[string]string{
-	"version":     "0.0.5",
+	"version":     "0.0.6",
 	"id":          "example-plugin",
 	"name":        "Example Plugin",
 	"description": "Example plugin to demonstrate plugin functionality",

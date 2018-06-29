@@ -23,15 +23,13 @@ import (
 var _SupportedFileSuffixes = []string{".so"}
 
 func _IsDynamicLibrary(file os.FileInfo) bool {
-	hasSupportedSuffix := false
 	fileName := file.Name()
 	for _, suffix := range _SupportedFileSuffixes {
 		if strings.HasSuffix(fileName, suffix) {
-			hasSupportedSuffix = true
-			break
+			return true
 		}
 	}
-	return hasSupportedSuffix
+	return false
 }
 
 type PluginManager struct {
@@ -56,8 +54,15 @@ func GetManager() *PluginManager {
 	return _singleton
 }
 
-func (m *PluginManager) RegisterSignalHandlers() {
-	log.Println("Registering signal listeners...")
+func (pluginManager *PluginManager) _ReloadConfig(newConfig config.Config) error {
+	log.Println("----------------------------")
+	log.Println("Reloading...")
+	pluginManager.Proxy.Config = newConfig
+	return pluginManager.Proxy.ReloadListeners()
+}
+
+func (pluginManager *PluginManager) _RegisterShutdownSignalHandlers() {
+	log.Println("Registering shutdown signal listeners...")
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel,
 		syscall.SIGABRT,
@@ -71,19 +76,37 @@ func (m *PluginManager) RegisterSignalHandlers() {
 		exitSignal := <-signalChannel
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
 
-		m.Shutdown()
+		pluginManager.Shutdown()
 
 		log.Printf("Exiting...")
 		os.Exit(0)
 	}()
-	log.Println("Signal listeners registered")
+}
+
+func (pluginManager *PluginManager) _RegisterReloadSignalHandlers() {
+	log.Println("Registering reload signal listeners...")
+	signalChannel := make(chan os.Signal, 1)
+	signal.Notify(signalChannel, syscall.SIGUSR1)
+
+	go func() {
+		for {
+			reloadSignal := <-signalChannel
+			log.Printf("Intercepted reload signal '%v'. Reloading...", reloadSignal)
+			pluginManager._ReloadConfig(pluginManager.Proxy.Config)
+		}
+	}()
+}
+
+func (pluginManager *PluginManager) RegisterSignalHandlers() {
+	pluginManager._RegisterShutdownSignalHandlers()
+	pluginManager._RegisterReloadSignalHandlers()
 }
 
 // _IsSupportedPluginApiVersion returns a boolean indicating if we support
 // the interface API version that plugin is advertising
 // TODO: Support a list of supported versions
 func _IsSupportedPluginApiVersion(version string) bool {
-	return version == "0.0.5"
+	return version == "0.0.6"
 }
 
 // LoadPlugin tries to load all internal plugin info strings
@@ -296,16 +319,16 @@ func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) er
 	return nil
 }
 
-func (m *PluginManager) InitializeConnectionManagers(c config.Config) error {
+func (pluginManager *PluginManager) InitializeConnectionManagers(c config.Config) error {
 	log.Println("Initializing managers...")
-	for managerId, connManagerPlugin := range m.ConnectionManagers {
-		err := connManagerPlugin.Initialize(c)
+	for managerId, connManagerPlugin := range pluginManager.ConnectionManagers {
+		err := connManagerPlugin.Initialize(c, pluginManager._ReloadConfig)
 		if err != nil {
 			log.Printf("Failed to initialize manager '%s': %s\n", managerId, err.Error())
 
 			// TODO: Decide if manager initialization erroring is a fatal error.
 			//       For now we treat it as a non-fatal error.
-			delete(m.ConnectionManagers, managerId)
+			delete(pluginManager.ConnectionManagers, managerId)
 			continue
 		}
 		log.Printf("Manager '%s' initialized.", managerId)

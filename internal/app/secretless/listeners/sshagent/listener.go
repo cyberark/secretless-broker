@@ -106,6 +106,17 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 	return l.EventNotifier
 }
 
+// GetName implements plugin_v1.Listener
+func (l *Listener) GetName() string {
+	return "sshagent"
+}
+
+// Shutdown implements plugin_v1.Listener
+func (l *Listener) Shutdown() error {
+	// TODO: Clean up all handlers
+	return l.NetListener.Close()
+}
+
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,

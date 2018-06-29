@@ -13,6 +13,7 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 - [Configuring Secretless](#configuring-secretless)
   - [Listeners](#listeners)
   - [Handlers](#handlers)
+- [Plugins](#plugins)
 - [Client Application Configuration](#client-application-configuration)
 - [Testing](#testing)
 - [Performance](#performance)
@@ -21,11 +22,11 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 
 Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service. 
 
-To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the Backend service from a secrets vault such as Conjur, a keychain service, or text files. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend. 
+To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the backend service from a secrets vault such as Conjur, a keychain service, text files, or other sources. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend. 
 
 # Why Secretless?
 
-Exposing plaintext secrets to clients (both users and machines) is hazardous from both a security and operational standpoint. First, by providing a secret to a client, the client becomes part of the threat surface. If the client is compromised, then the attacker has a good chance of obtaining the plaintext secrets and being able to establish direct connections to backend resources. To mitigate the severity of this problem, important secrets are (or should be) rotated (changed) on a regular basis. However, rotation introduces the operational problem of keeping applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords.
+Exposing plaintext secrets to clients (both users and machines) is hazardous from both a security and operational standpoint. First, by providing a secret to a client, the client becomes part of the threat surface. If the client is compromised, then the attacker has a good chance of obtaining the plaintext secrets and being able to establish direct connections to backend resources. To mitigate the severity of this problem, important secrets are (or should be) rotated (changed) on a regular basis. However, rotation introduces the operational problem of keeping applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords thus requiring restarts when they change.
 
 When the client connects to a backend resource through Secretless:
 
@@ -61,7 +62,7 @@ Now build for your platform. On Linux:
 secretless $ ./build/build
 ```
 
-On OS X:
+On OSX:
 
 ```sh-session
 secretless $ ./build/build_darwin
@@ -241,7 +242,27 @@ Then set the environment variable `http_proxy=localhost:1080` in the client envi
 
 ## Handlers
 
-TODO
+Handlers are objects that get instantiated on each connection to a listener that provide connectivity between:
+- Downstream to the proxy server
+- Proxy server to upstream server
+
+As part of this functionality, they also modify traffic at connection-level to provide the injection of credentials for the particular type of protocol they handling though majority of their functionality is in simple shuttling of data between downstream and upstream in a transparent manner.
+
+_Please note: Handler API interface signatures are currently under heavy development due to needing to deal with non-overlapping types of communications protocols (as expressed by the interface definitions) so they will be likely to change in the near future._
+
+# Plugins
+
+Plugins can be used to extend the functionality of Secretless via a shared library in `/usr/local/lib/secretless` in most core capabilities by providing a way to add additional:
+- Listener plugins
+- Handler plugins
+- Connection management plugins
+
+Currently, these API definitions reside [here](pkg/secretless/plugin_v1) and an example plugin can be found in the [`test/plugin`](test/plugin) directory.
+
+TODO: Expand this section
+
+_Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
+
 
 # Client Application Configuration
 
@@ -264,7 +285,7 @@ Build the project by running:
 $ ./build/build
 ```
 
-Or on OS X:
+Or on OSX:
 
 ```sh-session
 $ ./build/build_darwin
@@ -359,4 +380,3 @@ tps = 15.822442 (excluding connections establishing)
 14% fewer tps (excluding establishing connections) via Secretless.
 
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios. 
-

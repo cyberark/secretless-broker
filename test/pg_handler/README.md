@@ -81,7 +81,7 @@ Now you can run the secretless server:
 
 ```sh-session
 pg_handler# PG_ADDRESS=pg:5432 \
-  ../../bin/linux/amd64/secretless \
+  ../../dist/linux/amd64/secretless \
   -config secretless.dev.yml
 2018/01/10 21:25:15 Secretless starting up...
 ...
@@ -120,7 +120,7 @@ postgres=> \q
 
 ### Running the test suite in Docker
 You can test your local changes by re-building the Docker images (running
-`./build/build` in the project root) and then running the test suite as usual:
+`./bin/build` in the project root) and then running the test suite as usual:
 ```
 ./start
 ./test

@@ -1,0 +1,61 @@
+#!/bin/bash -e
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 [--dry-run] <new_release_version>"
+  exit 1
+fi
+
+dry_run="false"
+if [[ "$1" == "--dry-run" ]]; then
+  dry_run="true"
+  shift
+fi
+
+desired_version=$(echo ${1} | sed 's/^v//')
+tags=$(git tag | grep '^v' | sed 's/^v//')
+latest_tag=$(echo "$tags" | sort -rV | head -1)
+
+echo "Latest known tag: 'v${latest_tag}'"
+echo "New version: 'v${desired_version}'"
+
+# Sanity check
+newer_version=$(echo -e "${latest_tag}\n${desired_version}" | sort -rV | head -1)
+if [[ "${newer_version}" != "${desired_version}" ]]; then
+  echo "ERROR! Desired version 'v${desired_version}' is below latest version 'v${latest_tag}'!"
+  echo "Exiting!"
+  exit 1
+fi
+
+echo "Fetching git commit data..."
+git_diff=$(git log --format="- %s" "v${latest_tag}..HEAD")
+change_date=$(date +%Y-%m-%d)
+
+changelog_snippet="\n"
+changelog_snippet+="## [${desired_version}] ${change_date}\n\n"
+changelog_snippet+="### TODO: Don't commit this without proofreading!!!\n\n"
+changelog_snippet+="### Added\n\n"
+changelog_snippet+="### Changed\n\n"
+changelog_snippet+="${git_diff}"
+
+echo "Adding snippet to tempfile..."
+tmp_file=$(mktemp /tmp/changelog_snippet.XXXXXX)
+echo -e "${changelog_snippet}" >> ${tmp_file}
+echo "Tempfile: ${tmp_file}"
+
+echo "Adding snippet to CHANGELOG..."
+sed "/^## \[Unreleased\]/r ${tmp_file}" CHANGELOG.md > CHANGELOG.md.tmp
+
+rm -f "${tmp_file}"
+
+echo "Appending link to diff..."
+echo -e "[${desired_version}]: https://github.com/conjurinc/secretless/compare/${latest_tag}...${desired_version}\n" >> CHANGELOG.md.tmp
+
+if [[ "${dry_run}" == "true" ]]; then
+  cat CHANGELOG.md.tmp
+  rm -rf CHANGELOG.md.tmp
+else
+  mv CHANGELOG.md.tmp CHANGELOG.md
+  "${EDITOR:-vi}" CHANGELOG.md
+fi
+
+echo "--- DONE ---"

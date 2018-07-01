@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# Builds secretless binaries
+# usage: ./bin/build
+set -ex
+
+on_exit () {
+  containers=$(docker container ls -aq --filter "label=builder=secretless-builder")
+
+  if [ "${containers}" != "" ]; then
+    docker rm -f "${containers}" >/dev/null
+  fi
+}
+trap on_exit ERR INT QUIT EXIT
+
+
+VERSION=$(cat VERSION)
+
+DOCKER_FLAGS=""
+if [ "${KEEP_ALIVE}" != "" ]; then
+  DOCKER_FLAGS="${DOCKER_FLAGS} -rm=false"
+fi
+
+echo "Building Docker image"
+docker build -t "secretless:${VERSION}" \
+             -t "secretless:latest" \
+             $DOCKER_FLAGS \
+             .
+
+echo "Building Docker dev image"
+docker build -t "secretless-dev:${VERSION}" \
+             -t "secretless-dev:latest" \
+             -f Dockerfile.dev \
+             $DOCKER_FLAGS \
+             .

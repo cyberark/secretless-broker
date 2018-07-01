@@ -21,7 +21,7 @@ It will also configure the MySQL server as follows:
 From the root project directory, build the secretless binaries for your platform:
 ```
 platform=$(go run test/print_platform.go)
-./build/build $platform amd64
+./bin/build $platform amd64
 ```
 
 From this directory, start secretless:
@@ -126,7 +126,7 @@ To run the test suite in Docker, run:
 ./start  # Stand up MySQL and Secretless servers
 ./test   # Run tests in a test container
 ```
-Make sure you build the project by running `./build/build` in the project root
+Make sure you build the project by running `./bin/build` in the project root
 before running the tests so that the test container will be using updated
 code. If you want to run using your local changes, you can run `./test -l`
 instead, which will mount your local project directory as a volume in the

@@ -1,5 +1,5 @@
 ---
-title: CyberArk Secretless
+title: Secretless
 id: index
 layout: landing
 description: Secretless

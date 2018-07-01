@@ -1,0 +1,20 @@
+---
+layout: default
+---
+
+<h1>Secretless Blog</h1>
+
+<ul class="posts">
+  {% for post in site.posts %}
+    <li class="post card">
+      {% if post.image %}
+        <img class="post-list-thumb" src="{{ base.url }}/img/blog/{{ post.thumb }}" alt="{{ post.image-alt }}">
+      {% endif %}
+      <div class="post-content">
+        <a href="{{ post.url }}"><h2>{{ post.title }}</h2><span class="blog-subhead">{{ post.sub }}</span></a>
+        <p class="date">{{ post.date | date: '%B %d, %Y' }}</p>
+        {{ post.excerpt | strip_html | truncatewords: 40 }}
+      </div>
+    </li>
+  {% endfor %}
+</ul>

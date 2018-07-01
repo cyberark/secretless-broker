@@ -8,9 +8,10 @@ import (
 
 type ListenerOptions struct {
 	EventNotifier  EventNotifier
-	ListenerConfig config.Listener
 	HandlerConfigs []config.Handler
+	ListenerConfig config.Listener
 	NetListener    net.Listener
+	RunHandlerFunc func(string, HandlerOptions) Handler
 }
 
 // Listener is the interface which accepts client connections and passes them

@@ -32,7 +32,7 @@ COPY . .
 
 # Not strictly needed but we might as well do this step too since
 # the dev may want to run the binary
-RUN go build -o bin/$GOOS/$GOARCH/secretless ./cmd/secretless && \
-    go build -o bin/$GOOS/$GOARCH/summon2 ./cmd/summon2 && \
-    ln -s $ROOT_DIR/bin/$GOOS/$GOARCH/secretless /usr/local/bin/ && \
-    ln -s $ROOT_DIR/bin/$GOOS/$GOARCH/summon2 /usr/local/bin/
+RUN go build -o dist/$GOOS/$GOARCH/secretless ./cmd/secretless && \
+    go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2 && \
+    ln -s $ROOT_DIR/dist/$GOOS/$GOARCH/secretless /usr/local/bin/ && \
+    ln -s $ROOT_DIR/dist/$GOOS/$GOARCH/summon2 /usr/local/bin/

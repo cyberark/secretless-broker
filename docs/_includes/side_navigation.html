@@ -1,0 +1,9 @@
+
+<nav id="side-navigation" class="side-nav">  
+	<p class="card-side-heading">Documentation</p>
+	<ul>
+	{% for item in site.data.navigation.docsIndex %}
+		<li class="sidenav-item"><a href="{{ item.url }}" alt="{{ item.title }}">{{item.page}}</a></li>
+	{% endfor %}
+	</ul>
+</nav>

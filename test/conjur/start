@@ -8,12 +8,7 @@ admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:us
 export CONJUR_AUTHN_API_KEY=$admin_api_key
 
 conjur_host_port=$(docker-compose port conjur 80)
-conjur_port=$(docker run --rm \
-  -v $PWD/../util/:/util/ \
-  -e conjur_host_port=$conjur_host_port \
-  golang:1.10.3-stretch bash -exc "
-  echo \"$conjur_host_port\" | go run /util/parse_port.go
-  ")
+conjur_port="${conjur_host_port##*:}"
 
 # Remove files from tmp but avoid recreating the folder to
 # avoid cache busting

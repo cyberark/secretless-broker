@@ -17,6 +17,7 @@ type Listener struct {
 	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -57,12 +58,13 @@ func (l *Listener) Listen() {
 
 		// Serve the first Handler which is attached to this listener
 		if len(l.HandlerConfigs) > 0 {
-			handler := &Handler{
-				Client:        client,
-				Config:        l.HandlerConfigs[0],
-				EventNotifier: l.EventNotifier,
+			options := plugin_v1.HandlerOptions{
+				ClientConnection: client,
+				HandlerConfig:    l.HandlerConfigs[0],
+				EventNotifier:    l.EventNotifier,
 			}
-			handler.Run()
+
+			l.RunHandlerFunc("example-handler", options)
 		} else {
 			client.Write([]byte("Error - no handlers were defined!"))
 		}
@@ -97,8 +99,9 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,
+		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
-		EventNotifier:  options.EventNotifier,
+		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

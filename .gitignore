@@ -3,17 +3,17 @@ debug
 debug.*
 .vscode/
 vendor
-/doc/godoc
+/demo/godoc
 /secretless
 /showpw
 run
 tmp
-/bin/**/secretless
-/bin/**/summon2
+dist
 *.retry
-doc/**/proxy_tls
-doc/**/myapp
-!doc/**/src/myapp
+demo/**/proxy_tls
+demo/**/myapp
+!demo/**/src/myapp
+docs/_site
 test/junit.*
 test/plugin/out/
 

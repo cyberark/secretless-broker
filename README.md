@@ -9,6 +9,7 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 - [Secretless](#secretless)
 - [Why Secretless?](#why-secretless)
 - [Quick Start](#quick-start)
+- [Longer Example](#longer-example-with-docker-images)
   - [Walkthrough](#walkthrough)
 - [Configuring Secretless](#configuring-secretless)
   - [Listeners](#listeners)
@@ -22,7 +23,17 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 
 Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service. 
 
-To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the backend service from a secrets vault such as Conjur, a keychain service, text files, or other sources. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend. 
+To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the backend service from a secrets vault such as Conjur, a keychain service, text files, or other sources. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend.
+
+# Currently supported
+
+- MySQL (Socket)
+- PostgreSQL (Socket and TCP)
+- SSH
+- SSHAgent (OSX and Linux keyrings)
+- HTTP (Conjur and AWS auth providers)
+
+With many others in plans!
 
 # Why Secretless?
 
@@ -38,40 +49,105 @@ When the client connects to a backend resource through Secretless:
 
 **Prerequisites**
 
+* **Docker** You need Docker to run the examples and the tests. Most code has been confirmed to work on Docker version 18.03.1-ce and up.
+* **PostgreSQL** You need PostgreSQL client (`psql`) on your host to fully run this example
+* **Linux** This example assumes a Linux amd64 environment
+
+## Download Secretless
+
+```sh-session
+$ wget https://github.com/conjurinc/secretless/releases/download/v<version>/secretless-linux-amd64.tar.gz
+$ tar -xzf ./secretless-linux-amd64.tar.gz
+$ ls
+secretless  secretless-linux-amd64.tar.gz  summon2
+```
+
+## Start PostgreSQL container on localhost:6543
+```sh-session
+$ sudo docker run --rm \
+                  --name pgsql \
+                  -p 6543:5432 \
+                  -e POSTGRES_PASSWORD=test \
+                  -d postgres:alpine
+```
+
+## Create a minimal configuration for Secretless
+
+```sh-session
+$ # We will listen on 15432 and forward requests to our
+$ # PostgreSQL container on localhost:6543
+$ tee secretless.yml <<EOF
+listeners:
+  - name: pg
+    protocol: pg
+    address: 0.0.0.0:15432
+
+handlers:
+  - name: pg
+    listener: pg
+    credentials:
+      - name: address
+        provider: literal
+        id: localhost:6543
+      - name: username
+        provider: literal
+        id: postgres
+      - name: password
+        provider: literal
+        id: test
+EOF
+```
+Normally, you would pull the credentials from a real vault with one of the included providers but for the quick start, we're just adding the secrets directly.
+
+## (Optional) Verify that PostgreSQL requires credentials
+
+```sh-session
+$ # This should only allow you to log in if you type in `test` as the password
+$ psql -h localhost -p 6543 -U postgres -d postgres
+Password for user postgres: 
+...
+postgres-# \q
+```
+
+## Start Secretless
+```sh-session
+$ ./secretless
+```
+
+## Check that you can connect to PostgreSQL over Secretless without a password
+In a different terminal, connect to Secretless listening port with `psql`:
+```sh-session
+$ # You may need to install psql client tools on your host to do this step (`sudo apt install postgresql-client-10`).
+$ # Note that there was _no_ request for password to be able to log in!
+$ psql -h localhost -p 15432 -d postgres
+psql (10.4 (Ubuntu 10.4-0ubuntu0.18.04))
+Type "help" for help.
+
+postgres=# select current_user;
+ current_user 
+--------------
+ postgres
+(1 row)
+
+```
+
+## Smile and grab a :cookie: because it was too easy!
+
+You have just delegated responsibilty for keeping credentials secure away from your app!
+
+# Longer example with Docker images
+
+**Prerequisites**
+
 * **Docker** You need Docker to run the examples and the tests.
 
 ## Walkthrough
-
-At this time, you'll need to build Secretless in order to use it. 
-
-First, clone `https://github.com/conjurinc/secretless`. If you're new to Go, be aware that Go is very selective about
-where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
-is `~/go`. Projects should be checked out to `$GOPATH/src`. This is required by Go in order for dependencies to resolve
-properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless`.
-
-Now you can build Secretless. First fetch all the dependencies:
+--------------------------------
+Navigate to the directory `doc/quick-demo`:
 
 ```sh-session
-~ $ cd $GOPATH/src/github.com/conjurinc/secretless
-secretless $ dep ensure
-```
-
-Now build for your platform. On Linux:
-
-```sh-session
-secretless $ ./bin/build
-```
-
-On OSX:
-
-```sh-session
-secretless $ ./bin/build_darwin
-```
-
-Now navigate to the directory `doc/quick-demo`:
-
-```sh-session
-secretless $ cd doc/quick-demo
+$ # From Secretless repository root 
+$ cd doc/quick-demo
 ```
 
 You will use Secretless to connect a client to a Postgresql database, without the client knowing the database password.
@@ -85,7 +161,7 @@ Creating quick_pg_1 ...
 Creating quick_pg_1 ... done
 ```
 
-Verify that Postgresql is running and accepting connections on port 5432:
+Verify that PostgreSQL is running and accepting connections on port 5432:
 
 ```
 $ docker-compose ps
@@ -102,7 +178,7 @@ Starting quick_psql_1 ... done
 root@f6683931b82c:/#
 ```
 
-Now connect to Postgresql using the username "test" and password "test" (type `\q` to quit):
+Now connect to PostgreSQL using the username "test" and password "test" (type `\q` to quit):
 
 ```sh-session
 root@f6683931b82c:/# PGPASSWORD=test PGUSER=test PGPORT=5432 PGHOST=pg PGDATABASE=postgres psql
@@ -153,7 +229,7 @@ Creating quick_secretless_1 ...
 Creating quick_secretless_1 ... done
 ```
 
-Verify that it's up and listening:
+Verify that Secretless is up and listening:
 
 ```sh-session
 $ docker-compose logs secretless
@@ -216,7 +292,7 @@ Note that a real-world deployment would differ from this setup in the following 
 
 # Configuring Secretless
 
-The Secretless configuration file is composed of three sections:
+The Secretless configuration file is composed of two sections:
 
 * `listeners` A list of protocol listeners, each one on a Unix socket or TCP port.
 * `handlers` When a new connection is received by a Listener, it's routed to a Handler for processing. The Handler is configured to obtain the backend connection credentials from one or more Providers. 
@@ -273,6 +349,44 @@ You need to ensure that when your client code connects to a backend service, the
 
 In all cases, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost.
 
+
+# Building
+
+First, clone `https://github.com/conjurinc/secretless`. If you're new to Go, be aware that Go is very selective about
+where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
+is `~/go`. Projects should be checked out to `$GOPATH/src`. This is required by Go in order for dependencies to resolve
+properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless`.
+
+Now you can build Secretless. First fetch all the dependencies:
+
+```sh-session
+~ $ cd $GOPATH/src/github.com/conjurinc/secretless
+secretless $ dep ensure
+```
+
+## Docker containers
+
+```sh-session
+$ # From Secretless repository root 
+$ ./bin/build
+```
+
+This should create a Docker container with tag `secretless:latest` in your local registry.
+
+## Binaries
+### Linux
+```sh-session
+$ # From Secretless repository root 
+$ go build -o ./secretless ./cmd/secretless
+```
+
+### OSX
+
+```sh-session
+$ # From Secretless repository root 
+$ ./bin/build_darwin
+```
+
 # Testing
 
 **Prerequisites**
@@ -283,12 +397,6 @@ Build the project by running:
 
 ```sh-session
 $ ./bin/build
-```
-
-Or on OSX:
-
-```sh-session
-$ ./bin/build_darwin
 ```
 
 Then run the test cases:

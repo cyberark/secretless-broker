@@ -1,0 +1,32 @@
+#!/bin/bash -e
+
+CURRENT_DIR=$(dirname $0 | xargs realpath)
+DEST_SITE_DIR="$CURRENT_DIR/../docs/_site"
+
+CONTAINER_NAME="$(date -u +%Y%m%d_%H%M%S)_$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-f0-9' | head -c 6)"
+
+echo "Using container name: ${container_name}"
+
+docker build -f "${CURRENT_DIR}/Dockerfile.website" \
+             -t secretless-website-builder \
+             "${CURRENT_DIR}/../docs"
+
+clean_up() {
+  docker container rm -f "${CONTAINER_NAME}" || true
+}
+trap clean_up EXIT
+
+echo "Cleaning up current _site..."
+rm -rf "${DEST_SITE_DIR}"
+mkdir -p "${DEST_SITE_DIR}"
+
+echo "Building..."
+docker run --name "secretless-website-${container_name}" \
+           -w /usr/src/app \
+           --network none \
+           -v "$CURRENT_DIR/../docs:/usr/src/app:ro" \
+           -v "${DEST_SITE_DIR}:/tmp/_site" \
+           secretless-website-builder
+
+# TODO: Copy files back
+echo "Done!"

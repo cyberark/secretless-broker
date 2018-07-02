@@ -335,7 +335,7 @@ Plugins can be used to extend the functionality of Secretless via a shared libra
 
 Currently, these API definitions reside [here](pkg/secretless/plugin_v1) and an example plugin can be found in the [`test/plugin`](test/plugin) directory.
 
-TODO: Expand this section
+You can read more about how to make plugins and the underlying architecture in the [API directory](pkg/secretless/plugin_v1).
 
 _Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
 

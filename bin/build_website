@@ -12,7 +12,7 @@ docker build -f "${CURRENT_DIR}/Dockerfile.website" \
              "${CURRENT_DIR}/../docs"
 
 clean_up() {
-  docker container rm -f "${CONTAINER_NAME}" || true
+  docker container rm -f "${CONTAINER_NAME}" &>/dev/null || true
 }
 trap clean_up EXIT
 
@@ -21,7 +21,7 @@ rm -rf "${DEST_SITE_DIR}"
 mkdir -p "${DEST_SITE_DIR}"
 
 echo "Building..."
-docker run --name "secretless-website-${container_name}" \
+docker run --name "secretless-website-${CONTAINER_NAME}" \
            -w /usr/src/app \
            --network none \
            -v "$CURRENT_DIR/../docs:/usr/src/app:ro" \

@@ -18,7 +18,7 @@ description: Secretless Documentation
     <p>Attack surface:</p>
       <ul>
         <li>The attack surface of a software environment refers to all the different ways that an attacker (i.e. malicious actor) might attempt to access protected resources. For example, if you run email on a server, then email is part of the attack surface - an attacker can try to send malicious emails to infect your machine.</li>
-        <li>Each application you run which is accessible to the outside world is also part of the threat surface. For example, a business website may be exploitable by an attacker to install malware on a server. Each other person that you give sensitive information to becomes part of the threat surface. The entry point to the Target hack was through an <a href="https://krebsonsecurity.com/2014/02/target-hackers-broke-in-via-hvac-company">HVAC contractor</a>.</li>
+        <li>Each application you run which is accessible to the outside world is also part of the threat surface. For example, a business website may be exploitable by an attacker to install malware on a server. Each other person that you give sensitive information to becomes part of the threat surface. The entry point to the Target hack was through an <a href="https://krebsonsecurity.com/2014/02/target-hackers-broke-in-via-hvac-company">HVAC contractor.</a></li>
       </ul>
     <p>Vault:</p>
       <ul>

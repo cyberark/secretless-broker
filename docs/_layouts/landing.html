@@ -1,5 +1,6 @@
 ---
 layout: default
+id: home
 ---
 
 <div class="container">
@@ -17,7 +18,7 @@ layout: default
 			<div class="col-md-6 about-subitem">
 				<div class="inner">
 					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right" aria-hidden="true"></i>
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
 						<p class="inner-text">Reduce Attack Surface</p>
 					</div>
 					<p class="inner-text-description">Any secret acquired and used increases your attack surface. Secretless acts as the mediator, removing direct communication between the client and the resource and shrinking your attack surface.</p>
@@ -26,7 +27,7 @@ layout: default
 			<div class="col-md-6 about-subitem">
 				<div class="inner">
 					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right" aria-hidden="true"></i>
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
 						<p class="inner-text">Worry-Free Secret Management</p>
 					</div>
 					<p class="inner-text-description"></p>
@@ -38,7 +39,7 @@ layout: default
 			<div class="col-md-6 about-subitem">
 				<div class="inner">						
 						<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right" aria-hidden="true"></i>
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
 						
 						<p class="inner-text">Transparent Secret Rotation</p>
 						</div>
@@ -48,7 +49,7 @@ layout: default
 			<div class="col-md-6 about-subitem">
 				<div class="inner">
 					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right" aria-hidden="true"></i>
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
 						<p class="inner-text">Open Source and audited for security</p>
 					</div>
 				</div>
@@ -56,21 +57,20 @@ layout: default
 		</div>
 	</div>
 </div>
+
 <div class="container">
 	<div class="card documentation">
-	<div class="col-md-3 docs-sidenav">
-		{% include side_navigation.html %}
-	</div>
-	<div class="col-md-9 ">
+		<div class="side-nav">
+			{% include side_navigation.html %}	
+		</div>
 		<div id="content" class="documentation-content">
 		      {{ content }}
 		    </div>
 		</div> 
 	</div>
 </div>
-<script>
-</script>
-<!-- <script src="/javascript/secretless_js.js"></script> -->
+
+<script src="/javascript/secretless_js.js"></script>
 
 
 

@@ -1,18 +1,28 @@
 
 p{
-	/*font-family: 'Open Sans', sans-serif;*/
-	font-family: "Source Sans Pro",sans-serif;
-    font-size: 16px;
+	font-family: "Roboto",sans-serif;
+    font-size: 15px;
     line-height: 1.5;
 }
 li{
-	font-family: "Source Sans Pro",sans-serif;
-    font-size: 16px;
+	font-family: "Roboto",sans-serif;
+    font-size: 15px;
     line-height: 1.5;
     margin-left: 25px;
 }
 code{
 	margin-left: 25px;
+}
+a {
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+}
+hr{
+	position: relative;
+}
+button:focus{
+	outline: 0;
 }
 .navbar-list li{
 	font-size:14px;
@@ -22,9 +32,7 @@ code{
 }
 .navbar-list a:hover{
 	text-decoration: none;
-
 }
-
 .sidenav-item{
 	list-style-type: none;
 	margin-left: -15px;
@@ -34,10 +42,16 @@ code{
 }
 .sidenav-item a{
 	color: #404040;
-	line-height: 20px;
+	/*line-height: 20px;*/
 }
-.fixed-nav nav{
+.fixed-nav {
 	position: fixed;
+	top: 0;
+	margin-right: 100px;
+}
+.fixed-nav-documentation{
+    position: relative;
+    left: 215px;
 }
 .sidenav-item i{
 	font-size: 10px;
@@ -53,16 +67,18 @@ code{
 	justify-content: center;
 	flex-direction: column;
 	height: 250px;
+	width: 215px;
 }
 .introduction-heading {
 	font-size: 1.5em;
 }
 .center-block{
 	top: 70px;
-	background-color: #fff;
+	background-color: transparent;
 }
 #frame{
-	background-color: transparent;
+	height: 465px;
+	border-bottom: 2px solid #e2e2e2
 }
 .docs-subheading{
 	font-size: 18px;
@@ -115,9 +131,27 @@ code{
 .button:hover{
 	text-decoration: none;
 
+
 }
 .btnrow{
 	text-align: center;
+}
+.btn-arrow{
+	border-radius: 50%;
+	height: 40px;
+    width: 40px;
+    margin: -20px -50px;
+    position: absolute;
+    top: 114%;
+    left: 55%;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+    transition: all .3s
+}
+.btn-arrow:hover{
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.3);
+
+
 }
 .jumbotron-img{
 	width: 20%;
@@ -134,6 +168,8 @@ code{
 #jumbotron-subtext {
 	font-size: 30px;
 	text-align: center;
+	text-transform: uppercase;
+    letter-spacing: 3px;
 	font-family: 'Open Sans', sans-serif;
 	margin-top:20px;
 }
@@ -141,43 +177,25 @@ code{
 	font-size: 15px;
 	margin-right: 10px;
 }
-a {
-    text-decoration: none;
-    display: inline-block;
-    padding: 8px 16px;
-
-}
-hr{
-	position: relative;
-}
-.down {
-    background-color: #4CAF50;
-    color: white;
-    width: 35px;
-    height: 35px;
-    left: 50%;
-    top:50%;
-    /*bottom: -100px;*/
-    padding: 0;
-    position: absolute;
-    transform: translateX(-30%);
-}
-
 .round {
     border-radius: 50%;
 }
-/*.test{
-	margin-left: 10px;
-}*/
 .inner p {
 	margin-left: 20px;
 }
 .inner-text{
 	margin-left: 0;
+	letter-spacing: 1px;
+    font-size: 18px;
 }
-.fa{
+.btn-arrow-right{
 	font-size: 20px;
 	margin-top: 1px;
+}
+.btn-arrow-down{
+	font-size: 22px;
+	margin: 3px auto 0;
+	transition: all .3s ease-out;
 }
 .introduction-img{
 	width: 450px;
@@ -196,6 +214,7 @@ hr{
     box-shadow: 0 2px 4px rgba(0,0,0,.1);
     border: 1px solid #e2e2e2;
     margin: 0 0 30px;
+    transition: .8s ease;
 }
 .in-line-frame{
 	display: flex;
@@ -208,6 +227,13 @@ hr{
 }
 .documentation-content{
 	padding-bottom: 100px;
+	margin-left: 50px;
+	width: 630px;
+}
+.documentation{
+	display: flex;
+	max-width: 85%;
+    margin: 0 auto;
 }
 .about{
 	width: 10px;
@@ -255,10 +281,11 @@ footer{
 }
 .container .container-footer {
 	width: 100%;
-	position:absolute;
+	position:relative;
 	left:0;
 	right:0;
 }
+
 footer .left-links{
 	text-align: center;
 	color: white;
@@ -278,7 +305,6 @@ footer .right-links li{
 	color: white;
 	list-style-type: none;
 }
-
 .cybr-logo-footer{
 	width: 200px;
 	margin: 10px;

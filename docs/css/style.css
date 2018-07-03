@@ -138,19 +138,23 @@ button:focus{
 	text-align: center;
 }
 .btn-arrow{
+    text-decoration: none;
 	border-radius: 50%;
 	height: 40px;
     width: 40px;
     margin: -20px -50px;
     position: absolute;
-    top: 128%;
-    left: 55%;
+    top: 120%;
+    left: 54%;
     border-radius: 50%;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
-    transition: all .3s
+    transition: all .3s;
+
 }
 .btn-arrow:hover{
+    text-decoration: none;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.3);
+
 }
 .jumbotron-img{
 	width: 20%;

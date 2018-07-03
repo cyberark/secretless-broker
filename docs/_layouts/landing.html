@@ -2,12 +2,22 @@
 layout: default
 id: home
 ---
-
 <div class="container">
 	<div class="card introduction" id="intro">
 		<div class="row sub-card">
-			<p class="card-heading">Introduction to Secretless Code</p>
-			<p>Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service.</p>
+			<p class="card-heading">Why Secretless?</p>
+			<p>“Secretless” is designed to solve two problems. The first is loss or theft of credentials, which can occur by:</p>
+			<ol>
+				<li>Accidental credential leakage (e.g. credential checked into source control, etc)</li>
+				<li>An attack on a privileged user (e.g. phishing, developer machine compromises, etc)</li>
+				<li>A vulnerability in an application (e.g. remote code execution, environment variable dump, etc)</li>
+			</ol>
+			<p>The second is downtime which is caused when applications or services do not respond to credential rotation and crash or get locked out of backend data sources as a result</p>
+			<p>Keeping secrets in a vault is a good practice. However, when a client “checks out” a secret from a vault, where does it go? Often, directly into unprotected application memory at which point that client app has now part of the threat surface. There are a stringent set of best practices and recommendations that should be be followed by every user and application which checks secrets out of a vault but even if you harden the app in every possible way, it does not protect you from 0-day vulnerabilities in the app, underlaying framework, and/or the programming language used.</p>
+			<p>In the long run, it’s a losing battle to try and train every user and application developer about how to safely handle a secret once they’ve obtained it even if you can mitigate all of the attack surfaces of the client app itself. There are so many things that can go wrong, and people (and applications) have better things to worry about than babysitting secrets (such doing their jobs). Do you want developers to write features or try to be security engineers too?</p>
+			<p>Secretless alleviates users and applications from the burden of handling secrets. Instead of checking out secrets, when a user or application needs access to something important, it uses the Secretless proxy to establish the connection on its behalf.</p>
+			<p>Secretless is the software is specifically written to be really good at interacting with a variety of vaults and abstracting away the security to a specialized module that can easily be audited and expanded with custom plugins. It does a really good job of taking care of any secrets that it might obtain from a vault, and it does it the same way no matter the developer, technology, or platform. Additionally, it knows what to do when a secret has been changed so that the client users and code never have to respond to changing secrets or even know that they are changing!</p>
+
 		</div>
 	</div>
 </div>

@@ -77,7 +77,8 @@ button:focus{
 	background-color: transparent;
 }
 #frame{
-	height: 465px;
+	margin-bottom: 0;
+	height: 525px;
 	border-bottom: 2px solid #e2e2e2
 }
 .docs-subheading{
@@ -142,7 +143,7 @@ button:focus{
     width: 40px;
     margin: -20px -50px;
     position: absolute;
-    top: 114%;
+    top: 128%;
     left: 55%;
     border-radius: 50%;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
@@ -150,8 +151,6 @@ button:focus{
 }
 .btn-arrow:hover{
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.3);
-
-
 }
 .jumbotron-img{
 	width: 20%;
@@ -172,6 +171,19 @@ button:focus{
     letter-spacing: 3px;
 	font-family: 'Open Sans', sans-serif;
 	margin-top:20px;
+
+}
+.jumbotron-sub{
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+    height: 100px;
+    background: #383950;
+}
+.jumbotron-sub p{
+	color:white;
+	text-align: center;
+
 }
 .fab{
 	font-size: 15px;

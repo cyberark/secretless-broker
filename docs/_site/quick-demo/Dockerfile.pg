@@ -1,5 +1,0 @@
-FROM postgres:9.3
-
-COPY pg_hba.conf /etc/
-COPY pg_hba /docker-entrypoint-initdb.d/
-COPY test.sql /docker-entrypoint-initdb.d/

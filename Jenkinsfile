@@ -36,7 +36,6 @@ pipeline {
     stage('Build Website') {
       steps {
         sh './bin/build_website'
-        archiveArtifacts '_site/'
       }
     }
 
@@ -54,6 +53,7 @@ pipeline {
           }
           steps {
             sh 'summon -e staging bin/publish_website'
+            archiveArtifacts '_site/'
           }
         }
 
@@ -63,6 +63,7 @@ pipeline {
           }
           steps {
             sh 'summon -e production bin/publish_website'
+            archiveArtifacts '_site/'
           }
         }
       }

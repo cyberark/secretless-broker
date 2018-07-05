@@ -318,17 +318,17 @@ Then set the environment variable `http_proxy=localhost:1080` in the client envi
 
 ## Handlers
 
-Handlers are objects that get instantiated on each connection to a listener that provide connectivity between:
+Handlers are objects that get instantiated on each connection to a listener that provide connectivity:
 - Downstream to the proxy server
 - Proxy server to upstream server
 
-As part of this functionality, they also modify traffic at connection-level to provide the injection of credentials for the particular type of protocol they handling though majority of their functionality is in simple shuttling of data between downstream and upstream in a transparent manner.
+As part of this functionality, they also modify traffic to inject credentials for the connection to the upstream server - but the majority of their functionality is in simple shuttling data between downstream and upstream in a transparent manner.
 
 _Please note: Handler API interface signatures are currently under heavy development due to needing to deal with non-overlapping types of communications protocols (as expressed by the interface definitions) so they will be likely to change in the near future._
 
 # Plugins
 
-Plugins can be used to extend the functionality of Secretless via a shared library in `/usr/local/lib/secretless` in most core capabilities by providing a way to add additional:
+Plugins can be used to extend the functionality of Secretless via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
 - Listener plugins
 - Handler plugins
 - Connection management plugins

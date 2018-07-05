@@ -2,19 +2,19 @@ main:
   - page: Github
     url: https://github.com/conjurinc/secretless
   - page: Docs
-    url: /docs.html
+    url: docs.html#docs-overview
   - page: Blog
-    url: /blog.html
+    path: blog.html
   - page: Community
-    url: /community.html
+    path: community.html
 
 docsIndex:
   - page: Overview
-    url: /docs.html/#docs-overview
+    url: docs.html#docs-overview
   - page: How it Works?
-    url: /works.html/#docs-works
+    url: works.html#docs-works
   - page: Key Terms
-    url: /key_terms.html/#docs-key-terms
+    url: key_terms.html#docs-key-terms
   - page: Get Started
-    url: /get_started.html/#docs-get-started
+    url: get_started.html#docs-get-started
 

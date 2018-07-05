@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 pipeline {
-  agent { label 'updated' }
+  agent { label 'executor-v2' }
 
   options {
     timestamps()

@@ -54,7 +54,7 @@ func TestMySQLHandler(t *testing.T) {
 		Convey("With username, wrong password", func() {
 
 			options := make(map[string]string)
-			options["--socket"] = "run/mysql/mysql.sock"
+			options["--socket"] = "sock/mysql.sock"
 			options["--password"] = "wrongpassword"
 
 			cmdOut, err := mysql("", 0, "testuser", []string{}, options, []string{})
@@ -66,7 +66,7 @@ func TestMySQLHandler(t *testing.T) {
 		Convey("With wrong username, wrong password", func() {
 
 			options := make(map[string]string)
-			options["--socket"] = "run/mysql/mysql.sock"
+			options["--socket"] = "sock/mysql.sock"
 			options["--password"] = "wrongpassword"
 
 			cmdOut, err := mysql("", 0, "wrongusername", []string{}, options, []string{})
@@ -78,7 +78,7 @@ func TestMySQLHandler(t *testing.T) {
 		Convey("With empty username, empty password", func() {
 
 			options := make(map[string]string)
-			options["--socket"] = "run/mysql/mysql.sock"
+			options["--socket"] = "sock/mysql.sock"
 			options["--password"] = ""
 
 			cmdOut, err := mysql("", 0, "", []string{}, options, []string{})

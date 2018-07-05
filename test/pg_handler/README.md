@@ -10,6 +10,8 @@ $ docker-compose up -d pg
 
 Run Secretless locally and execute tests:
 
+_Note: Since secretless container runs the daemon as a limited user, sockets should be mounted to `/sock` directory._
+
 ```sh-session
 $ ./run_dev_test
 ...
@@ -33,7 +35,7 @@ Now you can run `secretless` in a terminal:
 $ ./run_dev
 ...
 2018/01/10 16:33:09 pg listener 'pg_tcp' listening at: [::]:15432
-2018/01/10 16:33:09 pg listener 'pg_socket' listening at: ./run/postgresql/.s.PGSQL.5432
+2018/01/10 16:33:09 pg listener 'pg_socket' listening at: ./sock/.s.PGSQL.5432
 ```
 
 Now run a client in another terminal.
@@ -86,7 +88,7 @@ pg_handler# PG_ADDRESS=pg:5432 \
 2018/01/10 21:25:15 Secretless starting up...
 ...
 2018/01/10 21:25:15 pg listener 'pg_tcp' listening at: [::]:15432
-2018/01/10 21:25:15 pg listener 'pg_socket' listening at: ./run/postgresql/.s.PGSQL.5432
+2018/01/10 21:25:15 pg listener 'pg_socket' listening at: ./sock/.s.PGSQL.5432
 ```
 
 Now run another `dev` container as the client:
@@ -101,7 +103,7 @@ pg_handler#
 Connect to Postgres using psql, over a Unix socket:
 
 ```sh-session
-pg_handler# psql -h $PWD/run/postgresql/ postgres
+pg_handler# psql -h $PWD/sock/ postgres
 psql (9.4.15, server 9.3.20)
 Type "help" for help.
 

@@ -6,3 +6,6 @@ doc/full-demo/myapp/myapp
 *.sw[po]
 
 test/junit.output
+
+# Ignore compose file changes
+docker-compose.yml

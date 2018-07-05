@@ -40,7 +40,10 @@ RUN mkdir -p /lib64 && \
             secretless && \
     # Ensure plugin dir is owned by secretless user
     mkdir -p /usr/local/lib/secretless && \
-    chown secretless:secretless /usr/local/lib/secretless
+    # Make and setup a directory for sockets at /sock
+    mkdir /sock && \
+    chown secretless:secretless /usr/local/lib/secretless \
+                                /sock
 
 USER secretless
 

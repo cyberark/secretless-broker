@@ -17,8 +17,10 @@ RUN groupadd -r secretless && \
             -m \
             -r \
             secretless && \
-    mkdir -p /usr/local/lib/secretless && \
-    chown secretless:secretless /usr/local/lib/secretless
+    mkdir -p /usr/local/lib/secretless \
+             /sock && \
+    chown secretless:secretless /usr/local/lib/secretless \
+                                /sock
 
 RUN curl -fsSL -o /usr/local/bin/dep \
     https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 && \
@@ -40,7 +42,7 @@ RUN dep ensure --vendor-only
 COPY . .
 
 # Not strictly needed but we might as well do this step too since
-# the dev may want to run the binary.
+# the dev may want to run the binary
 RUN go build -o dist/$GOOS/$GOARCH/secretless ./cmd/secretless && \
     go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2 && \
     ln -s $ROOT_DIR/dist/$GOOS/$GOARCH/secretless /usr/local/bin/ && \

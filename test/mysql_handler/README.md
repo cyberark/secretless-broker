@@ -31,8 +31,11 @@ From this directory, start secretless:
 
 #### Log in to the MySQL server via the Secretless MySQL handler
 In another terminal, navigate to the `test/mysql_handler` directory and send a MySQL request via Unix socket:
+
+_Note: Since secretless container runs the daemon as a limited user, sockets should be mounted to `/sock` directory._
+
 ```
-mysql --socket=run/mysql/mysql.sock
+mysql --socket=sock/mysql.sock
 ```
 or via TCP:
 ```
@@ -97,7 +100,7 @@ docker-compose run --rm dev
 Then, to connect with MySQL you can run either
 `mysql -h secretless -P 3306`
 to connect via TCP (SSL mode is disabled by default), or
-`mysql --socket=/run/mysql/mysql.sock`
+`mysql --socket=/sock/mysql.sock`
 to connect via Unix socket.
 
 ## Running the test suite

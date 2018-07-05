@@ -2,6 +2,8 @@
 
 docker-compose build
 
+rm -rf sock/*
+
 docker-compose up \
   -d \
   mysql

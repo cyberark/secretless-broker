@@ -2,6 +2,8 @@
 
 docker-compose build
 
+rm -rf sock/.agent
+
 docker-compose up \
   -d \
   ssh_host secretless

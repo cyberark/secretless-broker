@@ -11,7 +11,7 @@ description: Secretless Documentation
       <p>In a Secretless deployment, clients don’t directly obtain secrets or connect directly to protected services. Instead, when a client wants to communicate with an external service, it directs the request to a Secretless proxy service. The Secretless proxy is able to authenticate with a secrets vault on behalf of the client and obtain an identity credential. This identity credential is stored securely within the Secretless proxy, and used to obtain a backend connection secret such as database password from the secrets vault. The connection secrets are managed entirely within the Secretless service, and never exposed to the client. The Secretless proxy uses the connection secret to establishes a connection to the protected service and then transfers messages between the client and the service.</p>
     </div>
     <div class="col-md-4">
-      <img class="introduction-img" src="/img/secretlessbrokerwhite.png">
+      <img class="introduction-img" src="/img/secretlessbrokerwhite.png" alt="Secretless Broker Architecture">
     </div>
   </div>
   <ol>

@@ -6,7 +6,7 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg"
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/ssh"
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/sshagent"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // HandlerFactories contains the list of built-in handler factories

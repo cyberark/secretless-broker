@@ -10,7 +10,7 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // ClientOptions stores the option that were specified by the connection client.

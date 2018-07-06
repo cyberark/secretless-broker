@@ -6,7 +6,7 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg"
 	"github.com/conjurinc/secretless/internal/app/secretless/listeners/ssh"
 	"github.com/conjurinc/secretless/internal/app/secretless/listeners/sshagent"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // ListenerFactories contains the list of built-in listener factories

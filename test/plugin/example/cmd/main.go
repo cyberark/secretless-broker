@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	"github.com/conjurinc/secretless/test/plugin/example"
 )
 

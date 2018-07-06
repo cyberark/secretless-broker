@@ -10,7 +10,7 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // BackendConfig stores the connection info to the real backend database.

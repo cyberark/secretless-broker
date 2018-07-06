@@ -1,4 +1,4 @@
-package plugin_v1
+package v1
 
 import (
 	"net"
@@ -6,6 +6,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
+// ListenerOptions contains the configuration for the listener
 type ListenerOptions struct {
 	EventNotifier  EventNotifier
 	HandlerConfigs []config.Handler

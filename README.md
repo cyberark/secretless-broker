@@ -47,8 +47,8 @@ Secretless is currently licensed under [ASL 2.0](#license)
 
 With many others in the planning stages!
 
-_Note: Since our container process runs as a limited user, socket listeners are required to be created in `/sock` (or another
-limited-user accessible location within `secretless` Docker image)._
+_Note: Since our container process runs as a limited (non-root) user, socket listeners are required to be shared in `/sock` (or another
+limited-user accessible location within `secretless` Docker image) and/or with proper UID/GID permissions._
 
 # Why Secretless?
 

@@ -32,9 +32,11 @@ RUN mkdir -p /lib64 && \
     # Add Limited user
     apk update && \
     apk add shadow && \
-    groupadd -r secretless && \
+    groupadd -r secretless \
+             -g 777 && \
     useradd -c "secretless runner account" \
             -g secretless \
+            -u 777 \
             -m \
             -r \
             secretless && \

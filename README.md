@@ -405,6 +405,16 @@ Then run the test cases:
 $ ./bin/test
 ```
 
+If you are on a Mac, you may also test the OSX Keychain provider:
+```sh-session
+cd test/keychain_provider/
+go test -v keychain_provider_test.go
+```
+This test will not be run as part of the test suite, since it requires access
+to the Mac OSX Keychain. You will be prompted for your password when running
+this test, as it temporarily adds a generic password to your account, and
+verifies that it can retrieve the value.
+
 # Performance
 
 Using Secretless reduces the transaction throughput by about 25% on Postgresql. Once the connection to the backend database is established, Secretless runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:

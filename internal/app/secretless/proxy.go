@@ -80,6 +80,10 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin
 	return listener
 }
 
+// ReloadListeners will loop through the listeners and shut them down
+// As each listener is shut down the WaitGroup is decremented, and once the
+// counter is zero the Proxy.Run loop will complete and restart, reloading all
+// of the listeners.
 func (p *Proxy) ReloadListeners() error {
 	if p.Listeners == nil || len(p.Listeners) == 0 {
 		log.Println("WARN: No listeners to reload!")

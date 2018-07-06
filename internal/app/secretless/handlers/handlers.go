@@ -9,6 +9,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
+// HandlerFactories contains the list of built-in handler factories
 var HandlerFactories = map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler{
 	"http/aws":    http.AWSHandlerFactory,
 	"http/conjur": http.ConjurHandlerFactory,

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/conjurinc/secretless/internal/pkg/provider/keychain_provider"
+	"github.com/conjurinc/secretless/internal/pkg/provider/keychain"
 	"github.com/conjurinc/secretless/pkg/secretless"
 )
 
@@ -36,5 +36,5 @@ func (p KeychainProvider) Value(id string) ([]byte, error) {
 	service := tokens[0]
 	account := tokens[1]
 
-	return keychain_provider.GetGenericPassword(service, account)
+	return keychain.GetGenericPassword(service, account)
 }

@@ -99,9 +99,10 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	return
 }
 
+// Authenticate is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("pg listener does not use Authenticate!")
+	return errors.New("pg listener does not use Authenticate")
 }
 
 // GetConfig implements secretless.Handler

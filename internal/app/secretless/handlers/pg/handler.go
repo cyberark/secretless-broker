@@ -113,9 +113,10 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
+// Authenticate is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("pg listener does not use Authenticate!")
+	return errors.New("pg listener does not use Authenticate")
 }
 
 // GetConfig implements secretless.Handler
@@ -133,9 +134,10 @@ func (h *Handler) GetBackendConnection() net.Conn {
 	return h.Backend
 }
 
+// LoadKeys is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("pg handler does not use LoadKeys!")
+	return errors.New("pg handler does not use LoadKeys")
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

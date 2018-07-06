@@ -134,9 +134,10 @@ func (h *AWSHandler) GetBackendConnection() net.Conn {
 	return nil
 }
 
+// LoadKeys is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *AWSHandler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("http/aws handler does not use LoadKeys!")
+	return errors.New("http/aws handler does not use LoadKeys")
 }
 
 // AWSHandlerFactory instantiates a handler given HandlerOptions

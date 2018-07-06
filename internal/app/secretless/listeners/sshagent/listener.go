@@ -117,6 +117,7 @@ func (l *Listener) Shutdown() error {
 	return l.NetListener.Close()
 }
 
+// ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,

@@ -9,6 +9,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
 )
 
+// ListenerFactories contains the list of built-in listener factories
 var ListenerFactories = map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener{
 	"http":      http.ListenerFactory,
 	"mysql":     mysql.ListenerFactory,

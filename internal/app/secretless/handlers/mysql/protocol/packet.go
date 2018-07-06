@@ -31,14 +31,14 @@ import (
 	"net"
 )
 
-//...
+// ConnSettings contains the connection settings
 type ConnSettings struct {
 	ClientCapabilities uint32
 	ServerCapabilities uint32
 	SelectedDb         string
 }
 
-//...
+// DeprecateEOFSet checks whether ClientDeprecateEOF is set on the client or server
 func (h *ConnSettings) DeprecateEOFSet() bool {
 	return ((ClientDeprecateEOF & h.ServerCapabilities) != 0) &&
 		((ClientDeprecateEOF & h.ClientCapabilities) != 0)
@@ -130,16 +130,18 @@ func ReadPrepareResponse(conn net.Conn) ([]byte, byte, error) {
 	return nil, 0, nil
 }
 
+// ReadErrMessage reads the message in an error packet
 func ReadErrMessage(errPacket []byte) string {
 	return string(errPacket[13:])
 }
 
+// ReadShowFieldsResponse reads the response with deprecateEof set to true
 func ReadShowFieldsResponse(conn net.Conn) ([]byte, byte, error) {
 	return ReadResponse(conn, true)
 }
 
-// ReadResponse ...
-func ReadResponse(conn net.Conn, deprecateEof bool) ([]byte, byte, error) {
+// ReadResponse reads the response
+func ReadResponse(conn net.Conn, deprecateEOF bool) ([]byte, byte, error) {
 	pkt, err := ReadPacket(conn)
 	if err != nil {
 		return nil, 0, err
@@ -159,7 +161,7 @@ func ReadResponse(conn net.Conn, deprecateEof bool) ([]byte, byte, error) {
 
 	data = append(data, pkt...)
 
-	if !deprecateEof {
+	if !deprecateEOF {
 		pktReader := bytes.NewReader(pkt[4:])
 		columns, _ := ReadLenEncodedInteger(pktReader)
 

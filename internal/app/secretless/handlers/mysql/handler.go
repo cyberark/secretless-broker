@@ -95,9 +95,10 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
+// Authenticate is unused here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("mysql listener does not use Authenticate!")
+	return errors.New("mysql listener does not use Authenticate")
 }
 
 // GetConfig implements secretless.Handler
@@ -115,9 +116,10 @@ func (h *Handler) GetBackendConnection() net.Conn {
 	return h.Backend
 }
 
+// LoadKeys is unused here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("mysql handler does not use LoadKeys!")
+	return errors.New("mysql handler does not use LoadKeys")
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

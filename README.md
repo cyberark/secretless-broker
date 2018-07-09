@@ -23,17 +23,17 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 
 Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service. 
 
-To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the backend service from a secrets vault such as Conjur, a keychain service, text files, or other sources. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend.
+To provide Secretless access to a backend service, a "handler" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the backend service from a secrets vault such as Conjur, a keychain service, text files, or other sources. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend.
 
 # Currently supported
 
 - MySQL (Socket)
 - PostgreSQL (Socket and TCP)
 - SSH
-- SSHAgent (OSX and Linux keyrings)
-- HTTP (Conjur and AWS auth providers)
+- SSH-Agent
+- HTTP (Conjur and AWS authorization strategies)
 
-With many others in plans!
+With many others in the planning stages!
 
 # Why Secretless?
 
@@ -133,7 +133,7 @@ postgres=# select current_user;
 
 ## Smile and grab a :cookie: because it was too easy!
 
-You have just delegated responsibilty for keeping credentials secure away from your app!
+You have just delegated responsibilty for keeping credentials securely isolated from your app!
 
 # Longer example with Docker images
 
@@ -329,6 +329,7 @@ _Please note: Handler API interface signatures are currently under heavy develop
 # Plugins
 
 Plugins can be used to extend the functionality of Secretless via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
+
 - Listener plugins
 - Handler plugins
 - Connection management plugins

@@ -26,7 +26,7 @@ All plugins are currently loaded in the following manner:
 - Directory in `/usr/local/lib/secretless` is listed and any `*.so` files are iterated over. Sub-directory traversal
 is not supported at this time.
 - Each shared library plugin is searched for these variables:
-  - [`PluginApiVersion`](#pluginapiversion)
+  - [`PluginAPIVersion`](#pluginapiversion)
   - [`PluginInfo`](#plugininfo)
   - [`GetListeners`](#getlisteners)
   - [`GetHandlers`](#gethandlers)
@@ -37,10 +37,10 @@ is not supported at this time.
  - Managers are instantiated.
  - Listeners and handlers are instantiated by id whenever a configuration references them.
   
- ### PluginApiVersion 
+ ### PluginAPIVersion 
  (returns `string`)
   
-`PluginApiVersion` string indicates the target API version of Secretless and must match the
+`PluginAPIVersion` string indicates the target API version of Secretless and must match the
 [supported version](https://github.com/conjurinc/secretless/blob/master/internal/pkg/plugin/manager.go#L108) list in the
 main daemon.
 
@@ -79,10 +79,10 @@ factory parameter like the rest of the factory maps in the future releases_
 
 ## Example plugin
 ```
-var PluginApiVersion = "0.0.6"
+var PluginAPIVersion = "0.0.7"
 
 var PluginInfo = map[string]string{
-	"version":     "0.0.6",
+	"version":     "0.0.7",
 	"id":          "test-plugin",
 	"name":        "Test Plugin",
 	"description": "Test plugin to demonstrate plugin functionality",

@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+// ListenPort is the port that the echo server is listening on
 const ListenPort = "6174"
 
 func main() {

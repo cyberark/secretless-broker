@@ -17,7 +17,7 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless"
 	secretlessPkg "github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 var _SupportedFileSuffixes = []string{".so"}
@@ -32,19 +32,22 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 	return false
 }
 
-type PluginManager struct {
+// Manager contains the main proxy and all connection managers, listener factories,
+// and handler factories that are available
+type Manager struct {
 	ConnectionManagers map[string]plugin_v1.ConnectionManager
 	HandlerFactories   map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
 	ListenerFactories  map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
 	Proxy              secretless.Proxy
 }
 
-var _singleton *PluginManager
+var _singleton *Manager
 var _once sync.Once
 
-func GetManager() *PluginManager {
+// GetManager returns the manager, and creates it if it doesn't exist
+func GetManager() *Manager {
 	_once.Do(func() {
-		_singleton = &PluginManager{
+		_singleton = &Manager{
 			ConnectionManagers: make(map[string]plugin_v1.ConnectionManager),
 			HandlerFactories:   make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
 			ListenerFactories:  make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
@@ -54,14 +57,14 @@ func GetManager() *PluginManager {
 	return _singleton
 }
 
-func (pluginManager *PluginManager) _ReloadConfig(newConfig config.Config) error {
+func (manager *Manager) _ReloadConfig(newConfig config.Config) error {
 	log.Println("----------------------------")
 	log.Println("Reloading...")
-	pluginManager.Proxy.Config = newConfig
-	return pluginManager.Proxy.ReloadListeners()
+	manager.Proxy.Config = newConfig
+	return manager.Proxy.ReloadListeners()
 }
 
-func (pluginManager *PluginManager) _RegisterShutdownSignalHandlers() {
+func (manager *Manager) _RegisterShutdownSignalHandlers() {
 	log.Println("Registering shutdown signal listeners...")
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel,
@@ -76,14 +79,14 @@ func (pluginManager *PluginManager) _RegisterShutdownSignalHandlers() {
 		exitSignal := <-signalChannel
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
 
-		pluginManager.Shutdown()
+		manager.Shutdown()
 
 		log.Printf("Exiting...")
 		os.Exit(0)
 	}()
 }
 
-func (pluginManager *PluginManager) _RegisterReloadSignalHandlers() {
+func (manager *Manager) _RegisterReloadSignalHandlers() {
 	log.Println("Registering reload signal listeners...")
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, syscall.SIGUSR1)
@@ -92,21 +95,22 @@ func (pluginManager *PluginManager) _RegisterReloadSignalHandlers() {
 		for {
 			reloadSignal := <-signalChannel
 			log.Printf("Intercepted reload signal '%v'. Reloading...", reloadSignal)
-			pluginManager._ReloadConfig(pluginManager.Proxy.Config)
+			manager._ReloadConfig(manager.Proxy.Config)
 		}
 	}()
 }
 
-func (pluginManager *PluginManager) RegisterSignalHandlers() {
-	pluginManager._RegisterShutdownSignalHandlers()
-	pluginManager._RegisterReloadSignalHandlers()
+// RegisterSignalHandlers registers shutdown and reload signal handlers
+func (manager *Manager) RegisterSignalHandlers() {
+	manager._RegisterShutdownSignalHandlers()
+	manager._RegisterReloadSignalHandlers()
 }
 
-// _IsSupportedPluginApiVersion returns a boolean indicating if we support
+// _IsSupportedPluginAPIVersion returns a boolean indicating if we support
 // the interface API version that plugin is advertising
 // TODO: Support a list of supported versions
-func _IsSupportedPluginApiVersion(version string) bool {
-	return version == "0.0.6"
+func _IsSupportedPluginAPIVersion(version string) bool {
+	return version == "0.0.7"
 }
 
 // LoadPlugin tries to load all internal plugin info strings
@@ -121,7 +125,7 @@ func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
 }
 
 // _LoadConnectionManagers appends all managers from the plugin to the pluginManager
-func _LoadConnectionManagers(pluginManager *PluginManager, config config.Config,
+func _LoadConnectionManagers(manager *Manager, config config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
 
 	rawManagerPluginsFunc, err := pluginObj.Lookup("GetConnectionManagers")
@@ -132,21 +136,21 @@ func _LoadConnectionManagers(pluginManager *PluginManager, config config.Config,
 	// TODO: Handle different interface versions
 	connManagerPluginsFunc, ok := rawManagerPluginsFunc.(func() map[string]func() plugin_v1.ConnectionManager)
 	if !ok {
-		return errors.New("ERROR! Could not cast GetConnectionManagers to proper type!")
+		return errors.New("ERROR: Could not cast GetConnectionManagers to proper type")
 	}
 	connManagerPlugins := connManagerPluginsFunc()
 
-	for managerId, connManagerPluginFactory := range connManagerPlugins {
+	for managerID, connManagerPluginFactory := range connManagerPlugins {
 		connManagerPlugin := connManagerPluginFactory()
-		pluginManager.ConnectionManagers[managerId] = connManagerPlugin
-		log.Printf("Manager '%s' added from plugin %s", managerId, pluginName)
+		manager.ConnectionManagers[managerID] = connManagerPlugin
+		log.Printf("Manager '%s' added from plugin %s", managerID, pluginName)
 	}
 
 	return nil
 }
 
 // _LoadHandlersFromPlugin appends all handlers from the plugin to the pluginManager
-func _LoadHandlersFromPlugin(pluginManager *PluginManager, config config.Config,
+func _LoadHandlersFromPlugin(manager *Manager, config config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
 
 	rawHandlerPluginsFunc, err := pluginObj.Lookup("GetHandlers")
@@ -157,19 +161,19 @@ func _LoadHandlersFromPlugin(pluginManager *PluginManager, config config.Config,
 	// TODO: Handle different interface versions
 	handlerPluginsFunc, ok := rawHandlerPluginsFunc.(func() map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler)
 	if !ok {
-		return errors.New("ERROR! Could not cast GetcwHandlers to proper type!")
+		return errors.New("ERROR: Could not cast GetcwHandlers to proper type")
 	}
 	handlerPlugins := handlerPluginsFunc()
-	for handlerId, handlerFactory := range handlerPlugins {
-		pluginManager.HandlerFactories[handlerId] = handlerFactory
-		log.Printf("Handler factory '%s' added from plugin %s", handlerId, pluginName)
+	for handlerID, handlerFactory := range handlerPlugins {
+		manager.HandlerFactories[handlerID] = handlerFactory
+		log.Printf("Handler factory '%s' added from plugin %s", handlerID, pluginName)
 	}
 
 	return nil
 }
 
 // _LoadListenersFromPlugin appends all listeners from the plugin to the pluginManager
-func _LoadListenersFromPlugin(pluginManager *PluginManager, config config.Config,
+func _LoadListenersFromPlugin(manager *Manager, config config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
 
 	rawListenerPluginsFunc, err := pluginObj.Lookup("GetListeners")
@@ -180,68 +184,68 @@ func _LoadListenersFromPlugin(pluginManager *PluginManager, config config.Config
 	// TODO: Handle different interface versions
 	listenerPluginsFunc, ok := rawListenerPluginsFunc.(func() map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener)
 	if !ok {
-		return errors.New("ERROR! Could not cast GetListeners to proper type!")
+		return errors.New("ERROR: Could not cast GetListeners to proper type")
 	}
 	listenerPlugins := listenerPluginsFunc()
-	for listenerId, listenerFactory := range listenerPlugins {
-		pluginManager.ListenerFactories[listenerId] = listenerFactory
-		log.Printf("Listener factory '%s' added from plugin %s", listenerId, pluginName)
+	for listenerID, listenerFactory := range listenerPlugins {
+		manager.ListenerFactories[listenerID] = listenerFactory
+		log.Printf("Listener factory '%s' added from plugin %s", listenerID, pluginName)
 	}
 
 	return nil
 }
 
-func (pluginManager *PluginManager) _RunHandler(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler {
+func (manager *Manager) _RunHandler(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	// Ensure that we have this handler
-	if _, ok := pluginManager.HandlerFactories[id]; !ok {
+	if _, ok := manager.HandlerFactories[id]; !ok {
 		log.Panicf("Error! Unrecognized handler id '%s'", id)
 	}
 
-	return pluginManager.HandlerFactories[id](options)
+	return manager.HandlerFactories[id](options)
 }
 
-func (pluginManager *PluginManager) _RunListener(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener {
+func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	// Ensure that we have this listener
-	if _, ok := pluginManager.ListenerFactories[id]; !ok {
-		log.Panicf("Error! Unrecognized listener id '%s'")
+	if _, ok := manager.ListenerFactories[id]; !ok {
+		log.Panicf("Error: Unrecognized listener id '%s'", id)
 	}
 
-	return pluginManager.ListenerFactories[id](options)
+	return manager.ListenerFactories[id](options)
 }
 
 // Run is the main wait loop once we load all the plugins
-func (pluginManager *PluginManager) Run(configuration config.Config) error {
-	pluginManager.InitializeConnectionManagers(configuration)
+func (manager *Manager) Run(configuration config.Config) error {
+	manager.InitializeConnectionManagers(configuration)
 
-	pluginManager.Proxy = secretless.Proxy{
+	manager.Proxy = secretless.Proxy{
 		Config:          configuration,
-		EventNotifier:   pluginManager,
-		RunHandlerFunc:  pluginManager._RunHandler,
-		RunListenerFunc: pluginManager._RunListener,
+		EventNotifier:   manager,
+		RunHandlerFunc:  manager._RunHandler,
+		RunListenerFunc: manager._RunListener,
 	}
 
-	pluginManager.Proxy.Run()
+	manager.Proxy.Run()
 
 	return nil
 }
 
 // LoadInternalPlugins loads all handlers/listeners/managers that are included in secretless by default
-func (pluginManager *PluginManager) LoadInternalPlugins(config config.Config) error {
+func (manager *Manager) LoadInternalPlugins(config config.Config) error {
 	log.Println("Enumerating internal plugins...")
 
-	for managerId, managerFactory := range secretless.InternalConnectionManagers {
-		pluginManager.ConnectionManagers[managerId] = managerFactory()
-		log.Printf("Manager factory '%s' added.", managerId)
+	for managerID, managerFactory := range secretless.InternalConnectionManagers {
+		manager.ConnectionManagers[managerID] = managerFactory()
+		log.Printf("Manager factory '%s' added.", managerID)
 	}
 
-	for handlerId, handlerFactory := range secretless.InternalHandlers {
-		pluginManager.HandlerFactories[handlerId] = handlerFactory
-		log.Printf("Handler factory '%s' added.", handlerId)
+	for handlerID, handlerFactory := range secretless.InternalHandlers {
+		manager.HandlerFactories[handlerID] = handlerFactory
+		log.Printf("Handler factory '%s' added.", handlerID)
 	}
 
-	for listenerId, listenerFactory := range secretless.InternalListeners {
-		pluginManager.ListenerFactories[listenerId] = listenerFactory
-		log.Printf("Listener factory '%s' added.", listenerId)
+	for listenerID, listenerFactory := range secretless.InternalListeners {
+		manager.ListenerFactories[listenerID] = listenerFactory
+		log.Printf("Listener factory '%s' added.", listenerID)
 	}
 
 	log.Println("Completed loading internal plugins.")
@@ -249,7 +253,7 @@ func (pluginManager *PluginManager) LoadInternalPlugins(config config.Config) er
 }
 
 // LoadLibraryPlugins loads all shared object files in `path`
-func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) error {
+func (manager *Manager) LoadLibraryPlugins(path string, config config.Config) error {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
@@ -268,16 +272,16 @@ func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) er
 		}
 
 		// Grab version of interface that the plugin is advertising
-		rawPluginApiVersion, err := pluginObj.Lookup("PluginApiVersion")
+		rawPluginAPIVersion, err := pluginObj.Lookup("PluginAPIVersion")
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		pluginApiVersion := *rawPluginApiVersion.(*string)
+		pluginAPIVersion := *rawPluginAPIVersion.(*string)
 
 		// Bail if plugin interface API is an unsupported version
-		log.Printf("Trying to load %s (API v%s)...", file.Name(), pluginApiVersion)
-		if !_IsSupportedPluginApiVersion(pluginApiVersion) {
+		log.Printf("Trying to load %s (API v%s)...", file.Name(), pluginAPIVersion)
+		if !_IsSupportedPluginAPIVersion(pluginAPIVersion) {
 			log.Printf("ERROR! Plugin %s is using an unsupported API version! Skipping!", file.Name())
 			continue
 		}
@@ -298,19 +302,19 @@ func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) er
 		log.Println(string(formattedInfo))
 
 		// Load managers
-		if err := _LoadConnectionManagers(m, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadConnectionManagers(manager, config, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
 
 		// Load handlers
-		if err := _LoadHandlersFromPlugin(m, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadHandlersFromPlugin(manager, config, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
 
 		// Load listeners
-		if err := _LoadListenersFromPlugin(m, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadListenersFromPlugin(manager, config, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
@@ -319,67 +323,85 @@ func (m *PluginManager) LoadLibraryPlugins(path string, config config.Config) er
 	return nil
 }
 
-func (pluginManager *PluginManager) InitializeConnectionManagers(c config.Config) error {
+// InitializeConnectionManagers loops through the connection managers and initializes them
+func (manager *Manager) InitializeConnectionManagers(c config.Config) error {
 	log.Println("Initializing managers...")
-	for managerId, connManagerPlugin := range pluginManager.ConnectionManagers {
-		err := connManagerPlugin.Initialize(c, pluginManager._ReloadConfig)
+	for managerID, connManagerPlugin := range manager.ConnectionManagers {
+		err := connManagerPlugin.Initialize(c, manager._ReloadConfig)
 		if err != nil {
-			log.Printf("Failed to initialize manager '%s': %s\n", managerId, err.Error())
+			log.Printf("Failed to initialize manager '%s': %s\n", managerID, err.Error())
 
 			// TODO: Decide if manager initialization erroring is a fatal error.
 			//       For now we treat it as a non-fatal error.
-			delete(pluginManager.ConnectionManagers, managerId)
+			delete(manager.ConnectionManagers, managerID)
 			continue
 		}
-		log.Printf("Manager '%s' initialized.", managerId)
+		log.Printf("Manager '%s' initialized.", managerID)
 	}
 	log.Println("Initializing managers done.")
 
 	return nil
 }
 
-func (m *PluginManager) CreateListener(l plugin_v1.Listener) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.CreateListener(l)
+// CreateListener loops through the connection managers and creates the listener l
+func (manager *Manager) CreateListener(l plugin_v1.Listener) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.CreateListener(l)
 	}
 }
-func (m *PluginManager) NewConnection(l plugin_v1.Listener, c net.Conn) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.NewConnection(l, c)
+
+// NewConnection loops through the connection managers and adds a connection to the listener l
+func (manager *Manager) NewConnection(l plugin_v1.Listener, c net.Conn) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.NewConnection(l, c)
 	}
 }
-func (m *PluginManager) CloseConnection(c net.Conn) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.CloseConnection(c)
+
+// CloseConnection loops through the connection managers and closes the connection c
+func (manager *Manager) CloseConnection(c net.Conn) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.CloseConnection(c)
 	}
 }
-func (m *PluginManager) CreateHandler(h plugin_v1.Handler, c net.Conn) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.CreateHandler(h, c)
+
+// CreateHandler loops through the connection managers to create the handler h
+func (manager *Manager) CreateHandler(h plugin_v1.Handler, c net.Conn) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.CreateHandler(h, c)
 	}
 }
-func (m *PluginManager) DestroyHandler(h plugin_v1.Handler) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.DestroyHandler(h)
+
+// DestroyHandler loops through the connection managers to destroy the handler h
+func (manager *Manager) DestroyHandler(h plugin_v1.Handler) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.DestroyHandler(h)
 	}
 }
-func (m *PluginManager) ResolveVariable(p secretlessPkg.Provider, id string, value []byte) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.ResolveVariable(p, id, value)
+
+// ResolveVariable loops through the connection managers to resolve the variable specified
+func (manager *Manager) ResolveVariable(p secretlessPkg.Provider, id string, value []byte) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.ResolveVariable(p, id, value)
 	}
 }
-func (m *PluginManager) ClientData(c net.Conn, buf []byte) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.ClientData(c, buf)
+
+// ClientData loops through the connection managers to proxy data from the client
+func (manager *Manager) ClientData(c net.Conn, buf []byte) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.ClientData(c, buf)
 	}
 }
-func (m *PluginManager) ServerData(c net.Conn, buf []byte) {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.ServerData(c, buf)
+
+// ServerData loops through the connection managers to proxy data from the server
+func (manager *Manager) ServerData(c net.Conn, buf []byte) {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.ServerData(c, buf)
 	}
 }
-func (m *PluginManager) Shutdown() {
-	for _, managerPlugin := range m.ConnectionManagers {
-		managerPlugin.Shutdown()
+
+// Shutdown loops through the connection managers to call Shutdown
+func (manager *Manager) Shutdown() {
+	for _, connectionManager := range manager.ConnectionManagers {
+		connectionManager.Shutdown()
 	}
 }

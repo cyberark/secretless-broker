@@ -1,4 +1,4 @@
-package plugin_v1
+package v1
 
 import (
 	"net"

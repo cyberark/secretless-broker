@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -134,9 +134,10 @@ func (h *AWSHandler) GetBackendConnection() net.Conn {
 	return nil
 }
 
+// LoadKeys is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *AWSHandler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("http/aws handler does not use LoadKeys!")
+	return errors.New("http/aws handler does not use LoadKeys")
 }
 
 // AWSHandlerFactory instantiates a handler given HandlerOptions

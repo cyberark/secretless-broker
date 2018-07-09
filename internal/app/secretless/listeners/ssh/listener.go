@@ -11,7 +11,7 @@ import (
 
 	"github.com/conjurinc/secretless/internal/pkg/util"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
@@ -19,7 +19,6 @@ import (
 //
 // NOTE: This MITM approach to SSH is experimental. The ssh-agent approach is
 // better validated and probably better all-around.
-
 type Listener struct {
 	Config         config.Listener
 	EventNotifier  plugin_v1.EventNotifier
@@ -152,6 +151,7 @@ func (l *Listener) Shutdown() error {
 	return l.NetListener.Close()
 }
 
+// ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,

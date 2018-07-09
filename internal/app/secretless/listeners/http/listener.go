@@ -13,10 +13,11 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
+// Listener listens for and handles new connections
 type Listener struct {
 	Config         config.Listener
 	EventNotifier  plugin_v1.EventNotifier
@@ -71,6 +72,7 @@ func copyHeaders(dst, src http.Header) {
 	}
 }
 
+// LookupHandler returns the handler that matches the request URL
 func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 	for _, handlerConfig := range l.HandlerConfigs {
 		for _, pattern := range handlerConfig.Patterns {
@@ -161,6 +163,7 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Listen serves HTTP requests
 func (l *Listener) Listen() {
 	caCertPool, err := x509.SystemCertPool()
 	if err != nil {
@@ -215,6 +218,7 @@ func (l *Listener) Shutdown() error {
 	return l.NetListener.Close()
 }
 
+// ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,

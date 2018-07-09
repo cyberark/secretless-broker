@@ -1,0 +1,69 @@
+# SECTION: QUICK START APPLICATION
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quick-start-application
+  namespace: quick-start
+  labels:
+    app: quick-start-application
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: quick-start-application
+  template:
+    metadata:
+      labels:
+        app: quick-start-application
+    spec:
+      containers:
+      - name: secretless
+        image: secretless-client:latest
+        imagePullPolicy: Never
+        args: ["-f", "/etc/secretless/secretless.yml"]
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: secret
+          mountPath: /etc/secret
+          readOnly: true
+        - name: config
+          mountPath: /etc/secretless
+          readOnly: true
+      - name: quick-start-application
+        image: quick-start-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DATABASE_URL
+          value: postgresql://localhost:5432/postgres?sslmode=disable
+      volumes:
+      - name: secret
+        secret:
+          secretName: quick-start-backend-credentials
+          items:
+          - key: address
+            path: address
+          - key: username
+            path: username
+          - key: password
+            path: password
+      - name: config
+        configMap:
+          name: quick-start-application-secretless-config
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: quick-start-application
+  namespace: quick-start
+spec:
+  selector:
+    app: quick-start-application
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30002
+  type: NodePort

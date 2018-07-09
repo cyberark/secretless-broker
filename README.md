@@ -31,7 +31,7 @@ To provide Secretless access to a backend service, a "handler" implements the pr
 - PostgreSQL (Socket and TCP)
 - SSH
 - SSH-Agent
-- HTTP
+- HTTP (Conjur and AWS authorization strategies)
 
 With many others in the planning stages!
 

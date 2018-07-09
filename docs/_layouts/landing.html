@@ -3,67 +3,97 @@ layout: default
 id: home
 ---
 <div class="container">
-	<div class="card introduction" id="intro">
+	<div class="card-features about" id="about">
 		<div class="row sub-card">
-			<p class="card-heading">Why Secretless?</p>
-			<p>“Secretless” is designed to solve two problems. The first is loss or theft of credentials, which can occur by:</p>
-			<ol>
-				<li>Accidental credential leakage (e.g. credential checked into source control, etc)</li>
-				<li>An attack on a privileged user (e.g. phishing, developer machine compromises, etc)</li>
-				<li>A vulnerability in an application (e.g. remote code execution, environment variable dump, etc)</li>
-			</ol>
-			<p>The second is downtime which is caused when applications or services do not respond to credential rotation and crash or get locked out of backend data sources as a result</p>
-			<p>Keeping secrets in a vault is a good practice. However, when a client “checks out” a secret from a vault, where does it go? Often, directly into unprotected application memory at which point that client app has now part of the threat surface. There are a stringent set of best practices and recommendations that should be be followed by every user and application which checks secrets out of a vault but even if you harden the app in every possible way, it does not protect you from 0-day vulnerabilities in the app, underlaying framework, and/or the programming language used.</p>
-			<p>In the long run, it’s a losing battle to try and train every user and application developer about how to safely handle a secret once they’ve obtained it even if you can mitigate all of the attack surfaces of the client app itself. There are so many things that can go wrong, and people (and applications) have better things to worry about than babysitting secrets (such doing their jobs). Do you want developers to write features or try to be security engineers too?</p>
-			<p>Secretless alleviates users and applications from the burden of handling secrets. Instead of checking out secrets, when a user or application needs access to something important, it uses the Secretless proxy to establish the connection on its behalf.</p>
-			<p>Secretless is the software is specifically written to be really good at interacting with a variety of vaults and abstracting away the security to a specialized module that can easily be audited and expanded with custom plugins. It does a really good job of taking care of any secrets that it might obtain from a vault, and it does it the same way no matter the developer, technology, or platform. Additionally, it knows what to do when a secret has been changed so that the client users and code never have to respond to changing secrets or even know that they are changing!</p>
-
+			<div class="col-md-4 about-subitem">
+				<div class="inner">
+					<div class ="in-line-frame">
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
+						<p class="inner-text">Extend Trust</p>
+					</div>
+					<p class="inner-text-description">Credentials carry privilege. Do you trust your applications to manage sensitive information? Secretless provides a secure interface for applications to access external resources - and allows you to remove your applications from the threat surface.</p>
+				</div>
+			</div>
+			<div class="col-md-4 about-subitem">
+				<div class="inner">
+					<div class ="in-line-frame">
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
+						<p class="inner-text">Security Simplified</p>
+					</div>
+					<p class="inner-text-description">
+					Dynamic secrets are tricky to manage. Until now, applications required additional logic to handle external password rotations. With Secretless, no code changes or dependencies are necessary - the Secretless broker handles it all for you.</p>
+				</div>
+			</div>
+			<div class="col-md-4 about-subitem">
+				<div class="inner">						
+					<div class ="in-line-frame">
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>	
+						<p class="inner-text">Keep Moving</p>
+					</div>
+					<p class="inner-text-description">Let developers focus on what they do best:  writing code. Secretless gives you the freedom to supply credentials from your existing vault, and it takes care of communication with your vault of choice for you. Quit trying to understand vault-specific APIs or integration tools, and focus on adding value to your applications.</p>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
 <div class="container">
-	<div class="card about" id="about">
+	<div class="card arch">
 		<div class="row sub-card">
-			<p class="card-heading">About</p>
-			<div class="col-md-6 about-subitem">
-				<div class="inner">
-					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<p class="inner-text">Reduce Attack Surface</p>
-					</div>
-					<p class="inner-text-description">Any secret acquired and used increases your attack surface. Secretless acts as the mediator, removing direct communication between the client and the resource and shrinking your attack surface.</p>
-				</div>
-			</div>
-			<div class="col-md-6 about-subitem">
-				<div class="inner">
-					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<p class="inner-text">Worry-Free Secret Management</p>
-					</div>
-					<p class="inner-text-description"></p>
-					<p>Increase developer productivity by allowing them to focus more on doing what they do best and less on security training and secret handling.</p>
-				</div>
-			</div>
+			<p class="card-heading">Traditional Architecture</p>
+		    <div class="col-md-7">
+      			<p class="card-subheading">Developer Responsibilities</p>
+      			<ul class="arch-list">
+      				<li>Retrieve secrets from vault​</li>
+      				<li>Securely handle retrieved secrets within app​</li>
+      				<li>Resiliently handle secret rotations</li>
+      				<li>Manage connection disruptions</li>
+      			</ul>
+   			 </div>
+		    <div class="col-md-5">
+		      <img class="trad-img" src="/img/traditionalarch.png" alt="Traditional Architecture">
+		    </div>	
 		</div>
-		<div class="row">
-			<div class="col-md-6 about-subitem">
-				<div class="inner">						
-						<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						
-						<p class="inner-text">Transparent Secret Rotation</p>
-						</div>
-						<p>Rotation and safe secret handling is the responsibility of the ”secretless” client and thus, does not require any configurational changes.</p>
-					</div>
-					</div>
-			<div class="col-md-6 about-subitem">
-				<div class="inner">
-					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<p class="inner-text">Open Source and Audited for Security</p>
-					</div>
-				</div>
-			</div>
+
+		<div class="row sub-card">
+			<p class="card-heading">Secretless Architecture</p>
+			<div class="col-md-5">
+		      <img class="trad-img" src="/img/secretarch.png" alt="Traditional Architecture">
+		    </div>	
+		    <div class="col-md-7">
+		    	<p class="card-subheading">Broker Responsibilities</p>
+		    	<ul class="arch-list">
+			    	<li>Retrieve secrets from vault​</li>
+			    	<li>Securely handle retrieved secrets​</li>
+			    	<li>Transparently handle secret rotations</li>
+			    </ul>
+      			
+      			<p class="card-subheading">Developer Responsibilities</p>
+      			<ul class="arch-list">
+      				<li>Build app to be responsive to connection disruption</li>
+      			</ul>
+   			 </div>
+		 
+		</div>
+	</div>
+</div>
+
+<div class="container-fluid">
+	<div class="card introduction" id="intro">
+		<div class="row sub-card">
+			<p class="card-heading">It's simple to get started!</p>
+			<ol>
+				<li>Download and run the Secretless quick-start as a Docker container:
+				<pre>docker container run --rm -p 5454:5454 cyberark/secretless-quickstart</pre></li>
+				<li>That's all! Now you can connect to the password-protected PostgreSQL database via the Secretless broker, without knowing its password.<p>Give it a try:</p>
+<pre>psql \
+--host localhost \
+--port 5454 \
+--username secretless \
+-d quickstart \
+-c 'select * from counties;'
+</pre></li>
+			</ol>
+
 		</div>
 	</div>
 </div>

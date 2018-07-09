@@ -24,11 +24,15 @@ hr{
 button:focus{
 	outline: 0;
 }
+pre{
+	background-color: white;
+}
 .navbar-list li{
 	font-size:14px;
+	text-transform: uppercase;
 }
 .navbar-list a{
-	color: black;
+	color: #fff;
 }
 .navbar-list a:hover{
 	text-decoration: none;
@@ -62,6 +66,7 @@ button:focus{
 	 text-decoration: none;
 }
 .side-nav{
+	box-shadow: 0 2px 4px rgba(0,0,0,.1);
 	background-color: #f8f8f8;
 	display: flex;
 	justify-content: center;
@@ -78,7 +83,8 @@ button:focus{
 }
 #frame{
 	margin-bottom: 0;
-	height: 525px;
+	height: 465px;
+	background: #383950;
 	border-bottom: 2px solid #e2e2e2
 }
 .docs-subheading{
@@ -98,9 +104,9 @@ button:focus{
 	letter-spacing: 1px;
 	margin-left: 30px;
 }
-.sub-card{
+/*.sub-card{
 	margin-top:20px;
-}
+}*/
 .navbar-list > ul{
 	display: flex;
 	list-style: none;
@@ -115,12 +121,10 @@ button:focus{
 }
 .button{
 	margin: 30px;
-	font-family: 'Open Sans', sans-serif;
+	font-family: 'Source Sans Pro', sans-serif;
     font-size: 16px;
     padding: 10px 50px 10px 50px;
     background: #FFFFFF;
-    /*border: 1px solid #7b8A8E;*/
-    /*box-shadow: 4px 4px 0 rgba(0,0,0,0.1);*/
     color: #7b8A8E;
     display: inline-block;
     font-weight: 600;
@@ -142,7 +146,7 @@ button:focus{
 	border-radius: 50%;
 	height: 40px;
     width: 40px;
-    margin: -20px -50px;
+    margin: -80px -50px;
     position: absolute;
     top: 120%;
     left: 54%;
@@ -167,14 +171,15 @@ button:focus{
 	text-align: center;
 	font-family: 'Open Sans', sans-serif;
 	margin-top:20px;
+	color: #fff;
 }
 #jumbotron-subtext {
 	font-size: 30px;
 	text-align: center;
 	text-transform: uppercase;
     letter-spacing: 3px;
-	font-family: 'Open Sans', sans-serif;
 	margin-top:20px;
+	color: #fff;
 
 }
 .jumbotron-sub{
@@ -182,12 +187,11 @@ button:focus{
 	justify-content: center;
 	flex-direction: column;
     height: 100px;
-    background: #383950;
+    background-color: #f8f8f8;
 }
 .jumbotron-sub p{
-	color:white;
+	color: #383950;
 	text-align: center;
-
 }
 .fab{
 	font-size: 15px;
@@ -198,6 +202,9 @@ button:focus{
 }
 .inner p {
 	margin-left: 20px;
+}
+.inner-text-description{
+	font-size: 14px;
 }
 .inner-text{
 	margin-left: 0;
@@ -216,6 +223,24 @@ button:focus{
 .introduction-img{
 	width: 450px;
 }
+.arch{
+	margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.trad-img{
+	width: 300px;
+}
+
+.arch-list > li{
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 17px;
+}
+.card-subheading{
+	font-style: italic;
+	font-size: 17px;
+	font-weight: bold;
+}
 .center-block{
     float: none;
     display: block;
@@ -225,12 +250,17 @@ button:focus{
 	padding: 5px 5px 5px 5px;
 }
 .about-subitem .inner{
-    min-height: 200px;
+    min-height: 245px;
     padding: 25px;
     box-shadow: 0 2px 4px rgba(0,0,0,.1);
     border: 1px solid #e2e2e2;
-    margin: 0 0 30px;
-    transition: .8s ease;
+    margin: 0 10px 30px;
+    transition: .5s ease;
+}
+.inner:hover{
+	transform: scale(1.025);
+    box-shadow: 3px 3px 18px rgba(0,.1,0,.2);
+
 }
 .in-line-frame{
 	display: flex;
@@ -255,7 +285,7 @@ button:focus{
 	width: 10px;
 	margin-left: auto;
     margin-right: auto;
-    width: 80%;
+    width:110%;
 }
 .guides{
 	width: 10px;
@@ -276,12 +306,19 @@ button:focus{
     width: 80%;
 }
 .introduction{
-	margin-left: auto;
-    margin-right: auto;
-    width: 80%;
+    margin: 0 auto;
+    width: 60%;
 }
 .card{
-	padding-top: 100px;
+	padding-top: 75px;
+	padding-bottom: 75px;
+}
+.card-docs {
+	padding-top: 20px;
+}
+.card-features{
+	padding-top: 25px;
+
 }
 .docs-heading{
 	color: #7b8A8E;
@@ -289,6 +326,16 @@ button:focus{
 }
 .introduction img{
 	width: 250px;
+}
+.container .container-introduction {
+	width: 100%;
+	position:relative;
+	left:0;
+	right:0;
+}
+.container-fluid{
+	background-color: #f8f8f8;
+	/*box-shadow: 0 3px 4px rgba(0,0,0,.1);*/
 }
 footer{
 	background-color: #4e4f4f;
@@ -300,6 +347,13 @@ footer{
 	position:relative;
 	left:0;
 	right:0;
+	/*    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    background-color: black;
+    margin-left: -50vw;
+    margin-right: -50vw;*/
 }
 
 footer .left-links{

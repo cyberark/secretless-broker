@@ -16,7 +16,7 @@ description: Secretless Documentation
     <p>Using the Secretless Docker image</p>
   </div>
 
-  <div class="card installation">
+  <div class="card-docs installation">
     <p class="card-heading">Installation</p>
     <div class="docs-installation-info">
       <ul>
@@ -26,7 +26,7 @@ description: Secretless Documentation
     </div>
   </div>
 
-  <div class="card configuration">
+  <div class="card-docs configuration">
     <p class="card-heading">Configuration</p>
     <div class="docs-configuration-info">
     <p>The Secretless broker configuration is written in YAML. The configuration for the broker is provided by specifying listeners and handlers, which defines which external services the broker will be connecting to, the credentials needed for each, and how clients will connect to the Secretless broker.</p>
@@ -34,7 +34,7 @@ description: Secretless Documentation
     </div>
   </div>
 
-  <div class="card backends">
+  <div class="card-docs backends">
     <p class="card-heading">Available Backends</p>
     <div class="docs-installation-info">
       <p>Handlers</p>
@@ -57,15 +57,14 @@ description: Secretless Documentation
     </div>
   </div>
 
-
-  <div class="card plugins" id="plugins">
+  <div class="card-docs plugins" id="plugins">
     <p class="card-heading">Plugins</p>
     <div class="docs-plugins-info">
       <p>TODO</p>
     </div>
   </div>
 
-  <div class="card examples" id="examples">
+  <div class="card-docs examples" id="examples">
     <p class="card-heading">Examples</p>
     <div class="docs-examples-info">
       <p>Quick start to run a simple example</p>
@@ -76,5 +75,5 @@ description: Secretless Documentation
         </ul>
     </div>
   </div>
-  </div>
+</div>
 

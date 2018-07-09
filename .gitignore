@@ -14,6 +14,7 @@ doc/**/proxy_tls
 doc/**/myapp
 !doc/**/src/myapp
 test/junit.*
+test/*.xml
 test/plugin/out/
 
 # Remove common editors' swapfiles

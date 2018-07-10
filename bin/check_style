@@ -1,0 +1,60 @@
+#!/bin/bash
+
+project_root="/go/src/github.com/conjurinc/secretless/"
+root_dir_length=${#project_root}
+
+# accepts an input string of style errs and outputs XML
+# the style err string is a newline-delimited list of
+# style errors of the form "file:line:[0-9]*: error"
+# the output is checkstyle-format XML, with a list of
+# errors for each file
+output_xml() {
+  style_errs="${1}"
+
+  echo "<checkstyle>"
+  if [[ ! -z "$style_errs" ]]; then
+    current_file=""
+
+    # loop through each file with errors
+    while IFS= read -r err_line; do
+
+      # get the filename and line # of the error
+      file_and_line_length=$(expr index "$err_line" " ")-2
+      file_and_line=${err_line:0:file_and_line_length}
+
+      IFS=":" read -r -a file_data <<< "$file_and_line"
+      file=${file_data[0]:$root_dir_length}
+      line=${file_data[1]}
+
+      # get the error
+      error=${err_line:$file_and_line_length+2}
+
+      # output the file (if haven't already) and error
+      if [ "$current_file" != "$file" ]; then
+        if [[ ! -z "$current_file" ]]; then
+          echo "  </file>"
+        fi
+        echo "  <file name=\"$file\">"
+        current_file=$file
+      fi
+
+      echo "    <error line=\"$line\" message=\"$error\"></error>"
+    done <<< "$style_errs"
+
+    echo "  </file>"
+  fi
+  echo "</checkstyle>"
+}
+
+style_errs=$(docker run \
+  --rm \
+  secretless-dev \
+  bash -c "
+    go get -u golang.org/x/lint/golint
+    golint /go/src/github.com/conjurinc/secretless/cmd/...
+    golint /go/src/github.com/conjurinc/secretless/internal/...
+    golint /go/src/github.com/conjurinc/secretless/pkg/...
+    golint /go/src/github.com/conjurinc/secretless/test/...
+  ")
+
+output_xml "$style_errs" 2>&1 | tee ./test/golint.xml

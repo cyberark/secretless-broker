@@ -59,6 +59,29 @@ handlers:
 		So(config.Listeners, ShouldHaveLength, 1)
 	})
 
+	Convey("Allows listeners to have debug flag", t, func() {
+		yaml := `
+listeners:
+- name: http_default
+  protocol: http
+  debug: true
+  address: 0.0.0.0:1080
+
+handlers:
+- name: conjur
+  listener: http_default
+  credentials:
+    - name: accessToken
+      provider: conjur
+      id: accessToken
+
+`
+		config, err := Load([]byte(yaml))
+		So(err, ShouldBeNil)
+		So(config.Handlers, ShouldHaveLength, 1)
+		So(config.Listeners, ShouldHaveLength, 1)
+	})
+
 	Convey("Reports an invalid top-level map key", t, func() {
 		yaml := `
 foobar: []
@@ -82,7 +105,7 @@ listeners:
   - protocol: myapp
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Protocol: must be a valid value")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank.")
 	})
 
 	Convey("Reports a Handler which wants to use an undefined Listener", t, func() {

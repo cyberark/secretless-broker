@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
@@ -47,8 +48,17 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 			if !h.HasCredential("accessToken") {
 				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessToken'")
 			}
+		} else if h.Type == "basic_auth" {
+			for _, credential := range [...]string{"username", "password"} {
+				if !h.HasCredential(credential) {
+					errors[strconv.Itoa(i)] = fmt.Errorf("must have credential '" + credential + "'")
+				}
+			}
+		} else {
+			errors[strconv.Itoa(i)] = fmt.Errorf("Handler type is not supported")
 		}
 	}
+
 	return errors.Filter()
 }
 
@@ -95,6 +105,8 @@ func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 
 // Standard net/http function. Shouldn't be used directly, http.Serve will use it.
 func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	listenerDebug := l.Config.Debug
+
 	//r.Header["X-Forwarded-For"] = w.RemoteAddr()
 	if r.Method == "CONNECT" {
 		http.Error(w, "CONNECT is not supported.", 405)
@@ -122,34 +134,38 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		if handler.GetConfig().Debug {
-			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, backendVariables)
+		if listenerDebug || handler.GetConfig().Debug {
+			keys := reflect.ValueOf(backendVariables).MapKeys()
+			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, keys)
 		}
 		if err = handler.Authenticate(backendVariables, r); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
+	} else {
+		log.Printf("WARN: Have no handler for request: %s %s", r.Method, r.URL)
 	}
+
+	handlerDebug := handler != nil && handler.GetConfig().Debug
 
 	r.RequestURI = "" // this must be reset when serving a request with the client
 
-	if handler.GetConfig().Debug {
+	if listenerDebug || handlerDebug {
 		log.Printf("Sending request %v", r)
 	}
 
 	resp, err := l.Transport.RoundTrip(r)
-
 	if err != nil {
-		if handler.GetConfig().Debug {
+		if listenerDebug || handlerDebug {
 			log.Printf("Error: %v", err)
 		}
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), 503)
 		return
 	}
 
 	// Note: resp is likely nil if err is non-nil, so don't access it until you get here.
 
-	if handler.GetConfig().Debug {
+	if listenerDebug || handlerDebug {
 		log.Printf("Received response status: %d", resp.Status)
 	}
 

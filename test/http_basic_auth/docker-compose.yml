@@ -1,0 +1,38 @@
+version: '3.0'
+
+services:
+  nginx:
+    image: nginx:1-alpine
+    ports:
+      - 8080
+    healthcheck:
+      test: ["CMD-SHELL", "curl localhost:8080/test"]
+      interval: 1s
+      timeout: 30s
+    volumes:
+      - ./http-basic-auth.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./basic_auth.htpasswd:/etc/nginx/.htpasswd:ro
+
+  secretless:
+    build:
+      context: ../..
+    environment:
+      HTTP_HOST: nginx
+      HTTP_PORT: 8080
+    volumes:
+      - ./secretless.yml:/secretless.yml
+    depends_on:
+      - nginx
+
+  test:
+    image: alpine:latest
+    environment:
+      http_proxy: http://secretless:8080
+    command: wget -q -O- nginx:8080/
+    depends_on:
+      - secretless
+
+  dev:
+    image: secretless-dev
+    volumes:
+      - ../..:/go/src/github.com/conjurinc/secretless

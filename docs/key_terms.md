@@ -1,7 +1,7 @@
 ---
 title: Secretless
 id: key-terms
-layout: landing
+layout: docs
 description: Secretless Documentation
 peramlink: key-terms
 ---

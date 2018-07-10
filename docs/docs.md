@@ -1,7 +1,7 @@
 ---
 title: Secretless
 id: docs
-layout: landing
+layout: docs
 description: Secretless Documentation
 permalink: docs
 ---

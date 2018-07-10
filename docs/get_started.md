@@ -1,7 +1,7 @@
 ---
 title: Secretless
 id: get-started
-layout: landing
+layout: docs
 description: Secretless Documentation
 permalink: get_started
 ---

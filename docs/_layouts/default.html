@@ -1,12 +1,26 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
+  <link rel="stylesheet" href="{{ site.baseurl }}/css/style.css">
   {% include head.html %}
+
   <body>
-      {% include jumbotron.html %} 
-      <div id="content" class="">
-        {{ content }}
+
+    {% if page.id == "index" %}
+      {% include jumbotron.html %}
+    {% elsif page.id != "index" %}
+      {% include top_nav.html %}
+    {% endif %}
+
+    <div class="container">
+      <div class="row">
+        <div id="content" class="">
+          {{ content }}
+        </div>
       </div>
     </div>
+
     {% include footer.html %}
+
   </body>
 </html>

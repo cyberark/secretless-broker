@@ -2,7 +2,7 @@ main:
   - page: HOME
     url: docs.html
   - page: Docs
-    url: docs.html#docs-overview
+    url: docs.html
   - page: Community
     path: community.html
   - page: Blog
@@ -12,11 +12,11 @@ main:
 
 docsIndex:
   - page: Overview
-    url: docs#docs-overview
+    url: docs.html
   - page: How it Works?
-    url: works#docs-works
+    url: works.html
   - page: Key Terms
-    url: key_terms#docs-key-terms
+    url: key_terms.html
   - page: Get Started
-    url: get_started#docs-get-started
+    url: get_started.html
 

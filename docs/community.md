@@ -1,6 +1,6 @@
 ---
 title: Secretless
-id: docs
+id: community
 layout: page
 description: Secretless Community
 ---

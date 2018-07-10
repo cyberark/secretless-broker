@@ -179,7 +179,7 @@ func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
 
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.GetConfig()
+	return h.HandlerConfig
 }
 
 // GetClientConnection implements secretless.Handler

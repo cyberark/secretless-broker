@@ -85,7 +85,7 @@ pre{
 	margin-bottom: 0;
 	height: 465px;
 	background: #383950;
-	border-bottom: 2px solid #e2e2e2
+	
 }
 .docs-subheading{
 	font-size: 18px;
@@ -229,7 +229,7 @@ pre{
     width: 80%;
 }
 .trad-img{
-	width: 300px;
+	width: 400px;
 }
 
 .arch-list > li{

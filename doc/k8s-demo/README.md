@@ -54,8 +54,11 @@ curl $(minikube service -n quick-start quick-start-application --url)/note
 ```
 POST `/note` to add a note - title and description must be specified via json body.
 ```
-curl -d '{"title":"value1", "description":"value2"}' -H "Content-Type: application/json" -X POST $(minikube service -n quick-start quick-start-application --url)/note
-
+curl \
+ -d '{"title":"value1", "description":"value2"}' \
+ -H "Content-Type: application/json" \
+ -X POST \
+ $(minikube service -n quick-start quick-start-application --url)/note
 ```
 
 #### Rotate application database credentials

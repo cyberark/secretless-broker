@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+CURRENT_DIR=$(dirname $0 | xargs realpath)
+
+docker run -v $CURRENT_DIR/../docs/_site:/_site:ro \
+           --network none \
+           --rm \
+           18fgsa/html-proofer --check-external-hash \
+                               --disable-external \
+                               --enforce-https \
+                               /_site

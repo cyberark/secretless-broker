@@ -1,0 +1,32 @@
+#!/bin/bash -ex
+
+CURRENT_DIR=$(dirname $0 | xargs realpath)
+DEST_SITE_DIR="$CURRENT_DIR/../docs/_site"
+
+IMAGE_NAME="secretless-website-builder"
+CONTAINER_NAME="secretless-website-builder-$(date -u +%Y%m%d_%H%M%S)"
+
+echo "Using container name: ${CONTAINER_NAME}"
+
+clean_up() {
+  docker container rm -f "${CONTAINER_NAME}" 2>/dev/null || true
+}
+trap clean_up EXIT
+
+docker build -f "${CURRENT_DIR}/Dockerfile.website" \
+             -t "${IMAGE_NAME}" \
+             "${CURRENT_DIR}/../docs"
+
+echo "Cleaning up current _site..."
+rm -rf "${DEST_SITE_DIR}"
+mkdir -p "${DEST_SITE_DIR}"
+
+echo "Building..."
+docker run --name "${CONTAINER_NAME}" \
+           -w /usr/src/app \
+           --network none \
+           -v "$CURRENT_DIR/../docs:/usr/src/app:ro" \
+           -v "${DEST_SITE_DIR}:/tmp/_site" \
+           "${IMAGE_NAME}"
+
+echo "Done!"

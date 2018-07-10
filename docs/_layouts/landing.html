@@ -1,0 +1,106 @@
+---
+layout: default
+id: home
+---
+<div class="container">
+	<div class="card-features about" id="about">
+		<div class="row sub-card">
+			<div class="col-md-4 about-subitem">
+				<div class="inner">
+					<div class ="in-line-frame">
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
+						<p class="inner-text">Extend Trust</p>
+					</div>
+					<p class="inner-text-description">Credentials carry privilege. Do you trust your applications to manage sensitive information? Secretless provides a secure interface for applications to access external resources - and allows you to remove your applications from the threat surface.</p>
+				</div>
+			</div>
+			<div class="col-md-4 about-subitem">
+				<div class="inner">
+					<div class ="in-line-frame">
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
+						<p class="inner-text">Security Simplified</p>
+					</div>
+					<p class="inner-text-description">
+					Dynamic secrets are tricky to manage. Until now, applications required additional logic to handle external password rotations. With Secretless, no code changes or dependencies are necessary - the Secretless broker handles it all for you.</p>
+				</div>
+			</div>
+			<div class="col-md-4 about-subitem">
+				<div class="inner">						
+					<div class ="in-line-frame">
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>	
+						<p class="inner-text">Keep Moving</p>
+					</div>
+					<p class="inner-text-description">Let developers focus on what they do best:  writing code. Secretless gives you the freedom to supply credentials from your existing vault, and it takes care of communication with your vault of choice for you. Quit trying to understand vault-specific APIs or integration tools, and focus on adding value to your applications.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container">
+	<div class="card arch">
+		<div class="row sub-card">
+			<p class="card-heading">Traditional Architecture</p>
+		    <div class="col-md-7">
+      			<p class="card-subheading">Developer Responsibilities</p>
+      			<ul class="arch-list">
+      				<li>Retrieve secrets from vault​</li>
+      				<li>Securely handle retrieved secrets within app​</li>
+      				<li>Resiliently handle secret rotations</li>
+      				<li>Manage connection disruptions</li>
+      			</ul>
+   			 </div>
+		    <div class="col-md-5">
+		      <img class="trad-img" src="/img/traditionalarch.png" alt="Traditional Architecture">
+		    </div>	
+		</div>
+
+		<div class="row sub-card">
+			<p class="card-heading">Secretless Architecture</p>
+			<div class="col-md-5">
+		      <img class="trad-img" src="/img/secretarch.png" alt="Traditional Architecture">
+		    </div>	
+		    <div class="col-md-7">
+		    	<p class="card-subheading">Broker Responsibilities</p>
+		    	<ul class="arch-list">
+			    	<li>Retrieve secrets from vault​</li>
+			    	<li>Securely handle retrieved secrets​</li>
+			    	<li>Transparently handle secret rotations</li>
+			    </ul>
+      			
+      			<p class="card-subheading">Developer Responsibilities</p>
+      			<ul class="arch-list">
+      				<li>Build app to be responsive to connection disruption</li>
+      			</ul>
+   			 </div>
+		 
+		</div>
+	</div>
+</div>
+
+<div class="container-fluid">
+	<div class="card introduction" id="intro">
+		<div class="row sub-card">
+			<p class="card-heading">It's simple to get started!</p>
+			<ol>
+				<li>Download and run the Secretless quick-start as a Docker container:
+				<pre>docker container run --rm -p 5454:5454 cyberark/secretless-quickstart</pre></li>
+				<li>That's all! Now you can connect to the password-protected PostgreSQL database via the Secretless broker, without knowing its password.<p>Give it a try:</p>
+<pre>psql \
+--host localhost \
+--port 5454 \
+--username secretless \
+-d quickstart \
+-c 'select * from counties;'
+</pre></li>
+			</ol>
+
+		</div>
+	</div>
+</div>
+
+<script src="javascript/secretless_js.js"></script>
+
+
+
+
+

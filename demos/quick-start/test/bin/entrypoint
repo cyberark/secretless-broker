@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# entrypoint runs smoke tests for postgres, ssh, http authentication.
+set -e
+
+readonly RESULT_FILE="/tmp/.results_$$"
+> "${RESULT_FILE}"
+
+RETURN_CODE=0
+report_result () {
+  rc=$?
+  name="$1"
+  if [[ $rc != 0 ]]; then
+    RETURN_CODE=1
+    echo "FAIL: ${name} authentication" >> "${RESULT_FILE}"
+  else
+    echo "PASS: ${name} authentication" >> "${RESULT_FILE}"
+  fi
+}
+
+# Install packages required for testing
+apk add -U curl openssh expect &>/dev/null
+
+# Test postgres connection
+set +e
+psql \
+  --host quickstart \
+  --port 5454 \
+  --username secretless \
+  -d quickstart \
+  -c 'select * from counties;'
+report_result "PostgreSQL"
+set -e
+
+# Test SSH connection
+set +e
+expect -c "
+  spawn ssh \
+    -p 2222 \
+    -o UserKnownHostsFile=/dev/null \
+    -o StrictHostKeyChecking=no \
+    use@quickstart echo Success
+
+  expect {
+    password { send \\r }
+    timeout  { exit 1 }
+    eof      { exit 1 }
+  }
+  expect \$ { send echo Success }
+"
+report_result "SSH"
+set -e
+
+# Test HTTP connection
+set +e
+curl -sI quickstart | head -n1 | grep '200 OK'
+report_result "HTTP"
+set -e
+
+echo -e "\n\nResults\n======================================="
+cat "${RESULT_FILE}"
+exit $RETURN_CODE

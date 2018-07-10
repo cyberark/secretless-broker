@@ -6,8 +6,6 @@ import (
     "net/http"
 )
 
-// SECTION: NOTE
-
 type Note struct {
     Title     string `json:"title"`
     Description string `json:"description"`

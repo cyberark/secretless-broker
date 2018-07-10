@@ -10,8 +10,6 @@ import (
     _ "github.com/lib/pq"
 )
 
-// SECTION: MAIN
-
 // The new router function creates the router and
 // returns it to us. We can now use this function
 // to instantiate and test the router outside of the main function

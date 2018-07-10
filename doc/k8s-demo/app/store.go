@@ -4,8 +4,6 @@ import (
     "database/sql"
 )
 
-// SECTION: STORE
-
 // Our store will have two methods, to add a new note,
 // and to get all existing notes
 // Each method returns an error, in case something goes wrong

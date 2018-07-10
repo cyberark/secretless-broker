@@ -3,6 +3,7 @@ title: Secretless
 id: key-terms
 layout: landing
 description: Secretless Documentation
+peramlink: key-terms
 ---
 <div id="docs-key-terms">
     <p class="card-heading">Key Terms</p>

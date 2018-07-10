@@ -3,6 +3,7 @@ title: Secretless
 id: docs
 layout: landing
 description: Secretless Documentation
+permalink: docs
 ---
 <div id="docs-overview">
   <p class="card-heading">Overview</p>

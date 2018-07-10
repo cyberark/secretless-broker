@@ -3,6 +3,7 @@ title: Secretless
 id: works
 layout: landing
 description: Secretless Documentation
+permalink: works
 ---
 <div id="docs-works">
   <div class="row">

@@ -12,11 +12,11 @@ main:
 
 docsIndex:
   - page: Overview
-    url: docs.html#docs-overview
+    url: docs#docs-overview
   - page: How it Works?
-    url: works.html#docs-works
+    url: works#docs-works
   - page: Key Terms
-    url: key_terms.html#docs-key-terms
+    url: key_terms#docs-key-terms
   - page: Get Started
-    url: get_started.html#docs-get-started
+    url: get_started#docs-get-started
 

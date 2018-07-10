@@ -3,6 +3,7 @@ title: Secretless
 id: get-started
 layout: landing
 description: Secretless Documentation
+permalink: get_started
 ---
 <div class="col-md-9 docs" id="docs-get-started">
   <p class="card-heading">Get Started</p>

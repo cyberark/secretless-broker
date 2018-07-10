@@ -347,15 +347,11 @@ footer{
 	position:relative;
 	left:0;
 	right:0;
-	/*    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    background-color: black;
-    margin-left: -50vw;
-    margin-right: -50vw;*/
 }
-
+.left-links p {
+	font-size: 10px;
+	letter-spacing: .8px;
+}
 footer .left-links{
 	text-align: center;
 	color: white;

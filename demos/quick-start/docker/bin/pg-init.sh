@@ -30,3 +30,5 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER}" --dbname "${POSTGRES_DB}" 
     INSERT INTO counties (name) VALUES ('Dukes');
     INSERT INTO counties (name) VALUES ('Nantucket');
 EOSQL
+
+touch /run/postgresql/.init

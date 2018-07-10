@@ -11,8 +11,8 @@ trap cleanup EXIT ERR
 pushd test &>/dev/null
   docker-compose up -d quickstart
 
-  # Quick and dirty check to see if Postgres is running and we can begin testing
-  while [[ -z "$(docker-compose logs quickstart | grep 'ready to accept connections')" ]]; do
+  echo "Waiting for services to be running.."
+  until docker-compose exec quickstart ls /run/postgresql/.init &>/dev/null; do
     sleep 1s
   done
 

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: secretless
-        image: secretless-client:latest
+        image: secretless:latest
         imagePullPolicy: Never
         args: ["-f", "/etc/secretless/secretless.yml"]
         ports:

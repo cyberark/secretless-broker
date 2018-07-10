@@ -40,4 +40,4 @@ wait_for_app quick-start-application
 # kubectl --namespace quick-start exec -it $(get_first_pod_for_app quick-start-application) -c quick-start-application -- bash
 # ./main
 # curl localhost:8080/note
-# curl -d "title=value1&description=value2" -X POST localhost:8080/note
+# curl -d '{"title":"value1", "description":"value2"}' -H "Content-Type: application/json" -X POST http://localhost:8080/note

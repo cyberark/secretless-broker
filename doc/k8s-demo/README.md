@@ -3,7 +3,7 @@
 run `./start.sh`
 access quick-start-application service 
 GET `/note` for notes
-POST `/note` with title and description form fields
+POST `/note` with title and description json body
 
 quick-start-application can be any application that can use DATABASE_URL env. Simple change image to your own.
 

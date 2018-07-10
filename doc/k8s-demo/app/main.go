@@ -80,18 +80,14 @@ func getNoteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createNoteHandler(w http.ResponseWriter, r *http.Request) {
-    note := Note{}
-
-    err := r.ParseForm()
-
+    decoder := json.NewDecoder(r.Body)
+    var note Note
+    err := decoder.Decode(&note)
     if err != nil {
         fmt.Println(fmt.Errorf("Error: %v", err))
         w.WriteHeader(http.StatusInternalServerError)
         return
     }
-
-    note.Title = r.Form.Get("title")
-    note.Description = r.Form.Get("description")
 
     // The only change we made here is to use the `CreateNote` method instead of
     // appending to the `note` variable like we did earlier

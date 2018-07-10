@@ -53,7 +53,7 @@ set -e
 
 # Test HTTP connection
 set +e
-curl -sI quickstart | head -n1 | grep '200 OK'
+http_proxy=quickstart:8081 curl -sI quickstart | head -n1 | grep '200 OK'
 report_result "HTTP"
 set -e
 

@@ -24,11 +24,12 @@ type Variable struct {
 // Listener listens on a port on socket for inbound connections, which are
 // handed off to Handlers.
 type Listener struct {
+	Address     string
+	CACertFiles []string `yaml:"caCertFiles"`
+	Debug       bool
 	Name        string
 	Protocol    string
-	Address     string
 	Socket      string
-	CACertFiles []string `yaml:"caCertFiles"`
 }
 
 // Handler processes an inbound message and connects to a specified backend

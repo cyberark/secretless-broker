@@ -84,6 +84,7 @@ func (h *Handler) Run() {
 	var server ssh.Conn
 
 	if serverConfig, err = h.serverConfig(); err != nil {
+		log.Println(err)
 		return
 	}
 

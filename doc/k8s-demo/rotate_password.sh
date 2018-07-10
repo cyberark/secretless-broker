@@ -22,4 +22,12 @@ done
 echo Ready!
 
 # prune open connections
-kubectl --namespace quick-start exec -it $qs_backend -- psql -U postgres -c "ALTER ROLE $DB_USERNAME WITH PASSWORD '$new_password'; SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
+kubectl --namespace quick-start exec -it $qs_backend -- psql -U postgres -c "
+ALTER ROLE $DB_USERNAME WITH PASSWORD '$new_password';
+SELECT
+    pg_terminate_backend(pid)
+FROM
+    pg_stat_activity
+WHERE
+    pid <> pg_backend_pid();
+"

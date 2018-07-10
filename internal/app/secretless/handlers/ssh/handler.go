@@ -12,15 +12,17 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
+// ServerConfig is the configuration info for the target server
 type ServerConfig struct {
 	Network      string
 	Address      string
 	ClientConfig ssh.ClientConfig
 }
 
+// Handler contains the configuration and channels
 type Handler struct {
 	Channels      <-chan ssh.NewChannel
 	EventNotifier plugin_v1.EventNotifier
@@ -75,12 +77,14 @@ func (h *Handler) serverConfig() (config ServerConfig, err error) {
 	return
 }
 
+// Run opens the connection to the target server and proxies requests
 func (h *Handler) Run() {
 	var err error
 	var serverConfig ServerConfig
 	var server ssh.Conn
 
 	if serverConfig, err = h.serverConfig(); err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -167,14 +171,15 @@ func (h *Handler) Run() {
 	}
 }
 
+// Authenticate is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("ssh handler does not use Authenticate!")
+	return errors.New("ssh handler does not use Authenticate")
 }
 
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.GetConfig()
+	return h.HandlerConfig
 }
 
 // GetClientConnection implements secretless.Handler
@@ -187,9 +192,10 @@ func (h *Handler) GetBackendConnection() net.Conn {
 	return nil
 }
 
+// LoadKeys is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("ssh handler does not use LoadKeys!")
+	return errors.New("ssh handler does not use LoadKeys")
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

@@ -9,10 +9,12 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 - [Secretless](#secretless)
 - [Why Secretless?](#why-secretless)
 - [Quick Start](#quick-start)
+- [Longer Example](#longer-example-with-docker-images)
   - [Walkthrough](#walkthrough)
 - [Configuring Secretless](#configuring-secretless)
   - [Listeners](#listeners)
   - [Handlers](#handlers)
+- [Plugins](#plugins)
 - [Client Application Configuration](#client-application-configuration)
 - [Testing](#testing)
 - [Performance](#performance)
@@ -21,11 +23,21 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 
 Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service. 
 
-To provide Secretless access to a backend service, a "provider" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the Backend service from a secrets vault such as Conjur, a keychain service, or text files. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend. 
+To provide Secretless access to a backend service, a "handler" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the backend service from a secrets vault such as Conjur, a keychain service, text files, or other sources. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend.
+
+# Currently supported
+
+- MySQL (Socket)
+- PostgreSQL (Socket and TCP)
+- SSH
+- SSH-Agent
+- HTTP (Basic auth, Conjur, and AWS authorization strategies)
+
+With many others in the planning stages!
 
 # Why Secretless?
 
-Exposing plaintext secrets to clients (both users and machines) is hazardous from both a security and operational standpoint. First, by providing a secret to a client, the client becomes part of the threat surface. If the client is compromised, then the attacker has a good chance of obtaining the plaintext secrets and being able to establish direct connections to backend resources. To mitigate the severity of this problem, important secrets are (or should be) rotated (changed) on a regular basis. However, rotation introduces the operational problem of keeping applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords.
+Exposing plaintext secrets to clients (both users and machines) is hazardous from both a security and operational standpoint. First, by providing a secret to a client, the client becomes part of the threat surface. If the client is compromised, then the attacker has a good chance of obtaining the plaintext secrets and being able to establish direct connections to backend resources. To mitigate the severity of this problem, important secrets are (or should be) rotated (changed) on a regular basis. However, rotation introduces the operational problem of keeping applications up to date with changing passwords. This is a significant problem as many applications only read secrets on startup and are not prepared to handle changing passwords thus requiring restarts when they change.
 
 When the client connects to a backend resource through Secretless:
 
@@ -37,40 +49,105 @@ When the client connects to a backend resource through Secretless:
 
 **Prerequisites**
 
+* **Docker** You need Docker to run the examples and the tests. Most code has been confirmed to work on Docker version 18.03.1-ce and up.
+* **PostgreSQL** You need PostgreSQL client (`psql`) on your host to fully run this example
+* **Linux** This example assumes a Linux amd64 environment
+
+## Download Secretless
+
+```sh-session
+$ wget https://github.com/conjurinc/secretless/releases/download/v<version>/secretless-linux-amd64.tar.gz
+$ tar -xzf ./secretless-linux-amd64.tar.gz
+$ ls
+secretless  secretless-linux-amd64.tar.gz  summon2
+```
+
+## Start PostgreSQL container on localhost:6543
+```sh-session
+$ sudo docker run --rm \
+                  --name pgsql \
+                  -p 6543:5432 \
+                  -e POSTGRES_PASSWORD=test \
+                  -d postgres:alpine
+```
+
+## Create a minimal configuration for Secretless
+
+```sh-session
+$ # We will listen on 15432 and forward requests to our
+$ # PostgreSQL container on localhost:6543
+$ tee secretless.yml <<EOF
+listeners:
+  - name: pg
+    protocol: pg
+    address: 0.0.0.0:15432
+
+handlers:
+  - name: pg
+    listener: pg
+    credentials:
+      - name: address
+        provider: literal
+        id: localhost:6543
+      - name: username
+        provider: literal
+        id: postgres
+      - name: password
+        provider: literal
+        id: test
+EOF
+```
+Normally, you would pull the credentials from a real vault with one of the included providers but for the quick start, we're just adding the secrets directly.
+
+## (Optional) Verify that PostgreSQL requires credentials
+
+```sh-session
+$ # This should only allow you to log in if you type in `test` as the password
+$ psql -h localhost -p 6543 -U postgres -d postgres
+Password for user postgres: 
+...
+postgres-# \q
+```
+
+## Start Secretless
+```sh-session
+$ ./secretless
+```
+
+## Check that you can connect to PostgreSQL over Secretless without a password
+In a different terminal, connect to Secretless listening port with `psql`:
+```sh-session
+$ # You may need to install psql client tools on your host to do this step (`sudo apt install postgresql-client-10`).
+$ # Note that there was _no_ request for password to be able to log in!
+$ psql -h localhost -p 15432 -d postgres
+psql (10.4 (Ubuntu 10.4-0ubuntu0.18.04))
+Type "help" for help.
+
+postgres=# select current_user;
+ current_user 
+--------------
+ postgres
+(1 row)
+
+```
+
+## Smile and grab a :cookie: because it was too easy!
+
+You have just delegated responsibilty for keeping credentials securely isolated from your app!
+
+# Longer example with Docker images
+
+**Prerequisites**
+
 * **Docker** You need Docker to run the examples and the tests.
 
 ## Walkthrough
-
-At this time, you'll need to build Secretless in order to use it. 
-
-First, clone `https://github.com/conjurinc/secretless`. If you're new to Go, be aware that Go is very selective about
-where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
-is `~/go`. Projects should be checked out to `$GOPATH/src`. This is required by Go in order for dependencies to resolve
-properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless`.
-
-Now you can build Secretless. First fetch all the dependencies:
+--------------------------------
+Navigate to the directory `doc/quick-demo`:
 
 ```sh-session
-~ $ cd $GOPATH/src/github.com/conjurinc/secretless
-secretless $ dep ensure
-```
-
-Now build for your platform. On Linux:
-
-```sh-session
-secretless $ ./bin/build
-```
-
-On OS X:
-
-```sh-session
-secretless $ ./bin/build_darwin
-```
-
-Now navigate to the directory `doc/quick-demo`:
-
-```sh-session
-secretless $ cd doc/quick-demo
+$ # From Secretless repository root 
+$ cd doc/quick-demo
 ```
 
 You will use Secretless to connect a client to a Postgresql database, without the client knowing the database password.
@@ -84,7 +161,7 @@ Creating quick_pg_1 ...
 Creating quick_pg_1 ... done
 ```
 
-Verify that Postgresql is running and accepting connections on port 5432:
+Verify that PostgreSQL is running and accepting connections on port 5432:
 
 ```
 $ docker-compose ps
@@ -101,7 +178,7 @@ Starting quick_psql_1 ... done
 root@f6683931b82c:/#
 ```
 
-Now connect to Postgresql using the username "test" and password "test" (type `\q` to quit):
+Now connect to PostgreSQL using the username "test" and password "test" (type `\q` to quit):
 
 ```sh-session
 root@f6683931b82c:/# PGPASSWORD=test PGUSER=test PGPORT=5432 PGHOST=pg PGDATABASE=postgres psql
@@ -152,7 +229,7 @@ Creating quick_secretless_1 ...
 Creating quick_secretless_1 ... done
 ```
 
-Verify that it's up and listening:
+Verify that Secretless is up and listening:
 
 ```sh-session
 $ docker-compose logs secretless
@@ -215,7 +292,7 @@ Note that a real-world deployment would differ from this setup in the following 
 
 # Configuring Secretless
 
-The Secretless configuration file is composed of three sections:
+The Secretless configuration file is composed of two sections:
 
 * `listeners` A list of protocol listeners, each one on a Unix socket or TCP port.
 * `handlers` When a new connection is received by a Listener, it's routed to a Handler for processing. The Handler is configured to obtain the backend connection credentials from one or more Providers. 
@@ -241,7 +318,28 @@ Then set the environment variable `http_proxy=localhost:1080` in the client envi
 
 ## Handlers
 
-TODO
+Handlers are objects that get instantiated on each connection to a listener that provide connectivity:
+- Downstream to the proxy server
+- Proxy server to upstream server
+
+As part of this functionality, they also modify traffic to inject credentials for the connection to the upstream server - but the majority of their functionality is in simple shuttling data between downstream and upstream in a transparent manner.
+
+_Please note: Handler API interface signatures are currently under heavy development due to needing to deal with non-overlapping types of communications protocols (as expressed by the interface definitions) so they will be likely to change in the near future._
+
+# Plugins
+
+Plugins can be used to extend the functionality of Secretless via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
+
+- Listener plugins
+- Handler plugins
+- Connection management plugins
+
+Currently, these API definitions reside [here](pkg/secretless/plugin/v1) and an example plugin can be found in the [`test/plugin`](test/plugin) directory.
+
+You can read more about how to make plugins and the underlying architecture in the [API directory](pkg/secretless/plugin).
+
+_Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
+
 
 # Client Application Configuration
 
@@ -251,6 +349,44 @@ You need to ensure that when your client code connects to a backend service, the
 2) **Proxy** HTTP services support an environment variable or configuration setting `http_proxy=<url>` which will cause outbound traffic to route through the proxy URL on its way to the destination. Secretless can operate as an HTTP forward proxy, in which case it will place the proper authorization header on the outbound request. It can also optionally forward the connection using HTTPS. The client should always use plain `http://` URLs, otherwise Secretless cannot read the network traffic because it will encrypted.  
 
 In all cases, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost.
+
+
+# Building
+
+First, clone `https://github.com/conjurinc/secretless`. If you're new to Go, be aware that Go is very selective about
+where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
+is `~/go`. Projects should be checked out to `$GOPATH/src`. This is required by Go in order for dependencies to resolve
+properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless`.
+
+Now you can build Secretless. First fetch all the dependencies:
+
+```sh-session
+~ $ cd $GOPATH/src/github.com/conjurinc/secretless
+secretless $ dep ensure
+```
+
+## Docker containers
+
+```sh-session
+$ # From Secretless repository root 
+$ ./bin/build
+```
+
+This should create a Docker container with tag `secretless:latest` in your local registry.
+
+## Binaries
+### Linux
+```sh-session
+$ # From Secretless repository root 
+$ go build -o ./secretless ./cmd/secretless
+```
+
+### OSX
+
+```sh-session
+$ # From Secretless repository root 
+$ ./bin/build_darwin
+```
 
 # Testing
 
@@ -264,17 +400,21 @@ Build the project by running:
 $ ./bin/build
 ```
 
-Or on OS X:
-
-```sh-session
-$ ./bin/build_darwin
-```
-
 Then run the test cases:
 
 ```sh-session
 $ ./bin/test
 ```
+
+If you are on a Mac, you may also test the OSX Keychain provider:
+```sh-session
+cd test/keychain_provider/
+go test -v keychain_provider_test.go
+```
+This test will not be run as part of the test suite, since it requires access
+to the Mac OSX Keychain. You will be prompted for your password when running
+this test, as it temporarily adds a generic password to your account, and
+verifies that it can retrieve the value.
 
 # Performance
 
@@ -359,4 +499,3 @@ tps = 15.822442 (excluding connections establishing)
 14% fewer tps (excluding establishing connections) via Secretless.
 
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios. 
-

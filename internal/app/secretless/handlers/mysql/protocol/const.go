@@ -24,7 +24,9 @@ SOFTWARE.
 
 package protocol
 
+// Random constants
 const (
+	// MySQL response types
 	responseEOF         = 0xfe
 	responseOk          = 0x00
 	responsePrepareOk   = 0x00
@@ -50,6 +52,7 @@ const (
 	defaultAuthPluginName = "mysql_native_password"
 )
 
+// Protocol commands
 const (
 	comQuit byte = iota + 1
 	comInitDB

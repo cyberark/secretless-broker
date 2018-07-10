@@ -1,4 +1,4 @@
-package plugin_v1
+package v1
 
 import (
 	"net"
@@ -11,7 +11,7 @@ import (
 // manage connections for handlers and listeners.
 type ConnectionManager interface {
 	// Initialize is called before proxy initialization
-	Initialize(config.Config) error
+	Initialize(config.Config, func(config.Config) error) error
 
 	// CreateListener is called for every listener created by Proxy
 	CreateListener(Listener)

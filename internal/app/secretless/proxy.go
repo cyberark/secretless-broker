@@ -9,19 +9,21 @@ import (
 	"syscall"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // Proxy is the main struct of Secretless.
 type Proxy struct {
-	Config          config.Config
-	EventNotifier   plugin_v1.EventNotifier
-	RunListenerFunc func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
-	RunHandlerFunc  func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
+	Config            config.Config
+	EventNotifier     plugin_v1.EventNotifier
+	Listeners         []plugin_v1.Listener
+	ListenerWaitGroup sync.WaitGroup
+	RunListenerFunc   func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
+	RunHandlerFunc    func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // Listen runs the listen loop for a specific Listener.
-func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
+func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin_v1.Listener {
 	var netListener net.Listener
 	var err error
 
@@ -74,14 +76,47 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) {
 		defer wg.Done()
 		listener.Listen()
 	}()
+
+	return listener
+}
+
+// ReloadListeners will loop through the listeners and shut them down
+// As each listener is shut down the WaitGroup is decremented, and once the
+// counter is zero the Proxy.Run loop will complete and restart, reloading all
+// of the listeners.
+func (p *Proxy) ReloadListeners() error {
+	if p.Listeners == nil || len(p.Listeners) == 0 {
+		log.Println("WARN: No listeners to reload!")
+		return nil
+	}
+
+	for _, listener := range p.Listeners {
+		log.Printf("Shutting down '%v' listener...", listener.GetName())
+		listener.Shutdown()
+		p.ListenerWaitGroup.Done()
+	}
+
+	// TODO: Return any errors we get during reload
+	return nil
 }
 
 // Run is the main entrypoint to the secretless program.
 func (p *Proxy) Run() {
-	var wg sync.WaitGroup
-	wg.Add(len(p.Config.Listeners))
-	for _, config := range p.Config.Listeners {
-		p.Listen(config, wg)
+	p.ListenerWaitGroup = sync.WaitGroup{}
+	// We loop until we get an exit signal (in which case we exit program)
+	for {
+		// TODO: Delegate logic of this `if` check to connection managers
+		if len(p.Config.Listeners) < 1 {
+			log.Fatalln("ERROR! No listeners specified in config!")
+		}
+
+		p.Listeners = make([]plugin_v1.Listener, 0)
+		log.Println("Starting all listeners and handlers...")
+		p.ListenerWaitGroup.Add(len(p.Config.Listeners))
+		for _, config := range p.Config.Listeners {
+			listener := p.Listen(config, p.ListenerWaitGroup)
+			p.Listeners = append(p.Listeners, listener)
+		}
+		p.ListenerWaitGroup.Wait()
 	}
-	wg.Wait()
 }

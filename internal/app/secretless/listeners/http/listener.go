@@ -9,14 +9,16 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
+// Listener listens for and handles new connections
 type Listener struct {
 	Config         config.Listener
 	EventNotifier  plugin_v1.EventNotifier
@@ -46,8 +48,17 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 			if !h.HasCredential("accessToken") {
 				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessToken'")
 			}
+		} else if h.Type == "basic_auth" {
+			for _, credential := range [...]string{"username", "password"} {
+				if !h.HasCredential(credential) {
+					errors[strconv.Itoa(i)] = fmt.Errorf("must have credential '" + credential + "'")
+				}
+			}
+		} else {
+			errors[strconv.Itoa(i)] = fmt.Errorf("Handler type is not supported")
 		}
 	}
+
 	return errors.Filter()
 }
 
@@ -71,6 +82,7 @@ func copyHeaders(dst, src http.Header) {
 	}
 }
 
+// LookupHandler returns the handler that matches the request URL
 func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 	for _, handlerConfig := range l.HandlerConfigs {
 		for _, pattern := range handlerConfig.Patterns {
@@ -93,6 +105,8 @@ func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 
 // Standard net/http function. Shouldn't be used directly, http.Serve will use it.
 func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	listenerDebug := l.Config.Debug
+
 	//r.Header["X-Forwarded-For"] = w.RemoteAddr()
 	if r.Method == "CONNECT" {
 		http.Error(w, "CONNECT is not supported.", 405)
@@ -120,34 +134,38 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		if handler.GetConfig().Debug {
-			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, backendVariables)
+		if listenerDebug || handler.GetConfig().Debug {
+			keys := reflect.ValueOf(backendVariables).MapKeys()
+			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, keys)
 		}
 		if err = handler.Authenticate(backendVariables, r); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
+	} else {
+		log.Printf("WARN: Have no handler for request: %s %s", r.Method, r.URL)
 	}
+
+	handlerDebug := handler != nil && handler.GetConfig().Debug
 
 	r.RequestURI = "" // this must be reset when serving a request with the client
 
-	if handler.GetConfig().Debug {
+	if listenerDebug || handlerDebug {
 		log.Printf("Sending request %v", r)
 	}
 
 	resp, err := l.Transport.RoundTrip(r)
-
 	if err != nil {
-		if handler.GetConfig().Debug {
+		if listenerDebug || handlerDebug {
 			log.Printf("Error: %v", err)
 		}
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), 503)
 		return
 	}
 
 	// Note: resp is likely nil if err is non-nil, so don't access it until you get here.
 
-	if handler.GetConfig().Debug {
+	if listenerDebug || handlerDebug {
 		log.Printf("Received response status: %d", resp.Status)
 	}
 
@@ -161,6 +179,7 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Listen serves HTTP requests
 func (l *Listener) Listen() {
 	caCertPool, err := x509.SystemCertPool()
 	if err != nil {
@@ -204,6 +223,18 @@ func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
 	return l.EventNotifier
 }
 
+// GetName implements plugin_v1.Listener
+func (l *Listener) GetName() string {
+	return "http"
+}
+
+// Shutdown implements plugin_v1.Listener
+func (l *Listener) Shutdown() error {
+	// TODO: Clean up all handlers
+	return l.NetListener.Close()
+}
+
+// ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
 		Config:         options.ListenerConfig,

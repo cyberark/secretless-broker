@@ -14,7 +14,7 @@ import (
 
 	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // Handler implements an ssh-agent which holds a single key.
@@ -99,9 +99,10 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	return
 }
 
+// Authenticate is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("pg listener does not use Authenticate!")
+	return errors.New("pg listener does not use Authenticate")
 }
 
 // GetConfig implements secretless.Handler

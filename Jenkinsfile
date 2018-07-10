@@ -15,11 +15,19 @@ pipeline {
       }
     }
 
-    stage('Run Tests') {
+    stage('Static analysis - code linting') {
+      steps {
+        sh './bin/check_style'
+
+        checkstyle pattern: 'test/golint.xml', canComputeNew: false, unstableTotalAll: '0', healthy: '0', failedTotalAll: '20',  unHealthy: '10'
+      }
+    }
+
+    stage('Run tests') {
       steps {
         sh './bin/test'
 
-        junit 'test/*.xml'
+        junit 'test/junit.xml'
       }
     }
 

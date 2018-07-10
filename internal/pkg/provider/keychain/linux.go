@@ -1,6 +1,6 @@
 // +build linux
 
-package keychain_provider
+package keychain
 
 import (
 	"fmt"

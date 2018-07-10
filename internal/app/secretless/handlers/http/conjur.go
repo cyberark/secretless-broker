@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // ConjurHandler applies Conjur authentication to the HTTP Authorization header.
@@ -56,9 +56,10 @@ func (h *ConjurHandler) GetBackendConnection() net.Conn {
 	return nil
 }
 
+// LoadKeys is unused here
 // TODO: Remove this when interface is cleaned up
 func (h *ConjurHandler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("http/conjur handler does not use LoadKeys!")
+	return errors.New("http/conjur handler does not use LoadKeys")
 }
 
 // ConjurHandlerFactory instantiates a handler given HandlerOptions

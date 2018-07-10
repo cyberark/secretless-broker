@@ -1,0 +1,12 @@
+FROM alpine:latest
+
+RUN apk add --update openssh
+
+COPY ./id_insecure.pub /tmp/id_insecure.pub
+
+CMD ["/usr/sbin/sshd", "-D"]
+
+RUN ssh-keygen -A && \
+    mkdir -p /root/.ssh && \
+    chmod 700 /root/.ssh && \
+    cat /tmp/id_insecure.pub >> /root/.ssh/authorized_keys

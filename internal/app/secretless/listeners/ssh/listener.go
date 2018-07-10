@@ -1,10 +1,15 @@
 package ssh
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"strconv"
 
 	"golang.org/x/crypto/ssh"
@@ -36,11 +41,10 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 	hs := value.([]config.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
-		if !h.HasCredential("address") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'address'")
-		}
-		if !h.HasCredential("privateKey") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'privateKey'")
+		for _, credential := range [...]string{"address", "privateKey"} {
+			if !h.HasCredential(credential) {
+				errors[strconv.Itoa(i)] = fmt.Errorf(credential)
+			}
 		}
 	}
 	return errors.Filter()
@@ -54,18 +58,72 @@ func (l Listener) Validate() error {
 	)
 }
 
+// _GenerateSSHKeys generates a new private and public keypair
+func _GenerateSSHKeys(keyPath string) error {
+	// Create new private key of length 2048
+	// TODO: Add capability to specify different sizes
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return err
+	}
+
+	// Generate a PEM structure using the private key
+	privateKeyPEM := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+	}
+
+	// Create the destination private key file
+	privateKeyFile, err := os.Create(keyPath)
+	defer privateKeyFile.Close()
+	if err != nil {
+		return err
+	}
+
+	// Write out the PEM object to the private key file
+	if err := pem.Encode(privateKeyFile, privateKeyPEM); err != nil {
+		return err
+	}
+
+	// Get our public key part from the private key we generated
+	publicKey, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("New host key fingerprint: %s", ssh.FingerprintSHA256(publicKey))
+
+	// Write the public key into the provided path
+	publicKeyPath := keyPath + ".pub"
+	return ioutil.WriteFile(publicKeyPath,
+		ssh.MarshalAuthorizedKey(publicKey),
+		0644)
+}
+
 // Listen accepts SSH connections and MITMs them using a Handler.
 func (l *Listener) Listen() {
+	expectedHostKeyPath := "/tmp/id_rsa"
+
+	// Generate a host key if one isn't present in ./tmp/id_rsa
+	// TODO: Be able to use secretless.yml-provided host key
+	if _, err := os.Stat(expectedHostKeyPath); err != nil {
+		log.Printf("Could not find pre-existing host key at %s. Generating...", expectedHostKeyPath)
+		if err := _GenerateSSHKeys(expectedHostKeyPath); err != nil {
+			log.Fatal("Failed to create host key: ", err)
+		}
+	}
+
 	serverConfig := &ssh.ServerConfig{
+		NoClientAuth: true,
 		PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
 			return nil, nil
 		},
 		PublicKeyCallback: func(c ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
-			return nil, fmt.Errorf("Public key authentication is not supported")
+			return nil, nil
 		},
 	}
 
-	privateBytes, err := ioutil.ReadFile("./tmp/id_rsa")
+	privateBytes, err := ioutil.ReadFile(expectedHostKeyPath)
 	if err != nil {
 		log.Fatal("Failed to load private key: ", err)
 	}
@@ -111,6 +169,7 @@ func (l *Listener) Listen() {
 			EventNotifier:    l.EventNotifier,
 		}
 
+		// TODO: Kill connection to client when backend fails to be contacted
 		l.RunHandlerFunc("ssh", handlerOptions)
 	}
 }

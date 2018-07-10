@@ -6,6 +6,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"reflect"
+	"strings"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -39,16 +42,27 @@ func (h *Handler) serverConfig() (config ServerConfig, err error) {
 	}
 
 	if h.GetConfig().Debug {
-		log.Printf("SSH backend connection parameters: %s", values)
+		keys := reflect.ValueOf(values).MapKeys()
+		log.Printf("SSH backend connection parameters: %s", keys)
 	}
 
 	config.Network = "tcp"
 	if address, ok := values["address"]; ok {
 		config.Address = string(address)
+		if !strings.Contains(config.Address, ":") {
+			config.Address = config.Address + ":22"
+		}
 	}
 
+	// XXX: Should this be the user that the client was trying to connect as?
+	config.ClientConfig.User = "root"
 	if user, ok := values["user"]; ok {
 		config.ClientConfig.User = string(user)
+
+	}
+
+	if h.HandlerConfig.Debug {
+		log.Printf("Trying to connect with user: %s", config.ClientConfig.User)
 	}
 
 	if hostKeyStr, ok := values["hostKey"]; ok {
@@ -59,7 +73,7 @@ func (h *Handler) serverConfig() (config ServerConfig, err error) {
 		}
 		config.ClientConfig.HostKeyCallback = ssh.FixedHostKey(hostKey)
 	} else {
-		log.Printf("No hostKey specified; I will accept any host key!")
+		log.Printf("WARN: No SSH hostKey specified. Secretless will accept any backend host key!")
 		config.ClientConfig.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 	}
 
@@ -84,8 +98,11 @@ func (h *Handler) Run() {
 	var server ssh.Conn
 
 	if serverConfig, err = h.serverConfig(); err != nil {
-		log.Println(err)
-		return
+		log.Fatalf("ERROR: Could not resolve server config\n", err)
+	}
+
+	if h.HandlerConfig.Debug {
+		log.Printf("Using config\n%v", serverConfig.ClientConfig)
 	}
 
 	if server, err = ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {
@@ -116,7 +133,7 @@ func (h *Handler) Run() {
 				log.Printf("Client request : %s", clientRequest.Type)
 				ok, err := serverChannel.SendRequest(clientRequest.Type, clientRequest.WantReply, clientRequest.Payload)
 				if err != nil {
-					log.Printf("Failed to send client request to server channel : %s", err)
+					log.Printf("WARN: Failed to send client request to server channel : %s", err)
 				}
 				if clientRequest.WantReply {
 					log.Printf("Server reply is %v", ok)
@@ -129,7 +146,7 @@ func (h *Handler) Run() {
 				log.Printf("Server request : %s", serverRequest.Type)
 				ok, err := clientChannel.SendRequest(serverRequest.Type, serverRequest.WantReply, serverRequest.Payload)
 				if err != nil {
-					log.Printf("Failed to send server request to client channel : %s", err)
+					log.Printf("WARN: Failed to send server request to client channel : %s", err)
 				}
 				if serverRequest.WantReply {
 					log.Printf("Client reply is %v", ok)
@@ -137,12 +154,19 @@ func (h *Handler) Run() {
 			}
 		}()
 
+		// This delay is to prevent closing of channels on the other side
+		// too early when we receive an EOF but have not had the chance to
+		// pass that on to the client/server.
+		// TODO: Maybe use a better logic for handling EOF conditions
+		softDelay := time.Second * 2
+
 		go func() {
 			for {
 				data := make([]byte, 1024)
 				len, err := clientChannel.Read(data)
 				if err == io.EOF {
 					log.Printf("Client channel is closed")
+					time.Sleep(softDelay)
 					serverChannel.Close()
 					return
 				}
@@ -159,6 +183,7 @@ func (h *Handler) Run() {
 				len, err := serverChannel.Read(data)
 				if err == io.EOF {
 					log.Printf("Server channel is closed")
+					time.Sleep(softDelay)
 					clientChannel.Close()
 					return
 				}

@@ -1,12 +1,12 @@
 main:
   - page: HOME
-    url: docs.html
+    url: index.html
   - page: Docs
     url: docs.html
   - page: Community
-    path: community.html
+    url: community.html
   - page: Blog
-    path: blog.html
+    url: blog.html
   - page: Github
     url: https://github.com/conjurinc/secretless
 

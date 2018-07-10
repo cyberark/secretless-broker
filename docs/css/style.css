@@ -81,6 +81,12 @@ pre{
 	top: 70px;
 	background-color: transparent;
 }
+#cybr-nav{
+	margin-bottom: 0;
+	height: 65px;
+	background: #383950;
+}
+
 #frame{
 	margin-bottom: 0;
 	height: 465px;

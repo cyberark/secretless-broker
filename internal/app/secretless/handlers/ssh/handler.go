@@ -84,6 +84,7 @@ func (h *Handler) Run() {
 	var server ssh.Conn
 
 	if serverConfig, err = h.serverConfig(); err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -178,7 +179,7 @@ func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
 
 // GetConfig implements secretless.Handler
 func (h *Handler) GetConfig() config.Handler {
-	return h.GetConfig()
+	return h.HandlerConfig
 }
 
 // GetClientConnection implements secretless.Handler

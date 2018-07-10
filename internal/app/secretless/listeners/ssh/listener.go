@@ -81,14 +81,14 @@ func (l *Listener) Listen() {
 		nConn, err := util.Accept(l)
 		if err != nil {
 			log.Printf("Failed to accept incoming connection: ", err)
-			return
+			continue
 		}
 
 		// https://godoc.org/golang.org/x/crypto/ssh#NewServerConn
 		conn, chans, reqs, err := ssh.NewServerConn(nConn, serverConfig)
 		if err != nil {
 			log.Printf("Failed to handshake: %s", err)
-			return
+			continue
 		}
 		log.Printf("New connection accepted for user %s from %s", conn.User(), conn.RemoteAddr())
 

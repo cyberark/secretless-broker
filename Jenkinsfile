@@ -9,13 +9,13 @@ pipeline {
   }
 
   stages {
-    stage('Build Linux binaries & Docker images') {
+    stage('Build Binaries & Images') {
       steps {
         sh './bin/build'
       }
     }
 
-    stage('Run tests') {
+    stage('Run Tests') {
       steps {
         sh './bin/test'
 
@@ -23,13 +23,49 @@ pipeline {
       }
     }
 
-    stage('Push images') {
+    stage('Push Images') {
       when {
         branch 'master'
       }
 
       steps {
         sh './bin/publish'
+      }
+    }
+
+    stage('Build Website') {
+      steps {
+        sh './bin/build_website'
+      }
+    }
+
+    stage('Check Links') {
+      steps {
+        sh './bin/check_website_links'
+      }
+    }
+
+    stage('Publish') {
+      parallel {
+        stage('Publish Website (staging)') {
+          when {
+            branch 'staging'
+          }
+          steps {
+            sh 'summon -e staging bin/publish_website'
+            archiveArtifacts '_site/'
+          }
+        }
+
+        stage('Publish Website (production)') {
+          when {
+            branch 'master'
+          }
+          steps {
+            sh 'summon -e production bin/publish_website'
+            archiveArtifacts '_site/'
+          }
+        }
       }
     }
   }

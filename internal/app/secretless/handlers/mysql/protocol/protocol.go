@@ -32,14 +32,21 @@ import (
 	"io"
 )
 
+// ErrInvalidPacketLength is for invalid packet lengths
 var ErrInvalidPacketLength = errors.New("Protocol: Invalid packet length")
+
+// ErrInvalidPacketType is for invalid packet types
 var ErrInvalidPacketType = errors.New("Protocol: Invalid packet type")
+
+// ErrFieldTypeNotImplementedYet is for field types that are not yet implemented
 var ErrFieldTypeNotImplementedYet = errors.New("Protocol: Required field type not implemented yet")
 
+// ErrResponse provides an object to store error messages
 type ErrResponse struct {
 	Message string
 }
 
+// UnpackErrResponse is not yet implemented
 func UnpackErrResponse(packet []byte) (*ErrResponse, error) {
 	return nil, nil
 }
@@ -570,11 +577,12 @@ func ReadNullTerminatedString(r *bytes.Reader) string {
 	for {
 		//TODO: Check for error
 		b, _ := r.ReadByte()
+
 		if b == 0x00 {
 			return string(str)
-		} else {
-			str = append(str, b)
 		}
+
+		str = append(str, b)
 	}
 }
 
@@ -583,11 +591,12 @@ func ReadNullTerminatedBytes(r *bytes.Reader) (str []byte) {
 	for {
 		//TODO: Check for error
 		b, _ := r.ReadByte()
+
 		if b == 0x00 {
 			return
-		} else {
-			str = append(str, b)
 		}
+
+		str = append(str, b)
 	}
 }
 

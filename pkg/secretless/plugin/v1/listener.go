@@ -1,4 +1,4 @@
-package plugin_v1
+package v1
 
 import (
 	"net"
@@ -6,6 +6,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
+// ListenerOptions contains the configuration for the listener
 type ListenerOptions struct {
 	EventNotifier  EventNotifier
 	HandlerConfigs []config.Handler
@@ -17,11 +18,13 @@ type ListenerOptions struct {
 // Listener is the interface which accepts client connections and passes them
 // to a handler
 type Listener interface {
-	Validate() error
 	GetConfig() config.Listener
-	GetNotifier() EventNotifier
-	GetListener() net.Listener
-	GetHandlers() []Handler
 	GetConnections() []net.Conn
+	GetHandlers() []Handler
+	GetListener() net.Listener
+	GetName() string
+	GetNotifier() EventNotifier
 	Listen()
+	Validate() error
+	Shutdown() error
 }

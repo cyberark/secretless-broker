@@ -1,4 +1,4 @@
-package plugin_v1
+package v1
 
 import (
 	"net"
@@ -10,6 +10,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
+// HandlerOptions contains the configuration for the handler
 type HandlerOptions struct {
 	HandlerConfig    config.Handler
 	Channels         <-chan ssh.NewChannel

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
-	"github.com/conjurinc/secretless/pkg/secretless/plugin_v1"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // BackendConfig stores the connection info to the real backend database.
@@ -131,7 +131,7 @@ func (h *Handler) Run() {
 	}
 
 	if h.EventNotifier == nil {
-		h.abort(errors.New("ERROR! EventNotifier was not set in example handler!"))
+		h.abort(errors.New("ERROR! EventNotifier was not set in example handler"))
 		return
 	}
 
@@ -143,9 +143,10 @@ func (h *Handler) GetConfig() config.Handler {
 	return h.HandlerConfig
 }
 
+// Authenticate is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("example listener does not use Authenticate!")
+	return errors.New("example listener does not use Authenticate")
 }
 
 // GetClientConnection implements secretless.Handler
@@ -158,9 +159,10 @@ func (h *Handler) GetBackendConnection() net.Conn {
 	return nil
 }
 
+// LoadKeys is not used here
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("example handler does not use LoadKeys!")
+	return errors.New("example handler does not use LoadKeys")
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

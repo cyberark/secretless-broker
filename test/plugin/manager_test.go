@@ -11,7 +11,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestExampleManager(t *testing.T) {
+func TestManager(t *testing.T) {
 	host := os.Getenv("SECRETLESS_HOST")
 	if host == "" {
 		host = "localhost"

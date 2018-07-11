@@ -113,11 +113,13 @@ curl \
 
 #### Rotate application database credentials
 
+Rotator script rotates database credentials in k8s secrets, waits for secrets to be propagated to application pod volumes, then rotates database credentials. k8s secrets updates have an associated lag. Using a secret management solution, such as Conjur, would avoid the need to wait for propagation.
+
 Run the following with your own value for `>new password value<`:
 
 ```
 ./rotate_password >new password value<
 ```
 
-Observe that requests to application API are not interrupted by rotation.
+Observe that requests to the application API are not encumbered by rotation.
  

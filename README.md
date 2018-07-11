@@ -14,6 +14,13 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 - [Configuring Secretless](#configuring-secretless)
   - [Listeners](#listeners)
   - [Handlers](#handlers)
+- [Credential Providers](#credential-providers)
+  - [Conjur (`conjur`)](#conjur-provider)
+  - [HashiCorp Vault (`vault`)](#hashicorp-vault-provider)
+  - [File Provider (`file`)](#file-provider)
+  - [Environment Variable (`env`)](#environment-variable-provider )
+  - [Literal Value (`literal`)](#literal-value-provider)
+  - [Keychain (`keychain`)](#keychain-provider)
 - [Plugins](#plugins)
 - [Client Application Configuration](#client-application-configuration)
 - [Testing](#testing)
@@ -326,6 +333,113 @@ As part of this functionality, they also modify traffic to inject credentials fo
 
 _Please note: Handler API interface signatures are currently under heavy development due to needing to deal with non-overlapping types of communications protocols (as expressed by the interface definitions) so they will be likely to change in the near future._
 
+# Credential Providers
+
+Credential providers interact with a credential source to deliver secrets needed for authentication
+to Secretless listeners and handlers. The Secretless broker comes built-in with several different
+credential providers, making it easy to use with your existing workflows regardless of your current
+secrets management toolset.
+
+We currently support the following secrets providers/vaults:
+- [Conjur (`conjur`)](#conjur-provider)
+- [HashiCorp Vault (`vault`)](#hashicorp-vault-provider)
+- [File Provider (`file`)](#file-provider)
+- [Environment Variable (`env`)](#environment-variable-provider )
+- [Literal Value (`literal`)](#literal-value-provider)
+- [Keychain (`keychain`)](#keychain-provider)
+
+### Conjur Provider
+
+Conjur (`conjur`) provider allows use of [CyberArk Conjur](https://www.conjur.org/) for fetching secrets.
+
+Example:
+```
+...
+    credentials:
+      - name: accessToken
+        provider: conjur
+        id: path/to/the/token
+...
+```
+
+### HashiCorp Vault Provider
+
+Vault (`vault`) provider allows use of [HashiCorp Vault](https://www.vaultproject.io/) for fetching secrets.
+
+Example:
+```
+...
+    credentials:
+      - name: accessToken
+        provider: vault
+        id: path/to/the/token
+...
+```
+
+### File Provider
+
+File (`file`) provider allows you to use a file available to the Secretless process and/or container as sources of
+credentials.
+
+Example:
+```
+...
+    credentials:
+      - name: rsa
+        provider: file
+        id: /path/to/file
+...
+```
+
+### Environment Variable Provider
+
+Environment (`env`) provider allows use of environment variables as source of credentials.
+
+Example:
+```
+...
+    credentials:
+      - name: accessToken
+        provider: env
+        id: ACCESS_TOKEN
+...
+```
+
+### Literal Value Provider
+
+Literal (`literal`) provider allows use of hard-coded values as credential sources.
+
+_Note: This type of secrets inclusion is highly likely to be much less secure versus other
+available providers so please use care when choosing this as your secrets source._
+
+Example:
+```
+...
+    credentials:
+      - name: accessToken
+        provider: literal
+        id: supersecretaccesstoken
+...
+```
+
+### Keychain Provider
+
+Keychain (`keychain`) provider allows use of your OS-level keychain as the credentials provider.
+
+_Note: This provider currently only works on Mac OS at the time and only when building from source so it should
+be avoided unless you are a developer working on the source code. There are plans to integrate all major OS
+keychains into this provider in a future release._
+
+Example:
+```
+...
+    credentials:
+      - name: rsa
+        provider: keychain
+        id: servicename#accountname
+...
+```
+
 # Plugins
 
 Plugins can be used to extend the functionality of Secretless via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
@@ -339,7 +453,6 @@ Currently, these API definitions reside [here](pkg/secretless/plugin/v1) and an 
 You can read more about how to make plugins and the underlying architecture in the [API directory](pkg/secretless/plugin).
 
 _Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
-
 
 # Client Application Configuration
 

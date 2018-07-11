@@ -20,7 +20,7 @@ spec:
       containers:
       - name: quick-start-backend
         image: postgres:9.6
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 5432
         env:

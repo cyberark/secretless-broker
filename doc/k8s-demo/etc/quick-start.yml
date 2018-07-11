@@ -20,7 +20,7 @@ spec:
       containers:
       - name: secretless
         image: secretless:latest
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         args: ["-f", "/etc/secretless/secretless.yml"]
         ports:
         - containerPort: 5432
@@ -32,8 +32,8 @@ spec:
           mountPath: /etc/secretless
           readOnly: true
       - name: quick-start-application
-        image: quick-start-app:latest
-        imagePullPolicy: Never
+        image: codebykumbi/note-store-app:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:

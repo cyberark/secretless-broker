@@ -23,9 +23,9 @@ The following steps are generally required to get up and running with Secretless
 This example shows how easy it is to leverage the Secretless broker with an application that uses 12-factor principles to configure access to a database via a DATABASE_URL environment variable.
 
 ### Prerequisites
-+ Kubernetes cluster running in minikube
-+ kubectl pointed to minikube cluster
-+ docker-cli pointed to daemon inside minikube cluster
++ Kubernetes cluster
++ kubectl pointed to cluster
++ docker-cli
 
 ### Set up working environment
 
@@ -37,6 +37,8 @@ Run through the following commands to set up an environment in which a simple no
 
 
 #### [choice 1] Postgres inside k8s
+
+Note: If not running minikube, modify IP address component of `DB_URL` to match the public IP of your cluster in `./config.sh`.
 
 Run the following script to create a pg stateful state in the `quick-start-db` namespace:
 
@@ -75,6 +77,8 @@ Run:
 5. Configure application to connect to protected resource through interface exposed by Secretless 
 6. Run Secretless adjacent to the application
 
+*Feel free to modify `quick-start.yml:35` to use your own application image.*
+
 Run: 
 ```
 ./03_start_app.sh
@@ -82,10 +86,21 @@ Run:
 
 ### Interact with working environment
 
+#### Port-forward application service to localhost
+
+Port-forwarding allows local access to the application service. This is to avoid the complexities of publicly exposing an application outside of the cluster.
+ 
+```
+kubectl port-forward -n quick-start svc/quick-start-application 8080:8080
+```
+
+The application service should then be available at `localhost:8080`.
+
 #### Consume application API
+
 GET `/note` to retrieve notes
 ```
-curl $(minikube service -n quick-start quick-start-application --url)/note
+curl localhost:8080/note
 ```
 POST `/note` to add a note - title and description must be specified via json body.
 ```
@@ -93,7 +108,7 @@ curl \
  -d '{"title":"value1", "description":"value2"}' \
  -H "Content-Type: application/json" \
  -X POST \
- $(minikube service -n quick-start quick-start-application --url)/note
+ localhost:8080/note
 ```
 
 #### Rotate application database credentials
@@ -103,3 +118,6 @@ Run the following with your own value for `>new password value<`:
 ```
 ./rotate_password >new password value<
 ```
+
+Observe that requests to application API are not interrupted by rotation.
+ 

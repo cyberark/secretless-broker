@@ -16,7 +16,7 @@ echo Ready!
 # create database
 echo ">>--- Create database"
 
-kubectl apply -f pg.yml
+kubectl apply -f etc/pg.yml
 
 # Wait for it
 wait_for_app quick-start-backend quick-start-db

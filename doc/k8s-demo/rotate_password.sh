@@ -29,5 +29,6 @@ FROM
     pg_stat_activity
 WHERE
     pid <> pg_backend_pid()
-AND usename='$DB_USER';
+AND
+    usename='$DB_USER';
 "

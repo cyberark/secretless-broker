@@ -125,6 +125,7 @@ pre{
 	margin-bottom: 0;
 }
 .button{
+	text-transform: uppercase;
 	margin: 30px;
 	font-family: 'Source Sans Pro', sans-serif;
     font-size: 16px;
@@ -134,14 +135,14 @@ pre{
     display: inline-block;
     font-weight: 600;
     letter-spacing: 1px;
-    transition: .4s ease-out;
+    transition: .2s ease-out;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
-
+}
+.button:hover p{
+	color: #35a6a9;
 }
 .button:hover{
 	text-decoration: none;
-
-
 }
 .btnrow{
 	text-align: center;
@@ -281,6 +282,15 @@ pre{
     box-shadow: 3px 3px 18px rgba(0,.1,0,.2);
 
 }
+.inner i{
+	padding-top: 3px;
+    transition: .5s ease;
+}
+
+.inner:hover i{
+	transform: translateX(12px);
+}
+
 .in-line-frame{
 	display: flex;
 }

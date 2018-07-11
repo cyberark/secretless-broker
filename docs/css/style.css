@@ -1,4 +1,3 @@
-
 p{
 	font-family: "Roboto",sans-serif;
     font-size: 15px;
@@ -26,6 +25,11 @@ button:focus{
 }
 pre{
 	background-color: white;
+}
+#cybr-nav{
+       margin-bottom: 0;
+       height: 65px;
+       background: #383950;
 }
 .navbar-list li{
 	font-size:14px;
@@ -81,12 +85,6 @@ pre{
 	top: 70px;
 	background-color: transparent;
 }
-#cybr-nav{
-	margin-bottom: 0;
-	height: 65px;
-	background: #383950;
-}
-
 #frame{
 	margin-bottom: 0;
 	height: 465px;
@@ -228,6 +226,12 @@ pre{
 }
 .introduction-img{
 	width: 450px;
+}
+.arch-respons-box{
+	margin-bottom: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center
 }
 .arch{
 	margin-left: auto;
@@ -380,4 +384,7 @@ footer .right-links li{
 .cybr-logo-footer{
 	width: 200px;
 	margin: 10px;
+}
+.arch-right{
+	margin-left: 20px;
 }

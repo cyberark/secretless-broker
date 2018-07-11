@@ -10,7 +10,7 @@ permalink: how_it_works
 
 In a Secretless deployment, when a client needs access to a target service it doesn't try and make a direct connection to it. Instead, it sends the request through its Secretless connection broker.
 
-<img class="introduction-img" src="img/secretless-architecture-transparent.png" alt="Secretless Architecture">
+<img class="introduction-img" src="img/secretlessarch.png" alt="Secretless Architecture">
 
 The Secretless connection broker authenticates with a secrets vault and obtains an identity credential. This identity credential is managed securely within Secretless, and used to obtain a backend connection secret such as database password from the secrets vault. The connection secrets are managed entirely within the Secretless process, and never exposed to the client. The Secretless connection broker uses the connection secret to establish a connection to the target service and then transfers data between the client and the target.
 

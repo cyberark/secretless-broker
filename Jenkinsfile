@@ -61,7 +61,7 @@ pipeline {
           }
           steps {
             sh 'summon -e staging bin/publish_website'
-            archiveArtifacts '_site/'
+            archiveArtifacts 'docs/_site/'
           }
         }
 
@@ -73,7 +73,7 @@ pipeline {
             sh 'echo "Skipping production website push - pushing to staging"'
             sh 'summon -e staging bin/publish_website'
             //sh 'summon -e production bin/publish_website'
-            archiveArtifacts '_site/'
+            archiveArtifacts 'docs/_site/'
           }
         }
       }

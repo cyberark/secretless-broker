@@ -38,7 +38,7 @@ spec:
         - containerPort: 8080
         env:
         - name: DATABASE_URL
-          value: postgresql://localhost:5432/postgres?sslmode=disable
+          value: postgresql://localhost:5432/quick_start_db?sslmode=disable
       volumes:
       - name: secret
         secret:

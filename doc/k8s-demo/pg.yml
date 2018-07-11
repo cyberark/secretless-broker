@@ -6,7 +6,7 @@ metadata:
   name: pg
   labels:
     app: quick-start-backend
-  namespace: quick-start
+  namespace: quick-start-db
 spec:
   serviceName: quick-start-backend
   selector:
@@ -31,11 +31,12 @@ kind: Service
 apiVersion: v1
 metadata:
   name: quick-start-backend
-  namespace: quick-start
+  namespace: quick-start-db
 spec:
   selector:
     app: quick-start-backend
   ports:
     - port: 5432
       targetPort: 5432
-
+      nodePort: 30001
+  type: NodePort

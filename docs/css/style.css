@@ -201,6 +201,10 @@ pre{
 	font-size: 15px;
 	margin-right: 10px;
 }
+.far{
+	font-size: 15px;
+	margin-right: 10px;
+}
 .round {
     border-radius: 50%;
 }
@@ -232,6 +236,9 @@ pre{
 	display: flex;
 	align-items: center;
 	justify-content: center
+}
+.arch-right{
+	margin-left: 20px;
 }
 .arch{
 	margin-left: auto;
@@ -390,6 +397,14 @@ footer .right-links li{
 	width: 200px;
 	margin: 10px;
 }
-.arch-right{
-	margin-left: 20px;
+.footer-resource a {
+	color: white;
+	font-size: 14px;
+}
+.footer-resource a:hover {
+	text-decoration: none;
+}
+
+.footer-title {
+	font-size: 18px;
 }

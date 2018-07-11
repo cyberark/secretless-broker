@@ -8,7 +8,7 @@ li{
 	font-family: "Roboto",sans-serif;
     font-size: 15px;
     line-height: 1.5;
-    margin-left: 25px;
+    margin-left: 15px;
 }
 code{
 	margin-left: 25px;
@@ -16,7 +16,6 @@ code{
 a {
     text-decoration: none;
     display: inline-block;
-    padding: 8px 16px;
 }
 hr{
 	position: relative;
@@ -37,6 +36,7 @@ pre{
 }
 .navbar-list a{
 	color: #fff;
+	padding: 8px 16px;
 }
 .navbar-list a:hover{
 	text-decoration: none;
@@ -49,8 +49,10 @@ pre{
 	color: #404040;
 }
 .sidenav-item a{
-	color: #404040;
-	/*line-height: 20px;*/
+	margin-left: -15px;
+	font-family: "Source Sans Pro",sans-serif;
+	font-size: 15px;
+	padding: 8px 16px;
 }
 .fixed-nav {
 	position: fixed;
@@ -64,7 +66,7 @@ pre{
 .sidenav-item i{
 	font-size: 10px;
 	margin-right: -10px;
-	margin-left: 15px;
+	margin-left: 5px;
 }
 .sidenav-item:hover a:hover{
 	 text-decoration: none;
@@ -75,15 +77,11 @@ pre{
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-	height: 250px;
+	max-height: 575px;
 	width: 215px;
 }
 .introduction-heading {
 	font-size: 1.5em;
-}
-.center-block{
-	top: 70px;
-	background-color: transparent;
 }
 #cybr-nav{
 	margin-bottom: 0;
@@ -95,7 +93,7 @@ pre{
 	margin-bottom: 0;
 	height: 465px;
 	background: #383950;
-	
+
 }
 .docs-subheading{
 	font-size: 18px;
@@ -105,14 +103,12 @@ pre{
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 24px;
 	letter-spacing: 1px;
-	margin-left: 30px;
 }
 .card-side-heading{
 	font-weight: bold;
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 20px;
 	letter-spacing: 1px;
-	margin-left: 30px;
 }
 /*.sub-card{
 	margin-top:20px;
@@ -174,19 +170,18 @@ pre{
 	width: 20%;
 	display: block;
     margin-left: auto;
-    margin-right: auto;   
+    margin-right: auto;
 }
 #jumbotron-text {
-	font-size: 16px;
+	font-size: 20px;
 	text-align: center;
 	font-family: 'Open Sans', sans-serif;
-	margin-top:20px;
+	margin-top:10px;
 	color: #fff;
 }
-#jumbotron-subtext {
-	font-size: 30px;
+#jumbotron-heading {
+	font-size: 60px;
 	text-align: center;
-	text-transform: uppercase;
     letter-spacing: 3px;
 	margin-top:20px;
 	color: #fff;
@@ -255,6 +250,8 @@ pre{
     float: none;
     display: block;
     margin: 0 auto;
+    top: 10px;
+    background-color: transparent;
 }
 .about-subitem{
 	padding: 5px 5px 5px 5px;

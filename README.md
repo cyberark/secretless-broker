@@ -6,6 +6,8 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 
 ***
 
+# Table Of Contents
+
 - [Secretless](#secretless)
 - [Why Secretless?](#why-secretless)
 - [Quick Start](#quick-start)
@@ -25,12 +27,15 @@ Secretless is currently a technology preview, suitable for demo and evaluation p
 - [Client Application Configuration](#client-application-configuration)
 - [Testing](#testing)
 - [Performance](#performance)
+- [License](#license)
 
 # Secretless
 
 Secretless is a connection broker which relieves client applications of the need to directly handle secrets to backend services such as databases, web services, SSH connections, or any other TCP-based service. 
 
 To provide Secretless access to a backend service, a "handler" implements the protocol of the backend service, replacing the authentication handshake. The client does not need to know or use a real password to the backend. Instead, it proxies its connection to the backend through Secretless. Secretless obtains credentials to the backend service from a secrets vault such as Conjur, a keychain service, text files, or other sources. The credentials are used to establish a connection to the actual backend, and the Secretless server then rapidly shuttles data back and forth between the client and the backend.
+
+Secretless is currently licensed under [ASL 2.0](#license)
 
 # Currently supported
 
@@ -612,3 +617,7 @@ tps = 15.822442 (excluding connections establishing)
 14% fewer tps (excluding establishing connections) via Secretless.
 
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios. 
+
+# License
+
+Secretless is licensed under Apache License 2.0 - see [`LICENSE.md`](LICENSE.md) for more details.

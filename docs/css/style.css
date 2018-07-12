@@ -103,15 +103,16 @@ pre{
 	font-size: 24px;
 	letter-spacing: 1px;
 }
+.broker {
+	font-family: 'Open Sans', sans-serif;
+}
 .card-side-heading{
 	font-weight: bold;
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 20px;
 	letter-spacing: 1px;
 }
-/*.sub-card{
-	margin-top:20px;
-}*/
+
 .navbar-list > ul{
 	display: flex;
 	list-style: none;

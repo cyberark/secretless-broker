@@ -30,6 +30,7 @@ pre{
 	background-color: white;
 }
 #cybr-nav{
+       width: 100%;
        margin-bottom: 0;
        height: 65px;
        background: #383950;

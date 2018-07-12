@@ -1,19 +1,33 @@
-const nav=document.querySelector('#side-navigation');
-const topOfNav = nav.offsetTop;
-const docConClass = document.querySelector('.documentation-content').classList;
+// toggleFixedNav
+// This section fixes the documentation sidebar in place when the page is
+// scrolled, by toggling on/off the fixed-nav class
+document.addEventListener("DOMContentLoaded", function() {
+		nav = document.querySelector('#side-navigation');
+		topOfNav = nav.offsetTop;
+		navHeight = nav.offsetHeight;
 
-function fixNav(){
-	if(window.scrollY >= topOfNav){
-		document.querySelector('.side-nav').classList.add('fixed-nav');
+		footer = document.querySelector('footer')
+		footerHeight = footer.offsetTop;
+
+		console.log('footer: ' + footerHeight)
+
+		docConClass = document.querySelector('.documentation-content').classList;
+
+		window.addEventListener('scroll', function() { toggleFixedNav(); });
+	});
+
+function toggleFixedNav() {
+	const sideNav = document.querySelector('.side-nav');
+	const navBottom = window.scrollY + navHeight
+
+	if (window.scrollY >= topOfNav) {
+		sideNav.classList.add('fixed-nav');
 		docConClass.add('fixed-nav-documentation');
-	} else{
-		document.querySelector('.side-nav').classList.remove('fixed-nav');
+	} else {
+		sideNav.classList.remove('fixed-nav');
 		docConClass.remove('fixed-nav-documentation');
-
 	}
 }
-window.addEventListener('scroll', fixNav);
-
 
 // showTab
 // Traverses up the DOM and finds `tab-content` class elements which share a

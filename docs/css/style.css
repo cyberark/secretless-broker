@@ -29,6 +29,9 @@ button:focus{
 pre{
 	background-color: white;
 }
+code{
+	margin: 0;
+}
 #cybr-nav{
        margin-bottom: 0;
        height: 65px;

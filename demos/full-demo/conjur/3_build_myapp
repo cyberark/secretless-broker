@@ -12,7 +12,7 @@ docker-compose up -d myapp_secretless
 export DB_HOST=/var/lib/postgresql
 
 docker-compose run --rm \
-  --entrypoint ./makedb \
-  myapp
+                   --entrypoint ./makedb \
+                   myapp
 
 docker-compose up --no-deps -d myapp

@@ -39,7 +39,7 @@ services:
       CONJUR_AUTHN_API_KEY:
     volumes:
       - ./secretless_ansible.yml:/secretless.yml
-      - ssh_agent:/run/ssh-agent
+      - ssh_agent:/sock
     depends_on:
       - conjur
       - pg
@@ -47,17 +47,16 @@ services:
   ansible:
     build:
       context: ../src/ansible
-    entrypoint: [ "/summon2", "-f", "/secrets.yml" ]
+    entrypoint: [ "summon2", "-f", "/secrets.yml" ]
     environment:
-      SSH_AUTH_SOCK: /run/ssh-agent/.agent
+      SSH_AUTH_SOCK: /sock/.agent
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_LOGIN: host/ansible
       CONJUR_AUTHN_API_KEY:
       SUMMON_PROVIDER: conjur
     volumes:
-      - ssh_agent:/run/ssh-agent
-      - ../../../dist/linux/amd64/summon2:/summon2
+      - ssh_agent:/sock
       - ./ansible_secrets.yml:/secrets.yml
     depends_on:
       - pg
@@ -73,7 +72,7 @@ services:
       CONJUR_AUTHN_API_KEY:
     volumes:
       - ./secretless_myapp.yml:/secretless.yml
-      - pg_socket:/run/postgresql
+      - pg_socket:/sock
     depends_on:
       - conjur
       - pg
@@ -86,7 +85,7 @@ services:
     ports:
       - 80
     volumes:
-      - pg_socket:/run/postgresql
+      - pg_socket:/var/run/postgresql
     depends_on:
       - myapp_secretless
 

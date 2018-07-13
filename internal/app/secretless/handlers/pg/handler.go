@@ -11,6 +11,7 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"io"
 )
 
 // ClientOptions stores the option that were specified by the connection client.
@@ -62,8 +63,15 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	var err error
 
 	for {
+
 		length, err = source.Read(buffer)
 		if err != nil {
+			if err == io.EOF {
+				source.Close()
+				dest.Close()
+
+				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
+			}
 			return
 		}
 

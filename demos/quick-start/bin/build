@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+readonly IMAGE_NAME="secretless-quickstart"
+readonly IMAGE_TAG="latest"
+
+pushd docker &>/dev/null
+  docker build -t "${IMAGE_NAME}:${IMAGE_TAG}" .
+popd &>/dev/null

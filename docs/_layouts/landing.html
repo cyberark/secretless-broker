@@ -40,44 +40,42 @@ id: home
 	<div class="card arch">
 		<div class="row sub-card">
 			<p class="card-heading">Traditional Architecture</p>
-		    <div class="col-md-7">
-      			<p class="card-subheading">Developer Responsibilities</p>
-      			<ul class="arch-list">
-      				<li>Retrieve secrets from vault​</li>
-      				<li>Securely handle retrieved secrets within app​</li>
-      				<li>Resiliently handle secret rotations</li>
-      				<li>Manage connection disruptions</li>
-      			</ul>
-   			 </div>
-		    <div class="col-md-5">
-		      <img class="trad-img" src="img/traditional-architecture.png" alt="Traditional Architecture">
-		    </div>
+			<div class="arch-respons-box">
+				<div class="arch-respons">
+					<p class="card-subheading">Developer Responsibilities</p>
+					<ul class="arch-list">
+						<li>Retrieve secrets from vault​</li>
+						<li>Securely handle retrieved secrets within app​</li>
+						<li>Resiliently handle secret rotations</li>
+						<li>Manage connection disruptions</li>
+					</ul>
+				</div>
+				<img class="trad-img" src="img/traditional-architecture.png" alt="Traditional Architecture">
+			</div>
 		</div>
 
 		<div class="row sub-card">
 			<p class="card-heading">Secretless Architecture</p>
-			<div class="col-md-5">
-		      <img class="trad-img" src="img/secretless-architecture-transparent.png" alt="Traditional Architecture">
-		    </div>
-		    <div class="col-md-7">
-		    	<p class="card-subheading">Broker Responsibilities</p>
-		    	<ul class="arch-list">
-			    	<li>Retrieve secrets from vault​</li>
-			    	<li>Securely handle retrieved secrets​</li>
-			    	<li>Transparently handle secret rotations</li>
-			    </ul>
+			<div class="arch-respons-box">
+				<img class="trad-img" src="img/secretless-architecture-transparent.png" alt="Traditional Architecture">
+				<div class="arch-respons arch-right">
+					<p class="card-subheading">Broker Responsibilities</p>
+					<ul class="arch-list">
+						<li>Retrieve secrets from vault​</li>
+						<li>Securely handle retrieved secrets​</li>
+						<li>Transparently handle secret rotations</li>
+					</ul>
 
-      			<p class="card-subheading">Developer Responsibilities</p>
-      			<ul class="arch-list">
-      				<li>Manage connection disruptions</li>
-      				<li>Connect to target services using local sockets and URLs</li>
-      			</ul>
-   			 </div>
-
+					<p class="card-subheading">Developer Responsibilities</p>
+					<ul class="arch-list">
+						<li>Manage connection disruption</li>
+						<li>Connect to target services using local sockets and URLs</li>
+					</ul>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
-
 <div class="container-fluid">
 	<div class="card introduction" id="simple-started">
 		<div class="row sub-card">

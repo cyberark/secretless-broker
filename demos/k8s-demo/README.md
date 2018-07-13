@@ -9,20 +9,22 @@ Secretless pushes the trust boundary of secrets away from application code into 
 
 The Secretless broker operates as a sidecar container within a kubernetes application pod. This means there is shared storage/network between the application container and the Secretless broker. It is this which allows Secretless to provide a local interface.
 
-The following steps are generally required to get up and running with Secretless.
+The following steps are generally required to get up and running with Secretless:
 
 1. Provision protected resources
 2. Configure protected resources for usage by application and add credentials to secret store
-3. Configure Secretless to broker connection using credentials from the secret store, configure application to connect to protected resource through interface exposed by Secretless, deploy and run Secretless adjacent to the application.
+3. Configure Secretless to broker connection using credentials from the secret store
+4. Configure application to connect to protected resource through interface exposed by Secretless
+5. Deploy and run Secretless adjacent to the application
 
 ## Quickstart
 
-This example shows how easy it is to leverage the Secretless broker with an application that uses 12-factor principles to configure access to a database via a `DATABASE_URL` environment variable.
+This example shows how easy it is to leverage the Secretless broker with an application that uses [12-factor principles](https://12factor.net/) to configure access to a database via a `DATABASE_URL` environment variable.
 
-The database credentials of the application are those being transparently handled by secretless. The initial values of these credentials are set in `./config.sh` for convenience.
+The database credentials of the application are those being transparently handled by secretless. The initial values of these credentials are set in `./config.sh`, and are used only to configure the database and load the values in the secret store. **The secret values in config.sh are not loaded into either the demo application or the Secretless broker directly**! The app connects to the Secretless broker via localhost, and the Secretless broker uses a credential provider to retrieve the credentials via the secret store and open an authenticated connection to the database.
 
 Admin-level database credentials are used to create the application user. 
-These (`DB_ADMIN_USER` and `DB_ADMIN_PASSWORD`) are housed in `./config.sh` for convenience. In practice, an admin user would manage configuration of the database on their own and this config file would not be necessary.
+These (`DB_ADMIN_USER` and `DB_ADMIN_PASSWORD`) are housed in `./config.sh` for convenience. In practice, an admin user would manage configuration of the database (and storing the credentials in the secret store) on their own and this config file would not be necessary.
 
 ### Prerequisites
 + Kubernetes cluster

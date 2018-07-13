@@ -11,6 +11,17 @@ type Note struct {
     Description string `json:"description"`
 }
 
+type ErrorResponse struct {
+   Error string `json:"error"`
+}
+
+func errorJSONBytes(err error) []byte {
+    errBytes, _ := json.Marshal(ErrorResponse{
+        Error:   err.Error(),
+    })
+    return errBytes
+}
+
 func getNoteHandler(w http.ResponseWriter, r *http.Request) {
     /*
         The list of notes is now taken from the store instead of the package level variable we had earlier
@@ -19,6 +30,7 @@ func getNoteHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         fmt.Println(fmt.Errorf("Error: %v", err))
         w.WriteHeader(http.StatusInternalServerError)
+        w.Write(errorJSONBytes(err))
         return
     }
     // Everything else is the same as before
@@ -39,6 +51,7 @@ func createNoteHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         fmt.Println(fmt.Errorf("Error: %v", err))
         w.WriteHeader(http.StatusInternalServerError)
+        w.Write(errorJSONBytes(err))
         return
     }
 
@@ -49,5 +62,5 @@ func createNoteHandler(w http.ResponseWriter, r *http.Request) {
         fmt.Println(err)
     }
 
-    http.Redirect(w, r, "/assets/", http.StatusFound)
+    w.WriteHeader(http.StatusCreated)
 }

@@ -22,8 +22,6 @@ spec:
         image: secretless:latest
         imagePullPolicy: IfNotPresent
         args: ["-f", "/etc/secretless/secretless.yml"]
-        ports:
-        - containerPort: 5432
         volumeMounts:
         - name: secret
           mountPath: /etc/secret

@@ -1,4 +1,4 @@
-# Introduction to Secretless on K8S
+# Introduction to Secretless on Kubernetes
 
 ## Description: Secretless
 
@@ -12,44 +12,54 @@ The Secretless broker operates as a sidecar container within a kubernetes applic
 The following steps are generally required to get up and running with Secretless.
 
 1. Provision protected resources
-2. Setup protected resources for usage by application
-4. Add credentials to secret store
-3. Configure Secretless to broker connection using credentials from the secret store
-5. Configure application to connect to protected resource through interface exposed by Secretless 
-6. Run Secretless adjacent to the application
+2. Configure protected resources for usage by application and add credentials to secret store
+3. Configure Secretless to broker connection using credentials from the secret store, configure application to connect to protected resource through interface exposed by Secretless, deploy and run Secretless adjacent to the application.
 
 ## Quickstart
 
-This example shows how easy it is to leverage the Secretless broker with an application that uses 12-factor principles to configure access to a database via a DATABASE_URL environment variable.
+This example shows how easy it is to leverage the Secretless broker with an application that uses 12-factor principles to configure access to a database via a `DATABASE_URL` environment variable.
+
+The database credentials of the application are those being transparently handled by secretless. The initial values of these credentials are set in `./config.sh` for convenience.
+
+Admin-level database credentials are used to create the application user. 
+These (`DB_ADMIN_USER` and `DB_ADMIN_PASSWORD`) are housed in `./config.sh` for convenience. In practice, an admin user would manage configuration of the database on their own and this config file would not be necessary.
 
 ### Prerequisites
 + Kubernetes cluster
 + kubectl pointed to cluster
 + docker-cli
 
+#### Required modification to suite your needs
+
++ For this guide we've provided our own sample application - note storage-and-retrieval. Feel free to modify `quick-start.yml:35` to use your own application image, and see the power of secretless closer to home.*
+
++ Modify Service definition to use Service types that suit your needs.  The default just works with `minikube`.
+  + Update `./etc/pg.yml` and `./etc/quick-start.yml` to suit your needs. The reference manifests use a `NodePort` type Service, which works with `minikube`. For example, a `Load Balancer` type Service might be more appropriate in a GKE cluster. 
+  + Update `DB_URL` and `APPLICATION_URL` in `./config.sh` to reflect the endpoints made available by the aforementioned services.
+
 ### Set up working environment
 
-Run through the following commands to set up an environment in which a simple note storage-and-retrieval application makes use of Secretless to access a postgres storage backend:
+Run through the following commands to set up an environment in which an application makes use of Secretless to access a postgres storage backend:
 
-#### Provision database
+#### 1. Provision database
 
-1. Provision protected resources
++ Provision protected resources
 
+##### [choice 1] Postgres inside k8s
 
-#### [choice 1] Postgres inside k8s
-
-Note: If not running minikube, modify IP address component of `DB_URL` to match the public IP of your cluster in `./config.sh`.
-
-Run the following script to create a pg stateful state in the `quick-start-db` namespace:
+Run the following script to create a Postgres stateful-set instance in the `quick-start-db` namespace:
 
 ```
 ./01_create_db.sh
 ```
 
-#### [choice 2] Remote Postgres
+##### [choice 2] Remote Postgres
 
-+ Ensure your Kubernetes cluster is able to access your remote db.
++ Ensure your Kubernetes cluster is able to access your remote DB.
 + Ensure the remote instance has a database called `quick_start_db`
+
+#### 2. Configure database and add credentials to secret store
+
 + Update `DB_` env vars in `./config.sh`. For example (with Amazon RDS):
 
 ```
@@ -60,60 +70,68 @@ DB_USER=quick_start_user
 DB_INITIAL_PASSWORD=quick_start_user
 ```
 
-
-#### Setup database and add credentials to secret store
-
-2. Setup protected resources for usage by application
-3. Add credentials to secret store
++ Configure protected resources for usage by application
++ Add credentials to secret store
 
 Run:
 ```
-./02_setup_db.sh
+./02_configure_db.sh
 ```
 
-#### Build and deploy application
+#### 3. Deploy application
 
-4. Configure Secretless to broker connection using credentials from the secret store
-5. Configure application to connect to protected resource through interface exposed by Secretless 
-6. Run Secretless adjacent to the application
++ Configure Secretless to broker connection using credentials from the secret store
++ Configure application to connect to protected resource through interface exposed by Secretless 
++ Run Secretless adjacent to the application
 
-*Feel free to modify `quick-start.yml:35` to use your own application image.*
-
-Run: 
+Run:
 ```
-./03_start_app.sh
+./03_deploy_app.sh
 ```
 
 ### Interact with working environment
-
-#### Port-forward application service to localhost
-
-Port-forwarding allows local access to the application service. This is to avoid the complexities of publicly exposing an application outside of the cluster.
- 
-```
-kubectl port-forward -n quick-start svc/quick-start-application 8080:8080
-```
-
-The application service should then be available at `localhost:8080`.
 
 #### Consume application API
 
 GET `/note` to retrieve notes
 ```
-curl localhost:8080/note
+APPLICATION_URL=$(. ./config.sh; echo $APPLICATION_URL)
+
+curl $APPLICATION_URL/note
 ```
+
 POST `/note` to add a note - title and description must be specified via json body.
 ```
+APPLICATION_URL=$(. ./config.sh; echo $APPLICATION_URL)
+
 curl \
  -d '{"title":"value1", "description":"value2"}' \
  -H "Content-Type: application/json" \
- -X POST \
- localhost:8080/note
+ $APPLICATION_URL/note
 ```
 
 #### Rotate application database credentials
 
-Rotator script rotates database credentials in k8s secrets, waits for secrets to be propagated to application pod volumes, then rotates database credentials. k8s secrets updates have an associated lag. Using a secret management solution, such as Conjur, would avoid the need to wait for propagation.
+We've provided a rotator script that works by:
+ + updating the password in the vault
+ + waiting for the update to take effect
+ + rotating the credentials with the database
+
+Typically, you'd want your rotation to work the other way - update the DB and then your vault - but we're using kubernetes secrets in this guide, which isn't built to handle secret rotation gracefully. For that, you'd want to use a better secrets management solution.
+
+To see graceful rotation, poll the retrieve notes endpoint (GET `/note`) in a separate terminal before rotating:
+
+```
+APPLICATION_URL=$(. ./config.sh; echo $APPLICATION_URL)
+
+while true
+do 
+    echo "Retrieving notes"
+    curl $APPLICATION_URL/note
+    echo ""
+    sleep 1
+done
+```
 
 Run the following with your own value for `>new password value<`:
 
@@ -122,4 +140,3 @@ Run the following with your own value for `>new password value<`:
 ```
 
 Observe that requests to the application API are not encumbered by rotation.
- 

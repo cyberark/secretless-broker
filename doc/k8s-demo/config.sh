@@ -1,8 +1,16 @@
 #!/bin/bash -e
 
-DB_URL=192.168.99.100:30001/quick_start_db # Change IP address component accordingly if not running a minikube cluster
-DB_ROOT_USER=postgres
-DB_ROOT_PASSWORD=postgres
+# application url accessible to local machine
+APPLICATION_URL=192.168.99.100:30002 # CHANGE to reflect endpoint exposed by application service
+
+# database url accessible to kubernetes cluster and local machine
+DB_URL=192.168.99.100:30001/quick_start_db # CHANGE to reflect endpoint exposed by db service
+
+# admin-user credentials
+DB_ADMIN_USER=postgres
+DB_ADMIN_PASSWORD=postgres
+
+# application-user credentials
 DB_USER=quick_start
 DB_INITIAL_PASSWORD=quick_start
 

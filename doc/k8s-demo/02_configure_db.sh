@@ -7,7 +7,7 @@
 echo ">>--- Set up database"
 
 docker run --rm -it postgres:9.6 env \
- PGPASSWORD=$DB_ROOT_PASSWORD psql -U $DB_ROOT_USER "postgres://$DB_URL" -c "
+ PGPASSWORD=$DB_ADMIN_PASSWORD psql -U $DB_ADMIN_USER "postgres://$DB_URL" -c "
 /* Clean DB */
 REVOKE ALL ON ALL TABLES IN SCHEMA PUBLIC FROM $DB_USER;
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA PUBLIC FROM $DB_USER;
@@ -17,7 +17,7 @@ DROP USER IF EXISTS $DB_USER;
 "
 
 docker run --rm -it postgres:9.6 env \
- PGPASSWORD=$DB_ROOT_PASSWORD psql -U $DB_ROOT_USER "postgres://$DB_URL" -c "
+ PGPASSWORD=$DB_ADMIN_PASSWORD psql -U $DB_ADMIN_USER "postgres://$DB_URL" -c "
 /* Create Application User */
 CREATE USER $DB_USER PASSWORD '$DB_INITIAL_PASSWORD';
 GRANT ALL ON SCHEMA PUBLIC TO $DB_USER;

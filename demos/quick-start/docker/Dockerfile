@@ -22,4 +22,7 @@ RUN apk add -U openssl openssh nginx apache2-utils tini \
     && adduser -DH secretless \
     && chown secretless /etc/secretless.yml \
     && adduser -s /bin/bash -D user \
-    && passwd -u user
+    && passwd -u user \
+    && sed \
+        -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' \
+        /etc/ssh/sshd_config

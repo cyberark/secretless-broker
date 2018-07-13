@@ -41,11 +41,6 @@ expect -c "
     -o StrictHostKeyChecking=no \
     use@quickstart echo Success
 
-  expect {
-    password { send \\r }
-    timeout  { exit 1 }
-    eof      { exit 1 }
-  }
   expect \$ { send echo Success }
 "
 report_result "SSH"

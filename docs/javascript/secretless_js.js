@@ -8,6 +8,32 @@ function fixNav(){
 		docConClass.add('fixed-nav-documentation');
 	} else{
 		document.querySelector('.side-nav').classList.remove('fixed-nav');
+
+		footer = document.querySelector('footer')
+		footerHeight = footer.offsetTop;
+
+		console.log('footer: ' + footerHeight)
+
+		docConClass = document.querySelector('.documentation-content').classList;
+
+		window.addEventListener('scroll', function() { toggleFixedNav(); });
+	});
+
+function toggleFixedNav() {
+	const sideNav = document.querySelector('.side-nav');
+	const navBottom = window.scrollY + navHeight
+	console.log(navBottom);
+	if (navBottom >= footerHeight) {
+		console.log("i am overflowing");
+		sideNav.classList.remove('fixed-nav');
+		docConClass.remove('fixed-nav-documentation');
+	}
+	if (window.scrollY >= topOfNav) {
+		sideNav.classList.add('fixed-nav');
+		docConClass.add('fixed-nav-documentation');
+	}
+	else {
+		sideNav.classList.remove('fixed-nav');
 		docConClass.remove('fixed-nav-documentation');
 
 	}

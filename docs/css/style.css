@@ -88,14 +88,14 @@ pre{
 }
 #frame{
 	margin-bottom: 0;
-	height: 465px;
+	height: 33.5em;
 	background: #383950;
 }
 .card-heading{
 	font-weight: bold;
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 1.5em;
-	letter-spacing: 1px;
+	letter-spacing: .1em;
 }
 .navbar-list > ul{
 	display: flex;

@@ -2,7 +2,7 @@
 
 docker-compose build
 
-rm -rf sock/.agent
+./stop
 
 docker-compose up \
   -d \

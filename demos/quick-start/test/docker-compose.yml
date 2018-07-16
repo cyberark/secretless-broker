@@ -1,0 +1,11 @@
+version: "2"
+
+services:
+  quickstart:
+    image: secretless-quickstart
+
+  test-client:
+    image: postgres:9.6.9-alpine
+    volumes: [ "./bin/entrypoint:/entrypoint" ]
+    entrypoint: [ "/entrypoint" ]
+    depends_on: [ "quickstart" ]

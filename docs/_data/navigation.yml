@@ -10,13 +10,22 @@ main:
   - page: Github
     url: https://github.com/conjurinc/secretless
 
-docsIndex:
-  - page: Overview
-    url: docs.html
-  - page: How it Works?
-    url: works.html
-  - page: Key Terms
-    url: key_terms.html
-  - page: Get Started
-    url: get_started.html
-
+documentation:
+  - title: Overview
+    subfolderitems:
+      - page: Why Secretless?
+        url: docs.html
+      - page: How does it work?
+        url: how_it_works.html
+      - page: Key Terms
+        url: key_terms.html
+  - title: Get Started
+    subfolderitems:
+      - page: Quick Start
+        url: quick_start.html
+      - page: Deploying to Kubernetes
+        url: deploy_to_kubernetes.html
+  - page: Reference
+    url: reference.html
+  - page: FAQ
+    url: faq.html

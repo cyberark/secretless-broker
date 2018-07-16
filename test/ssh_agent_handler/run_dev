@@ -1,0 +1,6 @@
+#!/bin/bash -ex
+
+trap './stop' EXIT QUIT INT
+
+docker-compose up -d dev
+docker-compose exec dev /bin/bash

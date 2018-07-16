@@ -230,8 +230,9 @@ pre{
 	margin: 3px auto 0;
 	transition: all .3s ease-out;
 }
-.introduction-img{
+.docs-img{
 	width: 450px;
+	margin: 0 auto;
 }
 .arch-respons-box{
 	margin-bottom: 40px;

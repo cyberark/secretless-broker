@@ -26,14 +26,14 @@ secretless $ ./bin/build
 Then from this directory, build each scenario:
 
 ```sh-session
-full-demo $ ./build
+secretless/demos/full-demo $ ./build
 ```
 
 Next, enter the scenario directory. For example, "plaintext":
 
 ```sh-session
-full-demo $ cd plaintext
-plaintext $ 
+secretless/demos/full-demo $ cd plaintext
+secretless/demos/full-demo/plaintext $
 ```
 
 In this directory you'll find a sequence of shell scripts. Run each script in sequence.
@@ -110,11 +110,11 @@ This app expects two environment variables: `SSL_CERT_FILE` and `SSL_KEY_FILE`. 
 
 ### Myapp
 
-* **DB_HOST** Secretless runs a `pg` listener on Unix socket `/var/run/postgresql`. This socket file is shared with `myapp`. `myapp` connects to `pg` through Secretless using this socket.
+* **DB_HOST** Secretless runs a `pg` listener on Unix socket `/sock/s.PGSQL.5432`. This socket file is shared with `myapp`. `myapp` connects to `pg` through Secretless using this socket.
 * **DB_PASSWORD** Not provided.
 
 ### Proxy_tls
 
 * **SSL_CERT_FILE** The certificate is built into the container.
-* **SSL_KEY_FILE**  `summon2` is used as the entrypoint to the container.  `CONJUR_AUTHN_API_KEY` is provided as a container environment variable. The SSL key is stored by `summon2` as a temp file in the container, which is deleted when the `summon2` exits. 
+* **SSL_KEY_FILE**  `summon2` is used as the entrypoint to the container.  `CONJUR_AUTHN_API_KEY` is provided as a container environment variable. The SSL key is stored by `summon2` as a temp file in the container, which is deleted when the `summon2` exits.
 

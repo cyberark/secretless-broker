@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 source ./_conjur.sh
 
@@ -6,9 +6,15 @@ admin_api_key=$(docker-compose exec conjur conjurctl role retrieve-key dev:user:
 ansible_api_key=$(conjur_cli "$admin_api_key" host rotate_api_key -h ansible | tr -d '\r')
 
 export CONJUR_AUTHN_API_KEY="$ansible_api_key"
+
+echo "Launching Ansible runner and PostgreSQL..."
 docker-compose up -d pg ansible_secretless
 
+echo "Running Anisible playbook..."
 docker-compose run --rm \
-  --no-deps \
-  -e CONJUR_AUTHN_API_KEY="$ansible_api_key" \
-  ansible ansible-playbook postgresql.yml
+                   --no-deps \
+                   -e ANSIBLE_HOST_KEY_CHECKING=False \
+                   -e CONJUR_AUTHN_API_KEY="$ansible_api_key" \
+                   ansible ansible-playbook postgresql.yml
+
+echo "Done"

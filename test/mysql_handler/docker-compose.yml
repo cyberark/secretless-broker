@@ -24,7 +24,7 @@ services:
       MYSQL_PASSWORD: testpass
     volumes:
       - ./secretless.yml:/secretless.yml
-      - mysql-socket:/run/mysql
+      - mysql-socket:/sock
 
   test:
     build:
@@ -32,7 +32,7 @@ services:
       dockerfile: Dockerfile.dev
     command: go test -v ./test/mysql_handler
     volumes:
-      - mysql-socket:/go/src/github.com/conjurinc/secretless/test/mysql_handler/run/mysql
+      - mysql-socket:/go/src/github.com/conjurinc/secretless/test/mysql_handler/sock
     depends_on:
       - secretless
 
@@ -42,7 +42,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
-      - mysql-socket:/run/mysql
+      - mysql-socket:/sock
 
 volumes:
   mysql-socket:

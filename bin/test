@@ -16,12 +16,7 @@ pushd test
         continue
       fi
 
-      # Stop anything that might be running
-      if [[ -f ./stop ]]; then
-        ./stop || true
-      fi
-
-      # Start the needed prerequisites
+      # Start the needed prerequisites. Assumes that start pre-cleans the env
       ./start
 
       # Run the tests

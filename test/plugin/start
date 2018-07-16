@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+./stop
+
 docker-compose build
 docker-compose up -d echo \
                      secretless-with-plugin

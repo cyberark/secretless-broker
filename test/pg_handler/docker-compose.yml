@@ -19,7 +19,7 @@ services:
       PG_PASSWORD: test
     volumes:
       - ./secretless.yml:/secretless.yml
-      - pg-socket:/run/postgresql
+      - pg-socket:/sock
 
   test:
     build:
@@ -27,7 +27,7 @@ services:
       dockerfile: Dockerfile.dev
     command: go test -v ./test/pg_handler
     volumes:
-      - pg-socket:/go/src/github.com/conjurinc/secretless/test/pg_handler/run/postgresql
+      - pg-socket:/sock
     depends_on:
       - secretless
 
@@ -39,7 +39,7 @@ services:
       PG_PASSWORD: test
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
-      - pg-socket:/go/src/github.com/conjurinc/secretless/test/pg_handler/run/postgresql
+      - pg-socket:/sock
 
 volumes:
   pg-socket:

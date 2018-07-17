@@ -14,5 +14,5 @@ To construct:
 1. `git clone https://github.com/conjurinc/secretless.git`
 2. `cd docs`
 3. Run the following command:
-`$ bundle exec jekyll serve`
+`bundle exec jekyll serve`
 4. Preview Jekyll site locally in web browser by either running `open localhost:4000` or manually navigating to http://localhost:4000

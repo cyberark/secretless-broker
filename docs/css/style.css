@@ -29,6 +29,9 @@ h1{
 pre{
 	background-color: white;
 }
+code{
+	margin: 0;
+}
 #cybr-nav{
    margin-bottom: 0;
    /*height: 5em;*/
@@ -96,6 +99,8 @@ pre{
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 1.5em;
 	letter-spacing: .1em;
+.broker {
+	font-family: 'Open Sans', sans-serif;
 }
 .navbar-list > ul{
 	display: flex;
@@ -214,6 +219,8 @@ pre{
 }
 .introduction-img{
 	width: 22em;
+	width: 22em;
+	margin: 0 auto;
 }
 .arch-respons-box{
 	margin-bottom: 3em;
@@ -229,7 +236,7 @@ pre{
     margin-right: auto;
     width: 80%;
 }
-.trad-img{
+.arch-img{
 	width: 22em;
 }
 .arch-list > li{

@@ -6,6 +6,7 @@ trap "exit 0" INT
 # Initialize postgres secrets
 export QUICKSTART_USERNAME="secretless"
 export QUICKSTART_PASSWORD="$(openssl rand -hex 8)"
+export POSTGRES_PASSWORD="$(openssl rand -hex 8)"
 
 ## Initialize SSH secrets
 ssh-keygen -b 2048 -f /tmp/id_rsa -N ''

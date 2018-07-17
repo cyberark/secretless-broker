@@ -50,16 +50,16 @@ id: home
 						<li>Manage connection disruptions</li>
 					</ul>
 				</div>
-				<img class="trad-img" src="img/traditional-architecture.png" alt="Traditional Architecture">
+				<img class="arch-img" src="img/traditionalarch.png" alt="Traditional Architecture">
 			</div>
 		</div>
 
 		<div class="row sub-card">
 			<p class="card-heading">Secretless Architecture</p>
 			<div class="arch-respons-box">
-				<img class="trad-img" src="img/secretless-architecture-transparent.png" alt="Traditional Architecture">
+				<img class="arch-img" src="img/secretlessarch.png" alt="Secretless Architecture">
 				<div class="arch-respons arch-right">
-					<p class="card-subheading">Broker Responsibilities</p>
+					<p class="card-subheading broker">Broker Responsibilities</p>
 					<ul class="arch-list">
 						<li>Retrieve secrets from vault​</li>
 						<li>Securely handle retrieved secrets​</li>
@@ -88,37 +88,88 @@ id: home
 			</div>
 			<div class="tab-content" style="display: block" id="PostgreSQL">
 				<ol>
-					<li>Download and run the Secretless quick-start as a Docker container:
-					<pre>docker container run --rm -p 5454:5454 cyberark/secretless-quickstart</pre></li>
-					<li>That's all! Now you can connect to the password-protected PostgreSQL database via the Secretless broker, without knowing its password.<p>Give it a try:</p>
-	<pre>psql \
+					<li>
+						Download and run the Secretless quick-start as a Docker container:
+						<pre>docker container run \
+  --rm \
+  -p 5432:5432 \
+  -p 5454:5454 \
+  cyberark/secretless-quickstart</pre>
+					</li>
+					<li>
+						Direct access to the PostgreSQL database is available over port
+						<code>5432</code>. You can try querying some data, but you don't
+						have the credentials required to connect:
+						<pre>psql \
+  --host localhost \
+  --port 5432 \
+  --username secretless \
+  -d quickstart \
+  -c 'select * from counties;'</pre>
+					</li>
+					<li>
+						The good news is that you don't need any credentials! Instead, you
+						can connect to the password-protected PostgreSQL database via the
+						Secretless broker on port <code>5454</code>, <i>without knowing the
+						password.</i> Give it a try:
+						<pre>psql \
   --host localhost \
   --port 5454 \
   --username secretless \
   -d quickstart \
-  -c 'select * from counties;'
-	</pre></li>
+  -c 'select * from counties;'</pre>
+					</li>
 				</ol>
 			</div>
 			<div class="tab-content" id="HTTP">
 				<ol>
-					<li>Download and run the Secretless quick-start as a Docker container:
-					<pre>docker container run --rm -p 80:80 -p 8081:8081 cyberark/secretless-quickstart</pre></li>
-					<li>That's all! Now you can make an authenticated HTTP request by using the Secretless broker as a proxy without knowing any credentials.<p>Give it a try:</p>
-						<pre>http_proxy=localhost:8081 curl -i localhost</pre>
+					<li>
+						Download and run the Secretless quick-start as a Docker container:
+						<pre>docker container run \
+  --rm \
+  -p 8080:80 \
+  -p 8081:8081 \
+  cyberark/secretless-quickstart</pre>
+					</li>
+					<li>
+						The service we're trying to connect to is listening on port
+						<code>8080</code>. If you try to access it, the service will inform
+						you that you're unauthorized:
+						<pre>curl -i localhost:8080</pre>
+					</li>
+					<li>
+						Instead, you can make an authenticated HTTP request by proxying
+						through the Secretless broker on port <code>8081</code>. Secretless
+						will inject the proper credentials into the request <i>without you
+						needing to know what they are</i>. Give it a try:
+						<pre>http_proxy=localhost:8081 curl -i localhost:8080</pre>
 					</li>
 				</ol>
 			</div>
 			<div class="tab-content" id="SSH">
 				<ol>
-					<li>Download and run the Secretless quick-start as a Docker container:
-					<pre>docker container run --rm -p 2222:2222 cyberark/secretless-quickstart</pre></li>
-					<li>That's all! Now you can establish an SSH connection through the Secretless broker without knowing any credentials.<p>Give it a try:</p>
+					<li>
+						Download and run the Secretless quick-start as a Docker container:
+						<pre>docker container run \
+  --rm \
+  -p 2221:22 \
+  -p 2222:2222 \
+  cyberark/secretless-quickstart</pre>
+					</li>
+					<li>
+						The default SSH service is exposed over port <code>2221</code>. You
+						can try opening an SSH connection to the server, but you don't have
+						the credentials to log in:
+						<pre>ssh -p 2221 user@localhost</pre>
+					</li>
+					<li>
+						The good news is that you don't need credentials! You can establish
+						an SSH connection through the Secretless broker on port
+						<code>2222</code> <i>without any credentials</i>. Give it a try:
 						<pre>ssh -p 2222 user@localhost</pre>
 					</li>
 				</ol>
 			</div>
-
 			<p>Want to learn more? Check out our <a href="docs.html">documentation</a> for more information!</p>
 		</div>
 	</div>

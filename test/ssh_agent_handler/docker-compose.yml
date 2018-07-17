@@ -34,8 +34,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    command: sleep 999d
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
+      - ./id_insecure:/id_insecure:ro
+      - ssh-agent-socket:/sock
+    depends_on:
+      - ssh_host
 
 volumes:
   ssh-agent-socket:

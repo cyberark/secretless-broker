@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"golang.org/x/crypto/ssh/agent"
@@ -53,7 +54,8 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	}
 
 	if h.GetConfig().Debug {
-		log.Printf("ssh-agent credential values : %s", values)
+		keys := reflect.ValueOf(values).MapKeys()
+		log.Printf("SSH agent connection parameters: %s", keys)
 	}
 
 	key := agent.AddedKey{}

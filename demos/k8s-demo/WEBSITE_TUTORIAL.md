@@ -4,7 +4,7 @@ To get started with Secretless, try working through this tutorial, which goes th
 
 We've chosen a Postgres database as the protected resource for this sample, but you have many more options for protected resources such as other databases, web services, SSH connections, or any other TCP-based service.
 
-## Introduction to Secretless on Kubernetes
+## Getting started
 
 The following sections of this tutorial detail the steps required to configure and deploy the sample. If you'd rather just run the code and inspect it, jump to [Review complete sample repository](#review-complete-sample-repository).
 
@@ -32,7 +32,7 @@ For simplicity, the application only exposes the `C` and `R` of the well-known `
 
 For a deep dive into how the routes are handled please consult [the source code](https://github.com/conjurinc/secretless/blob/master/demos/k8s-demo/app/note.go).
 
-### Provision protected resources
+## Provision protected resources
 
 In this section, you will create the Postgres storage backend in your Kubernetes cluster. 
 
@@ -101,7 +101,7 @@ To deploy a Postgres StatefulSet, follow these steps:
     
     In this way, the Postgres backend becomes available via `$NODE_IP:30001` (referred to as `REMOTE_DB_URL`, moving forward).
  
-### Setup and Configure protected resources
+## Setup and Configure protected resources
 
 Before proceeding, in this section, we assume that you have a Postgres backend set up and ready to go. Concretely this means:
 
@@ -140,7 +140,7 @@ $ docker run --rm -it postgres:9.6 env \
 "
 ```
 
-### Create application namespace and store application-user credentials
+## Create application namespace and store application-user credentials
 
 Now that the storage backend is setup and good to go, it's time to deploy the application with secretless.
 
@@ -172,7 +172,7 @@ EOF
 ```
 
 
-### Deploy and run Application + Secretless
+## Deploy and run Application + Secretless
 
 In this section, you create the deployment manifest for deploying your application and Secretless by building on this base manifest:
 
@@ -204,7 +204,7 @@ In this base manifest, you declare a deployment of 3 replicas with associated me
 + Create and store secretless configuration as a ConfigMap
 + Add and configure the Secretless sidecar container
 
-#### Add and configure application container
+### Add and configure application container
 
 The sample application receives it's configuration via environment variables. For this reason we add `DATABASE_URL=postgresql://localhost:5432/quick_start_db?sslmode=disable` to the application container spec in the application deployment manifest at `$.spec.template.spec.containers`.
 
@@ -223,7 +223,7 @@ $.spec.template.spec.containers...
           value: postgresql://localhost:5432/quick_start_db?sslmode=disable
 ```
 
-#### Create and store Secretless configuration as ConfigMap
+### Create and store Secretless configuration as ConfigMap
 
 There are 3 steps to configuring Secretless for usage by the application
 + Declare listeners, which provide local interfaces to protected resources
@@ -267,7 +267,7 @@ $ kubectl create configmap quick-start-application-secretless-config \
   --from-file=secretless.yml
 ```
 
-### Add and Configure Secretless sidecar container
+## Add and Configure Secretless sidecar container
 
 Below is the template spec for the application and the secretless sidecar. It includes:
 
@@ -309,7 +309,7 @@ $.spec.template.spec...
           name: quick-start-application-secretless-config
 ```
 
-#### Deploy and run Application + Secretless
+### Deploy and run Application + Secretless
 
 Run this command to deploy the application:
 ```bash
@@ -320,7 +320,7 @@ Run this command to ensure the application pods have started and are healthy:
 ```bash
 $ kubectl get po --namespace ${APPLICATION_NAMESPACE}
 ```
-#### Expose application publicly
+### Expose application publicly
 
 Run this command to expose the application on node port 30002:
 
@@ -341,7 +341,7 @@ spec:
 EOF
 ```
 
-### Consume application
+## Consume application
 
 Now that the application is up and running, let's test it out.
 
@@ -364,7 +364,6 @@ We expect the command above to respond with a JSON array containing the previous
 There we have it. This application is communicating with a protected resource without managing any secrets.
 
 #TODO:
-### Rotate protected resource credentials
+## Rotate protected resource credentials
 ## Review complete sample repository
 ## Next steps
-

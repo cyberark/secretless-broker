@@ -1,4 +1,4 @@
-FROM secretless:latest as secretless
+FROM registry2.itci.conjur.net/conjurinc/secretless:latest as secretless
 FROM postgres:9.6.9-alpine
 
 MAINTAINER "CyberArk Software, Inc."

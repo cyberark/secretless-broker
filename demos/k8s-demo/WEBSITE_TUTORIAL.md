@@ -8,11 +8,13 @@ We've chosen a Postgres database as the protected resource for this sample, but 
 
 The following sections of this tutorial detail the steps required to configure and deploy the sample. If you'd rather just run the code and inspect it, jump to [Review complete sample repository](#review-complete-sample-repository).
 
+### Requirements
+
 This tutorial assumes you have a running Kubernetes cluster and access to it via `kubectl`.
 
 We also make use of `docker` to avoid asking you to install utility software on your local machine such as `psql`.
 
-### Sample application
+## About the Sample application
 
 For this sample, we use a [simple note storage-and-retrieval application written in Go](https://github.com/conjurinc/secretless/tree/master/demos/k8s-demo/app). The application is an `http service` that uses a `Postgres storage backend`. It follows the [12-factor principles](https://12factor.net/config) to store configuration in the environment. Specifically, the `DATABASE_URL` environment variable is used:
 
@@ -23,7 +25,7 @@ db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
 `DATABASE_URL` is used by the application to establish a database handle, `db` (representing a pool of connections) which allows the application to communicate with the database.
 
-#### Application server routes
+### Application server routes
 
 For simplicity, the application only exposes the `C` and `R` of the well-known `CRUD` operations. 
 
@@ -32,11 +34,11 @@ For simplicity, the application only exposes the `C` and `R` of the well-known `
 
 For a deep dive into how the routes are handled please consult [the source code](https://github.com/conjurinc/secretless/blob/master/demos/k8s-demo/app/note.go).
 
-## Provision protected resources
+## Provision protected resources (optional)
 
 In this section, you will create the Postgres storage backend in your Kubernetes cluster. 
 
-NOTE: It is possible to skip this step and leverage a remote Postgres storage backend. Continue to [Configure protected resources](#configure-protected-resources)
+*NOTE: It is possible to skip this step and leverage a remote Postgres storage backend. Continue to [Configure protected resources](#configure-protected-resources)*
 
 Our Postgres storage backend is stateful. For this reason, we'll use a StatefulSet to manage the backend. Please consult [the kubernetes docs](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) to better understand why a StatefulSets are appropriate for stateful applications.
 

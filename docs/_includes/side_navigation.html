@@ -1,28 +1,28 @@
 <nav id="side-navigation">
 	<ul>
 		{% for item in site.data.navigation.documentation %}
-			{% if item.title %}
-				<p class="sidenav-item">
-					{% if item.url %}
-						<a href="{{ item.url }}">{{ item.title }}</a>
-					{% else %}
-						{{ item.title }}
-					{% endif %}
-				</p>
-				{% if item.subfolderitems[0] %}
-					<ul>
-						{% for entry in item.subfolderitems %}
-							<li class="sidenav-subitem">
-								<a href="{{ entry.url }}" alt="{{ entry.title }}">{{entry.page}}</a>
-							</li>
-						{% endfor %}
-					</ul>
-				{% endif %}
+		{% if item.title %}
+		<p class="sidenav-item">
+			{% if item.url %}
+			<a href="{{ item.url }}">{{ item.title }}</a>
 			{% else %}
-				<p class="sidenav-item">
-					<a href="{{ item.url }}">{{ item.page }}</a>
-				</p>
+			{{ item.title }}
 			{% endif %}
+		</p>
+		{% if item.subfolderitems[0] %}
+		<ul>
+			{% for entry in item.subfolderitems %}
+			<li class="sidenav-subitem">
+				<a href="{{ entry.url }}" alt="{{ entry.title }}">{{entry.page}}</a>
+			</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+		{% else %}
+		<p class="sidenav-item">
+			<a href="{{ item.url }}">{{ item.page }}</a>
+		</p>
+		{% endif %}
 		{% endfor %}
 	</ul>
 </nav>

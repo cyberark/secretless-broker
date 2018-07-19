@@ -1,20 +1,20 @@
 p{
 	font-family: "Roboto",sans-serif;
-    font-size: 15px;
-    line-height: 1.5;
+	font-size: 15px;
+	line-height: 1.5;
 }
 li{
 	font-family: "Roboto",sans-serif;
-    font-size: 15px;
-    line-height: 1.5;
-    margin-left: 15px;
+	font-size: 15px;
+	line-height: 1.5;
+	margin-left: 15px;
 }
 code{
 	margin-left: 25px;
 }
 a {
-    text-decoration: none;
-    display: inline-block;
+	text-decoration: none;
+	display: inline-block;
 }
 hr{
 	position: relative;
@@ -33,10 +33,10 @@ code{
 	margin: 0;
 }
 #cybr-nav{
-       width: 100%;
-       margin-bottom: 0;
-       height: 65px;
-       background: #383950;
+	width: 100%;
+	margin-bottom: 0;
+	height: 65px;
+	background: #383950;
 }
 .navbar-list li{
 	font-size:14px;
@@ -53,7 +53,7 @@ code{
 	list-style-type: none;
 	margin-left: -1em;
 	margin-bottom: 0;
-    margin-top: 1em;
+	margin-top: 1em;
 	font-family: "Source Sans Pro",sans-serif;
 	font-size: 15px;
 	color: #404040;
@@ -74,8 +74,8 @@ code{
 	margin-right: 100px;
 }
 .fixed-nav-documentation{
-    position: relative;
-    left: 215px;
+	position: relative;
+	left: 215px;
 }
 .sidenav-item i{
 	font-size: 10px;
@@ -83,7 +83,7 @@ code{
 	margin-left: 5px;
 }
 .sidenav-item:hover a:hover{
-	 text-decoration: none;
+	text-decoration: none;
 }
 .side-nav{
 	box-shadow: 0 2px 4px rgba(0,0,0,.1);
@@ -140,15 +140,15 @@ code{
 	text-transform: uppercase;
 	margin: 30px;
 	font-family: 'Source Sans Pro', sans-serif;
-    font-size: 16px;
-    padding: 10px 50px 10px 50px;
-    background: #FFFFFF;
-    color: #7b8A8E;
-    display: inline-block;
-    font-weight: 600;
-    letter-spacing: 1px;
-    transition: .2s ease-out;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+	font-size: 16px;
+	padding: 10px 50px 10px 50px;
+	background: #FFFFFF;
+	color: #7b8A8E;
+	display: inline-block;
+	font-weight: 600;
+	letter-spacing: 1px;
+	transition: .2s ease-out;
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
 }
 .button:hover p{
 	color: #35a6a9;
@@ -160,29 +160,29 @@ code{
 	text-align: center;
 }
 .btn-arrow{
-    text-decoration: none;
+	text-decoration: none;
 	border-radius: 50%;
 	height: 40px;
-    width: 40px;
-    margin: -80px -50px;
-    position: absolute;
-    top: 120%;
-    left: 54%;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
-    transition: all .3s;
+	width: 40px;
+	margin: -80px -50px;
+	position: absolute;
+	top: 120%;
+	left: 54%;
+	border-radius: 50%;
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+	transition: all .3s;
 
 }
 .btn-arrow:hover{
-    text-decoration: none;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.3);
+	text-decoration: none;
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.3);
 
 }
 .jumbotron-img{
 	width: 20%;
 	display: block;
-    margin-left: auto;
-    margin-right: auto;
+	margin-left: auto;
+	margin-right: auto;
 }
 #jumbotron-text {
 	font-size: 20px;
@@ -194,7 +194,7 @@ code{
 #jumbotron-heading {
 	font-size: 60px;
 	text-align: center;
-    letter-spacing: 3px;
+	letter-spacing: 3px;
 	margin-top:20px;
 	color: #fff;
 
@@ -203,8 +203,8 @@ code{
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-    height: 100px;
-    background-color: #f8f8f8;
+	height: 100px;
+	background-color: #f8f8f8;
 }
 .jumbotron-sub p{
 	color: #383950;
@@ -219,7 +219,7 @@ code{
 	margin-right: 10px;
 }
 .round {
-    border-radius: 50%;
+	border-radius: 50%;
 }
 .inner p {
 	margin-left: 20px;
@@ -230,7 +230,7 @@ code{
 .inner-text{
 	margin-left: 0;
 	letter-spacing: 1px;
-    font-size: 18px;
+	font-size: 18px;
 }
 .btn-arrow-right{
 	font-size: 20px;
@@ -256,8 +256,8 @@ code{
 }
 .arch{
 	margin-left: auto;
-    margin-right: auto;
-    width: 80%;
+	margin-right: auto;
+	width: 80%;
 }
 .arch-img{
 	width: 400px;
@@ -273,31 +273,31 @@ code{
 	font-weight: bold;
 }
 .center-block{
-    float: none;
-    display: block;
-    margin: 0 auto;
-    top: 10px;
-    background-color: transparent;
+	float: none;
+	display: block;
+	margin: 0 auto;
+	top: 10px;
+	background-color: transparent;
 }
 .about-subitem{
 	padding: 5px 5px 5px 5px;
 }
 .about-subitem .inner{
-    min-height: 245px;
-    padding: 25px;
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
-    border: 1px solid #e2e2e2;
-    margin: 0 10px 30px;
-    transition: .5s ease;
+	min-height: 245px;
+	padding: 25px;
+	box-shadow: 0 2px 4px rgba(0,0,0,.1);
+	border: 1px solid #e2e2e2;
+	margin: 0 10px 30px;
+	transition: .5s ease;
 }
 .inner:hover{
 	transform: scale(1.025);
-    box-shadow: 3px 3px 18px rgba(0,.1,0,.2);
+	box-shadow: 3px 3px 18px rgba(0,.1,0,.2);
 
 }
 .inner i{
 	padding-top: 3px;
-    transition: .5s ease;
+	transition: .5s ease;
 }
 
 .inner:hover i{
@@ -310,8 +310,8 @@ code{
 .docs{
 	width: 10px;
 	margin-left: auto;
-    margin-right: auto;
-    width: 80%;
+	margin-right: auto;
+	width: 80%;
 }
 .documentation-content{
 	padding-bottom: 100px;
@@ -321,35 +321,35 @@ code{
 .documentation{
 	display: flex;
 	max-width: 85%;
-    margin: 0 auto;
+	margin: 0 auto;
 }
 .about{
 	width: 10px;
 	margin-left: auto;
-    margin-right: auto;
-    width:110%;
+	margin-right: auto;
+	width:110%;
 }
 .guides{
 	width: 10px;
 	margin-left: auto;
-    margin-right: auto;
-    width: 80%;
+	margin-right: auto;
+	width: 80%;
 }
 .references{
 	width: 10px;
 	margin-left: auto;
-    margin-right: auto;
-    width: 80%;
+	margin-right: auto;
+	width: 80%;
 }
 .faq{
 	width: 10px;
 	margin-left: auto;
-    margin-right: auto;
-    width: 80%;
+	margin-right: auto;
+	width: 80%;
 }
 .introduction{
-    margin: 0 auto;
-    width: 60%;
+	margin: 0 auto;
+	width: 60%;
 }
 .card{
 	padding-top: 75px;
@@ -403,16 +403,16 @@ footer .left-links{
 }
 footer .right-links p{
 	font-weight: 200;
-    padding: 6px 0;
-    letter-spacing: .5px;
-    line-height: 36px;
+	padding: 6px 0;
+	letter-spacing: .5px;
+	line-height: 36px;
 	color:white;
 }
 footer .right-links li{
 	font-weight: 200;
-    font-size: .9em;
-    padding: 6px 0;
-    letter-spacing: .5px;
+	font-size: .9em;
+	padding: 6px 0;
+	letter-spacing: .5px;
 	color: white;
 	list-style-type: none;
 }

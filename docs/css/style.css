@@ -236,7 +236,10 @@ code{
     width: 80%;
 }
 .arch-img{
-	width: 22em;
+	width: 26em;
+}
+.secretless-img{
+	width: 29em;
 }
 .arch-list > li{
 	font-family: 'Source Sans Pro', sans-serif;

@@ -12,6 +12,17 @@ To get started with Secretless, try working through this tutorial, which goes th
 
 We've chosen a Postgres database as the protected resource for this sample, but you have many more options for protected resources such as other databases, web services, SSH connections, or any other TCP-based service.
 
+## Table of Contents
+
++ [Getting Started](#getting-started)
++ [About the Sample application](#about-the-sample-application)
++ [Provision protected resources (optional)](#provision-protected-resources-(optional))
++ [Setup and configure protected resources](#setup-and-configure-protected-resources)
++ [Create application namespace and store application-user credentials](#create-application-namespace-and-store-application-user-credentials)
++ [Deploy and run Application + Secretless](#deploy-and-run-application-+-secretless)
++ [Add and Configure Secretless sidecar container](#add-and-configure-secretless-sidecar-container)
++ [Consume application](#consume-application)
+
 ## Getting started
 
 The following sections of this tutorial detail the steps required to configure and deploy the sample. If you'd rather just run the code and inspect it, jump to [Review complete sample repository](#review-complete-sample-repository).
@@ -111,6 +122,8 @@ To deploy a Postgres StatefulSet, follow these steps:
     
     In this way, the Postgres backend becomes available via `$NODE_IP:30001` (referred to as `REMOTE_DB_URL`, moving forward).
  
+ 
+ 
 ## Setup and Configure protected resources
 
 Before proceeding, in this section, we assume that you have a Postgres backend set up and ready to go. Concretely this means:
@@ -180,7 +193,6 @@ data:
     password: $(echo -n ${APPLICATION_DB_INITIAL_PASSWORD}" | base64)
 EOF
 ```
-
 
 ## Deploy and run Application + Secretless
 

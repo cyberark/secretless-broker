@@ -23,6 +23,8 @@ documentation:
     subfolderitems:
       - page: Quick Start
         url: /quick_start.html
+      - page: Plugins
+        url: /generated/pkg_secretless_plugin_v1.html
       - page: Deploying to Kubernetes
         url: /deploy_to_kubernetes.html
   - page: Reference

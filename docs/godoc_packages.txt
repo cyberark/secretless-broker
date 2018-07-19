@@ -1,0 +1,2 @@
+# This is a list of packages that should be turned into webpages
+pkg/secretless/plugin/v1

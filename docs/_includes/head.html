@@ -20,6 +20,10 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/css/style.css">
 
+    {% if page.godoc %}
+      {% include godoc.html %}
+    {% endif %}
+
     {% if page.custom_js %}
         {% for js_file in page.custom_js %}
             <script src='{{ js_file }}' type="text/javascript" data-proofer-ignore></script>

@@ -1,0 +1,16 @@
+FROM golang:1.10.3-alpine
+MAINTAINER Conjur Inc.
+LABEL id="secretless-test-runner"
+
+ENTRYPOINT [ "go", "test", "-v", "-timeout", "3m" ]
+WORKDIR /go/src/github.com/conjurinc/secretless
+
+RUN apk add -u curl git && \
+    curl -fsSL -o /usr/local/bin/dep \
+    https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 && \
+    chmod +x /usr/local/bin/dep
+
+COPY Gopkg.toml Gopkg.lock ./
+RUN dep ensure --vendor-only
+
+COPY . .

@@ -9,13 +9,13 @@ pipeline {
   }
 
   stages {
-    stage('Build Binaries & Images') {
+    stage('Image Build') {
       steps {
         sh './bin/build'
       }
     }
 
-    stage('Static analysis - code linting') {
+    stage('Linting') {
       steps {
         sh './bin/check_style'
 
@@ -23,9 +23,17 @@ pipeline {
       }
     }
 
-    stage('Run tests') {
+    stage('Unit tests') {
       steps {
-        sh './bin/test'
+        sh './bin/test_unit'
+
+        junit 'test/junit.xml'
+      }
+    }
+
+    stage('Integration tests') {
+      steps {
+        sh './bin/test_integration'
 
         junit 'test/junit.xml'
       }

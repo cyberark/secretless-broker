@@ -23,7 +23,7 @@ h1{
 	font-size: 1.1em;
 }
 .button.active{
-	box-shadow: inset 0 2px 5px 0 rgba(0,0,0,0.16), inset 0 2px 10px 0 rgba(0,0,0,0.12);
+	box-shadow: inset 0 0.125em 0.313em 0 rgba(0,0,0,0.16), inset 0 0.125em 0.250em 0 rgba(0,0,0,0.12);
 	background-color: rgba(0,0,0,0.001);
 }
 pre{
@@ -33,9 +33,10 @@ code{
 	margin: 0;
 }
 #cybr-nav{
-   margin-bottom: 0;
-   /*height: 5em;*/
-   background: #383950;
+       width: 100%;
+       margin-bottom: 0;
+       height: 5em;
+       background: #383950;
 }
 .navbar-list li{
 	font-size: 1em;
@@ -51,30 +52,24 @@ code{
 .sidenav-item{
 	list-style-type: none;
 	margin-left: -1em;
+	margin-bottom: 0;
+    margin-top: 1em;
 	font-family: "Source Sans Pro",sans-serif;
 	font-size: 1.3em;
 	color: #404040;
 }
-.sidenav-item a{
-	margin-left: -1em;
+
+.sidenav-subitem {
+	list-style-type: none;
+	margin-left: -3em;
 	font-family: "Source Sans Pro",sans-serif;
 	font-size: .8em;
 	padding: 0.5em 0em;
 }
-/*.fixed-nav {
-	position: fixed;
-	top: 0;
-	margin-right: 100px;
+.sidenav-item a{
+	color: black;
+
 }
-.fixed-nav-documentation{
-    position: relative;
-    left: 215px;
-}*/
-/*.sidenav-item i{
-	font-size: 10px;
-	margin-right: -10px;
-	margin-left: 5px;
-}*/
 .sidenav-item:hover a:hover{
 	 text-decoration: none;
 }
@@ -85,6 +80,8 @@ code{
 	flex-direction: column;
 	max-height: 28em;
 	width: 16em;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
 }
 .introduction-heading {
 	font-size: 1.5em;
@@ -99,6 +96,8 @@ code{
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 1.5em;
 	letter-spacing: .1em;
+}
+
 .broker {
 	font-family: 'Open Sans', sans-serif;
 }
@@ -126,7 +125,7 @@ code{
     font-weight: 600;
     letter-spacing: .1em;
     transition: .2s ease-out;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+    box-shadow: 0 0.125em 0.625em 0 rgba(0,0,0,0.12),0 0.125em 0.313em 0 rgba(0,0,0,0.16);
 }
 .button:hover p{
 	color: #35a6a9;
@@ -152,13 +151,13 @@ code{
     top: 144%;
     left: 54%;
     border-radius: 50%;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+    box-shadow: 0 0.5em 1em 0 rgba(0,0,0,0.16), 0 0.5em 4em 0 rgba(0,0,0,0.12);
     transition: all .3s;
 
 }
 .btn-arrow:hover{
     text-decoration: none;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.3);
+    box-shadow: 0 0.5em 1em 0 rgba(0,0,0,0.16), 0 .5em 4em 0 rgba(0,0,0,0.3);
 
 }
 .jumbotron-img{
@@ -217,8 +216,8 @@ code{
 .btn-arrow-right{
 	font-size: 1.3em;
 }
+
 .introduction-img{
-	width: 22em;
 	width: 22em;
 	margin: 0 auto;
 }
@@ -261,8 +260,8 @@ code{
 .about-subitem .inner{
     min-height: 20em;
     padding: 2em;
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
-    border: 1px solid #e2e2e2;
+    box-shadow: 0 .5em 1.5em rgba(0,0,0,.1);
+    border: 0.05em solid #e2e2e2;
     margin: 0 1em 1em;
     transition: .5s ease;
     display: flex;
@@ -271,7 +270,7 @@ code{
 }
 .inner:hover{
 	transform: scale(1.025);
-    box-shadow: 3px 3px 18px rgba(0,.1,0,.2);
+    box-shadow: .5em .5em 2em rgba(0,.1,0,.2);
 
 }
 .inner i{
@@ -280,7 +279,7 @@ code{
 }
 
 .inner:hover i{
-	transform: translateX(12px);
+	transform: translateX(.5em);
 }
 
 .in-line-frame{
@@ -352,15 +351,13 @@ code{
 }
 .container-fluid{
 	background-color: #f8f8f8;
-	/*box-shadow: 0 3px 4px rgba(0,0,0,.1);*/
 }
 .tab-content{
 	display: none;
 }
 footer{
 	background-color: #4e4f4f;
-	padding: 5em 0 5em 0;
-	box-shadow: 0px 500px 0px 500px #4e4f4f;
+	padding: 3em 0 3em 0;
 }
 .container .container-footer {
 	width: 100%;

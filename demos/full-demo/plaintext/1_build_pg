@@ -10,4 +10,5 @@ db_password=$(<../secrets/db.password)
 docker-compose run --rm \
   --no-deps \
   -e DB_PASSWORD="$db_password" \
+  -e ANSIBLE_HOST_KEY_CHECKING=False \
   ansible ansible-playbook --key-file "/root/id_insecure" postgresql.yml

@@ -40,12 +40,7 @@ func psql(host string, port int, user string, environment []string) (string, err
 func TestPGHandler(t *testing.T) {
 
 	Convey("Connect over a Unix socket", t, func() {
-		cwd, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-
-		cmdOut, err := psql(fmt.Sprintf("%s/run/postgresql", cwd), 0, "", []string{})
+		cmdOut, err := psql("/sock", 0, "", []string{})
 		So(err, ShouldBeNil)
 		So(cmdOut, ShouldContainSubstring, "1 row")
 	})

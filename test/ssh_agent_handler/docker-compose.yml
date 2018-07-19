@@ -11,8 +11,8 @@ services:
     image: secretless
     volumes:
       - ./secretless.yml:/secretless.yml
-      - ./run:/run/ssh-agent
-      - ./id_insecure:/root/id_insecure:ro
+      - ssh-agent-socket:/sock
+      - ./id_insecure:/id_insecure:ro
     depends_on:
       - ssh_host
 
@@ -21,11 +21,11 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     working_dir: /go/src/github.com/conjurinc/secretless/test/ssh_agent_handler
-    command: ssh -o StrictHostKeyChecking=no ssh_host cat /root/.ssh/authorized_keys
+    command: ssh -o StrictHostKeyChecking=no root@ssh_host cat /root/.ssh/authorized_keys
     environment:
-      SSH_AUTH_SOCK: /run/ssh-agent/.agent
+      SSH_AUTH_SOCK: /sock/.agent
     volumes:
-      - ./run:/run/ssh-agent
+      - ssh-agent-socket:/sock
     depends_on:
       - secretless
       - ssh_host
@@ -34,5 +34,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    command: sleep 999d
     volumes:
       - ../..:/go/src/github.com/conjurinc/secretless
+      - ./id_insecure:/id_insecure:ro
+      - ssh-agent-socket:/sock
+    depends_on:
+      - ssh_host
+
+volumes:
+  ssh-agent-socket:

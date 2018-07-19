@@ -2,6 +2,8 @@
 
 docker-compose build
 
+./stop
+
 docker-compose up \
   -d \
   ssh_host secretless

@@ -18,7 +18,7 @@ services:
       - 2222
     volumes:
       - ./secretless.yml:/secretless.yml
-      - ./id_insecure:/root/id_insecure:ro
+      - ./id_insecure:/id_insecure:ro
     depends_on:
       - ssh-host
 

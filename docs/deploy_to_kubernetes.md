@@ -16,7 +16,7 @@ We've chosen a Postgres database as the protected resource for this sample, but 
 
 + [Getting Started](#getting-started)
 + [About the Sample application](#about-the-sample-application)
-+ [Provision protected resources (optional)](#provision-protected-resources-(optional))
++ [Provision protected resources (optional)](#provision-protected-resources-optional)
 + [Setup and configure protected resources](#setup-and-configure-protected-resources)
 + [Create application namespace and store application-user credentials](#create-application-namespace-and-store-application-user-credentials)
 + [Deploy and run Application + Secretless](#deploy-and-run-application-+-secretless)

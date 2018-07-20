@@ -19,9 +19,11 @@ We've chosen a Postgres database as the protected resource for this sample, but 
 + [Provision protected resources (optional)](#provision-protected-resources-optional)
 + [Setup and configure protected resources](#setup-and-configure-protected-resources)
 + [Create application namespace and store application-user credentials](#create-application-namespace-and-store-application-user-credentials)
-+ [Deploy and run Application + Secretless](#deploy-and-run-application-+-secretless)
++ [Deploy and run Application + Secretless](#deploy-and-run-application--secretless)
 + [Add and Configure Secretless sidecar container](#add-and-configure-secretless-sidecar-container)
 + [Consume application](#consume-application)
++ [Rotate protected resource credentials](#rotate-protected-resource-credentials)
++ [Review complete sample repository](#review-complete-sample-repository)
 
 ## Getting started
 
@@ -385,7 +387,85 @@ We expect the command above to respond with a JSON array containing the previous
 
 There we have it. This application is communicating with a protected resource without managing any secrets.
 
-# TODO:
 ## Rotate protected resource credentials
+
+In this section, you get to see how an application using Secretless deals with credential rotation.
+These are the steps you wil take to rotate the credentials of the dabatase:
++ update the application-user db credentials in the vault
++ wait for the update to take effect
++ rotate the credentials in the database
+
+Typically, you'd want your rotation to work the other way - update the DB and then your vault - but we're using kubernetes secrets in this guide, which isn't built to handle secret rotation gracefully. For that, you'd want to use a better secrets management solution.
+
+Before rotating, you will run the command below in a new terminal to poll the retrieve notes endpoint (GET `/note`). This will allow you to see the request-response cycle of the application. If something goes wrong, like a database connection failure you will see it as a > 400 HTTP status code.
+
+```bash
+$ while true
+do 
+    echo "Retrieving notes"
+    curl $APPLICATION_URL/note
+    echo ""
+    sleep 1
+done
+```
+
+Let us now proceed to rotation.
+
+Run the following command to update the application-user db credentials in Kubernetes secrets:
+
+```bash
+$ cat <<EOF | kubectl apply -f -
+---
+apiVersion: v1
+kind: Secret
+metadata:
+    name: quick-start-backend-credentials
+type: Opaque
+data:
+    address: $(echo -n ${REMOTE_DB_URL} | base64)
+    username: $(echo -n ${APPLICATION_DB_USER} | base64)
+    password: $(echo -n ${APPLICATION_DB_NEW_PASSWORD}" | base64)
+EOF
+```
+
+There will be a lag for these credentials to propagate to the volume mount of the application under `/etc/secret`.
+You can check that the credential have been propagate by `exec`ing into any one of the application pods and comparing the contents of `/etc/secret/password` against `APPLICATION_DB_NEW_PASSWORD`.
+Run the following command to wait for Kubernetes secrets to propagate to the application pod Secretless sidecar container volume mounts:
+
+```bash
+application_first_pod = $(kubectl get --namespace ${APPLICATION_NAMESPACE} po -l=app="quick-start-application" -o=jsonpath='{$.items[0].metadata.name}')
+
+while [[ ! "$(kubectl --namespace ${APPLICATION_NAMESPACE} exec -it ${application_first_pod} -c secretless -- cat /etc/secret/password)" == "${APPLICATION_DB_NEW_PASSWORD}" ]] ; do
+    echo "Waiting for secret to be propagated"
+    sleep 10
+done
+
+echo Ready!
+```
+
+Now you can proceed to rotate the credentials in the database. You will also need to prune existing connections established using old credentials - this in itself has no noticeable effect on the application because most drivers keep a pool of connections and replenish them as and when needed. You will be using admin-credentials to carry out these steps. Prune existing connections requires more privileges.
+
+```bash
+$ docker run --rm -it postgres:9.6 env \
+ PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} psql -U ${REMOTE_DB_ADMIN_USER} "postgres://${REMOTE_DB_URL}" -c "
+    /* Rotate Application User password */
+    ALTER ROLE ${APPLICATION_DB_USER} WITH PASSWORD '${APPLICATION_DB_NEW_PASSWORD}';
+    
+    /* Prune Existing Connections */
+    SELECT
+        pg_terminate_backend(pid)
+    FROM
+        pg_stat_activity
+    WHERE
+        pid <> pg_backend_pid()
+    AND
+        usename='${APPLICATION_DB_USER}';
+"
+```
+
+Now return to the polling terminal. Observe that requests to the application API have at no point been encumbered, which is to say there has been a seamless rotation of the database credentials.
+
 ## Review complete sample repository
-## Next steps
+
+We've created a [complete sample repository](https://github.com/conjurinc/secretless/tree/master/demos/k8s-demo) that contains all the artifacts (configuration and kubernetes manifests) mentioned above and scripts to automate the steps. The scripts and artifacts are configurable to suite your needs.
+A comprehensive [README.md](https://github.com/conjurinc/secretless/blob/master/demos/k8s-demo/README.md) has been provided to guide you through the repository.

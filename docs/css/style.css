@@ -53,7 +53,7 @@ code{
 	list-style-type: none;
 	margin-left: -1em;
 	margin-bottom: 0;
-    margin-top: 1em;
+	margin-top: 0.5em;
 	font-family: "Source Sans Pro",sans-serif;
 	font-size: 15px;
 	color: #404040;
@@ -63,10 +63,7 @@ code{
 	margin-left: -3em;
 	font-family: "Source Sans Pro",sans-serif;
 	font-size: 15px;
-	padding: 8px 16px;
-}
-.sidenav-item a{
-	color: black;
+	padding: 0.5em 1em;
 }
 .fixed-nav {
 	position: fixed;
@@ -74,8 +71,8 @@ code{
 	margin-right: 100px;
 }
 .fixed-nav-documentation{
-    position: relative;
-    left: 215px;
+	position: relative;
+	left: 215px;
 }
 .sidenav-item i{
 	font-size: 10px;
@@ -91,7 +88,7 @@ code{
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-	max-height: 28em;
+	max-height: 38em;
 	width: 215px;
 	padding-top: 0.5em;
 	padding-bottom: 0.5em;
@@ -384,7 +381,7 @@ code{
 }
 footer{
 	background-color: #4e4f4f;
-	padding: 3em 0 3em 0;
+	padding: 1em 0 1em 0;
 	box-shadow: 0px 500px 0px 500px #4e4f4f;
 }
 .container .container-footer {

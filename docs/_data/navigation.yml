@@ -27,7 +27,16 @@ documentation:
         url: /generated/pkg_secretless_plugin_v1.html
       - page: Deploying to Kubernetes
         url: /deploy_to_kubernetes.html
-  - page: Reference
+  - title: Reference
     url: /reference.html
+    subfolderitems:
+      - page: Listeners
+        url: /listeners.html
+      - page: Handlers
+        url: /handlers.html
+      - page: Credential Providers
+        url: /providers.html
+      - page: How to Deploy
+        url: /how_to_deploy.html
   - page: FAQ
     url: /faq.html

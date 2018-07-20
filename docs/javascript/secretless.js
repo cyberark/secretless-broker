@@ -6,11 +6,6 @@ document.addEventListener("DOMContentLoaded", function() {
 		topOfNav = nav.offsetTop;
 		navHeight = nav.offsetHeight;
 
-		footer = document.querySelector('footer')
-		footerHeight = footer.offsetTop;
-
-		console.log('footer: ' + footerHeight)
-
 		docConClass = document.querySelector('.documentation-content').classList;
 
 		window.addEventListener('scroll', function() { toggleFixedNav(); });

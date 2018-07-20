@@ -429,7 +429,9 @@ EOF
 ```
 
 There will be a lag for these credentials to propagate to the volume mount of the application under `/etc/secret`.
+
 You can check that the credential have been propagate by `exec`ing into any one of the application pods and comparing the contents of `/etc/secret/password` against `APPLICATION_DB_NEW_PASSWORD`.
+
 Run the following command to wait for Kubernetes secrets to propagate to the application pod Secretless sidecar container volume mounts:
 
 ```bash
@@ -443,7 +445,11 @@ done
 echo Ready!
 ```
 
-Now you can proceed to rotate the credentials in the database. You will also need to prune existing connections established using old credentials - this in itself has no noticeable effect on the application because most drivers keep a pool of connections and replenish them as and when needed. You will be using admin-credentials to carry out these steps. Prune existing connections requires more privileges.
+Now you can proceed to rotate the credentials in the database. 
+
+You will also need to prune existing connections established using old credentials - this in itself has no noticeable effect on the application because most drivers keep a pool of connections and replenish them as and when needed. 
+
+You will be using admin-credentials to carry out these steps. To prune existing connections requires higher privileges.
 
 ```bash
 $ docker run --rm -it postgres:9.6 env \
@@ -468,4 +474,5 @@ Now return to the polling terminal. Observe that requests to the application API
 ## Review complete sample repository
 
 We've created a [complete sample repository](https://github.com/conjurinc/secretless/tree/master/demos/k8s-demo) that contains all the artifacts (configuration and kubernetes manifests) mentioned above and scripts to automate the steps. The scripts and artifacts are configurable to suite your needs.
+
 A comprehensive [README.md](https://github.com/conjurinc/secretless/blob/master/demos/k8s-demo/README.md) has been provided to guide you through the repository.

@@ -1,50 +1,11 @@
-#!/bin/bash
+#!/bin/bash -e
 
-set -eo pipefail
+CURRENT_DIR=$(dirname $0)
 
-project_dir=$PWD
-rm -f $project_dir/test/junit.output
-touch $project_dir/test/junit.output
+echo "Running unit tests..."
+$CURRENT_DIR/test_unit
 
-pushd test
-  exit_status="0"
-  for dir in */; do
-    pushd "$dir" 2>/dev/null
-      # Bail if the folder doesn't have a start script
-      if [[ ! -f start ]]; then
-        popd 2>/dev/null
-        continue
-      fi
+echo "Running integration tests..."
+$CURRENT_DIR/test_integration
 
-      # Start the needed prerequisites. Assumes that start pre-cleans the env
-      ./start
-
-      # Run the tests
-      set +e
-        ./test | tee -a $project_dir/test/junit.output
-        last_status="$?"
-
-        # Only save first failure exit code
-        if [[ "$exit_status" -eq "0" && "$last_status" -ne "0" ]]; then
-          exit_status="$last_status"
-        fi
-      set -e
-
-      # Clean up
-      if [[ -f ./stop ]]; then
-        ./stop
-      fi
-    popd
-  done
-
-  rm -f $project_dir/test/junit.xml
-  docker run --rm \
-    -v $project_dir/test/:/go/src/github.com/conjurinc/secretless/test/output/ \
-    secretless-dev \
-    bash -exc "
-      go get -u github.com/jstemmer/go-junit-report
-      cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml
-    "
-popd || true
-
-exit $exit_status
+echo "Done"

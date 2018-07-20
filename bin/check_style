@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 project_root="/go/src/github.com/conjurinc/secretless/"
 root_dir_length=${#project_root}
@@ -17,17 +17,16 @@ output_xml() {
 
     # loop through each file with errors
     while IFS= read -r err_line; do
-
       # get the filename and line # of the error
-      file_and_line_length=$(expr index "$err_line" " ")-2
-      file_and_line=${err_line:0:file_and_line_length}
+      file_and_line_length=$(echo "$err_line" | awk '{ print $1 }')
+      file_and_line=${err_line:0:${#file_and_line_length}-1}
 
       IFS=":" read -r -a file_data <<< "$file_and_line"
       file=${file_data[0]:$root_dir_length}
       line=${file_data[1]}
 
       # get the error
-      error=${err_line:$file_and_line_length+2}
+      error=${err_line:${#file_and_line}+2}
 
       # output the file (if haven't already) and error
       if [ "$current_file" != "$file" ]; then

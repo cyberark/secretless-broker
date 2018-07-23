@@ -3,3 +3,6 @@ _site/
 
 # Ignore the generated html pages
 generated/*.html
+
+# Ignore the sass cache
+.sass-cache/

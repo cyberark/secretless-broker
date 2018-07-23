@@ -1,0 +1,250 @@
+// ***********************
+// Headers
+// ***********************
+.introduction-heading {
+	font-size: 1.5em;
+}
+.docs-subheading{
+	font-size: 18px;
+}
+.card-heading{
+	font-weight: bold;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 24px;
+	letter-spacing: 1px;
+}
+.broker {
+	font-family: 'Open Sans', sans-serif;
+}
+.card-side-heading{
+	font-weight: bold;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 20px;
+	letter-spacing: 1px;
+}
+.card-subheading{
+	font-style: italic;
+	font-size: 17px;
+	font-weight: bold;
+}
+
+
+// ***********************
+// Jumbotron
+// ***********************
+.center-block{
+	float: none;
+	display: block;
+	margin: 0 auto;
+	top: 10px;
+	background-color: transparent;
+}
+#jumbotron-text {
+	font-size: 20px;
+	text-align: center;
+	font-family: 'Open Sans', sans-serif;
+	margin-top:10px;
+	color: #fff;
+}
+#jumbotron-heading {
+	font-size: 60px;
+	text-align: center;
+	letter-spacing: 3px;
+	margin-top:20px;
+	color: #fff;
+}
+.jumbotron-sub{
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	height: 100px;
+	background-color: #f8f8f8;
+}
+.jumbotron-sub p{
+	color: #383950;
+	text-align: center;
+}
+#frame{
+	margin-bottom: 0;
+	height: 465px;
+	background: #383950;
+}
+
+// ***********************
+// Features
+// ***********************
+.about{
+	width: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	width:110%;
+}
+.about-subitem{
+	padding: 5px 5px 5px 5px;
+}
+.about-subitem .inner{
+	min-height: 245px;
+	padding: 25px;
+	box-shadow: 0 2px 4px rgba(0,0,0,.1);
+	border: 1px solid #e2e2e2;
+	margin: 0 10px 30px;
+	transition: .5s ease;
+}
+.inner:hover{
+	transform: scale(1.025);
+	box-shadow: 3px 3px 18px rgba(0,.1,0,.2);
+}
+.inner i{
+	padding-top: 3px;
+	transition: .5s ease;
+}
+.inner:hover i{
+	transform: translateX(12px);
+}
+.inner p {
+	margin-left: 20px;
+}
+.inner-text-description{
+	font-size: 14px;
+}
+.inner-text{
+	margin-left: 0;
+	letter-spacing: 1px;
+	font-size: 18px;
+}
+.in-line-frame{
+	display: flex;
+}
+.card-features{
+	padding-top: 25px;
+}
+
+// ***********************
+// Architecture
+// ***********************
+.arch-respons-box{
+	margin-bottom: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center
+}
+.arch-right{
+	padding-left: 30px;
+}
+.arch{
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+}
+.card{
+	padding-top: 75px;
+	padding-bottom: 75px;
+}
+.arch-list > li{
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 17px;
+}
+
+// ***********************
+// Get Started
+// ***********************
+.introduction{
+	margin: 0 auto;
+	width: 60%;
+}
+.container-fluid{
+	background-color: #f8f8f8;
+}
+.tab-content{
+	display: none;
+}
+
+// ***********************
+// Documentation
+// ***********************
+.documentation-content{
+	padding-bottom: 100px;
+	margin-left: 50px;
+	width: 630px;
+}
+.documentation{
+	display: flex;
+	max-width: 85%;
+	margin: 0 auto;
+}
+
+// ***********************
+// Icons
+// ***********************
+.fab{
+	font-size: 15px;
+	margin-right: 10px;
+}
+.far{
+	font-size: 15px;
+	margin-right: 10px;
+}
+
+// ***********************
+// Images
+// ***********************
+.jumbotron-img{
+	width: 20%;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+.arch-img{
+	width: 400px;
+}
+.docs-img{
+	width: 450px;
+	margin: 0 auto;
+}
+.introduction img{
+	width: 250px;
+}
+
+// ***********************
+// Etc
+// ***********************
+.round {
+	border-radius: 50%;
+}
+.docs{
+	width: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+}
+.guides{
+	width: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+}
+.references{
+	width: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+}
+.faq{
+	width: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 80%;
+}
+.card-docs {
+	padding-top: 20px;
+}
+.docs-heading{
+	color: #7b8A8E;
+	font-size: 2em;
+}
+.container .container-introduction {
+	width: 100%;
+	position:relative;
+	left:0;
+	right:0;
+}

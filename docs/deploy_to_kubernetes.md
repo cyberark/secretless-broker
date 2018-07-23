@@ -142,8 +142,8 @@ In the section that follow, you will setup and configure the Postgres storage ba
 Run this `psql` command to create the application database, application table, application user and grant the application user relevant privileges:
 
 ```bash
-$ docker run --rm -it postgres:9.6 env \
- PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} psql -U ${REMOTE_DB_ADMIN_USER} "postgres://${REMOTE_DB_URL}" -c "
+$ docker run --rm -i postgres:9.6 env \
+ PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} psql -U ${REMOTE_DB_ADMIN_USER} "postgres://${REMOTE_DB_URL}" - << EOSQL
     /* Create Application Database */
     CREATE DATABASE ${APPLICATION_DB_NAME};
  
@@ -162,7 +162,7 @@ $ docker run --rm -it postgres:9.6 env \
  
     /* Grant Permissions */
     GRANT SELECT, INSERT ON public.notes TO ${APPLICATION_DB_USER};
-"
+EOSQL
 ```
 
 ## Create application namespace and store application-user credentials

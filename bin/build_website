@@ -44,6 +44,7 @@ godoc_package: ${package}
 ---
 
 <h3>Package import</h3>
+<div data-proofer-ignore>
 " > "${output_file}"
   set -x
 
@@ -60,6 +61,8 @@ godoc_package: ${package}
     echo "ERROR: Output file '${output_file}' was empty!"
     exit 1
   fi
+
+  echo -e "\n</div>\n" >> "${output_file}"
 done
 echo "Finished generating godoc pages."
 

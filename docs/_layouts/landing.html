@@ -50,14 +50,14 @@ id: home
 						<li>Manage connection disruptions</li>
 					</ul>
 				</div>
-				<img class="arch-img" src="img/traditionalarch.png" alt="Traditional Architecture">
+				<img class="arch-img traditional-img" src="img/traditionalarch.png" alt="Traditional Architecture">
 			</div>
 		</div>
 
 		<div class="row sub-card">
 			<p class="card-heading">Secretless Architecture</p>
 			<div class="arch-respons-box">
-				<img class="arch-img" src="img/secretlessarch.png" alt="Secretless Architecture">
+				<img class="arch-img secretless-img" src="img/secretlessarch.png" alt="Secretless Architecture">
 				<div class="arch-respons arch-right">
 					<p class="card-subheading broker">Broker Responsibilities</p>
 					<ul class="arch-list">
@@ -82,61 +82,61 @@ id: home
 			<p class="card-heading">It's simple to get started!</p>
 			<p class="card-subheading">Choose your path:</p>
 			<div class="row btnrow"></div>
-				<a class="button active" href="javascript:void(0)" onclick="showTab(event, 'PostgreSQL')">PostgreSQL</a>
-				<a class="button" href="javascript:void(0)" onclick="showTab(event, 'HTTP')">HTTP</a>
-				<a class="button" href="javascript:void(0)" onclick="showTab(event, 'SSH')">SSH</a>
-			</div>
-			<div class="tab-content" style="display: block" id="PostgreSQL">
-				<ol>
-					<li>
-						Download and run the Secretless quick-start as a Docker container:
-						<pre>docker container run \
+			<a class="button active" href="javascript:void(0)" onclick="showTab(event, 'PostgreSQL')">PostgreSQL</a>
+			<a class="button" href="javascript:void(0)" onclick="showTab(event, 'HTTP')">HTTP</a>
+			<a class="button" href="javascript:void(0)" onclick="showTab(event, 'SSH')">SSH</a>
+		</div>
+		<div class="tab-content" style="display: block" id="PostgreSQL">
+			<ol>
+				<li>
+					Download and run the Secretless quick-start as a Docker container:
+					<pre>docker container run \
   --rm \
   -p 5432:5432 \
   -p 5454:5454 \
   cyberark/secretless-quickstart</pre>
-					</li>
-					<li>
-						Direct access to the PostgreSQL database is available over port
-						<code>5432</code>. You can try querying some data, but you don't
-						have the credentials required to connect:
-						<pre>psql \
+				</li>
+				<li>
+					Direct access to the PostgreSQL database is available over port
+					<code>5432</code>. You can try querying some data, but you don't
+					have the credentials required to connect:
+					<pre>psql \
   --host localhost \
   --port 5432 \
   --username secretless \
   -d quickstart \
   -c 'select * from counties;'</pre>
-					</li>
-					<li>
-						The good news is that you don't need any credentials! Instead, you
-						can connect to the password-protected PostgreSQL database via the
-						Secretless broker on port <code>5454</code>, <i>without knowing the
-						password.</i> Give it a try:
-						<pre>psql \
+				</li>
+				<li>
+					The good news is that you don't need any credentials! Instead, you
+					can connect to the password-protected PostgreSQL database via the
+					Secretless broker on port <code>5454</code>, <i>without knowing the
+					password.</i> Give it a try:
+					<pre>psql \
   --host localhost \
   --port 5454 \
   --username secretless \
   -d quickstart \
   -c 'select * from counties;'</pre>
-					</li>
+				</li>
 				</ol>
-			</div>
-			<div class="tab-content" id="HTTP">
-				<ol>
-					<li>
-						Download and run the Secretless quick-start as a Docker container:
-						<pre>docker container run \
+				</div>
+				<div class="tab-content" id="HTTP">
+					<ol>
+						<li>
+							Download and run the Secretless quick-start as a Docker container:
+							<pre>docker container run \
   --rm \
   -p 8080:80 \
   -p 8081:8081 \
   cyberark/secretless-quickstart</pre>
-					</li>
-					<li>
-						The service we're trying to connect to is listening on port
-						<code>8080</code>. If you try to access it, the service will inform
-						you that you're unauthorized:
-						<pre>curl -i localhost:8080</pre>
-					</li>
+						</li>
+						<li>
+							The service we're trying to connect to is listening on port
+							<code>8080</code>. If you try to access it, the service will inform
+							you that you're unauthorized:
+							<pre>curl -i localhost:8080</pre>
+						</li>
 					<li>
 						Instead, you can make an authenticated HTTP request by proxying
 						through the Secretless broker on port <code>8081</code>. Secretless

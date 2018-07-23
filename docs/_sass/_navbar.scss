@@ -1,0 +1,81 @@
+// ***********************
+// Navbar
+// this file contains styling for both top navbar and sidenav for docs page
+// ***********************
+
+#cybr-nav{
+	width: 100%;
+	margin-bottom: 0;
+	height: 65px;
+	background: #383950;
+}
+.navbar-list li{
+	font-size:14px;
+	text-transform: uppercase;
+}
+.navbar-list a{
+	color: #fff;
+	padding: 8px 16px;
+}
+.navbar-list a:hover{
+	text-decoration: none;
+}
+.sidenav-item{
+	list-style-type: none;
+	margin-left: -1em;
+	margin-bottom: 0;
+	margin-top: 1em;
+	font-family: "Source Sans Pro",sans-serif;
+	font-size: 15px;
+	color: #404040;
+}
+.sidenav-subitem {
+	list-style-type: none;
+	margin-left: -3em;
+	font-family: "Source Sans Pro",sans-serif;
+	font-size: 15px;
+	padding: 8px 16px;
+}
+.sidenav-item a{
+	color: black;
+}
+.fixed-nav {
+	position: fixed;
+	top: 0;
+	margin-right: 100px;
+}
+.fixed-nav-documentation{
+	position: relative;
+	left: 215px;
+}
+.sidenav-item i{
+	font-size: 10px;
+	margin-right: -10px;
+	margin-left: 5px;
+}
+.sidenav-item:hover a:hover{
+	text-decoration: none;
+}
+.side-nav{
+	box-shadow: 0 2px 4px rgba(0,0,0,.1);
+	background-color: #f8f8f8;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	max-height: 28em;
+	width: 215px;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+}
+.navbar-list > ul{
+	display: flex;
+	list-style: none;
+	justify-content: flex-end;
+	letter-spacing: 2px;
+}
+.navbar-list > ul > li{
+	margin: 10px;
+}
+.navbar .default{
+	margin-bottom: 0;
+}

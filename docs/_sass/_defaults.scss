@@ -1,0 +1,33 @@
+// ***********************
+// Default values
+// ***********************
+p{
+	font-family: "Roboto",sans-serif;
+	font-size: 15px;
+	line-height: 1.5;
+}
+li{
+	font-family: "Roboto",sans-serif;
+	font-size: 15px;
+	line-height: 1.5;
+	margin-left: 15px;
+}
+code{
+	margin-left: 25px;
+}
+a {
+	text-decoration: none;
+	display: inline-block;
+}
+hr{
+	position: relative;
+}
+button:focus{
+	outline: 0;
+}
+pre{
+	background-color: white;
+}
+code{
+	margin: 0;
+}

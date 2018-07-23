@@ -59,7 +59,7 @@ For a deep dive into how the routes are handled please consult [the source code]
 
 In this section, you will create the Postgres storage backend in your Kubernetes cluster. 
 
-*NOTE: It is possible to skip this step and leverage a remote Postgres storage backend. Continue to [Configure protected resources](#configure-protected-resources)*
+*NOTE: It is possible to skip this step and leverage a remote Postgres storage backend. Continue to [Setup and Configure protected resources](#setup-and-configure-protected-resources)*
 
 Our Postgres storage backend is stateful. For this reason, we'll use a StatefulSet to manage the backend. Please consult [the kubernetes docs](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) to better understand why a StatefulSets are appropriate for stateful applications.
 

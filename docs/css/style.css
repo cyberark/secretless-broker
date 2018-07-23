@@ -13,7 +13,7 @@ code{
 	margin-left: 25px;
 }
 a {
-    text-decoration: none;
+    text-decoration: underline;
     display: inline-block;
 }
 hr{
@@ -33,10 +33,10 @@ code{
 	margin: 0;
 }
 #cybr-nav{
-       width: 100%;
-       margin-bottom: 0;
-       height: 65px;
-       background: #383950;
+   width: 100%;
+   margin-bottom: 0;
+   height: 65px;
+   background: #383950;
 }
 .navbar-list li{
 	font-size:14px;
@@ -44,6 +44,7 @@ code{
 }
 .navbar-list a{
 	color: #fff;
+	text-decoration: none;
 	padding: 8px 16px;
 }
 .navbar-list a:hover{
@@ -65,7 +66,11 @@ code{
 	font-size: 15px;
 	padding: 8px 16px;
 }
+.sidenav-subitem a{
+	text-decoration: none;
+}
 .sidenav-item a{
+	text-decoration: none;	
 	color: black;
 }
 .fixed-nav {
@@ -123,7 +128,6 @@ code{
 	font-size: 20px;
 	letter-spacing: 1px;
 }
-
 .navbar-list > ul{
 	display: flex;
 	list-style: none;
@@ -139,6 +143,7 @@ code{
 .button{
 	text-transform: uppercase;
 	margin: 30px;
+	text-decoration: none;
 	font-family: 'Source Sans Pro', sans-serif;
     font-size: 16px;
     padding: 10px 50px 10px 50px;
@@ -423,6 +428,7 @@ footer .right-links li{
 .footer-resource a {
 	color: white;
 	font-size: 14px;
+	text-decoration: none;
 }
 .footer-resource a:hover {
 	text-decoration: none;

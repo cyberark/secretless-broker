@@ -1,12 +1,12 @@
 main:
   - page: HOME
-    url: index.html
+    url: /index.html
   - page: Docs
-    url: docs.html
+    url: /docs.html
   - page: Community
-    url: community.html
+    url: /community.html
   - page: Blog
-    url: blog.html
+    url: /blog.html
   - page: Github
     url: https://github.com/conjurinc/secretless
 
@@ -14,18 +14,20 @@ documentation:
   - title: Overview
     subfolderitems:
       - page: Why Secretless?
-        url: docs.html
+        url: /docs.html
       - page: How does it work?
-        url: how_it_works.html
+        url: /how_it_works.html
       - page: Key Terms
-        url: key_terms.html
+        url: /key_terms.html
   - title: Get Started
     subfolderitems:
       - page: Quick Start
-        url: quick_start.html
+        url: /quick_start.html
+      - page: Plugins
+        url: /generated/pkg_secretless_plugin_v1.html
       - page: Deploying to Kubernetes
-        url: deploy_to_kubernetes.html
+        url: /deploy_to_kubernetes.html
   - page: Reference
-    url: reference.html
+    url: /reference.html
   - page: FAQ
-    url: faq.html
+    url: /faq.html

@@ -10,7 +10,7 @@ permalink: quick_start
 
 # Introduction
 
-In this guide, we'll demonstrate Secretless brokering access to a PostgreSQL database using Docker. If you're looking for instructions on running Secretless within Kubernetes, visit our <a href="deploy_to_kubernetes.html">Deploying to Kubernetes</a> demo.
+In this guide, we'll demonstrate Secretless brokering access to a PostgreSQL database using Docker. If you're looking for instructions on running Secretless within Kubernetes, visit our <a href="/deploy_to_kubernetes.html">Deploying to Kubernetes</a> demo.
 
 # Running the demo environment
 

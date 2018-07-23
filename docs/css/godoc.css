@@ -1,0 +1,8 @@
+.toggle > .expanded { display: none; }
+.toggle > .collapsed { display: block; }
+.toggleButton { cursor: pointer; }
+.toggleVisible > .collapsed { display: none; }
+.toggleVisible > .expanded { display: block; }
+
+:hover > .permalink { display: inline; }
+.permalink { display: none; }

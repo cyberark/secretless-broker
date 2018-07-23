@@ -23,7 +23,7 @@ The Secretless connection broker authenticates with a secrets vault and obtains 
 1. The Secretless Connection Broker uses the Identity Credential to obtains secrets which allow access to the Target Resource. Secrets are managed securely by the Connection Broker process.
 1. Secretless Connection Broker uses the secrets to connect to the Target Service.
 1. Secretless Connection Broker pipes traffic between the Client and the Target Service.
-1. If a secret is changed, the Connection Broker automatically obtains out the new secret and uses it to establish new connections.  
+1. If a secret is changed, the Connection Broker automatically obtains out the new secret and uses it to establish new connections.
 
 
 The Secretless Connection Broker is a proxy which intercepts traffic to the backend service and performs the authentication phase of the backend protocol. The data-transfer phases of the protocol are direct pass-through between the client and backend service.
@@ -34,7 +34,7 @@ Examples of protocols which can be brokered:
 -  HTTP via Authorization header
 -  SSH, via MITM or by implementing an ssh-agent   
 
-Any published protocol can be supported in Secretless. Software code in Secretless is generally required for each new protocol. See <a href="reference.html">Handlers</a>.
+Any published protocol can be supported in Secretless. Software code in Secretless is generally required for each new protocol. See <a href="/reference.html">Handlers</a>.
 
 <!-- TODO - link to handler section of reference page -->
 

@@ -1,7 +1,14 @@
 # Build settings
+title: Secretless
 markdown: kramdown
-plugins:
-  - jekyll-feed
-title: CyberArk Secretless
+
 baseurl: ""
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
+
+plugins:
+  - jekyll-feed
+
+liquid:
+  error_mode:       strict
+  strict_filters:   true
+  strict_variables: false

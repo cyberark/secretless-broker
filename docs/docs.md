@@ -4,7 +4,6 @@ id: docs
 layout: docs
 description: Secretless Documentation
 permalink: docs
-redirect_from: docs.html
 ---
 
   <p class="card-heading">Why Secretless?</p>

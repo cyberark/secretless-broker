@@ -13,7 +13,6 @@ dist
 demo/**/proxy_tls
 demo/**/myapp
 !demo/**/src/myapp
-docs/_site
 test/junit.*
 test/*.xml
 test/plugin/out/

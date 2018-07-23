@@ -1,10 +1,13 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 CURRENT_DIR=$(dirname $0 | xargs realpath)
 DEST_SITE_DIR="$CURRENT_DIR/../docs/_site"
 
 IMAGE_NAME="secretless-website-builder"
 CONTAINER_NAME="secretless-website-builder-$(date -u +%Y%m%d_%H%M%S)"
+
+echo "Generating static godoc pages..."
+$CURRENT_DIR/../docs/_bin/build_generated_pages
 
 echo "Using container name: ${CONTAINER_NAME}"
 

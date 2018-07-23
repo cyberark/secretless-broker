@@ -1,0 +1,5 @@
+# Ignore the generated site
+_site/
+
+# Ignore the generated html pages
+generated/*.html

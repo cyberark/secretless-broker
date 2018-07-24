@@ -1,0 +1,12 @@
+version: '2'
+services:
+  dev:
+    command: [ "bundle", "exec", "jekyll", "serve", "--host", "0.0.0.0" ]
+    ports:
+      - 4000:4000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: secretless-website-builder:latest
+    volumes:
+      - .:/src

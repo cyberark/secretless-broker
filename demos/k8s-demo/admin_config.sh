@@ -8,11 +8,11 @@ DB_URL=192.168.99.100:30001/quick_start_db # CHANGE to reflect endpoint exposed 
 
 # admin-user credentials
 DB_ADMIN_USER=postgres
-DB_ADMIN_PASSWORD=postgres
+DB_ADMIN_PASSWORD=admin_password
 
 # application-user credentials
 DB_USER=quick_start
 DB_INITIAL_PASSWORD=quick_start
 
 # Run this to access postgres
-# docker run --rm -it postgres:9.6 env PGPASSWORD=$DB_ROOT_PASSWORD psql -U $DB_ROOT_USER "postgres://$DB_URL"
+# docker run --rm -it postgres:9.6 env PGPASSWORD=$DB_ADMIN_PASSWORD psql -U $DB_ADMIN_USER "postgres://$DB_URL"

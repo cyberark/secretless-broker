@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-. ./config.sh
+. ./admin_config.sh
 . ./utils.sh
 
 # setup db
@@ -23,11 +23,10 @@ CREATE USER $DB_USER PASSWORD '$DB_INITIAL_PASSWORD';
 GRANT ALL ON SCHEMA PUBLIC TO $DB_USER;
 
 /* Create Table */
-DROP TABLE IF EXISTS notes;
-CREATE TABLE notes (
+DROP TABLE IF EXISTS pets;
+CREATE TABLE pets (
     id serial primary key,
-    title varchar(256),
-    description varchar(1024)
+    name varchar(256)
 );
 
 /* Grant Permissions */

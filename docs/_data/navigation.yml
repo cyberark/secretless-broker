@@ -12,19 +12,19 @@ main:
 
 documentation:
   - title: Overview
+    url: /overview.html
     subfolderitems:
       - page: Why Secretless?
         url: /docs.html
-      - page: How does it work?
+      - page: How Does It Work?
         url: /how_it_works.html
       - page: Key Terms
         url: /key_terms.html
   - title: Get Started
+    url: /get_started.html
     subfolderitems:
       - page: Quick Start
         url: /quick_start.html
-      - page: Plugins
-        url: /generated/pkg_secretless_plugin_v1.html
       - page: Deploying to Kubernetes
         url: /deploy_to_kubernetes.html
   - title: Reference
@@ -36,6 +36,8 @@ documentation:
         url: /handlers.html
       - page: Credential Providers
         url: /providers.html
+      - page: Plugin Reference
+        url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
         url: /how_to_deploy.html
   - page: FAQ

@@ -32,8 +32,9 @@ type Handler struct {
 	Backend          net.Conn
 	BackendConfig    *BackendConfig
 	ClientConnection net.Conn
-	HandlerConfig    config.Handler
 	EventNotifier    plugin_v1.EventNotifier
+	HandlerConfig    config.Handler
+	Resolver         plugin_v1.Resolver
 }
 
 func (h *Handler) abort(err error) {
@@ -128,6 +129,7 @@ func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 		ClientConnection: options.ClientConnection,
 		EventNotifier:    options.EventNotifier,
 		HandlerConfig:    options.HandlerConfig,
+		Resolver:         options.Resolver,
 	}
 
 	handler.Run()

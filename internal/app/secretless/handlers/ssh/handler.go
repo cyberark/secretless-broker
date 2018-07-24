@@ -13,7 +13,6 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
@@ -30,6 +29,7 @@ type Handler struct {
 	Channels      <-chan ssh.NewChannel
 	EventNotifier plugin_v1.EventNotifier
 	HandlerConfig config.Handler
+	Resolver      plugin_v1.Resolver
 }
 
 func (h *Handler) serverConfig() (config ServerConfig, err error) {
@@ -37,7 +37,7 @@ func (h *Handler) serverConfig() (config ServerConfig, err error) {
 
 	log.Printf("%s", h.GetConfig().Credentials)
 
-	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
+	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
 		return
 	}
 
@@ -229,6 +229,7 @@ func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 		Channels:      options.Channels,
 		EventNotifier: options.EventNotifier,
 		HandlerConfig: options.HandlerConfig,
+		Resolver:      options.Resolver,
 	}
 
 	handler.Run()

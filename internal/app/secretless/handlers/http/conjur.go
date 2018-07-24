@@ -17,6 +17,7 @@ import (
 // ConjurHandler applies Conjur authentication to the HTTP Authorization header.
 type ConjurHandler struct {
 	HandlerConfig config.Handler
+	Resolver      plugin_v1.Resolver
 }
 
 // Authenticate applies the "accessToken" credential to the Authorization header, following the
@@ -66,5 +67,6 @@ func (h *ConjurHandler) LoadKeys(keyring agent.Agent) error {
 func ConjurHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return &ConjurHandler{
 		HandlerConfig: options.HandlerConfig,
+		Resolver:      options.Resolver,
 	}
 }

@@ -29,6 +29,7 @@ type Listener struct {
 	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
+	Resolver       plugin_v1.Resolver
 	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
@@ -167,6 +168,7 @@ func (l *Listener) Listen() {
 			Channels:         chans,
 			ClientConnection: nil,
 			EventNotifier:    l.EventNotifier,
+			Resolver:         l.Resolver,
 		}
 
 		// TODO: Kill connection to client when backend fails to be contacted
@@ -217,6 +219,7 @@ func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
+		Resolver:       options.Resolver,
 		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

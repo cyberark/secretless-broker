@@ -2,8 +2,6 @@ package v1
 
 import (
 	"net"
-
-	"github.com/conjurinc/secretless/pkg/secretless"
 )
 
 // EventNotifier is the interface which is used to pass event up from handlers/
@@ -23,7 +21,7 @@ type EventNotifier interface {
 	CreateListener(Listener)
 
 	// ResolveVariable is called when a provider resolves a variable
-	ResolveVariable(p secretless.Provider, id string, value []byte)
+	ResolveVariable(provider Provider, id string, value []byte)
 
 	// ServerData is called for each inbound packet from the backend
 	ServerData(net.Conn, []byte)

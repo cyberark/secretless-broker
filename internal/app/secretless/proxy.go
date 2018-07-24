@@ -18,6 +18,7 @@ type Proxy struct {
 	EventNotifier     plugin_v1.EventNotifier
 	Listeners         []plugin_v1.Listener
 	ListenerWaitGroup sync.WaitGroup
+	Resolver          plugin_v1.Resolver
 	RunListenerFunc   func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
 	RunHandlerFunc    func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
@@ -60,6 +61,7 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin
 		ListenerConfig: listenerConfig,
 		HandlerConfigs: listenerConfig.SelectHandlers(p.Config.Handlers),
 		NetListener:    netListener,
+		Resolver:       p.Resolver,
 		RunHandlerFunc: p.RunHandlerFunc,
 	}
 

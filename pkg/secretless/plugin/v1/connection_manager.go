@@ -3,7 +3,6 @@ package v1
 import (
 	"net"
 
-	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 )
 
@@ -30,7 +29,7 @@ type ConnectionManager interface {
 	DestroyHandler(Handler)
 
 	// ResolveVariable is called when a provider resolves a variable
-	ResolveVariable(p secretless.Provider, id string, value []byte)
+	ResolveVariable(provider Provider, id string, value []byte)
 
 	// ClientData is called for each inbound packet from clients
 	ClientData(net.Conn, []byte)

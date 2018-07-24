@@ -10,12 +10,12 @@ import (
 	"os"
 	"os/signal"
 	"plugin"
+	"reflect"
 	"strings"
 	"sync"
 	"syscall"
 
 	"github.com/conjurinc/secretless/internal/app/secretless"
-	secretlessPkg "github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
@@ -38,6 +38,7 @@ type Manager struct {
 	ConnectionManagers map[string]plugin_v1.ConnectionManager
 	HandlerFactories   map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
 	ListenerFactories  map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
+	ProviderFactories  map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider
 	Proxy              secretless.Proxy
 }
 
@@ -51,6 +52,7 @@ func GetManager() *Manager {
 			ConnectionManagers: make(map[string]plugin_v1.ConnectionManager),
 			HandlerFactories:   make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
 			ListenerFactories:  make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
+			ProviderFactories:  make(map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider),
 		}
 	})
 
@@ -110,7 +112,7 @@ func (manager *Manager) RegisterSignalHandlers() {
 // the interface API version that plugin is advertising
 // TODO: Support a list of supported versions
 func _IsSupportedPluginAPIVersion(version string) bool {
-	return version == "0.0.7"
+	return version == "0.0.8"
 }
 
 // LoadPlugin tries to load all internal plugin info strings
@@ -195,6 +197,29 @@ func _LoadListenersFromPlugin(manager *Manager, config config.Config,
 	return nil
 }
 
+// _LoadProvidersFromPlugin appends all providers from the plugin to the pluginManager
+func _LoadProvidersFromPlugin(manager *Manager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	rawProviderPluginsFunc, err := pluginObj.Lookup("GetProviders")
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle different interface versions
+	providerPluginsFunc, ok := rawProviderPluginsFunc.(func() map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider)
+	if !ok {
+		return errors.New("ERROR: Could not cast GetProviders to proper type")
+	}
+	providerPlugins := providerPluginsFunc()
+	for providerID, providerFactory := range providerPlugins {
+		manager.ProviderFactories[providerID] = providerFactory
+		log.Printf("Provider factory '%s' added from plugin %s", providerID, pluginName)
+	}
+
+	return nil
+}
+
 func (manager *Manager) _RunHandler(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	// Ensure that we have this handler
 	if _, ok := manager.HandlerFactories[id]; !ok {
@@ -217,9 +242,15 @@ func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOption
 func (manager *Manager) Run(configuration config.Config) error {
 	manager.InitializeConnectionManagers(configuration)
 
+	resolver := &Resolver{
+		EventNotifier:     manager,
+		ProviderFactories: manager.ProviderFactories,
+	}
+
 	manager.Proxy = secretless.Proxy{
 		Config:          configuration,
 		EventNotifier:   manager,
+		Resolver:        resolver,
 		RunHandlerFunc:  manager._RunHandler,
 		RunListenerFunc: manager._RunListener,
 	}
@@ -231,22 +262,33 @@ func (manager *Manager) Run(configuration config.Config) error {
 
 // LoadInternalPlugins loads all handlers/listeners/managers that are included in secretless by default
 func (manager *Manager) LoadInternalPlugins(config config.Config) error {
-	log.Println("Enumerating internal plugins...")
-
+	// Load all internal ConnectionManagers
 	for managerID, managerFactory := range secretless.InternalConnectionManagers {
 		manager.ConnectionManagers[managerID] = managerFactory()
-		log.Printf("Manager factory '%s' added.", managerID)
 	}
+	managerNames := reflect.ValueOf(manager.ConnectionManagers).MapKeys()
+	log.Printf("- ConnectionManagers: %v", managerNames)
 
+	// Load all internal Providers
+	for providerID, providerFactory := range secretless.InternalProviders {
+		manager.ProviderFactories[providerID] = providerFactory
+	}
+	providerNames := reflect.ValueOf(manager.ProviderFactories).MapKeys()
+	log.Printf("- Providers: %v", providerNames)
+
+	// Load all internal Handlers
 	for handlerID, handlerFactory := range secretless.InternalHandlers {
 		manager.HandlerFactories[handlerID] = handlerFactory
-		log.Printf("Handler factory '%s' added.", handlerID)
 	}
+	handlerNames := reflect.ValueOf(manager.HandlerFactories).MapKeys()
+	log.Printf("- Handlers: %v", handlerNames)
 
+	// Load all internal Listeners
 	for listenerID, listenerFactory := range secretless.InternalListeners {
 		manager.ListenerFactories[listenerID] = listenerFactory
-		log.Printf("Listener factory '%s' added.", listenerID)
 	}
+	listenerNames := reflect.ValueOf(manager.ListenerFactories).MapKeys()
+	log.Printf("- Listeners: %v", listenerNames)
 
 	log.Println("Completed loading internal plugins.")
 	return nil
@@ -303,6 +345,12 @@ func (manager *Manager) LoadLibraryPlugins(path string, config config.Config) er
 
 		// Load managers
 		if err := _LoadConnectionManagers(manager, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
+			log.Println(err)
+		}
+
+		// Load providers
+		if err := _LoadProvidersFromPlugin(manager, config, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
@@ -379,9 +427,9 @@ func (manager *Manager) DestroyHandler(h plugin_v1.Handler) {
 }
 
 // ResolveVariable loops through the connection managers to resolve the variable specified
-func (manager *Manager) ResolveVariable(p secretlessPkg.Provider, id string, value []byte) {
+func (manager *Manager) ResolveVariable(provider plugin_v1.Provider, id string, value []byte) {
 	for _, connectionManager := range manager.ConnectionManagers {
-		connectionManager.ResolveVariable(p, id, value)
+		connectionManager.ResolveVariable(provider, id, value)
 	}
 }
 

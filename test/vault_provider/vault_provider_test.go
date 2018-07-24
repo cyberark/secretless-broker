@@ -5,39 +5,40 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/conjurinc/secretless/internal/pkg/provider"
+	"github.com/conjurinc/secretless/internal/app/secretless/providers"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+
 	_ "github.com/joho/godotenv/autoload"
 )
 
 func TestVault_Provider(t *testing.T) {
-	var err error
-
 	name := "vault"
 
-	provider, err := provider.NewVaultProvider(name)
-	if err != nil {
-		t.Fatal(err)
+	options := plugin_v1.ProviderOptions{
+		Name: name,
 	}
 
+	provider := providers.ProviderFactories[name](options)
+
 	Convey("Has the expected provider name", t, func() {
-		So(provider.Name(), ShouldEqual, "vault")
+		So(provider.GetName(), ShouldEqual, "vault")
 	})
 
 	Convey("Reports when the secret is not found", t, func() {
-		value, err := provider.Value("foobar")
+		value, err := provider.GetValue("foobar")
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, "HashiCorp Vault provider could not find a secret called 'foobar'")
 		So(value, ShouldBeNil)
 	})
 
 	Convey("Can provide a secret", t, func() {
-		value, err := provider.Value("kv/db/password#password")
+		value, err := provider.GetValue("kv/db/password#password")
 		So(err, ShouldBeNil)
 		So(string(value), ShouldEqual, "db-secret")
 	})
 
 	Convey("Can provide a secret with default field name", t, func() {
-		value, err := provider.Value("kv/web/password")
+		value, err := provider.GetValue("kv/web/password")
 		So(err, ShouldBeNil)
 		So(string(value), ShouldEqual, "web-secret")
 	})

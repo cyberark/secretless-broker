@@ -1,0 +1,53 @@
+// ***********************
+// Footer
+// ***********************
+
+footer {
+	background-color: #4e4f4f;
+	padding: 3em 0 3em 0;
+	box-shadow: 0px 500px 0px 500px #4e4f4f;
+}
+.container .container-footer {
+	width: 100%;
+	position:relative;
+	left:0;
+	right:0;
+}
+footer .left-links {
+	text-align: center;
+	color: white;
+}
+.left-links p {
+	font-size: 10px;
+	letter-spacing: .8px;
+}
+footer .right-links p {
+	font-weight: 200;
+  padding: 6px 0;
+  letter-spacing: .5px;
+  line-height: 36px;
+	color:white;
+}
+footer .right-links li {
+	font-weight: 200;
+  font-size: .9em;
+  padding: 6px 0;
+  letter-spacing: .5px;
+	color: white;
+	list-style-type: none;
+}
+.cybr-logo-footer {
+	width: 200px;
+  margin: 10px;
+}
+.footer-resource a {
+	color: white;
+	font-size: 14px;
+}
+.footer-resource a:hover {
+	text-decoration: none;
+}
+
+.footer-title {
+	font-size: 18px;
+}

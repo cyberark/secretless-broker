@@ -71,7 +71,7 @@ docker run --rm \
            --name "${CONTAINER_NAME}" \
            -w /usr/src/app \
            --network none \
-           -v "$CURRENT_DIR/../docs:/usr/src/app:ro" \
+           -v "$CURRENT_DIR/../docs:/usr/src/app" \
            -v "${DEST_SITE_DIR}:/tmp/_site" \
            "${IMAGE_NAME}"
 

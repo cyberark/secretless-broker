@@ -5,8 +5,8 @@ main:
     url: /docs.html
   - page: Community
     url: /community.html
-  - page: Blog
-    url: /blog.html
+  # - page: Blog
+  #   url: /blog.html
   - page: Github
     url: https://github.com/conjurinc/secretless
 

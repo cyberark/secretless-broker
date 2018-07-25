@@ -54,9 +54,7 @@ To run through this tutorial, you will need:
 + [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured to point to the cluster
 + [Docker CLI](https://docs.docker.com/install/)
 
-#### Conditional Changes To Tutorial
-
-+ Our Kubernetes deployment manifests assume that you are using minikube, so we use `NodePort` to expose the services; you may prefer to use a `LoadBalancer` for a GKE cluster.
+Our Kubernetes deployment manifests assume that you are using minikube, so we use `NodePort` to expose the services; you may prefer to use a `LoadBalancer` for a GKE cluster.
 
 ## Sample Application
 

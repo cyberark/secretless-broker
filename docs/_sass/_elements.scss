@@ -2,13 +2,13 @@
 // Headers
 // ***********************
 .docs-subheading {
-	font-size: 18px;
+	font-size: 1.8rem;
 }
 .card-heading {
 	font-weight: bold;
 	font-family: 'Source Sans Pro', sans-serif;
-	font-size: 24px;
-	letter-spacing: 1px;
+	font-size: 2.4rem;
+	letter-spacing: .1rem;
 }
 .broker {
 	font-family: 'Open Sans', sans-serif;
@@ -16,12 +16,12 @@
 .card-side-heading {
 	font-weight: bold;
 	font-family: 'Source Sans Pro', sans-serif;
-	font-size: 20px;
-	letter-spacing: 1px;
+	font-size: 2rem;
+	letter-spacing: .1rem;
 }
 .card-subheading {
 	font-style: italic;
-	font-size: 17px;
+	font-size: 1.7rem;
 	font-weight: bold;
 }
 
@@ -33,28 +33,28 @@
 	float: none;
 	display: block;
 	margin: 0 auto;
-	top: 10px;
+	top: 1;
 	background-color: transparent;
 }
 #jumbotron-text {
-	font-size: 20px;
+	font-size: 2.0rem;
 	text-align: center;
 	font-family: 'Open Sans', sans-serif;
-	margin-top:10px;
+	margin-top: 1rem;
 	color: #fff;
 }
 #jumbotron-heading {
-	font-size: 60px;
+	font-size: 6.0rem;
 	text-align: center;
-	letter-spacing: 3px;
-	margin-top:20px;
+	letter-spacing: .3rem;
+	margin-top: 2.0rem;
 	color: #fff;
 }
 .jumbotron-sub {
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-	height: 100px;
+	height: 10.0rem;
 	background-color: #f8f8f8;
 }
 .jumbotron-sub p {
@@ -63,7 +63,7 @@
 }
 #frame {
 	margin-bottom: 0;
-	height: 465px;
+	height: 46.5rem;
 	background: #383950;
 }
 
@@ -71,62 +71,62 @@
 // Features
 // ***********************
 .about {
-	width: 10px;
+	width: 1.0rem;
 	margin-left: auto;
 	margin-right: auto;
-	width:110%;
+	width: 110%;
 }
 .about-subitem {
-	padding: 5px 5px 5px 5px;
+	padding: .5rem .5rem .5rem .5rem;
 }
 .about-subitem .inner {
-	min-height: 245px;
-	padding: 25px;
-	box-shadow: 0 2px 4px rgba(0,0,0,.1);
-	border: 1px solid #e2e2e2;
-	margin: 0 10px 30px;
+	min-height: 24.5rem;
+	padding: 2.5rem;
+	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
+	border: .1rem solid #e2e2e2;
+	margin: 0 1.0rem 3.0rem;
 	transition: .5s ease;
 }
 .inner:hover {
 	transform: scale(1.025);
-	box-shadow: 3px 3px 18px rgba(0,.1,0,.2);
+	box-shadow: .3rem .3rem 1.8rem rgba(0,.1,0,.2);
 }
 .inner i {
-	padding-top: 3px;
+	padding-top: .3rem;
 	transition: .5s ease;
 }
 .inner:hover i {
-	transform: translateX(12px);
+	transform: translateX(1.2rem);
 }
 .inner p {
-	margin-left: 20px;
+	margin-left: 2.0rem;
 }
 .inner-text-description {
-	font-size: 14px;
+	font-size: 1.4rem;
 }
 .inner-text {
 	margin-left: 0;
-	letter-spacing: 1px;
-	font-size: 18px;
+	letter-spacing: .1rem;
+	font-size: 1.8rem;
 }
 .in-line-frame {
 	display: flex;
 }
 .card-features {
-	padding-top: 25px;
+	padding-top: 2.5rem;
 }
 
 // ***********************
 // Architecture
 // ***********************
 .arch-respons-box {
-	margin-bottom: 40px;
+	margin-bottom: 4.0rem;
 	display: flex;
 	align-items: center;
 	justify-content: center
 }
 .arch-right {
-	padding-left: 30px;
+	padding-left: 3.0rem;
 }
 .arch {
 	margin-left: auto;
@@ -134,12 +134,12 @@
 	width: 80%;
 }
 .card {
-	padding-top: 75px;
-	padding-bottom: 75px;
+	padding-top: 7.5rem;
+	padding-bottom: 7.5rem;
 }
 .arch-list > li {
 	font-family: 'Source Sans Pro', sans-serif;
-	font-size: 17px;
+	font-size: 1.7rem;
 }
 
 // ***********************
@@ -160,9 +160,9 @@
 // Documentation
 // ***********************
 .documentation-content {
-	padding-bottom: 100px;
-	margin-left: 50px;
-	width: 630px;
+	padding-bottom: 10.0rem;
+	margin-left: 5.0rem;
+	width: 63.0rem;
 }
 .documentation {
 	display: flex;
@@ -171,26 +171,26 @@
 }
 .faq {
 	font-weight: bold;
-	font-size: 18px;
-	padding: 10px 0px;
+	font-size: 1.8rem;
+	padding: 1.0rem 0rem;
 }
 #faq-list {
-	padding: 10px 10px;
+	padding: 1.0rem 1.0rem;
 }
 #faq-list a{
-	padding: 5px 0px;
+	padding: .5rem 0rem;
 }
 
 // ***********************
 // Icons
 // ***********************
 .fab {
-	font-size: 15px;
-	margin-right: 10px;
+	font-size: 1.5rem;
+	margin-right: 1.0rem;
 }
 .far {
-	font-size: 15px;
-	margin-right: 10px;
+	font-size: 1.5rem;
+	margin-right: 1.0rem;
 }
 
 // ***********************
@@ -203,12 +203,12 @@
 	margin-right: auto;
 }
 .arch-img {
-	width: 400px;
+	width: 40.0rem;
 }
 .docs-img {
-	width: 450px;
+	width: 45.0rem;
 	margin: 0 auto;
 }
 .introduction img {
-	width: 250px;
+	width: 25.0rem;
 }

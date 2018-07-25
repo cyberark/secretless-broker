@@ -1,19 +1,22 @@
 // ***********************
 // Default values
 // ***********************
+html { 
+	font-size: 62.5%; 
+}
 p {
 	font-family: "Roboto",sans-serif;
-	font-size: 15px;
+	font-size: 1.5rem;
 	line-height: 1.5;
 }
 li {
 	font-family: "Roboto",sans-serif;
-	font-size: 15px;
+	font-size: 1.5rem;
 	line-height: 1.5;
-	margin-left: 15px;
+	margin-left: 1.5rem;
 }
 code {
-	margin-left: 25px;
+	margin-left: 2.5rem;
 }
 a {
 	text-decoration: none;

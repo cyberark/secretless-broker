@@ -10,23 +10,23 @@ permalink: deploy_to_kubernetes
 
 To get started with Secretless, try working through this tutorial, which goes through deploying Secretless with a sample application that uses a Postgres database for backend storage.
 
-We have chosen a Postgres database as the protected resource for this tutorial, however the Secretless broker comes built-in with support for several other target services; check out our [reference page](secretless.io/references) for more info.
+We have chosen a Postgres database as the protected resource for this tutorial, however the Secretless broker comes built-in with support for several other target services; check out our [github README](https://github.com/conjurinc/secretless#currently-supported-services) for more info.
 
 ## Table of Contents
 
 + [Getting Started](#getting-started)
-+ [Sample Application](#about-the-sample-application)
++ [Sample Application](#sample-application)
 + Steps for the admin user
     + [Provision Protected Resources (optional)](#provision-protected-resources-optional)
     + [Setup And Configure Protected Resources](#setup-and-configure-protected-resources)
-    + [Create Application Namespace and Store Application DB-Credentials](#create-application-namespace-and-store-application-user-credentials)
+    + [Create Application Namespace and Store Application DB-Credentials](#create-application-namespace-and-store-application-db-credentials)
     + [Create Secretless Configuration ConfigMap](#create-secretless-configuration-configmap)
 + Steps for the non-privileged user (i.e developer)
     + [Deploy Application With Secretless](#deploy-application-with-secretless)
     + [Add and Configure Secretless sidecar container](#add-and-configure-secretless-sidecar-container)
 + [Consume Application](#consume-application)
 + [Rotate Protected Resource Credentials](#rotate-protected-resource-credentials)
-+ [Review Complete Tutorial With Scripts](#review-complete-sample-repository)
++ [Review Complete Tutorial With Scripts](#review-complete-tutorial-with-scripts)
 
 ## Getting started
 
@@ -194,9 +194,9 @@ In the section that follows, you will setup and configure the Postgres storage b
 
 **Note:** You must set and export the value of `$APPLICATION_DB_NAME`, `$APPLICATION_DB_USER` and `$APPLICATION_DB_INITIAL_PASSWORD` before proceeding e.g. 
 ``` bash
-export APPLICATION_DB_NAME=quick_start_db
-export APPLICATION_DB_USER=app_user
-export APPLICATION_DB_INITIAL_PASSWORD=app_user_password
+$ export APPLICATION_DB_NAME=quick_start_db
+$ export APPLICATION_DB_USER=app_user
+$ export APPLICATION_DB_INITIAL_PASSWORD=app_user_password
 ```
 
 To create the application database, application table, application user and grant the application user relevant privileges, run this command:

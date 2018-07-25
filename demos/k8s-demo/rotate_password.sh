@@ -3,11 +3,12 @@
 new_password="$1"
 #new_password="password$RANDOM"
 if [[ -z $new_password ]]; then
-  echo "usage: $0 <new-password>"
+  echo "usage: $0 [new-password]"
   exit 1
 fi
 
 . ./utils.sh
+. ./admin_config.sh
 
 # update stored credentials
 update_password_k8s_secret "$new_password"
@@ -21,7 +22,7 @@ echo Ready!
 
 # prune open connections
 docker run --rm -it postgres:9.6 env \
- PGPASSWORD=$DB_ROOT_PASSWORD psql -U $DB_ROOT_USER "postgres://$DB_URL" -c "
+ PGPASSWORD=$DB_ADMIN_PASSWORD psql -U $DB_ADMIN_USER "postgres://$DB_URL" -c "
 ALTER ROLE $DB_USER WITH PASSWORD '$new_password';
 SELECT
     pg_terminate_backend(pid)

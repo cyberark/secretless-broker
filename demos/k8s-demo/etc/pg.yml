@@ -25,7 +25,7 @@ spec:
           - containerPort: 5432
         env:
           - name: POSTGRES_PASSWORD
-            value: postgres
+            value: admin_password
 ---
 kind: Service
 apiVersion: v1

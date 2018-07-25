@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 . ./utils.sh
+. ./admin_config.sh
+
 # create namespace
 echo ">>--- Clean up quick-start-db namespace"
 
@@ -23,6 +25,6 @@ wait_for_app quick-start-backend quick-start-db
 sleep 3
 
 kubectl --namespace quick-start-db \
-    exec -it $(get_first_pod_for_app quick-start-backend quick-start-db) -- psql -U postgres -c "
+    exec -it $(get_first_pod_for_app quick-start-backend quick-start-db) -- psql -U ${DB_ADMIN_USER} -c "
 CREATE DATABASE quick_start_db;
 "

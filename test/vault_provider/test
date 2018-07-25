@@ -9,9 +9,9 @@ while getopts :l opt; do
 done
 
 if $local_test; then
-  docker_args="-v $(cd ../..; pwd):/go/src/github.com/conjurinc/secretless"
+  docker_args="-v $(cd ../..; pwd):/secretless"
 else
-  docker_args="-v $(pwd)/.env:/go/src/github.com/conjurinc/secretless/test/vault_provider/.env"
+  docker_args="-v $(pwd)/.env:/secretless/test/vault_provider/.env"
 fi
 
 docker-compose run \

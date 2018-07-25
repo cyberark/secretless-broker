@@ -1,5 +1,5 @@
 /*
-Plugins are ways to add extended functionality to Secretless and the current interface version is v1.
+Package v1 plugins are ways to add extended functionality to Secretless
 
 WARNING: Given the speed of development, there will likely be cases of outdated documentation so please use this document
 as a reference point and use the source code in this folder as the true representation of the API state!

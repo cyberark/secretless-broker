@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-project_root="/go/src/github.com/conjurinc/secretless/"
-root_dir_length=${#project_root}
+PROJECT_ROOT="/secretless/"
+ROOT_DIR_LENGTH=${#PROJECT_ROOT}
 
 # accepts an input string of style errs and outputs XML
 # the style err string is a newline-delimited list of
@@ -22,7 +22,7 @@ output_xml() {
       file_and_line=${err_line:0:${#file_and_line_length}-1}
 
       IFS=":" read -r -a file_data <<< "$file_and_line"
-      file=${file_data[0]:$root_dir_length}
+      file=${file_data[0]:$ROOT_DIR_LENGTH}
       line=${file_data[1]}
 
       # get the error
@@ -48,12 +48,12 @@ output_xml() {
 style_errs=$(docker run \
   --rm \
   secretless-dev \
-  bash -c "
+  bash -ec "
     go get -u golang.org/x/lint/golint
-    golint /go/src/github.com/conjurinc/secretless/cmd/...
-    golint /go/src/github.com/conjurinc/secretless/internal/...
-    golint /go/src/github.com/conjurinc/secretless/pkg/...
-    golint /go/src/github.com/conjurinc/secretless/test/...
+    golint ${PROJECT_ROOT}cmd/...
+    golint ${PROJECT_ROOT}internal/...
+    golint ${PROJECT_ROOT}pkg/...
+    golint ${PROJECT_ROOT}test/...
   ")
 
 output_xml "$style_errs" 2>&1 | tee ./test/golint.xml

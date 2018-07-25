@@ -31,4 +31,4 @@ services:
   dev:
     image: secretless-dev
     volumes:
-      - ../../:/go/src/github.com/conjurinc/secretless
+      - ../../:/secretless

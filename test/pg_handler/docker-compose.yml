@@ -38,7 +38,7 @@ services:
     environment:
       PG_PASSWORD: test
     volumes:
-      - ../..:/go/src/github.com/conjurinc/secretless
+      - ../..:/secretless
       - pg-socket:/sock
 
 volumes:

@@ -27,34 +27,15 @@
 	display: flex;
 	justify-content: center;
 }
-.btn-arrow {
-	text-decoration: none;
-	border-radius: 50%;
-	height: 4rem;
-	width: 4rem;
-	margin: -8rem -5rem;
-	position: absolute;
-	top: 120%;
-	left: 54%;
-	border-radius: 50%;
-	box-shadow: 0 .2rem .5rem 0 rgba(0,0,0,0.16), 0 .2rem .1rem 0 rgba(0,0,0,0.12);
-	transition: all .3s;
-}
-.btn-arrow:hover {
-	text-decoration: none;
-	box-shadow: 0 .2rem .5rem 0 rgba(0,0,0,0.16), 0 .2rem .1rem 0 rgba(0,0,0,0.3);
-}
 .btn-arrow-right {
 	font-size: 2rem;
 	margin-top: .1rem;
 }
-.btn-arrow-down {
-	font-size: 2.2rem;
-	margin: .3rem auto 0;
-	transition: all .3s ease-out;
-}
 .left-btn {
 	background-color: #4d8fcc;
+	color: white;
+}
+.left-btn:hover {
 	color: white;
 }
 .right-btn {

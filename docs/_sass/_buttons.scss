@@ -10,11 +10,9 @@
 	margin: 3rem;
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 1.6rem;
-	padding: 1rem 5rem 1rem 5rem;
-	background: #FFFFFF;
-	color: #7b8A8E;
+	padding: 1rem 3rem 1rem 3rem;
+	border-radius: .6rem;
 	display: inline-block;
-	font-weight: 600;
 	letter-spacing: .1rem;
 	transition: .2s ease-out;
 	box-shadow: 0 .2rem .5rem 0 rgba(0,0,0,0.16), 0 .2rem .10rem 0 rgba(0,0,0,0.12);
@@ -26,7 +24,8 @@
 	text-decoration: none;
 }
 .btnrow {
-	text-align: center;
+	display: flex;
+	justify-content: center;
 }
 .btn-arrow {
 	text-decoration: none;
@@ -53,4 +52,12 @@
 	font-size: 2.2rem;
 	margin: .3rem auto 0;
 	transition: all .3s ease-out;
+}
+.left-btn {
+	background-color: #4d8fcc;
+	color: white;
+}
+.right-btn {
+	background-color: #fff;
+	color: #4d8fcc;
 }

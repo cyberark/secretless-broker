@@ -119,7 +119,7 @@ docker container run \
       </div>
       
       <br/>
-			<p>Want to learn more? Check out our <a href="/docs.html">documentation</a> for more information!</p>
+      
 		</div>
 	</div>
 </div>

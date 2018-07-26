@@ -1,6 +1,4 @@
 main:
-  - page: HOME
-    url: /index.html
   - page: Docs
     url: /docs.html
   - page: Community

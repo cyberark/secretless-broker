@@ -18,8 +18,9 @@ import (
 // BackendConfig stores the connection info to the real backend database.
 // These values are pulled from the handler credentials config
 type BackendConfig struct {
-	Host string
-	Port uint
+	Host             string
+	Port             uint
+	ProviderVariable string
 }
 
 // Handler connects a client to a backend. It uses the handler Config and Providers to
@@ -31,6 +32,7 @@ type Handler struct {
 	ClientConnection net.Conn
 	HandlerConfig    config.Handler
 	EventNotifier    plugin_v1.EventNotifier
+	Resolver         plugin_v1.Resolver
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -61,7 +63,7 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	}
 }
 
-func streamWithTransform(source, dest net.Conn, callback func([]byte)) {
+func streamWithTransform(source, dest net.Conn, config *BackendConfig, callback func([]byte)) {
 	timeoutDuration := 2 * time.Second
 	buffer := make([]byte, 4096)
 
@@ -78,11 +80,12 @@ func streamWithTransform(source, dest net.Conn, callback func([]byte)) {
 		}
 
 		lines := strings.Split(string(buffer), "\r\n")
-		newLines := append(lines, "")
+		newLines := append(lines, "", "")
 
 		insertIndex := 2
-		copy(newLines[insertIndex+1:], newLines[insertIndex:])
+		copy(newLines[insertIndex+2:], newLines[insertIndex:])
 		newLines[insertIndex] = "Example-Header: IsSet"
+		newLines[insertIndex+1] = "Example-Provider-Variable: " + config.ProviderVariable
 
 		newContent := strings.Join(newLines, "\r\n")
 
@@ -104,7 +107,7 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go streamWithTransform(h.GetClientConnection(), h.Backend, func(b []byte) {
+	go streamWithTransform(h.GetClientConnection(), h.Backend, h.BackendConfig, func(b []byte) {
 		h.EventNotifier.ClientData(h.GetClientConnection(), b)
 	})
 	go stream(h.Backend, h.GetClientConnection(), func(b []byte) {
@@ -171,6 +174,7 @@ func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 		ClientConnection: options.ClientConnection,
 		EventNotifier:    options.EventNotifier,
 		HandlerConfig:    options.HandlerConfig,
+		Resolver:         options.Resolver,
 	}
 
 	handler.Run()

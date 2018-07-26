@@ -5,7 +5,6 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
@@ -65,8 +64,8 @@ func (manager *Manager) DestroyHandler(h plugin_v1.Handler) {
 }
 
 // ResolveVariable is called when a provider resolves a variable
-func (manager *Manager) ResolveVariable(provider secretless.Provider, id string, value []byte) {
-	log.Println("Resolve variable manager event...")
+func (manager *Manager) ResolveVariable(provider plugin_v1.Provider, id string, value []byte) {
+	log.Printf("Example-plugin ConnectionManager: Resolve variable manager event: %s = %s", id, string(value))
 }
 
 // ClientData is called for each inbound packet from clients

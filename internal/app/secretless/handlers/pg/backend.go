@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
-	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 )
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
@@ -15,7 +14,7 @@ func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{Options: make(map[string]string)}
 
 	var values map[string][]byte
-	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
+	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
 		return
 	}
 

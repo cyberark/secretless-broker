@@ -13,7 +13,6 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
@@ -22,6 +21,7 @@ import (
 type Handler struct {
 	EventNotifier plugin_v1.EventNotifier
 	HandlerConfig config.Handler
+	Resolver      plugin_v1.Resolver
 }
 
 func parseKey(pemStr []byte) (rawkey interface{}, err error) {
@@ -49,7 +49,7 @@ func parseKey(pemStr []byte) (rawkey interface{}, err error) {
 func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 	var values map[string][]byte
 
-	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
+	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
 		return
 	}
 
@@ -127,5 +127,6 @@ func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return &Handler{
 		EventNotifier: options.EventNotifier,
 		HandlerConfig: options.HandlerConfig,
+		Resolver:      options.Resolver,
 	}
 }

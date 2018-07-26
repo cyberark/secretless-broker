@@ -7,8 +7,12 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
-	providerpkg "github.com/conjurinc/secretless/internal/pkg/provider"
 	"github.com/cyberark/summon/secretsyml"
+
+	"github.com/conjurinc/secretless/internal/app/secretless"
+	"github.com/conjurinc/secretless/internal/pkg/plugin"
+
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // The code in this file operates at the CLI level; it reads CLI arguments and will exit the process.
@@ -82,7 +86,17 @@ func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err
 		return
 	}
 
-	if subcommand.Provider, err = providerpkg.GetProvider(options.Provider); err != nil {
+	// Load all internal Providers
+	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider)
+	for providerID, providerFactory := range secretless.InternalProviders {
+		providerFactories[providerID] = providerFactory
+	}
+
+	resolver := &plugin.Resolver{
+		ProviderFactories: providerFactories,
+	}
+
+	if subcommand.Provider, err = resolver.GetProvider(options.Provider); err != nil {
 		return
 	}
 

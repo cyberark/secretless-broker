@@ -12,6 +12,7 @@ type ListenerOptions struct {
 	HandlerConfigs []config.Handler
 	ListenerConfig config.Listener
 	NetListener    net.Listener
+	Resolver       Resolver
 	RunHandlerFunc func(string, HandlerOptions) Handler
 }
 

@@ -17,6 +17,7 @@ import (
 // BasicAuthHandler applies HTTP Basic authentication to the HTTP Authorization header.
 type BasicAuthHandler struct {
 	HandlerConfig config.Handler
+	Resolver      plugin_v1.Resolver
 }
 
 // Authenticate applies the "username" and "password" credential to the Authorization header, following the
@@ -75,5 +76,6 @@ func (h *BasicAuthHandler) LoadKeys(keyring agent.Agent) error {
 func BasicAuthHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return &BasicAuthHandler{
 		HandlerConfig: options.HandlerConfig,
+		Resolver:      options.Resolver,
 	}
 }

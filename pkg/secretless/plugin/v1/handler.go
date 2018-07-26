@@ -16,6 +16,7 @@ type HandlerOptions struct {
 	Channels         <-chan ssh.NewChannel
 	ClientConnection net.Conn
 	EventNotifier    EventNotifier
+	Resolver         Resolver
 }
 
 // Handler is an interface which takes a connection and connects it to a backend

@@ -12,7 +12,6 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -24,6 +23,7 @@ type Listener struct {
 	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
+	Resolver       plugin_v1.Resolver
 	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 	Transport      *http.Transport
 }
@@ -94,6 +94,7 @@ func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 
 				handlerOptions := plugin_v1.HandlerOptions{
 					HandlerConfig: handlerConfig,
+					Resolver:      l.Resolver,
 				}
 
 				return l.RunHandlerFunc("http/"+handlerConfig.Type, handlerOptions)
@@ -130,7 +131,7 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if handler != nil {
 		var backendVariables map[string][]byte
-		if backendVariables, err = variable.Resolve(handler.GetConfig().Credentials, l.EventNotifier); err != nil {
+		if backendVariables, err = l.Resolver.Resolve(handler.GetConfig().Credentials); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -241,6 +242,7 @@ func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
+		Resolver:       options.Resolver,
 		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

@@ -6,11 +6,11 @@ import (
 )
 
 // PluginAPIVersion is the API version being used
-var PluginAPIVersion = "0.0.7"
+var PluginAPIVersion = "0.0.8"
 
 // PluginInfo describes the plugin
 var PluginInfo = map[string]string{
-	"version":     "0.0.7",
+	"version":     "0.0.8",
 	"id":          "example-plugin",
 	"name":        "Example Plugin",
 	"description": "Example plugin to demonstrate plugin functionality",
@@ -27,6 +27,13 @@ func GetListeners() map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listene
 func GetHandlers() map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler{
 		"example-handler": example.HandlerFactory,
+	}
+}
+
+// GetProviders returns the example provider
+func GetProviders() map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider {
+	return map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider{
+		"example-provider": example.ProviderFactory,
 	}
 }
 

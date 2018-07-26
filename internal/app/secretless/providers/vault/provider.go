@@ -1,36 +1,43 @@
-package provider
+package vault
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
-	"github.com/conjurinc/secretless/pkg/secretless"
 	vault "github.com/hashicorp/vault/api"
+
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
-// VaultProvider provides data values from the Conjur vault.
-type VaultProvider struct {
-	name   string
-	client *vault.Client
+// Provider provides data values from the Conjur vault.
+type Provider struct {
+	Name   string
+	Client *vault.Client
 }
 
-// NewVaultProvider constructs a VaultProvider. The API client is configured from
+// ProviderFactory constructs a Provider. The API client is configured from
 // environment variables.
-func NewVaultProvider(name string) (provider secretless.Provider, err error) {
+func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
 	config := vault.DefaultConfig()
 
 	var client *vault.Client
+	var err error
 	if client, err = vault.NewClient(config); err != nil {
-		return
+		log.Panicf("ERROR: Could not create Vault provider: %s", err)
 	}
 
-	provider = VaultProvider{name: name, client: client}
-	return
+	provider := Provider{
+		Name:   options.Name,
+		Client: client,
+	}
+
+	return provider
 }
 
-// Name returns the name of the provider
-func (p VaultProvider) Name() string {
-	return p.name
+// GetName returns the name of the provider
+func (p Provider) GetName() string {
+	return p.Name
 }
 
 // VaultDefaultField is the default value returned by the provider from the
@@ -48,15 +55,15 @@ func parseVaultID(id string) (string, string) {
 	}
 }
 
-// Value obtains a value by id. Any secret which is stored in the vault is recognized.
+// GetValue obtains a value by id. Any secret which is stored in the vault is recognized.
 // The datatype returned by Vault is map[string]interface{}. Therefore this provider needs
 // to know which field to return from the map. By default, it returns the 'value'.
 // An alternative field can be obtained by appending '#fieldName' to the id argument.
-func (p VaultProvider) Value(id string) (value []byte, err error) {
+func (p Provider) GetValue(id string) (value []byte, err error) {
 	id, fieldName := parseVaultID(id)
 
 	var secret *vault.Secret
-	if secret, err = p.client.Logical().Read(id); err != nil {
+	if secret, err = p.Client.Logical().Read(id); err != nil {
 		return
 	}
 	// secret can be nil if it's not found

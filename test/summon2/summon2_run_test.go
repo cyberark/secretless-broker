@@ -10,7 +10,8 @@ import (
 	"github.com/cyberark/summon/secretsyml"
 
 	"github.com/conjurinc/secretless/internal/app/summon/command"
-	"github.com/conjurinc/secretless/pkg/secretless"
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -18,10 +19,10 @@ type MapProvider struct {
 	Secrets map[string][]byte
 }
 
-func (mp MapProvider) Name() string {
+func (mp MapProvider) GetName() string {
 	return "mapProvider"
 }
-func (mp MapProvider) Value(id string) ([]byte, error) {
+func (mp MapProvider) GetValue(id string) ([]byte, error) {
 	value, ok := mp.Secrets[id]
 	if ok {
 		return value, nil
@@ -29,12 +30,12 @@ func (mp MapProvider) Value(id string) ([]byte, error) {
 	return nil, fmt.Errorf("Value '%s' not found in MapProvider", id)
 }
 
-func makeEmptyProvider() secretless.Provider {
+func makeEmptyProvider() plugin_v1.Provider {
 	secrets := make(map[string][]byte)
 	return MapProvider{Secrets: secrets}
 }
 
-func makePasswordProvider() secretless.Provider {
+func makePasswordProvider() plugin_v1.Provider {
 	secrets := make(map[string][]byte)
 	secrets["db/password"] = []byte("secret")
 	return MapProvider{Secrets: secrets}

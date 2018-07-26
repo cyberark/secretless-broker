@@ -4,8 +4,6 @@ import (
 	"log"
 	"net"
 	"strconv"
-
-	"github.com/conjurinc/secretless/internal/app/secretless/variable"
 )
 
 func (h *Handler) abort(err error) {
@@ -18,10 +16,12 @@ func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{}
 
 	var values map[string][]byte
-	if values, err = variable.Resolve(h.GetConfig().Credentials, h.EventNotifier); err != nil {
-		log.Fatalf("FATAL! Could not resolve credentials!")
+	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
+		log.Fatalf("FATAL! Could not resolve all credentials for example plugin!\n%s", err)
 		return
 	}
+
+	log.Println("Example plugin variables resolved")
 
 	if h.GetConfig().Debug {
 		log.Printf("Example backend connection parameters: %s", values)
@@ -36,12 +36,13 @@ func (h *Handler) ConfigureBackend() (err error) {
 		result.Port = uint(port64)
 	}
 
+	result.ProviderVariable = string(values["providerVariable"])
+
 	delete(values, "host")
 	delete(values, "port")
+	delete(values, "providerVariable")
 
 	h.BackendConfig = &result
-	log.Println(h.BackendConfig)
-
 	return
 }
 

@@ -6,8 +6,9 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/conjurinc/secretless/pkg/secretless"
 	"github.com/cyberark/summon/secretsyml"
+
+	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 )
 
 // Subcommand defines the input needed to run Summon.
@@ -15,7 +16,7 @@ type Subcommand struct {
 	Args        []string
 	SecretsMap  secretsyml.SecretsMap
 	TempFactory *TempFactory
-	Provider    secretless.Provider
+	Provider    plugin_v1.Provider
 
 	// Set this to an io.Writer to capture stdout from the child process.
 	// By default, the child process stdout goes to this process' stdout.
@@ -34,13 +35,13 @@ func buildEnvironment(secrets map[string]string, secretsMap secretsyml.SecretsMa
 }
 
 // resolveVariables obtains the value of each requested secret.
-func resolveVariables(provider secretless.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
+func resolveVariables(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
 	result = make(map[string]string)
 	for key, spec := range secretsMap {
 		var value string
 		if spec.IsVar() {
 			var valueBytes []byte
-			if valueBytes, err = provider.Value(spec.Path); err != nil {
+			if valueBytes, err = provider.GetValue(spec.Path); err != nil {
 				return
 			}
 			value = string(valueBytes)

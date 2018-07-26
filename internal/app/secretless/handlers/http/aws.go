@@ -24,6 +24,7 @@ import (
 // AWSHandler applies AWS signature authentication to the HTTP Authorization header.
 type AWSHandler struct {
 	HandlerConfig config.Handler
+	Resolver      plugin_v1.Resolver
 }
 
 // AWS4-HMAC-SHA256 Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
@@ -144,5 +145,6 @@ func (h *AWSHandler) LoadKeys(keyring agent.Agent) error {
 func AWSHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return &AWSHandler{
 		HandlerConfig: options.HandlerConfig,
+		Resolver:      options.Resolver,
 	}
 }

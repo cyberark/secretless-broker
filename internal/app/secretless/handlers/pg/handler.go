@@ -45,6 +45,7 @@ type Handler struct {
 	ClientConnection net.Conn
 	ClientOptions    *ClientOptions
 	EventNotifier    plugin_v1.EventNotifier
+	Resolver         plugin_v1.Resolver
 }
 
 func (h *Handler) abort(err error) {
@@ -154,6 +155,7 @@ func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 		ClientConnection: options.ClientConnection,
 		EventNotifier:    options.EventNotifier,
 		HandlerConfig:    options.HandlerConfig,
+		Resolver:         options.Resolver,
 	}
 
 	handler.Run()

@@ -2,15 +2,28 @@
 // Navbar
 // this file contains styling for both top navbar and sidenav for docs page
 // ***********************
+
+#top-navigation {
+	background-image: url("../img/secretless_pattern_dark.png");
+	background-repeat: repeat-y;
+	border-radius: 0;
+	margin: 0;
+}
+
+#top-navigation.home {
+	background: none;
+}
+
+
 #cybr-nav {
 	width: 100%;
 	margin-bottom: 0;
 	height: 6.5rem;
-	background: #383950;
+	background: transparent;
 }
 .navbar-list li {
 	font-size: 1.4rem;
-	text-transform: uppercase;
+	font-weight: 100;
 }
 .navbar-list a {
 	color: #fff;
@@ -24,14 +37,12 @@
 	margin-left: -1rem;
 	margin-bottom: 0;
 	margin-top: 2rem;
-	font-family: "Source Sans Pro",sans-serif;
 	font-size: 1.5rem;
 	color: #404040;
 }
 .sidenav-subitem {
 	list-style-type: none;
 	margin-left: -4rem;
-	font-family: "Source Sans Pro",sans-serif;
 	font-size: 1.5rem;
 	padding: .8rem 1.6rem;
 }

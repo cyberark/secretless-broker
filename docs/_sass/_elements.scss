@@ -6,26 +6,39 @@
 }
 .card-heading {
 	font-weight: bold;
-	font-family: 'Source Sans Pro', sans-serif;
-	font-size: 2.4rem;
+	line-height: 4.5rem;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 3.3rem;
 	letter-spacing: .1rem;
+	color: #4d8fcc;
 }
 .broker {
 	font-family: 'Open Sans', sans-serif;
 }
 .card-side-heading {
 	font-weight: bold;
-	font-family: 'Source Sans Pro', sans-serif;
+	font-family: 'Open Sans', sans-serif;
 	font-size: 2rem;
 	letter-spacing: .1rem;
 }
 .card-subheading {
-	font-style: italic;
 	font-size: 1.7rem;
 	font-weight: bold;
 }
-
-
+.jumbotron-sub-header {
+	font-weight: bold;
+	letter-spacing: .1rem;
+	font-size: 2.4rem;
+}
+.jumbotron-sub p {
+	text-align: center;
+	color: white;
+}
+.jumbotron-sub-description {
+	width: 53%;
+    margin: 0 auto;
+    font-weight: 100;
+}
 // ***********************
 // Jumbotron
 // ***********************
@@ -35,13 +48,14 @@
 	margin: 0 auto;
 	top: 1;
 	background-color: transparent;
+	text-align: center;
 }
 #jumbotron-text {
 	font-size: 2.0rem;
 	text-align: center;
 	font-family: 'Open Sans', sans-serif;
 	margin-top: 1rem;
-	color: #fff;
+	color: #4d8fcc;
 }
 #jumbotron-heading {
 	font-size: 6.0rem;
@@ -54,17 +68,15 @@
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-	height: 10.0rem;
-	background-color: #f8f8f8;
-}
-.jumbotron-sub p {
-	color: #383950;
-	text-align: center;
+	height: 15.7rem;
+	background: linear-gradient(#165d9e, #4d8fcc);
 }
 #frame {
 	margin-bottom: 0;
-	height: 46.5rem;
-	background: #383950;
+	margin-top: -6.5rem;
+	padding-top: 10.5rem;
+	background-image: url("../img/secretless_pattern_dark.png");
+	background-repeat: round;
 }
 
 // ***********************
@@ -74,7 +86,7 @@
 	width: 1.0rem;
 	margin-left: auto;
 	margin-right: auto;
-	width: 110%;
+	width: 100%;
 }
 .about-subitem {
 	padding: .5rem .5rem .5rem .5rem;
@@ -83,9 +95,9 @@
 	min-height: 24.5rem;
 	padding: 2.5rem;
 	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
-	border: .1rem solid #e2e2e2;
 	margin: 0 1.0rem 3.0rem;
 	transition: .5s ease;
+	background: #EDF2F6;
 }
 .inner:hover {
 	transform: scale(1.025);
@@ -108,6 +120,7 @@
 	margin-left: 0;
 	letter-spacing: .1rem;
 	font-size: 1.8rem;
+	font-weight: 800;
 }
 .in-line-frame {
 	display: flex;
@@ -125,8 +138,8 @@
 	align-items: center;
 	justify-content: center
 }
-.arch-right {
-	padding-left: 3.0rem;
+.arch-respons {
+	margin: 6rem;
 }
 .arch {
 	margin-left: auto;
@@ -138,7 +151,7 @@
 	padding-bottom: 7.5rem;
 }
 .arch-list > li {
-	font-family: 'Source Sans Pro', sans-serif;
+	font-family: 'Open Sans', sans-serif;
 	font-size: 1.7rem;
 }
 
@@ -150,7 +163,6 @@
 	width: 60%;
 }
 .container-fluid {
-	background-color: #f8f8f8;
 }
 .tab-content {
 	display: none;
@@ -187,10 +199,12 @@
 .fab {
 	font-size: 1.5rem;
 	margin-right: 1.0rem;
+	color: #4d8fcc;
 }
 .far {
 	font-size: 1.5rem;
 	margin-right: 1.0rem;
+	color: #4d8fcc;
 }
 
 // ***********************
@@ -211,4 +225,7 @@
 }
 .introduction img {
 	width: 25.0rem;
+}
+.secretless-logo {
+	width: 40rem;
 }

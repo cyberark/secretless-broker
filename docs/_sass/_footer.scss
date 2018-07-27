@@ -1,9 +1,27 @@
 // ***********************
 // Footer
 // ***********************
+.learn-banner {
+	background-color: #4d8fcc;
+	height: 9.3rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	line-height: 3rem;
+	margin-bottom: 4rem;
+}
+.learn-banner p {
+	color: white;
+	font-size: 2rem;
+	font-weight: normal;
+}
+.learn-banner a {
+	color: white;
+}
 footer {
-	background-color: #4e4f4f;
-	padding: 4rem 0 4rem 0;
+	background-image: url("../img/secretless_pattern_dark.png");
+	background-repeat: round;
+	padding: 0 0 4rem 0;
 	box-shadow: 0rem 50.0rem 0rem 50.0rem #4e4f4f;
 }
 .container .container-footer {
@@ -21,11 +39,8 @@ footer .left-links {
 	letter-spacing: .08rem;
 }
 footer .right-links p {
-	font-weight: 200;
-	padding: .6rem 0;
 	letter-spacing: .05rem;
 	line-height: 3.6rem;
-	color:white;
 }
 footer .right-links li {
 	font-weight: 200;
@@ -36,7 +51,7 @@ footer .right-links li {
 	list-style-type: none;
 }
 .cybr-logo-footer {
-	width: 20.0rem;
+	width: 15.0rem;
 	margin: 1.0rem;
 }
 .footer-resource a {
@@ -47,5 +62,7 @@ footer .right-links li {
 	text-decoration: none;
 }
 .footer-title {
-	font-size: 1.8rem;
+	font-size: 1.4rem;
+	color: #4D8FCC;
+	line-height: 1.9rem;
 }

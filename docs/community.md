@@ -1,7 +1,7 @@
 ---
 title: Secretless
 id: community
-layout: page
+layout: subpages
 description: Secretless Community
 ---
 

@@ -73,7 +73,9 @@
 }
 #frame {
 	margin-bottom: 0;
-	height: 46.5rem;
+	margin-top: -6.5rem;
+	padding-top: 6.5rem;
+	//height: 46.5rem;
 	background-image: url("../img/secretless_pattern_dark.png");
 	background-repeat: round;
 }
@@ -85,7 +87,7 @@
 	width: 1.0rem;
 	margin-left: auto;
 	margin-right: auto;
-	width: 110%;
+	width: 100%;
 }
 .about-subitem {
 	padding: .5rem .5rem .5rem .5rem;

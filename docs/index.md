@@ -1,6 +1,6 @@
 ---
 title: Secretless
-id: index
+id: home
 layout: landing
 description: Secretless
 ---

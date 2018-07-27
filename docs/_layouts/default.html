@@ -6,8 +6,9 @@
 
   <body>
 
-    {% include jumbotron.html %}
-    
+    {% if page.id == "home" %}
+      {% include jumbotron.html %}
+    {% endif %}
 
     <div class="container">
       <div class="row">

@@ -62,24 +62,26 @@ Our Kubernetes deployment manifests assume that you are using minikube, so we us
 
 ## Sample Application
 
-In this tutorial, we use a [simple note storage-and-retrieval application](https://github.com/conjurinc/secretless/tree/master/demos/k8s-demo/app) written in Go. The application is an **http service** that uses a **PostgresSQL storage backend**. It exposes the following routes:
+The tutorial uses an existing [pet store demo application](https://github.com/conjurinc/pet-store-demo) that exposes the following routes:
 
-- `GET /note` to retrieve notes
-- `POST /note` to add a note
-  - Requires `Content-Type: application/json` header and JSON body that includes `title` and `description` data
+- `GET /pets` to list all the pets in inventory
+- `POST /pet` to add a pet
+  - Requires `Content-Type: application/json` header and body that includes `name` data
+
+There are additional routes that are also available, but these are the two that we will focus on for this tutorial.
+
+Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `DB_URL` environment variables in the application's environment (following [12-factor principles](https://12factor.net/)).
 
 See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
 
-The application is configured to connect to the database by setting the `DATABASE_URL` environment variables in the application's environment (following [12-factor principles](https://12factor.net/)).
-
 _main.go_
 ```go
-db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+db, err := sql.Open("postgres", os.Getenv("DB_URL"))
 ```
 
-The application uses `DATABASE_URL` to establish a database handle, `db` (representing a pool of connections) which allows the application to communicate with the database. 
+The application uses `DB_URL` to establish a database handle, `db` (representing a pool of connections) which allows the application to communicate with the database. 
 
-The database is **credential-protected**. With Secretless, we will be able to use a value of `DATABASE_URL` of the form:  `postgresql://x@localhost:5432/[APPLICATION_DB_NAME]?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
+The database is **credential-protected**. With Secretless, we will be able to use a value of `DB_URL` of the form:  `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
 
 ## Steps for the admin user
 
@@ -213,7 +215,7 @@ export REMOTE_DB_URL="$(minikube ip):30001"
 
 You will setup and configure the PostgresSQL storage backend by carrying the following steps:
 1. Create a dedicated application database (henceforth referred to by the environment variable `$APPLICATION_DB_NAME`) within the PostgresSQL DBMS, then carry out the rest of the steps within its context
-2. Create the application table (i.e. notes)
+2. Create the application table (i.e. pets)
 3. Create an application user with limited privileges, `SELECT` and `INSERT` on the application table 
 4. Store the application user's credentials (`$APPLICATION_DB_USER` and `$APPLICATION_DB_INITIAL_PASSWORD`) in in a secret store (for the purposes of this demo, we're using Kubernetes secrets). 
 
@@ -240,18 +242,17 @@ docker run \
     \c ${APPLICATION_DB_NAME};
 
     /* Create Application Table */
-    CREATE TABLE notes (
-        id serial primary key,
-        title varchar(256),
-        description varchar(1024)
+    CREATE TABLE pets (
+      id serial primary key,
+      name varchar(256)
     );
 
     /* Create Application User */
     CREATE USER ${APPLICATION_DB_USER} PASSWORD '${APPLICATION_DB_INITIAL_PASSWORD}';
  
     /* Grant Permissions */
-    GRANT SELECT, INSERT ON public.notes TO ${APPLICATION_DB_USER};
-    GRANT USAGE, SELECT ON SEQUENCE public.notes_id_seq TO ${APPLICATION_DB_USER};
+    GRANT SELECT, INSERT ON public.pets TO ${APPLICATION_DB_USER};
+    GRANT USAGE, SELECT ON SEQUENCE public.pets_id_seq TO ${APPLICATION_DB_USER};
 EOSQL
 ```
 
@@ -300,8 +301,8 @@ The Secretless configuration file has 2 sections:
 + Handlers, which are passed new connection requests received by the listeners, and are the part of Secretless that actually opens up a connection to the target service with credentials that it retrieves using the specified credential provider(s)
 
 In our sample, we create a `secretless.yml` file as follows:
-+ Define a `pg` listener named `notes-pg-listener` that listens on `localhost:5432`
-+ Define a handler named `notes-pg-handler` that uses the `file` provider to retrieve the `address`, `username` and `password` of the remote database. The file provider is used to access Kubernetes secrets made available to the Secretless container via volume mounts. 
++ Define a `pg` listener named `pets-pg-listener` that listens on `localhost:5432`
++ Define a handler named `pets-pg-handler` that uses the `file` provider to retrieve the `address`, `username` and `password` of the remote database. The file provider is used to access Kubernetes secrets made available to the Secretless container via volume mounts. 
 
   _NOTE: There is a pending feature for a Kubernetes secret provider which will retrieve secrets directly from the Kubernetes API_.
   
@@ -312,12 +313,12 @@ Run the command below to create a Secretless configuration file named `secretles
 ```bash
 cat << EOF > secretless.yml
 listeners:
-  - name: notes-pg-listener
+  - name: pets-pg-listener
     protocol: pg
     address: localhost:5432
 handlers:
-  - name: notes-pg-handler
-    listener: notes-pg-listener
+  - name: pets-pg-handler
+    listener: pets-pg-listener
     credentials:
       - name: address
         provider: file
@@ -391,10 +392,10 @@ The secretless broker sidecar container has a shared network with the applicatio
 
 _Note_: 
 + An application must connect to Secretless without SSL, though the actual connection between Secretless and the target service can leverage SSL. To achieve this we append the query parameters `sslmode=disable` to the connection string, which prevents the PostgresSQL driver from using SSL mode with Secretless.
-+ Some database drivers require the connection string to explicitly specify a user. This is the reason for `..x@localhost...` in `$DATABASE_URL` below.
++ Some database drivers require the connection string to explicitly specify a user. This is the reason for `..x@localhost...` in `$DB_URL` below.
 + Secretless respects the parameters specified in the database connections string.
 
-You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `$DATABASE_URL` environment variable to `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via Secretless.
+You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `$DB_URL` environment variable to `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via Secretless.
 
 Add the application container to the base manifest:
 
@@ -403,9 +404,9 @@ _quick-start.yml_
 # update the path $.spec.template.spec in the base manifest with the content below
 containers:
   - name: quick-start-application
-    image: codebykumbi/note-store-app:latest
+    image: codebykumbi/pet-store:latest
     env:
-      - name: DATABASE_URL
+      - name: DB_URL
         # don't forget to substitute the actual value of ${APPLICATION_DB_NAME} below !!!
         value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
 ```
@@ -470,9 +471,9 @@ spec:
     spec:
       containers:
         - name: quick-start-application
-          image: codebykumbi/note-store-app:latest
+          image: codebykumbi/pet-store:latest
           env:
-            - name: DATABASE_URL
+            - name: DB_URL
               value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
         - name: secretless
           image: cyberark/secretless:latest
@@ -545,25 +546,24 @@ The next steps rely on the presence of `$APPLICATION_URL` in your environment. F
 export APPLICATION_URL=$(minikube ip):30002
 ```
 
-Run the command below to create a note:
+Run the command below to create a pet:
 ```bash
 curl -i -d @- \
  -H "Content-Type: application/json" \
- ${APPLICATION_URL}/note \
+ ${APPLICATION_URL}/pet \
  << EOF
 {
-   "title": "Secretless release",
-   "description": "Once the tutorials are uploaded, initiate the release!"
+   "name": "Secretlessly Fluffy"
 }
 EOF
 ```
 We expect the command above to respond with HTTP status 201.
 
-Run the command below to retrieve all the notes:
+Run the command below to retrieve all the pets:
 ```bash
-curl -i ${APPLICATION_URL}/note
+curl -i ${APPLICATION_URL}/pets
 ```
-We expect the command above to respond with a JSON array containing all the notes.
+We expect the command above to respond with a JSON array containing all the pets.
 
 There we have it. This application is communicating with a target service without managing any secrets.
 
@@ -578,7 +578,7 @@ These are the steps you wil take to rotate the credentials of the dabatase:
 Typically, you'd want your rotation to work the other way - update the DB and then your vault - but we're using kubernetes secrets in this guide, which isn't built to handle secret rotation gracefully. For that, you'd want to use a better secrets management solution.
 
 ### Poll Application API [separate terminal]
-Before rotating, **you will run the commands in this section in a new and separate terminal** to poll the retrieve notes endpoint (GET `/note`). This will allow you to see the request-response cycle of the application. If something goes wrong, like a database connection failure you will see it as a > 400 HTTP status code.
+Before rotating, **you will run the commands in this section in a new and separate terminal** to poll the retrieve pets endpoint (GET `/pets`). This will allow you to see the request-response cycle of the application. If something goes wrong, like a database connection failure you will see it as a > 400 HTTP status code.
 
 First, setup the environment with `$APPLICATION_URL`. If you're using `minikube`:
 ```bash
@@ -589,8 +589,8 @@ To start polling run this command:
 ```bash
 while true
 do 
-  echo "Retrieving notes at $(date):"
-  curl $APPLICATION_URL/note
+  echo "Retrieving pets at $(date):"
+  curl $APPLICATION_URL/pets
   echo ""
   echo ""
   sleep 3

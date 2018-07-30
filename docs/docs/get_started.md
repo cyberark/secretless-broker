@@ -6,7 +6,7 @@ description: Secretless Documentation
 permalink: docs/get_started
 ---
 
-<p class="card-heading">Get Started</p>
+# Get Started
 
 To get started trying out Secretless, you can run through our [quick start demos](/quick_start.html)
 that allow you to try it out with PostgreSQL, SSH, or an HTTP web service.

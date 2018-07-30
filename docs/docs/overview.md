@@ -6,7 +6,7 @@ description: Secretless Documentation
 permalink: docs/overview
 ---
 
-<p class="card-heading">Overview</p>
+# Overview
 
 Secretless is a connection broker which relieves client applications of the need
 to directly handle secrets to target services such as databases, web services, SSH

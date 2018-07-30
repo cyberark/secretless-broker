@@ -6,9 +6,9 @@ description: Secretless Documentation
 permalink: docs/overview/key_terms
 ---
 
-<p class="card-heading">Key Terms</p>
+# Key Terms
 
-# General-Purpose Terminology
+## General-Purpose Terminology
 
 - Target service
 
@@ -28,7 +28,7 @@ permalink: docs/overview/key_terms
 
   When a client uses the API to interact with the vault, this interaction is written to a separate database called the audit. The audit can be used to search and report on historical interactions with secret data. Vaults may also be capable of automatically rotating the secrets. Or rotation may be performed by a separate application, acting through the Vault API.
 
-# Secretless-Specific Terminology
+## Secretless-Specific Terminology
 
 - Listener
 

@@ -566,10 +566,10 @@ Before rotating, you will run the command below in a new terminal to poll the re
 ```bash
 while true
 do 
-    echo "Retrieving notes"
-    curl $APPLICATION_URL/note
-    echo ""
-    sleep 1
+  echo "Retrieving notes"
+  curl $APPLICATION_URL/note
+  echo ""
+  sleep 1
 done
 ```
 
@@ -584,12 +584,12 @@ cat << EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
-    name: quick-start-backend-credentials
+  name: quick-start-backend-credentials
 type: Opaque
 data:
-    address: $(echo -n ${REMOTE_DB_URL} | base64)
-    username: $(echo -n ${APPLICATION_DB_USER} | base64)
-    password: $(echo -n ${APPLICATION_DB_NEW_PASSWORD}" | base64)
+  address: $(echo -n ${REMOTE_DB_URL} | base64)
+  username: $(echo -n ${APPLICATION_DB_USER} | base64)
+  password: $(echo -n ${APPLICATION_DB_NEW_PASSWORD}" | base64)
 EOF
 ```
 
@@ -600,11 +600,27 @@ You can check that the credential have been propagate by `exec`ing into any one 
 Run the following command to wait for Kubernetes secrets to propagate to the application pod Secretless sidecar container volume mounts:
 
 ```bash
-application_first_pod = $(kubectl get --namespace ${APPLICATION_NAMESPACE} po -l=app="quick-start-application" -o=jsonpath='{$.items[0].metadata.name}')
+function first_pod {
+  kubectl --namespace ${APPLICATION_NAMESPACE} \
+    get pods \
+    -l=app="quick-start-application"
+    -o=jsonpath='{$.items[0].metadata.name}'
+}
 
-while [[ ! "$(kubectl --namespace ${APPLICATION_NAMESPACE} exec -it ${application_first_pod} -c secretless -- cat /etc/secret/password)" == "${APPLICATION_DB_NEW_PASSWORD}" ]] ; do
-    echo "Waiting for secret to be propagated"
-    sleep 10
+function first_pod_password {
+  kubectl --namespace ${APPLICATION_NAMESPACE} \
+    exec \
+    -it \
+    -c secretless \
+    $(first_pod) \
+    -- \
+    cat /etc/secret/password
+}
+
+while [[ ! "$(first_pod_password)" == "${APPLICATION_DB_NEW_PASSWORD}" ]]
+do
+  echo "Waiting for secret to be propagated"
+  sleep 10
 done
 
 echo Ready!
@@ -629,13 +645,13 @@ docker run \
     
     /* Prune Existing Connections */
     SELECT
-        pg_terminate_backend(pid)
+      pg_terminate_backend(pid)
     FROM
-        pg_stat_activity
+      pg_stat_activity
     WHERE
-        pid <> pg_backend_pid()
+      pid <> pg_backend_pid()
     AND
-        usename='${APPLICATION_DB_USER}';
+      usename='${APPLICATION_DB_USER}';
 "
 ```
 

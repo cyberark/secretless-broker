@@ -6,7 +6,7 @@ description: Secretless Documentation
 permalink: docs/get_started/quick_start
 ---
 
-<p class="card-heading">Quick Start</p>
+# Quick Start
 
 Try out Secretless brokering a connection to a PostgreSQL database, an SSH connection,
 or a connection to an HTTP service authenticating with basic auth.

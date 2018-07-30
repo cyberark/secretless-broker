@@ -6,7 +6,7 @@ description: Secretless Documentation
 permalink: docs/reference
 ---
 
-<p class="card-heading">Reference</p>
+# Reference
 
 The following target services are currently supported by Secretless:
 

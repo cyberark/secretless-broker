@@ -6,7 +6,7 @@ description: Secretless Documentation
 permalink: docs/get_started/deploy_to_kubernetes
 ---
 
-<p class="card-heading">Deploy to Kubernetes</p>
+# Deploy to Kubernetes
 
 To get started with Secretless, try working through this tutorial, which goes through deploying Secretless with a sample application that uses a PostgresSQL database for backend storage.
 

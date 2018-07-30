@@ -6,7 +6,7 @@ description: Secretless Documentation
 permalink: docs/reference/listeners
 ---
 
-<p class="card-heading">Listeners</p>
+# Listeners
 
 You can configure the following kinds of Secretless *Listeners*:
 

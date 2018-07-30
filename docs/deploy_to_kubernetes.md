@@ -47,7 +47,7 @@ We are going to do the following:
 1. Configure Secretless to broker the connection to the target service using credentials from the secret store
 
 **As the application developer:**
-1. Configure application to connect to target service through interface exposed by Secretless
+1. Configure application to connect to target service via the Secretless broker
 1. Deploy and run Secretless adjacent to the application
 
 ### Prerequisites
@@ -70,7 +70,7 @@ The tutorial uses an existing [pet store demo application](https://github.com/co
 
 There are additional routes that are also available, but these are the two that we will focus on for this tutorial.
 
-Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `DB_URL` environment variables in the application's environment (following [12-factor principles](https://12factor.net/)).
+Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `DB_URL` environment variable in the application's environment (following [12-factor principles](https://12factor.net/)).
 
 See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
 
@@ -79,7 +79,7 @@ _main.go_
 db, err := sql.Open("postgres", os.Getenv("DB_URL"))
 ```
 
-The application uses `DB_URL` to establish a database handle, `db` (representing a pool of connections) which allows the application to communicate with the database. 
+The application uses `DB_URL` to establish a database handle `db` (representing a pool of connections) which allows the application to communicate with the database. 
 
 The database is **credential-protected**. With Secretless, we will be able to use a value of `DB_URL` of the form:  `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
 
@@ -205,7 +205,7 @@ In this section, we assume that you have a PostgresSQL backend set up and ready 
 + The PostgresSQL backend is publicly available via some URL. We'll refer to this public URL by the environment variable `$REMOTE_DB_URL`
 + Admin-level database credentials exist to allow you to create the application user. We'll refer to them as the environment variables `$REMOTE_DB_ADMIN_USER` and `$REMOTE_DB_ADMIN_PASSWORD`
 
-Please ensure the environment variable are set to reflect your environment. For example, if you followed along in the last section and are using minikube for your local K8s cluster, you can run:
+Please ensure the environment variables are set to reflect your environment. For example, if you followed along in the last section and are using minikube for your local K8s cluster, you can run:
 
 ``` bash
 export REMOTE_DB_ADMIN_USER=quick_start_admin_user
@@ -382,9 +382,11 @@ spec:
 
 The manifest should be saved as a file named `quick-start.yml`. As you can see above, to start off the base manifest you declare a deployment of 3 replicas with associated metadata. 
 
-The additional steps to complete building the manifest are:
+The additional steps to complete building the manifest are provided to be informative:
 + [Add & Configure Application Container](#add--configure-application-container)
 + [Add & Configure Secretless Sidecar Container](#add--configure-secretless-sidecar-container)
+
+A [Completed Application Deployment Manifest](#completed-application-deployment-manifest) is provided in the last section, where you'll actually create the `quick_start.yml`. 
 
 #### Add & Configure Application Container
 
@@ -702,7 +704,7 @@ docker run \
 ```
 
 ### Conclusion
-Now return to the polling terminal. Observe that requests to the application API are not affected by the password rotation - we continue to be able to query the application as usual, without interruption!.
+Now return to the polling terminal. Observe that requests to the application API are not affected by the password rotation - we continue to be able to query the application as usual, without interruption!
 
 ## Review Complete Tutorial With Scripts
 

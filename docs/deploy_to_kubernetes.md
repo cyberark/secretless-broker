@@ -451,7 +451,7 @@ You should now save the application deployment manifest in a file named `quick-s
 Running the command below will save a completed deployment manifest to `quick-start.yml` in your current working directory, using the value of the `$APPLICATION_DB_NAME` environment variable in the executing terminal:
 
 ```bash
-cat <<EOF > quick-start.yml
+cat << EOF > quick-start.yml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -459,7 +459,7 @@ metadata:
   labels:
     app: quick-start-application
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: quick-start-application
@@ -654,13 +654,17 @@ function first_pod_password {
     cat /etc/secret/password
 }
 
-while [[ ! "$(first_pod_password)" == "${APPLICATION_DB_NEW_PASSWORD}" ]]
-do
-  echo "Waiting for secret to be propagated"
-  sleep 10
-done
+function wait_for_secret_propagation {
+  while [[ ! "$(first_pod_password)" == "${APPLICATION_DB_NEW_PASSWORD}" ]]
+  do
+    echo "Waiting for secret to be propagated"
+    sleep 10
+  done
 
-echo Ready!
+  echo "Ready!"
+}
+
+wait_for_secret_propagation
 ```
 
 #### Rotate Credentials In DB

@@ -64,7 +64,7 @@ In this tutorial, we use a [simple note storage-and-retrieval application](https
 - `POST /note` to add a note
   - Requires `Content-Type: application/json` header and JSON body that includes `title` and `description` data
 
-See [Try The Running Application](#consume-application) for examples of consuming the routes using `curl`.
+See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
 
 The application is configured to connect to the database by setting the `DATABASE_URL` environment variables in the application's environment (following [12-factor principles](https://12factor.net/)).
 

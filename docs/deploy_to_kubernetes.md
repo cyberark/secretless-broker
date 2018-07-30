@@ -540,7 +540,7 @@ If you used the service definition above, the application should now be availabl
 
 That's it! You've configured your application to connect to PostgreSQL via Secretless, and we can try it out to validate that it's working as expected.
 
-The next steps rely on the presence of `APPLICATION_URL` in your environment. For example, if you used the service definition in the previous then you would setup your environment as follows:
+The next steps rely on the presence of `$APPLICATION_URL` in your environment. For example, if you used the service definition in the previous then you would setup your environment as follows:
 ```bash
 export APPLICATION_URL=$(minikube ip):30002
 ```

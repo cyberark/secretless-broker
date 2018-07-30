@@ -74,13 +74,6 @@ Pet data is stored in a PostgreSQL database, and the application may be configur
 
 See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
 
-_main.go_
-```go
-db, err := sql.Open("postgres", os.Getenv("DB_URL"))
-```
-
-The application uses `DB_URL` to establish a database handle `db` (representing a pool of connections) which allows the application to communicate with the database. 
-
 The database is **credential-protected**. With Secretless, we will be able to use a value of `DB_URL` of the form:  `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
 
 ## Steps for the admin user
@@ -406,7 +399,7 @@ _quick-start.yml_
 # update the path $.spec.template.spec in the base manifest with the content below
 containers:
   - name: quick-start-application
-    image: codebykumbi/pet-store:latest
+    image: cyberark/pet-store:latest
     env:
       - name: DB_URL
         # don't forget to substitute the actual value of ${APPLICATION_DB_NAME} below !!!
@@ -473,7 +466,7 @@ spec:
     spec:
       containers:
         - name: quick-start-application
-          image: codebykumbi/pet-store:latest
+          image: cyberark/pet-store:latest
           env:
             - name: DB_URL
               value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable

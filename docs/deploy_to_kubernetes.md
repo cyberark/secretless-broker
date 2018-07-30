@@ -17,13 +17,17 @@ We have chosen a PostgresSQL database as the target service for this tutorial, h
 + [Getting Started](#getting-started)
 + [Sample Application](#sample-application)
 + Steps for the admin user
-    + [Provision Target Services (optional)](#provision-target-services-optional)
-    + [Setup And Configure Target Service](#setup-and-configure-target-service)
-    + [Create Application Namespace and Store Application DB-Credentials](#create-application-namespace-and-store-application-db-credentials)
-    + [Create Secretless Configuration ConfigMap](#create-secretless-configuration-configmap)
+  + [Provision Target Services (optional)](#provision-target-services-optional)
+  + [Setup And Configure Target Service](#setup-and-configure-target-service)
+  + [Create Application Namespace and Store Application DB-Credentials](#create-application-namespace-and-store-application-db-credentials)
+  + [Create Secretless Configuration ConfigMap](#create-secretless-configuration-configmap)
 + Steps for the non-privileged user (i.e developer)
-    + [Deploy Application With Secretless](#deploy-application-with-secretless)
-    + [Add and Configure Secretless sidecar container](#add-and-configure-secretless-sidecar-container)
+  + [Build Application Deployment Manifest](#build-application-deployment-manifest)
+    + [Add & Configure Application Container](#add--configure-application-container)
+    + [Add & Configure Secretless Sidecar Container](#add--configure-secretless-sidecar-container)
+    + [Completed Application Deployment Manifest](#completed-application-deployment-manifest)
+  + [Deploy Application With Secretless](#deploy-application-with-secretless)
+    + [Expose Application Publicly](#expose-application-publicly)
 + [Try The Running Application](#try-the-running-application)
 + [Rotate Target Service Credentials](#rotate-target-service-credentials)
 + [Review Complete Tutorial With Scripts](#review-complete-tutorial-with-scripts)
@@ -348,9 +352,9 @@ export APPLICATION_NAMESPACE=quick-start-app
 export APPLICATION_DB_NAME=quick_start_db
 ```
 
-### Deploy Application With Secretless
+### Build Application Deployment Manifest
 
-In this section, you create the deployment manifest for the application. The manifest includes a section for specifying the pod template (`$.spec.template`), it is here that we will declare the application container and Secretless sidecar container.
+In this section, you build the deployment manifest for the application. The manifest includes a section for specifying the pod template (`$.spec.template`), it is here that we will declare the application container and Secretless sidecar container.
 
 Below is the base manifest that you will be building upon: 
 _quick-start.yml_
@@ -490,9 +494,10 @@ spec:
             name: quick-start-application-secretless-config
 EOF
 ```
+
 ### Deploy Application With Secretless
 
-You now have a complete application deployment manifest, with 2 containers (the application and the Secretless sidecar) defined in the Pod template. It is time to deploy the application using this manifest.
+You now have a complete application deployment manifest from the previous section, with 2 containers (the application and the Secretless sidecar) defined in the Pod template. It is time to deploy the application using this manifest.
 
 To deploy the application, run this command:
 ```bash

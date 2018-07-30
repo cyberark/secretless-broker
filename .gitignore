@@ -22,3 +22,6 @@ test/plugin/out/
 
 # Remove OSX-specific temp files
 .DS_Store
+
+# We don't use dep anymore
+Gopkg.*

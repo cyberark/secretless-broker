@@ -26,6 +26,7 @@ pushd test
 
         # Only save first failure exit code
         if [[ "$exit_status" -eq "0" && "$last_status" -ne "0" ]]; then
+          echo "ERROR: Detected a failure in the runner for $dir!"
           exit_status="$last_status"
         fi
       set -e
@@ -39,7 +40,7 @@ pushd test
 
   rm -f $project_dir/test/junit.xml
   docker run --rm \
-    -v $project_dir/test/:/go/src/github.com/conjurinc/secretless/test/output/ \
+    -v $project_dir/test/:/secretless/test/output/ \
     secretless-dev \
     bash -exc "
       go get -u github.com/jstemmer/go-junit-report

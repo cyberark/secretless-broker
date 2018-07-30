@@ -50,4 +50,4 @@ services:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
     volumes:
-      - ../..:/go/src/github.com/conjurinc/secretless
+      - ../..:/secretless

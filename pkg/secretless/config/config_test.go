@@ -87,7 +87,7 @@ handlers:
 foobar: []
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "field foobar not found in struct config.Config")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "field foobar not found in type config.Config")
 	})
 
 	Convey("Reports an unnamed Listener definition", t, func() {

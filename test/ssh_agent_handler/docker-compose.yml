@@ -20,7 +20,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    working_dir: /go/src/github.com/conjurinc/secretless/test/ssh_agent_handler
+    working_dir: /secretless/test/ssh_agent_handler
     command: ssh -o StrictHostKeyChecking=no root@ssh_host cat /root/.ssh/authorized_keys
     environment:
       SSH_AUTH_SOCK: /sock/.agent
@@ -36,7 +36,7 @@ services:
       dockerfile: Dockerfile.dev
     command: sleep 999d
     volumes:
-      - ../..:/go/src/github.com/conjurinc/secretless
+      - ../..:/secretless
       - ./id_insecure:/id_insecure:ro
       - ssh-agent-socket:/sock
     depends_on:

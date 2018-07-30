@@ -27,7 +27,7 @@ set -e
 
 rm -f $PROJECT_DIR/test/junit.xml
 docker run --rm \
-  -v $PROJECT_DIR/test/:/go/src/github.com/conjurinc/secretless/test/output/ \
+  -v $PROJECT_DIR/test/:/secretless/test/output/ \
   secretless-dev \
   bash -exc "
     go get -u github.com/jstemmer/go-junit-report

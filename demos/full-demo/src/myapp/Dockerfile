@@ -1,4 +1,4 @@
-FROM golang:1.10.3
+FROM golang:1.11beta2
 
 EXPOSE 80
 
@@ -8,14 +8,11 @@ RUN apt-get update && \
                        postgresql-client \
                        vim
 
-RUN go get -u github.com/golang/dep/cmd/dep
-
 ENTRYPOINT [ "./myapp" ]
 
 WORKDIR /go/src/myapp
 
-COPY Gopkg.toml Gopkg.lock ./
-RUN dep ensure --vendor-only
-
 COPY . .
+RUN go mod -sync
+
 RUN go build

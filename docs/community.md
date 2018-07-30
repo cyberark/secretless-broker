@@ -1,5 +1,5 @@
 ---
-title: Secretless
+title: Community
 id: community
 layout: subpages
 description: Secretless Community

@@ -3,7 +3,7 @@ title: Secretless
 id: handlers
 layout: docs
 description: Secretless Documentation
-permalink: handlers
+permalink: docs/reference/handlers
 ---
 
 <p class="card-heading">Handlers</p>

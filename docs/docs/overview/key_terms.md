@@ -3,7 +3,7 @@ title: Secretless
 id: key_terms
 layout: docs
 description: Secretless Documentation
-permalink: key_terms
+permalink: docs/overview/key_terms
 ---
 
 <p class="card-heading">Key Terms</p>

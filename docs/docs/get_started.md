@@ -3,7 +3,7 @@ title: Secretless
 id: get_started
 layout: docs
 description: Secretless Documentation
-permalink: get_started
+permalink: docs/get_started
 ---
 
 <p class="card-heading">Get Started</p>

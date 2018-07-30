@@ -3,7 +3,7 @@ title: Secretless
 id: how_to_deploy
 layout: docs
 description: Secretless Documentation
-permalink: how_to_deploy
+permalink: docs/reference/how_to_deploy
 ---
 
 <p class="card-heading">Deploying Secretless</p>

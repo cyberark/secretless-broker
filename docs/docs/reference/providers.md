@@ -3,7 +3,7 @@ title: Secretless
 id: providers
 layout: docs
 description: Secretless Documentation
-permalink: providers
+permalink: docs/reference/providers
 ---
 
 <p class="card-heading">Credential Providers</p>

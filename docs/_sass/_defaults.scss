@@ -3,14 +3,16 @@
 // ***********************
 html { 
 	font-size: 62.5%; 
+	font-family: "Open Sans",sans-serif;
+}
+body {
+	font-family: "Open Sans",sans-serif;
 }
 p {
-	font-family: "Open Sans",sans-serif;
 	font-size: 1.5rem;
 	line-height: 1.5;
 }
 li {
-	font-family: "Open Sans",sans-serif;
 	font-size: 1.5rem;
 	line-height: 1.5;
 }
@@ -32,4 +34,31 @@ pre {
 }
 code {
 	margin: 0;
+}
+
+h1 {
+	color: $sless-light-blue;
+}
+
+h2 {
+	color: $sless-light-blue;
+}
+
+h3 {
+
+}
+
+h4 {
+
+}
+
+h5 {
+
+}
+
+#content {
+	padding: 4rem 0;
+	.documentation-content {
+		padding: 0;
+	}
 }

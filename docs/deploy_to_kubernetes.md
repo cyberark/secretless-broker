@@ -547,11 +547,15 @@ export APPLICATION_URL=$(minikube ip):30002
 
 Run the command below to create a note:
 ```bash
-curl \
- -i \
- -d '{"title":"Secretless release", "description":"Once the tutorials are uploaded, initiate the release!"}' \
+curl -i -d @- \
  -H "Content-Type: application/json" \
- ${APPLICATION_URL}/note
+ ${APPLICATION_URL}/note \
+ << EOF
+{
+   "title": "Secretless release",
+   "description": "Once the tutorials are uploaded, initiate the release!"
+}
+EOF
 ```
 We expect the command above to respond with HTTP status 201.
 

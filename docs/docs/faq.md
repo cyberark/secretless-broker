@@ -3,7 +3,7 @@ title: Secretless
 id: faq
 layout: docs
 description: Secretless Documentation
-permalink: faq
+permalink: docs/faq
 ---
 
 <p class="card-heading">FAQ</p>

@@ -3,7 +3,7 @@
 	<div class="navbar-list">
 		<ul>
 		{% for item in site.data.navigation.main %}
-			<li><a href="{{ item.url }}" alt="{{ item.title }}">{{item.page}}</a></li>
+			<li><a href="{{ item.url }}" alt="{{ item.title }}" class="{{ item.class }}">{{item.page}}</a></li>
 		{% endfor %}
 		</ul>
   	</div>

@@ -3,7 +3,7 @@ title: Secretless
 id: overview
 layout: docs
 description: Secretless Documentation
-permalink: overview
+permalink: docs/overview
 ---
 
 <p class="card-heading">Overview</p>

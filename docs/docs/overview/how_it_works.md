@@ -3,7 +3,7 @@ title: Secretless
 id: how_it_works
 layout: docs
 description: Secretless Documentation
-permalink: how_it_works
+permalink: docs/overview/how_it_works
 ---
 
 <p class="card-heading">How does it work?</p>

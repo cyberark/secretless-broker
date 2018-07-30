@@ -2,14 +2,17 @@
 layout: default
 ---
 
+{% include top_nav.html %}
+
 <h1>Secretless Blog</h1>
 
-<ul class="posts">
+<ul>
   {% for post in site.posts %}
-    <li class="post card">
+    <li class="post">
       {% if post.image %}
         <img class="post-list-thumb" src="{{ base.url }}/img/blog/{{ post.thumb }}" alt="{{ post.image-alt }}">
       {% endif %}
+
       <div class="post-content">
         <a href="{{ post.url }}"><h2>{{ post.title }}</h2><span class="blog-subhead">{{ post.sub }}</span></a>
         <p class="date">{{ post.date | date: '%B %d, %Y' }}</p>
@@ -18,3 +21,6 @@ layout: default
     </li>
   {% endfor %}
 </ul>
+
+<br />
+<br />

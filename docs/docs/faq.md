@@ -45,12 +45,12 @@ permalink: docs/faq
 </div>
 
 <p>For info on currently supported vaults, please see our
-  <a href="/providers.html">Credential Providers</a> reference page.</p>
+  <a href="/docs/reference/providers">Credential Providers</a> reference page.</p>
 
 <p>If the vault you would like to use is not currently supported, please check our
   <a href="https://github.com/conjurinc/secretless/issues">Github issues</a> to see
   if we already have plans to support it. If not, please open a new issue with your
-  request. Secretless is also <a href="community.html">open to contributions</a>
+  request. Secretless is also <a href="/community">open to contributions</a>
   from the community, and we plan to standardize the Provider API to make it easy
   to contribute a Credential Provider.</p>
 
@@ -58,12 +58,12 @@ permalink: docs/faq
   The service I use is not supported! Can I still use Secretless?
 </div>
 
-<p>For info on currently supported services, please see our <a href="/reference.html">reference</a>.</p>
+<p>For info on currently supported services, please see our <a href="/docs/reference">reference</a>.</p>
 
 <p>If the service you would like to use is not currently supported, please check our
   <a href="https://github.com/conjurinc/secretless/issues">Github issues</a> to see if
   we already have plans to support it. If not, please open a new issue with your request.
-  Secretless is also <a href="community.html">open to contributions</a> from the community;
+  Secretless is also <a href="/community">open to contributions</a> from the community;
   please see our <a href="/docs/reference/generated/pkg_secretless_plugin_v1">plugin reference</a>
   for guidance on implementing new Listeners or Handlers (to enable Secretless to proxy
   connections to a new service).</p>

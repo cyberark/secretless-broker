@@ -39,6 +39,7 @@
     margin: 0 auto;
     font-weight: 100;
 }
+
 // ***********************
 // Jumbotron
 // ***********************
@@ -68,8 +69,8 @@
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-	height: 15.7rem;
 	background: linear-gradient(#165d9e, #4d8fcc);
+	padding: 2rem 0 3rem 0;
 }
 #frame {
 	margin-bottom: 0;
@@ -111,7 +112,7 @@
 	transform: translateX(1.2rem);
 }
 .inner p {
-	margin-left: 2.0rem;
+	margin-left: 1.5rem;
 }
 .inner-text-description {
 	font-size: 1.4rem;
@@ -139,12 +140,12 @@
 	justify-content: center
 }
 .arch-respons {
-	margin: 6rem;
+	margin: 0 6rem 0 0;
 }
 .arch {
 	margin-left: auto;
 	margin-right: auto;
-	width: 80%;
+	//width: 80%;
 }
 .card {
 	padding-top: 7.5rem;
@@ -160,7 +161,7 @@
 // ***********************
 .introduction {
 	margin: 0 auto;
-	width: 60%;
+	//width: 60%;
 }
 .container-fluid {
 }
@@ -216,16 +217,16 @@
 	margin-left: auto;
 	margin-right: auto;
 }
-.arch-img {
-	width: 40.0rem;
-}
-.docs-img {
-	width: 45.0rem;
-	margin: 0 auto;
-}
-.introduction img {
-	width: 25.0rem;
-}
+// .arch-img {
+// 	width: 40.0rem;
+// }
+// .docs-img {
+// 	width: 45.0rem;
+// 	margin: 0 auto;
+// }
+// .introduction img {
+// 	width: 25.0rem;
+// }
 .secretless-logo {
 	width: 40rem;
 }

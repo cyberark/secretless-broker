@@ -10,7 +10,7 @@ permalink: docs/get_started/deploy_to_kubernetes
 
 To get started with Secretless, try working through this tutorial, which goes through deploying Secretless with a sample application that uses a PostgresSQL database for backend storage.
 
-We have chosen a PostgresSQL database as the target service for this tutorial, however the Secretless broker comes built-in with support for several other target services; check out our [reference](/docs/reference.html) for more info.
+We have chosen a PostgresSQL database as the target service for this tutorial, however the Secretless broker comes built-in with support for several other target services; check out our [reference](/reference.html) for more info.
 
 ## Table of Contents
 

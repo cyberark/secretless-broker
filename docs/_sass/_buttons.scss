@@ -8,12 +8,11 @@
 .button {
 	text-transform: uppercase;
 	margin: 3rem;
-	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 1.6rem;
 	padding: 1rem 3rem 1rem 3rem;
-	border-radius: .6rem;
+	border-radius: .4rem;
 	display: inline-block;
-	letter-spacing: .1rem;
+	letter-spacing: .05rem;
 	transition: .2s ease-out;
 	box-shadow: 0 .2rem .5rem 0 rgba(0,0,0,0.16), 0 .2rem .10rem 0 rgba(0,0,0,0.12);
 }
@@ -29,16 +28,20 @@
 }
 .btn-arrow-right {
 	font-size: 2rem;
-	margin-top: .1rem;
+	margin-top: .35rem;
 }
-.left-btn {
-	background-color: #4d8fcc;
+.btn-primary {
+	background-color: $sless-blue;
 	color: white;
+	&:hover {
+		color: white;
+	}
 }
-.left-btn:hover {
-	color: white;
-}
-.right-btn {
+.btn-secondary {
 	background-color: #fff;
-	color: #4d8fcc;
+	color: $sless-blue; 
+	&:hover {
+		background-color: darken($sless-light-blue, 05);
+		color: darken($sless-blue, 10);
+	}
 }

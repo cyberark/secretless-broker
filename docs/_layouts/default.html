@@ -2,7 +2,10 @@
 <html lang="en-us">
 
   {% include head.html %}
-  {% include top_nav_home.html %}
+
+  {% if page.id == "home" %}
+    {% include top_nav_home.html %}
+  {% endif %}
 
   <body>
 

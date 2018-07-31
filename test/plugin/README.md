@@ -3,6 +3,7 @@ implements an example plugin and verifies that it works as expected.
 
 Currently tests:
  - Manager connection reject/allow
+ - Sample Provider
  - Listener that passes a connection and injects a custom header in a HTTP-like
  connection
 
@@ -31,7 +32,7 @@ $ curl -A Agent http://<agent_host>:6174
 
 The plugin opens two local ports (6175 and 6176) and forwards them to the backend echo
 service. Manager closes any connections to even ports (in this case 6176). Allowed
-connections are intercepted and a mock header added. Tests listen for this header to ensure
+connections are intercepted and two mock headers added. Tests listen for these headers to ensure
 that the plugin is operating as expected.
 
 Plugin is generally built and placed in `/usr/local/lib/secretless` as a `.so` library.
@@ -48,6 +49,9 @@ Note: If either side of the connection is forcibly closed, the whole tunnel goes
 is also too much delay in sending the messages to the backend echo server, the listener
 will close the connection.
 
+#### Provider (`./example/provider.go`)
+
+This provider resolves variables by appending `Provider` to the variable id
 
 #### Manager (`./example/manager.go`)
 

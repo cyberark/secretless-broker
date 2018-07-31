@@ -5,50 +5,52 @@ date: 2018-07-30 09:00:00 -0600
 author: Srdjan Grubor
 categories: blog
 published: true
-excerpt: "How we converted Secretless to the new Golang dependency management"
+excerpt: "How we converted Secretless to use the new Golang dependency management"
 ---
 
 ## Introduction
 
-There has been a lot of buzz lately about Go modules but the information out is a bit slim about what they are and how they fit into the future development of Go projects. Let us first take a look at a bit of history on how we got to where we are in terms of Go dependency management tooling.
+There has been a lot of buzz lately about Go modules, but there is still not much information available about what they are and how they fit into the future development of Go projects. Based on the information available, however, we recently updated Secretless to use Go modules for our dependency management. In this post, we will talk about what led us to make this decision, and some of the technical details of how we implemented this change. But first, let's look at a bit of history on how we got to where we are in terms of Go dependency management tooling.
 
 ## At first, there was nothing
 
-If you ever developed in Go and worked with other programming language is, you might have noticed a different workflow when it came to dependencies. In Golang, all of your code for all your projects including their dependencies was assumed to be stored in your GOPATH location (usually `~/go`) which is rather unique way of checkpointing the state of your local dependencies. While at first look it is hard to understand why this is so, we have to understand a bit who created the language: Google.
+If you write code in Go after working with other programming languages, you may notice a different workflow when it comes to dependencies. In the early stages of Go, all of your code for all your projects _including their dependencies_ were assumed to be stored in your `GOPATH` location (usually `~/go`), which is rather unique way of checkpointing the state of your local dependencies. It's reasonable to wonder why Golang didn't choose to follow well-established patterns that other modern programming languages have adopted; to understand why this might be so, it helps to consider the origins of the language at Google.
 
 ### Golang at Google
 
-I have to preface this by saying that my tenure with Go is short and I do not work for Google but it is widely known that Google keeps majority of its code in a [big monorepo](https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext). Since Go was developed there initially as an internal tool, the need for dependency management and storing your code in more than a single location would not have made sense in such a context. In other words, with a monorepo, each `git checkout` and `git commit` is tied exactly to the state of all dependencies you would want to care about so "dependency management system" outside of `git` itself and the rather-rudimentary `go get` command isn't really needed.
+Go was [developed at Google initially](https://talks.golang.org/2012/splash.article) to make it easier for its software engineers to write modern fast code at Google's scale. In the early phases of the project, dependency versioning or vendoring was not supported; this may be due in part to the fact that (as is widely known) Google keeps the majority of its code in a [big monorepo](https://cacm.acm.org/magazines/2016/7/204032-why-google-stores-billions-of-lines-of-code-in-a-single-repository/fulltext). In that context, support for managing dependency versions or storing code in more than a single location would not have made much sense. In other words - with a monorepo, each `git checkout` and `git commit` is tied exactly to the state of all the dependencies that matter, so a "dependency management system" outside of `git` itself and the `go get` command isn't really needed.
 
-With the rise of Docker, Kubernetes, and other containerization tools written in Go, the wider community has picked up the language but unlike within Google, most developers:
+## Nature abhors a vacuum
+
+Since `Go1` was officially released in 2012, [interest in Go has grown](https://blog.golang.org/8years) over time. As adoption increases in the wider community, there is greater demand for dependency management that supports developers who:
 - do not store all their code in a single repo
 - do not want only a single version of a dependency shared between projects
 - do not store all their dependencies for all projects in a single location
 
-With these changes in use cases and developer profiles as Go was getting more traction outside of Google, it is not hard to understand why in the last couple of years dependency management has become such a hotly debated topic.
-
-## Nature finds a way
-
-Lack of serious push upstream for a real dependency management other than the [vendor directory](https://blog.golang.org/go1.5) seems to have motivated the wider community to make their own solution. Many projects have tried to fill this void with their [own visions](https://medium.com/@sdboyer/so-you-want-to-write-a-package-manager-4ae9c17d9527) of what this type of system should be (such as dep, Godep, Govendor, and many others). Within the last year or so, things have stabilized to some degree with [`dep`](https://github.com/golang/dep) emerging as a _de facto_  dependency management system and even being titled an "official experiment". Somewhere around this point, Google started working on creating an official dependency management system that would be integrated within the binary itself.
+Since there has been no one official solution that addresses all of these issues, a number of [alternate solutions](https://hackernoon.com/the-state-of-go-dependency-management-6cc5f82a4bfa) have emerged over time. At the time we started the Secretless project the best solution available was [`dep`](https://github.com/golang/dep) (released in mid-2017), which was known as an "official experiment" and had emerged as the _de facto_  dependency management system for Go. `Dep` was easy to use, and running `dep ensure` would update the vendor directory (officially supported in Go as of [`Go1.5`](https://blog.golang.org/go1.5)).
 
 ## `vgo` and the new Go modules
 
-The result of upstream research into this culminated with a [vgo prosal](https://research.swtch.com/vgo-intro) and a sample implementation. These changes seemed to have garnered a lot of heated discussions in the community over the last few months but in the end `vgo` is now available as the built-in dependency manager. This feature has since been added in `golang:1.11beta2` ([docker image](https://hub.docker.com/_/golang/)) and should be available in the GA version of 1.11 around 1st of August (a day after this posting).
+Despite the growing acceptance of `dep` as _the_ dependency management tool for Golang, in mid-2018 a [new proposal](https://blog.golang.org/versioning-proposal) emerged for managing Golang project dependencies, known as `vgo` or Versioned Go Modules. The proposal was accepted, and as of [`Go1.11`](https://tip.golang.org/doc/go1.11#modules) modules will be available as an alternative to `GOPATH`, with integrated support for versioning and package distribution. Go modules are currently available as part of `golang:1.11beta2` ([docker image](https://hub.docker.com/_/golang/)) and are expected to become available in the GA version of `Go1.11` around August 1st (a day after this posting).
 
 ## Conversion of Secretless
 
-At this point you might be asking yourself "why would we want to change from already-working system to the new modules"? The answers to this are numerous but the main ones are:
-- Use of official upstream-supported tool
-- Anticipated future deprecation of current non-official tooling
+As mentioned earlier in the post, Secretless was built using the `dep` dependency manager. So why would we change at this point? Our primary justifications for switching from `dep` to Go modules are:
+- To use the official upstream-supported tool
+- In anticipation of the future deprecation of current non-official tooling (i.e. `dep`)
 - Simpler builds
 - Faster builds
 - Directory-independent development
 
-Also, we have more freedom to change things now, early in the development of Secretless which will become much harder to do as the project grows.
+In addition, our project is in its early stages, which means we have more freedom to change things that may become harder to change as the project grows.
 
-So with all of this in mind, let us see what is needed to convert your project to `vgo`-style one.
+So with all of this in mind, let us see what is needed to convert your project to `vgo`-style dependency management.
 
 ### Step #1 - Move your code out of `$GOPATH`
+
+```
+mv $GOPATH/path/to/my-code /path/to/new/location/
+```
 
 Because we won’t use the old “vendor” storage, we need to move our code away from `$GOPATH` to activate the automatic module processing. The current Golang (v1.11) way of activating modules follows two paths:
 - If you use go modules outside of `$GOPATH`, you don’t need anything - the modules are used by default
@@ -58,9 +60,9 @@ Since dealing with environment variables is cumbersome and we want to use the sa
 
 ### Step #2 - Convert your old tooling definitions to `go.mod`
 
-This step is rather trivial and only takes a single command. Even if you don’t have `dep` as your dependency management tool, `go mod` is designed to handle conversion from most tools you might be using. If you’re running this inside a container, make sure that you have `git` installed beforehand.
+The instructions below should work even if you don't currently have `dep` as your current dependency management tool, since `go mod` is designed to handle conversion from most tools you might be using. Since we're converting from `dep`, though, the instructions include references to `dep`-specific artifacts  like `Gopkg.lock`.
 
-_Note: Codebase no longer needs to reside in the GOPATH - in fact, `go mod` will warn you if you try to have it in the path as mentioned in the previous step!_
+To convert to using Go modules, you run the following command from your project root:
 
 ```
 $ go mod -v -init -module github.com/conjurinc/secretless
@@ -68,13 +70,24 @@ go: creating new go.mod: module github.com/conjurinc/secretless
 go: copying requirements from Gopkg.lock
 ```
 
-You should now have a new `go.mod` file present in your repository. While `vendor/` directory is currently still supported on top of go modules, it is a deprecated way to store your dependencies moving forward and you may remove it.
+After running this command, you should have a new `go.mod` file in your repository. Once this file has been created, you can commit it and remove the `Gopkg.*` files from your repository.
 
-_Note: If this conversion works, don't forget to commit the `go.mod` and remove your `Gopkg.*` files in your repository._
+You may also want to remove the `vendor/` directory; though it is currently still supported, it is expected that it [will be deprecated](https://github.com/golang/proposal/blob/master/design/24301-versioned-go.md#proposal) going forward.
 
-_Note #2: As we found out during conversion, if you have local modules that your code depends on you may need to manually add things to your `go.mod` files by:
-- Adding the dependency name in the `require` section with a version number like this: `github.com/conjurinc/secretless v0.3.0`
-- Adding a `replace` directive at the bottom of the file like this: `replace github.com/conjurinc/secretless => ../secretless`_
+#### Things to watch out for
+- If you’re running this inside a container, make sure that you have `git` installed beforehand.
+- If you skipped step one and your code still resides in the `GOPATH`, `go mod` will give you a warning when you run this step!
+- If you have local modules that your code depends on, you may need to manually add things to your `go.mod` file.
+
+  For example, if you have two projects in the same directory, and `project-a` depends on `project-b`, you can manually update the `go.mod` file for `project-a` to include the versioned dependency on `project-b` in the `require` section with a `replace` directive at the bottom of the `go.mod` file:
+  ```
+  github.com/org/project-b v0.3.0
+  ...
+  replace github.com/org/project-b => ../project-b
+  ```
+
+  This ensures that `project-a` includes the local code from `project-b`.
+
 
 ### Step #3 - Sync Your Dependencies
 
@@ -86,7 +99,7 @@ go: finding golang.org/x/text v0.0.0-20171227012246-e19ae1496984
 go: downloading golang.org/x/text v0.0.0-20171227012246-e19ae1496984
 ```
 
-This stage will create `go.sum` which will contain verification hashes of modules that you `sync`d and remove unused imports from `go.mod` so make sure to commit these two files again or amend the previous commit.
+This stage will create `go.sum`, which will contain verification hashes of modules that you synced. It will also remove unused imports from `go.mod`, so make sure to commit these two files again or amend the previous commit.
 
 
 ### Step #4 - Run Your Code!
@@ -102,7 +115,7 @@ _Note: If you did not run the sync command, `go run` and `go build` will fetch a
 
 ## Conclusion
 
-While our conversion was not as trivial as many other blogs have led us to believe, we were able to do this in about 16 dev-hours for two codebases. The changeover has reduced bloat and made dependencies much simpler/faster and we are in good shape on this from for the forseeable future. Even though there are kinks to work out and there are some odd architecture choices made in `vgo` it is looking like a much needed step in the right direction for Golang tooling.
+While our conversion was not as trivial as many other blogs have led us to believe, we were able to do this in about 16 dev-hours for two codebases. The changeover has reduced bloat and made dependencies much simpler/faster, and we are in good shape on this for the forseeable future. The project is in its early stages (still in beta), so there are still issues to resolve and ways to make the process even smoother, but in general `vgo` is looking like a much needed step in the right direction for Golang tooling.
 
 ## Addendum
 

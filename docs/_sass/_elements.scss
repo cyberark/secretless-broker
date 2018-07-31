@@ -298,3 +298,7 @@ pre {
 .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
 	color: $sless-blue;
 }
+
+.ui-tabs .ui-tabs-nav {
+	padding: 0;
+}

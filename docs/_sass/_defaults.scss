@@ -38,6 +38,9 @@ code {
 
 h1 {
 	color: $sless-light-blue;
+	margin-top: 0;
+	margin-bottom: 3rem;
+	font-weight: 800;
 }
 
 h2 {
@@ -61,4 +64,8 @@ h5 {
 	.documentation-content {
 		padding: 0;
 	}
+}
+
+.row {
+	margin: 0 2rem;
 }

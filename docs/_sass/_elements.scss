@@ -202,6 +202,7 @@
 	margin-right: 1.0rem;
 	color: #4d8fcc;
 }
+
 .far {
 	font-size: 1.5rem;
 	margin-right: 1.0rem;
@@ -217,16 +218,83 @@
 	margin-left: auto;
 	margin-right: auto;
 }
-// .arch-img {
-// 	width: 40.0rem;
-// }
-// .docs-img {
-// 	width: 45.0rem;
-// 	margin: 0 auto;
-// }
-// .introduction img {
-// 	width: 25.0rem;
-// }
+
 .secretless-logo {
 	width: 40rem;
+	margin-bottom: 2rem;
+
+}
+
+.ui-tabs {
+	margin: 3rem 0;
+	padding: 0;
+}
+
+// ******************
+// Tabs
+// ******************
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active, a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover {
+	border: 1px solid $sless-blue;
+	background: $sless-blue;
+	font-weight: normal;
+	color: #fff;
+}
+
+.ui-widget-header {
+	border: 0;
+	border-radius: 0;
+	background: none;
+	color: $sless-text;
+	font-weight: bold;
+}
+
+.ui-tabs.ui-tabs-panel {
+	background-color: $sless-blue;
+}
+
+.ui-widget.ui-widget-content {
+	border: 0;
+}
+
+pre {
+	display: block;
+	padding: 9.5px;
+	margin: 0 0 10px;
+	font-size: 13px;
+	line-height: 1.42857143;
+	color: #fff;
+	word-break: break-all;
+	word-wrap: break-word;
+	background-color: $sless-dark-blue;
+	border: 0;
+	border-radius: 4px;
+}
+
+.ui-tabs .ui-tabs-panel {
+	display: block;
+	border-width: 0;
+	padding: 2em 1.4em;
+	background: $sless-light-blue;
+}
+
+.ui-tabs .ui-tabs-nav li {
+	margin: 1px .8rem 0 0;
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
+	background: #fff; 
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
+	border: 3px solid $sless-light-blue;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+	background-color: $sless-light-blue;
+	color: $sless-blue;
+	font-weight: 800;
+}
+
+.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+	color: $sless-blue;
 }

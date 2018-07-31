@@ -4,9 +4,11 @@
 html { 
 	font-size: 62.5%; 
 	font-family: "Open Sans",sans-serif;
+	color: $sless-text;
 }
 body {
 	font-family: "Open Sans",sans-serif;
+	color: $sless-text;
 }
 p {
 	font-size: 1.5rem;
@@ -44,7 +46,7 @@ h1 {
 }
 
 h2 {
-	color: $sless-light-blue;
+	color: $sless-blue;
 }
 
 h3 {
@@ -67,5 +69,5 @@ h5 {
 }
 
 .row {
-	margin: 0 2rem;
+	//margin: 0 2rem;
 }

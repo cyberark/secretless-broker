@@ -64,6 +64,6 @@ permalink: docs/faq
   <a href="https://github.com/conjurinc/secretless/issues">Github issues</a> to see if
   we already have plans to support it. If not, please open a new issue with your request.
   Secretless is also <a href="community.html">open to contributions</a> from the community;
-  please see our <a href="/generated/pkg_secretless_plugin_v1.html">plugin reference</a>
+  please see our <a href="/docs/reference/generated/pkg_secretless_plugin_v1">plugin reference</a>
   for guidance on implementing new Listeners or Handlers (to enable Secretless to proxy
   connections to a new service).</p>

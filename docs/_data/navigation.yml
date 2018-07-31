@@ -36,7 +36,7 @@ documentation:
       - page: Credential Providers
         url: /docs/reference/providers
       - page: Plugin Reference
-        url: 
+        url: /docs/reference/generated/pkg_secretless_plugin_v1
       - page: How to Deploy
         url: /docs/reference/how_to_deploy
   - page: FAQ

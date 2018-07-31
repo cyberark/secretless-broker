@@ -62,7 +62,7 @@ Our Kubernetes deployment manifests assume that you are using minikube, so we us
 
 ## Sample Application
 
-The tutorial uses an existing [pet store demo application](https://github.com/conjurinc/pet-store-demo) that exposes the following routes:
+The tutorial uses an existing [pet store demo application](https://github.com/conjurdemos/pet-store-demo) that exposes the following routes:
 
 - `GET /pets` to list all the pets in inventory
 - `POST /pet` to add a pet
@@ -399,7 +399,7 @@ _quick-start.yml_
 # update the path $.spec.template.spec in the base manifest with the content below
 containers:
   - name: quick-start-application
-    image: cyberark/pet-store:latest
+    image: cyberark/demo-app:latest
     env:
       - name: DB_URL
         # don't forget to substitute the actual value of ${APPLICATION_DB_NAME} below !!!
@@ -466,7 +466,7 @@ spec:
     spec:
       containers:
         - name: quick-start-application
-          image: cyberark/pet-store:latest
+          image: cyberark/demo-app:latest
           env:
             - name: DB_URL
               value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable

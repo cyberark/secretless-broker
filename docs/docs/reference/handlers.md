@@ -10,7 +10,7 @@ permalink: docs/reference/handlers
 
 When Secretless receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless configuration for processing. Each Listener in the Secretless configuration should therefore have a corresponding Handler.
 
-The Handler configuration specifies the Listener that the Handler is handling connections for and any credentials that will be needed for that connection. Several credential sources are currently supported; see the [Credential Providers](/providers.html) section for more information.
+The Handler configuration specifies the Listener that the Handler is handling connections for and any credentials that will be needed for that connection. Several credential sources are currently supported; see the [Credential Providers](/docs/reference/providers) section for more information.
 
 The example below defines a Handler to process connection requests from the `pg_socket` Listener, and it has three credentials: `address`, `username`, and `password`. The `address` and `username` are literally specified in this case, and the `password` is taken from the environment of the running Secretless process.
 <pre>
@@ -35,7 +35,7 @@ When a Handler receives a new connection requests, it retrieves any required cre
 
 Select the tab for the Handler you are interested in below to learn about the credentials it accepts in its configuration file.
 
-# Handler Credential Configuration
+## Handler Credential Configuration
 
 <div id="handler-tabs">
   <ul>

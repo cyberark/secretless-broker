@@ -3,7 +3,7 @@ title: Plugin Reference
 id: docs
 layout: docs
 description: Secretless Documentation
-permalink: docs/reference/generated/pkg_secretless_plugin_v1
+permalink: 
 ---
 
 # pkg_secretless_plugin_v1

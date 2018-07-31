@@ -21,6 +21,8 @@ import (
 	"unsafe"
 )
 
+const NULL=0
+
 func release(ref C.CFTypeRef) {
 	C.CFRelease(ref)
 }
@@ -34,8 +36,8 @@ func GetGenericPassword(service, account string) ([]byte, error) {
 		defer C.free(unsafe.Pointer(ptr))
 	}
 
-	serviceCf := C.CFStringCreateWithCString(nil, serviceC, C.kCFStringEncodingUTF8)
-	accountCf := C.CFStringCreateWithCString(nil, accountC, C.kCFStringEncodingUTF8)
+	serviceCf := C.CFStringCreateWithCString(NULL, serviceC, C.kCFStringEncodingUTF8)
+	accountCf := C.CFStringCreateWithCString(NULL, accountC, C.kCFStringEncodingUTF8)
 
 	for _, ptr := range []C.CFStringRef{serviceCf, accountCf} {
 		defer release(C.CFTypeRef(ptr))
@@ -57,7 +59,7 @@ func GetGenericPassword(service, account string) ([]byte, error) {
 	keyCallbacks := (*C.CFDictionaryKeyCallBacks)(&C.kCFTypeDictionaryKeyCallBacks)
 	valCallbacks := (*C.CFDictionaryValueCallBacks)(&C.kCFTypeDictionaryValueCallBacks)
 
-	queryCf := C.CFDictionaryCreate(nil, (*unsafe.Pointer)(unsafe.Pointer(&keys[0])), (*unsafe.Pointer)(unsafe.Pointer(&values[0])), C.CFIndex(len(keys)), keyCallbacks, valCallbacks)
+	queryCf := C.CFDictionaryCreate(NULL, (*unsafe.Pointer)(unsafe.Pointer(&keys[0])), (*unsafe.Pointer)(unsafe.Pointer(&values[0])), C.CFIndex(len(keys)), keyCallbacks, valCallbacks)
 
 	defer release(C.CFTypeRef(unsafe.Pointer(queryCf)))
 

@@ -4,7 +4,7 @@ title: "Lorem ipsum dolor sit amet"
 date: 2018-07-31 09:00:00 -0600
 author: Srdjan Grubor
 categories: blog
-published: true
+published: false
 excerpt: "In this post, we will talk about what led us to make this decision, and some of the technical details of how we implemented this change."
 ---
 

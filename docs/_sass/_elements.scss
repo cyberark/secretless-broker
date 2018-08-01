@@ -98,7 +98,7 @@
 	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
 	margin: 0 1.0rem 3.0rem;
 	transition: .5s ease;
-	background: #EDF2F6;
+	background: $sless-light-blue;
 }
 .inner:hover {
 	transform: scale(1.025);
@@ -175,6 +175,7 @@
 	display: grid;
 	margin: 0 auto;
 	grid-template-columns: 230px 1fr;
+	grid-column-gap: 20px;
 }
 .faq {
 	font-weight: bold;

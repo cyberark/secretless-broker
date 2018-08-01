@@ -27,3 +27,13 @@ function toggleFixedNav() {
 		docConClass.remove('fixed-nav-documentation');
 	}
 }
+
+// This section collapses navbar into hamburger, when button is clicked, by adding a class to element
+function collapseNavBar() {
+    var x = document.getElementById("mobileNav");
+    if (x.className === "topnav") {
+        x.className += " responsive";
+    } else {
+        x.className = "topnav";
+    }
+}

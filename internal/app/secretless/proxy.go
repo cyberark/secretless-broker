@@ -10,6 +10,7 @@ import (
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless/internal/pkg/global"
 )
 
 // Proxy is the main struct of Secretless.
@@ -36,7 +37,10 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin
 		// https://stackoverflow.com/questions/16681944/how-to-reliably-unlink-a-unix-domain-socket-in-go-programming-language
 		// Handle common process-killing signals so we can gracefully shut down:
 		sigc := make(chan os.Signal, 1)
+
 		signal.Notify(sigc, os.Interrupt, os.Kill, syscall.SIGTERM)
+		global.TheEndWaitGroup.Add(1)
+
 		go func(c chan os.Signal) {
 			// Wait for a SIGINT or SIGKILL:
 			sig := <-c
@@ -44,7 +48,7 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin
 			// Stop listening (and unlink the socket if unix type):
 			netListener.Close()
 			// And we're done:
-			os.Exit(0)
+			global.TheEndWaitGroup.Wait()
 		}(sigc)
 	}
 	if err != nil {

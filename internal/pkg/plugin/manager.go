@@ -18,6 +18,7 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless/internal/pkg/global"
 )
 
 var _SupportedFileSuffixes = []string{".so"}
@@ -77,14 +78,19 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 		syscall.SIGTERM,
 	)
 
+	global.TheEndWaitGroup.Add(1)
+	go func() {
+		global.TheEndWaitGroup.Wait()
+
+		log.Printf("Exiting...")
+		os.Exit(0)
+	}()
 	go func() {
 		exitSignal := <-signalChannel
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
 
 		manager.Shutdown()
-
-		log.Printf("Exiting...")
-		os.Exit(0)
+		global.TheEndWaitGroup.Done()
 	}()
 }
 

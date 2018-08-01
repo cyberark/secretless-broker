@@ -12,6 +12,12 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	"io"
+	"os"
+	"os/signal"
+	"syscall"
+	"github.com/conjurinc/secretless/internal/pkg/global"
+	"fmt"
+	"sync"
 )
 
 // ClientOptions stores the option that were specified by the connection client.
@@ -58,6 +64,11 @@ func (h *Handler) abort(err error) {
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
+	defer func() {
+		dest.Close()
+		source.Close()
+	}()
+
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -68,9 +79,6 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 		length, err = source.Read(buffer)
 		if err != nil {
 			if err == io.EOF {
-				source.Close()
-				dest.Close()
-
 				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
 			}
 			return
@@ -91,12 +99,53 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.GetClientConnection(), h.Backend, func(b []byte) {
-		h.EventNotifier.ClientData(h.ClientConnection, b)
-	})
-	go stream(h.Backend, h.GetClientConnection(), func(b []byte) {
-		h.EventNotifier.ServerData(h.GetClientConnection(), b)
-	})
+	sigC := make(chan os.Signal, 1)
+	signal.Notify(sigC, os.Interrupt, os.Kill, syscall.SIGTERM)
+	global.TheEndWaitGroup.Add(1)
+
+	go func(c chan os.Signal) {
+		_, ok := <-c
+		if ok == false {
+			// c already closed
+			return
+		}
+
+		h.abort(fmt.Errorf("secretless shutting down"))
+
+		// And we're done:
+		global.TheEndWaitGroup.Done()
+	}(sigC)
+
+
+	// ensures sigC gets cleaned up
+	sigCDone := false
+	sigCDoneMutex := &sync.Mutex{}
+	clearSigC := func() {
+		sigCDoneMutex.Lock()
+
+		if sigCDone {
+			return
+		}
+		close(sigC)
+		signal.Stop(sigC)
+		global.TheEndWaitGroup.Done()
+		sigCDone = true
+
+		sigCDoneMutex.Unlock()
+	}
+
+	go func() {
+		stream(h.GetClientConnection(), h.Backend, func(b []byte) {
+			h.EventNotifier.ClientData(h.ClientConnection, b)
+		})
+		defer clearSigC()
+	}()
+	go func() {
+		stream(h.Backend, h.GetClientConnection(), func(b []byte) {
+			h.EventNotifier.ServerData(h.GetClientConnection(), b)
+		})
+		defer clearSigC()
+	}()
 }
 
 // Run processes the startup message, configures the backend connection, connects to the backend,

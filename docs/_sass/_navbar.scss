@@ -88,12 +88,20 @@
 	font-weight: 100;
 }
 .navbar-list a {
-	color: #fff;
-	padding: .8rem 1.6rem;
+	color: #ffffff73;
+	padding: .8rem 1rem;
+	font-size: 1.5rem;
+	font-weight: 500;
+	transition: all 0.4s;
+	letter-spacing: 1px;
+	&:hover {
+		text-decoration: none;
+		color: $sless-blue;
+	}
 }
-.navbar-list a:hover {
-	text-decoration: none;
-}
+// .navbar-list a:hover {
+// 	text-decoration: none;
+// }
 
 .sidenav-item {
 	list-style-type: none;

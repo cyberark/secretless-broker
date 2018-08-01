@@ -88,7 +88,7 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 	}()
 }
 
-func (manager *Manager) _RegisterReloadSignalHandlers() {
+func (manager *Manager) _RegisterReloadSignalHandlers(configFile string) {
 	log.Println("Registering reload signal listeners...")
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, syscall.SIGUSR1)
@@ -96,16 +96,37 @@ func (manager *Manager) _RegisterReloadSignalHandlers() {
 	go func() {
 		for {
 			reloadSignal := <-signalChannel
-			log.Printf("Intercepted reload signal '%v'. Reloading...", reloadSignal)
-			manager._ReloadConfig(manager.Proxy.Config)
+			log.Printf("Intercepted reload signal '%v'. Reloading (from file)...", reloadSignal)
+			config := manager.LoadConfigurationFile(configFile)
+			manager._ReloadConfig(config)
 		}
 	}()
 }
 
 // RegisterSignalHandlers registers shutdown and reload signal handlers
-func (manager *Manager) RegisterSignalHandlers() {
+func (manager *Manager) RegisterSignalHandlers(configFile string) {
 	manager._RegisterShutdownSignalHandlers()
-	manager._RegisterReloadSignalHandlers()
+	manager._RegisterReloadSignalHandlers(configFile)
+}
+
+func (manager *Manager) LoadConfigurationFile(configFile string) config.Config {
+	configuration, err := config.LoadFromFile(configFile)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return configuration
+}
+
+// RegisterConfigFileWatcher adds a configuration file change trigger for reloads
+func (manager *Manager) RegisterConfigFileWatcher(configFile string) {
+	onChangeRunner := func() {
+		log.Println("Sending reload signal (SIGUSR1)...")
+		syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
+	}
+
+	AttachWatcher(configFile, onChangeRunner)
 }
 
 // _IsSupportedPluginAPIVersion returns a boolean indicating if we support

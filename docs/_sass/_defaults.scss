@@ -3,14 +3,18 @@
 // ***********************
 html { 
 	font-size: 62.5%; 
+	font-family: "Open Sans",sans-serif;
+	color: $sless-text;
+}
+body {
+	font-family: "Open Sans",sans-serif;
+	color: $sless-text;
 }
 p {
-	font-family: "Open Sans",sans-serif;
 	font-size: 1.5rem;
 	line-height: 1.5;
 }
 li {
-	font-family: "Open Sans",sans-serif;
 	font-size: 1.5rem;
 	line-height: 1.5;
 }
@@ -32,4 +36,38 @@ pre {
 }
 code {
 	margin: 0;
+}
+
+h1 {
+	color: $sless-blue;
+	margin-top: 0;
+	margin-bottom: 3rem;
+	font-weight: 800;
+}
+
+h2 {
+	color: $sless-blue;
+}
+
+h3 {
+
+}
+
+h4 {
+
+}
+
+h5 {
+
+}
+
+#content {
+	padding: 4rem 0;
+	.documentation-content {
+		padding: 0;
+	}
+}
+
+.row {
+	//margin: 0 2rem;
 }

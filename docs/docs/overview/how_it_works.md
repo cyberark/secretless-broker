@@ -3,10 +3,10 @@ title: Secretless
 id: how_it_works
 layout: docs
 description: Secretless Documentation
-permalink: how_it_works
+permalink: docs/overview/how_it_works
 ---
 
-<p class="card-heading">How does it work?</p>
+# How does it work?
 
 In a Secretless deployment, when a client needs access to a target service it doesn't try and make a direct connection to it. Instead, it sends the request through its Secretless connection broker.
 
@@ -16,7 +16,7 @@ In a Secretless deployment, when a client needs access to a target service it do
 
 The Secretless connection broker authenticates with a secrets vault and obtains an identity credential. This identity credential is managed securely within Secretless, and used to obtain a backend connection secret such as database password from the secrets vault. The connection secrets are managed entirely within the Secretless process, and never exposed to the client. The Secretless connection broker uses the connection secret to establish a connection to the target service and then transfers data between the client and the target.
 
-<p class="card-heading">Standard Workflow</p>
+## Standard Workflow
 
 1. A Client (user or code) connects to the Secretless Connection Broker (a local service) to obtain a connection to the Target Service (a database, server or web service).
 1. The Secretless Connection Broker authenticates with the  Vault to obtain an Identity Credential, which is managed securely within the Connection Broker process.
@@ -34,7 +34,7 @@ Examples of protocols which can be brokered:
 -  HTTP via Authorization header
 -  SSH, via MITM or by implementing an ssh-agent   
 
-Any published protocol can be supported in Secretless. Software code in Secretless is generally required for each new protocol. See <a href="/reference.html">Handlers</a>.
+Any published protocol can be supported in Secretless. Software code in Secretless is generally required for each new protocol. See <a href="/docs/reference/handlers.html">Handlers</a>.
 
 <!-- TODO - link to handler section of reference page -->
 

@@ -3,13 +3,17 @@
 // scrolled, by toggling on/off the fixed-nav class
 document.addEventListener("DOMContentLoaded", function() {
 		nav = document.querySelector('#side-navigation');
-		topOfNav = nav.offsetTop;
-		navHeight = nav.offsetHeight;
 
-		docConClass = document.querySelector('.documentation-content').classList;
+		if (nav !== null) {
+			topOfNav = nav.offsetTop;
+			navHeight = nav.offsetHeight;
 
-		window.addEventListener('scroll', function() { toggleFixedNav(); });
-	});
+			docConClass = document.querySelector('.documentation-content').classList;
+
+			window.addEventListener('scroll', function() { toggleFixedNav(); });
+		}
+	}
+);
 
 function toggleFixedNav() {
 	const sideNav = document.querySelector('.side-nav');

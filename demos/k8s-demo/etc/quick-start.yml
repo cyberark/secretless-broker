@@ -32,7 +32,7 @@ spec:
           mountPath: /etc/secretless
           readOnly: true
       - name: quick-start-application
-        image: registry2.itci.conjur.net/conjurinc/pet-store:latest
+        image: cyberark/demo-app:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

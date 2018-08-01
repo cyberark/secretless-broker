@@ -31,7 +31,7 @@ To accomplish this, we are going to do the following:
 
 ## Quickstart
 
-The tutorial uses an existing [pet store demo application](https://github.com/conjurinc/pet-store-demo) that exposes the following routes:
+The tutorial uses an existing [pet store demo application](https://github.com/conjurdemos/pet-store-demo) that exposes the following routes:
 
 - `GET /pets` to list all the pets in inventory
 - `POST /pet` to add a pet

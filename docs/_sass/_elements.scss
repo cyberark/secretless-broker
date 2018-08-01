@@ -1,4 +1,11 @@
 // ***********************
+// Site wrap
+// ***********************
+.main-content {
+	flex: 1;
+}
+
+// ***********************
 // Headers
 // ***********************
 .docs-subheading {
@@ -39,6 +46,7 @@
     margin: 0 auto;
     font-weight: 100;
 }
+
 // ***********************
 // Jumbotron
 // ***********************
@@ -136,7 +144,7 @@
 	margin-bottom: 4.0rem;
 	display: flex;
 	align-items: center;
-	justify-content: center
+	justify-content: center;
 }
 .arch-respons {
 	margin: 6rem;
@@ -192,7 +200,10 @@
 #faq-list a{
 	padding: .5rem 0rem;
 }
-
+.container-subpage {
+	margin-top: 4rem;
+	min-height: 50rem;
+}
 // ***********************
 // Icons
 // ***********************

@@ -4,6 +4,11 @@
 html { 
 	font-size: 62.5%; 
 }
+body {
+	display: flex;
+	min-height: 100vh;
+	flex-direction: column;
+}
 p {
 	font-family: "Open Sans",sans-serif;
 	font-size: 1.5rem;

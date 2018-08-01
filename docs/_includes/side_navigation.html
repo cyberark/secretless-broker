@@ -4,7 +4,7 @@
 			{% if item.title %}
 				<li class="sidenav-list">
 					{% if item.url %}
-						<a href="{{ item.url }}">{{ item.title }}</a>
+						<a class="list-link" href="{{ item.url }}">{{ item.title }}</a>
 					{% else %}
 						{{ item.title }}
 					{% endif %}
@@ -19,7 +19,7 @@
 				{% endif %}
 				{% else %}
 				<li class="sidenav-list">
-					<a href="{{ item.url }}">{{ item.page }}</a>
+					<a class="list-link" href="{{ item.url }}">{{ item.page }}</a>
 				</li>
 			{% endif %}
 				</li>

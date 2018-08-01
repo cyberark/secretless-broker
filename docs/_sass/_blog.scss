@@ -1,0 +1,22 @@
+// ****************
+// Blog
+// ****************
+
+.posts {
+  padding: 0;
+  margin: 0 0 4rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-column-gap: 2rem;
+  grid-row-gap: 2rem;
+  display: grid;
+  list-style-type: none;
+}
+
+.post {
+  background-color: #EDF2F6;
+  padding: 2rem;
+  border-radius: $border-radius;
+  h2 {
+    margin-top: 0;
+  }
+}

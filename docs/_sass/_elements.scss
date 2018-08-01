@@ -292,7 +292,6 @@ pre {
 .ui-tabs .ui-tabs-nav li.ui-tabs-active {
 	background-color: $sless-light-blue;
 	color: $sless-blue;
-	font-weight: 800;
 }
 
 .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
@@ -301,4 +300,8 @@ pre {
 
 .ui-tabs .ui-tabs-nav {
 	padding: 0;
+}
+
+.ui-tabs a:focus {
+	outline: none;
 }

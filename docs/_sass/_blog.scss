@@ -4,19 +4,34 @@
 
 .posts {
   padding: 0;
-  margin: 0 0 4rem 0;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  margin: 4rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
   grid-column-gap: 2rem;
   grid-row-gap: 2rem;
   display: grid;
   list-style-type: none;
+
+  a {
+    color: #333;
+  }
 }
 
 .post {
   background-color: #EDF2F6;
   padding: 3rem;
   border-radius: $border-radius;
+  transition: all 0.4s;
+
   h2 {
     margin-top: 0;
   }
+
+  &:hover {
+    text-decoration: none;
+    background-color: darken(#EDF2F6,10);
+  }
+}
+
+.post-meta {
+  color: #999;
 }

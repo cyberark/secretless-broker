@@ -63,15 +63,6 @@
 .sidenav-item:hover a:hover {
 	text-decoration: none;
 }
-.side-nav {
-	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
-	background-color: #f8f8f8;
-	justify-content: center;
-	width: 21.5rem;
-	padding-top: 0.5em;
-	padding-bottom: 0.5em;
-	z-index: 99999;
-}
 .navbar-list > ul {
 	display: flex;
 	list-style: none;
@@ -83,4 +74,14 @@
 }
 .navbar .default {
 	margin-bottom: 0;
+}
+
+#side-navigation {
+	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
+	background-color: #f8f8f8;
+	justify-content: center;
+	flex-direction: column;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+	position: fixed;
 }

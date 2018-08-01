@@ -170,12 +170,11 @@
 .documentation-content {
 	padding-bottom: 10.0rem;
 	margin-left: 5.0rem;
-	width: 63.0rem;
 }
 .documentation {
-	display: flex;
-	//max-width: 85%;
+	display: grid;
 	margin: 0 auto;
+	grid-template-columns: 230px 1fr;
 }
 .faq {
 	font-weight: bold;

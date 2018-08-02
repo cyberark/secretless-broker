@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.4.1] 2018-08-02
+
+ ### Added
+ - layouts for blog index and single posts
+ - page headings to template
+ 
+
 ## [0.3.0] 2018-06-28
 
 ### Added

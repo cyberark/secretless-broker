@@ -43,13 +43,33 @@
 // ***********************
 // Jumbotron
 // ***********************
+
+.s-badge {
+	background-color: #4d8fcc9c;
+	border-radius: 4px;
+	color: #edf2f6c9;
+	padding: .5rem 1rem;
+	position: absolute;
+		top: 1.8rem;
+		left: 1rem;
+	i {
+		margin-right: .8rem;
+		color: $sless-dark-blue;
+	}
+	.badge-title {
+		font-size: 1.5rem;
+		font-weight: 800;
+		margin: 0;
+		letter-spacing: 1px;
+	}
+}
+
 .center-block {
 	float: none;
 	display: block;
 	margin: 0 auto;
 	top: 1;
 	background-color: transparent;
-	text-align: center;
 }
 #jumbotron-text {
 	font-size: 2.0rem;
@@ -78,6 +98,7 @@
 	padding-top: 10.5rem;
 	background-image: url("../img/secretless_pattern_dark.png");
 	background-repeat: round;
+	text-align: center;
 }
 
 // ***********************
@@ -98,7 +119,7 @@
 	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
 	margin: 0 1.0rem 3.0rem;
 	transition: .5s ease;
-	background: #EDF2F6;
+	background: $sless-light-blue;
 }
 .inner:hover {
 	transform: scale(1.025);
@@ -170,12 +191,12 @@
 .documentation-content {
 	padding-bottom: 10.0rem;
 	margin-left: 5.0rem;
-	width: 63.0rem;
 }
 .documentation {
-	display: flex;
-	//max-width: 85%;
+	display: grid;
 	margin: 0 auto;
+	grid-template-columns: 230px 1fr;
+	grid-column-gap: 20px;
 }
 .faq {
 	font-weight: bold;
@@ -257,7 +278,7 @@ pre {
 	margin: 0 0 10px;
 	font-size: 13px;
 	line-height: 1.42857143;
-	color: #fff;
+	color: #fffc;
 	word-break: break-all;
 	word-wrap: break-word;
 	background-color: $sless-dark-blue;
@@ -268,7 +289,7 @@ pre {
 .ui-tabs .ui-tabs-panel {
 	display: block;
 	border-width: 0;
-	padding: 2em 1.4em;
+	padding: 2rem 4rem 2rem 1.4rem;
 	background: $sless-light-blue;
 }
 
@@ -299,4 +320,9 @@ pre {
 
 .ui-tabs a:focus {
 	outline: none;
+}
+
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+	font-family: $sless-font-secondary;
+
 }

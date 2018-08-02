@@ -11,8 +11,6 @@ permalink: docs/get_started/quick_start
 Try out Secretless brokering a connection to a PostgreSQL database, an SSH connection,
 or a connection to an HTTP service authenticating with basic auth.
 
-Choose your path:
-
 <div id="quick-start-tabs">
   <ul>
     <li><a href="#tabs-demo-pg">PostgreSQL</a></li>

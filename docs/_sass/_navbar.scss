@@ -14,6 +14,62 @@
 	background: none;
 }
 
+// *********************
+// Side Navigation
+
+#side-navigation {
+	//box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
+	border-radius: 4px;
+	justify-content: center;
+	flex-direction: column;
+	position: fixed;
+	width: 230px;
+	a {
+		color: $sless-text;
+		transition: all 0.4s;
+		&:hover {
+			color: $sless-blue;
+			text-decoration: none;
+		}
+	}
+	ul {
+		list-style-type: none;
+		padding: 0;
+	}
+
+	.list-link {
+		font-family: $sless-font-secondary;
+		width: 100%;
+		//background-color: lighten($sless-light-blue, 02);
+		padding: 1rem 0 0 2.5rem ;
+
+	}
+
+	.sidenav-group {
+		background-color: lighten($sless-light-blue, 02);
+		:nth-child(1) {
+			border-top: none;
+		 }
+		 :last-child {
+			margin-bottom: 0;
+			padding-bottom: .5rem
+		 }
+	}
+
+	.sidenav-list {
+		font-weight: 800;
+		margin: .5rem 0;
+		border-top: 1px solid darken($sless-light-blue, 10);
+	}
+	.sidenav-sublist {
+		font-weight: 500;
+		//background-color: lighten($sless-light-blue, 02);
+	}
+
+	.sidenav-sublist {
+    padding: 0px 2.5rem;
+	}
+}
 
 #cybr-nav {
 	width: 100%;
@@ -21,31 +77,31 @@
 	height: 6.5rem;
 	background: transparent;
 }
+
 .navbar-list li {
 	font-size: 1.4rem;
 	font-weight: 100;
 }
 .navbar-list a {
-	color: #fff;
-	padding: .8rem 1.6rem;
+	color: lighten($sless-light-blue, 05);
+	padding: .8rem 1rem;
+	font-size: 1.5rem;
+	font-weight: 500;
+	transition: all 0.4s;
+	letter-spacing: 1px;
+	&:hover {
+		text-decoration: none;
+		color: $sless-blue;
+	}
 }
-.navbar-list a:hover {
-	text-decoration: none;
-}
+
 .sidenav-item {
 	list-style-type: none;
-	margin-left: -1rem;
-	margin-bottom: 0;
-	margin-top: 2rem;
+	margin: 0 0 .2rem 0;
 	font-size: 1.5rem;
-	color: #404040;
+	font-weight: 800;
 }
-.sidenav-subitem {
-	list-style-type: none;
-	margin-left: -4rem;
-	font-size: 1.5rem;
-	padding: .8rem 1.6rem;
-}
+
 .fixed-nav {
 	position: fixed;
 	top: 0;
@@ -55,32 +111,22 @@
 	position: relative;
 	left: 21.5rem;
 }
-.sidenav-item i {
-	font-size: 1.0rem;
-	margin-right: -1.0rem;
-	margin-left: .5rem;
-}
+
 .sidenav-item:hover a:hover {
 	text-decoration: none;
 }
-.side-nav {
-	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
-	background-color: #f8f8f8;
-	justify-content: center;
-	width: 21.5rem;
-	padding-top: 0.5em;
-	padding-bottom: 0.5em;
-	z-index: 99999;
-}
+
 .navbar-list > ul {
 	display: flex;
 	list-style: none;
 	justify-content: flex-end;
 	letter-spacing: .2rem;
 }
+
 .navbar-list > ul > li {
 	margin: 1.0rem;
 }
+
 .navbar .default {
 	margin-bottom: 0;
 }

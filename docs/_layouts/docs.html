@@ -1,17 +1,36 @@
 ---
-layout: subpages
 title: Docs
 id: docs
 description: Secretless Documentation
 ---
 
-  <div class="documentation">
-    <div class="side-nav">
-      {% include side_navigation.html %}
+<!DOCTYPE html>
+<html lang="en-us">
+
+  {% include head.html %}
+
+  <body>
+
+    {% include top_nav.html %}
+
+    <div class="container">
+      <div class="row">
+        <div id="content" class="">
+          <div class="documentation">
+              <div class="side-nav">
+                {% include side_navigation.html %}
+              </div>
+          
+              <div id="content" class="documentation-content">
+                  <h1 class="page-title" >{{ page.title }}</h1>
+                {{ content }}
+              </div>
+            </div>
+        </div>
+      </div>
     </div>
 
-    <div id="content" class="documentation-content">
-      {{ content }}
-    </div>
-  </div>
+    {% include footer.html %}
 
+  </body>
+</html>

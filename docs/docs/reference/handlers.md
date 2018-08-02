@@ -1,5 +1,5 @@
 ---
-title: Secretless
+title: Documentation
 id: handlers
 layout: docs
 description: Secretless Documentation

@@ -1,5 +1,5 @@
 ---
-title: Secretless
+title: Documentation
 id: reference
 layout: docs
 description: Secretless Documentation

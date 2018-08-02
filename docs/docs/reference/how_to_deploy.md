@@ -1,5 +1,5 @@
 ---
-title: Secretless
+title: Documentation
 id: how_to_deploy
 layout: docs
 description: Secretless Documentation

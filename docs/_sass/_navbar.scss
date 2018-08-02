@@ -19,7 +19,6 @@
 
 #side-navigation {
 	//box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
-	background-color: lighten($sless-light-blue, 02); //#f8f8f8;
 	border-radius: 4px;
 	justify-content: center;
 	flex-direction: column;
@@ -40,33 +39,31 @@
 
 	.list-link {
 		font-family: $sless-font-secondary;
-		//padding-left: 2.5rem;
-		// border-top: 1px solid darken($sless-light-blue, 10);
 		width: 100%;
-		background-color: lighten($sless-light-blue, 02); //#f8f8f8;
+		//background-color: lighten($sless-light-blue, 02);
 		padding: 1rem 0 0 2.5rem ;
 
 	}
 
 	.sidenav-group {
+		background-color: lighten($sless-light-blue, 02);
 		:nth-child(1) {
 			border-top: none;
+		 }
+		 :last-child {
+			margin-bottom: 0;
+			padding-bottom: .5rem
 		 }
 	}
 
 	.sidenav-list {
 		font-weight: 800;
-		margin-bottom: 2rem;
+		margin: .5rem 0;
 		border-top: 1px solid darken($sless-light-blue, 10);
-		// :nth-child(1) {
-		// 	border-top: none;
-		// }
 	}
 	.sidenav-sublist {
 		font-weight: 500;
-		background-color: lighten($sless-light-blue, 02); //#f8f8f8;
-		//background: rgb(203,217,229);
-		//background: linear-gradient(180deg, rgba(203,217,229,0.14469537815126055) 0%, rgba(244,247,249,1) 41%);
+		//background-color: lighten($sless-light-blue, 02);
 	}
 
 	.sidenav-sublist {

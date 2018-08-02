@@ -257,7 +257,7 @@ pre {
 	margin: 0 0 10px;
 	font-size: 13px;
 	line-height: 1.42857143;
-	color: #fff;
+	color: #fffc;
 	word-break: break-all;
 	word-wrap: break-word;
 	background-color: $sless-dark-blue;
@@ -299,4 +299,9 @@ pre {
 
 .ui-tabs a:focus {
 	outline: none;
+}
+
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+	font-family: $sless-font-secondary;
+
 }

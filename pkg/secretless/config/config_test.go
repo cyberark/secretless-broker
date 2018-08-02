@@ -147,4 +147,22 @@ handlers:
 		_, err := Load([]byte(yaml))
 		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Handlers: (0: (Name: cannot be blank.).)")
 	})
+
+	Convey("Can serialize match fields", t, func() {
+		yaml := `
+listeners:
+  - name: http_default
+    protocol: tcp
+    address: 0.0.0.0:1080
+
+handlers:
+  - name: http_default
+    listener: http_default
+    match:
+      - test_for_secretless_issues_216
+`
+		config, err := Load([]byte(yaml))
+		So(err, ShouldBeNil)
+		So(config.String(), ShouldContainSubstring, "test_for_secretless_issues_216")
+	})
 }

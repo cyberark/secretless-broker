@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - layouts for blog index and single posts
 - page headings to template
+- Beta badge added to homepage
+- Sticky footer added
+
+### Changed
+- Updated heading styles and fonts
+- Sidebar styling
 
 ## [0.4.0] 2018-08-02
 

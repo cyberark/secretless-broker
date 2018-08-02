@@ -3,11 +3,11 @@
 // ***********************
 html { 
 	font-size: 62.5%; 
-	font-family: "Open Sans",sans-serif;
+	font-family: $sless-font-primary;
 	color: $sless-text;
 }
 body {
-	font-family: "Open Sans",sans-serif;
+	font-family: $sless-font-primary;
 	color: $sless-text;
 	display: flex;
 	flex-direction: column;
@@ -50,28 +50,32 @@ code {
 }
 
 h1 {
-	font-size: 4.5rem;
-	font-weight: 800;
 	color: $sless-blue;
 	margin-top: 0;
-	margin-bottom: 1.5rem;
+	margin-bottom: 3rem;
+	font-weight: 800;
+	font-size: 4.5rem;
+	font-family: $sless-font-secondary;
 }
 
 h2 {
 	color: $sless-blue;
 	font-size: 3rem;
 	margin: 3rem 0 1rem 0;
+	font-family: $sless-font-secondary;
 }
 
 h3 {
 	color: $sless-blue;
 	font-size: 2rem;
 	margin: 3rem 0 1rem 0;
+	font-family: $sless-font-secondary;
 }
 
 h4 {
 	text-transform: uppercase;
 	color: $sless-text;
+	font-family: $sless-font-secondary;
 }
 
 h5 {

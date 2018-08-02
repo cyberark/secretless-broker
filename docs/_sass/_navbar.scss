@@ -23,7 +23,6 @@
 	border-radius: 4px;
 	justify-content: center;
 	flex-direction: column;
-	//padding: 2rem;
 	position: fixed;
 	width: 230px;
 	a {
@@ -40,41 +39,40 @@
 	}
 
 	.list-link {
-		padding-left: 2.5rem;
-		border-bottom: 1px solid darken($sless-light-blue, 10);
+		font-family: $sless-font-secondary;
+		//padding-left: 2.5rem;
+		// border-top: 1px solid darken($sless-light-blue, 10);
 		width: 100%;
-		//margin: .5rem 0 ;
-		margin: .5rem 0 0 0;
+		background-color: lighten($sless-light-blue, 02); //#f8f8f8;
+		padding: 1rem 0 0 2.5rem ;
+
 	}
 
 	.sidenav-group {
-		margin-top: 1rem;
+		:nth-child(1) {
+			border-top: none;
+		 }
 	}
 
 	.sidenav-list {
 		font-weight: 800;
 		margin-bottom: 2rem;
+		border-top: 1px solid darken($sless-light-blue, 10);
+		// :nth-child(1) {
+		// 	border-top: none;
+		// }
 	}
 	.sidenav-sublist {
 		font-weight: 500;
-		background: rgb(203,217,229);
-		background: linear-gradient(180deg, rgba(203,217,229,0.14469537815126055) 0%, rgba(244,247,249,1) 41%);
+		background-color: lighten($sless-light-blue, 02); //#f8f8f8;
+		//background: rgb(203,217,229);
+		//background: linear-gradient(180deg, rgba(203,217,229,0.14469537815126055) 0%, rgba(244,247,249,1) 41%);
 	}
 
 	.sidenav-sublist {
     padding: 0px 2.5rem;
 	}
 }
-
-// .list-link {
-// 	padding-left: 2.5rem;
-// 	border-bottom: 1px solid darken($sless-light-blue, 10);
-// 	width: 100%;
-// 	margin: .5rem 0 ;
-// }
-// END #side-navigation
-// *********************
-
 
 #cybr-nav {
 	width: 100%;
@@ -88,7 +86,7 @@
 	font-weight: 100;
 }
 .navbar-list a {
-	color: #ffffff73;
+	color: lighten($sless-light-blue, 05);
 	padding: .8rem 1rem;
 	font-size: 1.5rem;
 	font-weight: 500;
@@ -99,9 +97,6 @@
 		color: $sless-blue;
 	}
 }
-// .navbar-list a:hover {
-// 	text-decoration: none;
-// }
 
 .sidenav-item {
 	list-style-type: none;

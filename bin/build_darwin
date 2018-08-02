@@ -3,10 +3,6 @@
 pushd $(dirname $0)/..
 trap popd EXIT INT TERM
 
-if [ "$NO_DEP" == "" ]; then
-  dep ensure
-fi
-
 echo "Building for darwin/amd64"
 
 mkdir -p dist/darwin/amd64

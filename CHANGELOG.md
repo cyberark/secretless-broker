@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - layouts for blog index and single posts
 - page headings to template
- 
+
 ## [0.4.0] 2018-08-02
 
 ### Fixed

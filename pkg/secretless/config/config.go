@@ -39,8 +39,8 @@ type Handler struct {
 	Type         string
 	ListenerName string `yaml:"listener"`
 	Debug        bool
-	Match        []string `yaml:"match"`
-	Patterns     []*regexp.Regexp
+	Match        []string         `yaml:"match"`
+	Patterns     []*regexp.Regexp `yaml:"-"`
 	Credentials  []Variable
 }
 
@@ -189,8 +189,8 @@ func Load(data []byte) (config Config, err error) {
 		}
 
 		h.Patterns = make([]*regexp.Regexp, len(h.Match))
-		for i, pattern := range h.Match {
-			pattern, err := regexp.Compile(pattern)
+		for i, matchPattern := range h.Match {
+			pattern, err := regexp.Compile(matchPattern)
 			if err != nil {
 				panic(err.Error())
 			} else {

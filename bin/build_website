@@ -36,8 +36,8 @@ cat $DOCS_DIR/godoc_packages.txt | while read package; do
   echo "---
 layout: docs
 id: ${sanitized_package_name}
-title: Secretless
-description: Secretless
+title: Documentation
+description: Secretless Documentation
 godoc: True
 godoc_repository: ${REPOSITORY}
 godoc_package: ${package}

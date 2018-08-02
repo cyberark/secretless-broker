@@ -7,6 +7,7 @@ as a reference point and use the source code in this folder as the true represen
 Supported plugin types:
   -Listeners
   -Handlers
+  -Providers
   -Connection managers
 
 There is also an additional EventNotifier class used to bubble up events from listeners and handlers up
@@ -22,11 +23,14 @@ All plugins are currently loaded in the following manner:
     - PluginInfo
     - GetListeners
     - GetHandlers
+    - GetProviders
     - GetConnectionManagers
   - Handlers are added to handler factory map.
   - Listeners are added to listener factory map.
+  - Providers are added to provider factory map.
   - Managers are added to manager factory map.
   - Managers are instantiated.
+  - Providers are instantiated.
   - Listeners and handlers are instantiated by id whenever a configuration references them.
 
 
@@ -53,18 +57,23 @@ While extraneous keys in the map are ignored, the map _must_ contain the followi
 GetListeners
 
 Returns a map of provided listener ids to their factory methods (`map[string]func(v1.ListenerOptions) v1.Listener`) that
-accept `v1.ListenerOptions` when invoked and return a new `v1.Listener` [listener](#listeners).
+accept v1.ListenerOptions when invoked and return a new v1.Listener.
 
 GetHandlers
 
 Returns a map of provided handler ids to their factory methods (`map[string]func(v1.HandlerOptions) v1.Handler`) that
-accept `v1.HandlerOptions` when invoked and return a new `v1.Handler` [handler](#handlers).
+accept v1.HandlerOptions when invoked and return a new v1.Handler.
+
+GetProviders
+
+Returns a map of provided provider ids to their factory methods (`map[string]func(v1.ProviderOptions) v1.Provider`) that
+accept v1.ProviderOptions when invoked and return a new v1.Provider.
 
 GetConnectionManagers
 
 
 Returns a map of provided manager ids to their factory methods (`map[string]func() v1.ConnectionManager`) that
-return a new `v1.ConnectionManager` connection manager when invoked.
+return a new v1.ConnectionManager connection manager when invoked.
 
 Note: There is a high likelihood that this method will also have `v1.ConnectionManagerOptions` as the
 factory parameter like the rest of the factory maps in the future releases
@@ -81,11 +90,11 @@ The following shows a sample plugin that conforms to the expected API:
   )
 
   // PluginAPIVersion is the API version being used
-  var PluginAPIVersion = "0.0.7"
+  var PluginAPIVersion = "0.0.8"
 
   // PluginInfo describes the plugin
   var PluginInfo = map[string]string{
-  	"version":     "0.0.7",
+  	"version":     "0.0.8",
   	"id":          "example-plugin",
   	"name":        "Example Plugin",
   	"description": "Example plugin to demonstrate plugin functionality",
@@ -105,11 +114,19 @@ The following shows a sample plugin that conforms to the expected API:
   	}
   }
 
+  // GetProviders returns the example provider
+  func GetProviders() map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider {
+  	return map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider{
+  		"example-provider": example.ProviderFactory,
+  	}
+  }
+
   // GetConnectionManagers returns the example connection manager
   func GetConnectionManagers() map[string]func() plugin_v1.ConnectionManager {
   	return map[string]func() plugin_v1.ConnectionManager{
   		"example-plugin-manager": example.ManagerFactory,
   	}
   }
+
 */
 package v1

@@ -3,10 +3,10 @@ title: Secretless
 id: listeners
 layout: docs
 description: Secretless Documentation
-permalink: listeners
+permalink: docs/reference/listeners
 ---
 
-<p class="card-heading">Listeners</p>
+# Listeners
 
 You can configure the following kinds of Secretless *Listeners*:
 

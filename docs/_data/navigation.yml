@@ -1,42 +1,43 @@
 main:
   - page: Docs
-    url: /docs.html
+    url: /docs/overview.html
   - page: Community
     url: /community.html
   - page: Blog
     url: /blog.html
   - page: Github
     url: https://github.com/conjurinc/secretless
+    class: gh
 
 documentation:
   - title: Overview
-    url: /overview.html
+    url: /docs/overview.html
     subfolderitems:
       - page: Why Secretless?
-        url: /docs.html
+        url: /docs/overview/why_secretless.html
       - page: How Does It Work?
-        url: /how_it_works.html
+        url: /docs/overview/how_it_works.html
       - page: Key Terms
-        url: /key_terms.html
+        url: /docs/overview/key_terms.html
   - title: Get Started
-    url: /get_started.html
+    url: /docs/get_started.html
     subfolderitems:
       - page: Quick Start
-        url: /quick_start.html
+        url: /docs/get_started/quick_start.html
       - page: Deploying to Kubernetes
-        url: /deploy_to_kubernetes.html
+        url: /docs/get_started/deploy_to_kubernetes.html
   - title: Reference
-    url: /reference.html
+    url: /docs/reference.html
     subfolderitems:
       - page: Listeners
-        url: /listeners.html
+        url: /docs/reference/listeners.html
       - page: Handlers
-        url: /handlers.html
+        url: /docs/reference/handlers.html
       - page: Credential Providers
-        url: /providers.html
+        url: /docs/reference/providers.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
-        url: /how_to_deploy.html
+        url: /docs/reference/how_to_deploy.html
   - page: FAQ
-    url: /faq.html
+    url: /docs/faq.html

@@ -3,10 +3,10 @@ title: Secretless
 id: reference
 layout: docs
 description: Secretless Documentation
-permalink: reference
+permalink: docs/reference
 ---
 
-<p class="card-heading">Reference</p>
+# Reference
 
 The following target services are currently supported by Secretless:
 

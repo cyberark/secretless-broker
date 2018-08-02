@@ -12,7 +12,7 @@ body {
 }
 p {
 	font-size: 1.5rem;
-	line-height: 1.5;
+	line-height: 1.8;
 }
 li {
 	font-size: 1.5rem;
@@ -38,15 +38,25 @@ code {
 	margin: 0;
 }
 
+.page-title {
+	font-size: 4rem;
+	color: $sless-blue;
+	font-weight: 800;
+	margin-bottom: 3rem;
+
+}
+
 h1 {
+	font-size: 3rem;
+	font-weight: 800;
 	color: $sless-blue;
 	margin-top: 0;
-	margin-bottom: 3rem;
-	font-weight: 800;
+	margin-bottom: 1.5rem;
 }
 
 h2 {
 	color: $sless-blue;
+	font-size: 2rem;
 }
 
 h3 {

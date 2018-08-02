@@ -1,5 +1,5 @@
 ---
-title: Secretless
+title: Documentation
 id: how_it_works
 layout: docs
 description: Secretless Documentation

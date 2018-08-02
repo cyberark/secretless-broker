@@ -1,5 +1,5 @@
 ---
-title: Secretless
+title: Documentation
 id: deploy_to_kubernetes
 layout: docs
 description: Secretless Documentation

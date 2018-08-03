@@ -17,6 +17,8 @@ documentation:
         url: /docs/overview/why_secretless.html
       - page: How Does It Work?
         url: /docs/overview/how_it_works.html
+      - page: Security
+        url: /docs/overview/security.html
       - page: Key Terms
         url: /docs/overview/key_terms.html
   - title: Get Started

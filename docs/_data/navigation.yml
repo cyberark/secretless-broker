@@ -47,6 +47,11 @@ documentation:
         url: /docs/reference/handlers.html
       - page: Credential Providers
         url: /docs/reference/providers.html
+        subsubfolderitems:
+        - page: AWS
+          url: /docs/reference/providers.html
+        - page: Conjur
+          url: /docs/reference/providers.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy

@@ -92,13 +92,14 @@
 	background: linear-gradient(#165d9e, #4d8fcc);
 	padding: 2rem 0 3rem 0;
 }
-#frame {
+.jumbotron {
 	margin-bottom: 0;
-	margin-top: -6.5rem;
+	margin-top: -7.5rem;
 	padding-top: 10.5rem;
 	background-image: url("../img/secretless_pattern_dark.png");
 	background-repeat: round;
 	text-align: center;
+	border-radius: 0;
 }
 
 // ***********************

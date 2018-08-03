@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Key Terms
 id: key_terms
 layout: docs
 description: Secretless Documentation
 permalink: docs/overview/key_terms
 ---
-
-# Key Terms
 
 ## General-Purpose Terminology
 

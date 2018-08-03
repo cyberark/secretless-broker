@@ -13,11 +13,9 @@ import (
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	"io"
 	"os"
-	"os/signal"
-	"syscall"
 	"github.com/conjurinc/secretless/internal/pkg/global"
 	"fmt"
-	"sync"
+	"syscall"
 )
 
 // ClientOptions stores the option that were specified by the connection client.
@@ -99,10 +97,7 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	sigC := make(chan os.Signal, 1)
-	signal.Notify(sigC, os.Interrupt, os.Kill, syscall.SIGTERM)
-	global.TheEndWaitGroup.Add(1)
-
+	shutdownCh, cleanUpShutdownCh := global.ShutdownChCreator(os.Interrupt, os.Kill, syscall.SIGTERM)
 	go func(c chan os.Signal) {
 		_, ok := <-c
 		if ok == false {
@@ -113,38 +108,20 @@ func (h *Handler) Pipe() {
 		h.abort(fmt.Errorf("secretless shutting down"))
 
 		// And we're done:
-		global.TheEndWaitGroup.Done()
-	}(sigC)
-
-
-	// ensures sigC gets cleaned up
-	sigCDone := false
-	sigCDoneMutex := &sync.Mutex{}
-	clearSigC := func() {
-		sigCDoneMutex.Lock()
-
-		if sigCDone {
-			return
-		}
-		close(sigC)
-		signal.Stop(sigC)
-		global.TheEndWaitGroup.Done()
-		sigCDone = true
-
-		sigCDoneMutex.Unlock()
-	}
+		cleanUpShutdownCh()
+	}(shutdownCh)
 
 	go func() {
 		stream(h.GetClientConnection(), h.Backend, func(b []byte) {
 			h.EventNotifier.ClientData(h.ClientConnection, b)
 		})
-		defer clearSigC()
+		defer cleanUpShutdownCh()
 	}()
 	go func() {
 		stream(h.Backend, h.GetClientConnection(), func(b []byte) {
 			h.EventNotifier.ServerData(h.GetClientConnection(), b)
 		})
-		defer clearSigC()
+		defer cleanUpShutdownCh()
 	}()
 }
 

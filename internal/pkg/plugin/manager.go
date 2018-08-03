@@ -69,28 +69,21 @@ func (manager *Manager) _ReloadConfig(newConfig config.Config) error {
 
 func (manager *Manager) _RegisterShutdownSignalHandlers() {
 	log.Println("Registering shutdown signal listeners...")
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel,
-		syscall.SIGABRT,
-		syscall.SIGHUP,
-		syscall.SIGINT,
-		syscall.SIGQUIT,
-		syscall.SIGTERM,
-	)
 
-	global.TheEndWaitGroup.Add(1)
+	shutdownCh, cleanUpShutdownCh := global.ShutdownChCreator(syscall.SIGABRT, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+
 	go func() {
-		global.TheEndWaitGroup.Wait()
+		global.WaitForGlobalCleanUp()
 
 		log.Printf("Exiting...")
 		os.Exit(0)
 	}()
 	go func() {
-		exitSignal := <-signalChannel
+		defer cleanUpShutdownCh()
+		exitSignal := <-shutdownCh
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
 
 		manager.Shutdown()
-		global.TheEndWaitGroup.Done()
 	}()
 }
 

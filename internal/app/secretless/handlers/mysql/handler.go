@@ -11,6 +11,11 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless/internal/pkg/global"
+	"os"
+	"syscall"
+	"fmt"
+	"io"
 )
 
 // BackendConfig stores the connection info to the real backend database.
@@ -47,6 +52,10 @@ func (h *Handler) abort(err error) {
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
+	defer func() {
+		dest.Close()
+		source.Close()
+	}()
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -55,6 +64,9 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	for {
 		length, err = source.Read(buffer)
 		if err != nil {
+			if err == io.EOF {
+				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
+			}
 			return
 		}
 
@@ -73,8 +85,28 @@ func (h *Handler) Pipe() {
 		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
 	}
 
-	go stream(h.GetClientConnection(), h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
-	go stream(h.Backend, h.GetClientConnection(), func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
+	shutdownCh, cleanUpShutdownCh := global.ShutdownChCreator(os.Interrupt, os.Kill, syscall.SIGTERM)
+	go func(c chan os.Signal) {
+		_, ok := <-c
+		if ok == false {
+			// c already closed
+			return
+		}
+
+		h.abort(fmt.Errorf("secretless shutting down"))
+
+		// And we're done:
+		cleanUpShutdownCh()
+	}(shutdownCh)
+
+	go func() {
+		defer cleanUpShutdownCh()
+		stream(h.GetClientConnection(), h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
+	}()
+	go func() {
+		defer cleanUpShutdownCh()
+		stream(h.Backend, h.GetClientConnection(), func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
+	}()
 }
 
 // Run configures the backend connection info, connects to the backend to

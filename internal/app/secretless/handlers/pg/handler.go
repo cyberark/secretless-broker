@@ -112,16 +112,16 @@ func (h *Handler) Pipe() {
 	}(shutdownCh)
 
 	go func() {
+		defer cleanUpShutdownCh()
 		stream(h.GetClientConnection(), h.Backend, func(b []byte) {
 			h.EventNotifier.ClientData(h.ClientConnection, b)
 		})
-		defer cleanUpShutdownCh()
 	}()
 	go func() {
+		defer cleanUpShutdownCh()
 		stream(h.Backend, h.GetClientConnection(), func(b []byte) {
 			h.EventNotifier.ServerData(h.GetClientConnection(), b)
 		})
-		defer cleanUpShutdownCh()
 	}()
 }
 

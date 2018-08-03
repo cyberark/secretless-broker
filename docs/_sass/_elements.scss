@@ -7,17 +7,17 @@
 .card-heading {
 	font-weight: bold;
 	line-height: 4.5rem;
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	font-size: 3.3rem;
 	letter-spacing: .1rem;
 	color: #4d8fcc;
 }
 .broker {
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 }
 .card-side-heading {
 	font-weight: bold;
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	font-size: 2rem;
 	letter-spacing: .1rem;
 }
@@ -49,9 +49,6 @@
 	border-radius: 4px;
 	color: #edf2f6c9;
 	padding: .5rem 1rem;
-	position: absolute;
-		top: 1.8rem;
-		left: 1rem;
 	i {
 		margin-right: .8rem;
 		color: $sless-dark-blue;
@@ -74,7 +71,7 @@
 #jumbotron-text {
 	font-size: 2.0rem;
 	text-align: center;
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	margin-top: 1rem;
 	color: #4d8fcc;
 }
@@ -169,7 +166,7 @@
 	margin-right: auto;
 }
 .arch-list > li {
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	font-size: 1.7rem;
 }
 

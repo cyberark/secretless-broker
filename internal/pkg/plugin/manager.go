@@ -73,12 +73,6 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 	shutdownCh, cleanUpShutdownCh := global.ShutdownChCreator(syscall.SIGABRT, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 
 	go func() {
-		global.WaitForGlobalCleanUp()
-
-		log.Printf("Exiting...")
-		os.Exit(0)
-	}()
-	go func() {
 		defer cleanUpShutdownCh()
 		exitSignal := <-shutdownCh
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)

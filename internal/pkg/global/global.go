@@ -4,6 +4,8 @@ import (
     "sync"
     "os"
     "os/signal"
+    "log"
+    "syscall"
 )
 
 var shutdownNotifyWaitGroup = sync.WaitGroup{}
@@ -32,6 +34,16 @@ func ShutdownChCreator(sig ...os.Signal) (chan os.Signal, func()) {
     return shutdownCh, cleanUpShutdownCh
 }
 
-func WaitForGlobalCleanUp() {
-    shutdownNotifyWaitGroup.Wait()
+func init() {
+    shutdownCh, cleanUpShutdownCh := ShutdownChCreator(syscall.SIGABRT, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+
+    go func() {
+        defer cleanUpShutdownCh()
+
+        <- shutdownCh
+        shutdownNotifyWaitGroup.Wait()
+
+        log.Printf("Exiting...")
+        os.Exit(0)
+    }()
 }

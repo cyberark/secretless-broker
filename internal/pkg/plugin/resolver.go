@@ -1,7 +1,9 @@
 package plugin
 
 import (
+	"fmt"
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/conjurinc/secretless/pkg/secretless/config"
@@ -13,6 +15,23 @@ type Resolver struct {
 	EventNotifier     plugin_v1.EventNotifier
 	ProviderFactories map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider
 	Providers         map[string]plugin_v1.Provider
+	LogFatalf         func(string, ...interface{})
+}
+
+func NewResolver(providerFactories map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider,
+	eventNotifier plugin_v1.EventNotifier,
+	LogFatalFunc func(string, ...interface{})) plugin_v1.Resolver {
+
+	if LogFatalFunc == nil {
+		LogFatalFunc = log.Fatalf
+	}
+
+	return &Resolver{
+		EventNotifier:     eventNotifier,
+		LogFatalf:         LogFatalFunc,
+		ProviderFactories: providerFactories,
+		Providers:         make(map[string]plugin_v1.Provider),
+	}
 }
 
 // GetProvider finds or creates a named provider.
@@ -22,17 +41,13 @@ func (resolver *Resolver) GetProvider(name string) (provider plugin_v1.Provider,
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if resolver.Providers == nil {
-		resolver.Providers = make(map[string]plugin_v1.Provider)
-	}
-
 	if provider = resolver.Providers[name]; provider != nil {
 		return
 	}
 
 	// If we don't know what this provider is, it's a critical error
 	if _, ok := resolver.ProviderFactories[name]; !ok {
-		log.Fatalf("ERROR: Provider '%s' cannot be found", name)
+		resolver.LogFatalf("ERROR: Provider '%s' cannot be found", name)
 	}
 
 	providerOptions := plugin_v1.ProviderOptions{
@@ -51,24 +66,33 @@ func (resolver *Resolver) GetProvider(name string) (provider plugin_v1.Provider,
 
 // Resolve accepts an list of Providers and a list of Variables and
 // attempts to obtain the value of each Variable from the appropriate Provider.
-func (resolver *Resolver) Resolve(variables []config.Variable) (result map[string][]byte, err error) {
+func (resolver *Resolver) Resolve(variables []config.Variable) (map[string][]byte, error) {
 	if variables == nil {
-		log.Fatalln("ERROR! Variables not defined in Resolve call!")
+		resolver.LogFatalf("ERROR! Variables not defined in Resolve call!")
 	}
 
-	result = make(map[string][]byte)
+	result := make(map[string][]byte)
+	errorStrings := make([]string, 0, len(variables))
 
+	var err error
 	for _, variable := range variables {
 		var provider plugin_v1.Provider
 		var value []byte
 
 		if provider, err = resolver.GetProvider(variable.Provider); err != nil {
-			log.Fatalf("ERROR: Provider '%s' could not be used!", variable.Provider)
+			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", variable.Provider, err)
 		}
 
 		// This provider cannot resolve the named variable
 		if value, err = provider.GetValue(variable.ID); err != nil {
-			return
+			errInfo := fmt.Sprintf("ERROR: Resolving variable '%s' from provider '%s' failed: %v",
+				variable.ID,
+				variable.Provider,
+				err)
+			log.Println(errInfo)
+
+			errorStrings = append(errorStrings, errInfo)
+			continue
 		}
 
 		result[variable.Name] = value
@@ -78,5 +102,10 @@ func (resolver *Resolver) Resolve(variables []config.Variable) (result map[strin
 		}
 	}
 
-	return
+	err = nil
+	if len(errorStrings) > 0 {
+		err = fmt.Errorf(strings.Join(errorStrings, "\n"))
+	}
+
+	return result, err
 }

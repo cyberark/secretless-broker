@@ -242,10 +242,7 @@ func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOption
 func (manager *Manager) Run(configuration config.Config) error {
 	manager.InitializeConnectionManagers(configuration)
 
-	resolver := &Resolver{
-		EventNotifier:     manager,
-		ProviderFactories: manager.ProviderFactories,
-	}
+	resolver := NewResolver(manager.ProviderFactories, manager, nil)
 
 	manager.Proxy = secretless.Proxy{
 		Config:          configuration,

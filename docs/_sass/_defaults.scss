@@ -24,7 +24,9 @@ li {
 code {
 	margin-left: 2.5rem;
 	color: #4d8fcc;
-	background-color: darken($sless-light-blue, 02); /*#7ca8d224;*/
+	&.highlighter-rouge {
+		background-color: darken($sless-light-blue, 02);
+	}
 }
 a {
 	text-decoration: none;
@@ -88,8 +90,11 @@ h5 {
 	 flex: 1
 }
 
+.content {
+	padding-top: 3rem;
+}
 #content {
-	padding: 4rem 0;
+	padding: 4rem 2rem;
 	.documentation-content {
 		padding: 0;
 	}

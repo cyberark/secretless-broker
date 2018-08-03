@@ -28,3 +28,11 @@
 		{% endfor %}
 	</ul>
 </nav>
+
+<script>
+$(document).ready(function(){
+    $(".list-link").click(function(){
+        $(".sidenav-sublist").slideToggle();
+    });
+});
+</script>

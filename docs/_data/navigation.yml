@@ -2,12 +2,15 @@ main:
   - title: Docs
     url: /docs/overview.html
     sublinks:
-    - title: Why Secretless?
-      url: /docs/overview/why_secretless.html
-    - title: How Does It Work?
-      url: /docs/overview/how_it_works.html
-    - title: Key Terms
-      url: /docs/overview/key_terms.html
+    - title: Overview
+      url: /docs/overview.html
+      dropdown:
+      - title: sublink2
+        url: /docs/overview.html
+    - title: Get Started
+      url: /docs/get_started.html
+    - title: Reference
+      url: /docs/reference.html
   - title: Community
     url: /community.html
   - title: Blog

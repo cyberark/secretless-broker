@@ -1,11 +1,11 @@
-<nav id="top-navigation" class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg">
 	<a class="navbar-brand" href="/">SLSS</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>
 	</button>
 
 	<div class="collapse navbar-collapse" id="navbarSupportedContent">
-		<ul class="navbar-nav mr-auto">
+		<ul class="navbar-nav ml-auto">
 				{% assign links = site.data.navigation.main %}
         {% for link in links %}
             {% assign class = nil %}
@@ -33,15 +33,9 @@
                 </li>
             {% endif %}
         {% endfor %}
-				<!-- {% for item_hash in site.data.navigation.main %}
-					{% assign key = item_hash[0] %}
-					{% assign value = item_hash[1] %}
-					{% include top_nav_menu.html item=value section=key %}
-				{% endfor %} -->
 			<!-- {% for item in site.data.navigation.main %}
 				<li><a href="{{ item.url }}" alt="{{ item.title }}" class="{{ item.class }}">{{item.title}}</a></li>
 			{% endfor %} -->
->
 		</ul>
 		
 	</div>

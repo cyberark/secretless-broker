@@ -1,11 +1,11 @@
 main:
-  - page: Docs
+  - title: Docs
     url: /docs/overview.html
-  - page: Community
+  - title: Community
     url: /community.html
-  - page: Blog
+  - title: Blog
     url: /blog.html
-  - page: Github
+  - title: Github
     url: https://github.com/conjurinc/secretless
     class: gh
 

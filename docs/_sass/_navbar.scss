@@ -63,6 +63,7 @@
 	font-weight: 500;
 	transition: all 0.4s;
 	letter-spacing: .5px;
+	width: 100%;
 	&:hover {
 		text-decoration: none;
 		color: $sless-blue;
@@ -75,6 +76,10 @@
 	border-radius: 0 0 4px 4px;
 	margin: 0;
 	border: 0;
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+	li {
+		height: 5rem;
+	}
 }
 
 // *********************

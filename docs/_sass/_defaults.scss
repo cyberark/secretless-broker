@@ -29,6 +29,7 @@ code {
 a {
 	text-decoration: none;
 	display: inline-block;
+	color: $sless-blue;
 }
 hr {
 	position: relative;
@@ -69,7 +70,7 @@ h2 {
 h3 {
 	color: $sless-blue;
 	font-size: 2rem;
-	margin: 3rem 0 1rem 0;
+	margin: 2rem 0 0 0;
 	font-family: $sless-font-secondary;
 }
 

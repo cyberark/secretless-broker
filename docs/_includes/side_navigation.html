@@ -1,30 +1,59 @@
 <nav id="side-navigation">
 	<ul class="sidenav-group">
-		{% for item in site.data.navigation.documentation %}
-			{% if item.title %}
-				<li class="sidenav-list">
-					{% if item.url %}
-						<a class="list-link" href="{{ item.url }}">{{ item.title }}</a>
-					{% else %}
-						{{ item.title }}
-					{% endif %}
+			{% if site.data.navigation.documentation[0] %}
+			{% for item in site.data.navigation.documentation %}
+				<h3><a href="{{ item.url }}">{{ item.title }}</a></h3>
 					{% if item.subfolderitems[0] %}
-					<ul class="sidenav-sublist">
-						{% for entry in item.subfolderitems %}
-							<li class="sidenav-subitem">
-									<a href="{{ entry.url }}" alt="{{ entry.title }}">{{entry.page}}</a>
-							</li>
-						{% endfor %}
-					</ul>
-				{% endif %}
-				{% else %}
-				<li class="sidenav-list">
-					<a class="list-link" href="{{ item.url }}">{{ item.page }}</a>
-				</li>
-			{% endif %}
-				</li>
-				
-			
-		{% endfor %}
+						<ul class="sidenav-sublist">
+							{% for entry in item.subfolderitems %}
+									<li class="{% if item.url == page.url %}active{% endif %} sidenav-subitem"><a href="{{ entry.url }}">{{ entry.page }}</a>
+										{% if entry.subsubfolderitems[0] %}
+											<ul>
+											{% for subentry in entry.subsubfolderitems %}
+													<li><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
+											{% endfor %}
+											</ul>
+										{% endif %}
+									</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+				{% endfor %}
+		{% endif %}
 	</ul>
 </nav>
+
+
+
+
+
+<!-- <nav id="side-navigation">
+		<ul class="sidenav-group">
+			{% for item in site.data.navigation.documentation %}
+				{% if item.title %}
+					<li class="sidenav-list">
+						{% if item.url %}
+							<a class="list-link" href="{{ item.url }}">{{ item.title }}</a>
+						{% else %}
+							{{ item.title }}
+						{% endif %}
+						{% if item.subfolderitems[0] %}
+						<ul class="sidenav-sublist">
+							{% for entry in item.subfolderitems %}
+								<li class="sidenav-subitem">
+										<a href="{{ entry.url }}" alt="{{ entry.title }}">{{entry.page}}</a>
+								</li>
+							{% endfor %}
+						</ul>
+					{% endif %}
+					{% else %}
+					<li class="sidenav-list">
+						<a class="list-link" href="{{ item.url }}">{{ item.page }}</a>
+					</li>
+				{% endif %}
+					</li>
+					
+				
+			{% endfor %}
+		</ul>
+	</nav> -->

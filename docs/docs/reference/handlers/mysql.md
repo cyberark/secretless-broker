@@ -1,12 +1,12 @@
 ---
-title: Secretless
+title: Secretless Handlers
 id: mysql
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers/mysql
 ---
 
-# MySQL Handler
+# MySQL
 ## Overview
 The MySQL handler authenticates incoming connections for a particular
 listener.

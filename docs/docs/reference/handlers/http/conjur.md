@@ -1,12 +1,12 @@
 ---
-title: Secretless
+title: Secretless Handlers
 id: conjur
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers/http/conjur
 ---
 
-# HTTP(S) Conjur Handler
+# Conjur - HTTP(S)
 ## Overview
 The Conjur handler exposes an HTTP proxy which will authenticate requests made
 to Conjur without revealing credentials to the consumer.

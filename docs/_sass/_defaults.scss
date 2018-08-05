@@ -24,7 +24,7 @@ li {
 code {
 	margin-left: 2.5rem;
 	color: #4d8fcc;
-	background-color: darken($sless-light-blue, 02); //#7ca8d224;
+	background-color: darken($sless-light-blue, 02); /*#7ca8d224;*/
 }
 a {
 	text-decoration: none;
@@ -48,7 +48,6 @@ code {
 	color: $sless-blue;
 	font-weight: 800;
 	margin-bottom: 3rem;
-
 }
 
 h1 {
@@ -96,5 +95,5 @@ h5 {
 }
 
 .row {
-	//margin: 0 2rem;
+	/*margin: 0 2rem;*/
 }

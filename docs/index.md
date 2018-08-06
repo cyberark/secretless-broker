@@ -7,7 +7,7 @@ description: Secretless
 
 <div class="container-fluid">
 	<div class="card introduction" id="simple-started">
-		<div class="row sub-card">
+		<div class="sub-card">
 			<p class="card-heading">It's simple to get started!</p>
       <div id="quick-start-tabs-main">
         <ul>

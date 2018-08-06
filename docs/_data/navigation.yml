@@ -4,8 +4,8 @@ main:
     sublinks:
     - title: Overview
       url: /docs/overview.html
-      dropdown:
-      - title: sublink2
+      subsublinks:
+      - title: My Sublink
         url: /docs/overview.html
     - title: Get Started
       url: /docs/get_started.html

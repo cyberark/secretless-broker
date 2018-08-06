@@ -114,6 +114,7 @@
 
 	.sidenav-group {
 		background-color: lighten($sless-light-blue, 02);
+		padding: .5rem 0;
 		:nth-child(1) {
 			border-top: none;
 		 }
@@ -122,9 +123,11 @@
 			padding-bottom: .5rem
 		 }
 		 h3 {
-				padding: .5rem 2.5rem;
+				padding: 1rem 2.5rem .5rem 2.5rem;
 				color: $sless-blue;
+				border-top: 1px solid darken($sless-light-blue, 10);
 				font-weight: 800;
+				margin-top: 1rem;
 		 }
 	}
 
@@ -201,11 +204,3 @@
 .navbar .default {
 	margin-bottom: 0;
 }
-
-
-// .sidenav-subitem.collapsed {
-// 	color: red;
-// 	&:after {
-// 		content: "plop";
-// 	}
-// }

@@ -90,8 +90,10 @@
 	border-radius: 4px;
 	justify-content: center;
 	flex-direction: column;
-	//position: fixed;
 	position: sticky;
+	h3 a{
+		color: $sless-blue;
+	}
 	a {
 		color: $sless-text;
 		transition: all 0.4s;

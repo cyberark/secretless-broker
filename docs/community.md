@@ -5,7 +5,7 @@ layout: subpages
 description: Secretless Community
 ---
 
-<div class="row">
+<div class="row community">
 	<div class="col-md-4 col-sm-12">
     <h2><i class="slss-icon fas fa-code"></i> Contributing</h2>
     <p>Secretless development is open to contributions from the community, including feature requests and issues (which should be logged in our<a href="https://github.com/conjurinc/secretless">GitHub repository</a>.</p>

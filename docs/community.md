@@ -16,7 +16,7 @@ description: Secretless Community
     <p>For discussions on the product and to ask our engineering team about the specifics of deploying and using the Secretless broker, please join our <a href="https://groups.google.com/forum/#!forum/secretless">Google group</a>.</p>
 	</div>
 	<div class="col-md-4 col-sm-12">
-		<h2><i class="slss-icon fas fa-bug"></i> Report</h2>
+		<h2><i class="slss-icon fas fa-exclamation-triangle"></i> Report</h2>
     <p>Want to report a potential security vulnerability? Contact us at <a href="mailto:security@secretless.io">security@secretless.io</a>.</p>
 	</div>
 </div>

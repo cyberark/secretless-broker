@@ -6,12 +6,11 @@ description: Secretless Documentation
 permalink: docs/reference/handlers/postgres
 ---
 
-# PostgreSQL
-## Overview
+#### Overview
 The PostgreSQL handler authenticates incoming connections for a particular
 listener.
 
-## Credentials
+### Credentials
 - `address`  
 _Required_  
 Connection string of the form `host[:port][/dbname]`  
@@ -24,7 +23,7 @@ Username of the PostgreSQL account to connect as
 _Required_  
 Password of the PostgreSQL account to connect with  
 
-## Examples
+### Examples
 #### Listening on a network address
 ``` yaml
 listeners:

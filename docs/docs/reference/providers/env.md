@@ -6,11 +6,11 @@ description: Secretless Documentation
 permalink: docs/reference/providers/env
 ---
 
-# Environment
+## Environment
 The environment provider (`env`) allows the use of environment variables as a
 source of credentials.
 
-## Examples
+### Examples
 ``` yaml
 listeners:
   - name: http_listener

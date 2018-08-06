@@ -1,15 +1,15 @@
 ---
-title: Secretless
+title: Secretless Handlers
 id: ssh
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers/ssh
 ---
 
-# SSH Handler
+# SSH
 ## Overview
-The SSH handler authenticates incoming SSH connections for a particular
-listener without exposing passwords or keys to the consumer.
+The SSH handler acts as a man-in-the-middle, authenticating inbound SSH 
+connections automatically without exposing passwords or keys.
 
 ## Credentials
 - `address`  

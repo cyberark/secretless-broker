@@ -1,12 +1,12 @@
 ---
-title: Secretless
+title: Secretless Handlers
 id: ssh_agent
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers/ssh_agent
 ---
 
-# SSH Agent Handler
+# SSH Agent
 ## Overview
 The SSH Agent handler enables Secretless to replace `ssh-agent` by providing
 similar functionality over a socket without exposing keys. Once running, export

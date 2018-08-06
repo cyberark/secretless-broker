@@ -1,12 +1,12 @@
 ---
-title: Secretless
+title: Secretless Handlers
 id: basic
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers/http/basic
 ---
 
-# HTTP(S) Basic Authentication Handler
+# Basic Authentication - HTTP(S)
 ## Overview
 The basic authentication handler exposes an HTTP proxy which will authenticate
 requests made to an arbitrary service requiring basic authentication.

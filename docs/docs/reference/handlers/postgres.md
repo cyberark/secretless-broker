@@ -1,12 +1,12 @@
 ---
-title: Secretless
+title: Secretless Handlers
 id: postgres
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers/postgres
 ---
 
-# PostgreSQL Handler
+# PostgreSQL
 ## Overview
 The PostgreSQL handler authenticates incoming connections for a particular
 listener.

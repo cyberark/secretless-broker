@@ -1,12 +1,12 @@
 ---
-title: Secretless
+title: Secretless Handlers
 id: aws
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers/http/aws
 ---
 
-# HTTPS AWS Handler
+# AWS - HTTPS 
 ## Overview
 The AWS handler exposes an HTTP proxy which will authenticate requests made to
 AWS without revealing access keys to the consumer.

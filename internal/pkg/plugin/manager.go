@@ -444,9 +444,24 @@ func (manager *Manager) ServerData(c net.Conn, buf []byte) {
 	}
 }
 
-// Shutdown loops through the connection managers to call Shutdown
+// Shutdown calls Shutdown on the Proxy and all the connection managers, concurrently
 func (manager *Manager) Shutdown() {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		manager.Proxy.Shutdown()
+	}()
+
 	for _, connectionManager := range manager.ConnectionManagers {
-		connectionManager.Shutdown()
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			connectionManager.Shutdown()
+		}()
 	}
+
+	wg.Wait()
 }

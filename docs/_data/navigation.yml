@@ -56,5 +56,5 @@ documentation:
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
         url: /docs/reference/how_to_deploy.html
-  - page: FAQ
+  - title: FAQ
     url: /docs/faq.html

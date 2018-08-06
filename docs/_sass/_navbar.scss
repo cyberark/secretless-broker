@@ -87,13 +87,11 @@
 // Side Navigation
 
 #side-navigation {
-	//box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
 	border-radius: 4px;
 	justify-content: center;
 	flex-direction: column;
 	//position: fixed;
 	position: sticky;
-	//width: 230px;
 	a {
 		color: $sless-text;
 		transition: all 0.4s;
@@ -110,7 +108,6 @@
 	.list-link {
 		font-family: $sless-font-secondary;
 		width: 100%;
-		//background-color: lighten($sless-light-blue, 02);
 		padding: 1rem 0 0 2.5rem ;
 
 	}
@@ -124,6 +121,11 @@
 			margin-bottom: 0;
 			padding-bottom: .5rem
 		 }
+		 h3 {
+				padding: .5rem 2.5rem;
+				color: $sless-blue;
+				font-weight: 800;
+		 }
 	}
 
 	.sidenav-list {
@@ -133,7 +135,6 @@
 	}
 	.sidenav-sublist {
 		font-weight: 500;
-		//background-color: lighten($sless-light-blue, 02);
 	}
 
 	.sidenav-sublist {
@@ -200,3 +201,11 @@
 .navbar .default {
 	margin-bottom: 0;
 }
+
+
+// .sidenav-subitem.collapsed {
+// 	color: red;
+// 	&:after {
+// 		content: "plop";
+// 	}
+// }

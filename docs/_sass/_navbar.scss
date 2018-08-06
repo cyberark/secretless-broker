@@ -117,16 +117,18 @@
 
 	.sidenav-group {
 		background-color: lighten($sless-light-blue, 02);
-		padding: .5rem 0;
+		padding: 2rem 0;
+		border-radius: $border-radius;
 		:nth-child(1) {
 			border-top: none;
+			padding-top: 0;
 		 }
 		 :last-child {
 			margin-bottom: 0;
-			padding-bottom: .5rem
+			padding-bottom: 0;
 		 }
 		 h3 {
-				padding: 2rem 2.5rem 0 2.5rem;
+				padding: 2rem 2.5rem .5rem 2.5rem;
 				color: $sless-blue;
 				border-top: 1px solid darken($sless-light-blue, 10);
 				font-weight: 800;
@@ -149,6 +151,10 @@
 
 	.sidenav-sublist {
     padding: 0px 2.5rem;
+	}
+
+	.sidenav-subsublist {
+		padding: .6rem 0;
 	}
 
 	.sidenav-subsublist li{

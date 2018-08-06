@@ -1,6 +1,13 @@
 // ***********************
 // Footer
 // ***********************
+
+footer {
+	ul {
+		padding: 0;
+	}
+}
+
 .learn-banner {
 	background-color: #4d8fcc;
 	height: 9.3rem;
@@ -24,12 +31,12 @@ footer {
 	padding: 0 0 4rem 0;
 	box-shadow: 0rem 50.0rem 0rem 50.0rem #4e4f4f;
 }
-.container .container-footer {
-	width: 100%;
-	position:relative;
-	left:0;
-	right:0;
-}
+// .container .container-footer {
+// 	width: 100%;
+// 	position:relative;
+// 	left:0;
+// 	right:0;
+// }
 footer .left-links {
 	text-align: center;
 	color: white;
@@ -65,4 +72,14 @@ footer .right-links li {
 	font-size: 1.4rem;
 	color: #4D8FCC;
 	line-height: 1.9rem;
+}
+
+
+@media (max-width: 768px) {
+	footer {
+		text-align: center;
+		.link-col {
+			margin: 2rem 0;
+		}
+	}
 }

@@ -45,19 +45,34 @@ documentation:
         url: /docs/reference/listeners.html
       - page: Handlers
         url: /docs/reference/handlers.html
+        # subsubfolderitems:
+        # - page: AWS
+        #   url: /docs/reference/handlers/http/aws.html
+        # - page: Conjur
+        #   url: /docs/reference/handlers/http/conjur.html
+        # - page: HTTP Basic Authentication
+        #   url: /docs/reference/handlers/http/basic.html
+        # - page: MySQL
+        #   url: /docs/reference/handlers/mysql.html
+        # - page: PostgreSQL
+        #   url: /docs/reference/handlers/postgres.html
+        # - page: SSH Agent
+        #   url: /docs/reference/handlers/ssh_agent.html
+        # - page: SSH
+        #   url: /docs/reference/handlers/ssh.html
       - page: Credential Providers
         url: /docs/reference/providers.html
-        subsubfolderitems:
-        - page: Conjur
-          url: /docs/reference/providers/conjur.html
-        - page: Environment
-          url: /docs/reference/providers/env.html
-        - page: File
-          url: /docs/reference/providers/file.html
-        - page: Keychain
-          url: /docs/reference/providers/keychain.html
-        - page: Literal
-          url: /docs/reference/providers/literal.html
+        # subsubfolderitems:
+        # - page: Conjur
+        #   url: /docs/reference/providers/conjur.html
+        # - page: Environment
+        #   url: /docs/reference/providers/env.html
+        # - page: File
+        #   url: /docs/reference/providers/file.html
+        # - page: Keychain
+        #   url: /docs/reference/providers/keychain.html
+        # - page: Literal
+        #   url: /docs/reference/providers/literal.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy

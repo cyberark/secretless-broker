@@ -125,11 +125,15 @@
 			padding-bottom: .5rem
 		 }
 		 h3 {
-				padding: 1rem 2.5rem .5rem 2.5rem;
+				padding: 2rem 2.5rem 0 2.5rem;
 				color: $sless-blue;
 				border-top: 1px solid darken($sless-light-blue, 10);
 				font-weight: 800;
 				margin-top: 1rem;
+				font-size: 1.6rem;
+				a:hover {
+					color: darken($sless-blue, 20);
+				}
 		 }
 	}
 

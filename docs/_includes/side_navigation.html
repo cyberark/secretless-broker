@@ -11,7 +11,7 @@
 										{% if entry.subsubfolderitems[0] %}
 											<ul class="sidenav-subsublist">
 											{% for subentry in entry.subsubfolderitems %}
-													<li><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
+													<li><i class="fas fa-chevron-right"></i><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
 											{% endfor %}
 											</ul>
 										{% endif %}

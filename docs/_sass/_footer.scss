@@ -2,41 +2,33 @@
 // Footer
 // ***********************
 
-footer {
-	ul {
-		padding: 0;
-	}
-}
-
-.learn-banner {
+.cta-banner {
 	background-color: #4d8fcc;
 	height: 9.3rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	line-height: 3rem;
-	margin-bottom: 4rem;
+	margin-bottom: 0;
+	padding: 0 4rem;
 }
-.learn-banner p {
+.cta-banner p {
 	color: white;
 	font-size: 2rem;
 	font-weight: normal;
 }
-.learn-banner a {
+.cta-banner a {
 	color: white;
 }
 footer {
 	background-image: url("../img/secretless_pattern_dark.png");
 	background-repeat: round;
-	padding: 0 0 4rem 0;
+	padding: 4rem 0 4rem 0;
 	box-shadow: 0rem 50.0rem 0rem 50.0rem #4e4f4f;
+	ul {
+		padding: 0;
+	}
 }
-// .container .container-footer {
-// 	width: 100%;
-// 	position:relative;
-// 	left:0;
-// 	right:0;
-// }
 footer .left-links {
 	text-align: center;
 	color: white;

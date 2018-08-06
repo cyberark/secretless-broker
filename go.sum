@@ -34,6 +34,8 @@ github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720 h1:T5LkgEMAC
 github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720/go.mod h1:GL3xCUCBDV3CZiTSEKksMWbLE66hEyuu9qyDOOqM47Y=
 github.com/cyberark/conjur-api-go v0.0.0-20180212213233-94b5cadf8f90 h1:lqVSvpspNTNIrjAkOfI0nHRicd9yLfrWjt548zq4oJY=
 github.com/cyberark/conjur-api-go v0.0.0-20180212213233-94b5cadf8f90/go.mod h1:492M4gGHnfHHWtuewzmj+1fe0BiLzzsrsdGYcbP2lU8=
+github.com/cyberark/conjur-authn-k8s-client v0.12.0 h1:mwtVQzKjlax67HRnDxY4ogS5lvszV7VVonxPItxi+iQ=
+github.com/cyberark/conjur-authn-k8s-client v0.12.0/go.mod h1:hjpUeTkRMUCSR0EAEIko2RCp4+dncNeiIWHNJeLFuRg=
 github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed h1:0HPMF9Oa2FiN6inNtxlAL5iobtWygfhYlhv/T10RWFU=
 github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed/go.mod h1:EDdy0BSD9OwcV/Rvz32HsX/QM44Zmi0P8tpdbQ6QwHY=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
@@ -50,6 +52,8 @@ github.com/fatih/structs v1.0.0 h1:BrX964Rv5uQ3wwS+KRUAJCBBw5PQmgJfJ6v4yly5QwU=
 github.com/fatih/structs v1.0.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
+github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 h1:v+vxrd9XS8uWIXG2RK0BHCnXc30qLVQXVqbK+IOmpXk=
+github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5/go.mod h1:KnogPXtdwXqoenmZCw6S+25EAm2MkxbG0deNDu4cbSA=
 github.com/go-ini/ini v1.32.0 h1:/MArBHSS0TFR28yPPDK1vPIjt4wUnPBfb81i6iiyKvA=
 github.com/go-ini/ini v1.32.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba h1:P0TvLfAFQ/hc8Q+VBsrgzGv52DxTjAu199VHbAI4LLQ=
@@ -141,6 +145,8 @@ github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc h1:5T6hzGUO
 github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc h1:gqYjvctjtX4GHzgfutJxZpvZ7XhGwQLGR5BASwhpO2o=
 github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
+github.com/nsf/gocode v0.0.0-20180502111240-9d1e0378d35b h1:agMWdTHUzw9qlSSiKEz7SwXP2ZmLesKkmWYaS0K2GLk=
+github.com/nsf/gocode v0.0.0-20180502111240-9d1e0378d35b/go.mod h1:6Q8/OMaaKAgTX7/jt2bOXVDrm1eJhoNd+iwzghR7jvs=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/onsi/ginkgo v1.6.0 h1:Ix8l273rp3QzYgXSR+c8d1fTG7UPgYkOSELPhiY/YGw=

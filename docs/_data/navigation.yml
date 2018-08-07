@@ -79,6 +79,8 @@ documentation:
           url: /docs/reference/providers/keychain.html
         - page: Literal
           url: /docs/reference/providers/literal.html
+        - page: Vault
+          url: /docs/reference/providers/vault.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy

@@ -87,6 +87,10 @@ func (p *Proxy) Shutdown() {
 
 // Loops through the listeners and shuts them down concurrently
 func (p *Proxy) cleanUpListeners() {
+	// because cleanUpListeners can be called from different goroutines
+	defer p._cleanUpMux.Unlock()
+	p._cleanUpMux.Lock()
+
 	var wg sync.WaitGroup
 
 	for _, _listener := range p.Listeners {

@@ -119,27 +119,23 @@
 .about-subitem .inner {
 	min-height: 31rem;
 	padding: 2.5rem;
-	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
 	margin: 0 1.0rem 3.0rem;
 	transition: .5s ease;
 	background: $sless-light-blue;
 }
 .inner:hover {
-	transform: scale(1.025);
-	box-shadow: .3rem .3rem 1.8rem rgba(0,.1,0,.2);
+	transform: scale(1.01);
 }
 .inner i {
 	padding-top: .3rem;
 	transition: .5s ease;
+	color: $sless-blue;
 }
 .inner:hover i {
-	transform: translateX(1.2rem);
+	transform: translateX(.5rem);
 }
 .inner p {
 	margin-left: 1.5rem;
-}
-.inner-text-description {
-	//font-size: 1.4rem;
 }
 .inner-text {
 	margin-left: 0;
@@ -173,11 +169,6 @@
 }
 .arch-list > li {
 	font-family: $sless-font-primary;
-<<<<<<< HEAD
-	font-size: 1.7rem;
-=======
-	//font-size: 1.7rem;
->>>>>>> adjusted body font-sizes
 }
 .slss-arch {
 	margin: 3rem 0;

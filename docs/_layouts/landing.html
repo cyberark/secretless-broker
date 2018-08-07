@@ -5,6 +5,15 @@ layout: default
 	<div class="card-features about" id="about">
 		<div class="row sub-card">
 			<div class="col-md-4 about-subitem">
+					<div class="inner">
+						<div class ="in-line-frame">
+							<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
+							<p class="inner-text">Work on Features, not Security</p>
+						</div>
+						<p class="inner-text-description">Let developers focus on delivering business value. You can stop building bespoke integrations with vault-specific APIs or integration tools, because Secretless integrates with your vault of choice automatically.</p>
+					</div>
+				</div>
+			<div class="col-md-4 about-subitem">
 				<div class="inner">
 					<div class ="in-line-frame">
 						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
@@ -21,15 +30,6 @@ layout: default
 					</div>
 					<p class="inner-text-description">
 					It's hard for applications to respond to changing secrets. Until now, applications required additional logic to handle secrets rotation. With Secretless, no code changes or application logic is necessary - the Secretless broker handles it all for you.</p>
-				</div>
-			</div>
-			<div class="col-md-4 about-subitem">
-				<div class="inner">
-					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<p class="inner-text">Work on Features, not Security</p>
-					</div>
-					<p class="inner-text-description">Let developers focus on delivering business value. You can stop building bespoke integrations with vault-specific APIs or integration tools, because Secretless integrates with your vault of choice automatically.</p>
 				</div>
 			</div>
 		</div>
@@ -73,49 +73,6 @@ layout: default
 	
 	</div>
 
-
-
-
-<!-- <div class="container">
-
-	<div class="row">
-		<div class="col-md-6">
-				<p class="card-heading">Traditional Architecture</p>
-				<p class="card-subheading">Developer Responsibilities</p>
-				<ul class="arch-list">
-					<li>Retrieve secrets from vault​</li>
-					<li>Securely handle retrieved secrets within app​</li>
-					<li>Resiliently handle secret rotations</li>
-					<li>Manage connection disruptions</li>
-				</ul>
-		</div>
-		<div class="col-md-6">
-			<img class="arch-img" src="/img/traditional_architecture_2.svg" alt="Traditional Architecture">
-		</div>
-	</div>
-
-	<div class="row">
-		<div class="col-md-6">
-				<p class="card-heading">Secretless Architecture</p>
-				<p class="card-subheading broker">Broker Responsibilities</p>
-				<ul class="arch-list">
-					<li>Retrieve secrets from vault​</li>
-					<li>Securely handle retrieved secrets​</li>
-					<li>Transparently handle secret rotations</li>
-				</ul>
-
-				<p class="card-subheading">Developer Responsibilities</p>
-				<ul class="arch-list">
-					<li>Manage connection disruption</li>
-					<li>Connect to target services using local sockets and URLs</li>
-				</ul>
-		</div>
-		<div class="col-md-6">
-			<img class="arch-img" src="/img/secretless_architecture.svg" alt="Secretless Architecture">
-		</div>
-	</div>
-
-</div> -->
 
 
 {{ content }}

@@ -226,7 +226,11 @@ func (manager *Manager) _RunHandler(id string, options plugin_v1.HandlerOptions)
 		log.Panicf("Error! Unrecognized handler id '%s'", id)
 	}
 
-	return manager.HandlerFactories[id](options)
+	handler := manager.HandlerFactories[id](options)
+
+	manager.CreateHandler(handler, options.ClientConnection)
+
+	return handler
 }
 
 func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener {

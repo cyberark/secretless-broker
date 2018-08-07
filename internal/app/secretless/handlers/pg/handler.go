@@ -152,9 +152,8 @@ func (h *Handler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("pg handler does not use LoadKeys")
 }
 
-func (h *Handler) Shutdown() error {
+func (h *Handler) Shutdown() {
 	h.abort(fmt.Errorf("secretless shutting down"))
-	return nil
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

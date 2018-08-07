@@ -72,8 +72,7 @@ func (h *BasicAuthHandler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("http/conjur handler does not use LoadKeys")
 }
 
-func (h *BasicAuthHandler) Shutdown() error {
-	return nil
+func (h *BasicAuthHandler) Shutdown() {
 }
 
 // BasicAuthHandlerFactory instantiates a handler given HandlerOptions

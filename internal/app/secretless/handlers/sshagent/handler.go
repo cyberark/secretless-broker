@@ -122,8 +122,7 @@ func (h *Handler) GetBackendConnection() net.Conn {
 	return nil
 }
 
-func (h *Handler) Shutdown() error {
-	return nil
+func (h *Handler) Shutdown() {
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

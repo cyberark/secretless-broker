@@ -141,8 +141,7 @@ func (h *AWSHandler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("http/aws handler does not use LoadKeys")
 }
 
-func (h *AWSHandler) Shutdown() error {
-	return nil
+func (h *AWSHandler) Shutdown() {
 }
 
 // AWSHandlerFactory instantiates a handler given HandlerOptions

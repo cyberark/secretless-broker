@@ -63,8 +63,7 @@ func (h *ConjurHandler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("http/conjur handler does not use LoadKeys")
 }
 
-func (h *ConjurHandler) Shutdown() error {
-	return nil
+func (h *ConjurHandler) Shutdown() {
 }
 
 // ConjurHandlerFactory instantiates a handler given HandlerOptions

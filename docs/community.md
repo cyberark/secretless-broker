@@ -5,7 +5,7 @@ layout: subpages
 description: Secretless Community
 ---
 
-## Contributing
+## Contribute
 
 Secretless development is open to contributions from the community, including feature requests and issues (which should be logged in our [GitHub repository][github]).
 Before contributing code changes, you will need to sign our [Contributor Agreement][contrib_agreement] and submit the signed copy to <oss@cyberark.com>.

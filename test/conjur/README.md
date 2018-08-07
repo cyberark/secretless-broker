@@ -2,7 +2,7 @@
 
 ## Local Environment (Laptop)
 
-These instructions show how to develop the Secretless Conjur Handler and Provider on you local machine. This way you can use niceties such as IDE features.
+These instructions show how to develop the Conjur Handler and Provider on you local machine. This way you can use niceties such as IDE features.
 
 First you'll need a Conjur server. It's easy to bring one up using the provided `docker-compose.yml`:
 
@@ -10,7 +10,7 @@ First you'll need a Conjur server. It's easy to bring one up using the provided 
 $ docker-compose up -d conjur
 ```
 
-Next, run `secretless` in a terminal:
+Next, run `secretless-broker` in a terminal:
 
 ```sh-session
 $ ./run_dev
@@ -27,7 +27,7 @@ $ docker-compose port conjur 80
 0.0.0.0:32812
 ```
 
-Now you can use `secretless` as a forward proxy to Conjur. `secretless` will add the authentication automatically.
+Now you can use `secretless-broker` as a forward proxy to Conjur. `secretless-broker` will add the authentication automatically.
 
 Here's how to run `curl`, without any credentials, to list the data in Conjur (replace the port `31812` with the port number you just obtained):
 

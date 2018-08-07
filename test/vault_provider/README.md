@@ -2,7 +2,7 @@
 
 ## Local Environment (Laptop)
 
-These instructions show how to develop the Secretless HashiCorp Vault (`vault`) Provider on you local machine.
+These instructions show how to develop the HashiCorp Vault (`vault`) Provider on you local machine.
 
 First you'll need a Vault server. It's easy to bring one up using the provided `docker-compose.yml` which will create one in development mode:
 

@@ -8,20 +8,20 @@ Run Postgres in Docker:
 $ docker-compose up -d pg
 ```
 
-Run Secretless locally and execute tests:
+Run Secretless Broker locally and execute tests:
 
-_Note: Since secretless container runs the daemon as a limited user, sockets should be mounted to `/sock` directory._
+_Note: Since Secretless Broker container runs the daemon as a limited user, sockets should be mounted to `/sock` directory._
 
 ```sh-session
 $ ./run_dev_test
 ...
-ok      github.com/conjurinc/secretless/test/pg_handler   0.048s
+ok      github.com/conjurinc/secretless-broker/test/pg_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
 ```
 
 ## Local Environment (Laptop)
 
-These instructions show how to develop the Secretless PG handler on you local machine. This way you can use niceties such as IDE features.
+These instructions show how to develop the PG handler on you local machine. This way you can use niceties such as IDE features.
 
 First you'll need a Postgres server. You can run one natively, or using Docker:
 
@@ -29,7 +29,7 @@ First you'll need a Postgres server. You can run one natively, or using Docker:
 $ docker-compose up -d pg
 ```
 
-Now you can run `secretless` in a terminal:
+Now you can run `secretless-broker` in a terminal:
 
 ```sh-session
 $ ./run_dev
@@ -75,15 +75,15 @@ Then run a `dev` container:
 ```sh-session
 $ docker-compose run --rm dev
 Starting pghandler_pg_1 ... done
-secretless # cd test/pg_handler
+secretless-broker # cd test/pg_handler
 pg_handler # 
 ```
 
-Now you can run the secretless server:
+Now you can run the Secretless Broker:
 
 ```sh-session
 pg_handler# PG_ADDRESS=pg:5432 \
-  ../../dist/linux/amd64/secretless \
+  ../../dist/linux/amd64/secretless-broker \
   -config secretless.dev.yml
 2018/01/10 21:25:15 Secretless starting up...
 ...
@@ -96,7 +96,7 @@ Now run another `dev` container as the client:
 ```sh-session
 $ docker-compose run --rm dev
 Starting pghandler_pg_1 ... done
-secretless# cd test/pg_handler/
+secretless-broker# cd test/pg_handler/
 pg_handler#
 ```
 

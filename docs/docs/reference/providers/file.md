@@ -1,13 +1,13 @@
 ---
-title: Secretless Providers
+title: Providers
 id: file
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: docs/reference/providers/file
 ---
 
 ## File
-The file provider (`file`) allows you to use a file available to the Secretless
+The file provider (`file`) allows you to use a file available to the Secretless Broker
 process and/or container as sources of credentials.
 
 ### Examples

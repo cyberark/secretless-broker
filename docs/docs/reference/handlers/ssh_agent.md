@@ -1,14 +1,14 @@
 ---
-title: Secretless Handlers
+title: Handlers
 id: ssh_agent
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: docs/reference/handlers/ssh_agent
 ---
 
 ## SSH Agent
 ### Overview
-The SSH Agent handler enables Secretless to replace `ssh-agent` by providing
+The SSH Agent handler enables the Secretless Broker to replace `ssh-agent` by providing
 similar functionality over a socket without exposing keys. Once running, export
 `SSH_AUTH_SOCK` to equal the path of your listener socket targeted by this
 handler.
@@ -46,7 +46,7 @@ handlers:
         id: /id_rsa
 ```
   
-With Secretless running this configuration, use it in replacement of
+With the Secretless Broker running this configuration, use it in replacement of
 `ssh-agent` by exporting `SSH_AUTH_SOCK`:  
 ``` bash
 $ export SSH_AUTH_SOCK=/sock/.agent

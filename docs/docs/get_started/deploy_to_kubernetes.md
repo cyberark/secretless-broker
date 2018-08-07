@@ -2,13 +2,13 @@
 title: Deploy to Kubernetes
 id: deploy_to_kubernetes
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: /docs/get_started/deploy_to_kubernetes
 ---
 
-To get started with Secretless, try working through this tutorial, which goes through deploying Secretless with a sample application that uses a PostgresSQL database for backend storage.
+To get started with the Secretless Broker, try working through this tutorial, which goes through deploying the Secretless Broker with a sample application that uses a PostgresSQL database for backend storage.
 
-We have chosen a PostgresSQL database as the target service for this tutorial, however the Secretless broker comes built-in with support for several other target services; check out our [reference](/docs/reference.html) for more info.
+We have chosen a PostgresSQL database as the target service for this tutorial, however the Secretless Broker comes built-in with support for several other target services; check out our [reference](/docs/reference.html) for more info.
 
 ## Table of Contents
 
@@ -18,13 +18,13 @@ We have chosen a PostgresSQL database as the target service for this tutorial, h
   + [Provision Target Services (optional)](#provision-target-services-optional)
   + [Setup And Configure Target Service](#setup-and-configure-target-service)
   + [Create Application Namespace and Store Application DB-Credentials](#create-application-namespace-and-store-application-db-credentials)
-  + [Create Secretless Configuration ConfigMap](#create-secretless-configuration-configmap)
+  + [Create Secretless Broker Configuration ConfigMap](#create-secretless-broker-configuration-configmap)
 + Steps for the non-privileged user (i.e developer)
   + [Build Application Deployment Manifest](#build-application-deployment-manifest)
     + [Add & Configure Application Container](#add--configure-application-container)
-    + [Add & Configure Secretless Sidecar Container](#add--configure-secretless-sidecar-container)
+    + [Add & Configure Secretless Broker Sidecar Container](#add--configure-secretless-broker-sidecar-container)
     + [Completed Application Deployment Manifest](#completed-application-deployment-manifest)
-  + [Deploy Application With Secretless](#deploy-application-with-secretless)
+  + [Deploy Application With Secretless Broker](#deploy-application-with-secretless-broker)
     + [Expose Application Publicly](#expose-application-publicly)
 + [Try The Running Application](#try-the-running-application)
 + [Rotate Target Service Credentials](#rotate-target-service-credentials)
@@ -32,9 +32,9 @@ We have chosen a PostgresSQL database as the target service for this tutorial, h
 
 ## Getting started
 
-In this tutorial, we will walk through creating an application that communicates with a password-protected PostgreSQL database via the Secretless broker. _The application does not need to know anything about the credentials required to connect to the database;_ the admin super-user who provisions and configures the database will also configure Secretless to be able to communicate with it. The developer writing the application only needs to know the socket or address that Secretless is listening on to proxy the connection to the PostgreSQL backend.
+In this tutorial, we will walk through creating an application that communicates with a password-protected PostgreSQL database via the Secretless Broker. _The application does not need to know anything about the credentials required to connect to the database;_ the admin super-user who provisions and configures the database will also configure the Secretless Broker to be able to communicate with it. The developer writing the application only needs to know the socket or address that the Secretless Broker is listening on to proxy the connection to the PostgreSQL backend.
 
-If you'd rather just see the whole thing working end to end, check out [our tutorial on github](https://github.com/conjurinc/secretless/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+If you'd rather just see the whole thing working end to end, check out [our tutorial on github](https://github.com/conjurinc/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
 
 We are going to do the following:
 
@@ -42,11 +42,11 @@ We are going to do the following:
 
 1. Provision target services
 1. Configure target services for usage by application and add credentials to secret store
-1. Configure Secretless to broker the connection to the target service using credentials from the secret store
+1. Configure the Secretless Broker to broker the connection to the target service using credentials from the secret store
 
 **As the application developer:**
-1. Configure application to connect to target service via the Secretless broker
-1. Deploy and run Secretless adjacent to the application
+1. Configure application to connect to target service via the Secretless Broker
+1. Deploy and run the Secretless Broker adjacent to the application
 
 ### Prerequisites
 
@@ -72,7 +72,7 @@ Pet data is stored in a PostgreSQL database, and the application may be configur
 
 See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
 
-The database is **credential-protected**. With Secretless, we will be able to use a value of `DB_URL` of the form:  `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
+The database is **credential-protected**. With the Secretless Broker, we will be able to use a value of `DB_URL` of the form:  `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
 
 ## Steps for the admin user
 
@@ -281,25 +281,25 @@ data:
 EOF
 ```
 
-### Create Secretless Configuration ConfigMap
+### Create Secretless Broker Configuration ConfigMap
 
-At this point, we've provisioned our database, configured it to be accessed by the application, stored the access credentials in a secret store - so we're ready to write our Secretless configuration that will define how Secretless should listen for connections to this PostgreSQL database and what it should do with those connection requests when it receives them.
+At this point, we've provisioned our database, configured it to be accessed by the application, stored the access credentials in a secret store - so we're ready to write our Secretless Broker configuration that will define how the Secretless Broker should listen for connections to this PostgreSQL database and what it should do with those connection requests when it receives them.
 
 Once we've written that configuration, we can hand it off for the developer as they prepare to deploy their application.
 
-The Secretless configuration file has 2 sections:
-+ Listeners, to define how Secretless should listen for new connection requests for a particular backend
-+ Handlers, which are passed new connection requests received by the listeners, and are the part of Secretless that actually opens up a connection to the target service with credentials that it retrieves using the specified credential provider(s)
+The Secretless Broker configuration file has 2 sections:
++ Listeners, to define how the Secretless Broker should listen for new connection requests for a particular backend
++ Handlers, which are passed new connection requests received by the listeners, and are the part of the Secretless Broker that actually opens up a connection to the target service with credentials that it retrieves using the specified credential provider(s)
 
 In our sample, we create a `secretless.yml` file as follows:
 + Define a `pg` listener named `pets-pg-listener` that listens on `localhost:5432`
-+ Define a handler named `pets-pg-handler` that uses the `file` provider to retrieve the `address`, `username` and `password` of the remote database. The file provider is used to access Kubernetes secrets made available to the Secretless container via volume mounts. 
++ Define a handler named `pets-pg-handler` that uses the `file` provider to retrieve the `address`, `username` and `password` of the remote database. The file provider is used to access Kubernetes secrets made available to the Secretless Broker container via volume mounts. 
 
   _NOTE: There is a pending feature for a Kubernetes secret provider which will retrieve secrets directly from the Kubernetes API_.
   
-This configuration is shared amongst all Secretless sidecar containers, each residing within an application Pod replica. 
+This configuration is shared amongst all Secretless Broker sidecar containers, each residing within an application Pod replica. 
 
-Run the command below to create a Secretless configuration file named `secretless.yml` in your current working directory:
+Run the command below to create a Secretless Broker configuration file named `secretless.yml` in your current working directory:
 
 ```bash
 cat << EOF > secretless.yml
@@ -323,9 +323,9 @@ handlers:
 EOF
 ```
 
-You will now create a ConfigMap from the `secretless.yml` file. Later this ConfigMap will be made available to each Secretless sidecar container via a volume mount.
+You will now create a ConfigMap from the `secretless.yml` file. Later this ConfigMap will be made available to each Secretless Broker sidecar container via a volume mount.
 
-Create the Secretless Configuration ConfigMap by running the command:
+Create the Secretless Broker Configuration ConfigMap by running the command:
 ```bash
 kubectl --namespace ${APPLICATION_NAMESPACE} \
   create configmap \
@@ -346,7 +346,7 @@ export APPLICATION_DB_NAME=quick_start_db
 
 ### Build Application Deployment Manifest
 
-In this section, you build the deployment manifest for the application. The manifest includes a section for specifying the pod template (`$.spec.template`), it is here that we will declare the application container and Secretless sidecar container.
+In this section, you build the deployment manifest for the application. The manifest includes a section for specifying the pod template (`$.spec.template`), it is here that we will declare the application container and Secretless Broker sidecar container.
 
 Below is the base manifest that you will be building upon: 
 _quick-start.yml_
@@ -375,20 +375,20 @@ The manifest should be saved as a file named `quick-start.yml`. As you can see a
 
 The additional steps to complete building the manifest are provided to be informative:
 + [Add & Configure Application Container](#add--configure-application-container)
-+ [Add & Configure Secretless Sidecar Container](#add--configure-secretless-sidecar-container)
++ [Add & Configure Secretless Broker Sidecar Container](#add--configure-secretless-broker-sidecar-container)
 
 A [Completed Application Deployment Manifest](#completed-application-deployment-manifest) is provided in the last section, where you'll actually create the `quick_start.yml`. 
 
 #### Add & Configure Application Container
 
-The secretless broker sidecar container has a shared network with the application container. This allows us to point the application to `localhost` where Secretless is listening on port `5432`, in accordance with the configuration stored in ConfigMap.
+The Secretless Broker sidecar container has a shared network with the application container. This allows us to point the application to `localhost` where the Secretless Broker is listening on port `5432`, in accordance with the configuration stored in ConfigMap.
 
 _Note_: 
-+ An application must connect to Secretless without SSL, though the actual connection between Secretless and the target service can leverage SSL. To achieve this we append the query parameters `sslmode=disable` to the connection string, which prevents the PostgresSQL driver from using SSL mode with Secretless.
++ An application must connect to the Secretless Broker without SSL, though the actual connection between the Secretless Broker and the target service can leverage SSL. To achieve this we append the query parameters `sslmode=disable` to the connection string, which prevents the PostgresSQL driver from using SSL mode with the Secretless Broker.
 + Some database drivers require the connection string to explicitly specify a user. This is the reason for `..x@localhost...` in `$DB_URL` below.
-+ Secretless respects the parameters specified in the database connections string.
++ The Secretless Broker respects the parameters specified in the database connections string.
 
-You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `$DB_URL` environment variable to `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via Secretless.
+You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `$DB_URL` environment variable to `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
 
 Add the application container to the base manifest:
 
@@ -404,13 +404,13 @@ containers:
         value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
 ```
 
-#### Add & Configure Secretless Sidecar Container
+#### Add & Configure Secretless Broker Sidecar Container
 
-You will now add the Secretless sidecar container to the containers section under `spec` of the pod template. You will need to:
+You will now add the Secretless Broker sidecar container to the containers section under `spec` of the pod template. You will need to:
 
-1. Add the Secretless sidecar container definition
-2. Add read-only volume mounts on the Secretless sidecar container for:
-  + Secretless configuration ConfigMap (`quick-start-application-secretless-config`)
+1. Add the Secretless Broker sidecar container definition
+2. Add read-only volume mounts on the Secretless Broker sidecar container for:
+  + Secretless Broker configuration ConfigMap (`quick-start-application-secretless-config`)
   + Kubernetes secrets containing the application-user DB-credentials (`quick-start-backend-credentials`) 
 
 _quick-start.yml_
@@ -419,8 +419,8 @@ _quick-start.yml_
 containers:
   - name: quick-start-application
     # already filled in from previous section
-  - name: secretless
-    image: cyberark/secretless:latest
+  - name: secretless-broker
+    image: cyberark/secretless-broker:latest
     imagePullPolicy: IfNotPresent
     args: ["-f", "/etc/secretless/secretless.yml"]
     volumeMounts:
@@ -468,8 +468,8 @@ spec:
           env:
             - name: DB_URL
               value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
-        - name: secretless
-          image: cyberark/secretless:latest
+        - name: secretless-broker
+          image: cyberark/secretless-broker:latest
           imagePullPolicy: IfNotPresent
           args: ["-f", "/etc/secretless/secretless.yml"]
           volumeMounts:
@@ -489,9 +489,9 @@ spec:
 EOF
 ```
 
-### Deploy Application With Secretless
+### Deploy Application With Secretless Broker
 
-You now have a complete application deployment manifest from the previous section, with 2 containers (the application and the Secretless sidecar) defined in the Pod template. It is time to deploy the application using this manifest.
+You now have a complete application deployment manifest from the previous section, with 2 containers (the application and the Secretless Broker sidecar) defined in the Pod template. It is time to deploy the application using this manifest.
 
 To deploy the application, run this command:
 ```bash
@@ -532,7 +532,7 @@ If you used the service definition above, the application should now be availabl
 
 ## Try The Running Application
 
-That's it! You've configured your application to connect to PostgreSQL via Secretless, and we can try it out to validate that it's working as expected.
+That's it! You've configured your application to connect to PostgreSQL via the Secretless Broker, and we can try it out to validate that it's working as expected.
 
 The next steps rely on the presence of `$APPLICATION_URL` in your environment. For example, if you used the service definition in the previous then you would setup your environment as follows:
 ```bash
@@ -562,7 +562,7 @@ There we have it. This application is communicating with a target service withou
 
 ## Rotate Target Service Credentials
 
-In this section, you get to see how an application using Secretless deals with credential rotation.
+In this section, you get to see how an application using the Secretless Broker deals with credential rotation.
 These are the steps you wil take to rotate the credentials of the dabatase:
 + update the application-user DB-credentials in the vault
 + wait for the update to take effect
@@ -631,7 +631,7 @@ There will be a lag for these credentials to propagate to the volume mount of th
 
 You can check that the credential have been propagate by `exec`ing into any one of the application pods and comparing the contents of `/etc/secret/password` against `APPLICATION_DB_NEW_PASSWORD`.
 
-Run the following command to wait for Kubernetes secrets to propagate to the application pod Secretless sidecar container volume mounts:
+Run the following command to wait for Kubernetes secrets to propagate to the application pod Secretless Broker sidecar container volume mounts:
 
 ```bash
 function first_pod {
@@ -645,7 +645,7 @@ function first_pod_password {
   kubectl --namespace ${APPLICATION_NAMESPACE} \
     exec \
     -it \
-    -c secretless \
+    -c secretless-broker \
     $(first_pod) \
     -- \
     cat /etc/secret/password
@@ -699,4 +699,4 @@ Now return to the polling terminal. Observe that requests to the application API
 
 ## Review Complete Tutorial With Scripts
 
-Check out [our tutorial on github](https://github.com/conjurinc/secretless/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+Check out [our tutorial on github](https://github.com/conjurinc/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.

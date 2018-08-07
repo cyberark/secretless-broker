@@ -1,8 +1,8 @@
 ---
-title: Secretless Providers
+title: Providers
 id: keychain
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: docs/reference/providers/keychain
 ---
 

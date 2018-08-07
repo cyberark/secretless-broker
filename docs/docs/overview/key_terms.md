@@ -2,7 +2,7 @@
 title: Key Terms
 id: key_terms
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: docs/overview/key_terms
 ---
 
@@ -26,7 +26,7 @@ permalink: docs/overview/key_terms
 
   When a client uses the API to interact with the vault, this interaction is written to a separate database called the audit. The audit can be used to search and report on historical interactions with secret data. Vaults may also be capable of automatically rotating the secrets. Or rotation may be performed by a separate application, acting through the Vault API.
 
-## Secretless-Specific Terminology
+## Secretless Broker-Specific Terminology
 
 - ### Listener
 
@@ -34,8 +34,8 @@ permalink: docs/overview/key_terms
 
 - ### Provider
 
-  Secretless can obtain credentials from many different vaults. For each kind of vault, Secretless contains a Provider which can connect to that vault and obtain credentials. By adding new Providers, Secretless can be extended to support new vaults.
+  The Secretless Broker can obtain credentials from many different vaults. For each kind of vault, the Secretless Broker contains a Provider which can connect to that vault and obtain credentials. By adding new Providers, the Secretless Broker can be extended to support new vaults.
 
 - ### Handler
 
-  A Handler uses a Provider to obtain credentials to a target service. It uses the credentials to establish a connection to the target service, and then brokers the traffic between the client and the target.  Each Handler understands how to negotiate authentication with one specific type of target service, such as a MySQL database or SSH server. By adding new Handlers, Secretless can be extended to support new types of target services.
+  A Handler uses a Provider to obtain credentials to a target service. It uses the credentials to establish a connection to the target service, and then brokers the traffic between the client and the target.  Each Handler understands how to negotiate authentication with one specific type of target service, such as a MySQL database or SSH server. By adding new Handlers, the Secretless Broker can be extended to support new types of target services.

@@ -10,5 +10,5 @@ exec env CONJUR_APPLIANCE_URL="http://localhost:$conjur_port" \
   CONJUR_ACCOUNT=dev \
   CONJUR_AUTHN_LOGIN=admin \
   CONJUR_AUTHN_API_KEY="$admin_api_key" \
-  "../../dist/$platform/amd64/secretless" \
+  "../../dist/$platform/amd64/secretless-broker" \
   -config secretless.dev.yml

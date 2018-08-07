@@ -1,12 +1,12 @@
 package listeners
 
 import (
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/http"
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/mysql"
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/pg"
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/ssh"
-	"github.com/conjurinc/secretless/internal/app/secretless/listeners/sshagent"
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/listeners/http"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/listeners/mysql"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/listeners/pg"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/listeners/ssh"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/listeners/sshagent"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // ListenerFactories contains the list of built-in listener factories

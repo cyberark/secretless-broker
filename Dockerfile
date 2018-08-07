@@ -15,12 +15,12 @@ COPY go.mod go.sum /secretless/
 RUN go list -e $(go list -f '{{.Path}}' -m all 2>/dev/null)
 
 COPY . /secretless
-RUN go build -o dist/$GOOS/$GOARCH/secretless ./cmd/secretless && \
+RUN go build -o dist/$GOOS/$GOARCH/secretless-broker ./cmd/secretless-broker && \
     go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2
 
 
 # =================== MAIN CONTAINER ===================
-FROM alpine:3.8 as secretless
+FROM alpine:3.8 as secretless-broker
 MAINTAINER CyberArk Software, Inc.
 
 RUN apk add -u shadow libc6-compat && \
@@ -42,7 +42,7 @@ RUN apk add -u shadow libc6-compat && \
 
 USER secretless
 
-ENTRYPOINT [ "/usr/local/bin/secretless" ]
+ENTRYPOINT [ "/usr/local/bin/secretless-broker" ]
 
-COPY --from=secretless-builder /secretless/dist/linux/amd64/secretless \
+COPY --from=secretless-builder /secretless/dist/linux/amd64/secretless-broker \
                                /secretless/dist/linux/amd64/summon2 /usr/local/bin/

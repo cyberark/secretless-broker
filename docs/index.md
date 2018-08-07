@@ -6,10 +6,9 @@ description: Secretless Broker
 ---
 
 <div class="container-fluid">
-	<div class="introduction" id="simple-started">
-		<div class="row sub-card">
+	<div class="card introduction" id="simple-started">
+		<div class="sub-card">
 			<h2>It's simple to get started!</h2>
-
       <div id="quick-start-tabs-main">
         <ul>
           <li><a href="#tabs-demo-pg-main">PostgreSQL</a></li>

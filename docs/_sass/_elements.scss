@@ -31,9 +31,17 @@
 	font-size: 2.4rem;
 	font-family: $sless-font-secondary;
 }
-.jumbotron-sub p {
-	text-align: center;
-	color: white;
+.jumbotron-sub {
+	h2 {
+		text-align: center;
+		color: #fff;
+		color: #fff;
+    margin-top: .4rem;
+	}
+	p {
+		text-align: center;
+		color: white;
+	}
 }
 .jumbotron-sub-description {
 	width: 53%;
@@ -123,19 +131,30 @@
 	transition: .5s ease;
 	background: $sless-light-blue;
 }
-.inner:hover {
-	transform: scale(1.01);
-}
-.inner i {
-	padding-top: .3rem;
-	transition: .5s ease;
-	color: $sless-blue;
-}
-.inner:hover i {
-	transform: translateX(.5rem);
-}
-.inner p {
-	margin-left: 1.5rem;
+
+.inner {
+	i {
+		padding-top: .3rem;
+		transition: .5s ease;
+		color: $sless-blue;
+		margin-right: 8px;
+    margin-left: -11px;
+		&:hover {
+			transform: translateX(.2rem);
+		}
+	}
+	p {
+		margin-left: 1.5rem;
+	}
+	h3 {
+		margin-top: 7px;
+	}
+	&:hover {
+		transform: scale(1.01);
+		i {
+			transform: translateX(.5rem);
+		}
+	}
 }
 .inner-text {
 	margin-left: 0;

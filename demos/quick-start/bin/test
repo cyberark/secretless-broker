@@ -1,20 +1,28 @@
 #!/bin/bash
 set -e
 
-cleanup () {
-  pushd test &>/dev/null
-    docker-compose rm -fs
-  popd &>/dev/null
-}
-trap cleanup EXIT ERR
+CURRENT_DIR=$(dirname $0)
+
+echo "Cleaning up old runners..."
+$CURRENT_DIR/stop || true
+echo "Clean up complete"
 
 pushd test &>/dev/null
-  docker-compose up -d quickstart
+cleanup() {
+  local exit_status=$?
+  docker-compose rm -fsv || true
+  exit $exit_status
+}
+trap cleanup EXIT ABRT QUIT ERR
 
-  echo "Waiting for services to be running.."
-  until docker-compose exec quickstart ls /run/postgresql/.init &>/dev/null; do
-    sleep 1s
-  done
+docker-compose up -d quickstart
 
-  docker-compose up test-client
-popd &>/dev/null
+# Used to show in the builds what the test image is doing
+docker-compose logs quickstart &
+
+echo "Waiting for services to be running.."
+until docker-compose exec -T quickstart ls /run/postgresql/.init &>/dev/null; do
+  sleep 1s
+done
+
+docker-compose run -T test-client

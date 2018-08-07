@@ -39,6 +39,12 @@ pipeline {
       }
     }
 
+    stage('Demo tests') {
+      steps {
+        sh './bin/test_quickstart'
+      }
+    }
+
     stage('Push Images') {
       when {
         branch 'master'
@@ -46,6 +52,15 @@ pipeline {
 
       steps {
         sh './bin/publish'
+      }
+    }
+
+    stage('Fix Website Flags (staging)') {
+      when {
+        branch 'staging'
+      }
+      steps {
+        sh 'sed -i "s#^is_maintenance_mode:.*#is_maintenance_mode: false#" docs/_config.yml'
       }
     }
 
@@ -78,9 +93,7 @@ pipeline {
             branch 'master'
           }
           steps {
-            sh 'echo "Skipping production website push - pushing to staging"'
-            sh 'summon -e staging bin/publish_website'
-            //sh 'summon -e production bin/publish_website'
+            sh 'summon -e production bin/publish_website'
             archiveArtifacts 'docs/_site/'
           }
         }

@@ -1,31 +1,34 @@
 <!DOCTYPE html>
+
 <html lang="en-us">
+  {% if site.is_maintenance_mode %}
+    {% include maintenance_mode.html %}
+  {% else %}
+    {% include head.html %}
 
-  {% include head.html %}
+    {% if page.id == "home" %}
+      {% include top_nav_home.html %}
+    {% endif %}
 
-  {% if page.id == "home" %}
-    {% include top_nav_home.html %}
-  {% endif %}
-
-  <body>
+   <body>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DGS7TG"
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
 
-    {% if page.id == "home" %}
-      {% include jumbotron.html %}
-    {% endif %}
+      {% if page.id == "home" %}
+        {% include jumbotron.html %}
+      {% endif %}
 
-    <div class="container">
-      <div class="row">
-        <div id="content" class="">
-          {{ content }}
+      <div class="container">
+        <div class="row">
+          <div id="content" class="">
+            {{ content }}
+          </div>
         </div>
       </div>
-    </div>
 
-    {% include footer.html %}
-
-  </body>
+      {% include footer.html %}
+    </body>
+  {% endif %}
 </html>

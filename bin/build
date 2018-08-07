@@ -4,23 +4,15 @@
 # usage: ./bin/build
 set -ex
 
-on_exit () {
-  containers=$(docker container ls -aq --filter "label=builder=secretless-builder")
-
-  if [ "${containers}" != "" ]; then
-    for container in ${containers}; do
-      docker rm -f "${container}" >/dev/null
-    done
-  fi
-}
-trap on_exit ERR INT QUIT EXIT
-
-
 VERSION=$(cat VERSION)
+QUICK_START_REL_DIR="$(dirname $0)/../demos/quick-start/docker"
+QUICK_START_DIR="$(realpath "$QUICK_START_REL_DIR")"
 
 DOCKER_FLAGS=""
 if [ "${KEEP_ALIVE}" != "" ]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} -rm=false"
+else
+  DOCKER_FLAGS="${DOCKER_FLAGS} --force-rm"
 fi
 
 echo "Building Docker image"
@@ -32,6 +24,13 @@ docker build -t "secretless:${VERSION}" \
 echo "Building Docker dev image"
 docker build -t "secretless-dev:${VERSION}" \
              -t "secretless-dev:latest" \
-             -f Dockerfile.dev \
              $DOCKER_FLAGS \
+             -f Dockerfile.dev \
              .
+
+echo "Building Docker Quick-Start image"
+docker build -t "secretless-quickstart:${VERSION}" \
+             -t "secretless-quickstart:latest" \
+             $DOCKER_FLAGS \
+             -f "$QUICK_START_DIR/Dockerfile" \
+             "$QUICK_START_DIR"

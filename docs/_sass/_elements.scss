@@ -7,7 +7,7 @@
 .card-heading {
 	font-weight: bold;
 	line-height: 4.5rem;
-	font-family: $sless-font-primary;
+	font-family: $sless-font-secondary;
 	font-size: 3.3rem;
 	letter-spacing: .1rem;
 	color: #4d8fcc;
@@ -17,7 +17,7 @@
 }
 .card-side-heading {
 	font-weight: bold;
-	font-family: $sless-font-primary;
+	font-family: $sless-font-secondary;
 	font-size: 2rem;
 	letter-spacing: .1rem;
 }
@@ -29,6 +29,7 @@
 	font-weight: bold;
 	letter-spacing: .1rem;
 	font-size: 2.4rem;
+	font-family: $sless-font-secondary;
 }
 .jumbotron-sub p {
 	text-align: center;
@@ -36,8 +37,7 @@
 }
 .jumbotron-sub-description {
 	width: 53%;
-    margin: 0 auto;
-    font-weight: 100;
+  margin: 0 auto;
 }
 
 // ***********************
@@ -139,13 +139,14 @@
 	margin-left: 1.5rem;
 }
 .inner-text-description {
-	font-size: 1.4rem;
+	//font-size: 1.4rem;
 }
 .inner-text {
 	margin-left: 0;
-	letter-spacing: .1rem;
 	font-size: 1.8rem;
 	font-weight: 800;
+	font-family: $sless-font-secondary;
+	line-height: 2.5rem;
 }
 .in-line-frame {
 	display: flex;
@@ -172,7 +173,11 @@
 }
 .arch-list > li {
 	font-family: $sless-font-primary;
+<<<<<<< HEAD
 	font-size: 1.7rem;
+=======
+	//font-size: 1.7rem;
+>>>>>>> adjusted body font-sizes
 }
 .slss-arch {
 	margin: 3rem 0;

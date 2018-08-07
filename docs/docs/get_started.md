@@ -1,5 +1,5 @@
 ---
-title:  Get Started
+title: Get Started
 id: get_started
 layout: docs
 description: Secretless Documentation

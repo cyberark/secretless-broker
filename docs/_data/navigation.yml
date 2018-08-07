@@ -52,9 +52,9 @@ documentation:
       - page: Handlers
         url: /docs/reference/handlers.html
         subsubfolderitems:
-        - page: AWS
+        - page: AWS - HTTPS
           url: /docs/reference/handlers/http/aws.html
-        - page: Conjur
+        - page: Conjur - HTTP(S)
           url: /docs/reference/handlers/http/conjur.html
         - page: HTTP Basic Authentication
           url: /docs/reference/handlers/http/basic.html
@@ -69,18 +69,18 @@ documentation:
       - page: Credential Providers
         url: /docs/reference/providers.html
         subsubfolderitems:
-        - page: Conjur
+        - page: CyberArk Conjur
           url: /docs/reference/providers/conjur.html
         - page: Environment
           url: /docs/reference/providers/env.html
         - page: File
           url: /docs/reference/providers/file.html
+        - page: HashiCorp Vault
+          url: /docs/reference/providers/vault.html
         - page: Keychain
           url: /docs/reference/providers/keychain.html
         - page: Literal
           url: /docs/reference/providers/literal.html
-        - page: Vault
-          url: /docs/reference/providers/vault.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy

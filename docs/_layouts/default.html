@@ -1,27 +1,30 @@
 <!DOCTYPE html>
+
 <html lang="en-us">
-
-  {% include head.html %}
-
-  {% if page.id == "home" %}
-    {% include top_nav_home.html %}
-  {% endif %}
-
-  <body>
+  {% if site.is_maintenance_mode %}
+    {% include maintenance_mode.html %}
+  {% else %}
+    {% include head.html %}
 
     {% if page.id == "home" %}
-      {% include jumbotron.html %}
+      {% include top_nav_home.html %}
     {% endif %}
 
-    <div class="container">
-      <div class="row">
-        <div id="content" class="">
-          {{ content }}
+    <body>
+
+      {% if page.id == "home" %}
+        {% include jumbotron.html %}
+      {% endif %}
+
+      <div class="container">
+        <div class="row">
+          <div id="content" class="">
+            {{ content }}
+          </div>
         </div>
       </div>
-    </div>
 
-    {% include footer.html %}
-
-  </body>
+      {% include footer.html %}
+    </body>
+  {% endif %}
 </html>

@@ -55,6 +55,15 @@ pipeline {
       }
     }
 
+    stage('Fix Website Flags (staging)') {
+      when {
+        branch 'staging'
+      }
+      steps {
+        sh 'sed -i "s#^is_maintenance_mode:.*#is_maintenance_mode: false#" docs/_config.yml'
+      }
+    }
+
     stage('Build Website') {
       steps {
         sh './bin/build_website'
@@ -84,9 +93,7 @@ pipeline {
             branch 'master'
           }
           steps {
-            sh 'echo "Skipping production website push - pushing to staging"'
-            sh 'summon -e staging bin/publish_website'
-            //sh 'summon -e production bin/publish_website'
+            sh 'summon -e production bin/publish_website'
             archiveArtifacts 'docs/_site/'
           }
         }

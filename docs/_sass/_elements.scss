@@ -171,6 +171,26 @@
 	font-family: 'Open Sans', sans-serif;
 	font-size: 1.7rem;
 }
+.slss-arch {
+	margin: 3rem 0;
+}
+
+.slss-arch-card {
+	margin: 2rem 0;
+}
+
+.arch-img {
+	padding: 3rem;
+	width: 100%;
+}
+
+@media (min-width: 700px) {
+	.arch-img {
+		min-height: 300px;
+		margin: 2rem 0;
+		padding: 0;
+	}
+}
 
 // ***********************
 // Get Started

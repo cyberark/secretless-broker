@@ -6,15 +6,15 @@ description: Secretless Documentation
 permalink: docs/reference/providers/vault
 ---
 
-# HashiCorp Vault
+## HashiCorp Vault
 The Vault provider (`vault`) populates credentials from an external
 [Vault](https://www.vaultproject.io/) service.
 
-## Parameters
+### Parameters
 The value of `id` must be provided in the format `<path>#<key>` _or_ the path
 must have a key named `value`.
 
-## Examples
+### Examples
 ``` yaml
 listeners:
   - name: pg_listener

@@ -4,7 +4,7 @@ layout: subpages
 
 <ul class="posts">
   {% for post in site.posts %}
-    <a class="post" href="{{ post.url }}"><li class="card">
+    <a class="post" href="{{ post.url }}"><li>
       {% if post.image %}
         <img class="post-list-thumb" src="{{ base.url }}/img/blog/{{ post.thumb }}" alt="{{ post.image-alt }}">
       {% endif %}

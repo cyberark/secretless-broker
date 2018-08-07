@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Deploy to Kubernetes
 id: deploy_to_kubernetes
 layout: docs
 description: Secretless Documentation
 permalink: /docs/get_started/deploy_to_kubernetes
 ---
-
-<p class="card-heading">Deploy to Kubernetes</p>
 
 To get started with Secretless, try working through this tutorial, which goes through deploying Secretless with a sample application that uses a PostgresSQL database for backend storage.
 

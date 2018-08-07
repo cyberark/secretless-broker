@@ -6,12 +6,12 @@ description: Secretless Documentation
 permalink: docs/reference/handlers/ssh
 ---
 
-# SSH
-## Overview
+## SSH
+### Overview
 The SSH handler acts as a man-in-the-middle, authenticating inbound SSH 
 connections automatically without exposing passwords or keys.
 
-## Credentials
+### Credentials
 - `address`  
 _Required_  
 Server address of the form `host[:port]`  
@@ -28,7 +28,7 @@ User to SSH as (defaults to `root`)
 _Optional_  
 accepts any host key if not included  
 
-## Example
+### Example
 ``` yaml
 listeners:
   - name: ssh_listener

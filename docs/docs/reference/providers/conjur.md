@@ -6,11 +6,11 @@ description: Secretless Documentation
 permalink: docs/reference/providers/conjur
 ---
 
-# CyberArk Conjur
+## CyberArk Conjur
 The Conjur provider (`conjur`) populates credentials from an external
 [Conjur](https://www.conjur.org) service.
 
-## Examples
+### Examples
 ``` yaml
 listeners:
   - name: pg_listener

@@ -7,17 +7,17 @@
 .card-heading {
 	font-weight: bold;
 	line-height: 4.5rem;
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	font-size: 3.3rem;
 	letter-spacing: .1rem;
 	color: #4d8fcc;
 }
 .broker {
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 }
 .card-side-heading {
 	font-weight: bold;
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	font-size: 2rem;
 	letter-spacing: .1rem;
 }
@@ -48,20 +48,22 @@
 	background-color: #4d8fcc9c;
 	border-radius: 4px;
 	color: #edf2f6c9;
-	padding: .5rem 1rem;
-	position: absolute;
-		top: 1.8rem;
-		left: 1rem;
+	font-size: 1.3rem;
+	font-weight: 800;
+	padding: .2rem .8rem;
 	i {
 		margin-right: .8rem;
 		color: $sless-dark-blue;
 	}
-	.badge-title {
-		font-size: 1.5rem;
-		font-weight: 800;
+	p {
 		margin: 0;
-		letter-spacing: 1px;
 	}
+	// .badge-title {
+	// 	font-size: 1.5rem;
+	// 	font-weight: 800;
+	// 	margin: 0;
+	// 	letter-spacing: 1px;
+	// }
 }
 
 .center-block {
@@ -74,7 +76,7 @@
 #jumbotron-text {
 	font-size: 2.0rem;
 	text-align: center;
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	margin-top: 1rem;
 	color: #4d8fcc;
 }
@@ -92,13 +94,14 @@
 	background: linear-gradient(#165d9e, #4d8fcc);
 	padding: 2rem 0 3rem 0;
 }
-#frame {
+.jumbotron {
 	margin-bottom: 0;
-	margin-top: -6.5rem;
+	margin-top: -7.5rem;
 	padding-top: 10.5rem;
 	background-image: url("../img/secretless_pattern_dark.png");
 	background-repeat: round;
 	text-align: center;
+	border-radius: 0;
 }
 
 // ***********************
@@ -168,7 +171,7 @@
 	margin-right: auto;
 }
 .arch-list > li {
-	font-family: 'Open Sans', sans-serif;
+	font-family: $sless-font-primary;
 	font-size: 1.7rem;
 }
 
@@ -188,6 +191,11 @@
 // ***********************
 // Documentation
 // ***********************
+
+.docs {
+	padding-left: 6rem;
+}
+
 .documentation-content {
 	padding-bottom: 10.0rem;
 	margin-left: 5.0rem;

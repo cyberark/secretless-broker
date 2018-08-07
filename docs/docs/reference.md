@@ -1,13 +1,12 @@
 ---
-title: Documentation
+title: Reference
 id: reference
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference
 ---
 
-# Reference
-
+## Services
 The following target services are currently supported by Secretless:
 
 - MySQL (Socket and TCP)
@@ -20,7 +19,7 @@ With many others in the planning stages!
 
 If there is a specific target service that you would like to be included in this project, please open a [GitHub issue](https://github.com/conjurinc/secretless/issues) with your request.
 
-# Using Secretless
+## Using Secretless
 
 Secretless relies on YAML configuration files to specify which target services it can connect to and how it should retrieve the access credentials to authenticate with those services.
 

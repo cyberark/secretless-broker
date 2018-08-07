@@ -15,21 +15,16 @@ description: Secretless Documentation
 
     <div class="container">
       <div class="row">
-        <div id="content" class="">
-          <div class="documentation">
-              <div class="side-nav-wrap">
-                {% include side_navigation.html %}
-              </div>
-          
-              <div id="content" class="documentation-content">
-                  <h1 class="page-title" >{{ page.title }}</h1>
-                {{ content }}
-              </div>
-            </div>
+        <div class="sidebar col-md-3 col-sm-12">
+          {% include side_navigation.html %}
+        </div>
+    
+        <div class="docs col-md-9">
+            <h1 class="page-title" >{{ page.title }}</h1>
+          {{ content }}
         </div>
       </div>
     </div>
-
     {% include footer.html %}
 
   </body>

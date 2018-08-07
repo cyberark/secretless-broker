@@ -1,11 +1,27 @@
 main:
-  - page: Docs
+  - title: Docs
     url: /docs/overview.html
-  - page: Community
+    sublinks:
+    - title: Overview
+      url: /docs/overview.html
+      subsublinks:
+      - title: Why Secretless?
+        url: /docs/overview/why_secretless.html
+      - title: How Does It Work?
+        url: /docs/overview/how_it_works.html
+      - title: Security
+        url: /docs/overview/security.html
+      - title: Key Terms
+        url: /docs/overview/key_terms.html
+    - title: Get Started
+      url: /docs/get_started.html
+    - title: Reference
+      url: /docs/reference.html
+  - title: Community
     url: /community.html
-  - page: Blog
+  - title: Blog
     url: /blog.html
-  - page: Github
+  - title: Github
     url: https://github.com/conjurinc/secretless
     class: gh
 
@@ -35,11 +51,39 @@ documentation:
         url: /docs/reference/listeners.html
       - page: Handlers
         url: /docs/reference/handlers.html
+        subsubfolderitems:
+        - page: AWS - HTTPS
+          url: /docs/reference/handlers/http/aws.html
+        - page: Conjur - HTTP(S)
+          url: /docs/reference/handlers/http/conjur.html
+        - page: HTTP Basic Authentication
+          url: /docs/reference/handlers/http/basic.html
+        - page: MySQL
+          url: /docs/reference/handlers/mysql.html
+        - page: PostgreSQL
+          url: /docs/reference/handlers/postgres.html
+        - page: SSH Agent
+          url: /docs/reference/handlers/ssh_agent.html
+        - page: SSH
+          url: /docs/reference/handlers/ssh.html
       - page: Credential Providers
         url: /docs/reference/providers.html
+        subsubfolderitems:
+        - page: CyberArk Conjur
+          url: /docs/reference/providers/conjur.html
+        - page: Environment
+          url: /docs/reference/providers/env.html
+        - page: File
+          url: /docs/reference/providers/file.html
+        - page: HashiCorp Vault
+          url: /docs/reference/providers/vault.html
+        - page: Keychain
+          url: /docs/reference/providers/keychain.html
+        - page: Literal
+          url: /docs/reference/providers/literal.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
         url: /docs/reference/how_to_deploy.html
-  - page: FAQ
+  - title: FAQ
     url: /docs/faq.html

@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Listeners
 id: listeners
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/listeners
 ---
-
-# Listeners
 
 You can configure the following kinds of Secretless *Listeners*:
 

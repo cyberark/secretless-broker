@@ -6,12 +6,12 @@ description: Secretless Documentation
 permalink: docs/reference/handlers/http/conjur
 ---
 
-# Conjur - HTTP(S)
-## Overview
+## Conjur - HTTP(S)
+### Overview
 The Conjur handler exposes an HTTP proxy which will authenticate requests made
 to Conjur without revealing credentials to the consumer.
 
-## Handler Parameters
+### Handler Parameters
 - `type`  
 _Required_  
 This parameter indicates the type of service proxied by the handler. For AWS,
@@ -23,7 +23,7 @@ An array of regex patterns which match a request URI, either partially or fully.
 Requests which are matched by a regex in this array will be authenticated by
 this handler.  
 
-## Credentials
+### Credentials
 - `accessToken`  
 _Required_  
 Conjur access token  
@@ -32,7 +32,7 @@ Conjur access token
 _Optional_  
 Boolean; forces connection over HTTPS if true  
 
-## Examples
+### Examples
 #### Authenticates all requests proxied through this handler
 ``` yaml
 listeners:

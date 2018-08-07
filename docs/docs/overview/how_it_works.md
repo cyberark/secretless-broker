@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: How does it work?
 id: how_it_works
 layout: docs
 description: Secretless Documentation
 permalink: docs/overview/how_it_works
 ---
-
-# How does it work?
 
 In a Secretless deployment, when a client needs access to a target service it doesn't try and make a direct connection to it. Instead, it sends the request through its Secretless connection broker.
 

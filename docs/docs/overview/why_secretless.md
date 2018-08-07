@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Why Secretless?
 id: docs
 layout: docs
 description: Secretless Documentation
 permalink: docs/overview/why_secretless
 ---
-
-# Why Secretless?
 
 “Secretless” is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
 

@@ -4,16 +4,13 @@
 @media (max-width: 1200px) {
 }
 @media (max-width: 991px) {
-	.icon-bar {
-		background-color: #fff;
-	}
 	.about-subitem .inner {
 		min-height: 0;
 	}
 	.arch-respons-box {
 		flex-direction: column;
 	}
-	.learn-banner {
+	.cta-banner {
 		text-align: center;
 	}
 	.right-links {
@@ -75,7 +72,7 @@
 	.ui-tabs .ui-tabs-panel {
 		padding: 0;
 	}
-	footer .learn-banner p {
+	footer .cta-banner p {
 		font-size: 1.5rem;
 		width: 90%;
 	}

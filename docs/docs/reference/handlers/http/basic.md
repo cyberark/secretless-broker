@@ -6,12 +6,12 @@ description: Secretless Documentation
 permalink: docs/reference/handlers/http/basic
 ---
 
-# Basic Authentication - HTTP(S)
-## Overview
+## Basic Authentication - HTTP(S)
+### Overview
 The basic authentication handler exposes an HTTP proxy which will authenticate
 requests made to an arbitrary service requiring basic authentication.
 
-## Handler Parameters
+### Handler Parameters
 - `type`  
 _Required_  
 This parameter indicates the type of service proxied by the handler. For AWS,
@@ -23,7 +23,7 @@ An array of regex patterns which match a request URI, either partially or fully.
 Requests which are matched by a regex in this array will be authenticated by
 this handler.  
 
-## Credentials
+### Credentials
 - `username`  
 _Required_  
 Username to authenticate with  
@@ -36,7 +36,7 @@ Password to authenticate with
 _Optional_  
 Boolean; Forces connection over https if true  
 
-## Examples
+### Examples
 #### Authenticates all requests proxied through this handler
 ``` yaml
 listeners:

@@ -5,8 +5,14 @@ main:
     - title: Overview
       url: /docs/overview.html
       subsublinks:
-      - title: My Sublink
-        url: /docs/overview.html
+      - title: Why Secretless?
+        url: /docs/overview/why_secretless.html
+      - title: How Does It Work?
+        url: /docs/overview/how_it_works.html
+      - title: Security
+        url: /docs/overview/security.html
+      - title: Key Terms
+        url: /docs/overview/key_terms.html
     - title: Get Started
       url: /docs/get_started.html
     - title: Reference

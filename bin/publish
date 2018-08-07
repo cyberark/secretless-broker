@@ -1,13 +1,28 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 readonly VERSION="$(cat VERSION)"
-readonly IMAGE_NAME="secretless"
-readonly REGISTRY="${1:-registry2.itci.conjur.net}"
+readonly REGISTRY="${1:-registry2.itci.conjur.net/conjurinc}"
 
-# tag images
-docker tag "$IMAGE_NAME:$VERSION" "$REGISTRY/conjurinc/$IMAGE_NAME:$VERSION"
-docker tag "$IMAGE_NAME:$VERSION" "$REGISTRY/conjurinc/$IMAGE_NAME:latest"
+readonly IMAGES=(
+  "secretless"
+  "secretless-quickstart"
+)
 
-# push images
-docker push "$REGISTRY/conjurinc/$IMAGE_NAME:$VERSION"
-docker push "$REGISTRY/conjurinc/$IMAGE_NAME:latest"
+readonly TAGS=(
+  "$VERSION"
+  "latest"
+)
+
+for image_name in "${IMAGES[@]}"; do
+  # Tag images
+  for tag in "${TAGS[@]}"; do
+    echo "Tagging $REGISTRY/$image_name:$tag"
+    docker tag "$image_name:$VERSION" "$REGISTRY/$image_name:$tag"
+  done
+
+  # Push images
+  for tag in "${TAGS[@]}"; do
+    echo "Pushing $REGISTRY/$image_name:$tag"
+    echo docker push "$REGISTRY/$image_name:$tag"
+  done
+done

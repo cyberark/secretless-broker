@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -eo pipefail
+
+QUICK_START_REL_DIR="$(dirname $0)/../demos/quick-start"
+QUICK_START_DIR="$(realpath "$QUICK_START_REL_DIR")"
+
+pushd "$QUICK_START_REL_DIR" >/dev/null
+
+cleanup() {
+  ./bin/stop || true
+  popd >/dev/null
+}
+trap cleanup EXIT ABRT QUIT
+
+echo "Starting Quick Start demo tests..."
+set +e
+  ./bin/test
+  exit_status=$?
+set -e
+
+if [[ $exit_status -ne 0 ]]; then
+  echo "FAIL: Quick Start demo exited with an error (exit code $exit_status)!"
+  exit 1
+fi
+
+echo "PASS: Quick Start tests were successful!"

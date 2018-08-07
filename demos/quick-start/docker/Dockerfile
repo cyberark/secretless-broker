@@ -1,4 +1,6 @@
-FROM registry2.itci.conjur.net/conjurinc/secretless:latest as secretless
+# TODO: Use DockerHub account image after public release
+FROM secretless:latest as secretless
+
 FROM postgres:9.6.9-alpine
 
 MAINTAINER "CyberArk Software, Inc."
@@ -9,15 +11,18 @@ USER root
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD [ "/entrypoint" ]
 
-COPY --from=secretless /usr/local/bin/secretless  /usr/local/bin/
 COPY bin/entrypoint                 /
 COPY bin/pg-init.sh                 /docker-entrypoint-initdb.d/
 COPY etc/nginx.conf                 /etc/nginx/
 COPY etc/secretless.yml etc/motd    /etc/
 
-RUN apk add -U openssl openssh nginx apache2-utils tini \
+RUN apk add --no-cache apache2-utils \
+                       libc6-compat \
+                       nginx \
+                       tini \
+                       openssh \
+                       openssl \
     && mkdir -p /lib64 /etc/nginx /run/nginx /home/user/.ssh/ \
-    && ln -fs /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2 \
     && ssh-keygen -A \
     && adduser -DH secretless \
     && chown secretless /etc/secretless.yml \
@@ -26,3 +31,5 @@ RUN apk add -U openssl openssh nginx apache2-utils tini \
     && sed \
         -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' \
         /etc/ssh/sshd_config
+
+COPY --from=secretless /usr/local/bin/secretless  /usr/local/bin/

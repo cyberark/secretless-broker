@@ -11,7 +11,6 @@ import (
 const (
 	RESTART = iota
 	SHUTDOWN
-	KILL
 )
 
 // Proxy is the main struct of Secretless.

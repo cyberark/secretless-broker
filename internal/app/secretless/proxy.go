@@ -20,6 +20,7 @@ type Proxy struct {
 	EventNotifier     plugin_v1.EventNotifier
 	Listeners         []plugin_v1.Listener
 	_runCh            chan int
+	_cleanUpMux       sync.Mutex
 	Resolver          plugin_v1.Resolver
 	RunListenerFunc   func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
 	RunHandlerFunc    func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
@@ -88,7 +89,9 @@ func (p *Proxy) Shutdown() {
 func (p *Proxy) cleanUpListeners() {
 	var wg sync.WaitGroup
 
-	for _, listener := range p.Listeners {
+	for _, _listener := range p.Listeners {
+		listener := _listener
+
 		log.Printf("Shutting down '%v' listener...", listener.GetName())
 
 		wg.Add(1)
@@ -105,6 +108,7 @@ func (p *Proxy) cleanUpListeners() {
 // the for-select loop allows for queueing of RESTARTS and only 1 SHUTDOWN
 func (p *Proxy) Run() {
 	p._runCh = make(chan int, 1)
+	p._cleanUpMux = sync.Mutex{}
 
 	go func() {
 		p._runCh <- RESTART
@@ -147,7 +151,8 @@ func shutDownListener(listener plugin_v1.Listener) {
 
 	var wg sync.WaitGroup
 
-	for _, handler := range listener.GetHandlers() {
+	for _, _handler := range listener.GetHandlers() {
+		handler := _handler
 
 		wg.Add(1)
 		go func() {

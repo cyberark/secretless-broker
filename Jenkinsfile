@@ -39,6 +39,12 @@ pipeline {
       }
     }
 
+    stage('Demo tests') {
+      steps {
+        sh './bin/test_quickstart'
+      }
+    }
+
     stage('Push Images') {
       when {
         branch 'master'

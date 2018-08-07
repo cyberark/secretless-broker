@@ -11,6 +11,8 @@ import (
 	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"io"
+	"fmt"
 )
 
 // BackendConfig stores the connection info to the real backend database.
@@ -47,6 +49,11 @@ func (h *Handler) abort(err error) {
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
+	defer func() {
+		source.Close()
+		dest.Close()
+	}()
+
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -55,6 +62,9 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	for {
 		length, err = source.Read(buffer)
 		if err != nil {
+			if err == io.EOF {
+				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
+			}
 			return
 		}
 
@@ -121,6 +131,11 @@ func (h *Handler) GetBackendConnection() net.Conn {
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("mysql handler does not use LoadKeys")
+}
+
+func (h *Handler) Shutdown() error {
+	h.abort(fmt.Errorf("secretless shutting down"))
+	return nil
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

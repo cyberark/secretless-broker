@@ -223,6 +223,10 @@ func (h *Handler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("ssh handler does not use LoadKeys")
 }
 
+func (h *Handler) Shutdown() error {
+	return nil
+}
+
 // HandlerFactory instantiates a handler given HandlerOptions
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{

@@ -12,6 +12,7 @@ import (
 	"github.com/conjurinc/secretless/pkg/secretless/config"
 	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
 	"io"
+	"fmt"
 )
 
 // ClientOptions stores the option that were specified by the connection client.
@@ -58,6 +59,11 @@ func (h *Handler) abort(err error) {
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
+	defer func() {
+		source.Close()
+		dest.Close()
+	}()
+
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -68,9 +74,6 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 		length, err = source.Read(buffer)
 		if err != nil {
 			if err == io.EOF {
-				source.Close()
-				dest.Close()
-
 				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
 			}
 			return
@@ -147,6 +150,11 @@ func (h *Handler) GetBackendConnection() net.Conn {
 // TODO: Remove this when interface is cleaned up
 func (h *Handler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("pg handler does not use LoadKeys")
+}
+
+func (h *Handler) Shutdown() error {
+	h.abort(fmt.Errorf("secretless shutting down"))
+	return nil
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

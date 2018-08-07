@@ -11,6 +11,7 @@ import (
 const (
 	RESTART = iota
 	SHUTDOWN
+	KILL
 )
 
 // Proxy is the main struct of Secretless.
@@ -62,7 +63,7 @@ func (p *Proxy) Listen(listenerConfig config.Listener) plugin_v1.Listener {
 	p.EventNotifier.CreateListener(listener)
 
 	go func() {
-		defer listener.Shutdown()
+		defer shutDownListener(listener)
 		listener.Listen()
 	}()
 
@@ -80,6 +81,7 @@ func (p *Proxy) ReloadListeners() error {
 // Shutdown sends SHUTDOWN msg to _runCh
 func (p *Proxy) Shutdown() {
 	p._runCh <- SHUTDOWN
+	p.cleanUpListeners()
 }
 
 // Loops through the listeners and shuts them down concurrently
@@ -92,7 +94,7 @@ func (p *Proxy) cleanUpListeners() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			listener.Shutdown()
+			shutDownListener(listener)
 		}()
 	}
 
@@ -108,17 +110,16 @@ func (p *Proxy) Run() {
 		p._runCh <- RESTART
 	}()
 
-	// runs cleanUpListeners when _runCh receives message
-	// RESTART: reload all listeners
+	// when _runCh receives message...
+	// RESTART: runs cleanUpListeners and reloads all listeners
 	// SHUTDOWN: for-select turns to infinite non-busy loop
 	// default: panic
 	for {
 		select {
 		case msg := <-p._runCh:
-			p.cleanUpListeners()
-
 			switch msg {
 			case RESTART:
+				p.cleanUpListeners()
 				// TODO: Delegate logic of this `if` check to connection managers
 				if len(p.Config.Listeners) < 1 {
 					log.Fatalln("ERROR! No listeners specified in config!")
@@ -138,4 +139,24 @@ func (p *Proxy) Run() {
 			}
 		}
 	}
+}
+
+// util
+func shutDownListener(listener plugin_v1.Listener) {
+	log.Printf("Shutting down '%v' listener's handlers...", listener.GetName())
+
+	var wg sync.WaitGroup
+
+	for _, handler := range listener.GetHandlers() {
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			handler.Shutdown()
+		}()
+	}
+
+	wg.Wait()
+
+	listener.Shutdown()
 }

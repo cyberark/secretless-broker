@@ -35,45 +35,41 @@ layout: default
 		</div>
 	</div>
 </div>
+
 <div class="container">
 	<div class="arch">
-		<div class="row sub-card">
-			<div class="arch-respons-box">
-				<div class="arch-respons">
-					<h2>Traditional Architecture</h2>
-					<h3>Developer Responsibilities</h3>
-					<ul class="arch-list">
-						<li>Retrieve secrets from vault​</li>
-						<li>Securely handle retrieved secrets within app​</li>
-						<li>Resiliently handle secret rotations</li>
-						<li>Manage connection disruptions</li>
-					</ul>
-				</div>
-				<img class="arch-img" src="/img/traditionalarch.png" alt="Traditional Architecture">
+		
+		<div class="row">
+			<div class="col-md-6">
+				<img class="arch-img" src="/img/traditional_architecture_2.svg" alt="Traditional Architecture">
+				<p class="card-heading">Traditional Architecture</p>
+				<p class="card-subheading">Developer Responsibilities</p>
+				<ul class="arch-list">
+					<li>Retrieve secrets from vault​</li>
+					<li>Securely handle retrieved secrets within app​</li>
+					<li>Resiliently handle secret rotations</li>
+					<li>Manage connection disruptions</li>
+				</ul>
+			</div>
+			<div class="col-md-6">
+				<img class="arch-img" src="/img/secretless_architecture.svg" alt="Secretless Architecture">
+				<h2>Secretless Broker Architecture</h2>
+				<h3>Broker Responsibilities</h3>
+				<ul class="arch-list">
+					<li>Retrieve secrets from vault​</li>
+					<li>Securely handle retrieved secrets​</li>
+					<li>Transparently handle secret rotations</li>
+				</ul>
+				<p class="card-subheading">Developer Responsibilities</p>
+				<ul class="arch-list">
+					<li>Manage connection disruption</li>
+					<li>Connect to target services using local sockets and URLs</li>
+				</ul>
 			</div>
 		</div>
-
-		<div class="row sub-card">
-			<div class="arch-respons-box">
-				<div class="arch-respons">
-					<h2>Secretless Broker Architecture</h2>
-					<h3>Broker Responsibilities</h3>
-					<ul class="arch-list">
-						<li>Retrieve secrets from vault​</li>
-						<li>Securely handle retrieved secrets​</li>
-						<li>Transparently handle secret rotations</li>
-					</ul>
-
-					<h3>Developer Responsibilities</h3>
-					<ul class="arch-list">
-						<li>Manage connection disruption</li>
-						<li>Connect to target services using local sockets and URLs</li>
-					</ul>
-				</div>
-				<img class="arch-img" src="/img/secretlessarch.png" alt="Secretless Broker Architecture">
-			</div>
-		</div>
+	
 	</div>
-</div>
+</div> 
+
 
 {{ content }}

@@ -8,13 +8,13 @@ html {
 }
 body {
 	font-family: $sless-font-primary;
+	font-size: 1.5rem;
 	color: $sless-text;
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
 }
 p {
-	font-size: 1.5rem;
 	line-height: 1.8;
 }
 li {

@@ -3,6 +3,8 @@ title: Secretless
 markdown: kramdown
 highlighter: rouge
 
+is_maintenance_mode: true
+
 baseurl: ""
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 

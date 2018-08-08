@@ -10,6 +10,12 @@ permalink: docs/reference/providers/vault
 The Vault provider (`vault`) populates credentials from an external
 [Vault](https://www.vaultproject.io/) service.
 
+### Secretless Broker Configuration
+To use the Vault provider, the Secretless Broker requires the `VAULT_ADDR` and
+`VAULT_TOKEN` environment variables be set. You may optionally include any other
+configuration environment variables that are allowed by the
+[Vault Go Client Library](https://github.com/hashicorp/vault/tree/master/api).
+
 ### Parameters
 The value of `id` must be provided in the format `<path>#<key>` _or_ the path
 must have a key named `value`.

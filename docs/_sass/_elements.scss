@@ -339,8 +339,8 @@ pre {
 // Copy to Clipboard
 // ***********************
 
-.hover-button {
-  position: absolute;
+.copy-icon {
+  position: relative;
 	width: 15px;
 	height: 20px;
   background: url("/img/copy-to-clipboard.svg");
@@ -348,7 +348,21 @@ pre {
   background-position: center;
   border: none;
   cursor: pointer;
-  right: 24px;
+	float: right;
+	&:hover {
+		background: url("/img/clipboard-hover.svg");
+	}
+}
+.copy-icon-hover {
+  position: relative;
+	width: 15px;
+	height: 20px;
+  background: url("/img/clipboard-hover.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+	float: right;
 }
 
 .tooltip-text {

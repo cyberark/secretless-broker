@@ -51,14 +51,9 @@ function extractIrbCommands(irbBlock) {
 
 function createClipboardButton(block, clipboardText) {
   var btn = document.createElement("button");
-  btn.setAttribute("class", "clipboard-button hover-button");
+  btn.setAttribute("class", "clipboard-button copy-icon");
   btn.setAttribute("data-clipboard-text", clipboardText);
   block.parentNode.insertBefore(btn, block);
-
-  var tooltip = document.createElement("span");
-  tooltip.setAttribute("class", "tooltip-text arrow_box");
-  tooltip.innerHTML = "Copy to clipboard";
-  btn.appendChild(tooltip);
 
   new Clipboard(btn);
 }

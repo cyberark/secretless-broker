@@ -10,9 +10,8 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
-type HandlerShutdownNotifier interface {
-	PostShutdown(Handler)
-}
+type HandlerShutdownNotifier func(Handler)
+
 // HandlerOptions contains the configuration for the handler
 type HandlerOptions struct {
 	HandlerConfig           config.Handler
@@ -82,5 +81,5 @@ func (h *BaseHandler) LoadKeys(keyring agent.Agent) error {
 
 // Shutdown implements plugin_v1.Handler
 func (h *BaseHandler) Shutdown() {
-	defer h.ShutdownNotifier.PostShutdown(h)
+	defer h.ShutdownNotifier(h)
 }

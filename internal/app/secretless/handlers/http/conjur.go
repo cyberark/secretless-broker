@@ -2,22 +2,16 @@ package http
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"strconv"
 
-	"golang.org/x/crypto/ssh/agent"
-
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // ConjurHandler applies Conjur authentication to the HTTP Authorization header.
 type ConjurHandler struct {
-	HandlerConfig config.Handler
-	Resolver      plugin_v1.Resolver
+	plugin_v1.BaseHandler
 }
 
 // Authenticate applies the "accessToken" credential to the Authorization header, following the
@@ -42,31 +36,9 @@ func (h ConjurHandler) Authenticate(values map[string][]byte, r *http.Request) e
 	return nil
 }
 
-// GetConfig implements secretless.Handler
-func (h *ConjurHandler) GetConfig() config.Handler {
-	return h.HandlerConfig
-}
-
-// GetClientConnection implements secretless.Handler
-func (h *ConjurHandler) GetClientConnection() net.Conn {
-	return nil
-}
-
-// GetBackendConnection implements secretless.Handler
-func (h *ConjurHandler) GetBackendConnection() net.Conn {
-	return nil
-}
-
-// LoadKeys is unused here
-// TODO: Remove this when interface is cleaned up
-func (h *ConjurHandler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("http/conjur handler does not use LoadKeys")
-}
-
 // ConjurHandlerFactory instantiates a handler given HandlerOptions
 func ConjurHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return &ConjurHandler{
-		HandlerConfig: options.HandlerConfig,
-		Resolver:      options.Resolver,
+		BaseHandler: plugin_v1.NewBaseHandler(options),
 	}
 }

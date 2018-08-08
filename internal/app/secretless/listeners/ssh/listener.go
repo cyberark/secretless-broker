@@ -8,16 +8,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"os"
 	"strconv"
 
 	"golang.org/x/crypto/ssh"
+	"github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 // Listener accepts SSH connections and MITMs them using a Handler.
@@ -25,12 +24,7 @@ import (
 // NOTE: This MITM approach to SSH is experimental. The ssh-agent approach is
 // better validated and probably better all-around.
 type Listener struct {
-	Config         config.Listener
-	EventNotifier  plugin_v1.EventNotifier
-	HandlerConfigs []config.Handler
-	NetListener    net.Listener
-	Resolver       plugin_v1.Resolver
-	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
+	plugin_v1.BaseListener
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -176,50 +170,15 @@ func (l *Listener) Listen() {
 	}
 }
 
-// GetConfig implements plugin_v1.Listener
-func (l *Listener) GetConfig() config.Listener {
-	return l.Config
-}
-
-// GetListener implements plugin_v1.Listener
-func (l *Listener) GetListener() net.Listener {
-	return l.NetListener
-}
-
-// GetHandlers implements plugin_v1.Listener
-func (l *Listener) GetHandlers() []plugin_v1.Handler {
-	return nil
-}
-
-// GetConnections implements plugin_v1.Listener
-func (l *Listener) GetConnections() []net.Conn {
-	return nil
-}
-
-// GetNotifier implements plugin_v1.Listener
-func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
-	return l.EventNotifier
-}
-
 // GetName implements plugin_v1.Listener
 func (l *Listener) GetName() string {
 	return "ssh"
 }
 
-// Shutdown implements plugin_v1.Listener
-func (l *Listener) Shutdown() error {
-	// TODO: Clean up all handlers
-	return l.NetListener.Close()
-}
-
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	return &Listener{
-		Config:         options.ListenerConfig,
-		EventNotifier:  options.EventNotifier,
-		HandlerConfigs: options.HandlerConfigs,
-		NetListener:    options.NetListener,
-		Resolver:       options.Resolver,
-		RunHandlerFunc: options.RunHandlerFunc,
-	}
+	listener :=  &Listener{}
+	listener.BaseListener = plugin_v1.NewBaseListener(options, listener)
+
+	return listener
 }

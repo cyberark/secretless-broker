@@ -1,17 +1,14 @@
 package pg
 
 import (
-	"errors"
 	"log"
 	"net"
-	"net/http"
+	"io"
+	"fmt"
 
-	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-	"io"
 )
 
 // ClientOptions stores the option that were specified by the connection client.
@@ -39,13 +36,9 @@ type BackendConfig struct {
 //
 // Handler requires "address", "username" and "password" credentials.
 type Handler struct {
-	Backend          net.Conn
+	plugin_v1.BaseHandler
 	BackendConfig    *BackendConfig
-	HandlerConfig    config.Handler
-	ClientConnection net.Conn
 	ClientOptions    *ClientOptions
-	EventNotifier    plugin_v1.EventNotifier
-	Resolver         plugin_v1.Resolver
 }
 
 func (h *Handler) abort(err error) {
@@ -88,13 +81,13 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
 	if h.GetConfig().Debug {
-		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
+		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.GetBackendConnection().RemoteAddr())
 	}
 
-	go stream(h.GetClientConnection(), h.Backend, func(b []byte) {
+	go stream(h.GetClientConnection(), h.GetBackendConnection(), func(b []byte) {
 		h.EventNotifier.ClientData(h.ClientConnection, b)
 	})
-	go stream(h.Backend, h.GetClientConnection(), func(b []byte) {
+	go stream(h.GetBackendConnection(), h.GetClientConnection(), func(b []byte) {
 		h.EventNotifier.ServerData(h.GetClientConnection(), b)
 	})
 }
@@ -122,40 +115,16 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
-// Authenticate is not used here
-// TODO: Remove this when interface is cleaned up
-func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("pg listener does not use Authenticate")
-}
+func (h *Handler) Shutdown() {
+	defer h.BaseHandler.Shutdown()
 
-// GetConfig implements secretless.Handler
-func (h *Handler) GetConfig() config.Handler {
-	return h.HandlerConfig
-}
-
-// GetClientConnection implements secretless.Handler
-func (h *Handler) GetClientConnection() net.Conn {
-	return h.ClientConnection
-}
-
-// GetBackendConnection implements secretless.Handler
-func (h *Handler) GetBackendConnection() net.Conn {
-	return h.Backend
-}
-
-// LoadKeys is not used here
-// TODO: Remove this when interface is cleaned up
-func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("pg handler does not use LoadKeys")
+	h.abort(fmt.Errorf("secretless shutting down"))
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{
-		ClientConnection: options.ClientConnection,
-		EventNotifier:    options.EventNotifier,
-		HandlerConfig:    options.HandlerConfig,
-		Resolver:         options.Resolver,
+		BaseHandler: plugin_v1.NewBaseHandler(options),
 	}
 
 	handler.Run()

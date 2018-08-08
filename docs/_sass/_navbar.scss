@@ -259,3 +259,9 @@
 .navbar .default {
 	margin-bottom: 0;
 }
+
+/* default class and toggled when user selects down caret for side navbar*/
+.dropdown-container {
+    display: none;
+    padding-left: 8px;
+}

@@ -13,3 +13,9 @@ connections, or any other TCP-based service.
 In this section of the documentation, we will provide the motivation for
 [why you should use the Secretless Broker](/docs/overview/why_secretless.html), talk about [how it works](/docs/overview/how_it_works.html),
 and define some [key terms](/docs/overview/key_terms.html).
+
+
+{% highlight shell %}
+$ mkdir conjur-eval
+$ cd conjur-eval
+{% endhighlight %}

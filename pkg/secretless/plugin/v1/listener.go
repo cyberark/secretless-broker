@@ -99,8 +99,6 @@ func (l *BaseListener) Shutdown() error {
 	// TODO: Clean up all handlers
 	self := l.self
 
-	log.Printf("Shutting down '%v' listener", self.GetName())
-
 	log.Printf("Shutting down '%v' listener's handlers...", self.GetName())
 	var wg sync.WaitGroup
 
@@ -116,4 +114,25 @@ func (l *BaseListener) Shutdown() error {
 	wg.Wait()
 
 	return l.NetListener.Close()
+}
+
+func (l *BaseListener) AddHandler(handler Handler) {
+	if l.handlers == nil {
+		l.handlers = make([]Handler, 0)
+	}
+
+	l.handlers = append(l.handlers, handler)
+}
+
+func (l *BaseListener) RemoveHandler(targetHandler Handler) {
+	var handlers []Handler
+	for _, handler := range l.handlers {
+		if handler == targetHandler {
+			continue
+		} else {
+			handlers = append(handlers, handler)
+		}
+	}
+
+	l.handlers = handlers
 }

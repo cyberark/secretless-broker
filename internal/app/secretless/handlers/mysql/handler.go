@@ -3,6 +3,8 @@ package mysql
 import (
 	"log"
 	"net"
+	"fmt"
+	"io"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -38,6 +40,11 @@ func (h *Handler) abort(err error) {
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
+	defer func() {
+		source.Close()
+		dest.Close()
+	}()
+
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -46,6 +53,9 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	for {
 		length, err = source.Read(buffer)
 		if err != nil {
+			if err == io.EOF {
+				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
+			}
 			return
 		}
 
@@ -60,12 +70,9 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
-	if h.GetConfig().Debug {
-		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.GetBackendConnection().RemoteAddr())
-	}
-
-	go stream(h.GetClientConnection(), h.GetBackendConnection(), func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
-	go stream(h.GetBackendConnection(), h.GetClientConnection(), func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
+	plugin_v1.PipeHandlerWithStream(h, stream, h.EventNotifier, func() {
+		h.ShutdownNotifier(h)
+	})
 }
 
 // Run configures the backend connection info, connects to the backend to
@@ -90,7 +97,7 @@ func (h *Handler) Run() {
 func (h *Handler) Shutdown() {
 	defer h.BaseHandler.Shutdown()
 
-	h.abort(fmt.Errorf("secretless shutting down"))
+	h.abort(fmt.Errorf("handler shut down by secretless"))
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions

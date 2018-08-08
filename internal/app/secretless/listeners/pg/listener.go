@@ -64,13 +64,14 @@ func (l *Listener) Listen() {
 				HandlerConfig:    l.HandlerConfigs[0],
 				ClientConnection: client,
 				EventNotifier:    l.EventNotifier,
+				ShutdownNotifier: func(handler plugin_v1.Handler) {
+					l.RemoveHandler(handler)
+				},
 				Resolver:         l.Resolver,
 			}
 
 			handler := l.RunHandlerFunc("pg", handlerOptions)
-
-			// TODO: there's a better way to do this
-			l.EventNotifier.CreateHandler(handler, client)
+			l.AddHandler(handler)
 		} else {
 			pgError := protocol.Error{
 				Severity: protocol.ErrorSeverityFatal,

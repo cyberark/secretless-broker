@@ -3,6 +3,8 @@ package v1
 import (
 	"net"
 	"net/http"
+	"log"
+	"sync"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -10,6 +12,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
+//
 type HandlerShutdownNotifier func(Handler)
 
 // HandlerOptions contains the configuration for the handler
@@ -81,5 +84,39 @@ func (h *BaseHandler) LoadKeys(keyring agent.Agent) error {
 
 // Shutdown implements plugin_v1.Handler
 func (h *BaseHandler) Shutdown() {
-	defer h.ShutdownNotifier(h)
+	log.Printf("Handler shutting down...")
+	h.ShutdownNotifier(h)
+}
+
+// PipeHandlerWithStream performs continuous bidirectional transfer of data between handler client and backend
+// stream: function for transfer
+// eventNotifier: function ingesting transfer bytes
+// handler: holder of client and backend connections
+//
+func PipeHandlerWithStream(handler Handler, stream func(net.Conn, net.Conn, func(b []byte)), eventNotifier EventNotifier, callback func()) {
+	if handler.GetConfig().Debug {
+		log.Printf("Connecting client %s to backend %s", handler.GetClientConnection().RemoteAddr(), handler.GetBackendConnection().RemoteAddr())
+	}
+
+	var _once sync.Once
+	callbackOnce := func() {
+		_once.Do(func() {
+			callback()
+		})
+	}
+
+	go func() {
+		defer callbackOnce()
+		stream(handler.GetClientConnection(), handler.GetBackendConnection(), func(b []byte) {
+			eventNotifier.ClientData(handler.GetClientConnection(), b)
+		})
+	}()
+
+	go func() {
+		defer callbackOnce()
+		stream(handler.GetBackendConnection(), handler.GetClientConnection(), func(b []byte) {
+			eventNotifier.ServerData(handler.GetClientConnection(), b)
+		})
+	}()
+
 }

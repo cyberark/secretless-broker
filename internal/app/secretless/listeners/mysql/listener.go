@@ -68,9 +68,13 @@ func (l *Listener) Listen() {
 				ClientConnection: client,
 				EventNotifier:    l.EventNotifier,
 				Resolver:         l.Resolver,
+				ShutdownNotifier: func(handler plugin_v1.Handler) {
+					l.RemoveHandler(handler)
+				},
 			}
 
-			l.RunHandlerFunc("mysql", handlerOptions)
+			handler := l.RunHandlerFunc("mysql", handlerOptions)
+			l.AddHandler(handler)
 		} else {
 			mysqlError := protocol.Error{
 				Code:     protocol.CRUnknownError,

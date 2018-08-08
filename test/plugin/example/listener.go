@@ -13,12 +13,7 @@ import (
 
 // Listener listens for and handles new connections.
 type Listener struct {
-	Config         config.Listener
-	EventNotifier  plugin_v1.EventNotifier
-	HandlerConfigs []config.Handler
-	NetListener    net.Listener
-	Resolver       plugin_v1.Resolver
-	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
+	plugin_v1.BaseListener
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -64,38 +59,17 @@ func (l *Listener) Listen() {
 				HandlerConfig:    l.HandlerConfigs[0],
 				EventNotifier:    l.EventNotifier,
 				Resolver:         l.Resolver,
+				ShutdownNotifier: func(handler plugin_v1.Handler) {
+					l.RemoveHandler(handler)
+				},
 			}
 
-			l.RunHandlerFunc("example-handler", options)
+			handler := l.RunHandlerFunc("example-handler", options)
+			l.AddHandler(handler)
 		} else {
 			client.Write([]byte("Error - no handlers were defined!"))
 		}
 	}
-}
-
-// GetConfig implements plugin_v1.Listener
-func (l *Listener) GetConfig() config.Listener {
-	return l.Config
-}
-
-// GetListener implements plugin_v1.Listener
-func (l *Listener) GetListener() net.Listener {
-	return l.NetListener
-}
-
-// GetHandlers implements plugin_v1.Listener
-func (l *Listener) GetHandlers() []plugin_v1.Handler {
-	return nil
-}
-
-// GetConnections implements plugin_v1.Listener
-func (l *Listener) GetConnections() []net.Conn {
-	return nil
-}
-
-// GetNotifier implements plugin_v1.Listener
-func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
-	return l.EventNotifier
 }
 
 // GetName implements plugin_v1.Listener
@@ -103,20 +77,10 @@ func (l *Listener) GetName() string {
 	return "example"
 }
 
-// Shutdown implements plugin_v1.Listener
-func (l *Listener) Shutdown() error {
-	// TODO: Clean up all handlers
-	return l.NetListener.Close()
-}
-
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	return &Listener{
-		Config:         options.ListenerConfig,
-		EventNotifier:  options.EventNotifier,
-		HandlerConfigs: options.HandlerConfigs,
-		NetListener:    options.NetListener,
-		Resolver:       options.Resolver,
-		RunHandlerFunc: options.RunHandlerFunc,
-	}
+	listener :=  &Listener{}
+	listener.BaseListener = plugin_v1.NewBaseListener(options, listener)
+
+	return listener
 }

@@ -1,14 +1,14 @@
 ***
 
-**Status**: Alpha
+**Status**: Beta
 
-Secretless is currently in alpha, suitable for demo and evaluation purposes.
+The Secretless Broker is currently in beta.
 
 ***
 
 # Table of Contents
 
-- [Secretless](#secretless)
+- [Secretless Broker](#secretless-broker)
   - [Supported services](#currently-supported-services)
 - [Quick Start](#quick-start)
 - [Additional demos](#run-more-secretless-demos)
@@ -25,13 +25,13 @@ Secretless is currently in alpha, suitable for demo and evaluation purposes.
 - [License](#license)
 
 
-# Secretless
+# Secretless Broker
 
-Secretless is a connection broker which relieves client applications of the need to directly handle secrets to target services such as databases, web services, SSH connections, or any other TCP-based service.
+The Secretless Broker is a connection broker which relieves client applications of the need to directly handle secrets to target services such as databases, web services, SSH connections, or any other TCP-based service.
 
-![Secretless Architecture](https://github.com/conjurinc/secretless/blob/master/docs/img/secretlessarch.png)
+![Secretless Broker Architecture](https://github.com/conjurinc/secretless-broker/blob/master/docs/img/secretlessarch.png)
 
-Secretless is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
+The Secretless Broker is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
 
 - Accidental credential leakage (e.g. credential checked into source control, etc)
 - An attack on a privileged user (e.g. phishing, developer machine compromises, etc)
@@ -39,7 +39,7 @@ Secretless is designed to solve two problems. The first is **loss or theft of cr
 
 The second is **downtime caused when applications or services do not respond to credential rotation** and crash or get locked out of target services as a result.
 
-When the client connects to a target service through Secretless:
+When the client connects to a target service through the Secretless Broker:
 
 * **The client is not part of the threat surface**
 
@@ -47,15 +47,15 @@ When the client connects to a target service through Secretless:
 
 - **The client doesn’t have to know how to properly manage secrets**
 
-  Handling secrets safely involves some complexities, and when every application needs to know how to handle secrets, accidents happen. The Secretless broker centralizes the client-side management of secrets into one code base, making it easier for developers to focus on delivering features.
+  Handling secrets safely involves some complexities, and when every application needs to know how to handle secrets, accidents happen. The Secretless Broker centralizes the client-side management of secrets into one code base, making it easier for developers to focus on delivering features.
 
 - **The client doesn’t have to manage secret rotation**
 
-  The Secretless broker is responsible for establishing connections to the backend, and can handle secrets rotation in a way that’s transparent to the client.
+  The Secretless Broker is responsible for establishing connections to the backend, and can handle secrets rotation in a way that’s transparent to the client.
 
-To provide Secretless access to a target service, a [Handler](#handlers) implements the protocol of the service, replacing the authentication handshake. The client does not need to know or use a real password to the service. Instead, it proxies its connection to the service through a local connection to Secretless via a [Listener](#listeners). Secretless obtains credentials to the target service from a secrets vault (such as Conjur, a keychain service, text files, or other sources) via a [Credential Provider](#credential-providers). The credentials are used to establish a connection to the actual service, and the Secretless server then rapidly shuttles data back and forth between the client and the service.
+To provide the Secretless Broker access to a target service, a [Handler](#handlers) implements the protocol of the service, replacing the authentication handshake. The client does not need to know or use a real password to the service. Instead, it proxies its connection to the service through a local connection to the Secretless Broker via a [Listener](#listeners). The Secretless Broker obtains credentials to the target service from a secrets vault (such as Conjur, a keychain service, text files, or other sources) via a [Credential Provider](#credential-providers). The credentials are used to establish a connection to the actual service, and the Secretless Broker then rapidly shuttles data back and forth between the client and the service.
 
-Secretless is currently licensed under [ASL 2.0](#license)
+The Secretless Broker is currently licensed under [ASL 2.0](#license)
 
 ## Currently supported services
 
@@ -67,9 +67,9 @@ Secretless is currently licensed under [ASL 2.0](#license)
 
 With many others in the planning stages!
 
-If there is a specific target service that you would like to be included in this project, please open a [GitHub issue](https://github.com/conjurinc/secretless/issues) with your request.
+If there is a specific target service that you would like to be included in this project, please open a [GitHub issue](https://github.com/conjurinc/secretless-broker/issues) with your request.
 
-For specific guidelines about using a particular service, please see our instructions for [using Secretless](#using-secretless).
+For specific guidelines about using a particular service, please see our instructions for [using the Secretless Broker](#using-secretless).
 
 # Quick Start
 
@@ -77,27 +77,27 @@ Running the quick start demo requires [Docker][get-docker].
 
 [get-docker]: https://docs.docker.com/engine/installation
 
-To see Secretless in action, build the quick start image:
+To see the Secretless Broker in action, build the quick start image:
 
 ```sh-session
 $ cd demos/quick-start/
 $ ./bin/build
 ...
 Successfully built cbf747e7f548
-Successfully tagged secretless-quickstart:latest
+Successfully tagged secretless-broker-quickstart:latest
 ```
 
-The quick start image runs the Secretless binary and a few sample target services. Secretless is configured to retrieve the credentials required to access the services from the process environment. **All services are configured to require authorization to access**, but we don't know what those credentials are. We can try to access the services, but since we don't know the password our access attempts will fail. _But when we try to connect via Secretless_, we will be granted access.
+The quick start image runs the Secretless Broker binary and a few sample target services. The Secretless Broker is configured to retrieve the credentials required to access the services from the process environment. **All services are configured to require authorization to access**, but we don't know what those credentials are. We can try to access the services, but since we don't know the password our access attempts will fail. _But when we try to connect via the Secretless Broker_, we will be granted access.
 
 Let's try this with the PostgreSQL server running in the quick start image. We know that the server has been configured with a `quickstart` database, so let's try to access it.
 
-You can run the Secretless quick start as a Docker container:
+You can run the Secretless Broker quick start as a Docker container:
 ```sh-session
 $ docker run \
   --rm \
   -p 5432:5432 \
   -p 5454:5454 \
-  secretless-quickstart:latest
+  secretless-broker-quickstart:latest
 ```
 
 In a new window, if we try to connect to PostgreSQL directly via port 5432 (guessing at the `postgres` username), our attempt will fail:
@@ -108,7 +108,7 @@ Password for user postgres:
 psql: FATAL:  password authentication failed for user "postgres"
 ```
 
-But Secretless is listening on port 5454, and will add authentication credentials (both username and password) to our connection request and proxy our connection to the PostgreSQL server:
+But the Secretless Broker is listening on port 5454, and will add authentication credentials (both username and password) to our connection request and proxy our connection to the PostgreSQL server:
 
 ```sh-session
 $ psql -h localhost -p 5454 -d quickstart
@@ -136,29 +136,29 @@ quickstart=>
 
 You have just delegated responsibility for managing credentials to a secure process isolated from your app!
 
-# Run more Secretless demos
+# Run more Secretless Broker demos
 
-If the PostgreSQL quick start demo piqued your interest, please check out our [additional demos](https://github.com/conjurinc/secretless/tree/master/demos/quick-start#ssh-quick-start) where you can try Secretless with SSH and HTTP Basic Auth.
+If the PostgreSQL quick start demo piqued your interest, please check out our [additional demos](https://github.com/conjurinc/secretless-broker/tree/master/demos/quick-start#ssh-quick-start) where you can try the Secretless Broker with SSH and HTTP Basic Auth.
 
-For an even more in-depth demo, check out our [Deploying to Kubernetes](https://github.com/conjurinc/secretless/tree/master/demos/k8s-demo) demo, which walks you through deploying a sample app to Kubernetes with Secretless.
+For an even more in-depth demo, check out our [Deploying to Kubernetes](https://github.com/conjurinc/secretless-broker/tree/master/demos/k8s-demo) demo, which walks you through deploying a sample app to Kubernetes with the Secretless Broker.
 
 # Using Secretless
 
-Secretless relies on YAML configuration files to specify which target services it can connect to and how it should retrieve the access credentials to authenticate with those services.
+The Secretless Broker relies on YAML configuration files to specify which target services it can connect to and how it should retrieve the access credentials to authenticate with those services.
 
-Each Secretless configuration file is composed of two sections:
+Each Secretless Broker configuration file is composed of two sections:
 
 * `listeners`: A list of protocol Listeners, each one on a Unix socket or TCP port.
 * `handlers`: A list of Handlers to process the requests received by each Listener. Handlers implement the protocol for the target services and are configured to obtain the backend connection credentials from one or more Providers.
 
 ## Listeners
 
-You can configure the following kinds of Secretless *Listeners*:
+You can configure the following kinds of Secretless Broker *Listeners*:
 
-1) `unix` Secretless serves the backend protocol on a Unix domain socket.
-2) `tcp` Secretless serves the backend protocol on a TCP socket.
+1) `unix` The Secretless Broker serves the backend protocol on a Unix domain socket.
+2) `tcp` The Secretless Broker serves the backend protocol on a TCP socket.
 
-For example, PostgreSQL clients can connect to the PostgreSQL server either via Unix domain socket or over a TCP connection. If you are setting up Secretless to facilitate a connection to a PostgreSQL server, you can either configure it:
+For example, PostgreSQL clients can connect to the PostgreSQL server either via Unix domain socket or over a TCP connection. If you are setting up the Secretless Broker to facilitate a connection to a PostgreSQL server, you can either configure it:
 
 - to listen on a Unix socket as usual (default: `/var/run/postgresql/.s.PGSQL.5432`)
   ```
@@ -178,9 +178,9 @@ For example, PostgreSQL clients can connect to the PostgreSQL server either via 
   ```
   In this case, the client would be configured to connect to the database URL `localhost:5432`
 
-Note that in each case, **the client is not required to specify the username and password to connect to the target service**. It just needs to know where Secretless is listening, and it connects to Secretless directly via a local, unsecured connection.
+Note that in each case, **the client is not required to specify the username and password to connect to the target service**. It just needs to know where the Secretless Broker is listening, and it connects to the Secretless Broker directly via a local, unsecured connection.
 
-In general, there are currently two strategies to redirect your client to connect to the target service via Secretless:
+In general, there are currently two strategies to redirect your client to connect to the target service via the Secretless Broker:
 
 1) **Connection URL**
 
@@ -188,21 +188,21 @@ In general, there are currently two strategies to redirect your client to connec
 
 2) **Proxy**
 
-    HTTP services support an environment variable or configuration setting `http_proxy=<url>` which will cause outbound traffic to route through the proxy URL on its way to the destination. Secretless can operate as an HTTP forward proxy, in which case it will place the proper authorization header on the outbound request. It can also optionally forward the connection using HTTPS. The client should always use plain `http://` URLs, otherwise Secretless cannot read the network traffic because it will encrypted.
+    HTTP services support an environment variable or configuration setting `http_proxy=<url>` which will cause outbound traffic to route through the proxy URL on its way to the destination. The Secretless Broker can operate as an HTTP forward proxy, in which case it will place the proper authorization header on the outbound request. It can also optionally forward the connection using HTTPS. The client should always use plain `http://` URLs, otherwise the Secretless Broker cannot read the network traffic because it will encrypted.
 
-Regardless of the connection strategy, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost.
+Regardless of the connection strategy, the operating system provides security between the client and the Secretless Broker. It's important to configure the OS properly so that unauthorized processes and clients can't connect to the Secretless Broker. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, the Secretless Broker should be listening only on localhost.
 
-The Listener configuration governs the _client to Secretless_ connection. The connection from Secretless to the PostgreSQL server is defined in the Handler configuration, where the actual address and credential information for the connection to the PostgreSQL server is defined.
+The Listener configuration governs the _client to Secretless Broker_ connection. The connection from the Secretless Broker to the PostgreSQL server is defined in the Handler configuration, where the actual address and credential information for the connection to the PostgreSQL server is defined.
 
-At this time, the Secretless-to-target-service connection always happens over TCP by default.
+At this time, the Secretless-Broker-to-target-service connection always happens over TCP by default.
 
 ## Handlers
 
-When Secretless receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless configuration for processing. Each Listener in the Secretless configuration should therefore have a corresponding Handler.
+When the Secretless Broker receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless Broker configuration for processing. Each Listener in the Secretless Broker configuration should therefore have a corresponding Handler.
 
 The Handler configuration specifies the Listener that the Handler is handling connections for and any credentials that will be needed for that connection. Several credential sources are currently supported; see the [Credential Providers](#credential-providers) section for more information.
 
-In this example, I am setting up a Handler to process connection requests from the `pg_socket` Listener, and it has three credentials: `address`, `username`, and `password`. The `address` and `username` are literally specified in this case, and the `password` is taken from the environment of the running Secretless process.
+In this example, I am setting up a Handler to process connection requests from the `pg_socket` Listener, and it has three credentials: `address`, `username`, and `password`. The `address` and `username` are literally specified in this case, and the `password` is taken from the environment of the running Secretless Broker process.
 ```
 handlers:
   - name: pg_via_socket
@@ -219,7 +219,7 @@ handlers:
         id: PG_PASSWORD
 ```
 
-In production you would want your credential information to be pulled from a vault, and Secretless currently supports multiple vault Credential Providers.
+In production you would want your credential information to be pulled from a vault, and the Secretless Broker currently supports multiple vault Credential Providers.
 
 When a Handler receives a new connection requests, it retrieves any required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there, the Handler simply transparently shuttles data between the client and service.
 
@@ -227,7 +227,7 @@ _Please note: Handler API interface signatures are currently under heavy develop
 
 ### Handler Credentials
 
-Secretless comes with several built-in Handlers, and each accepts a different set of credentials for configuration. In this section we provide information on the credentials used by each Handler.
+The Secretless Broker comes with several built-in Handlers, and each accepts a different set of credentials for configuration. In this section we provide information on the credentials used by each Handler.
 
 - MySQL (accepts connections over Unix socket or TCP)
   - Credentials:
@@ -277,7 +277,7 @@ Secretless comes with several built-in Handlers, and each accepts a different se
 ## Credential Providers
 
 Credential providers interact with a credential source to deliver secrets needed for authentication
-to Secretless Listeners and Handlers. The Secretless broker comes built-in with several different
+to the Secretless Broker Listeners and Handlers. The Secretless Broker comes built-in with several different
 Credential Providers, making it easy to use with your existing workflows regardless of your current
 secrets management toolset.
 
@@ -319,7 +319,7 @@ Example:
 
 ### File Provider
 
-File (`file`) provider allows you to use a file available to the Secretless process and/or container as sources of
+File (`file`) provider allows you to use a file available to the Secretless Broker process and/or container as sources of
 credentials.
 
 Example:
@@ -383,23 +383,23 @@ Example:
 
 # Community
 
-Our primary channel for support is through our [Secretless mailing list](https://groups.google.com/forum/#!forum/secretless). More info here: [community support](https://secretless.io/community)
+Our primary channel for support is through our [Secretless Broker mailing list](https://groups.google.com/forum/#!forum/secretless). More info here: [community support](https://secretless.io/community)
 
 # Performance
 
-Using Secretless reduces the transaction throughput by about 25% on Postgresql. Once the connection to the backend database is established, Secretless runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:
+Using the Secretless Broker reduces the transaction throughput by about 25% on Postgresql. Once the connection to the backend database is established, the Secretless Broker runs 2 goroutines - one reads from the client and writes to the server, the other reads from the server and writes to the client. It's as simple as this:
 
 ```
     go stream(self.Client, self.Backend)
     go stream(self.Backend, self.Client)
 ```
 
-Here is some performance data created by running [pgbench](https://www.postgresql.org/docs/9.5/static/pgbench.html) in a Dockerized environment with the client, Secretless and database running on a single machine (2017 MacBook Pro with 4-core Intel Core i7 @ 2.9GHz).
+Here is some performance data created by running [pgbench](https://www.postgresql.org/docs/9.5/static/pgbench.html) in a Dockerized environment with the client, the Secretless Broker and database running on a single machine (2017 MacBook Pro with 4-core Intel Core i7 @ 2.9GHz).
 
 Directly to the database:
 
 ```
-root@566b7c06abcf:/go/src/github.com/conjurinc/secretless# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/conjurinc/secretless-broker# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -413,10 +413,10 @@ tps = 1441.077559 (including connections establishing)
 tps = 1443.230144 (excluding connections establishing)
 ```
 
-Through the `secretless` proxy:
+Through the `secretless-broker` proxy:
 
 ```
-root@566b7c06abcf:/go/src/github.com/conjurinc/secretless# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/conjurinc/secretless-broker# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -448,7 +448,7 @@ tps = 18.243307 (including connections establishing)
 tps = 18.542609 (excluding connections establishing)
 ```
 
-And to RDS through Secretless:
+And to RDS through the Secretless Broker:
 
 ```
 root@2a33637a9cb5:/work# pgbench -U alice -T 10 -c 12 -j 12 postgres
@@ -465,48 +465,43 @@ tps = 14.554441 (including connections establishing)
 tps = 15.822442 (excluding connections establishing)
 ```
 
-14% fewer tps (excluding establishing connections) via Secretless.
+14% fewer tps (excluding establishing connections) via the Secretless Broker.
 
 Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios.
 
 # Development
 
-We welcome contributions of all kinds to Secretless. See our [contributing guide](CONTRIBUTING.md).
+We welcome contributions of all kinds to the Secretless Broker. See our [contributing guide](CONTRIBUTING.md).
 
 ## Building
 
-First, clone `https://github.com/conjurinc/secretless`. If you're new to Go, be aware that Go is very selective about
+First, clone `https://github.com/conjurinc/secretless-broker`. If you're new to Go, be aware that Go is very selective about
 where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
 is `~/go`. Projects should be checked out to `$GOPATH/src`. This is required by Go in order for dependencies to resolve
-properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless`.
+properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless-broker`.
 
-Now you can build Secretless. First fetch all the dependencies:
-
-```sh-session
-~ $ cd $GOPATH/src/github.com/conjurinc/secretless
-secretless $ dep ensure
-```
+Now you can build the Secretless Broker.
 
 ### Docker containers
 
 ```sh-session
-$ # From Secretless repository root
+$ # From Secretless Broker repository root
 $ ./bin/build
 ```
 
-This should create a Docker container with tag `secretless:latest` in your local registry.
+This should create a Docker container with tag `secretless-broker:latest` in your local registry.
 
 ### Binaries
 #### Linux
 ```sh-session
-$ # From Secretless repository root
-$ go build -o ./secretless ./cmd/secretless
+$ # From Secretless Broker repository root
+$ go build -o ./secretless-broker ./cmd/secretless-broker
 ```
 
 #### OSX
 
 ```sh-session
-$ # From Secretless repository root
+$ # From Secretless Broker repository root
 $ ./bin/build_darwin
 ```
 
@@ -540,7 +535,7 @@ verifies that it can retrieve the value.
 
 ## Plugins
 
-Plugins can be used to extend the functionality of Secretless via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
+Plugins can be used to extend the functionality of the Secretless Broker via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
 
 - Listener plugins
 - Handler plugins
@@ -554,4 +549,4 @@ _Please note: Plugin API interface signatures and supported plugin API version(s
 
 # License
 
-Secretless is licensed under Apache License 2.0 - see [`LICENSE.md`](LICENSE.md) for more details.
+The Secretless Broker is licensed under Apache License 2.0 - see [`LICENSE.md`](LICENSE.md) for more details.

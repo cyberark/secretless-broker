@@ -1,4 +1,4 @@
-# CyberArk Secretless Website
+# Secretless Broker Website
 
 This website is generated using Jekyll. We've documented our uses and best practices in a [separate file](jekyll-structure.md).
 
@@ -11,7 +11,7 @@ To get the site up and running locally on your computer, ensure you have:
 
 ### Run Locally
 To construct:
-1. `git clone https://github.com/conjurinc/secretless.git`
+1. `git clone https://github.com/conjurinc/secretless-broker`
 2. `cd docs`
 3. Run the following command:
 `bundle exec jekyll serve`

@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Converting Secretless to Golang modules"
+title: "Converting the Secretless Broker to Golang modules"
 date: 2018-07-30 09:00:00 -0600
 author: Srdjan Grubor
 categories: blog
 published: true
-excerpt: "How we converted Secretless to use the new Golang dependency management"
+excerpt: "How we converted the Secretless Broker to use the new Golang dependency management"
 ---
 
 ## Introduction
 
-There has been a lot of buzz lately about Go modules, but there is still not much information available about what they are and how they fit into the future development of Go projects. Based on the information available, however, we recently updated Secretless to use Go modules for our dependency management. In this post, we will talk about what led us to make this decision, and some of the technical details of how we implemented this change. But first, let's look at a bit of history on how we got to where we are in terms of Go dependency management tooling.
+There has been a lot of buzz lately about Go modules, but there is still not much information available about what they are and how they fit into the future development of Go projects. Based on the information available, however, we recently updated the Secretless Broker to use Go modules for our dependency management. In this post, we will talk about what led us to make this decision, and some of the technical details of how we implemented this change. But first, let's look at a bit of history on how we got to where we are in terms of Go dependency management tooling.
 
 ## At first, there was nothing
 
@@ -27,15 +27,15 @@ Since `Go1` was officially released in 2012, [interest in Go has grown](https://
 - do not want only a single version of a dependency shared between projects
 - do not store all their dependencies for all projects in a single location
 
-Since there has been no one official solution that addresses all of these issues, a number of [alternate solutions](https://hackernoon.com/the-state-of-go-dependency-management-6cc5f82a4bfa) have emerged over time. At the time we started the Secretless project the best solution available was [`dep`](https://github.com/golang/dep) (released in mid-2017), which was known as an "official experiment" and had emerged as the _de facto_  dependency management system for Go. `Dep` was easy to use, and running `dep ensure` would update the vendor directory (officially supported in Go as of [`Go1.5`](https://blog.golang.org/go1.5)).
+Since there has been no one official solution that addresses all of these issues, a number of [alternate solutions](https://hackernoon.com/the-state-of-go-dependency-management-6cc5f82a4bfa) have emerged over time. At the time we started the Secretless Broker project the best solution available was [`dep`](https://github.com/golang/dep) (released in mid-2017), which was known as an "official experiment" and had emerged as the _de facto_  dependency management system for Go. `Dep` was easy to use, and running `dep ensure` would update the vendor directory (officially supported in Go as of [`Go1.5`](https://blog.golang.org/go1.5)).
 
 ## `vgo` and the new Go modules
 
 Despite the growing acceptance of `dep` as _the_ dependency management tool for Golang, in mid-2018 a [new proposal](https://blog.golang.org/versioning-proposal) emerged for managing Golang project dependencies, known as `vgo` or Versioned Go Modules. The proposal was accepted, and as of [`Go1.11`](https://tip.golang.org/doc/go1.11#modules) modules will be available as an alternative to `GOPATH`, with integrated support for versioning and package distribution. Go modules are currently available as part of `golang:1.11beta2` ([docker image](https://hub.docker.com/_/golang/)) and are expected to become available in the GA version of `Go1.11` around August 1st (a day after this posting).
 
-## Conversion of Secretless
+## Conversion of the Secretless Broker
 
-As mentioned earlier in the post, Secretless was built using the `dep` dependency manager. So why would we change at this point? Our primary justifications for switching from `dep` to Go modules are:
+As mentioned earlier in the post, the Secretless Broker was built using the `dep` dependency manager. So why would we change at this point? Our primary justifications for switching from `dep` to Go modules are:
 - To use the official upstream-supported tool
 - In anticipation of the future deprecation of current non-official tooling (i.e. `dep`)
 - Simpler builds
@@ -65,8 +65,8 @@ The instructions below should work even if you don't currently have `dep` as you
 To convert to using Go modules, you run the following command from your project root:
 
 ```
-$ go mod -v -init -module github.com/conjurinc/secretless
-go: creating new go.mod: module github.com/conjurinc/secretless
+$ go mod -v -init -module github.com/conjurinc/secretless-broker
+go: creating new go.mod: module github.com/conjurinc/secretless-broker
 go: copying requirements from Gopkg.lock
 ```
 

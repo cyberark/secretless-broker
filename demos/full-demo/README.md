@@ -2,38 +2,38 @@
 
 ## Overview
 
-The purpose of this demo is to show how to use Secretless and Summon2 comprehensively to securely deploy a variety of applications in a vault-independent way.
+The purpose of this demo is to show how to use the Secretless Broker and Summon2 comprehensively to securely deploy a variety of applications in a vault-independent way.
 
-## Secretless vs Summon2
+## Secretless Broker vs Summon2
 
-Secretless and Summon2 are two different approaches to delivering the secrets needed by an application. Secretless is a more secure option, since it hides the secrets from the application code completely. However, Secretless cannot be used in all cases. For example:
+Secretless Broker and Summon2 are two different approaches to delivering the secrets needed by an application. Secretless Broker is a more secure option, since it hides the secrets from the application code completely. However, Secretless Broker cannot be used in all cases. For example:
 
 * If an application requires secrets to be present on disk and the application code cannot be modified. Examples: `nginx` with SSL certificates. `postgresql` server with SSL client authentication.
-* If the application needs to connect to a backend service that is not yet implemented in Secretless. For example, a client application which connects to a database, and the database protocol is not implemented in Secretless.
+* If the application needs to connect to a backend service that is not yet implemented in the Secretless Broker. For example, a client application which connects to a database, and the database protocol is not implemented in the Secretless Broker.
 
 ## Vault-Independence
 
-Secretless and Summon2 give organizations the flexibility to securely deliver secrets from any vault to applications and infrastructure. In addition, Secretless and Summon2 can utilize multiple vaults simultaneously, and can switch seamlessly between vaults. 
+Secretless Broker and Summon2 give organizations the flexibility to securely deliver secrets from any vault to applications and infrastructure. In addition, the Secretless Broker and Summon2 can utilize multiple vaults simultaneously, and can switch seamlessly between vaults. 
 
 ## Building and Running
 
 First you need to build the project, from the top-level project directory:
 
 ```sh-session
-secretless $ ./bin/build
+secretless-broker $ ./bin/build
 ```
 
 Then from this directory, build each scenario:
 
 ```sh-session
-secretless/demos/full-demo $ ./build
+secretless-broker/demos/full-demo $ ./build
 ```
 
 Next, enter the scenario directory. For example, "plaintext":
 
 ```sh-session
-secretless/demos/full-demo $ cd plaintext
-secretless/demos/full-demo/plaintext $
+secretless-broker/demos/full-demo $ cd plaintext
+secretless-broker/demos/full-demo/plaintext $
 ```
 
 In this directory you'll find a sequence of shell scripts. Run each script in sequence.
@@ -105,12 +105,12 @@ This app expects two environment variables: `SSL_CERT_FILE` and `SSL_KEY_FILE`. 
 
 ### Ansible
 
-* **SSH key file** Secretless stores the SSH key in its ssh-agent implementation, and the ssh-agent Unix domain socket is shared with Ansible and exposed as `SSH_AUTH_SOCK`.
+* **SSH key file** The Secretless Broker stores the SSH key in its ssh-agent implementation, and the ssh-agent Unix domain socket is shared with Ansible and exposed as `SSH_AUTH_SOCK`.
 * **DB_PASSWORD** `summon2` is used as the entrypoint to the container.  `CONJUR_AUTHN_API_KEY` is provided as a container environment variable.
 
 ### Myapp
 
-* **DB_HOST** Secretless runs a `pg` listener on Unix socket `/sock/s.PGSQL.5432`. This socket file is shared with `myapp`. `myapp` connects to `pg` through Secretless using this socket.
+* **DB_HOST** The Secretless Broker runs a `pg` listener on Unix socket `/sock/s.PGSQL.5432`. This socket file is shared with `myapp`. `myapp` connects to `pg` through the Secretless Broker using this socket.
 * **DB_PASSWORD** Not provided.
 
 ### Proxy_tls

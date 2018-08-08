@@ -1,8 +1,8 @@
 ---
 layout: blog
 id: blog
-title: Secretless Blog
-description: Secretless Blog
+title: Secretless Broker Blog
+description: Secretless Broker Blog
 ---
 
 <p>{{ site.posts }}</p>

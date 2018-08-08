@@ -4,7 +4,7 @@
 
 - The MySQL handler is currently limited to connections via Unix domain socket 
 
-### To use the Secretless MySQL handler:
+### To use the MySQL handler:
 #### Start your MySQL server
 From this directory, call
 ```
@@ -17,22 +17,22 @@ It will also configure the MySQL server as follows:
 - Authorize the `testuser` user to connect to the database server from any IP and access any schema
 - Create a table `test` in the `testdb` schema and add two rows
 
-#### Start and configure secretless
-From the root project directory, build the secretless binaries for your platform:
+#### Start and configure secretless-broker
+From the root project directory, build the Secretless Broker binaries for your platform:
 ```
 platform=$(go run test/print_platform.go)
 ./bin/build $platform amd64
 ```
 
-From this directory, start secretless:
+From this directory, start Secretless Broker:
 ```
 ./run_dev
 ```
 
-#### Log in to the MySQL server via the Secretless MySQL handler
+#### Log in to the MySQL server via the MySQL handler
 In another terminal, navigate to the `test/mysql_handler` directory and send a MySQL request via Unix socket:
 
-_Note: Since secretless container runs the daemon as a limited user, sockets should be mounted to `/sock` directory._
+_Note: Since the Secretless Broker container runs the daemon as a limited user, sockets should be mounted to `/sock` directory._
 
 ```
 mysql --socket=sock/mysql.sock
@@ -59,7 +59,7 @@ This will run the MySQL shell as a client in SQL mode.
 
 ### Using VS Code
 
-The easiest way to do Secretless development is to use the VS Code debugger. As above, you will want to start up your MySQL server container before beginning development. To configure the Secretless server, you can provide VS Code with a `launch.json` file for debugging by copying the sample file below to `.vscode/launch.json`, replacing `[YOUR MYSQL PORT]` with the actual exposed port of your MySQL Docker container.
+The easiest way to do Secretless Broker development is to use the VS Code debugger. As above, you will want to start up your MySQL server container before beginning development. To configure the Secretless Broker, you can provide VS Code with a `launch.json` file for debugging by copying the sample file below to `.vscode/launch.json`, replacing `[YOUR MYSQL PORT]` with the actual exposed port of your MySQL Docker container.
 
 Sample `launch.json`:
 ```
@@ -79,14 +79,14 @@ Sample `launch.json`:
       "host": "127.0.0.1",
       "program": "${workspaceFolder}/cmd/secretless/",
       "env": { "MYSQL_HOST": "localhost", "MYSQL_PORT": "[YOUR MYSQL PORT]", "MYSQL_PASSWORD": "testpass" },
-      "args": [ "-f", "/Users/gjennings/go/src/github.com/conjurinc/secretless/test/mysql_handler/secretless.dev.yml"],
+      "args": [ "-f", "/Users/gjennings/go/src/github.com/conjurinc/secretless-broker/test/mysql_handler/secretless.dev.yml"],
       "showLog": true
     }
   ]
 }
 ```
 
-Once you start the debugger (which will automatically start Secretless with the dev MySQL Handler configuration), you can send requests to the MySQL server via a client as described above.
+Once you start the debugger (which will automatically start the Secretless Broker with the dev MySQL Handler configuration), you can send requests to the MySQL server via a client as described above.
 
 ### Using Docker
 
@@ -111,22 +111,22 @@ Run MySQL in Docker:
 $ docker-compose up -d mysql
 ```
 
-Run Secretless locally and execute tests:
+Run Secretless Broker locally and execute tests:
 ```sh-session
 $ ./run_dev_test
 ...
-ok      github.com/conjurinc/secretless/test/mysql_handler   0.048s
+ok      github.com/conjurinc/secretless-broker/test/mysql_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
 ```
 
 
 #### Run the tests in Docker
-Make sure you have built updated Secretless binaries for Linux and updated Docker images before running the test suite.
+Make sure you have built updated Secretless Broker binaries for Linux and updated Docker images before running the test suite.
 
 To run the test suite in Docker, run:
 ```
 ./stop   # Remove all existing project containers
-./start  # Stand up MySQL and Secretless servers
+./start  # Stand up MySQL and Secretless Broker servers
 ./test   # Run tests in a test container
 ```
 Make sure you build the project by running `./bin/build` in the project root

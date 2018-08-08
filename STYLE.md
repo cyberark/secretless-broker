@@ -1,6 +1,6 @@
-# Secretless Style Guide
+# Secretless Broker Style Guide
 
-Use this guide to maintain consistent style across the Secretless project.
+Use this guide to maintain consistent style across the Secretless Broker project.
 
 Generally, when you are contributing code changes to this project you should
 leverage [golint][golint] as you work to get suggestions for style fixes you
@@ -32,7 +32,7 @@ golint ./[path]/...
 
 ### Prose
 
-Secretless prose should be warm, direct, and clear about its intended
+Secretless Broker prose should be warm, direct, and clear about its intended
 audience. When editing copy, follow the [Chicago Manual of
 Style][cmos].
 
@@ -55,7 +55,7 @@ by humans.
 
 ### Code
 
-Secretless code favors readability over cleverness.
+Secretless Broker code favors readability over cleverness.
 
 ### Continuous integration
 

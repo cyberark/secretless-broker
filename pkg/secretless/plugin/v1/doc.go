@@ -1,5 +1,5 @@
 /*
-Package v1 plugins are ways to add extended functionality to Secretless
+Package v1 plugins are ways to add extended functionality to the Secretless Broker
 
 WARNING: Given the speed of development, there will likely be cases of outdated documentation so please use this document
 as a reference point and use the source code in this folder as the true representation of the API state!
@@ -36,8 +36,8 @@ All plugins are currently loaded in the following manner:
 
 PluginAPIVersion
 
-`PluginAPIVersion` (returns string) indicates the target API version of Secretless and must match the
-supported version found at https://github.com/conjurinc/secretless/blob/master/internal/pkg/plugin/manager.go#L108 list in the
+`PluginAPIVersion` (returns string) indicates the target API version of the Secretless Broker and must match the
+supported version found at https://github.com/conjurinc/secretless-broker/blob/master/internal/pkg/plugin/manager.go#L108 list in the
 main daemon.
 
 PluginInfo
@@ -85,8 +85,8 @@ The following shows a sample plugin that conforms to the expected API:
   package main
 
   import (
-  	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
-  	"github.com/conjurinc/secretless/test/plugin/example"
+  	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+  	"github.com/conjurinc/secretless-broker/test/plugin/example"
   )
 
   // PluginAPIVersion is the API version being used

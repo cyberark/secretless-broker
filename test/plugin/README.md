@@ -28,7 +28,7 @@ You can test the server with:
 $ curl -A Agent http://<agent_host>:6174
 ```
 
-### Secretless plugin
+### Secretless Broker plugin
 
 The plugin opens two local ports (6175 and 6176) and forwards them to the backend echo
 service. Manager closes any connections to even ports (in this case 6176). Allowed

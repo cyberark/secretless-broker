@@ -1,20 +1,20 @@
-# Introduction to Secretless on Kubernetes
+# Introduction to the Secretless Broker on Kubernetes
 
-## Description: Secretless
+## Description: Secretless Broker
 
 Secrets are used to provide privileged access to protected resources.
-Secretless pushes the trust boundary of secrets away from application code into a privileged process that's designed with security best practices in mind. The Secretless broker provides a local interface for application code to transparently consume protected resources.
+The Secretless Broker pushes the trust boundary of secrets away from application code into a privileged process that's designed with security best practices in mind. The Secretless Broker provides a local interface for application code to transparently consume protected resources.
 
 ## Usage: Secretless Broker as Sidecar
 
-The Secretless broker operates as a sidecar container within a kubernetes application pod. This means there is shared storage/network between the application container and the Secretless broker. It is this which allows Secretless to provide a local interface.
+The Secretless Broker operates as a sidecar container within a kubernetes application pod. This means there is shared storage/network between the application container and the Secretless Broker. It is this which allows the Secretless Broker to provide a local interface.
 
 In this tutorial, we will walk through creating an application that communicates
-with a password-protected PostgreSQL database via the Secretless broker. _The application
+with a password-protected PostgreSQL database via the Secretless Broker. _The application
 does not need to know anything about the credentials required to connect to the database;_
-the admin super-user who provisions and configures the database will also configure Secretless
+the admin super-user who provisions and configures the database will also configure the Secretless Broker
 to be able to communicate with it. The developer writing the application only needs to
-know the socket or address that Secretless is listening on to proxy the connection to the
+know the socket or address that the Secretless Broker is listening on to proxy the connection to the
 PostgreSQL backend.
 
 To accomplish this, we are going to do the following:
@@ -22,12 +22,12 @@ To accomplish this, we are going to do the following:
 **As the admin super-user:**
 
 1. Provision protected resources
-1. Configure protected resources for usage by application and add credentials to secret store
-1. Configure Secretless to broker connection using credentials from the secret store
+1. Configure protected resources for usage by application and add credentials to a secret store
+1. Configure the Secretless Broker to broker the connection using credentials from the secret store
 
 **As the application developer:**
-1. Configure application to connect to protected resource through interface exposed by Secretless
-1. Deploy and run Secretless adjacent to the application
+1. Configure the application to connect to protected resource through the interface exposed by the Secretless Broker
+1. Deploy and run the Secretless Broker adjacent to the application
 
 ## Quickstart
 
@@ -41,7 +41,7 @@ There are additional routes that are also available, but these are the two that 
 
 Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` environment variables in the application's environment (following [12-factor principles](https://12factor.net/)).
 
-We are going to deploy the application with the Secretless broker to Kubernetes, configure the Secretless broker to be able to retrieve the credentials from a secrets store, and configure the application with its `DB_URL` pointing to the Secretless broker _and no values set for its `DB_USERNAME` or `DB_PASSWORD`_.
+We are going to deploy the application with the Secretless Broker to Kubernetes, configure the Secretless Broker to be able to retrieve the credentials from a secrets store, and configure the application with its `DB_URL` pointing to the Secretless Broker _and no values set for its `DB_USERNAME` or `DB_PASSWORD`_.
 
 ### Prerequisites
 
@@ -57,7 +57,7 @@ Our Kubernetes deployment manifests assume that you are using Minikube, so that 
 
 Once you have run through this tutorial, you may enjoy trying it with some modifications to make it more pertinent to you. Here are some suggestions for things to try:
 
-- We've provided a sample application for you to try with Secretless - but if you're interested in exploring further, you can try out replacing it with your own app. To do this, you'll want to:
+- We've provided a sample application for you to try with the Secretless Broker - but if you're interested in exploring further, you can try out replacing it with your own app. To do this, you'll want to:
   - Modify `quick-start.yml:35` to use your own application image
   - Update `02_configure_db.sh` to appropriately configure the PostgreSQL database for your own application
 
@@ -107,9 +107,9 @@ Run:
 ./02_configure_db.sh
 ```
 
-#### 3. Configure Secretless to broker connection to target service
+#### 3. Configure the Secretless Broker to broker the connection to the target service
 
-In the last step, we added the database credentials to our secret store - so to configure Secretless to be able to retrieve these credentials and proxy the connection to the actual PostgreSQL database, we have written a [secretless.yml](/demos/k8s-demo/etc/secretless.yml) file that defines a PostgreSQL listener on port 5432 that uses the File Provider to retrieve the credential values that we stored when we ran the last script:
+In the last step, we added the database credentials to our secret store - so to configure the Secretless Broker to be able to retrieve these credentials and proxy the connection to the actual PostgreSQL database, we have written a [secretless.yml](/demos/k8s-demo/etc/secretless.yml) file that defines a PostgreSQL listener on port 5432 that uses the File Provider to retrieve the credential values that we stored when we ran the last script:
 
 ```yaml
 listeners:
@@ -140,18 +140,18 @@ handlers:
 
 #### 1. Configure application to access the database at `localhost:5432`
 
-In the application manifest, we set the `DB_URL` to point to `localhost:5432`, so that when the application is deployed it will open the connection to the PostgreSQL backend via Secretless.
+In the application manifest, we set the `DB_URL` to point to `localhost:5432`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
 
 #### 2. Deploy application
 
-To deploy the application with Secretless, run:
+To deploy the application with the Secretless Broker, run:
 ```
 ./03_deploy_app.sh
 ```
 
 ### Try it out!
 
-That's it! You've configured your application to connect to PostgreSQL via Secretless, and we can try it out to validate that it's working as expected.
+That's it! You've configured your application to connect to PostgreSQL via the Secretless Broker, and we can try it out to validate that it's working as expected.
 
 #### Use the pet store app
 
@@ -207,4 +207,4 @@ Observe that requests to the application API are not affected by the password ro
 
 ## Conclusion
 
-If you enjoyed this Secretless tutorial, please try to make it your own by trying out some of the [suggested modifications](#suggested-modifications-for-advanced-demos). Please also let us know what you think of it! You can submit [Github issues](https://github.com/conjurinc/secretless/issues) for features you would like to see, or send a message to our [mailing list](https://groups.google.com/forum/#!forum/secretless) with comments and/or questions.
+If you enjoyed this Secretless Broker tutorial, please try to make it your own by trying out some of the [suggested modifications](#suggested-modifications-for-advanced-demos). Please also let us know what you think of it! You can submit [Github issues](https://github.com/conjurinc/secretless-broker/issues) for features you would like to see, or send a message to our [mailing list](https://groups.google.com/forum/#!forum/secretless) with comments and/or questions.

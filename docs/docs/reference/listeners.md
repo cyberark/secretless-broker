@@ -15,21 +15,23 @@ You can configure the following kinds of Secretless Broker *Listeners*:
 For example, PostgreSQL clients can connect to the PostgreSQL server either via Unix domain socket or over a TCP connection. If you are setting up Secretless Broker to facilitate a connection to a PostgreSQL server, you can either configure it:
 
 - To listen on a Unix socket as usual (default: `/var/run/postgresql/.s.PGSQL.5432`)
-    ```
-      listeners:
-      - name: pg_socket
-        protocol: pg
-        socket: /sock/.s.PGSQL.5432
-    ```
+
+  ```yml
+    listeners:
+    - name: pg_socket
+      protocol: pg
+      socket: /sock/.s.PGSQL.5432
+  ```
   In this case, the client would be configured to connect to the database URL `/sock`.
 
 - To listen on a given port, which may be the PostgreSQL default 5432 or may be a different port to avoid conflicts with the actual PostgreSQL server
-    ```
-      listeners:
-      - name: pg_tcp
-        protocol: pg
-        address: 0.0.0.0:5432
-    ```
+
+  ```yml
+    listeners:
+    - name: pg_tcp
+      protocol: pg
+      address: 0.0.0.0:5432
+  ```
   In this case, the client would be configured to connect to the database URL `localhost:5432`
 
 

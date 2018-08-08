@@ -141,6 +141,9 @@ func (h *AWSHandler) LoadKeys(keyring agent.Agent) error {
 	return errors.New("http/aws handler does not use LoadKeys")
 }
 
+func (h *AWSHandler) Shutdown() {
+}
+
 // AWSHandlerFactory instantiates a handler given HandlerOptions
 func AWSHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return &AWSHandler{

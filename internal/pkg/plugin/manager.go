@@ -226,7 +226,11 @@ func (manager *Manager) _RunHandler(id string, options plugin_v1.HandlerOptions)
 		log.Panicf("Error! Unrecognized handler id '%s'", id)
 	}
 
-	return manager.HandlerFactories[id](options)
+	handler := manager.HandlerFactories[id](options)
+
+	manager.CreateHandler(handler, options.ClientConnection)
+
+	return handler
 }
 
 func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener {
@@ -444,9 +448,24 @@ func (manager *Manager) ServerData(c net.Conn, buf []byte) {
 	}
 }
 
-// Shutdown loops through the connection managers to call Shutdown
+// Shutdown calls Shutdown on the Proxy and all the connection managers, concurrently
 func (manager *Manager) Shutdown() {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		manager.Proxy.Shutdown()
+	}()
+
 	for _, connectionManager := range manager.ConnectionManagers {
-		connectionManager.Shutdown()
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			connectionManager.Shutdown()
+		}()
 	}
+
+	wg.Wait()
 }

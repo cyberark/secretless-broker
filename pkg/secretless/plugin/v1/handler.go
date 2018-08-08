@@ -28,4 +28,5 @@ type Handler interface {
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn
 	LoadKeys(keyring agent.Agent) error
+	Shutdown()
 }

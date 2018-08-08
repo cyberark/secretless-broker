@@ -16,6 +16,7 @@ import (
 
 // Listener listens for and handles new connections.
 type Listener struct {
+	handlers       []plugin_v1.Handler
 	Config         config.Listener
 	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
@@ -56,6 +57,8 @@ func (l Listener) Validate() error {
 
 // Listen listens on the port or socket and attaches new connections to the handler.
 func (l *Listener) Listen() {
+	l.handlers = make([]plugin_v1.Handler, 0)
+
 	for {
 		var client net.Conn
 		var err error
@@ -73,9 +76,7 @@ func (l *Listener) Listen() {
 			}
 
 			handler := l.RunHandlerFunc("pg", handlerOptions)
-
-			// TODO: there's a better way to do this
-			l.EventNotifier.CreateHandler(handler, client)
+			l.handlers = append(l.handlers, handler)
 		} else {
 			pgError := protocol.Error{
 				Severity: protocol.ErrorSeverityFatal,
@@ -99,7 +100,7 @@ func (l *Listener) GetListener() net.Listener {
 
 // GetHandlers implements plugin_v1.Listener
 func (l *Listener) GetHandlers() []plugin_v1.Handler {
-	return nil
+	return l.handlers
 }
 
 // GetConnections implements plugin_v1.Listener

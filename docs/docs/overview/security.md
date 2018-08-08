@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Security of Secretless
 id: docs
 layout: docs
 description: Secretless Documentation
 permalink: docs/overview/security
 ---
-
-# Security of Secretless
 
 Protection of Secretless credential resolution is based on industry-standard practices of keeping the data for the minimal duration needed and hardening of the execution environment. This is ensured by various strategies listed below.
 
@@ -40,10 +38,10 @@ You can use both localhost listening address and/or socket files to exchange inf
 
 _Please note that running Secretless with a configuration that listens to all interfaces in a non-collocated app deployment allows any other container in the network to connect to Secretless and authenticate using its configured providers. Use extreme care when your target environment is configured in this way._
 
-### Future Work
+## Future Work
 
 Protections beyond the currently-implemented ones for Secretless are also under consideration (e.g. kernel memory isolation, CPU-specific enclaves, read-only filesystems, etc) and may be added to future releases as the project evolves.
 
-### Additional Notes
+## Additional Notes
 
 While we have taken great care to secure Secretless and plan to do much more in the future, compared to the apps that would be consumers of Secretless connectivity, Secretless itself has a relatively minimal attack surface. Because of this, hardening efforts would in most cases have the best payoff when focused on the application itself and the infrastructure hosting your services.

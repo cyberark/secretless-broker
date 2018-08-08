@@ -14,16 +14,120 @@
 	background: none;
 }
 
+.navbar {
+	background-image: url("../img/secretless_pattern_dark.png");
+	background-repeat: repeat-y;
+	background-size: cover;
+	border-radius: 0;
+	margin: 0;
+	min-height: 6.5rem;
+	margin-bottom: 4rem;
+	.container {
+		padding: 0;
+	}
+}
+
+.icon-bar {
+	background-color: $sless-blue;
+	display: block;
+	width: 22px;
+	height: 2px;
+	border-radius: 1px;
+	margin-top: 4px;
+}
+
+.navbar-brand {
+	color: #fff;
+	min-height: 6.5rem;
+	background-image: url("../img/secretless_4c_ko_horiz.svg");
+	width: 150px;
+	text-indent: -9999px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position-y: center;
+}
+
+.navbar-nav {
+	.dropdown-menu {
+		width: 100%;
+	}
+}
+
+.navbar-nav li {
+	font-size: 1.4rem;
+	font-weight: 100;
+	height: 6.5rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	&.active {
+		a {
+			color: $sless-blue;
+		}
+	}
+}
+
+@media (max-width: 991px) {
+
+	.navbar-nav {
+		.dropdown-menu {
+			background-color: $sless-blue;
+			margin-bottom: 2rem;
+			border-radius: $border-radius;
+			li {
+				transition: all 0.4s;
+				&:hover {
+					background-color: darken($sless-blue, 10);
+					a {
+						color: #fff;
+					}
+				}
+			}
+		}
+		li {
+			flex-direction: column;
+		}
+	}
+}
+
+.navbar-nav a {
+	color: lighten($sless-light-blue, 05);
+	padding: .8rem 1rem;
+	font-size: 1.5rem;
+	font-weight: 500;
+	transition: all 0.4s;
+	letter-spacing: .5px;
+	width: 100%;
+	&:hover {
+		text-decoration: none;
+		color: $sless-blue;
+	}
+}
+
+.dropdown-menu {
+	background-color: $sless-dark-blue;
+	min-width: 160px;
+	border-radius: 0 0 4px 4px;
+	margin: 0;
+	border: 0;
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+	li {
+		height: 5rem;
+	}
+}
+
 // *********************
 // Side Navigation
 
 #side-navigation {
-	//box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
 	border-radius: 4px;
 	justify-content: center;
 	flex-direction: column;
-	position: fixed;
-	width: 230px;
+	position: sticky;
+	margin-bottom: 8rem;
+	h3 a{
+		color: $sless-blue;
+	}
 	a {
 		color: $sless-text;
 		transition: all 0.4s;
@@ -40,19 +144,32 @@
 	.list-link {
 		font-family: $sless-font-secondary;
 		width: 100%;
-		//background-color: lighten($sless-light-blue, 02);
 		padding: 1rem 0 0 2.5rem ;
 
 	}
 
 	.sidenav-group {
 		background-color: lighten($sless-light-blue, 02);
+		padding: 2rem 0;
+		border-radius: $border-radius;
 		:nth-child(1) {
 			border-top: none;
+			padding-top: 0;
 		 }
 		 :last-child {
 			margin-bottom: 0;
-			padding-bottom: .5rem
+			padding-bottom: 0;
+		 }
+		 h3 {
+				padding: 2rem 2.5rem .5rem 2.5rem;
+				color: $sless-blue;
+				border-top: 1px solid darken($sless-light-blue, 10);
+				font-weight: 800;
+				margin-top: 1rem;
+				font-size: 1.6rem;
+				a:hover {
+					color: darken($sless-blue, 20);
+				}
 		 }
 	}
 
@@ -63,11 +180,23 @@
 	}
 	.sidenav-sublist {
 		font-weight: 500;
-		//background-color: lighten($sless-light-blue, 02);
 	}
 
 	.sidenav-sublist {
     padding: 0px 2.5rem;
+	}
+
+	.sidenav-subsublist {
+		padding: .6rem 0;
+	}
+
+	.sidenav-subsublist li{
+		margin-left: 1rem;
+		i {
+			margin-right: .5rem;
+			font-size: 1.3rem;
+			color: $sless-blue;
+		}
 	}
 }
 

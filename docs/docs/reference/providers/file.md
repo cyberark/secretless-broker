@@ -6,11 +6,11 @@ description: Secretless Documentation
 permalink: docs/reference/providers/file
 ---
 
-# File
+## File
 The file provider (`file`) allows you to use a file available to the Secretless
 process and/or container as sources of credentials.
 
-## Examples
+### Examples
 ``` yaml
 listeners:
   - name: http_listener

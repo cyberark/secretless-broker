@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Frequently Asked Questions
 id: faq
 layout: docs
 description: Secretless Documentation
 permalink: docs/faq
 ---
-
-<p class="card-heading">FAQ</p>
 
 <div class="container-fluid" id="faq-list">
   <ul>

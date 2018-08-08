@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Credential Providers
 id: providers
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/providers
----
-
-# Credential Providers 
+--- 
 
 Credential Providers interact with a credential source to deliver secrets needed for authentication
 to Secretless Listeners and Handlers. The Secretless broker comes built-in with several different

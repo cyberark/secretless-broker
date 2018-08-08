@@ -6,12 +6,12 @@ description: Secretless Documentation
 permalink: docs/reference/handlers/mysql
 ---
 
-# MySQL
-## Overview
+## MySQL
+### Overview
 The MySQL handler authenticates incoming connections for a particular
 listener.
 
-## Credentials
+### Credentials
 - `host`  
 _Required_  
 Host name of the MySQL server  
@@ -28,7 +28,7 @@ Username of the MySQL account to connect as
 _Required_  
 Password of the MySQL account to connect with  
 
-## Examples
+### Examples
 #### Listening on a network address
 ``` yaml
 listeners:

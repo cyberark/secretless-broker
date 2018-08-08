@@ -6,7 +6,7 @@ description: Secretless Documentation
 permalink: docs/reference/providers/literal
 ---
 
-# Literal
+## Literal
 The literal provider (`literal`) allows use of hard-coded values as credential
 sources.
 
@@ -15,7 +15,7 @@ Secrets stored in this manner are considered insecure and should be provided
 through a secure solution such as [Conjur](conjur.html). Take caution and be
 mindful of the type of information supplied by this provider.
 
-## Examples
+### Examples
 ``` yaml
 listeners:
   - name: ssh_listener

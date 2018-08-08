@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Get Started
 id: get_started
 layout: docs
 description: Secretless Documentation
 permalink: docs/get_started
 ---
-
-# Get Started
 
 To get started trying out Secretless, you can run through our [quick start demos](/docs/get_started/quick_start.html)
 that allow you to try it out with PostgreSQL, SSH, or an HTTP web service.

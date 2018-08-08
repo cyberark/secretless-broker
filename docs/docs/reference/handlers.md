@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Handlers
 id: handlers
 layout: docs
 description: Secretless Documentation
 permalink: docs/reference/handlers
 ---
-
-# Handlers
 
 When Secretless receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless configuration for processing. Each Listener in the Secretless configuration should therefore have a corresponding Handler.
 

@@ -6,14 +6,14 @@ description: Secretless Documentation
 permalink: docs/reference/handlers/ssh_agent
 ---
 
-# SSH Agent
-## Overview
+## SSH Agent
+### Overview
 The SSH Agent handler enables Secretless to replace `ssh-agent` by providing
 similar functionality over a socket without exposing keys. Once running, export
 `SSH_AUTH_SOCK` to equal the path of your listener socket targeted by this
 handler.
 
-## Credentials
+### Credentials
 - `rsa` or `ecdsa`  
 _Required_  
 RSA or ECDSA private key
@@ -30,7 +30,7 @@ if not 0, the number of seconds the agent will store the key for
 _Optional_  
 confirms with user before using if true  
 
-## Example
+### Example
 ``` yaml
 listeners:
   - name: ssh_agent_listener

@@ -82,6 +82,18 @@ func copyHeaders(dst, src http.Header) {
 	}
 }
 
+// zeroizeVariable zeroizes credentials in the fetched variables. We don't want to
+// rely on garbage collection for this (it might be slow and/or only free them) so
+// we manually clear
+func zeroizeVariables(backendVariables map[string][]byte) {
+	for _, rawCredential := range reflect.ValueOf(backendVariables).MapKeys() {
+		credential := rawCredential.String()
+		for byteIndex, _ := range backendVariables[credential] {
+			backendVariables[credential][byteIndex] = 0
+		}
+	}
+}
+
 // LookupHandler returns the handler that matches the request URL
 func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 	for _, handlerConfig := range l.HandlerConfigs {
@@ -139,10 +151,14 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			keys := reflect.ValueOf(backendVariables).MapKeys()
 			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, keys)
 		}
-		if err = handler.Authenticate(backendVariables, r); err != nil {
+
+		err = handler.Authenticate(backendVariables, r)
+		zeroizeVariables(backendVariables)
+		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
+
 	} else {
 		log.Printf("WARN: Have no handler for request: %s %s", r.Method, r.URL)
 	}

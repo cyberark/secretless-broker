@@ -86,4 +86,4 @@ documentation:
       - page: How to Deploy
         url: /docs/reference/how_to_deploy
   - title: FAQ
-    url: /docs/faq.html
+    url: /docs/faq

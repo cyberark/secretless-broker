@@ -125,8 +125,15 @@
 	flex-direction: column;
 	position: sticky;
 	margin-bottom: 8rem;
-	h3 a{
-		color: $sless-blue;
+	h3 {
+		&.active {
+			a {
+				color: darken($sless-blue, 30);
+			}
+		}
+		a{
+			color: $sless-blue;
+		}
 	}
 	a {
 		color: $sless-text;
@@ -139,6 +146,15 @@
 	ul {
 		list-style-type: none;
 		padding: 0;
+		li {
+			font-weight: 300;
+			&.active.sub {
+				font-weight: 800;
+			}
+			&.active.subsub {
+				font-weight: 800;
+			}
+		}
 	}
 
 	.list-link {
@@ -260,11 +276,8 @@
 	margin-bottom: 0;
 }
 
-li.active {
-	a {
-		font-weight: 800;
-	}
-}
-h3.active a {
-	color: green !important;
-}
+// li.active {
+// 	a {
+// 		font-weight: 800;
+// 	}
+// }

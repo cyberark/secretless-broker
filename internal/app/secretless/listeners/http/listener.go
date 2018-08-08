@@ -12,8 +12,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/conjurinc/secretless/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 

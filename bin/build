@@ -16,8 +16,8 @@ else
 fi
 
 echo "Building Docker image"
-docker build -t "secretless:${VERSION}" \
-             -t "secretless:latest" \
+docker build -t "secretless-broker:${VERSION}" \
+             -t "secretless-broker:latest" \
              $DOCKER_FLAGS \
              .
 
@@ -29,8 +29,8 @@ docker build -t "secretless-dev:${VERSION}" \
              .
 
 echo "Building Docker Quick-Start image"
-docker build -t "secretless-quickstart:${VERSION}" \
-             -t "secretless-quickstart:latest" \
+docker build -t "secretless-broker-quickstart:${VERSION}" \
+             -t "secretless-broker-quickstart:latest" \
              $DOCKER_FLAGS \
              -f "$QUICK_START_DIR/Dockerfile" \
              "$QUICK_START_DIR"

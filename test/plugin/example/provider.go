@@ -1,6 +1,6 @@
 package example
 
-import plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+import plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 
 // Provider provides the `<ID>provider` as the value.
 type Provider struct {

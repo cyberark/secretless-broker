@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 )
 
 // newClientOptions builds a ClientOptions from an options map.

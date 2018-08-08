@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
 )
 
 // Resolver is the interface which is used to pass a generic resolver

@@ -1,5 +1,5 @@
 # TODO: Use DockerHub account image after public release
-FROM secretless:latest as secretless
+FROM secretless-broker:latest as secretless-broker
 
 FROM postgres:9.6.9-alpine
 
@@ -32,4 +32,4 @@ RUN apk add --no-cache apache2-utils \
         -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' \
         /etc/ssh/sshd_config
 
-COPY --from=secretless /usr/local/bin/secretless  /usr/local/bin/
+COPY --from=secretless-broker /usr/local/bin/secretless-broker /usr/local/bin/

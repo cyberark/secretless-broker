@@ -21,7 +21,7 @@ import (
 	"unsafe"
 )
 
-const NULL=0
+const NULL = 0
 
 func release(ref C.CFTypeRef) {
 	C.CFRelease(ref)

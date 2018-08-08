@@ -13,8 +13,8 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/conjurinc/secretless/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Handler implements an ssh-agent which holds a single key.

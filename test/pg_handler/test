@@ -10,7 +10,7 @@ done
 
 docker_args=""
 if $local_test; then
-  docker_args="-v $(cd ../..; pwd):/go/src/github.com/conjurinc/secretless"
+  docker_args="-v $(cd ../..; pwd):/go/src/github.com/conjurinc/secretless-broker"
 fi
 
 docker-compose run \

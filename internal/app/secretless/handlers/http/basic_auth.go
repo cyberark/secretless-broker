@@ -10,8 +10,8 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/conjurinc/secretless/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // BasicAuthHandler applies HTTP Basic authentication to the HTTP Authorization header.

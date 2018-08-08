@@ -343,7 +343,7 @@ pre {
   position: relative;
 	width: 15px;
 	height: 20px;
-  background: url("/img/copy-to-clipboard.svg");
+  background: url("/img/clipboard.svg");
   background-repeat: no-repeat;
   background-position: center;
   border: none;
@@ -351,6 +351,9 @@ pre {
 	float: right;
 	&:hover {
 		background: url("/img/clipboard-hover.svg");
+	}
+	&:active {
+		background: url("/img/clipboard-focus.svg");
 	}
 }
 .copy-icon-hover {

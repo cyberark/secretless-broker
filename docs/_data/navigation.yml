@@ -85,5 +85,10 @@ documentation:
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
         url: /docs/reference/how_to_deploy.html
+        subsubfolderitems:
+        - page: Using Kubernetes Secrets
+          url: /docs/reference/how_to_deploy.html
+        - page: Using Conjur
+          url: /docs/reference/how_to_deploy_conjur.html
   - title: FAQ
     url: /docs/faq.html

@@ -7,24 +7,24 @@
 
 	<div class="collapse navbar-collapse" id="navbarSupportedContent">
 		<ul class="navbar-nav ml-auto">
-				{% assign links = site.data.navigation.main %}
+		{% assign links = site.data.navigation.main %}
         {% for link in links %}
             {% assign class = nil %}
             {% if page.url contains link.url %}
-							{% assign class = 'active' %}
+				{% assign class = 'active' %}
             {% endif %}
             {% if link.sublinks %}
-							<li class="dropdown {{ class }}">
-								<a href="{{ site.baseurl }}{{ link.url }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ link.title }} <span class="caret"></span></a>
-								<ul class="dropdown-menu">
-									{% for sublink in link.sublinks %}
-										<li>
-												<a href="{{ site.baseurl }}{{ sublink.url }}">{{ sublink.title }}</a>
-										</li>
-									{% endfor %}
-									
-								</ul>
+				<li class="dropdown {{ class }}">
+					<a href="{{ site.baseurl }}{{ link.url }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ link.title }} <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						{% for sublink in link.sublinks %}
+							<li>
+								<a href="{{ site.baseurl }}{{ sublink.url }}">{{ sublink.title }}</a>
 							</li>
+						{% endfor %}
+						
+					</ul>
+				</li>
             {% else %}
                 <li class="{{ class }}">
                     <a href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>

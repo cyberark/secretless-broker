@@ -259,3 +259,12 @@
 .navbar .default {
 	margin-bottom: 0;
 }
+
+li.active {
+	a {
+		font-weight: 800;
+	}
+}
+h3.active a {
+	color: green !important;
+}

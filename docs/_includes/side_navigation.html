@@ -3,19 +3,28 @@
 	<ul class="sidenav-group">
 			{% if site.data.navigation.documentation[0] %}
 			{% for item in site.data.navigation.documentation %}
-				<h3><a href="{{ item.url }}">{{ item.title }}</a></h3>
+			{% if page.url contains item.url %}
+				{% assign class = 'active' %}
+			{% endif %}
+				<h3 class="{% if page.url == item.url %}active{% endif %}"><a href="{{ item.url }}">{{ item.title }}</a></h3>	
 					{% if item.subfolderitems[0] %}
 						<ul class="sidenav-sublist">
 							{% for entry in item.subfolderitems %}
-									<li class="{% if entry.url == page.url %}active{% endif %} sidenav-subitem"><a href="{{ entry.url }}">{{ entry.page }}</a>
-										{% if entry.subsubfolderitems[0] %}
-											<ul class="sidenav-subsublist">
-											{% for subentry in entry.subsubfolderitems %}
-													<li><i class="fas fa-angle-right"></i><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
-											{% endfor %}
-											</ul>
-										{% endif %}
-									</li>		
+								<li class="subfoldrr {% if page.url == entry.url %}active{% endif %} sidenav-subitem"><a href="{{ entry.url }}">{{ entry.page }}</a>
+									{% if entry.subsubfolderitems[0] %}
+										<ul class="sidenav-subsublist">
+										{% for subentry in entry.subsubfolderitems %}
+												<li class="subsubfoldrrr {% if page.url == subentry.url %}active{% endif %}"><i class="fas fa-angle-right"></i><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
+												<!-- <p class="item-url">{{ item.url }}</p>
+												<p class="entry-url">{{ entry.url }}</p>
+												<p class="page-url">{{ page.url }}</p> -->
+										{% endfor %}
+										</ul>
+									{% endif %}
+								</li>
+												<!-- <p class="item-url">{{ item.url }}</p>
+												<p class="entry-url">{{ entry.url }}</p>
+												<p class="page-url">{{ page.url }}</p>		 -->
 							{% endfor %}
 						</ul>
 					{% endif %}
@@ -23,3 +32,5 @@
 		{% endif %}
 	</ul>
 </nav>
+
+

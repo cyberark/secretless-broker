@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/conjurinc/secretless-broker/internal/app/summon/command"
+	"github.com/cyberark/secretless-broker/internal/app/summon/command"
 
 	"bufio"
 

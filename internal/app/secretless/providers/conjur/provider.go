@@ -15,7 +15,7 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 	"github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator"
 
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // authenticateCycleDuration is the default time the system waits to

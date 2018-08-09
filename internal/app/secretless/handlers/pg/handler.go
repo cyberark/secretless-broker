@@ -8,9 +8,9 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/pg/protocol"
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 	"io"
 )
 

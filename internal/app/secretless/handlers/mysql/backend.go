@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 )
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the

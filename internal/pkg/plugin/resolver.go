@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Resolver is used to instantiate providers and resolve credentials

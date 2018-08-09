@@ -20,7 +20,7 @@ function print_status() {
     echo "exit status 1"
   fi
 
-  echo "$result    github.com/conjurinc/secretless-broker/test/ssh_agent_handler  $(runtime).000s"
+  echo "$result    github.com/cyberark/secretless-broker/test/ssh_agent_handler  $(runtime).000s"
 }
 
 function runtime() {
@@ -40,7 +40,7 @@ done
 
 docker_args=""
 if $local_test; then
-  docker_args="-v $(cd ../..; pwd):/go/src/github.com/conjurinc/secretless-broker"
+  docker_args="-v $(cd ../..; pwd):/go/src/github.com/cyberark/secretless-broker"
 fi
 
 start=`date +%s`

@@ -28,9 +28,9 @@ One of the biggest security risks for an application is keeping credentials arou
 - `mysql`: Credentials are loaded for each connection but garbage-collected after connecting to the backend.
 - `pg`: Credentials are loaded for each connection but garbage-collected after connecting to the backend.
 - `ssh`: Loaded on each new each ssh connection and stored for the duration of the indvidual connection.
-- `ssh-agent`: Loaded at listener instantiation time. [Future work](https://github.com/conjurinc/secretless-broker/issues/270) will include instantiation of keyring on each connection instead of having a single one that is loaded at start.
+- `ssh-agent`: Loaded at listener instantiation time. [Future work](https://github.com/cyberark/secretless-broker/issues/270) will include instantiation of keyring on each connection instead of having a single one that is loaded at start.
 
-[Additional work](https://github.com/conjurinc/secretless-broker/issues/271) on zeroization is also pending to ensure that credentials are safe after garbage collection.
+[Additional work](https://github.com/cyberark/secretless-broker/issues/271) on zeroization is also pending to ensure that credentials are safe after garbage collection.
 
 ## Hardened Networking
 

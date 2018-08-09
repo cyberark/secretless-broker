@@ -1,8 +1,8 @@
 package main
 
 import (
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
-	"github.com/conjurinc/secretless-broker/test/plugin/example"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/test/plugin/example"
 )
 
 // PluginAPIVersion is the API version being used

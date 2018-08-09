@@ -22,7 +22,7 @@ main:
   - title: Blog
     url: /blog.html
   - title: Github
-    url: https://github.com/conjurinc/secretless-broker
+    url: https://github.com/cyberark/secretless-broker
     class: gh
 
 documentation:

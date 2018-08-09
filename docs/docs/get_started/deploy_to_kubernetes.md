@@ -34,7 +34,7 @@ We have chosen a PostgresSQL database as the target service for this tutorial, h
 
 In this tutorial, we will walk through creating an application that communicates with a password-protected PostgreSQL database via the Secretless Broker. _The application does not need to know anything about the credentials required to connect to the database;_ the admin super-user who provisions and configures the database will also configure the Secretless Broker to be able to communicate with it. The developer writing the application only needs to know the socket or address that the Secretless Broker is listening on to proxy the connection to the PostgreSQL backend.
 
-If you'd rather just see the whole thing working end to end, check out [our tutorial on github](https://github.com/conjurinc/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+If you'd rather just see the whole thing working end to end, check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
 
 We are going to do the following:
 
@@ -699,4 +699,4 @@ Now return to the polling terminal. Observe that requests to the application API
 
 ## Review Complete Tutorial With Scripts
 
-Check out [our tutorial on github](https://github.com/conjurinc/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+Check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.

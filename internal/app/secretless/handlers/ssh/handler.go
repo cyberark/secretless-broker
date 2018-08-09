@@ -13,8 +13,8 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // ServerConfig is the configuration info for the target server

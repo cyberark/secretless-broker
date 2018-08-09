@@ -29,7 +29,7 @@ The Secretless Broker is currently in beta.
 
 The Secretless Broker is a connection broker which relieves client applications of the need to directly handle secrets to target services such as databases, web services, SSH connections, or any other TCP-based service.
 
-![Secretless Broker Architecture](https://github.com/conjurinc/secretless-broker/blob/master/docs/img/secretless_architecture.svg)
+![Secretless Broker Architecture](https://github.com/cyberark/secretless-broker/blob/master/docs/img/secretless_architecture.svg)
 
 The Secretless Broker is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
 
@@ -67,7 +67,7 @@ The Secretless Broker is currently licensed under [ASL 2.0](#license)
 
 With many others in the planning stages!
 
-If there is a specific target service that you would like to be included in this project, please open a [GitHub issue](https://github.com/conjurinc/secretless-broker/issues) with your request.
+If there is a specific target service that you would like to be included in this project, please open a [GitHub issue](https://github.com/cyberark/secretless-broker/issues) with your request.
 
 For specific guidelines about using a particular service, please see our instructions for [using the Secretless Broker](#using-secretless).
 
@@ -138,9 +138,9 @@ You have just delegated responsibility for managing credentials to a secure proc
 
 # Run more Secretless Broker demos
 
-If the PostgreSQL quick start demo piqued your interest, please check out our [additional demos](https://github.com/conjurinc/secretless-broker/tree/master/demos/quick-start#ssh-quick-start) where you can try the Secretless Broker with SSH and HTTP Basic Auth.
+If the PostgreSQL quick start demo piqued your interest, please check out our [additional demos](https://github.com/cyberark/secretless-broker/tree/master/demos/quick-start#ssh-quick-start) where you can try the Secretless Broker with SSH and HTTP Basic Auth.
 
-For an even more in-depth demo, check out our [Deploying to Kubernetes](https://github.com/conjurinc/secretless-broker/tree/master/demos/k8s-demo) demo, which walks you through deploying a sample app to Kubernetes with the Secretless Broker.
+For an even more in-depth demo, check out our [Deploying to Kubernetes](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo) demo, which walks you through deploying a sample app to Kubernetes with the Secretless Broker.
 
 # Using Secretless
 
@@ -399,7 +399,7 @@ Here is some performance data created by running [pgbench](https://www.postgresq
 Directly to the database:
 
 ```
-root@566b7c06abcf:/go/src/github.com/conjurinc/secretless-broker# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/cyberark/secretless-broker# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -416,7 +416,7 @@ tps = 1443.230144 (excluding connections establishing)
 Through the `secretless-broker` proxy:
 
 ```
-root@566b7c06abcf:/go/src/github.com/conjurinc/secretless-broker# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
+root@566b7c06abcf:/go/src/github.com/cyberark/secretless-broker# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
 transaction type: TPC-B (sort of)
 scaling factor: 1
@@ -475,10 +475,10 @@ We welcome contributions of all kinds to the Secretless Broker. See our [contrib
 
 ## Building
 
-First, clone `https://github.com/conjurinc/secretless-broker`. If you're new to Go, be aware that Go is very selective about
+First, clone `https://github.com/cyberark/secretless-broker`. If you're new to Go, be aware that Go is very selective about
 where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
 is `~/go`. Projects should be checked out to `$GOPATH/src`. This is required by Go in order for dependencies to resolve
-properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/conjurinc/secretless-broker`.
+properly. So after you clone, the source code should be located in `$GOPATH/src/github.com/cyberark/secretless-broker`.
 
 Now you can build the Secretless Broker.
 

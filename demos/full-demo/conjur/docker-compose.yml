@@ -16,7 +16,7 @@ services:
       - conjur_pg
 
   conjur_client:
-    image: conjurinc/cli5
+    image: cyberark/cli5
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev

@@ -23,6 +23,6 @@ for image_name in "${IMAGES[@]}"; do
   # Push images
   for tag in "${TAGS[@]}"; do
     echo "Pushing $REGISTRY/$image_name:$tag"
-    echo docker push "$REGISTRY/$image_name:$tag"
+    docker push "$REGISTRY/$image_name:$tag"
   done
 done

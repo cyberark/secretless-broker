@@ -3,6 +3,7 @@ package v1
 import (
 	"net"
 	"log"
+	"sync"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
@@ -99,9 +100,19 @@ func (l *BaseListener) Validate() error {
 func (l *BaseListener) Shutdown() error {
 	log.Printf("Shutting down listener's handlers...")
 
+	var wg sync.WaitGroup
+
 	for _, handler := range l.handlers {
-		handler.Shutdown()
+		_handler := handler
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_handler.Shutdown()
+		}()
 	}
+
+	wg.Wait()
 
 	return l.NetListener.Close()
 }

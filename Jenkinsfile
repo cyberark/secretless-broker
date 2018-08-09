@@ -19,7 +19,7 @@ pipeline {
       steps {
         sh './bin/check_style'
 
-        checkstyle pattern: 'test/golint.xml', canComputeNew: false, unstableTotalAll: '0', healthy: '0', failedTotalAll: '20',  unHealthy: '10'
+        checkstyle pattern: 'test/golint.xml', canComputeNew: false, usePreviousBuildAsReference: false, unstableTotalAll: '0', healthy: '0', failedTotalAll: '0',  unHealthy: '0'
       }
     }
 

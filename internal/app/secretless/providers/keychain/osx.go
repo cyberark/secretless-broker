@@ -21,6 +21,7 @@ import (
 	"unsafe"
 )
 
+// NULL is just an int representation of C NULL
 const NULL = 0
 
 func release(ref C.CFTypeRef) {

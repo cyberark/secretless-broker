@@ -25,6 +25,37 @@
 	.container {
 		padding: 0;
 	}
+	&.home {
+		.dropdown-menu {
+			background-color: $sless-blue;
+			border-radius: $border-radius;
+			left: -5rem;
+		}
+		.dropdown.show {
+			.dropdown-toggle::after {
+				opacity: 0;
+			}
+		}
+	}
+}
+
+.arrow_box {
+	position: relative;
+	background: #4D8FCC;
+}
+.arrow_box:after {
+	bottom: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+	border-color: rgba(77, 143, 204, 0);
+	border-bottom-color: #4D8FCC;
+	border-width: 10px;
+	margin-left: -10px;
 }
 
 .icon-bar {

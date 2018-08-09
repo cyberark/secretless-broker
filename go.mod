@@ -1,4 +1,4 @@
-module github.com/conjurinc/secretless
+module github.com/conjurinc/secretless-broker
 
 require (
 	cloud.google.com/go v0.25.0 // indirect

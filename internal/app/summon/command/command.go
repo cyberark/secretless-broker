@@ -9,10 +9,10 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/cyberark/summon/secretsyml"
 
-	"github.com/conjurinc/secretless/internal/app/secretless"
-	"github.com/conjurinc/secretless/internal/pkg/plugin"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless"
+	"github.com/conjurinc/secretless-broker/internal/pkg/plugin"
 
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // The code in this file operates at the CLI level; it reads CLI arguments and will exit the process.

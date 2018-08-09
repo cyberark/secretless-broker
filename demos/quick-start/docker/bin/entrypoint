@@ -25,6 +25,6 @@ htpasswd \
 # Start services
 /usr/sbin/nginx
 /usr/sbin/sshd
-su -c 'secretless -f /etc/secretless.yml' secretless &
+su -c 'secretless-broker -f /etc/secretless.yml' secretless &
 su -c '/docker-entrypoint.sh postgres' postgres &
 wait

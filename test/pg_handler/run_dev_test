@@ -3,7 +3,7 @@
 platform=$(go run ../print_platform.go)
 
 pushd ../.. &>/dev/null
-  go build -o "dist/$platform/amd64/secretless" ./cmd/secretless
+  go build -o "dist/$platform/amd64/secretless-broker" ./cmd/secretless-broker
 popd &>/dev/null
 
 ./run_dev &

@@ -2,7 +2,7 @@ version: "3"
 
 services:
   quickstart:
-    image: secretless-quickstart
+    image: secretless-broker-quickstart
 
   test-client:
     image: postgres:9.6.9-alpine

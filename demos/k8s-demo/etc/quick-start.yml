@@ -21,7 +21,7 @@ spec:
       - name: registry2.itci.conjur.net
       containers:
       - name: secretless
-        image: registry2.itci.conjur.net/conjurinc/secretless:latest
+        image: registry2.itci.conjur.net/conjurinc/secretless-broker:latest
         imagePullPolicy: IfNotPresent
         args: ["-f", "/etc/secretless/secretless.yml"]
         volumeMounts:

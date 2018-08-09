@@ -10,7 +10,7 @@ services:
       context: .
     environment:
       - ECHO_HOST=echo
-    command: secretless -f /secretless.yml
+    command: secretless-broker -f /secretless.yml
     volumes:
       - ./secretless.yml:/secretless.yml
     depends_on:

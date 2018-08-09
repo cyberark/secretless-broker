@@ -3,7 +3,7 @@ package v1
 import (
 	"net"
 
-	"github.com/conjurinc/secretless/pkg/secretless/config"
+	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
 )
 
 // ListenerOptions contains the configuration for the listener

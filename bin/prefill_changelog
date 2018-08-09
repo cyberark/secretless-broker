@@ -48,7 +48,7 @@ sed "/^## \[Unreleased\]/r ${tmp_file}" CHANGELOG.md > CHANGELOG.md.tmp
 rm -f "${tmp_file}"
 
 echo "Appending link to diff..."
-echo -e "[${desired_version}]: https://github.com/conjurinc/secretless/compare/${latest_tag}...${desired_version}\n" >> CHANGELOG.md.tmp
+echo -e "[${desired_version}]: https://github.com/conjurinc/secretless-broker/compare/${latest_tag}...${desired_version}\n" >> CHANGELOG.md.tmp
 
 if [[ "${dry_run}" == "true" ]]; then
   cat CHANGELOG.md.tmp

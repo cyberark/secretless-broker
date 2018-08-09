@@ -4,7 +4,7 @@ set -o pipefail
 CURRENT_DIR=$(dirname $0 | xargs realpath)
 DOCS_DIR="$CURRENT_DIR/../docs"
 DEST_SITE_DIR="$DOCS_DIR/_site"
-REPOSITORY="github.com/conjurinc/secretless"
+REPOSITORY="github.com/conjurinc/secretless-broker"
 
 IMAGE_NAME="secretless-website-builder"
 CONTAINER_NAME="secretless-website-builder-$(date -u +%Y%m%d_%H%M%S)"

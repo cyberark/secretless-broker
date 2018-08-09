@@ -91,13 +91,13 @@ Our PostgresSQL storage backend is stateful. For this reason, we'll use a Statef
 To deploy a PostgresSQL StatefulSet, follow these steps:
 
 **1.** To create a dedicated namespace for the storage backend, run the command:
-```
+```bash
 kubectl create namespace quick-start-db
 ```
 
 **2.** To create and save the pg StatefulSet manifest in a file named `pg.yml` in your current working directory, run the command:
 
-```
+```bash
 cat << EOF > pg.yml
 apiVersion: apps/v1
 kind: StatefulSet

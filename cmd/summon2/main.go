@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/conjurinc/secretless/internal/app/summon/command"
+	"github.com/conjurinc/secretless-broker/internal/app/summon/command"
 )
 
 func main() {

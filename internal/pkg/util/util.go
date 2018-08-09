@@ -3,7 +3,7 @@ package util
 import (
 	"net"
 
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Accept listeners for new connections from Listener `l` and notifies plugins

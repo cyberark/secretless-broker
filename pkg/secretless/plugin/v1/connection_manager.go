@@ -3,7 +3,7 @@ package v1
 import (
 	"net"
 
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
 // ConnectionManager is an interface to be implemented by plugins that want to

@@ -18,7 +18,7 @@ The following target services are currently supported by the Secretless Broker:
 
 With many others in the planning stages!
 
-If there is a specific target service that you would like to be included in this project, please open a [GitHub issue](https://github.com/conjurinc/secretless-broker/issues) with your request.
+If there is a specific target service that you would like to be included in this project, please open a [GitHub issue](https://github.com/cyberark/secretless-broker/issues) with your request.
 
 ## Using the Secretless Broker
 

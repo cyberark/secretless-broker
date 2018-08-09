@@ -65,8 +65,8 @@ The instructions below should work even if you don't currently have `dep` as you
 To convert to using Go modules, you run the following command from your project root:
 
 ```
-$ go mod -v -init -module github.com/conjurinc/secretless-broker
-go: creating new go.mod: module github.com/conjurinc/secretless-broker
+$ go mod -v -init -module github.com/cyberark/secretless-broker
+go: creating new go.mod: module github.com/cyberark/secretless-broker
 go: copying requirements from Gopkg.lock
 ```
 

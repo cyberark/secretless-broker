@@ -11,7 +11,7 @@ To get the site up and running locally on your computer, ensure you have:
 
 ### Run Locally
 To construct:
-1. `git clone https://github.com/conjurinc/secretless-broker`
+1. `git clone https://github.com/cyberark/secretless-broker`
 2. `cd docs`
 3. Run the following command:
 `bundle exec jekyll serve`

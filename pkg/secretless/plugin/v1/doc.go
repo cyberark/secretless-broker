@@ -37,7 +37,7 @@ All plugins are currently loaded in the following manner:
 PluginAPIVersion
 
 `PluginAPIVersion` (returns string) indicates the target API version of the Secretless Broker and must match the
-supported version found at https://github.com/conjurinc/secretless-broker/blob/master/internal/pkg/plugin/manager.go#L108 list in the
+supported version found at https://github.com/cyberark/secretless-broker/blob/master/internal/pkg/plugin/manager.go#L108 list in the
 main daemon.
 
 PluginInfo
@@ -85,8 +85,8 @@ The following shows a sample plugin that conforms to the expected API:
   package main
 
   import (
-  	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
-  	"github.com/conjurinc/secretless-broker/test/plugin/example"
+  	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+  	"github.com/cyberark/secretless-broker/test/plugin/example"
   )
 
   // PluginAPIVersion is the API version being used

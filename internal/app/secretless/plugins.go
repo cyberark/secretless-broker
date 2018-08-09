@@ -1,10 +1,10 @@
 package secretless
 
 import (
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers"
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/listeners"
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/providers"
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // InternalHandlers is the set of built-in project handlers

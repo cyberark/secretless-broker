@@ -1,6 +1,6 @@
 # Contributing to the Secretless Broker
 
-Thanks for your interest in the Secretless Broker. Before contributing, please take a moment to read and sign our <a href="https://github.com/conjurinc/secretless-broker/blob/master/Contributing_OSS/CyberArk_Open_Source_Contributor_Agreement.pdf" download="secretless-broker_contributor_agreement">Contributor Agreement</a>. This provides patent protection for all Secretless Broker users and allows CyberArk to enforce its license terms. Please email a signed copy to <a href="oss@cyberark.com">oss@cyberark.com</a>.
+Thanks for your interest in the Secretless Broker. Before contributing, please take a moment to read and sign our <a href="https://github.com/cyberark/secretless-broker/blob/master/Contributing_OSS/CyberArk_Open_Source_Contributor_Agreement.pdf" download="secretless-broker_contributor_agreement">Contributor Agreement</a>. This provides patent protection for all Secretless Broker users and allows CyberArk to enforce its license terms. Please email a signed copy to <a href="oss@cyberark.com">oss@cyberark.com</a>.
 
 ## Pull Request Workflow
 
@@ -19,5 +19,5 @@ Use [this guide][style] to maintain consistent style across the Secretless Broke
 
 [style]: STYLE.md
 [tests]: README.md#testing
-[waffle]: https://waffle.io/conjurinc/secretless
-[issues]: https://github.com/conjurinc/secretless-broker/issues
+[waffle]: https://waffle.io/cyberark/secretless
+[issues]: https://github.com/cyberark/secretless-broker/issues

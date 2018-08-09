@@ -46,7 +46,7 @@ permalink: docs/faq
   <a href="/docs/reference/providers.html">Credential Providers</a> reference page.</p>
 
 <p>If the vault you would like to use is not currently supported, please check our
-  <a href="https://github.com/conjurinc/secretless-broker/issues">Github issues</a> to see
+  <a href="https://github.com/cyberark/secretless-broker/issues">Github issues</a> to see
   if we already have plans to support it. If not, please open a new issue with your
   request. The Secretless Broker is also <a href="/community.html">open to contributions</a>
   from the community, and we plan to standardize the Provider API to make it easy
@@ -59,7 +59,7 @@ permalink: docs/faq
 <p>For info on currently supported services, please see our <a href="/docs/reference.html">reference</a>.</p>
 
 <p>If the service you would like to use is not currently supported, please check our
-  <a href="https://github.com/conjurinc/secretless-broker/issues">Github issues</a> to see if
+  <a href="https://github.com/cyberark/secretless-broker/issues">Github issues</a> to see if
   we already have plans to support it. If not, please open a new issue with your request.
   The Secretless Broker is also <a href="/community.html">open to contributions</a> from the community;
   please see our <a href="/generated/pkg_secretless_plugin_v1.html">plugin reference</a>

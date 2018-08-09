@@ -15,7 +15,7 @@ _Note: Since Secretless Broker container runs the daemon as a limited user, sock
 ```sh-session
 $ ./run_dev_test
 ...
-ok      github.com/conjurinc/secretless-broker/test/pg_handler   0.048s
+ok      github.com/cyberark/secretless-broker/test/pg_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
 ```
 

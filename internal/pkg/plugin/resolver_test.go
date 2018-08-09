@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/providers"
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

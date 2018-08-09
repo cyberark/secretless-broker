@@ -6,11 +6,11 @@ import (
 	"strconv"
 
 	// TODO: These errors should be abstracted out ideally
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 
-	"github.com/conjurinc/secretless-broker/internal/pkg/util"
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/pkg/util"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 

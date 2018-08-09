@@ -79,7 +79,7 @@ Sample `launch.json`:
       "host": "127.0.0.1",
       "program": "${workspaceFolder}/cmd/secretless/",
       "env": { "MYSQL_HOST": "localhost", "MYSQL_PORT": "[YOUR MYSQL PORT]", "MYSQL_PASSWORD": "testpass" },
-      "args": [ "-f", "/Users/gjennings/go/src/github.com/conjurinc/secretless-broker/test/mysql_handler/secretless.dev.yml"],
+      "args": [ "-f", "/Users/gjennings/go/src/github.com/cyberark/secretless-broker/test/mysql_handler/secretless.dev.yml"],
       "showLog": true
     }
   ]
@@ -115,7 +115,7 @@ Run Secretless Broker locally and execute tests:
 ```sh-session
 $ ./run_dev_test
 ...
-ok      github.com/conjurinc/secretless-broker/test/mysql_handler   0.048s
+ok      github.com/cyberark/secretless-broker/test/mysql_handler   0.048s
 2018/01/11 15:06:56 Caught signal terminated: shutting down.
 ```
 

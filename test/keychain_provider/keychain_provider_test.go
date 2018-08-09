@@ -7,10 +7,10 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/variable"
-	"github.com/conjurinc/secretless-broker/internal/pkg/plugin"
-	"github.com/conjurinc/secretless-broker/internal/pkg/provider/keychain"
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/variable"
+	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/internal/pkg/provider/keychain"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

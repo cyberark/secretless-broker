@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/conjurinc/secretless-broker/internal/pkg/plugin"
-	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
+	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	yaml "gopkg.in/yaml.v1"
 )
 

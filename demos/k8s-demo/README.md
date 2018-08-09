@@ -207,4 +207,4 @@ Observe that requests to the application API are not affected by the password ro
 
 ## Conclusion
 
-If you enjoyed this Secretless Broker tutorial, please try to make it your own by trying out some of the [suggested modifications](#suggested-modifications-for-advanced-demos). Please also let us know what you think of it! You can submit [Github issues](https://github.com/conjurinc/secretless-broker/issues) for features you would like to see, or send a message to our [mailing list](https://groups.google.com/forum/#!forum/secretless) with comments and/or questions.
+If you enjoyed this Secretless Broker tutorial, please try to make it your own by trying out some of the [suggested modifications](#suggested-modifications-for-advanced-demos). Please also let us know what you think of it! You can submit [Github issues](https://github.com/cyberark/secretless-broker/issues) for features you would like to see, or send a message to our [mailing list](https://groups.google.com/forum/#!forum/secretless) with comments and/or questions.

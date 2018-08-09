@@ -1,14 +1,14 @@
 package providers
 
 import (
-	conjurProvider "github.com/conjurinc/secretless-broker/internal/app/secretless/providers/conjur"
-	envProvider "github.com/conjurinc/secretless-broker/internal/app/secretless/providers/env"
-	fileProvider "github.com/conjurinc/secretless-broker/internal/app/secretless/providers/file"
-	keychainProvider "github.com/conjurinc/secretless-broker/internal/app/secretless/providers/keychain"
-	literalProvider "github.com/conjurinc/secretless-broker/internal/app/secretless/providers/literal"
-	vaultProvider "github.com/conjurinc/secretless-broker/internal/app/secretless/providers/vault"
+	conjurProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/conjur"
+	envProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/env"
+	fileProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/file"
+	keychainProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/keychain"
+	literalProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/literal"
+	vaultProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/vault"
 
-	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // ProviderFactories contains the list of built-in provider factories

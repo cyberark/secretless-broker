@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 )
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the

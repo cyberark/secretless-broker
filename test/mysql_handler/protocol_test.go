@@ -29,7 +29,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/stretchr/testify/assert"
 )
 

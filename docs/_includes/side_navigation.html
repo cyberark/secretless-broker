@@ -1,7 +1,6 @@
-<!-- orig -->
 <nav id="side-navigation">
 	<ul class="sidenav-group">
-			{% if site.data.navigation.documentation[0] %}
+		{% if site.data.navigation.documentation[0] %}
 			{% for item in site.data.navigation.documentation %}
 			{% if page.url contains item.url %}
 				{% assign class = 'active' %}
@@ -27,5 +26,3 @@
 		{% endif %}
 	</ul>
 </nav>
-
-

@@ -93,7 +93,9 @@ pipeline {
             branch 'master'
           }
           steps {
-            sh 'summon -e production bin/publish_website'
+            sh 'echo "Skipping production website push - pushing to staging"'
+            sh 'summon -e staging bin/publish_website'
+            //sh 'summon -e production bin/publish_website'
             archiveArtifacts 'docs/_site/'
           }
         }

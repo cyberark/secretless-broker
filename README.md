@@ -29,7 +29,7 @@ The Secretless Broker is currently in beta.
 
 The Secretless Broker is a connection broker which relieves client applications of the need to directly handle secrets to target services such as databases, web services, SSH connections, or any other TCP-based service.
 
-![Secretless Broker Architecture](https://github.com/conjurinc/secretless-broker/blob/master/docs/img/secretlessarch.png)
+![Secretless Broker Architecture](https://github.com/conjurinc/secretless-broker/blob/master/docs/img/secretless_architecture.svg)
 
 The Secretless Broker is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
 

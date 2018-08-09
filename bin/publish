@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 readonly VERSION="$(cat VERSION)"
-readonly REGISTRY="${1:-registry2.itci.conjur.net/conjurinc}"
+readonly REGISTRY="${1:-cyberark}"
 
 readonly IMAGES=(
   "secretless-broker"
@@ -23,6 +23,6 @@ for image_name in "${IMAGES[@]}"; do
   # Push images
   for tag in "${TAGS[@]}"; do
     echo "Pushing $REGISTRY/$image_name:$tag"
-    echo docker push "$REGISTRY/$image_name:$tag"
+    docker push "$REGISTRY/$image_name:$tag"
   done
 done

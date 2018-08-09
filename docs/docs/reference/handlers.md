@@ -11,7 +11,7 @@ When the Secretless Broker receives a new request on a defined Listener, it auto
 The Handler configuration specifies the Listener that the Handler is handling connections for and any credentials that will be needed for that connection. Several credential sources are currently supported; see the [Credential Providers](/docs/reference/providers.html) section for more information.
 
 The example below defines a Handler to process connection requests from the `pg_socket` Listener, and it has three credentials: `address`, `username`, and `password`. The `address` and `username` are literally specified in this case, and the `password` is taken from the environment of the running Secretless Broker process.
-<pre>
+```
 handlers:
   - name: pg_via_socket
     listener: pg_socket
@@ -25,7 +25,7 @@ handlers:
       - name: password
         provider: env
         id: PG_PASSWORD
-</pre>
+```
 
 In production you would want your credential information to be pulled from a vault, and the Secretless Broker currently supports multiple vault Credential Providers.
 

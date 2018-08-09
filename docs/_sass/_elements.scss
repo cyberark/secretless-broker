@@ -7,7 +7,7 @@
 .card-heading {
 	font-weight: bold;
 	line-height: 4.5rem;
-	font-family: $sless-font-primary;
+	font-family: $sless-font-secondary;
 	font-size: 3.3rem;
 	letter-spacing: .1rem;
 	color: #4d8fcc;
@@ -17,7 +17,7 @@
 }
 .card-side-heading {
 	font-weight: bold;
-	font-family: $sless-font-primary;
+	font-family: $sless-font-secondary;
 	font-size: 2rem;
 	letter-spacing: .1rem;
 }
@@ -29,15 +29,23 @@
 	font-weight: bold;
 	letter-spacing: .1rem;
 	font-size: 2.4rem;
+	font-family: $sless-font-secondary;
 }
-.jumbotron-sub p {
-	text-align: center;
-	color: white;
+.jumbotron-sub {
+	h2 {
+		text-align: center;
+		color: #fff;
+		color: #fff;
+    margin-top: .4rem;
+	}
+	p {
+		text-align: center;
+		color: white;
+	}
 }
 .jumbotron-sub-description {
 	width: 53%;
-    margin: 0 auto;
-    font-weight: 100;
+  margin: 0 auto;
 }
 
 // ***********************
@@ -58,12 +66,6 @@
 	p {
 		margin: 0;
 	}
-	// .badge-title {
-	// 	font-size: 1.5rem;
-	// 	font-weight: 800;
-	// 	margin: 0;
-	// 	letter-spacing: 1px;
-	// }
 }
 
 .center-block {
@@ -119,33 +121,41 @@
 .about-subitem .inner {
 	min-height: 31rem;
 	padding: 2.5rem;
-	box-shadow: 0 .2rem .4rem rgba(0,0,0,.1);
 	margin: 0 1.0rem 3.0rem;
 	transition: .5s ease;
 	background: $sless-light-blue;
 }
-.inner:hover {
-	transform: scale(1.025);
-	box-shadow: .3rem .3rem 1.8rem rgba(0,.1,0,.2);
-}
-.inner i {
-	padding-top: .3rem;
-	transition: .5s ease;
-}
-.inner:hover i {
-	transform: translateX(1.2rem);
-}
-.inner p {
-	margin-left: 1.5rem;
-}
-.inner-text-description {
-	font-size: 1.4rem;
+
+.inner {
+	i {
+		padding-top: .3rem;
+		transition: .5s ease;
+		color: $sless-blue;
+		margin-right: 8px;
+    margin-left: -11px;
+		&:hover {
+			transform: translateX(.2rem);
+		}
+	}
+	p {
+		margin-left: 1.5rem;
+	}
+	h3 {
+		margin-top: 7px;
+	}
+	&:hover {
+		transform: scale(1.01);
+		i {
+			transform: translateX(.5rem);
+		}
+	}
 }
 .inner-text {
 	margin-left: 0;
-	letter-spacing: .1rem;
 	font-size: 1.8rem;
 	font-weight: 800;
+	font-family: $sless-font-secondary;
+	line-height: 2.5rem;
 }
 .in-line-frame {
 	display: flex;
@@ -172,7 +182,32 @@
 }
 .arch-list > li {
 	font-family: $sless-font-primary;
-	font-size: 1.7rem;
+}
+.slss-arch {
+	margin: 3rem 0;
+}
+
+.slss-arch-card {
+	margin: 2rem 0;
+}
+
+.arch-img {
+	padding: 3rem;
+	width: 100%;
+}
+
+.docs-img {
+	max-width: 550px;
+	margin: 4rem 0;
+	text-align: center;
+}
+
+@media (min-width: 700px) {
+	.arch-img {
+		max-height: 300px;
+		margin: 2rem 0;
+		padding: 0;
+	}
 }
 
 // ***********************
@@ -180,7 +215,6 @@
 // ***********************
 .introduction {
 	margin: 0 auto;
-	//width: 60%;
 }
 .container-fluid {
 }
@@ -234,6 +268,18 @@
 }
 
 // ***********************
+// Community
+// ***********************
+.community {
+	h2 {
+		margin-top: 0;
+	}
+	div {
+		margin-bottom: 4rem;
+	}
+}
+
+// ***********************
 // Icons
 // ***********************
 .fab {
@@ -246,6 +292,10 @@
 	font-size: 1.5rem;
 	margin-right: 1.0rem;
 	color: #4d8fcc;
+}
+
+.slss-icon {
+	color: lighten($sless-text, 70);
 }
 
 // ***********************
@@ -312,7 +362,7 @@ pre {
 .ui-tabs .ui-tabs-panel {
 	display: block;
 	border-width: 0;
-	padding: 2rem 4rem 2rem 1.4rem;
+	padding: 2rem 2rem 2rem 0; 
 	background: $sless-light-blue;
 }
 
@@ -348,4 +398,78 @@ pre {
 .ui-tabs .ui-tabs-nav .ui-tabs-anchor {
 	font-family: $sless-font-secondary;
 
+}
+
+// ***********************
+// Copy to Clipboard
+// ***********************
+
+.copy-icon {
+  position: relative;
+	width: 15px;
+	height: 20px;
+  background: url("/img/clipboard.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+	float: right;
+	&:hover {
+		background: url("/img/clipboard-hover.svg");
+	}
+	&:active {
+		background: url("/img/clipboard-focus.svg");
+	}
+}
+.copy-icon-hover {
+  position: relative;
+	width: 15px;
+	height: 20px;
+  background: url("/img/clipboard-hover.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+	float: right;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 120px;
+  background-color: $sless-blue;
+  font-family: $sless-font-primary;
+  font-size: 12px;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  right: -52px;
+  z-index: 1;
+  margin-top: 30px;
+}
+
+.hover-button:hover .tooltip-text {
+  visibility: visible;
+}
+figure.highlight {
+	background: none;
+}
+.highlight pre button {
+  visibility: visible;
+}
+
+.arrow_box:after {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-color: rgba(0, 0, 0, 0);
+  border-bottom-color: $sless-blue;
+  border-width: 10px;
+  margin-left: -10px;
 }

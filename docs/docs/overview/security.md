@@ -24,7 +24,7 @@ Our container is also based on [Alpine Linux](https://alpinelinux.org/) which ha
 
 One of the biggest security risks for an application is keeping credentials around longer than they are needed. Because Secretless Broker off-loads credential management from the app itself, there will be a window of time where such credentials are retrieved and injected into the backend connection but majority of the time, your credentials would be only stored in your providers that are built for their long-term storage. Since each listener/handler combination is responsible for credential lifecycles these are the lifecycles of credentials for each of the built-in listeners:
 
-- `http`: Listener fetches the credentials on each request and they are stored only for the duration of an individual connection. [Future work](https://github.com/conjurinc/secretless-broker/issues/269) will include credential zeroization after setting the header.
+- `http`: Listener fetches the credentials on each request and they are stored only for the duration of an individual connection authentication, after which they are zeroized.
 - `mysql`: Credentials are loaded for each connection but garbage-collected after connecting to the backend.
 - `pg`: Credentials are loaded for each connection but garbage-collected after connecting to the backend.
 - `ssh`: Loaded on each new each ssh connection and stored for the duration of the indvidual connection.

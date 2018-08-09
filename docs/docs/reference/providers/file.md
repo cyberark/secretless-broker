@@ -3,7 +3,7 @@ title: Providers
 id: file
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/providers/file
+permalink: docs/reference/providers/file.html
 ---
 
 ## File

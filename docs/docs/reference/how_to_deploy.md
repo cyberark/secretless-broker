@@ -3,7 +3,7 @@ title: Deploying the Secretless Broker
 id: how_to_deploy
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/how_to_deploy
+permalink: docs/reference/how_to_deploy.html
 ---
 
 Details on how to deploy the Secretless Broker will be added in the future. For now, check out

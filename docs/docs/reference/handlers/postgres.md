@@ -3,7 +3,7 @@ title: Handlers
 id: postgres
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers/postgres
+permalink: docs/reference/handlers/postgres.html
 ---
 
 ## PostgreSQL

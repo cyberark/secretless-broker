@@ -27,63 +27,63 @@ main:
 
 documentation:
   - title: Overview
-    url: /docs/overview
+    url: /docs/overview.html
     subfolderitems:
       - page: Why the Secretless Broker?
-        url: /docs/overview/why_secretless
+        url: /docs/overview/why_secretless.html
       - page: How Does It Work?
-        url: /docs/overview/how_it_works
+        url: /docs/overview/how_it_works.html
       - page: Security
-        url: /docs/overview/security
+        url: /docs/overview/security.html
       - page: Key Terms
-        url: /docs/overview/key_terms
+        url: /docs/overview/key_terms.html
   - title: Get Started
-    url: /docs/get_started
+    url: /docs/get_started.html
     subfolderitems:
       - page: Quick Start
-        url: /docs/get_started/quick_start
+        url: /docs/get_started/quick_start.html
       - page: Deploying to Kubernetes
-        url: /docs/get_started/deploy_to_kubernetes
+        url: /docs/get_started/deploy_to_kubernetes.html
   - title: Reference
-    url: /docs/reference
+    url: /docs/reference.html
     subfolderitems:
       - page: Listeners
-        url: /docs/reference/listeners
+        url: /docs/reference/listeners.html
       - page: Handlers
-        url: /docs/reference/handlers
+        url: /docs/reference/handlers.html
         subsubfolderitems:
         - page: AWS - HTTPS
-          url: /docs/reference/handlers/http/aws
+          url: /docs/reference/handlers/http/aws.html
         - page: Conjur - HTTP(S)
-          url: /docs/reference/handlers/http/conjur
+          url: /docs/reference/handlers/http/conjur.html
         - page: HTTP Basic Authentication
-          url: /docs/reference/handlers/http/basic
+          url: /docs/reference/handlers/http/basic.html
         - page: MySQL
-          url: /docs/reference/handlers/mysql
+          url: /docs/reference/handlers/mysql.html
         - page: PostgreSQL
-          url: /docs/reference/handlers/postgres
+          url: /docs/reference/handlers/postgres.html
         - page: SSH Agent
-          url: /docs/reference/handlers/ssh_agent
+          url: /docs/reference/handlers/ssh_agent.html
         - page: SSH
-          url: /docs/reference/handlers/ssh
+          url: /docs/reference/handlers/ssh.html
       - page: Credential Providers
-        url: /docs/reference/providers
+        url: /docs/reference/providers.html
         subsubfolderitems:
         - page: CyberArk Conjur
-          url: /docs/reference/providers/conjur
+          url: /docs/reference/providers/conjur.html
         - page: Environment
-          url: /docs/reference/providers/env
+          url: /docs/reference/providers/env.html
         - page: File
-          url: /docs/reference/providers/file
+          url: /docs/reference/providers/file.html
         - page: HashiCorp Vault
-          url: /docs/reference/providers/vault
+          url: /docs/reference/providers/vault.html
         - page: Keychain
-          url: /docs/reference/providers/keychain
+          url: /docs/reference/providers/keychain.html
         - page: Literal
-          url: /docs/reference/providers/literal
+          url: /docs/reference/providers/literal.html
       - page: Plugin Reference
-        url: /generated/pkg_secretless_plugin_v1
+        url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
-        url: /docs/reference/how_to_deploy
+        url: /docs/reference/how_to_deploy.html
   - title: FAQ
-    url: /docs/faq
+    url: /docs/faq.html

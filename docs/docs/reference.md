@@ -3,7 +3,7 @@ title: Reference
 id: reference
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference
+permalink: docs/reference.html
 ---
 
 ## Services

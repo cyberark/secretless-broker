@@ -3,7 +3,7 @@ title: Handlers
 id: ssh
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers/ssh
+permalink: docs/reference/handlers/ssh.html
 ---
 
 ## SSH

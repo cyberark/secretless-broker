@@ -3,7 +3,7 @@ title: Key Terms
 id: key_terms
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/overview/key_terms
+permalink: docs/overview/key_terms.html
 ---
 
 ## General-Purpose Terminology

@@ -3,7 +3,7 @@ title: Security of the Secretless Broker
 id: docs
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/overview/security
+permalink: docs/overview/security.html
 ---
 
 Protection of Secretless Broker credential resolution is based on industry-standard practices of keeping the data for the minimal duration needed and hardening of the execution environment. This is ensured by various strategies listed below.

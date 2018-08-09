@@ -3,7 +3,7 @@ title: Overview
 id: overview
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/overview
+permalink: docs/overview.html
 ---
 
 The Secretless Broker is a connection broker which relieves client applications of the need

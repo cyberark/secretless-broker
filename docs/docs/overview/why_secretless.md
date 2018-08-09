@@ -3,7 +3,7 @@ title: Why the Secretless Broker?
 id: docs
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/overview/why_secretless
+permalink: docs/overview/why_secretless.html
 ---
 
 The Secretless Broker is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:

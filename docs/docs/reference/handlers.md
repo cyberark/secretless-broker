@@ -3,7 +3,7 @@ title: Handlers
 id: handlers
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers
+permalink: docs/reference/handlers.html
 ---
 
 When the Secretless Broker receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless Broker configuration for processing. Each Listener in the Secretless Broker configuration should therefore have a corresponding Handler.

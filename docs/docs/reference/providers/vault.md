@@ -3,7 +3,7 @@ title: Providers
 id: vault
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/providers/vault
+permalink: docs/reference/providers/vault.html
 ---
 
 ## HashiCorp Vault

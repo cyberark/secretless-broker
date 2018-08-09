@@ -3,7 +3,7 @@ title: Handlers
 id: aws
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers/http/aws
+permalink: docs/reference/handlers/http/aws.html
 ---
 
 ## AWS - HTTPS 

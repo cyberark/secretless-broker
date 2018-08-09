@@ -3,7 +3,7 @@ title: Providers
 id: conjur
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/providers/conjur
+permalink: docs/reference/providers/conjur.html
 ---
 
 ## CyberArk Conjur

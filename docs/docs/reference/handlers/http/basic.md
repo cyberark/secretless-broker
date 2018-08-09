@@ -3,7 +3,7 @@ title: Handlers
 id: basic
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers/http/basic
+permalink: docs/reference/handlers/http/basic.html
 ---
 
 ## Basic Authentication - HTTP(S)

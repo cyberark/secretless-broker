@@ -3,7 +3,7 @@ title: Listeners
 id: listeners
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/listeners
+permalink: docs/reference/listeners.html
 ---
 
 You can configure the following kinds of Secretless Broker *Listeners*:

@@ -3,7 +3,7 @@ title: Handlers
 id: mysql
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers/mysql
+permalink: docs/reference/handlers/mysql.html
 ---
 
 ## MySQL

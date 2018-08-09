@@ -8,7 +8,16 @@ layout: default
 				<div class="inner">
 					<div class ="in-line-frame">
 						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<p class="inner-text">Prevent Loss and Theft of Secrets</p>
+						<h3>Work on Features, not Security</h3>
+					</div>
+					<p class="inner-text-description">Let developers focus on delivering business value. You can stop building bespoke integrations with vault-specific APIs or integration tools, because Secretless integrates with your vault of choice automatically.</p>
+				</div>
+			</div>
+			<div class="col-md-4 about-subitem">
+				<div class="inner">
+					<div class ="in-line-frame">
+						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
+						<h3>Prevent Loss and Theft of Secrets</h3>
 					</div>
 					<p class="inner-text-description">Credentials carry privilege. Don't allow your applications to manage any more sensitive information than necessary.<br>With the Secretless Broker, your applications can connect securely to target services, without becoming part of the secrets management threat surface</p>
 				</div>
@@ -17,63 +26,51 @@ layout: default
 				<div class="inner">
 					<div class ="in-line-frame">
 						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<p class="inner-text">Handle Secrets Rotation Seamlessly</p>
+						<h3>Handle Secrets Rotation Seamlessly</h3>
 					</div>
 					<p class="inner-text-description">
 					It's hard for applications to respond to changing secrets. Until now, applications required additional logic to handle secrets rotation. With the Secretless Broker, no code changes or application logic is necessary - the Secretless Broker handles it all for you.</p>
 				</div>
 			</div>
-			<div class="col-md-4 about-subitem">
-				<div class="inner">
-					<div class ="in-line-frame">
-						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<p class="inner-text">Work on Features, not Security</p>
-					</div>
-					<p class="inner-text-description">Let developers focus on delivering business value. You can stop building bespoke integrations with vault-specific APIs or integration tools, because the Secretless Broker integrates with your vault of choice automatically.</p>
-				</div>
-			</div>
 		</div>
 	</div>
 </div>
+
 <div class="container">
 	<div class="arch">
-		<div class="row sub-card">
-			<div class="arch-respons-box">
-				<div class="arch-respons">
-					<h2>Traditional Architecture</h2>
-					<h3>Developer Responsibilities</h3>
-					<ul class="arch-list">
-						<li>Retrieve secrets from vault​</li>
-						<li>Securely handle retrieved secrets within app​</li>
-						<li>Resiliently handle secret rotations</li>
-						<li>Manage connection disruptions</li>
-					</ul>
-				</div>
-				<img class="arch-img" src="/img/traditionalarch.png" alt="Traditional Architecture">
+		
+		<div class="row">
+			<div class="col-md-6">
+				<h2>Traditional Architecture</h2>
+				<img class="arch-img" src="/img/traditional_architecture.svg" alt="Traditional Architecture">
+				<h3>Developer Responsibilities</h3>
+				<ul class="arch-list">
+					<li>Retrieve secrets from vault​</li>
+					<li>Securely handle retrieved secrets within app​</li>
+					<li>Resiliently handle secret rotations</li>
+					<li>Manage connection disruptions</li>
+				</ul>
+			</div>
+			<div class="col-md-6">
+				<h2>Secretless Broker Architecture</h2>
+				<img class="arch-img" src="/img/secretless_architecture.svg" alt="Secretless Broker Architecture">
+				<h3>Broker Responsibilities</h3>
+				<ul class="arch-list">
+					<li>Retrieve secrets from vault​</li>
+					<li>Securely handle retrieved secrets​</li>
+					<li>Transparently handle secret rotations</li>
+				</ul>
+				<h3>Developer Responsibilities</h3>
+				<ul class="arch-list">
+					<li>Manage connection disruptions</li>
+					<li>Connect to target services using local sockets and URLs</li>
+				</ul>
 			</div>
 		</div>
-
-		<div class="row sub-card">
-			<div class="arch-respons-box">
-				<div class="arch-respons">
-					<h2>Secretless Broker Architecture</h2>
-					<h3>Broker Responsibilities</h3>
-					<ul class="arch-list">
-						<li>Retrieve secrets from vault​</li>
-						<li>Securely handle retrieved secrets​</li>
-						<li>Transparently handle secret rotations</li>
-					</ul>
-
-					<h3>Developer Responsibilities</h3>
-					<ul class="arch-list">
-						<li>Manage connection disruption</li>
-						<li>Connect to target services using local sockets and URLs</li>
-					</ul>
-				</div>
-				<img class="arch-img" src="/img/secretlessarch.png" alt="Secretless Broker Architecture">
-			</div>
-		</div>
+	
 	</div>
-</div>
+</div> 
+
+
 
 {{ content }}

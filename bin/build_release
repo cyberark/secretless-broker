@@ -1,0 +1,14 @@
+#!/bin/bash -e
+
+CURRENT_DIR=$(realpath $(dirname $0))
+echo "Current dir: $CURRENT_DIR"
+
+docker build -f "$CURRENT_DIR/Dockerfile.releaser" \
+             -t secretless-broker-releaser \
+             "$CURRENT_DIR/.."
+
+docker run --rm \
+           -v "$CURRENT_DIR/..":/secretless-broker \
+           secretless-broker-releaser
+
+echo "Releases built. Archives can be found in dist/goreleaser"

@@ -37,6 +37,9 @@ type Handler interface {
 	Shutdown()
 }
 
+// BaseHandler provides default (shared/common) implementations of Handler interface methods, where it makes sense - the rest of the methods panic if not implemented in the "DerivedHandler" e.g. BaseHandler#Authenticate.
+// The intention is to keep things DRY by embedding BaseHandler in "DerivedHandler"
+// There is no requirement to use BaseHandler.
 type BaseHandler struct {
 	HandlerConfig      config.Handler
 	Resolver           Resolver
@@ -46,6 +49,7 @@ type BaseHandler struct {
 	ShutdownNotifier   HandlerShutdownNotifier
 }
 
+// NewBaseHandler creates a BaseHandler from HandlerOptions
 func NewBaseHandler(options HandlerOptions) BaseHandler {
 	return BaseHandler{
 		HandlerConfig:     options.HandlerConfig,
@@ -93,7 +97,6 @@ func (h *BaseHandler) Shutdown() {
 // [stream]: function performing continuous bidirectional transfer
 // [eventNotifier]: EventNotifier-compliant struct. EventNotifier#ClientData is passed transfer bytes
 // [done]: function called once when transfer ceases
-
 func PipeHandlerWithStream(handler Handler, stream func(net.Conn, net.Conn, func(b []byte)), eventNotifier EventNotifier, done func()) {
 	if handler.GetConfig().Debug {
 		log.Printf("Connecting client %s to backend %s", handler.GetClientConnection().RemoteAddr(), handler.GetBackendConnection().RemoteAddr())

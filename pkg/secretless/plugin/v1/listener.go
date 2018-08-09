@@ -31,8 +31,11 @@ type Listener interface {
 	Shutdown() error
 }
 
+// BaseListener provides default (shared/common) implementations of Listener interface methods, where it makes sense - the rest of the methods panic if not implemented in the "DerivedListener" e.g. BaseListener#GetName.
+// The intention is to keep things DRY by embedding BaseListener in ""DerivedListener""
+// There is no requirement to use BaseListener.
 type BaseListener struct {
-	handlers       []Handler
+	handlers       []Handler // store of active handlers for this listener,
 	EventNotifier  EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
@@ -41,6 +44,7 @@ type BaseListener struct {
 	RunHandlerFunc func(id string, options HandlerOptions) Handler
 }
 
+// NewBaseListener creates a BaseListener from ListenerOptions
 func NewBaseListener(options ListenerOptions) BaseListener {
 	return BaseListener{
 		EventNotifier:  options.EventNotifier,
@@ -95,13 +99,14 @@ func (l *BaseListener) Validate() error {
 func (l *BaseListener) Shutdown() error {
 	log.Printf("Shutting down listener's handlers...")
 
-	for _, handler := range l.GetHandlers() {
+	for _, handler := range l.handlers {
 		handler.Shutdown()
 	}
 
 	return l.NetListener.Close()
 }
 
+// AddHandler appends a given Handler to the slice of Handlers held by BaseListener
 func (l *BaseListener) AddHandler(handler Handler) {
 	if l.handlers == nil {
 		l.handlers = make([]Handler, 0)
@@ -110,6 +115,7 @@ func (l *BaseListener) AddHandler(handler Handler) {
 	l.handlers = append(l.handlers, handler)
 }
 
+// RemoveHandler removes a given Handler from the slice of Handlers held by BaseListener
 func (l *BaseListener) RemoveHandler(targetHandler Handler) {
 	var handlers []Handler
 	for _, handler := range l.handlers {

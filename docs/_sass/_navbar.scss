@@ -278,3 +278,11 @@
     margin-top: .6rem;
 	}
 }
+
+.rotatingArrow{
+  transform: rotate(90deg);
+}
+
+.arrow {
+	 transition: all 0.4s;
+}

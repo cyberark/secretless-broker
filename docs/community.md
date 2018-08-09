@@ -8,7 +8,7 @@ description: Secretless Broker Community
 <div class="row community">
 	<div class="col-md-4 col-sm-12">
     <h2><i class="slss-icon fas fa-code"></i> Contributing</h2>
-    <p>Secretless development is open to contributions from the community, including feature requests and issues (which should be logged in our<a href="https://github.com/conjurinc/secretless">GitHub repository</a>.</p>
+    <p>Secretless Broker development is open to contributions from the community, including feature requests and issues (which should be logged in our<a href="https://github.com/conjurinc/secretless">GitHub repository</a>.</p>
     <p>Before contributing code changes, you will need to sign our <a href="https://github.com/conjurinc/secretless/blob/master/Contributing_OSS/CyberArk_Open_Source_Contributor_Agreement.pdf">Contributor Agreement</a> and submit the signed copy to <a href="mailto:oss@cyberark.com">oss@cyberark.com</a>.</p>
 	</div>
 	<div class="col-md-4 col-sm-12">
@@ -20,4 +20,3 @@ description: Secretless Broker Community
     <p>Want to report a potential security vulnerability? Contact us at <a href="mailto:security@secretless.io">security@secretless.io</a>.</p>
 	</div>
 </div>
-

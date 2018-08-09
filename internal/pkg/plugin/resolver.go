@@ -10,7 +10,7 @@ import (
 	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 )
 
-// Resolver is used toinstantiate providers and resolve credentials
+// Resolver is used to instantiate providers and resolve credentials
 type Resolver struct {
 	EventNotifier     plugin_v1.EventNotifier
 	ProviderFactories map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider
@@ -18,6 +18,7 @@ type Resolver struct {
 	LogFatalf         func(string, ...interface{})
 }
 
+// NewResolver instantiates providers based on the name and ProviderOptions
 func NewResolver(providerFactories map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider,
 	eventNotifier plugin_v1.EventNotifier,
 	LogFatalFunc func(string, ...interface{})) plugin_v1.Resolver {

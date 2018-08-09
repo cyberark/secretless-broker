@@ -88,7 +88,7 @@ func copyHeaders(dst, src http.Header) {
 func zeroizeVariables(backendVariables map[string][]byte) {
 	for _, rawCredential := range reflect.ValueOf(backendVariables).MapKeys() {
 		credential := rawCredential.String()
-		for byteIndex, _ := range backendVariables[credential] {
+		for byteIndex := range backendVariables[credential] {
 			backendVariables[credential][byteIndex] = 0
 		}
 	}

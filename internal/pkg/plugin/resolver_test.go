@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
@@ -18,7 +17,7 @@ func newInstance() plugin_v1.Resolver {
 	fatalErrors = []string{}
 	logFatalf := func(format string, args ...interface{}) {
 		fatalErrors = append(fatalErrors, fmt.Sprintf(format, args))
-		panic(errors.New(fmt.Sprintf(format, args)))
+		panic(fmt.Errorf(format, args))
 	}
 
 	return NewResolver(providers.ProviderFactories, nil, logFatalf)

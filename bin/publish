@@ -4,8 +4,8 @@ readonly VERSION="$(cat VERSION)"
 readonly REGISTRY="${1:-registry2.itci.conjur.net/conjurinc}"
 
 readonly IMAGES=(
-  "secretless"
-  "secretless-quickstart"
+  "secretless-broker"
+  "secretless-broker-quickstart"
 )
 
 readonly TAGS=(

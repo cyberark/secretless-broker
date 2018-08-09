@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Provider obtains a secret from an OS keychain.

@@ -40,8 +40,8 @@ is not supported at this time.
  ### PluginAPIVersion 
  (returns `string`)
   
-`PluginAPIVersion` string indicates the target API version of Secretless and must match the
-[supported version](https://github.com/conjurinc/secretless/blob/master/internal/pkg/plugin/manager.go#L108) list in the
+`PluginAPIVersion` string indicates the target API version of the Secretless Broker and must match the
+[supported version](https://github.com/conjurinc/secretless-broker/blob/master/internal/pkg/plugin/manager.go#L108) list in the
 main daemon.
 
 ### PluginInfo
@@ -113,7 +113,7 @@ Listeners are generally an ingress IP (TCP or UDP) port and/or socket file liste
 downstream client of a service. The listeners usually listens on the socket or port for inbound connections and
 then spawns [Handlers](#handlers) for any new connection to them.
 
-[Current API](https://github.com/conjurinc/secretless/blob/master/pkg/secretless/plugin_v1/listener.go)
+[Current API](https://github.com/conjurinc/secretless-broker/blob/master/pkg/secretless/plugin_v1/listener.go)
 
 ## Handlers
 
@@ -129,20 +129,20 @@ of data between downstream and upstream in a transparent manner.
 
 _Note: The handler API interface contains a few methods/fields that were unable to be abstracted away and provide
 support for all the protocols at the time of writing this note and those methods and fields are likely to get
-removed/changed in future versions of Secretless_
+removed/changed in future versions of the Secretless Broker_
 
-[Current API](https://github.com/conjurinc/secretless/blob/master/pkg/secretless/plugin_v1/handler.go)
+[Current API](https://github.com/conjurinc/secretless-broker/blob/master/pkg/secretless/plugin_v1/handler.go)
 
 ## Connection Managers
 
-Connection managers are plugins that can be used to both monitor and control Secretless. They provide callbacks
+Connection managers are plugins that can be used to both monitor and control the Secretless Broker. They provide callbacks
 for various events that are happening and can manage that information and act on it. 
 
 _Note: While the API interface is currently expressive enough to provide basic functionality for the intended
 purpose, the eventing is still being worked on heavily and the APIs/eventing triggers are extremely likely to
 change in the near future_
 
-[Current API](https://github.com/conjurinc/secretless/blob/master/pkg/secretless/plugin_v1/connection_manager.go)
+[Current API](https://github.com/conjurinc/secretless-broker/blob/master/pkg/secretless/plugin_v1/connection_manager.go)
 
 ## EventNotifier
 
@@ -152,4 +152,4 @@ in an abstract way without needing to pass down the full connection manager as a
 _Note: Currently not all included listeners and handlers use this eventing but full support for that is planned
 in the future releases_
 
-[Current API](https://github.com/conjurinc/secretless/blob/master/pkg/secretless/plugin_v1/event_notifier.go)
+[Current API](https://github.com/conjurinc/secretless-broker/blob/master/pkg/secretless/plugin_v1/event_notifier.go)

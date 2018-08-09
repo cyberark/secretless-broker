@@ -30,7 +30,7 @@ services:
       context: ../src/pg
 
   ansible_secretless:
-    image: secretless
+    image: secretless-broker
     command: "-debug"
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
@@ -63,7 +63,7 @@ services:
       - ansible_secretless
 
   myapp_secretless:
-    image: secretless
+    image: secretless-broker
     command: "-debug"
     environment:
       CONJUR_APPLIANCE_URL: http://conjur

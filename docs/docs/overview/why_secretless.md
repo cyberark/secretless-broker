@@ -1,12 +1,12 @@
 ---
-title: Why Secretless?
+title: Why the Secretless Broker?
 id: docs
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: docs/overview/why_secretless
 ---
 
-“Secretless” is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
+The Secretless Broker is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
 
 - Accidental credential leakage (e.g. credential checked into source control, etc)
 - An attack on a privileged user (e.g. phishing, developer machine compromises, etc)
@@ -20,11 +20,11 @@ Exposing plaintext secrets to clients (both users and machines) is hazardous fro
 
 In the long run, it’s a losing battle to try and train every user and application developer about how to safely handle a secret once they’ve obtained it even if you can mitigate all of the attack surfaces of the client app itself. There are so many things that can go wrong, and people (and applications) have better things to worry about than babysitting secrets (such doing their jobs). Do you want developers to write features or try to be security engineers too?
 
-Secretless alleviates users and applications from the burden of handling secrets. Instead of checking out secrets, when a user or application needs access to something important, it uses the Secretless proxy to establish the connection to the target service on its behalf.
+The Secretless Broker alleviates users and applications from the burden of handling secrets. Instead of checking out secrets, when a user or application needs access to something important, it uses the Secretless proxy to establish the connection to the target service on its behalf.
 
-Secretless is specifically written to be really good at interacting with a variety of vaults and abstracting away the security to a specialized module that can easily be audited and expanded with custom plugins. It does a really good job of securing any secrets that it might obtain from a vault, and it does it the same way no matter the developer, technology, or platform. Additionally, it knows what to do when a secret has been changed so that the client users and code never have to respond to changing secrets or even know that they are changing.
+The Secretless Broker is specifically written to be really good at interacting with a variety of vaults and abstracting away the security to a specialized module that can easily be audited and expanded with custom plugins. It does a really good job of securing any secrets that it might obtain from a vault, and it does it the same way no matter the developer, technology, or platform. Additionally, it knows what to do when a secret has been changed so that the client users and code never have to respond to changing secrets or even know that they are changing.
 
-In summary, when the client connects to the target service through the Secretless broker:
+In summary, when the client connects to the target service through the Secretless Broker:
 
 - **The client is not part of the threat surface**
 
@@ -32,8 +32,8 @@ In summary, when the client connects to the target service through the Secretles
 
 - **The client doesn't have to know how to properly manage secrets**
 
-  Handling secrets safely involves some complexities, and when every application needs to know how to handle secrets, accidents happen. The Secretless broker centralizes the client-side management of secrets into one code base, making it easier for developers to focus on delivering features.
+  Handling secrets safely involves some complexities, and when every application needs to know how to handle secrets, accidents happen. The Secretless Broker centralizes the client-side management of secrets into one code base, making it easier for developers to focus on delivering features.
 
 - **The client doesn't have to manage secret rotation**
 
-  The Secretless broker is responsible for establishing connections to the backend, and can handle secrets rotation in a way that's transparent to the client.
+  The Secretless Broker is responsible for establishing connections to the backend, and can handle secrets rotation in a way that's transparent to the client.

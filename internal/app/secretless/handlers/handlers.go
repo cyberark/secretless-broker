@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers/http"
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers/mysql"
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg"
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers/ssh"
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers/sshagent"
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/http"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/mysql"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/pg"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/ssh"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/sshagent"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // HandlerFactories contains the list of built-in handler factories

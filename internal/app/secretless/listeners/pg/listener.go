@@ -6,11 +6,11 @@ import (
 	"strconv"
 
 	// TODO: Ideally this protocol-specific import shouldn't be needed
-	"github.com/conjurinc/secretless/internal/app/secretless/handlers/pg/protocol"
+	"github.com/conjurinc/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 
-	"github.com/conjurinc/secretless/internal/pkg/util"
-	"github.com/conjurinc/secretless/pkg/secretless/config"
-	plugin_v1 "github.com/conjurinc/secretless/pkg/secretless/plugin/v1"
+	"github.com/conjurinc/secretless-broker/internal/pkg/util"
+	"github.com/conjurinc/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/conjurinc/secretless-broker/pkg/secretless/plugin/v1"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 

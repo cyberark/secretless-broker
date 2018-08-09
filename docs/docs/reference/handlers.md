@@ -2,16 +2,16 @@
 title: Handlers
 id: handlers
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: docs/reference/handlers
 ---
 
-When Secretless receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless configuration for processing. Each Listener in the Secretless configuration should therefore have a corresponding Handler.
+When the Secretless Broker receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless Broker configuration for processing. Each Listener in the Secretless Broker configuration should therefore have a corresponding Handler.
 
 The Handler configuration specifies the Listener that the Handler is handling connections for and any credentials that will be needed for that connection. Several credential sources are currently supported; see the [Credential Providers](/docs/reference/providers.html) section for more information.
 
-The example below defines a Handler to process connection requests from the `pg_socket` Listener, and it has three credentials: `address`, `username`, and `password`. The `address` and `username` are literally specified in this case, and the `password` is taken from the environment of the running Secretless process.
-<pre>
+The example below defines a Handler to process connection requests from the `pg_socket` Listener, and it has three credentials: `address`, `username`, and `password`. The `address` and `username` are literally specified in this case, and the `password` is taken from the environment of the running Secretless Broker process.
+```
 handlers:
   - name: pg_via_socket
     listener: pg_socket
@@ -25,9 +25,9 @@ handlers:
       - name: password
         provider: env
         id: PG_PASSWORD
-</pre>
+```
 
-In production you would want your credential information to be pulled from a vault, and Secretless currently supports multiple vault Credential Providers.
+In production you would want your credential information to be pulled from a vault, and the Secretless Broker currently supports multiple vault Credential Providers.
 
 When a Handler receives a new connection requests, it retrieves any required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there, the Handler simply transparently shuttles data between the client and service.
 

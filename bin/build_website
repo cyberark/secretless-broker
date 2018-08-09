@@ -4,7 +4,7 @@ set -o pipefail
 CURRENT_DIR=$(dirname $0 | xargs realpath)
 DOCS_DIR="$CURRENT_DIR/../docs"
 DEST_SITE_DIR="$DOCS_DIR/_site"
-REPOSITORY="github.com/conjurinc/secretless"
+REPOSITORY="github.com/conjurinc/secretless-broker"
 
 IMAGE_NAME="secretless-website-builder"
 CONTAINER_NAME="secretless-website-builder-$(date -u +%Y%m%d_%H%M%S)"
@@ -37,7 +37,7 @@ cat $DOCS_DIR/godoc_packages.txt | while read package; do
 layout: docs
 id: ${sanitized_package_name}
 title: Documentation
-description: Secretless Documentation
+description: Secretless Broker Documentation
 godoc: True
 godoc_repository: ${REPOSITORY}
 godoc_package: ${package}

@@ -5,7 +5,7 @@ main:
     - title: Overview
       url: /docs/overview.html
       subsublinks:
-      - title: Why Secretless?
+      - title: Why the Secretless Broker?
         url: /docs/overview/why_secretless.html
       - title: How Does It Work?
         url: /docs/overview/how_it_works.html
@@ -22,14 +22,14 @@ main:
   - title: Blog
     url: /blog.html
   - title: Github
-    url: https://github.com/conjurinc/secretless
+    url: https://github.com/conjurinc/secretless-broker
     class: gh
 
 documentation:
   - title: Overview
     url: /docs/overview.html
     subfolderitems:
-      - page: Why Secretless?
+      - page: Why the Secretless Broker?
         url: /docs/overview/why_secretless.html
       - page: How Does It Work?
         url: /docs/overview/how_it_works.html
@@ -85,5 +85,10 @@ documentation:
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
         url: /docs/reference/how_to_deploy.html
+        subsubfolderitems:
+        - page: Using Kubernetes Secrets
+          url: /docs/reference/how_to_deploy.html
+        - page: Using Conjur
+          url: /docs/reference/how_to_deploy_conjur.html
   - title: FAQ
     url: /docs/faq.html

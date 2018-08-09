@@ -1,8 +1,8 @@
 ---
-title: Secretless Handlers
+title: Handlers
 id: conjur
 layout: docs
-description: Secretless Documentation
+description: Secretless Broker Documentation
 permalink: docs/reference/handlers/http/conjur
 ---
 

@@ -199,6 +199,7 @@
 .grid-l-col {
 	display: grid;
 	grid-template-columns: 26rem 1fr;
+	column-gap: 4rem;
 }
 
 @media (max-width: 991px) {

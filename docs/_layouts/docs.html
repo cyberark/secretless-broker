@@ -14,18 +14,18 @@ description: Secretless Broker Documentation
     {% include top_nav.html %}
 
     <div class="container">
-      <div class="grid-l-col">
-        <div class="sidebar">
+      <div class="row">
+        <div class="sidebar col-md-3 col-sm-12">
           {% include side_navigation.html %}
         </div>
     
-        <div class="docs">
+        <div class="docs col-md-9">
             <h1 class="page-title" >{{ page.title }}</h1>
           {{ content }}
         </div>
       </div>
     </div>
     {% include footer.html %}
-
+    <script src='/javascript/clipboard-buttons.js' type="text/javascript"></script>
   </body>
 </html>

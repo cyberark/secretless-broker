@@ -12,7 +12,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
-//
+// HandlerShutdownNotifier is a function signature for notifying of a Handler's Shutdown
 type HandlerShutdownNotifier func(Handler)
 
 // HandlerOptions contains the configuration for the handler

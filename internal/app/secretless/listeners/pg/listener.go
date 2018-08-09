@@ -90,8 +90,5 @@ func (l *Listener) GetName() string {
 
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	listener :=  &Listener{}
-	listener.BaseListener = plugin_v1.NewBaseListener(options, listener)
-
-	return listener
+	return &Listener{ BaseListener: plugin_v1.NewBaseListener(options) }
 }

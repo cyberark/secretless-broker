@@ -4,16 +4,23 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"log"
+
+	"github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 // Listener listens for and handles new connections.
 type Listener struct {
-	plugin_v1.BaseListener
+	EventNotifier  plugin_v1.EventNotifier
+	HandlerConfigs []config.Handler
+	NetListener    net.Listener
+	Resolver       plugin_v1.Resolver
+	Config         config.Listener
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions)  plugin_v1.Handler
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -59,13 +66,10 @@ func (l *Listener) Listen() {
 				HandlerConfig:    l.HandlerConfigs[0],
 				EventNotifier:    l.EventNotifier,
 				Resolver:         l.Resolver,
-				ShutdownNotifier: func(handler plugin_v1.Handler) {
-					l.RemoveHandler(handler)
-				},
+				ShutdownNotifier: func(handler plugin_v1.Handler) {},
 			}
 
-			handler := l.RunHandlerFunc("example-handler", options)
-			l.AddHandler(handler)
+			l.RunHandlerFunc("example-handler", options)
 		} else {
 			client.Write([]byte("Error - no handlers were defined!"))
 		}
@@ -77,10 +81,50 @@ func (l *Listener) GetName() string {
 	return "example"
 }
 
+// GetConfig implements plugin_v1.Listener
+func (l *Listener) GetConfig() config.Listener {
+	return l.Config
+}
+
+// GetConnections implements plugin_v1.Listener
+func (l *Listener) GetConnections() []net.Conn {
+	return nil
+}
+
+// GetHandlers implements plugin_v1.Listener
+func (l *Listener) GetHandlers() []plugin_v1.Handler {
+	return nil
+}
+
+// GetListener implements plugin_v1.Listener
+func (l *Listener) GetListener() net.Listener {
+	return l.NetListener
+}
+
+// GetNotifier implements plugin_v1.Listener
+func (l *Listener) GetNotifier() plugin_v1.EventNotifier {
+	return l.EventNotifier
+}
+
+// Shutdown implements plugin_v1.Listener
+func (l *Listener) Shutdown() error {
+	log.Printf("Shutting down example listener's handlers...")
+
+	for _, handler := range l.GetHandlers() {
+		handler.Shutdown()
+	}
+
+	return l.NetListener.Close()
+}
+
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	listener :=  &Listener{}
-	listener.BaseListener = plugin_v1.NewBaseListener(options, listener)
-
-	return listener
+	return &Listener{
+		EventNotifier:  options.EventNotifier,
+		HandlerConfigs: options.HandlerConfigs,
+		NetListener:    options.NetListener,
+		Resolver:       options.Resolver,
+		Config:         options.ListenerConfig,
+		RunHandlerFunc: options.RunHandlerFunc,
+	}
 }

@@ -3,7 +3,6 @@ package v1
 import (
 	"net"
 	"log"
-	"sync"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
@@ -33,7 +32,6 @@ type Listener interface {
 }
 
 type BaseListener struct {
-	self		   Listener
 	handlers       []Handler
 	EventNotifier  EventNotifier
 	HandlerConfigs []config.Handler
@@ -43,9 +41,8 @@ type BaseListener struct {
 	RunHandlerFunc func(id string, options HandlerOptions) Handler
 }
 
-func NewBaseListener(options ListenerOptions, self Listener) BaseListener {
+func NewBaseListener(options ListenerOptions) BaseListener {
 	return BaseListener{
-		self:           self,
 		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
@@ -96,22 +93,11 @@ func (l *BaseListener) Validate() error {
 
 // Shutdown implements plugin_v1.Listener
 func (l *BaseListener) Shutdown() error {
-	// TODO: Clean up all handlers
-	self := l.self
+	log.Printf("Shutting down listener's handlers...")
 
-	log.Printf("Shutting down '%v' listener's handlers...", self.GetName())
-	var wg sync.WaitGroup
-
-	for _, handler := range self.GetHandlers() {
-		wg.Add(1)
-
-		go func(h Handler) {
-			defer wg.Done()
-			h.Shutdown()
-		}(handler)
+	for _, handler := range l.GetHandlers() {
+		handler.Shutdown()
 	}
-
-	wg.Wait()
 
 	return l.NetListener.Close()
 }

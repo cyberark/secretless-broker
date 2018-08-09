@@ -38,7 +38,6 @@ type Handler interface {
 }
 
 type BaseHandler struct {
-	self			   Handler
 	HandlerConfig      config.Handler
 	Resolver           Resolver
 	EventNotifier      EventNotifier
@@ -89,31 +88,33 @@ func (h *BaseHandler) Shutdown() {
 }
 
 // PipeHandlerWithStream performs continuous bidirectional transfer of data between handler client and backend
-// stream: function for transfer
-// eventNotifier: function ingesting transfer bytes
-// handler: holder of client and backend connections
-//
-func PipeHandlerWithStream(handler Handler, stream func(net.Conn, net.Conn, func(b []byte)), eventNotifier EventNotifier, callback func()) {
+// takes arguments ->
+// [handler]: Handler-compliant struct. Handler#GetClientConnection and Handler#GetBackendConnection provide client and backend connections (net.Conn)
+// [stream]: function performing continuous bidirectional transfer
+// [eventNotifier]: EventNotifier-compliant struct. EventNotifier#ClientData is passed transfer bytes
+// [done]: function called once when transfer ceases
+
+func PipeHandlerWithStream(handler Handler, stream func(net.Conn, net.Conn, func(b []byte)), eventNotifier EventNotifier, done func()) {
 	if handler.GetConfig().Debug {
 		log.Printf("Connecting client %s to backend %s", handler.GetClientConnection().RemoteAddr(), handler.GetBackendConnection().RemoteAddr())
 	}
 
 	var _once sync.Once
-	callbackOnce := func() {
+	doneOnce := func() {
 		_once.Do(func() {
-			callback()
+			done()
 		})
 	}
 
 	go func() {
-		defer callbackOnce()
+		defer doneOnce()
 		stream(handler.GetClientConnection(), handler.GetBackendConnection(), func(b []byte) {
 			eventNotifier.ClientData(handler.GetClientConnection(), b)
 		})
 	}()
 
 	go func() {
-		defer callbackOnce()
+		defer doneOnce()
 		stream(handler.GetBackendConnection(), handler.GetClientConnection(), func(b []byte) {
 			eventNotifier.ServerData(handler.GetClientConnection(), b)
 		})

@@ -7,6 +7,9 @@ import (
 	"net"
 	"strings"
 	"time"
+	"net/http"
+
+	"golang.org/x/crypto/ssh/agent"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
@@ -23,8 +26,13 @@ type BackendConfig struct {
 // establish the BackendConfig, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 type Handler struct {
-	plugin_v1.BaseHandler
-	BackendConfig    *BackendConfig
+	HandlerConfig      config.Handler
+	Resolver           plugin_v1.Resolver
+	EventNotifier      plugin_v1.EventNotifier
+	BackendConnection  net.Conn
+	ClientConnection   net.Conn
+	ShutdownNotifier   plugin_v1.HandlerShutdownNotifier
+	BackendConfig      *BackendConfig
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -135,10 +143,45 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
+// Authenticate implements plugin_v1.Handler
+func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
+	panic("example handler does not implement Authenticate")
+}
+
+// GetConfig implements plugin_v1.Handler
+func (h *Handler) GetConfig() config.Handler {
+	return h.HandlerConfig
+}
+
+// GetClientConnection implements plugin_v1.Handler
+func (h *Handler) GetClientConnection() net.Conn {
+	return h.ClientConnection
+}
+
+// GetBackendConnection implements plugin_v1.Handler
+func (h *Handler) GetBackendConnection() net.Conn {
+	return h.BackendConnection
+}
+
+// LoadKeys implements plugin_v1.Handler
+func (h *Handler) LoadKeys(keyring agent.Agent) error {
+	panic("example handler does not implement LoadKeys")
+}
+
+// Shutdown implements plugin_v1.Handler
+func (h *Handler) Shutdown() {
+	log.Printf("example handler shutting down...")
+	h.ShutdownNotifier(h)
+}
+
 // HandlerFactory instantiates a handler given HandlerOptions
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{
-		BaseHandler: plugin_v1.NewBaseHandler(options),
+		HandlerConfig:     options.HandlerConfig,
+		Resolver:          options.Resolver,
+		EventNotifier:     options.EventNotifier,
+		ClientConnection:  options.ClientConnection,
+		ShutdownNotifier:  options.ShutdownNotifier,
 	}
 
 	handler.Run()

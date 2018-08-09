@@ -259,3 +259,30 @@
 .navbar .default {
 	margin-bottom: 0;
 }
+
+ /* default class and toggled when user selects down caret for side navbar*/
+.dropdown-menu-option {
+    display: none;
+    padding-left: 8px;
+    border-top: 1px solid darken($sless-light-blue, 10);
+	display: none;
+	padding: 1rem 2.5rem;
+	margin: 0 -2.5rem;
+	background-color:darken($sless-light-blue, 02);
+}
+
+.dropdown-btn {
+	i {
+		float: right;
+    color: #4d8fcc;
+    margin-top: .6rem;
+	}
+}
+
+.rotatingArrow{
+  transform: rotate(90deg);
+}
+
+.arrow {
+	 transition: all 0.4s;
+}

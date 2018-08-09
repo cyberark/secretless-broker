@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 readonly VERSION="$(cat VERSION)"
-readonly REGISTRY="${1:-registry2.itci.conjur.net/conjurinc}"
+readonly REGISTRY="${1:-cyberark}"
 
 readonly IMAGES=(
   "secretless-broker"

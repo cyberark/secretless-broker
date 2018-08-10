@@ -1,6 +1,6 @@
 main:
   - title: Docs
-    url: /docs/overview.html
+    url: /docs/
     sublinks:
     - title: Overview
       url: /docs/overview.html

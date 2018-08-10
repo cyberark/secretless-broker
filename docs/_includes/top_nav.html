@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg">
 	<div class="container">
-	<a class="navbar-brand" href="/">SLSS</a>
+	<a class="navbar-brand" href="/">Secretless Broker</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span> </span>
 	</button>
@@ -10,15 +10,12 @@
 		{% assign links = site.data.navigation.main %}
         {% for link in links %}
             {% assign class = nil %}
-            {% if page.url contains link.url %}
-				{% assign class = 'active' %}
-            {% endif %}
             {% if link.sublinks %}
-				<li class="dropdown {{ class }}">
+				<li class="dropdown top-sub {% if page.url contains link.url %}active{% endif %}">
 					<a href="{{ site.baseurl }}{{ link.url }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ link.title }} <span class="caret"></span></a>
 					<ul class="dropdown-menu">
 						{% for sublink in link.sublinks %}
-							<li>
+							<li class="top-drop {% if page.url == sublink.url %}active{% endif %}">
 								<a href="{{ site.baseurl }}{{ sublink.url }}">{{ sublink.title }}</a>
 							</li>
 						{% endfor %}
@@ -26,7 +23,7 @@
 					</ul>
 				</li>
             {% else %}
-                <li class="{{ class }}">
+                <li class="top-sub {% if page.url == link.url %}active{% endif %}">
                     <a href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>
                 </li>
             {% endif %}
@@ -35,3 +32,4 @@
 	</div>
 	</div>
 </nav>
+

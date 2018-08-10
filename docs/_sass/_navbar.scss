@@ -91,10 +91,19 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	&.active {
-		a {
-			color: $sless-blue;
-		}
+	color: #fff;
+	padding: .8rem 1rem;
+	&.top-drop a {
+		color: #fff;
+	}
+	&.top-sub.active > a {
+		color: $sless-blue;
+	}
+	&.top-drop.active > a {
+		color: $sless-blue;
+	}
+	.dropdown-menu li a {
+		color: #fff;
 	}
 }
 
@@ -123,7 +132,6 @@
 
 .navbar-nav a {
 	color: lighten($sless-light-blue, 05);
-	padding: .8rem 1rem;
 	font-size: 1.5rem;
 	font-weight: 500;
 	transition: all 0.4s;
@@ -179,6 +187,11 @@
 		padding: 0;
 		li {
 			font-weight: 300;
+			&.active {
+				a {
+					font-weight: 800;
+				}
+			}
 			&.active.sub {
 				font-weight: 800;
 			}

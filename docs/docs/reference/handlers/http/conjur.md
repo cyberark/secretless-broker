@@ -3,7 +3,7 @@ title: Handlers
 id: conjur
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers/http/conjur
+permalink: docs/reference/handlers/http/conjur.html
 ---
 
 ## Conjur - HTTP(S)

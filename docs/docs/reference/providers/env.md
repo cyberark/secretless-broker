@@ -3,7 +3,7 @@ title: Providers
 id: env
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/providers/env
+permalink: docs/reference/providers/env.html
 ---
 
 ## Environment

@@ -3,7 +3,7 @@ title: Frequently Asked Questions
 id: faq
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/faq
+permalink: docs/faq.html
 ---
 
 <div class="container-fluid" id="faq-list">

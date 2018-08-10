@@ -3,7 +3,7 @@ title: Providers
 id: keychain
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/providers/keychain
+permalink: docs/reference/providers/keychain.html
 ---
 
 ## Keychain

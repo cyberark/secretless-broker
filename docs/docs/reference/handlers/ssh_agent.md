@@ -3,7 +3,7 @@ title: Handlers
 id: ssh_agent
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/handlers/ssh_agent
+permalink: docs/reference/handlers/ssh_agent.html
 ---
 
 ## SSH Agent

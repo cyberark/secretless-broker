@@ -25,6 +25,37 @@
 	.container {
 		padding: 0;
 	}
+	&.home {
+		.dropdown-menu {
+			background-color: $sless-blue;
+			border-radius: $border-radius;
+			left: -5rem;
+		}
+		.dropdown.show {
+			.dropdown-toggle::after {
+				opacity: 0;
+			}
+		}
+	}
+}
+
+.arrow_box {
+	position: relative;
+	background: #4D8FCC;
+}
+.arrow_box:after {
+	bottom: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+	border-color: rgba(77, 143, 204, 0);
+	border-bottom-color: #4D8FCC;
+	border-width: 10px;
+	margin-left: -10px;
 }
 
 .icon-bar {
@@ -60,10 +91,19 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	&.active {
-		a {
-			color: $sless-blue;
-		}
+	color: #fff;
+	padding: .8rem 1rem;
+	&.top-drop a {
+		color: #fff;
+	}
+	&.top-sub.active > a {
+		color: $sless-blue;
+	}
+	&.top-drop.active > a {
+		color: $sless-blue;
+	}
+	.dropdown-menu li a {
+		color: #fff;
 	}
 }
 
@@ -92,7 +132,6 @@
 
 .navbar-nav a {
 	color: lighten($sless-light-blue, 05);
-	padding: .8rem 1rem;
 	font-size: 1.5rem;
 	font-weight: 500;
 	transition: all 0.4s;
@@ -125,8 +164,15 @@
 	flex-direction: column;
 	position: sticky;
 	margin-bottom: 8rem;
-	h3 a{
-		color: $sless-blue;
+	h3 {
+		&.active {
+			a {
+				color: darken($sless-blue, 30);
+			}
+		}
+		a{
+			color: $sless-blue;
+		}
 	}
 	a {
 		color: $sless-text;
@@ -139,6 +185,20 @@
 	ul {
 		list-style-type: none;
 		padding: 0;
+		li {
+			font-weight: 300;
+			&.active {
+				a {
+					font-weight: 800;
+				}
+			}
+			&.active.sub {
+				font-weight: 800;
+			}
+			&.active.subsub {
+				font-weight: 800;
+			}
+		}
 	}
 
 	.list-link {

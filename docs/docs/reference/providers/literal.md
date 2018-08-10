@@ -3,7 +3,7 @@ title: Providers
 id: Literal
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/providers/literal
+permalink: docs/reference/providers/literal.html
 ---
 
 ## Literal

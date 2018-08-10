@@ -3,7 +3,7 @@ title: Deploy to Kubernetes
 id: deploy_to_kubernetes
 layout: docs
 description: Secretless Broker Documentation
-permalink: /docs/get_started/deploy_to_kubernetes
+permalink: /docs/get_started/deploy_to_kubernetes.html
 ---
 
 To get started with the Secretless Broker, try working through this tutorial, which goes through deploying the Secretless Broker with a sample application that uses a PostgresSQL database for backend storage.

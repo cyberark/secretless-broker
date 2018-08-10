@@ -3,7 +3,7 @@ title: Credential Providers
 id: providers
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/providers
+permalink: docs/reference/providers.html
 --- 
 
 Credential Providers interact with a credential source to deliver secrets needed for authentication

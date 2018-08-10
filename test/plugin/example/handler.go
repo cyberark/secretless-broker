@@ -5,14 +5,14 @@ import (
 	"errors"
 	"log"
 	"net"
-	"net/http"
 	"strings"
 	"time"
+	"net/http"
 
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
 // BackendConfig stores the connection info to the real backend database.
@@ -27,15 +27,21 @@ type BackendConfig struct {
 // establish the BackendConfig, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 type Handler struct {
-	Backend          net.Conn
-	BackendConfig    *BackendConfig
-	ClientConnection net.Conn
-	HandlerConfig    config.Handler
-	EventNotifier    plugin_v1.EventNotifier
-	Resolver         plugin_v1.Resolver
+	BackendConfig      *BackendConfig
+	BackendConnection  net.Conn
+	ClientConnection   net.Conn
+	EventNotifier      plugin_v1.EventNotifier
+	HandlerConfig      config.Handler
+	Resolver           plugin_v1.Resolver
+	ShutdownNotifier   plugin_v1.HandlerShutdownNotifier
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
+	defer func() {
+		source.Close()
+		dest.Close()
+	}()
+
 	timeoutDuration := 2 * time.Second
 	buffer := make([]byte, 4096)
 
@@ -46,16 +52,12 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 		source.SetReadDeadline(time.Now().Add(timeoutDuration))
 		length, err = source.Read(buffer)
 		if err != nil {
-			dest.Close()
-			source.Close()
 			return
 		}
 
 		dest.SetReadDeadline(time.Now().Add(timeoutDuration))
 		_, err = dest.Write(buffer[:length])
 		if err != nil {
-			dest.Close()
-			source.Close()
 			return
 		}
 
@@ -64,6 +66,11 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 }
 
 func streamWithTransform(source, dest net.Conn, config *BackendConfig, callback func([]byte)) {
+	defer func() {
+		source.Close()
+		dest.Close()
+	}()
+
 	timeoutDuration := 2 * time.Second
 	buffer := make([]byte, 4096)
 
@@ -74,8 +81,6 @@ func streamWithTransform(source, dest net.Conn, config *BackendConfig, callback 
 		source.SetReadDeadline(time.Now().Add(timeoutDuration))
 		length, err = source.Read(buffer)
 		if err != nil {
-			dest.Close()
-			source.Close()
 			return
 		}
 
@@ -92,8 +97,6 @@ func streamWithTransform(source, dest net.Conn, config *BackendConfig, callback 
 		dest.SetReadDeadline(time.Now().Add(timeoutDuration))
 		_, err = dest.Write(bytes.NewBufferString(newContent).Bytes())
 		if err != nil {
-			dest.Close()
-			source.Close()
 			return
 		}
 
@@ -104,13 +107,13 @@ func streamWithTransform(source, dest net.Conn, config *BackendConfig, callback 
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
 	if h.GetConfig().Debug {
-		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
+		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.GetBackendConnection().RemoteAddr())
 	}
 
-	go streamWithTransform(h.GetClientConnection(), h.Backend, h.BackendConfig, func(b []byte) {
+	go streamWithTransform(h.GetClientConnection(), h.GetBackendConnection(), h.BackendConfig, func(b []byte) {
 		h.EventNotifier.ClientData(h.GetClientConnection(), b)
 	})
-	go stream(h.Backend, h.GetClientConnection(), func(b []byte) {
+	go stream(h.GetBackendConnection(), h.GetClientConnection(), func(b []byte) {
 		h.EventNotifier.ClientData(h.GetClientConnection(), b)
 	})
 }
@@ -141,40 +144,45 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
-// GetConfig implements secretless.Handler
+// Authenticate implements plugin_v1.Handler
+func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
+	panic("example handler does not implement Authenticate")
+}
+
+// GetConfig implements plugin_v1.Handler
 func (h *Handler) GetConfig() config.Handler {
 	return h.HandlerConfig
 }
 
-// Authenticate is not used here
-// TODO: Remove this when interface is cleaned up
-func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("example listener does not use Authenticate")
-}
-
-// GetClientConnection implements secretless.Handler
+// GetClientConnection implements plugin_v1.Handler
 func (h *Handler) GetClientConnection() net.Conn {
 	return h.ClientConnection
 }
 
-// GetBackendConnection implements secretless.Handler
+// GetBackendConnection implements plugin_v1.Handler
 func (h *Handler) GetBackendConnection() net.Conn {
-	return nil
+	return h.BackendConnection
 }
 
-// LoadKeys is not used here
-// TODO: Remove this when interface is cleaned up
+// LoadKeys implements plugin_v1.Handler
 func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("example handler does not use LoadKeys")
+	panic("example handler does not implement LoadKeys")
+}
+
+// Shutdown implements plugin_v1.Handler
+func (h *Handler) Shutdown() {
+	log.Printf("example handler shutting down...")
+	h.ShutdownNotifier(h)
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{
-		ClientConnection: options.ClientConnection,
-		EventNotifier:    options.EventNotifier,
-		HandlerConfig:    options.HandlerConfig,
-		Resolver:         options.Resolver,
+		ClientConnection:  options.ClientConnection,
+		EventNotifier:     options.EventNotifier,
+		HandlerConfig:     options.HandlerConfig,
+		Resolver:          options.Resolver,
+		ShutdownNotifier:  options.ShutdownNotifier,
 	}
 
 	handler.Run()

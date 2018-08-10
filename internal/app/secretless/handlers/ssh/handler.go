@@ -1,19 +1,14 @@
 package ssh
 
 import (
-	"errors"
 	"io"
 	"log"
-	"net"
-	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
@@ -26,10 +21,8 @@ type ServerConfig struct {
 
 // Handler contains the configuration and channels
 type Handler struct {
+	plugin_v1.BaseHandler
 	Channels      <-chan ssh.NewChannel
-	EventNotifier plugin_v1.EventNotifier
-	HandlerConfig config.Handler
-	Resolver      plugin_v1.Resolver
 }
 
 func (h *Handler) serverConfig() (config ServerConfig, err error) {
@@ -196,40 +189,11 @@ func (h *Handler) Run() {
 	}
 }
 
-// Authenticate is not used here
-// TODO: Remove this when interface is cleaned up
-func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("ssh handler does not use Authenticate")
-}
-
-// GetConfig implements secretless.Handler
-func (h *Handler) GetConfig() config.Handler {
-	return h.HandlerConfig
-}
-
-// GetClientConnection implements secretless.Handler
-func (h *Handler) GetClientConnection() net.Conn {
-	return nil
-}
-
-// GetBackendConnection implements secretless.Handler
-func (h *Handler) GetBackendConnection() net.Conn {
-	return nil
-}
-
-// LoadKeys is not used here
-// TODO: Remove this when interface is cleaned up
-func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("ssh handler does not use LoadKeys")
-}
-
 // HandlerFactory instantiates a handler given HandlerOptions
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{
+		BaseHandler: plugin_v1.NewBaseHandler(options),
 		Channels:      options.Channels,
-		EventNotifier: options.EventNotifier,
-		HandlerConfig: options.HandlerConfig,
-		Resolver:      options.Resolver,
 	}
 
 	handler.Run()

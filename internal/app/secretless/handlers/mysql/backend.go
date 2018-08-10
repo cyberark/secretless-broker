@@ -130,7 +130,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		log.Printf("Successfully connected to '%s:%d'", h.BackendConfig.Host, h.BackendConfig.Port)
 	}
 
-	h.Backend = backend
+	h.BackendConnection = backend
 
 	return
 }

@@ -3,28 +3,32 @@ package secretless
 import (
 	"log"
 	"net"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
+const (
+	START  = iota
+	RESTART
+	SHUTDOWN
+)
+
 // Proxy is the main struct of Secretless.
 type Proxy struct {
-	Config            config.Config
-	EventNotifier     plugin_v1.EventNotifier
-	Listeners         []plugin_v1.Listener
-	ListenerWaitGroup sync.WaitGroup
-	Resolver          plugin_v1.Resolver
-	RunListenerFunc   func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
-	RunHandlerFunc    func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
+	cleanupMutex    sync.Mutex
+	runEventChan    chan int
+	EventNotifier   plugin_v1.EventNotifier
+	Config          config.Config
+	Listeners       []plugin_v1.Listener
+	Resolver        plugin_v1.Resolver
+	RunHandlerFunc  func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
+	RunListenerFunc func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
 }
 
 // Listen runs the listen loop for a specific Listener.
-func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin_v1.Listener {
+func (p *Proxy) Listen(listenerConfig config.Listener) plugin_v1.Listener {
 	var netListener net.Listener
 	var err error
 
@@ -32,20 +36,6 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin
 		netListener, err = net.Listen("tcp", listenerConfig.Address)
 	} else {
 		netListener, err = net.Listen("unix", listenerConfig.Socket)
-
-		// https://stackoverflow.com/questions/16681944/how-to-reliably-unlink-a-unix-domain-socket-in-go-programming-language
-		// Handle common process-killing signals so we can gracefully shut down:
-		sigc := make(chan os.Signal, 1)
-		signal.Notify(sigc, os.Interrupt, os.Kill, syscall.SIGTERM)
-		go func(c chan os.Signal) {
-			// Wait for a SIGINT or SIGKILL:
-			sig := <-c
-			log.Printf("Caught signal %s: shutting down.", sig)
-			// Stop listening (and unlink the socket if unix type):
-			netListener.Close()
-			// And we're done:
-			os.Exit(0)
-		}(sigc)
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -75,50 +65,86 @@ func (p *Proxy) Listen(listenerConfig config.Listener, wg sync.WaitGroup) plugin
 	p.EventNotifier.CreateListener(listener)
 
 	go func() {
-		defer wg.Done()
+		defer listener.Shutdown()
 		listener.Listen()
 	}()
 
 	return listener
 }
 
-// ReloadListeners will loop through the listeners and shut them down
-// As each listener is shut down the WaitGroup is decremented, and once the
-// counter is zero the Proxy.Run loop will complete and restart, reloading all
-// of the listeners.
+// ReloadListeners sends RESTART msg to runEventChan
 func (p *Proxy) ReloadListeners() error {
-	if p.Listeners == nil || len(p.Listeners) == 0 {
-		log.Println("WARN: No listeners to reload!")
-		return nil
-	}
-
-	for _, listener := range p.Listeners {
-		log.Printf("Shutting down '%v' listener...", listener.GetName())
-		listener.Shutdown()
-		p.ListenerWaitGroup.Done()
-	}
+	p.runEventChan <- RESTART
 
 	// TODO: Return any errors we get during reload
 	return nil
 }
 
-// Run is the main entrypoint to the secretless program.
-func (p *Proxy) Run() {
-	p.ListenerWaitGroup = sync.WaitGroup{}
-	// We loop until we get an exit signal (in which case we exit program)
-	for {
-		// TODO: Delegate logic of this `if` check to connection managers
-		if len(p.Config.Listeners) < 1 {
-			log.Fatalln("ERROR! No listeners specified in config!")
-		}
+// Shutdown sends SHUTDOWN msg to runEventChan
+func (p *Proxy) Shutdown() {
+	p.runEventChan <- SHUTDOWN
+	p.cleanUpListeners()
+}
 
-		p.Listeners = make([]plugin_v1.Listener, 0)
-		log.Println("Starting all listeners and handlers...")
-		p.ListenerWaitGroup.Add(len(p.Config.Listeners))
-		for _, config := range p.Config.Listeners {
-			listener := p.Listen(config, p.ListenerWaitGroup)
-			p.Listeners = append(p.Listeners, listener)
+// Loops through the listeners and shuts them down concurrently
+func (p *Proxy) cleanUpListeners() {
+	// because cleanUpListeners can be called from different goroutines
+	defer p.cleanupMutex.Unlock()
+	p.cleanupMutex.Lock()
+
+	var wg sync.WaitGroup
+
+	for _, listener := range p.Listeners {
+		// block scoped variable for use in goroutine
+		_listener := listener
+
+		log.Printf("Shutting down '%v' listener...", listener.GetName())
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_listener.Shutdown()
+		}()
+	}
+
+	wg.Wait()
+}
+
+// Run is the main entrypoint to the secretless program.
+// the for-select loop allows for queueing of RESTARTS and only 1 SHUTDOWN
+func (p *Proxy) Run() {
+	p.runEventChan = make(chan int, 1)
+	p.cleanupMutex = sync.Mutex{}
+
+	go func() {
+		p.runEventChan <- START
+	}()
+
+	// when runEventChan receives message...
+	// RESTART: runs cleanUpListeners and reloads all listeners
+	// SHUTDOWN: for-select turns to infinite non-busy loop
+	// default: panic
+	for {
+		msg := <-p.runEventChan;
+		switch msg {
+		case START, RESTART:
+			p.cleanUpListeners()
+			// TODO: Delegate logic of this `if` check to connection managers
+			if len(p.Config.Listeners) < 1 {
+				log.Fatalln("ERROR! No listeners specified in config!")
+			}
+
+			p.Listeners = make([]plugin_v1.Listener, 0)
+			log.Println("Starting all listeners and handlers...")
+			for _, config := range p.Config.Listeners {
+				listener := p.Listen(config)
+				p.Listeners = append(p.Listeners, listener)
+			}
+		case SHUTDOWN:
+			// non-busy for-select loops forever until explicit os.Exit
+			p.runEventChan = nil
+		default:
+			log.Panic("Proxy#Run should never reach here")
 		}
-		p.ListenerWaitGroup.Wait()
 	}
 }

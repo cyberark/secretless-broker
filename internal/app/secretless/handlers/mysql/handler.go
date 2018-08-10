@@ -1,15 +1,12 @@
 package mysql
 
 import (
-	"errors"
 	"log"
 	"net"
-	"net/http"
-
-	"golang.org/x/crypto/ssh/agent"
+	"fmt"
+	"io"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
@@ -29,12 +26,8 @@ type BackendConfig struct {
 //
 // Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
-	Backend          net.Conn
+	plugin_v1.BaseHandler
 	BackendConfig    *BackendConfig
-	ClientConnection net.Conn
-	EventNotifier    plugin_v1.EventNotifier
-	HandlerConfig    config.Handler
-	Resolver         plugin_v1.Resolver
 }
 
 func (h *Handler) abort(err error) {
@@ -47,6 +40,11 @@ func (h *Handler) abort(err error) {
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
+	defer func() {
+		source.Close()
+		dest.Close()
+	}()
+
 	buffer := make([]byte, 4096)
 
 	var length int
@@ -55,6 +53,9 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	for {
 		length, err = source.Read(buffer)
 		if err != nil {
+			if err == io.EOF {
+				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
+			}
 			return
 		}
 
@@ -69,12 +70,9 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 
 // Pipe performs continuous bidirectional transfer of data between the client and backend.
 func (h *Handler) Pipe() {
-	if h.GetConfig().Debug {
-		log.Printf("Connecting client %s to backend %s", h.GetClientConnection().RemoteAddr(), h.Backend.RemoteAddr())
-	}
-
-	go stream(h.GetClientConnection(), h.Backend, func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
-	go stream(h.Backend, h.GetClientConnection(), func(b []byte) { h.EventNotifier.ClientData(h.GetClientConnection(), b) })
+	plugin_v1.PipeHandlerWithStream(h, stream, h.EventNotifier, func() {
+		h.ShutdownNotifier(h)
+	})
 }
 
 // Run configures the backend connection info, connects to the backend to
@@ -96,40 +94,16 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
-// Authenticate is unused here
-// TODO: Remove this when interface is cleaned up
-func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	return errors.New("mysql listener does not use Authenticate")
-}
+func (h *Handler) Shutdown() {
+	defer h.BaseHandler.Shutdown()
 
-// GetConfig implements secretless.Handler
-func (h *Handler) GetConfig() config.Handler {
-	return h.HandlerConfig
-}
-
-// GetClientConnection implements secretless.Handler
-func (h *Handler) GetClientConnection() net.Conn {
-	return h.ClientConnection
-}
-
-// GetBackendConnection implements secretless.Handler
-func (h *Handler) GetBackendConnection() net.Conn {
-	return h.Backend
-}
-
-// LoadKeys is unused here
-// TODO: Remove this when interface is cleaned up
-func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("mysql handler does not use LoadKeys")
+	h.abort(fmt.Errorf("handler shut down by secretless"))
 }
 
 // HandlerFactory instantiates a handler given HandlerOptions
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{
-		ClientConnection: options.ClientConnection,
-		EventNotifier:    options.EventNotifier,
-		HandlerConfig:    options.HandlerConfig,
-		Resolver:         options.Resolver,
+		BaseHandler: plugin_v1.NewBaseHandler(options),
 	}
 
 	handler.Run()

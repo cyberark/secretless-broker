@@ -82,7 +82,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	h.Backend = connection
+	h.BackendConnection = connection
 
 	return
 }

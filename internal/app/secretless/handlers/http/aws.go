@@ -2,29 +2,23 @@ package http
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/ssh/agent"
-
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
+
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // AWSHandler applies AWS signature authentication to the HTTP Authorization header.
 type AWSHandler struct {
-	HandlerConfig config.Handler
-	Resolver      plugin_v1.Resolver
+	plugin_v1.BaseHandler
 }
 
 // AWS4-HMAC-SHA256 Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
@@ -120,31 +114,9 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	return nil
 }
 
-// GetConfig implements secretless.Handler
-func (h *AWSHandler) GetConfig() config.Handler {
-	return h.HandlerConfig
-}
-
-// GetClientConnection implements secretless.Handler
-func (h *AWSHandler) GetClientConnection() net.Conn {
-	return nil
-}
-
-// GetBackendConnection implements secretless.Handler
-func (h *AWSHandler) GetBackendConnection() net.Conn {
-	return nil
-}
-
-// LoadKeys is not used here
-// TODO: Remove this when interface is cleaned up
-func (h *AWSHandler) LoadKeys(keyring agent.Agent) error {
-	return errors.New("http/aws handler does not use LoadKeys")
-}
-
 // AWSHandlerFactory instantiates a handler given HandlerOptions
 func AWSHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	return &AWSHandler{
-		HandlerConfig: options.HandlerConfig,
-		Resolver:      options.Resolver,
+		BaseHandler: plugin_v1.NewBaseHandler(options),
 	}
 }

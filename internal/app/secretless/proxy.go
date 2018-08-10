@@ -125,28 +125,26 @@ func (p *Proxy) Run() {
 	// SHUTDOWN: for-select turns to infinite non-busy loop
 	// default: panic
 	for {
-		select {
-		case msg := <-p.runEventChan:
-			switch msg {
-			case START, RESTART:
-				p.cleanUpListeners()
-				// TODO: Delegate logic of this `if` check to connection managers
-				if len(p.Config.Listeners) < 1 {
-					log.Fatalln("ERROR! No listeners specified in config!")
-				}
-
-				p.Listeners = make([]plugin_v1.Listener, 0)
-				log.Println("Starting all listeners and handlers...")
-				for _, config := range p.Config.Listeners {
-					listener := p.Listen(config)
-					p.Listeners = append(p.Listeners, listener)
-				}
-			case SHUTDOWN:
-				// non-busy for-select loops forever until explicit os.Exit
-				p.runEventChan = nil
-			default:
-				log.Panic("Proxy#Run should never reach here")
+		msg := <-p.runEventChan;
+		switch msg {
+		case START, RESTART:
+			p.cleanUpListeners()
+			// TODO: Delegate logic of this `if` check to connection managers
+			if len(p.Config.Listeners) < 1 {
+				log.Fatalln("ERROR! No listeners specified in config!")
 			}
+
+			p.Listeners = make([]plugin_v1.Listener, 0)
+			log.Println("Starting all listeners and handlers...")
+			for _, config := range p.Config.Listeners {
+				listener := p.Listen(config)
+				p.Listeners = append(p.Listeners, listener)
+			}
+		case SHUTDOWN:
+			// non-busy for-select loops forever until explicit os.Exit
+			p.runEventChan = nil
+		default:
+			log.Panic("Proxy#Run should never reach here")
 		}
 	}
 }

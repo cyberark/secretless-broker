@@ -8,7 +8,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
-// ListenerOptions contains the configuration for the listener
+// ListenerOptions contains thetype Proxy struct { configuration for the listener
 type ListenerOptions struct {
 	EventNotifier  EventNotifier
 	HandlerConfigs []config.Handler
@@ -32,27 +32,34 @@ type Listener interface {
 	Shutdown() error
 }
 
-// BaseListener provides default (shared/common) implementations of Listener interface methods, where it makes sense - the rest of the methods panic if not implemented in the "DerivedListener" e.g. BaseListener#GetName.
-// The intention is to keep things DRY by embedding BaseListener in ""DerivedListener""
+// BaseListener provides default (shared/common) implementations
+// of Listener interface methods, where it makes sense
+// - the rest of the methods panic if
+// not implemented in the "DerivedListener"
+// e.g. BaseListener#GetName.
+//
+// The intention is to keep things DRY by
+// embedding BaseListener in "DerivedListener".
+//
 // There is no requirement to use BaseListener.
 type BaseListener struct {
 	handlers       []Handler // store of active handlers for this listener,
+	Config         config.Listener
 	EventNotifier  EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
 	Resolver       Resolver
-	Config         config.Listener
 	RunHandlerFunc func(id string, options HandlerOptions) Handler
 }
 
 // NewBaseListener creates a BaseListener from ListenerOptions
 func NewBaseListener(options ListenerOptions) BaseListener {
 	return BaseListener{
+		Config:         options.ListenerConfig,
 		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
 		Resolver:       options.Resolver,
-		Config:         options.ListenerConfig,
 		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }
@@ -103,6 +110,7 @@ func (l *BaseListener) Shutdown() error {
 	var wg sync.WaitGroup
 
 	for _, handler := range l.handlers {
+		// block scoped variable for use in goroutine
 		_handler := handler
 
 		wg.Add(1)

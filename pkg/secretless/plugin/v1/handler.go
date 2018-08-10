@@ -37,25 +37,32 @@ type Handler interface {
 	Shutdown()
 }
 
-// BaseHandler provides default (shared/common) implementations of Handler interface methods, where it makes sense - the rest of the methods panic if not implemented in the "DerivedHandler" e.g. BaseHandler#Authenticate.
-// The intention is to keep things DRY by embedding BaseHandler in "DerivedHandler"
+// BaseHandler provides default (shared/common) implementations
+// of Handler interface methods, where it makes sense
+// - the rest of the methods panic if
+// not implemented in the "DerivedHandler"
+// e.g. BaseHandler#Authenticate.
+//
+// The intention is to keep things DRY by
+// embedding BaseHandler in "DerivedHandler"
+//
 // There is no requirement to use BaseHandler.
 type BaseHandler struct {
-	HandlerConfig      config.Handler
-	Resolver           Resolver
-	EventNotifier      EventNotifier
 	BackendConnection  net.Conn
 	ClientConnection   net.Conn
+	EventNotifier      EventNotifier
+	HandlerConfig      config.Handler
+	Resolver           Resolver
 	ShutdownNotifier   HandlerShutdownNotifier
 }
 
 // NewBaseHandler creates a BaseHandler from HandlerOptions
 func NewBaseHandler(options HandlerOptions) BaseHandler {
 	return BaseHandler{
+		ClientConnection:  options.ClientConnection,
+		EventNotifier:     options.EventNotifier,
 		HandlerConfig:     options.HandlerConfig,
 		Resolver:          options.Resolver,
-		EventNotifier:     options.EventNotifier,
-		ClientConnection:  options.ClientConnection,
 		ShutdownNotifier:  options.ShutdownNotifier,
 	}
 }

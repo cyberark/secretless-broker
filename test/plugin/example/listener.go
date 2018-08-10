@@ -15,11 +15,11 @@ import (
 
 // Listener listens for and handles new connections.
 type Listener struct {
+	Config         config.Listener
 	EventNotifier  plugin_v1.EventNotifier
 	HandlerConfigs []config.Handler
 	NetListener    net.Listener
 	Resolver       plugin_v1.Resolver
-	Config         config.Listener
 	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions)  plugin_v1.Handler
 }
 
@@ -120,11 +120,11 @@ func (l *Listener) Shutdown() error {
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
+		Config:         options.ListenerConfig,
 		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
 		Resolver:       options.Resolver,
-		Config:         options.ListenerConfig,
 		RunHandlerFunc: options.RunHandlerFunc,
 	}
 }

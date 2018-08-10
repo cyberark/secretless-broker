@@ -17,14 +17,14 @@ const (
 
 // Proxy is the main struct of Secretless.
 type Proxy struct {
-	Config          config.Config
-	EventNotifier   plugin_v1.EventNotifier
-	Listeners       []plugin_v1.Listener
-	runEventChan    chan int
 	cleanupMutex    sync.Mutex
+	runEventChan    chan int
+	EventNotifier   plugin_v1.EventNotifier
+	Config          config.Config
+	Listeners       []plugin_v1.Listener
 	Resolver        plugin_v1.Resolver
-	RunListenerFunc func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
 	RunHandlerFunc  func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
+	RunListenerFunc func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
 }
 
 // Listen runs the listen loop for a specific Listener.
@@ -95,6 +95,7 @@ func (p *Proxy) cleanUpListeners() {
 	var wg sync.WaitGroup
 
 	for _, listener := range p.Listeners {
+		// block scoped variable for use in goroutine
 		_listener := listener
 
 		log.Printf("Shutting down '%v' listener...", listener.GetName())

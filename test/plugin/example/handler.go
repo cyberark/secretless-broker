@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
 // BackendConfig stores the connection info to the real backend database.
@@ -26,13 +27,13 @@ type BackendConfig struct {
 // establish the BackendConfig, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 type Handler struct {
-	HandlerConfig      config.Handler
-	Resolver           plugin_v1.Resolver
-	EventNotifier      plugin_v1.EventNotifier
+	BackendConfig      *BackendConfig
 	BackendConnection  net.Conn
 	ClientConnection   net.Conn
+	EventNotifier      plugin_v1.EventNotifier
+	HandlerConfig      config.Handler
+	Resolver           plugin_v1.Resolver
 	ShutdownNotifier   plugin_v1.HandlerShutdownNotifier
-	BackendConfig      *BackendConfig
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -177,10 +178,10 @@ func (h *Handler) Shutdown() {
 // HandlerFactory instantiates a handler given HandlerOptions
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{
+		ClientConnection:  options.ClientConnection,
+		EventNotifier:     options.EventNotifier,
 		HandlerConfig:     options.HandlerConfig,
 		Resolver:          options.Resolver,
-		EventNotifier:     options.EventNotifier,
-		ClientConnection:  options.ClientConnection,
 		ShutdownNotifier:  options.ShutdownNotifier,
 	}
 

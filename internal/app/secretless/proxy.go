@@ -4,6 +4,8 @@ import (
 	"log"
 	"net"
 	"sync"
+	"math"
+	"time"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -121,11 +123,10 @@ func (p *Proxy) Run() {
 	}()
 
 	// when runEventChan receives message...
-	// RESTART: runs cleanUpListeners and reloads all listeners
-	// SHUTDOWN: for-select turns to infinite non-busy loop
+	// START, RESTART: runs cleanUpListeners and reloads all listeners
+	// SHUTDOWN: proceed to infinite non-busy for-loop
 	// default: panic
-	for {
-		msg := <-p.runEventChan;
+	for msg := range p.runEventChan {
 		switch msg {
 		case START, RESTART:
 			p.cleanUpListeners()
@@ -141,10 +142,15 @@ func (p *Proxy) Run() {
 				p.Listeners = append(p.Listeners, listener)
 			}
 		case SHUTDOWN:
-			// non-busy for-select loops forever until explicit os.Exit
-			p.runEventChan = nil
+			close(p.runEventChan) // terminates the range for this for-loop
+			p.runEventChan = nil // prevents goroutines from panicking
 		default:
 			log.Panic("Proxy#Run should never reach here")
 		}
+	}
+
+	// non-busy for-loop blocks forever until explicit os.Exit
+	for {
+		<- time.After(math.MaxInt64)
 	}
 }

@@ -11,7 +11,7 @@
         {% for link in links %}
             {% assign class = nil %}
             {% if link.sublinks %}
-				<li class="dropdown top-sub {% if page.url contains link.url %}active{% endif %}">
+				<li class="dropdown top-sub {% if page.url contains link.section %}active{% endif %}">
 					<a href="{{ site.baseurl }}{{ link.url }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ link.title }} <span class="caret"></span></a>
 					<ul class="dropdown-menu">
 						{% for sublink in link.sublinks %}

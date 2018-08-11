@@ -7,6 +7,7 @@ import (
 	keychainProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/keychain"
 	literalProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/literal"
 	vaultProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/vault"
+	kubernetesProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/kubernetes-secrets"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
@@ -19,4 +20,5 @@ var ProviderFactories = map[string]func(plugin_v1.ProviderOptions) plugin_v1.Pro
 	"keychain": keychainProvider.ProviderFactory,
 	"literal":  literalProvider.ProviderFactory,
 	"vault":    vaultProvider.ProviderFactory,
+	"kubernetes-secrets":  kubernetesProvider.ProviderFactory,
 }

@@ -24,7 +24,7 @@ func psql(host string, port int, user string, environment []string) (string, err
 	}
 	args = append(args, "-c")
 	args = append(args, "select count(*) from test.test")
-	args = append(args, "dbname=postgres")
+	args = append(args, "dbname=postgres sslmode=disable")
 
 	log.Println(strings.Join(append([]string{"psql"}, args...), " "))
 

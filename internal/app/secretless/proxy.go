@@ -4,15 +4,13 @@ import (
 	"log"
 	"net"
 	"sync"
-	"math"
-	"time"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 const (
-	START  = iota
+	START = iota
 	RESTART
 	SHUTDOWN
 )
@@ -122,7 +120,7 @@ func (p *Proxy) Run() {
 		p.runEventChan <- START
 	}()
 
-	// when runEventChan receives message...
+	// When runEventChan receives message...
 	// START, RESTART: runs cleanUpListeners and reloads all listeners
 	// SHUTDOWN: proceed to infinite non-busy for-loop
 	// default: panic
@@ -142,15 +140,12 @@ func (p *Proxy) Run() {
 				p.Listeners = append(p.Listeners, listener)
 			}
 		case SHUTDOWN:
-			close(p.runEventChan) // terminates the range for this for-loop
-			p.runEventChan = nil // prevents goroutines from panicking
+			log.Println("Shutdown requested. Waiting for cleanup...")
+			// Block forever until explicit os.Exit and prevent processing
+			// of further runEventChan messages
+			select {}
 		default:
 			log.Panic("Proxy#Run should never reach here")
 		}
-	}
-
-	// non-busy for-loop blocks forever until explicit os.Exit
-	for {
-		<- time.After(math.MaxInt64)
 	}
 }

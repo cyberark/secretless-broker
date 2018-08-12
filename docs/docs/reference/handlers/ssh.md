@@ -1,6 +1,7 @@
 ---
 title: Handlers
 id: ssh
+sub_id: Handlers
 layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/handlers/ssh.html

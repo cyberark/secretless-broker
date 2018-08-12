@@ -1,6 +1,7 @@
 ---
 title: Handlers
 id: mysql
+sub_id: Handlers
 layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/handlers/mysql.html

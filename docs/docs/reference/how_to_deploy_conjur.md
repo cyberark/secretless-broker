@@ -1,6 +1,7 @@
 ---
 title: Documentation
 id: how_to_deploy
+sub_id: Deploying the Secretless Broker
 layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/how_to_deploy_conjur

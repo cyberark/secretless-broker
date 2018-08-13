@@ -1,0 +1,19 @@
+// ***********************
+// Grid
+// ***********************
+
+
+.grid-l-col {
+	display: grid;
+	grid-template-columns: 25% 70%;
+	column-gap: 5%;
+}
+
+@media (max-width: 991px) {
+	.grid-l-col {
+		grid-template-columns: 100%;
+	}
+	.docs {
+		padding: 0;
+	}
+}

@@ -29,6 +29,7 @@ require (
 	github.com/fatih/structs v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 // indirect
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.32.0 // indirect
 	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
@@ -39,6 +40,7 @@ require (
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/go-github v15.0.0+incompatible // indirect
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
+	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f // indirect
 	github.com/gotestyourself/gotestyourself v2.1.0+incompatible // indirect
 	github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce // indirect
@@ -58,6 +60,7 @@ require (
 	github.com/jefferai/jsonx v0.0.0-20160721235117-9cc31c3135ee // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/joho/godotenv v1.2.0
+	github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/keybase/go-crypto v0.0.0-20180627172517-670ebd3adf7a // indirect
 	github.com/kr/pretty v0.1.0 // indirect
@@ -71,6 +74,8 @@ require (
 	github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77 // indirect
 	github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc // indirect
 	github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v0.0.0-20180718012357-94122c33edd3 // indirect
 	github.com/nsf/gocode v0.0.0-20180502111240-9d1e0378d35b // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect
@@ -89,10 +94,12 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20170925172151-0b37b35ec743 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20170602164621-9e8dc3f972df
 	github.com/smartystreets/gunit v0.0.0-20180314194857-6f0d6275bdcd // indirect
+	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.2 // indirect
 	github.com/stretchr/testify v1.2.1
 	golang.org/x/crypto v0.0.0-20180119074636-ee41a25c63fb
 	golang.org/x/lint v0.0.0-20180702182130-06c8688daad7 // indirect
-	golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b // indirect
+	golang.org/x/net v0.0.0-20180811021610-c39426892332 // indirect
 	golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
 	golang.org/x/sys v0.0.0-20180724212812-e072cadbbdc8 // indirect
@@ -112,4 +119,7 @@ require (
 	gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0
 	gopkg.in/yaml.v2 v2.2.1
 	gotest.tools v2.1.0+incompatible // indirect
+	k8s.io/api v0.0.0-20180809133242-91bfdbcf0c2c
+	k8s.io/apimachinery v0.0.0-20180810004531-720795f37ef0
+	k8s.io/client-go v8.0.0+incompatible
 )

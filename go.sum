@@ -54,6 +54,8 @@ github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 h1:v+vxrd9XS8uWIXG2RK0BHCnXc30qLVQXVqbK+IOmpXk=
 github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5/go.mod h1:KnogPXtdwXqoenmZCw6S+25EAm2MkxbG0deNDu4cbSA=
+github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
+github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-ini/ini v1.32.0 h1:/MArBHSS0TFR28yPPDK1vPIjt4wUnPBfb81i6iiyKvA=
 github.com/go-ini/ini v1.32.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba h1:P0TvLfAFQ/hc8Q+VBsrgzGv52DxTjAu199VHbAI4LLQ=
@@ -76,6 +78,8 @@ github.com/google/go-github v15.0.0+incompatible h1:jlPg2Cpsxb/FyEV/MFiIE9tW/2RA
 github.com/google/go-github v15.0.0+incompatible/go.mod h1:zLgOLi98H3fifZn+44m+umXrS52loVEgC2AApnigrVQ=
 github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 h1:zLTLjkaOFEFIOxY5BWLFLwh+cL8vOBW4XJ2aqLE/Tf0=
 github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
+github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf h1:+RRA9JqSOZFfKrOeqr2z77+8R2RKyh8PG66dcu1V0ck=
+github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf/go.mod h1:HP5RmnzzSNb993RKQDq4+1A4ia9nllfqcQFTQJedwGI=
 github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f h1:FDM3EtwZLyhW48YRiyqjivNlNZjAObv4xt4NnJaU+NQ=
 github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/gotestyourself/gotestyourself v2.1.0+incompatible h1:JdX/5sh/7yF7jRW5Xpvh1wlkAlgZS+X3HVCMlYqlxmw=
@@ -116,6 +120,8 @@ github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 h1:12VvqtR6Ao
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/joho/godotenv v1.2.0 h1:vGTvz69FzUFp+X4/bAkb0j5BoLC+9bpqTWY8mjhA9pc=
 github.com/joho/godotenv v1.2.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
+github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b h1:X61dhFTE1Au92SvyF8HyAwdjWqiSdfBgFR7wTxC0+uU=
+github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/jtolds/gls v4.2.1+incompatible h1:fSuqC+Gmlu6l/ZYAoZzx2pyucC8Xza35fpRVWLVmUEE=
 github.com/jtolds/gls v4.2.1+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
 github.com/keybase/go-crypto v0.0.0-20180627172517-670ebd3adf7a h1:CXtue2isytULR47PBcKqp7F9tBMAMb2WYeEDlyoYyIE=
@@ -145,6 +151,10 @@ github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc h1:5T6hzGUO
 github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc h1:gqYjvctjtX4GHzgfutJxZpvZ7XhGwQLGR5BASwhpO2o=
 github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
+github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
+github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
+github.com/modern-go/reflect2 v0.0.0-20180718012357-94122c33edd3 h1:YFBuDro+e1UCqlJpDWGucQaO/UNhBX1GlS8Du0GNfPw=
+github.com/modern-go/reflect2 v0.0.0-20180718012357-94122c33edd3/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/nsf/gocode v0.0.0-20180502111240-9d1e0378d35b h1:agMWdTHUzw9qlSSiKEz7SwXP2ZmLesKkmWYaS0K2GLk=
 github.com/nsf/gocode v0.0.0-20180502111240-9d1e0378d35b/go.mod h1:6Q8/OMaaKAgTX7/jt2bOXVDrm1eJhoNd+iwzghR7jvs=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
@@ -181,6 +191,10 @@ github.com/smartystreets/goconvey v0.0.0-20170602164621-9e8dc3f972df h1:AawEzDdi
 github.com/smartystreets/goconvey v0.0.0-20170602164621-9e8dc3f972df/go.mod h1:XDJAKZRPZ1CvBcN2aX5YOUTYGHki24fSF0Iv48Ibg0s=
 github.com/smartystreets/gunit v0.0.0-20180314194857-6f0d6275bdcd h1:p5kvxG4NHogJX1brTLtvUSGdW0/aBvIyqDSW7tmnsmQ=
 github.com/smartystreets/gunit v0.0.0-20180314194857-6f0d6275bdcd/go.mod h1:XUKj4gbqj2QvJk/OdLWzyZ3FYli0f+MdpngyryX0gcw=
+github.com/spf13/cobra v0.0.3 h1:ZlrZ4XsMRm04Fr5pSFxBgfND2EBVa1nLpiy1stUsX/8=
+github.com/spf13/cobra v0.0.3/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3XqQ=
+github.com/spf13/pflag v1.0.2 h1:Fy0orTDgHdbnzHcsOgfCN4LtHf0ec3wwtiwJqwvf3Gc=
+github.com/spf13/pflag v1.0.2/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/stretchr/testify v1.2.1 h1:52QO5WkIUcHGIR7EnGagH88x1bUzqGXTC5/1bDTUQ7U=
 github.com/stretchr/testify v1.2.1/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 golang.org/x/crypto v0.0.0-20180119074636-ee41a25c63fb h1:kKl6FEVxIb8jK+8DM5N225ACdo3ftHG5AGmay9F3Yc8=
@@ -189,6 +203,8 @@ golang.org/x/lint v0.0.0-20180702182130-06c8688daad7 h1:00BeQWmeaGazuOrq8Q5K5d3/
 golang.org/x/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
 golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b h1:Xu6Gf1IrU0c8CSJqWR43Bh8vb+Ft3jVIUahRiqL1oaI=
 golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
+golang.org/x/net v0.0.0-20180811021610-c39426892332 h1:efGso+ep0DjyCBJPjvoz0HI6UldX4Md2F1rZFe1ir0E=
+golang.org/x/net v0.0.0-20180811021610-c39426892332/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc h1:3ElrZeO6IBP+M8kgu5YFwRo92Gqr+zBg3aooYQ6ziqU=
 golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f h1:wMNYb4v58l5UBM7MYRLPG6ZhfOqbKu7X5eyFl8ZhKvA=
@@ -232,3 +248,9 @@ gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gotest.tools v2.1.0+incompatible h1:5USw7CrJBYKqjg9R7QlA6jzqZKEAtvW82aNmsxxGPxw=
 gotest.tools v2.1.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
+k8s.io/api v0.0.0-20180809133242-91bfdbcf0c2c h1:unUN6f2OZqE/b08fnNDDHvmNpt9+fKOyrp6q+ScumaA=
+k8s.io/api v0.0.0-20180809133242-91bfdbcf0c2c/go.mod h1:iuAfoD4hCxJ8Onx9kaTIt30j7jUFS00AXQi6QMi99vA=
+k8s.io/apimachinery v0.0.0-20180810004531-720795f37ef0 h1:CBL+XMowlsWwfTsW7ttsvjOC2jB+1Q0QXGCQV4RECRo=
+k8s.io/apimachinery v0.0.0-20180810004531-720795f37ef0/go.mod h1:ccL7Eh7zubPUSh9A3USN90/OzHNSVN6zxzde07TDCL0=
+k8s.io/client-go v8.0.0+incompatible h1:7Zl+OVXn0bobcsi4NEZGdoQDTE9ij1zPMfM21+yqQsM=
+k8s.io/client-go v8.0.0+incompatible/go.mod h1:7vJpHMYJwNQCWgzmNV+VYUl1zCObLyodBc8nIyt8L5s=

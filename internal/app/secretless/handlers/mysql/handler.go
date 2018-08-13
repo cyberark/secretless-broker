@@ -1,10 +1,10 @@
 package mysql
 
 import (
-	"log"
-	"net"
 	"fmt"
 	"io"
+	"log"
+	"net"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -27,16 +27,18 @@ type BackendConfig struct {
 // Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
 	plugin_v1.BaseHandler
-	BackendConfig    *BackendConfig
+	BackendConfig *BackendConfig
 }
 
 func (h *Handler) abort(err error) {
-	mysqlError := protocol.Error{
-		Code:     protocol.CRUnknownError,
-		SQLSTATE: protocol.ErrorCodeInternalError,
-		Message:  err.Error(),
+	if h.GetClientConnection() != nil {
+		mysqlError := protocol.Error{
+			Code:     protocol.CRUnknownError,
+			SQLSTATE: protocol.ErrorCodeInternalError,
+			Message:  err.Error(),
+		}
+		h.GetClientConnection().Write(mysqlError.GetMessage())
 	}
-	h.GetClientConnection().Write(mysqlError.GetMessage())
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {

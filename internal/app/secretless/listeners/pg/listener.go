@@ -2,6 +2,7 @@ package pg
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"strconv"
 
@@ -51,10 +52,11 @@ func (l Listener) Validate() error {
 
 // Listen listens on the port or socket and attaches new connections to the handler.
 func (l *Listener) Listen() {
-	for {
+	for l.IsClosed != true {
 		var client net.Conn
 		var err error
 		if client, err = util.Accept(l); err != nil {
+			log.Printf("WARN: Failed to accept incoming pg connection: ", err)
 			continue
 		}
 
@@ -67,7 +69,7 @@ func (l *Listener) Listen() {
 				ShutdownNotifier: func(handler plugin_v1.Handler) {
 					l.RemoveHandler(handler)
 				},
-				Resolver:         l.Resolver,
+				Resolver: l.Resolver,
 			}
 
 			handler := l.RunHandlerFunc("pg", handlerOptions)
@@ -90,5 +92,5 @@ func (l *Listener) GetName() string {
 
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	return &Listener{ BaseListener: plugin_v1.NewBaseListener(options) }
+	return &Listener{BaseListener: plugin_v1.NewBaseListener(options)}
 }

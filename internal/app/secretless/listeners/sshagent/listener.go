@@ -5,8 +5,8 @@ import (
 	"log"
 	"strconv"
 
-	"golang.org/x/crypto/ssh/agent"
 	"github.com/go-ozzo/ozzo-validation"
+	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -64,10 +64,10 @@ func (l *Listener) Listen() {
 		return
 	}
 
-	for {
+	for l.IsClosed != true {
 		nConn, err := util.Accept(l)
 		if err != nil {
-			log.Printf("Failed to accept incoming connection: ", err)
+			log.Printf("WARN: Failed to accept incoming sshagent connection: ", err)
 			return
 		}
 
@@ -84,5 +84,5 @@ func (l *Listener) GetName() string {
 
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	return &Listener{ BaseListener: plugin_v1.NewBaseListener(options) }
+	return &Listener{BaseListener: plugin_v1.NewBaseListener(options)}
 }

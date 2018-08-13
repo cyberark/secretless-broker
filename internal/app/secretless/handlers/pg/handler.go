@@ -1,11 +1,10 @@
 package pg
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"net"
-	"io"
-	"fmt"
-
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -37,17 +36,19 @@ type BackendConfig struct {
 // Handler requires "address", "username" and "password" credentials.
 type Handler struct {
 	plugin_v1.BaseHandler
-	BackendConfig    *BackendConfig
-	ClientOptions    *ClientOptions
+	BackendConfig *BackendConfig
+	ClientOptions *ClientOptions
 }
 
 func (h *Handler) abort(err error) {
-	pgError := protocol.Error{
-		Severity: protocol.ErrorSeverityFatal,
-		Code:     protocol.ErrorCodeInternalError,
-		Message:  err.Error(),
+	if h.GetClientConnection() != nil {
+		pgError := protocol.Error{
+			Severity: protocol.ErrorSeverityFatal,
+			Code:     protocol.ErrorCodeInternalError,
+			Message:  err.Error(),
+		}
+		h.GetClientConnection().Write(pgError.GetMessage())
 	}
-	h.GetClientConnection().Write(pgError.GetMessage())
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {

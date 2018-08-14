@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"net"
 	"log"
+	"net"
 	"sync"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -43,10 +43,12 @@ type Listener interface {
 //
 // There is no requirement to use BaseListener.
 type BaseListener struct {
+	closingMutex   *sync.Mutex
 	handlers       []Handler // store of active handlers for this listener,
 	Config         config.Listener
 	EventNotifier  EventNotifier
 	HandlerConfigs []config.Handler
+	IsClosed       bool
 	NetListener    net.Listener
 	Resolver       Resolver
 	RunHandlerFunc func(id string, options HandlerOptions) Handler
@@ -55,6 +57,7 @@ type BaseListener struct {
 // NewBaseListener creates a BaseListener from ListenerOptions
 func NewBaseListener(options ListenerOptions) BaseListener {
 	return BaseListener{
+		closingMutex:   &sync.Mutex{},
 		Config:         options.ListenerConfig,
 		EventNotifier:  options.EventNotifier,
 		HandlerConfigs: options.HandlerConfigs,
@@ -105,8 +108,21 @@ func (l *BaseListener) Validate() error {
 
 // Shutdown implements plugin_v1.Listener
 func (l *BaseListener) Shutdown() error {
+	// If we are already in the process of shutdown, don't try to
+	// shutdown again. Wrap this check in a sync lock to prevent
+	// race conditions
+	l.closingMutex.Lock()
+
+	if l.IsClosed {
+		return nil
+	}
+	l.IsClosed = true
+
+	l.closingMutex.Unlock()
+
 	log.Printf("Shutting down listener's handlers...")
 
+	var err error
 	var wg sync.WaitGroup
 
 	for _, handler := range l.handlers {
@@ -122,7 +138,12 @@ func (l *BaseListener) Shutdown() error {
 
 	wg.Wait()
 
-	return l.NetListener.Close()
+	if l.NetListener != nil {
+		err = l.NetListener.Close()
+		l.NetListener = nil
+	}
+
+	return err
 }
 
 // AddHandler appends a given Handler to the slice of Handlers held by BaseListener

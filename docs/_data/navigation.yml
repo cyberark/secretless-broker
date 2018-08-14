@@ -22,7 +22,7 @@ main:
     url: /community.html
   - title: Blog
     url: /blog.html
-  - title: Github
+  - title: GitHub
     url: https://github.com/cyberark/secretless-broker
     class: gh
 

@@ -2,16 +2,16 @@
 
 set -eo pipefail
 
-CURRENT_DIR=$(realpath $(dirname $0))
-PROJECT_DIR=$PWD
+CURRENT_DIR=$($(dirname $0)/abspath)
+TOPLEVEL_DIR="$CURRENT_DIR/.."
 
-rm -f $PROJECT_DIR/test/junit.output
-touch $PROJECT_DIR/test/junit.output
+rm -f $TOPLEVEL_DIR/test/junit.output
+touch $TOPLEVEL_DIR/test/junit.output
 
 echo "Building unit test image..."
-docker build $CURRENT_DIR/.. \
+docker build "$TOPLEVEL_DIR" \
              -t secretless-unit-test-runner:latest \
-             -f $CURRENT_DIR/../Dockerfile.test
+             -f $TOPLEVEL_DIR/Dockerfile.test
 
 echo "Running unit tests..."
 set +e
@@ -21,13 +21,13 @@ set +e
              secretless-unit-test-runner:latest -vet=off \
                                                 ./cmd/... \
                                                 ./internal/... \
-                                                ./pkg/... | tee -a $PROJECT_DIR/test/junit.output
+                                                ./pkg/... | tee -a $TOPLEVEL_DIR/test/junit.output
   echo "Unit test exit status: $?"
 set -e
 
-rm -f $PROJECT_DIR/test/junit.xml
+rm -f $TOPLEVEL_DIR/test/junit.xml
 docker run --rm \
-  -v $PROJECT_DIR/test/:/secretless/test/output/ \
+  -v $TOPLEVEL_DIR/test/:/secretless/test/output/ \
   secretless-dev \
   bash -exc "
     go get -u github.com/jstemmer/go-junit-report

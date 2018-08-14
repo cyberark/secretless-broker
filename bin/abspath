@@ -1,0 +1,17 @@
+#!/bin/bash -e
+#
+# Returns the bin/ directory as an absolute path as a workaround
+# to avoid needing coreutils on OSX
+# usage: ./bin/abspath
+
+to_abspath() {
+  prefix=$(dirname $0)
+  if [[ "$prefix" != /* ]]; then
+    echo "$PWD/${prefix#./}"
+    return
+  fi
+
+  echo "$prefix"
+}
+
+to_abspath "$@"

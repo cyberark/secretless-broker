@@ -8,12 +8,13 @@
 
 # Note that this requires docs/_site to be present
 
-CURRENT_DIR=$(dirname $0 | xargs realpath)
+CURRENT_DIR=$($(dirname $0)/abspath)
+TOPLEVEL_DIR="$CURRENT_DIR/.."
 
 echo "Publishing to $S3_BUCKET..."
 
 docker run --rm \
-  -v "${CURRENT_DIR}/../docs/_site:/_site:ro" \
+  -v "${TOPLEVEL_DIR}/docs/_site:/_site:ro" \
   -e AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY \
   mesosphere/aws-cli \

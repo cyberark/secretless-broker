@@ -1,8 +1,10 @@
 #!/bin/bash -e
 set -o pipefail
 
-CURRENT_DIR=$(dirname $0 | xargs realpath)
-DOCS_DIR="$CURRENT_DIR/../docs"
+CURRENT_DIR=$($(dirname $0)/abspath)
+TOPLEVEL_DIR="$CURRENT_DIR/.."
+
+DOCS_DIR="$TOPLEVEL_DIR/docs"
 DEST_SITE_DIR="$DOCS_DIR/_site"
 REPOSITORY="github.com/cyberark/secretless-broker"
 
@@ -13,7 +15,7 @@ echo "Using container name: ${CONTAINER_NAME}"
 
 docker build -f "${CURRENT_DIR}/Dockerfile.website" \
              -t "${IMAGE_NAME}" \
-             "${CURRENT_DIR}/../docs"
+             "${TOPLEVEL_DIR}/docs"
 
 echo "Cleaning up current _site..."
 rm -rf "${DEST_SITE_DIR}"
@@ -51,7 +53,7 @@ godoc_package: ${package}
   # Generate the doc but strip out the header boilerplate and links
   docker run --rm \
              -t \
-             -v ${CURRENT_DIR}/..:/go/src/${REPOSITORY} \
+             -v "${TOPLEVEL_DIR}:/go/src/${REPOSITORY}" \
              "${IMAGE_NAME}" godoc -html \
                                    -links=false \
                                    "/go/src/${REPOSITORY}/${package}" | sed 1,19d >> "${output_file}"
@@ -71,7 +73,7 @@ docker run --rm \
            --name "${CONTAINER_NAME}" \
            -w /usr/src/app \
            --network none \
-           -v "$CURRENT_DIR/../docs:/usr/src/app" \
+           -v "$TOPLEVEL_DIR/docs:/usr/src/app" \
            -v "${DEST_SITE_DIR}:/tmp/_site" \
            "${IMAGE_NAME}"
 

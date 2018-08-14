@@ -18,7 +18,7 @@ var ProviderFactories = map[string]func(plugin_v1.ProviderOptions) plugin_v1.Pro
 	"env":      envProvider.ProviderFactory,
 	"file":     fileProvider.ProviderFactory,
 	"keychain": keychainProvider.ProviderFactory,
-	"kubernetes-secrets":  kubernetesProvider.ProviderFactory,
+	"kubernetes":  kubernetesProvider.ProviderFactory,
 	"literal":  literalProvider.ProviderFactory,
 	"vault":    vaultProvider.ProviderFactory,
 }

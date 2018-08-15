@@ -1,5 +1,5 @@
 ---
-title: Providers
+title: Credential Providers
 id: Literal
 layout: docs
 description: Secretless Broker Documentation

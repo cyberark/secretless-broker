@@ -192,10 +192,10 @@
 					font-weight: 800;
 				}
 			}
-			&.active.sub {
+			&.active.section {
 				font-weight: 800;
 			}
-			&.active.subsub {
+			&.active.entry {
 				font-weight: 800;
 			}
 		}
@@ -238,12 +238,9 @@
 		margin: .5rem 0;
 		border-top: 1px solid darken($sless-light-blue, 10);
 	}
-	.sidenav-sublist {
+	.group-of-sections {
 		font-weight: 500;
-	}
-
-	.sidenav-sublist {
-    padding: 0px 2.5rem;
+    	padding: 0px 2.5rem;
 	}
 
 	.sidenav-subsublist {
@@ -339,10 +336,15 @@
 	}
 }
 
-.rotatingArrow{
+.rotatingArrow {
   transform: rotate(90deg);
 }
 
 .arrow {
 	 transition: all 0.4s;
+}
+
+/* Keeps side navbar open */
+.navbar-open {
+	display: block;	
 }

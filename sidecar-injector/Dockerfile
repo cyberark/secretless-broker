@@ -10,8 +10,21 @@ ADD cmd ./cmd
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o secretless-sidecar-injector ./cmd/sidecar-injector/main.go
 
-FROM alpine:latest
+FROM alpine:3.8
 
-COPY --from=mutating-webhook-service-builder /go/src/github.com/cyberark/secretless-broker/sidecar-injector/secretless-sidecar-injector /secretless-sidecar-injector
+RUN apk add -u shadow libc6-compat && \
+    # Add Limited user
+    groupadd -r sidecar-injector \
+             -g 777 && \
+    useradd -c "sidecar-injector runner account" \
+            -g sidecar-injector \
+            -u 777 \
+            -m \
+            -r \
+            sidecar-injector
 
-ENTRYPOINT ["/secretless-sidecar-injector"]
+USER sidecar-injector
+
+COPY --from=mutating-webhook-service-builder /go/src/github.com/cyberark/secretless-broker/sidecar-injector/secretless-sidecar-injector /usr/local/bin/
+
+ENTRYPOINT ["/usr/local/bin/secretless-sidecar-injector", "-v=5"]

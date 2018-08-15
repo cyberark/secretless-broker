@@ -1,4 +1,4 @@
-package sidecar_injector
+package main
 
 import (
 	"context"
@@ -26,7 +26,8 @@ func main() {
 
 	pair, err := tls.LoadX509KeyPair(parameters.CertFile, parameters.KeyFile)
 	if err != nil {
-		glog.Errorf("Filed to load key pair: %v", err)
+		glog.Errorf("Failed to load key pair: %v", err)
+		os.Exit(1)
 	}
 
 	whsvr := &inject.WebhookServer{
@@ -44,7 +45,8 @@ func main() {
 	// start webhook server in goroutine
 	go func() {
 		if err := whsvr.Server.ListenAndServeTLS("", ""); err != nil {
-			glog.Errorf("Filed to listen and serve webhook server: %v", err)
+			glog.Errorf("Failed to listen and serve webhook server: %v", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -53,6 +55,6 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
-	glog.Infof("Receied OS shutdown signal, shutting down webhook server gracefully...")
+	glog.Infof("Received OS shutdown signal, shutting down webhook server gracefully...")
 	whsvr.Server.Shutdown(context.Background())
 }

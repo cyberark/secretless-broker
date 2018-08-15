@@ -27,9 +27,9 @@ With `minikube`, start your cluster as follows:
 1. Build docker image
    
     ```bash
-    ~$ cd ../.. # change directory to repo root directory
-    ~$ ./bin/build_secretless_injector_webhook.sh
-    ~$ cd ./cmd/mutating-webhook-service/
+    ~$ cd .. # change directory to repo root directory
+    ~$ ./bin/build_sidecar_injector.sh
+    ~$ cd ./sidecar-injector
     ```
 
 ## Secretless Namespace

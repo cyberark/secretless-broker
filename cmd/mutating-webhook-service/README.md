@@ -26,7 +26,7 @@ With `minikube`, start your cluster as follows:
 
 1. Build docker image
    
-    ```
+    ```bash
     ~$ cd ../.. # change directory to repo root directory
     ~$ ./bin/build_secretless_injector_webhook.sh
     ~$ cd ./cmd/mutating-webhook-service/
@@ -37,14 +37,14 @@ With `minikube`, start your cluster as follows:
 Create a namespace "secretless", where you will deploy the Secretless Broker Sidecar Injector Webhook components.
 
 1. Create namespace
-    ```
+    ```bash
     ~$ kubectl create namespace secretless
     ```
 
 ## Deploy
 
 1. Create a signed cert/key pair and store it in a Kubernetes `secret` that will be consumed by sidecar deployment
-    ```
+    ```bash
     ~$ ./deployment/webhook-create-signed-cert.sh \
         --service secretless-sidecar-injector-webhook-svc \
         --secret secretless-sidecar-injector-webhook-certs \
@@ -52,7 +52,7 @@ Create a namespace "secretless", where you will deploy the Secretless Broker Sid
     ```
 
 2. Patch the `MutatingWebhookConfiguration` by set `caBundle` with correct value from Kubernetes cluster
-    ```
+    ```bash
     ~$ cat deployment/mutatingwebhook.yaml | \
         deployment/webhook-patch-ca-bundle.sh \
           --service secretless-sidecar-injector-webhook-svc \
@@ -61,7 +61,7 @@ Create a namespace "secretless", where you will deploy the Secretless Broker Sid
     ```
 
 3. Deploy resources
-    ```
+    ```bash
     ~$ kubectl -n secretless apply -f deployment/deployment.yaml
     ~$ kubectl -n secretless apply -f deployment/service.yaml
     ~$ kubectl -n secretless apply -f deployment/mutatingwebhook-ca-bundle.yaml
@@ -70,14 +70,14 @@ Create a namespace "secretless", where you will deploy the Secretless Broker Sid
 ## Verify
 
 1. The sidecar injector webhook should be running
-    ```
+    ```bash
     ~$ kubectl -n secretless get pods
     ```
     ```
     NAME                                                  READY     STATUS    RESTARTS   AGE
     secretless-sidecar-injector-webhook-deployment-bbb689d69-882dd   1/1       Running   0          5m
     ```
-    ```
+    ```bash
     ~$ kubectl -n secretless get deployment
     ```
     ```
@@ -90,12 +90,12 @@ Create a namespace "secretless", where you will deploy the Secretless Broker Sid
 For this section, you'll work from a test namespace (test-namespace). Later you will label this namespace with `secretless-sidecar-injector=enabled` so as to allow the secretless-sidecar-injector to operate on pods created in this namespace.
 
 1. Create test namespace
-    ```
-    kubectl create namespace test-namespace
+    ```bash
+    ~$ kubectl create namespace test-namespace
     ```
 
 2. Label the default namespace with `secretless-sidecar-injector=enabled`
-    ```
+    ```bash
     ~$ kubectl label namespace test-namespace secretless-sidecar-injector=enabled
     ~$ kubectl get namespace -L secretless-sidecar-injector
     ```
@@ -107,7 +107,7 @@ For this section, you'll work from a test namespace (test-namespace). Later you 
     ```
 
 3. Create Secretless ConfigMap
-    ```
+    ```bash
     ~$ cat << EOL | kubectl -n test-namespace create configmap sleep-secretless-config --from-file=secretless.yml=/dev/stdin
     listeners:
     - name: http_good_basic_auth
@@ -133,7 +133,7 @@ For this section, you'll work from a test namespace (test-namespace). Later you 
     ```
 
 4. Deploy an app in Kubernetes cluster, take `sleep` app as an example
-    ```
+    ```bash
     ~$ cat << EOF | kubectl -n test-namespace create -f -
     apiVersion: extensions/v1beta1
     kind: Deployment
@@ -157,8 +157,8 @@ For this section, you'll work from a test namespace (test-namespace). Later you 
     ```
 
 5. Verify sidecar container injected
-    ```
-    # kubectl -n test-namespace get pods
+    ```bash
+    ~$ kubectl -n test-namespace get pods
     ```
     ```
     NAME                     READY     STATUS        RESTARTS   AGE
@@ -166,7 +166,7 @@ For this section, you'll work from a test namespace (test-namespace). Later you 
     ```
 
 6. Test Secretless
-    ```
+    ```bash
     ~$ a_sleep_pod=$(kubectl \
      -n test-namespace \
      get po \

@@ -26,9 +26,9 @@ var (
 )
 
 const (
-	admissionWebhookAnnotationInjectKey = "sidecar-injector-webhook.secretless.io/inject"
-	admissionWebhookAnnotationConfigKey = "sidecar-injector-webhook.secretless.io/config"
-	admissionWebhookAnnotationStatusKey = "sidecar-injector-webhook.secretless.io/status"
+	admissionWebhookAnnotationInjectKey = "sidecar-injector.secretless.io/inject"
+	admissionWebhookAnnotationConfigKey = "sidecar-injector.secretless.io/config"
+	admissionWebhookAnnotationStatusKey = "sidecar-injector.secretless.io/status"
 )
 
 

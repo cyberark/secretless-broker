@@ -142,8 +142,8 @@ For this section, you'll work from a test namespace (test-namespace). Later you 
       template:
         metadata:
           annotations:
-            sidecar-injector-webhook.secretless.io/inject: "yes"
-            sidecar-injector-webhook.secretless.io/config: "sleep-secretless-config"
+            sidecar-injector.secretless.io/inject: "yes"
+            sidecar-injector.secretless.io/config: "sleep-secretless-config"
           labels:
             app: sleep
         spec:

@@ -4,9 +4,11 @@
 # usage: ./bin/build
 set -ex
 
-VERSION=$(cat VERSION)
-QUICK_START_REL_DIR="$(dirname $0)/../demos/quick-start/docker"
-QUICK_START_DIR="$(realpath "$QUICK_START_REL_DIR")"
+CURRENT_DIR=$($(dirname $0)/abspath)
+TOPLEVEL_DIR="$CURRENT_DIR/.."
+
+VERSION=$(cat $TOPLEVEL_DIR/VERSION)
+QUICK_START_DIR="$TOPLEVEL_DIR/demos/quick-start/docker"
 
 DOCKER_FLAGS=""
 if [ "${KEEP_ALIVE}" != "" ]; then
@@ -19,14 +21,15 @@ echo "Building Docker image"
 docker build -t "secretless-broker:${VERSION}" \
              -t "secretless-broker:latest" \
              $DOCKER_FLAGS \
-             .
+             -f $TOPLEVEL_DIR/Dockerfile \
+             $TOPLEVEL_DIR
 
 echo "Building Docker dev image"
 docker build -t "secretless-dev:${VERSION}" \
              -t "secretless-dev:latest" \
              $DOCKER_FLAGS \
-             -f Dockerfile.dev \
-             .
+             -f $TOPLEVEL_DIR/Dockerfile.dev \
+             $TOPLEVEL_DIR
 
 echo "Building Docker Quick-Start image"
 docker build -t "secretless-broker-quickstart:${VERSION}" \

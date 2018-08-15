@@ -1,14 +1,16 @@
 #!/bin/bash -e
 
-CURRENT_DIR=$(realpath $(dirname $0))
+CURRENT_DIR=$($(dirname $0)/abspath)
+TOPLEVEL_DIR="$CURRENT_DIR/.."
+
 echo "Current dir: $CURRENT_DIR"
 
 docker build -f "$CURRENT_DIR/Dockerfile.releaser" \
              -t secretless-broker-releaser \
-             "$CURRENT_DIR/.."
+             "$TOPLEVEL_DIR"
 
 docker run --rm \
-           -v "$CURRENT_DIR/..":/secretless-broker \
+           -v "$TOPLEVEL_DIR":/secretless-broker \
            secretless-broker-releaser
 
 echo "Releases built. Archives can be found in dist/goreleaser"

@@ -2,10 +2,11 @@
 
 set -eo pipefail
 
-QUICK_START_REL_DIR="$(dirname $0)/../demos/quick-start"
-QUICK_START_DIR="$(realpath "$QUICK_START_REL_DIR")"
+CURRENT_DIR=$($(dirname $0)/abspath)
+TOPLEVEL_DIR="$CURRENT_DIR/.."
+QUICK_START_DIR="${TOPLEVEL_DIR}/demos/quick-start"
 
-pushd "$QUICK_START_REL_DIR" >/dev/null
+pushd "$QUICK_START_DIR" >/dev/null
 
 cleanup() {
   ./bin/stop || true

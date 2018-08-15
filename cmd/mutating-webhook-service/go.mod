@@ -1,4 +1,4 @@
-module github.com/cyberark/secretless-broker/kube-mutating-webhook
+module github.com/cyberark/secretless-broker/cmd/mutating-webhook-service
 
 require (
 	github.com/PuerkitoBio/purell v1.1.0

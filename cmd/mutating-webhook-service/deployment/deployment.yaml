@@ -1,18 +1,18 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: sidecar-injector-webhook-deployment
+  name: secretless-sidecar-injector-webhook-deployment
   labels:
-    app: sidecar-injector
+    app: secretless-sidecar-injector
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: sidecar-injector
+        app: secretless-sidecar-injector
     spec:
       containers:
-        - name: sidecar-injector
+        - name: secretless-sidecar-injector
           image: cyberark/secretless-sidecar-injector:latest
           imagePullPolicy: IfNotPresent
           args:
@@ -28,4 +28,4 @@ spec:
       volumes:
         - name: webhook-certs
           secret:
-            secretName: sidecar-injector-webhook-certs
+            secretName: secretless-sidecar-injector-webhook-certs

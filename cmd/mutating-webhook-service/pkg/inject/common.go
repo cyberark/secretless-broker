@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Check whether the target resoured need to be mutated
+// mutationRequired determines if target resource requires mutation
 func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	// skip special kubernete system namespaces
 	for _, namespace := range ignoredList {

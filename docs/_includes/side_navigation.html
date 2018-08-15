@@ -7,16 +7,15 @@
 					<ul class="sidenav-sublist">
 						{% for entry in item.subfolderitems %}
 							{% if entry.subsubfolderitems[0] %}
-							<li class="sub {% if page.url == entry.url %}active{% endif %} sidenav-subitem dropdown-btn"><a href="{{ entry.url }}">{{ entry.page }}</a>
-								<i class="fa fa-angle-right arrow"></i>
-							</li>
-								{% for subentry in entry.subsubfolderitems %}
-								  	<div class="dropdown-menu-option">
-										{% for subentry in entry.subsubfolderitems %}
-										<li class="subsub {% if page.url == subentry.url %}active{% endif %}"><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
-										{% endfor %}
-								  	</div>
-								{%endfor%}
+								{% assign entry = entry.page %}
+								<li class="sub {% if page.url == entry.url %}active{% endif %}sidenav-subitem dropdown-btn" onclick="extractParmsURL(event)"><a href="{{ entry.url }}">{{ entry.page }}</a>
+									<i class="fa fa-angle-right arrow"></i>
+								</li>
+								<div class="dropdown-menu-option">
+									{% for subentry in entry.subsubfolderitems %}
+										<li class="subsub {% if page.url == subentry.url%}active{% endif %}"><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
+									{%endfor%}
+								</div>
 							{% else %}
 								<li class="{% if entry.url == page.url %}active{% endif %} sidenav-subitem"><a href="{{ entry.url }}">{{ entry.page }}</a>
 							{% endif %}

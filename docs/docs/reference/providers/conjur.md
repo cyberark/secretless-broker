@@ -1,6 +1,7 @@
 ---
 title: Providers
 id: conjur
+sub_id: Providers
 layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/providers/conjur.html

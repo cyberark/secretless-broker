@@ -1,6 +1,7 @@
 ---
 title: Handlers
 id: conjur
+sub_id: Handlers
 layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/handlers/http/conjur.html

@@ -1,6 +1,7 @@
 ---
 title: Providers
 id: keychain
+sub_id: Providers
 layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/providers/keychain.html

@@ -1,4 +1,4 @@
-package main
+package sidecar_injector
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/cyberark/secretless-broker/cmd/mutating-webhook-service/pkg/inject"
+	"github.com/cyberark/secretless-broker/sidecar-injector/pkg/inject"
 )
 
 func main() {

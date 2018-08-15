@@ -1,4 +1,5 @@
-module github.com/cyberark/secretless-broker/cmd/mutating-webhook-service
+module github.com/cyberark/secretless-broker/sidecar-injector
+
 
 require (
 	github.com/PuerkitoBio/purell v1.1.0

@@ -6,12 +6,12 @@ WORKDIR /go/src/github.com/cyberark/secretless-broker/sidecar-injector
 
 ADD go.* ./
 ADD pkg ./pkg
-ADD *.go ./
+ADD cmd ./cmd
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o sidecar-injector-webhook-service .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o secretless-sidecar-injector ./cmd/sidecar-injector/main.go
 
 FROM alpine:latest
 
-COPY --from=mutating-webhook-service-builder /go/src/github.com/cyberark/secretless-broker/sidecar-injector/sidecar-injector-webhook-service /sidecar-injector-webhook-service
+COPY --from=mutating-webhook-service-builder /go/src/github.com/cyberark/secretless-broker/sidecar-injector/secretless-sidecar-injector /secretless-sidecar-injector
 
-ENTRYPOINT ["/sidecar-injector-webhook-service"]
+ENTRYPOINT ["/secretless-sidecar-injector"]

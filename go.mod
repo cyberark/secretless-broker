@@ -29,7 +29,7 @@ require (
 	github.com/emicklei/go-restful v2.8.0+incompatible // indirect
 	github.com/emicklei/go-restful-swagger12 v0.0.0-20170926063155-7524189396c6 // indirect
 	github.com/fatih/structs v1.0.0 // indirect
-	github.com/fsnotify/fsnotify v1.4.7 // indirect
+	github.com/fsnotify/fsnotify v1.4.7
 	github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.32.0 // indirect
@@ -110,7 +110,7 @@ require (
 	golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b // indirect
 	golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
-	golang.org/x/sys v0.0.0-20180724212812-e072cadbbdc8 // indirect
+	golang.org/x/sys v0.0.0-20180727230415-bd9dbc187b6e // indirect
 	golang.org/x/text v0.0.0-20171227012246-e19ae1496984 // indirect
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
 	golang.org/x/tools v0.0.0-20180726173139-0bf5a3224797 // indirect

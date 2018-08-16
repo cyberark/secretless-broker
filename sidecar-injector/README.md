@@ -22,13 +22,9 @@ With `minikube`, start your cluster as follows:
     --extra-config=controller-manager.cluster-signing-key-file="/var/lib/localkube/certs/ca.key"
 ```
 
-## Build
+## Docker image
 
-1. Build docker image
-   
-    ```bash
-    ~$ ./bin/build_sidecar_injector.sh
-    ```
+The docker image for the mutating webhook admission controller is publicly available on Dockerhub as [cyberark/sidecar-injector](https://hub.docker.com/r/cyberark/sidecar-injector/) .
 
 ## Secretless Namespace
 

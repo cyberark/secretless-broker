@@ -13,8 +13,8 @@ spec:
     spec:
       containers:
         - name: secretless-sidecar-injector
-          image: cyberark/secretless-sidecar-injector:latest
-          imagePullPolicy: IfNotPresent
+          image: cyberark/sidecar-injector:latest
+          imagePullPolicy: Always
           args:
             - -tlsCertFile=/etc/webhook/certs/cert.pem
             - -tlsKeyFile=/etc/webhook/certs/key.pem

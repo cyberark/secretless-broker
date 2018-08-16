@@ -50,7 +50,7 @@ func generateSidecarConfig(secretlessConfigMapName string) *Config {
 				Name:            "secretless",
 				Image:           "cyberark/secretless-broker:latest",
 				Args:            []string{"-f", "/etc/secretless/secretless.yml"},
-				ImagePullPolicy: "IfNotPresent",
+				ImagePullPolicy: "Always",
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "secretless-config",

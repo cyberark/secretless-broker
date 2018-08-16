@@ -26,8 +26,8 @@ code {
 	color: #4d8fcc;
 	&.highlighter-rouge {
 		background-color: darken($sless-light-blue, 02);
-		padding: 2px 4px;
-		border-radius: 2px;
+		padding: .2rem .4rem;
+		border-radius: .2rem;
 	}
 }
 a {

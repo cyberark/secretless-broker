@@ -6,8 +6,6 @@ description: Secretless Broker Documentation
 permalink: docs/reference/how_to_deploy_conjur.html
 ---
 
-# Deploying the Secretless Broker
-
 ## 1. Running Conjur
 To begin, make sure you have an instance of Conjur available to your Kubernetes
 cluster (either internally or externally). A quick start guide is available at

@@ -6,8 +6,6 @@ description: Secretless Broker Documentation
 permalink: docs/reference/how_to_deploy.html
 ---
 
-# Deploying the Secretless Broker
-
 ## 1. Adding the Secretless Broker sidecar container
 To begin, we start by adding the Secretless Broker sidecar to an existing
 service definition. This includes adding the Secretless Broker container, a

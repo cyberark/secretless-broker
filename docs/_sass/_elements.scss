@@ -416,9 +416,11 @@ pre {
 	float: right;
 	&:hover {
 		background: url("/img/clipboard-hover.svg");
+		background-repeat: no-repeat;
 	}
 	&:active {
 		background: url("/img/clipboard-focus.svg");
+		background-repeat: no-repeat;
 	}
 }
 .copy-icon-hover {

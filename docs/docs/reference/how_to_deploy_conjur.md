@@ -1,12 +1,10 @@
 ---
-title: Documentation
+title: Deploying the Secretless Broker
 id: how_to_deploy
 layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/how_to_deploy_conjur
 ---
-
-# Deploying the Secretless Broker
 
 ## 1. Running Conjur
 To begin, make sure you have an instance of Conjur available to your Kubernetes

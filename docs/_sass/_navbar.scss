@@ -54,25 +54,16 @@
 	pointer-events: none;
 	border-color: rgba(77, 143, 204, 0);
 	border-bottom-color: #4D8FCC;
-	border-width: 10px;
-	margin-left: -10px;
-}
-
-.icon-bar {
-	background-color: $sless-blue;
-	display: block;
-	width: 22px;
-	height: 2px;
-	border-radius: 1px;
-	margin-top: 4px;
+	border-width: 1rem;
+	margin-left: -1rem;
 }
 
 .navbar-brand {
 	color: #fff;
 	min-height: 6.5rem;
 	background-image: url("../img/secretless_4c_ko_horiz.svg");
-	width: 150px;
-	text-indent: -9999px;
+	width: 15rem;
+	text-indent: -999rem;
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position-y: center;
@@ -135,7 +126,7 @@
 	font-size: 1.5rem;
 	font-weight: 500;
 	transition: all 0.4s;
-	letter-spacing: .5px;
+	letter-spacing: .05rem;
 	width: 100%;
 	&:hover {
 		text-decoration: none;
@@ -145,11 +136,11 @@
 
 .dropdown-menu {
 	background-color: $sless-dark-blue;
-	min-width: 160px;
-	border-radius: 0 0 4px 4px;
+	min-width: 16rem;
+	border-radius: 0 0 .4rem .4rem;
 	margin: 0;
 	border: 0;
-	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+	box-shadow: 0 .6rem 1.2rem rgba(0, 0, 0, 0.175);
 	li {
 		height: 5rem;
 	}
@@ -159,7 +150,7 @@
 // Side Navigation
 
 #side-navigation {
-	border-radius: 4px;
+	border-radius: .4rem;
 	justify-content: center;
 	flex-direction: column;
 	position: sticky;
@@ -223,7 +214,7 @@
 		 h3 {
 				padding: 2rem 2.5rem .5rem 2.5rem;
 				color: $sless-blue;
-				border-top: 1px solid darken($sless-light-blue, 10);
+				border-top: .1rem solid darken($sless-light-blue, 10);
 				font-weight: 800;
 				margin-top: 1rem;
 				font-size: 1.6rem;
@@ -236,11 +227,15 @@
 	.sidenav-list {
 		font-weight: 800;
 		margin: .5rem 0;
-		border-top: 1px solid darken($sless-light-blue, 10);
+		border-top: .1rem solid darken($sless-light-blue, 10);
 	}
 	.group-of-sections {
 		font-weight: 500;
-    	padding: 0px 2.5rem;
+    padding: 0px 2.5rem;
+	}
+
+	.sidenav-sublist {
+    padding: 0rem 2.5rem;
 	}
 
 	.sidenav-subsublist {
@@ -274,7 +269,7 @@
 	font-size: 1.5rem;
 	font-weight: 500;
 	transition: all 0.4s;
-	letter-spacing: 1px;
+	letter-spacing: .1rem;
 	&:hover {
 		text-decoration: none;
 		color: $sless-blue;
@@ -320,8 +315,8 @@
  /* default class and toggled when user selects down caret for side navbar*/
 .dropdown-menu-option {
     display: none;
-    padding-left: 8px;
-    border-top: 1px solid darken($sless-light-blue, 10);
+    padding-left: .8rem;
+    border-top: .1rem solid darken($sless-light-blue, 10);
 	display: none;
 	padding: 1rem 2.5rem;
 	margin: 0 -2.5rem;
@@ -331,8 +326,8 @@
 .dropdown-btn {
 	i {
 		float: right;
-    color: #4d8fcc;
-    margin-top: .6rem;
+	    color: #4d8fcc;
+	    margin-top: .6rem;
 	}
 }
 

@@ -52,6 +52,7 @@ pipeline {
 
       steps {
         sh './bin/publish'
+        sh './sidecar-injector/bin/publish'
       }
     }
 

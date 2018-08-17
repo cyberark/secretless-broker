@@ -21,7 +21,7 @@ definition. This includes adding the Secretless Broker container and a ConfigMap
 for the Secretless Broker configuration. In this example, the Secretless Broker
 will be configured to authenticate local connections to a remote PostgreSQL
 database. For documentation on the other handlers available, visit
-[Handlers](/docs/reference/handlers.html). Be sure to change the
+[Handlers](/docs/reference/handlers/overview.html). Be sure to change the
 `CONJUR_APPLIANCE_URL` and `CONJUR_ACCOUNT` environment variables to match your
 own Conjur configuration.
 ``` yaml
@@ -151,5 +151,5 @@ sed '/s\${CONJUR_AUTHN_API_KEY}/$CONJUR_API_KEY/g' my-service.yml \
 ### 5. Next
 We've just completed a quick deployment of the Secretless Broker to an existing
 application using Conjur.
-- Learn about the different [Credential Providers](/docs/reference/providers.html)
-- Learn about other [Handlers](/docs/reference/handlers.html)
+- Learn about the different [Credential Providers](/docs/reference/providers/overview.html)
+- Learn about other [Handlers](/docs/reference/handlers/overview.html)

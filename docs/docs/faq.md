@@ -43,7 +43,7 @@ permalink: docs/faq.html
 </div>
 
 <p>For info on currently supported vaults, please see our
-  <a href="/docs/reference/providers.html">Credential Providers</a> reference page.</p>
+  <a href="/docs/reference/providers/overview.html">Credential Providers</a> reference page.</p>
 
 <p>If the vault you would like to use is not currently supported, please check our
   <a href="https://github.com/cyberark/secretless-broker/issues">GitHub issues</a> to see

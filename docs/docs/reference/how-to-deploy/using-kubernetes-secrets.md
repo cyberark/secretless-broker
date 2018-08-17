@@ -14,7 +14,7 @@ service definition. This includes adding the Secretless Broker container, a
 Kubernetes Secrets volume and a ConfigMap for the Secretless configuration. In
 this example, the Secretless Broker will be configured to authenticate
 connections to a PostgreSQL database. For documentation on the other handlers
-available, visit [Handlers](/docs/reference/handlers.html).
+available, visit [Handlers](/docs/reference/handlers/overview.html).
 ``` yaml
 ---
 apiVersion: apps/v1
@@ -112,6 +112,6 @@ kubectl apply -f my-service.yml
 ### 4. Next
 We've just completed a quick deployment of the Secretless Broker to an existing
 application using Kubernetes Secrets.
-- Learn how to [deploy Secretless Broker with Conjur](/docs/reference/how_to_deploy_conjur.html)
-- Learn about the different [Credential Providers](/docs/reference/providers.html)
-- Learn about other [Handlers](/docs/reference/handlers.html)
+- Learn how to [deploy Secretless Broker with Conjur](/docs/reference/how-to-deploy/using-conjur.html)
+- Learn about the different [Credential Providers](/docs/reference/providers/overview.html)
+- Learn about other [Handlers](/docs/reference/handlers/overview.html)

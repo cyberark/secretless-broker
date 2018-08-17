@@ -98,10 +98,11 @@
 }
 .jumbotron {
 	margin-bottom: 0;
-	margin-top: -7.5rem;
+	margin-top: -11.5rem;
 	padding-top: 10.5rem;
-	background-image: url("../img/secretless_pattern_dark.png");
-	background-repeat: round;
+	background-image: url("../img/slss_bg_pattern_2.svg");
+	background-color: $sless-dark-blue;
+	background-size: 1200px auto;
 	text-align: center;
 	border-radius: 0;
 }

@@ -1,44 +1,34 @@
 <nav class="navbar home navbar-expand-lg">
-		<div class="container">
-				<div class="s-badge mr-auto">
-						<p class="badge-title"><i class="fas fa-vial"></i><em>Beta</em></p>
-				</div>
-		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span> </span>
-		</button>
-	
-		<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			<ul class="navbar-nav ml-auto">
-					{% assign links = site.data.navigation.main %}
-					{% for link in links %}
-							{% assign class = nil %}
-							{% if page.url contains link.url %}
-								{% assign class = 'active' %}
-							{% endif %}
-							{% if link.sublinks %}
-								<li class="dropdown {{ class }}">
-									<a href="{{ site.baseurl }}{{ link.url }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ link.title }} <span class="caret"></span></a>
-									<ul class="dropdown-menu arrow_box">
-										{% for sublink in link.sublinks %}
-											{% if sublink.title == 'separator' %}
-												<li role="separator" class="divider"></li>
-											{% else %}
-												<li>
-														<a href="{{ site.baseurl }}{{ sublink.url }}">{{ sublink.title }}</a>
-												</li>
-											{% endif %}
-										{% endfor %}
-									</ul>
-								</li>
-							{% else %}
-									<li class="{{ class }}">
-											<a href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>
-									</li>
-							{% endif %}
-					{% endfor %}
-			</ul>
-		</div>
-		</div>
-	</nav>
-	
-	
+	<div class="container">
+	<a class="navbar-brand" href="/">Secretless Broker</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span> </span>
+	</button>
+
+	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		<ul class="navbar-nav ml-auto">
+		{% assign links = site.data.navigation.main %}
+        {% for link in links %}
+            {% assign class = nil %}
+            {% if link.sublinks %}
+				<li class="dropdown top-sub {% if page.url contains link.section %}active{% endif %}">
+					<a href="{{ site.baseurl }}{{ link.url }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ link.title }} <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						{% for sublink in link.sublinks %}
+							<li class="top-drop {% if page.url == sublink.url %}active{% endif %}">
+								<a href="{{ site.baseurl }}{{ sublink.url }}">{{ sublink.title }}</a>
+							</li>
+						{% endfor %}
+						
+					</ul>
+				</li>
+            {% else %}
+                <li class="top-sub {% if page.url == link.url %}active{% endif %}">
+                    <a href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+		</ul>
+	</div>
+	</div>
+</nav>

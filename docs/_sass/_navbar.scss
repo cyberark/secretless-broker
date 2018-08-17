@@ -4,8 +4,9 @@
 // ***********************
 
 #top-navigation {
-	background-image: url("../img/secretless_pattern_dark.png");
+	background-image: url("../img/slss_bg_pattern_2.svg");
 	background-repeat: repeat-y;
+	background-size: 1200px auto;
 	border-radius: 0;
 	margin: 0;
 }
@@ -15,9 +16,9 @@
 }
 
 .navbar {
-	background-image: url("../img/secretless_pattern_dark.png");
-	background-repeat: repeat-y;
-	background-size: cover;
+	background-image: url("../img/slss_bg_pattern_2.svg");
+	background-color: $sless-dark-blue;
+	background-size: 1200px auto;
 	border-radius: 0;
 	margin: 0;
 	min-height: 6.5rem;
@@ -26,6 +27,9 @@
 		padding: 0;
 	}
 	&.home {
+		.navbar-brand {
+			visibility: hidden;
+		}
 		.dropdown-menu {
 			background-color: $sless-blue;
 			border-radius: $border-radius;
@@ -56,6 +60,15 @@
 	border-bottom-color: #4D8FCC;
 	border-width: 1rem;
 	margin-left: -1rem;
+}
+
+.icon-bar {
+	background-color: $sless-blue;
+	display: block;
+	width: 22px;
+	height: 2px;
+	border-radius: 1px;
+	margin-top: 4px;
 }
 
 .navbar-brand {

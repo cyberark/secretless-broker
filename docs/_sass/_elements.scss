@@ -54,7 +54,7 @@
 
 .s-badge {
 	background-color: #4d8fcc9c;
-	border-radius: 4px;
+	border-radius: .4rem;
 	color: #edf2f6c9;
 	font-size: 1.3rem;
 	font-weight: 800;
@@ -131,8 +131,8 @@
 		padding-top: .3rem;
 		transition: .5s ease;
 		color: $sless-blue;
-		margin-right: 8px;
-    margin-left: -11px;
+		margin-right: .8rem;
+    margin-left: -1.1rem;
 		&:hover {
 			transform: translateX(.2rem);
 		}
@@ -141,7 +141,7 @@
 		margin-left: 1.5rem;
 	}
 	h3 {
-		margin-top: 7px;
+		margin-top: .7rem;
 	}
 	&:hover {
 		transform: scale(1.01);
@@ -197,14 +197,14 @@
 }
 
 .docs-img {
-	max-width: 550px;
+	max-width: 55rem;
 	margin: 4rem 0;
 	text-align: center;
 }
 
 @media (min-width: 700px) {
 	.arch-img {
-		max-height: 300px;
+		max-height: 30rem;
 		margin: 2rem 0;
 		padding: 0;
 	}
@@ -252,8 +252,8 @@
 .documentation {
 	display: grid;
 	margin: 0 auto;
-	grid-template-columns: 230px 1fr;
-	grid-column-gap: 20px;
+	grid-template-columns: 23rem 1fr;
+	grid-column-gap: 2rem;
 }
 .faq {
 	font-weight: bold;
@@ -323,7 +323,7 @@
 // Tabs
 // ******************
 .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active, a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover {
-	border: 1px solid $sless-blue;
+	border: .1rem solid $sless-blue;
 	background: $sless-blue;
 	font-weight: normal;
 	color: #fff;
@@ -347,16 +347,16 @@
 
 pre {
 	display: block;
-	padding: 9.5px;
-	margin: 0 0 10px;
-	font-size: 13px;
+	padding: .95rem;
+	margin: 0 0 1rem;
+	font-size: 1.4rem;
 	line-height: 1.42857143;
 	color: #fffc;
 	word-break: break-all;
 	word-wrap: break-word;
 	background-color: $sless-dark-blue;
 	border: 0;
-	border-radius: 4px;
+	border-radius: .4rem;
 }
 
 .ui-tabs .ui-tabs-panel {
@@ -367,7 +367,7 @@ pre {
 }
 
 .ui-tabs .ui-tabs-nav li {
-	margin: 1px .8rem 0 0;
+	margin: 0.1rem .8rem 0 0;
 }
 
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
@@ -375,7 +375,7 @@ pre {
 }
 
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
-	border: 3px solid $sless-light-blue;
+	border: .3rem solid $sless-light-blue;
 }
 
 .ui-tabs .ui-tabs-nav li.ui-tabs-active {
@@ -405,14 +405,14 @@ pre {
 // ***********************
 
 .copy-icon {
-  position: relative;
-	width: 15px;
-	height: 20px;
-  background: url("/img/clipboard.svg");
-  background-repeat: no-repeat;
-  background-position: center;
-  border: none;
-  cursor: pointer;
+	position: relative;
+	width: 1.5rem;
+	height: 2rem;
+	background: url("/img/clipboard.svg");
+	background-repeat: no-repeat;
+	background-position: center;
+	border: none;
+	cursor: pointer;
 	float: right;
 	&:hover {
 		background: url("/img/clipboard-hover.svg");
@@ -423,8 +423,8 @@ pre {
 }
 .copy-icon-hover {
   position: relative;
-	width: 15px;
-	height: 20px;
+	width: 1.5rem;
+	height: 2rem;
   background: url("/img/clipboard-hover.svg");
   background-repeat: no-repeat;
   background-position: center;
@@ -435,18 +435,18 @@ pre {
 
 .tooltip-text {
   visibility: hidden;
-  width: 120px;
+  width: 12rem;
   background-color: $sless-blue;
   font-family: $sless-font-primary;
-  font-size: 12px;
+  font-size: 1.2rem;
   color: #fff;
   text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
+  padding: .5rem 0;
+  border-radius: .6rem;
   position: absolute;
-  right: -52px;
+  right: -5.2rem;
   z-index: 1;
-  margin-top: 30px;
+  margin-top: 3rem;
 }
 
 .hover-button:hover .tooltip-text {
@@ -470,6 +470,6 @@ figure.highlight {
   pointer-events: none;
   border-color: rgba(0, 0, 0, 0);
   border-bottom-color: $sless-blue;
-  border-width: 10px;
-  margin-left: -10px;
+  border-width: 1rem;
+  margin-left: -1rem;
 }

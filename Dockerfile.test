@@ -5,7 +5,11 @@ LABEL id="secretless-test-runner"
 ENTRYPOINT [ "go", "test", "-v", "-timeout", "3m" ]
 WORKDIR /secretless
 
-RUN apk add -u curl gcc git musl-dev
+RUN apk add -u curl \
+               gcc \
+               git \
+               mercurial \
+               musl-dev
 
 COPY go.mod go.sum /secretless/
 

@@ -89,3 +89,39 @@ $ kubectl get crd
 NAME                           AGE
 configurations.secretless.io   5s
 ```
+
+# Watching CRD changes from code
+
+This code requires you to have a service account privileges but with those,
+you can use the `crd_watcher.go`:
+
+In one terminal start the watcher after you have added a CRD definition:
+```
+$ go run resource-definitions/crd_watcher.go
+2018/08/21 16:05:46 Secretless CRD watcher starting up...
+2018/08/21 16:05:46 Using home dir config...
+2018/08/21 16:05:46 Available configs: 0
+2018/08/21 16:05:46 Watching for changes...
+```
+
+Open another terminal and add a CRD definition:
+```
+$ kubectl apply -f resource-definitions/sconfig-example.yaml
+configuration.secretless.io "secretless-example-config" created
+```
+
+Observe that the watcher has noticed the change:
+```
+2018/08/21 16:05:46 Watching for changes...
+metadata:
+  name: secretless-example-config
+  generatename: ""
+  namespace: default
+  selflink: /apis/secretless.io/v1/namespaces/default/configurations/secretless-example-config
+  ...
+spec:
+  listeners:
+  ...
+  handlers:
+  ...
+```

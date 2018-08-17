@@ -38,7 +38,7 @@ type Manager struct {
 	ConnectionManagers map[string]plugin_v1.ConnectionManager
 	HandlerFactories   map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
 	ListenerFactories  map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
-	ProviderFactories  map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider
+	ProviderFactories  map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
 	Proxy              secretless.Proxy
 }
 
@@ -52,7 +52,7 @@ func GetManager() *Manager {
 			ConnectionManagers: make(map[string]plugin_v1.ConnectionManager),
 			HandlerFactories:   make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
 			ListenerFactories:  make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
-			ProviderFactories:  make(map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider),
+			ProviderFactories:  make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)),
 		}
 	})
 
@@ -228,7 +228,7 @@ func _LoadProvidersFromPlugin(manager *Manager, config config.Config,
 	}
 
 	// TODO: Handle different interface versions
-	providerPluginsFunc, ok := rawProviderPluginsFunc.(func() map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider)
+	providerPluginsFunc, ok := rawProviderPluginsFunc.(func() map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error))
 	if !ok {
 		return errors.New("ERROR: Could not cast GetProviders to proper type")
 	}

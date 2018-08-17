@@ -31,8 +31,8 @@ func GetHandlers() map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler {
 }
 
 // GetProviders returns the example provider
-func GetProviders() map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider {
-	return map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider{
+func GetProviders() map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
+	return map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error){
 		"example-provider": example.ProviderFactory,
 	}
 }

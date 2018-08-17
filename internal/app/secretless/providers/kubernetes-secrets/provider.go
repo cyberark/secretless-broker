@@ -2,7 +2,6 @@ package kubernetes_secrets
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -16,30 +15,30 @@ type Provider struct {
 
 // ProviderFactory constructs a Provider. The API client is configured from
 // in-cluster environment variables and files.
-func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
+func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	var client *KubeClient
 	var err error
 	if client, err = NewKubeClient(); err != nil {
-		log.Panicf("ERROR: Could not create Kubernetes Secrets provider: %s", err)
+		return nil, fmt.Errorf("ERROR: Could not create Kubernetes Secrets provider: %s", err)
 	}
 
-	provider := Provider{
+	provider := &Provider{
 		Name:   options.Name,
 		Client: client,
 	}
 
-	return provider
+	return provider, nil
 }
 
 // GetName returns the name of the provider
-func (p Provider) GetName() string {
+func (p *Provider) GetName() string {
 	return p.Name
 }
 
 // GetValue obtains a value by id. Any secret which is stored in Kubernetes Secrets is recognized.
 // The data type returned by Kubernetes Secrets is map[string][]byte. Therefore this provider needs
 // to know which field to return from the map. The field to be returned is specified by appending '#fieldName' to the id argument.
-func (p Provider) GetValue(id string) ([]byte, error) {
+func (p *Provider) GetValue(id string) ([]byte, error) {
 	tokens := strings.SplitN(id, "#", 2)
 
 	if len(tokens) != 2 {

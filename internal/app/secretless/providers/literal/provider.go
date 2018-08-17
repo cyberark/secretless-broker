@@ -9,18 +9,18 @@ type Provider struct {
 
 // ProviderFactory constructs a literal value Provider.
 // No configuration or credentials are required.
-func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
+func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	return &Provider{
 		Name: options.Name,
-	}
+	}, nil
 }
 
 // GetName returns the name of the provider
-func (p Provider) GetName() string {
+func (p *Provider) GetName() string {
 	return p.Name
 }
 
 // GetValue returns the id.
-func (p Provider) GetValue(id string) ([]byte, error) {
+func (p *Provider) GetValue(id string) ([]byte, error) {
 	return []byte(id), nil
 }

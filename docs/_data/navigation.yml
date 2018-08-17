@@ -51,7 +51,7 @@ chapters:
       - page: Listeners
         url: /docs/reference/listeners.html
       - page: Handlers
-        url: /docs/reference/handlers.html
+        url: /docs/reference/handlers/overview.html
         entries:
         - page: AWS - HTTPS
           url: /docs/reference/handlers/http/aws.html
@@ -68,7 +68,7 @@ chapters:
         - page: SSH
           url: /docs/reference/handlers/ssh.html
       - page: Credential Providers
-        url: /docs/reference/providers.html
+        url: /docs/reference/providers/overview.html
         entries:
         - page: CyberArk Conjur
           url: /docs/reference/providers/conjur.html
@@ -85,11 +85,11 @@ chapters:
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
-        url: /docs/reference/how_to_deploy.html
+        url: /docs/reference/how-to-deploy/overview.html
         entries:
-        - page: Using Kubernetes Secrets
-          url: /docs/reference/how_to_deploy.html
         - page: Using Conjur
-          url: /docs/reference/how_to_deploy_conjur.html
+          url: /docs/reference/how-to-deploy/using-conjur.html
+        - page: Using Kubernetes Secrets
+          url: /docs/reference/how-to-deploy/using-kubernetes-secrets.html
   - title: FAQ
     url: /docs/faq.html

@@ -3,17 +3,19 @@ title: How to Deploy
 id: how_to_deploy
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/how_to_deploy_conjur.html
+permalink: docs/reference/how-to-deploy/using-conjur.html
 ---
 
-## 1. Running Conjur
+## Using CyberArk Conjur
+
+### 1. Running Conjur
 To begin, make sure you have an instance of Conjur available to your Kubernetes
 cluster (either internally or externally). A quick start guide is available at
 the [Conjur website](https://www.conjur.org/get-started/). As you're getting set
 up, take note of the hostname used for your Conjur service, as well as the
 account name you're using. These will be needed for the next step.
 
-## 2. Adding the Secretless Broker sidecar container
+### 2. Adding the Secretless Broker sidecar container
 Next, we start by adding the Secretless Broker sidecar to an existing service
 definition. This includes adding the Secretless Broker container and a ConfigMap
 for the Secretless Broker configuration. In this example, the Secretless Broker
@@ -57,7 +59,7 @@ metadata:
         name: my-service-secretless-config
 ```
 
-## 3. Configuring the Secretless Broker
+### 3. Configuring the Secretless Broker
 The next step is to define a Secretless Broker configuration. Write the
 following YAML to a file named `secretless.yml`.
 ``` yaml
@@ -87,7 +89,7 @@ Create a new ConfigMap in Kubernetes using the newly created `secretless.yml`.
 kubectl create configmap my-service-secretless-config --from-file=secretless.yml
 ```
 
-## 3. Preparing Conjur
+### 3. Preparing Conjur
 Our `secretless.yml` uses the
 [conjur provider](/docs/reference/providers/file.html) to resolve credentials
 required to connect to PostgreSQL. Here we create a
@@ -135,7 +137,7 @@ Loaded policy 'root'
 $ export CONJUR_AUTHN_API_KEY=393rne9kpn5gy1xf6wa63jd17emkztvmt9xf2yq2ecphwa1c60cg2
 ```
 
-## 4. Running
+### 4. Running
 
 Apply the manifest. Once running, PostgreSQL will be available within the Pod at
 `localhost:5432`. You may need to make a change to your applications
@@ -146,7 +148,7 @@ sed '/s\${CONJUR_AUTHN_API_KEY}/$CONJUR_API_KEY/g' my-service.yml \
   | kubectl apply -f -
 ```
 
-## 5. Next
+### 5. Next
 We've just completed a quick deployment of the Secretless Broker to an existing
 application using Conjur.
 - Learn about the different [Credential Providers](/docs/reference/providers.html)

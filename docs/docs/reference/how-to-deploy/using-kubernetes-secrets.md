@@ -3,10 +3,12 @@ title: How to Deploy
 id: how_to_deploy
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/how_to_deploy.html
+permalink: docs/reference/how-to-deploy/using-kubernetes-secrets.html
 ---
 
-## 1. Adding the Secretless Broker sidecar container
+## Using Kubernetes Secrets
+
+### 1. Adding the Secretless Broker sidecar container
 To begin, we start by adding the Secretless Broker sidecar to an existing
 service definition. This includes adding the Secretless Broker container, a
 Kubernetes Secrets volume and a ConfigMap for the Secretless configuration. In
@@ -57,7 +59,7 @@ metadata:
       configMap:
         name: my-service-secretless-config
 ```
-## 2. Configuring the Secretless Broker
+### 2. Configuring the Secretless Broker
 Next, we'll define a Secretless Broker configuration. Write the following YAML
 to a file named `secretless.yml`.
 ``` yaml
@@ -97,7 +99,7 @@ kubectl create secret generic my-service-postgres \
   --from-literal=password=$POSTGRES_PASSWORD
 ```
 
-## 3. Running
+### 3. Running
 
 Apply the manifest. Once running, PostgreSQL will be available within the Pod at
 `localhost:5432`. You may need to make a change to your applications
@@ -107,7 +109,7 @@ password can be safely removed.
 kubectl apply -f my-service.yml
 ```
 
-## 4. Next
+### 4. Next
 We've just completed a quick deployment of the Secretless Broker to an existing
 application using Kubernetes Secrets.
 - Learn how to [deploy Secretless Broker with Conjur](/docs/reference/how_to_deploy_conjur.html)

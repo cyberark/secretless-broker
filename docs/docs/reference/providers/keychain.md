@@ -7,6 +7,7 @@ permalink: docs/reference/providers/keychain.html
 ---
 
 ## Keychain
+
 ### Overview
 The Keychain provider (`keychain`) allows the use of your OS-level keychain as a
 source of credentials.
@@ -15,11 +16,11 @@ source of credentials.
 source. There are plans to integrate all major OS keychains into this provider
 in a future release.
 
-## Parameters
-### macOS
+### Parameters
+#### macOS
 The value of `id` must be provided in the format `<service>#<account>`.
 
-## Examples
+### Examples
 ``` yaml
 listeners:
   - name: ssh_agent_listener

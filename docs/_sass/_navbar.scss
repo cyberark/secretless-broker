@@ -58,6 +58,15 @@
 	margin-left: -1rem;
 }
 
+.icon-bar {
+	background-color: $sless-blue;
+	display: block;
+	width: 22px;
+	height: 2px;
+	border-radius: 1px;
+	margin-top: 4px;
+}
+
 .navbar-brand {
 	color: #fff;
 	min-height: 6.5rem;

@@ -26,10 +26,10 @@ main:
     url: https://github.com/cyberark/secretless-broker
     class: gh
 
-documentation:
+chapters:
   - title: Overview
     url: /docs/overview.html
-    subfolderitems:
+    sections:
       - page: Why the Secretless Broker?
         url: /docs/overview/why_secretless.html
       - page: How Does It Work?
@@ -40,19 +40,19 @@ documentation:
         url: /docs/overview/key_terms.html
   - title: Get Started
     url: /docs/get_started.html
-    subfolderitems:
+    sections:
       - page: Quick Start
         url: /docs/get_started/quick_start.html
       - page: Deploying to Kubernetes
         url: /docs/get_started/deploy_to_kubernetes.html
   - title: Reference
     url: /docs/reference.html
-    subfolderitems:
+    sections:
       - page: Listeners
         url: /docs/reference/listeners.html
       - page: Handlers
         url: /docs/reference/handlers.html
-        subsubfolderitems:
+        entries:
         - page: AWS - HTTPS
           url: /docs/reference/handlers/http/aws.html
         - page: Conjur - HTTP(S)
@@ -69,7 +69,7 @@ documentation:
           url: /docs/reference/handlers/ssh.html
       - page: Credential Providers
         url: /docs/reference/providers.html
-        subsubfolderitems:
+        entries:
         - page: CyberArk Conjur
           url: /docs/reference/providers/conjur.html
         - page: Environment
@@ -86,7 +86,7 @@ documentation:
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy
         url: /docs/reference/how_to_deploy.html
-        subsubfolderitems:
+        entries:
         - page: Using Kubernetes Secrets
           url: /docs/reference/how_to_deploy.html
         - page: Using Conjur

@@ -1,24 +1,28 @@
 <nav id="side-navigation">
 	<ul class="sidenav-group">
-		{% if site.data.navigation.documentation[0] %}
-			{% for item in site.data.navigation.documentation %}
-			<h3 class="{% if page.url == item.url %}active{% endif %}"><a href="{{ item.url }}">{{ item.title }}</a></h3>
-				{% if item.subfolderitems[0] %}
-					<ul class="sidenav-sublist">
-						{% for entry in item.subfolderitems %}
-							{% if entry.subsubfolderitems[0] %}
-							<li class="sub {% if page.url == entry.url %}active{% endif %} sidenav-subitem dropdown-btn"><a href="{{ entry.url }}">{{ entry.page }}</a>
+		{% if site.data.navigation.chapters[0] %}
+			{% for chapter in site.data.navigation.chapters %}
+			<h3 class="{% if page.url == chapter.url %}active{% endif %}"><a href="{{ chapter.url }}">{{ chapter.title }}</a></h3>
+				{% if chapter.sections[0] %}
+					<ul class="group-of-sections">
+						{% for section in chapter.sections %}
+							{% if section.entries[0] %}
+							<li class="{% if page.url == section.url %}active {% endif %}section dropdown-btn"><a href="{{ section.url }}">{{ section.page }}</a>
+							{% if section.page == page.title %}
+								<i class="fa fa-angle-right arrow rotatingArrow"></i>
+							</li>
+							  	<div class="dropdown-menu-option navbar-open">
+							{% else %}
 								<i class="fa fa-angle-right arrow"></i>
 							</li>
-								{% for subentry in entry.subsubfolderitems %}
-								  	<div class="dropdown-menu-option">
-										{% for subentry in entry.subsubfolderitems %}
-										<li class="subsub {% if page.url == subentry.url %}active{% endif %}"><a href="{{ subentry.url }}">{{ subentry.page }}</a></li>
-										{% endfor %}
-								  	</div>
-								{%endfor%}
+								<div class="dropdown-menu-option">  
+							{% endif %}
+									{% for entry in section.entries %}
+										<li class="entry {% if page.url == entry.url %}active{% endif %}"><a href="{{ entry.url }}">{{ entry.page }}</a></li>
+									{% endfor %}
+							  	</div>
 							{% else %}
-								<li class="{% if entry.url == page.url %}active{% endif %} sidenav-subitem"><a href="{{ entry.url }}">{{ entry.page }}</a>
+								<li class="{% if section.url == page.url %}active {% endif %}section"><a href="{{ section.url }}">{{ section.page }}</a>
 							{% endif %}
 						{% endfor %}
 					</ul>
@@ -27,3 +31,5 @@
 		{% endif %}
 	</ul>
 </nav>
+							  
+							  		

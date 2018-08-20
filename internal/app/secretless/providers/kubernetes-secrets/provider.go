@@ -36,19 +36,17 @@ func (p Provider) GetName() string {
 	return p.Name
 }
 
-// parseKubernetesSecretID returns the secret id and field name.
-func parseKubernetesSecretID(id string) (string, string) {
-	tokens := strings.SplitN(id, "#", 2)
-
-	return tokens[0], tokens[1]
-}
-
 // GetValue obtains a value by id. Any secret which is stored in Kubernetes Secrets is recognized.
 // The data type returned by Kubernetes Secrets is map[string][]byte. Therefore this provider needs
 // to know which field to return from the map. The field to be returned is specified by appending '#fieldName' to the id argument.
 func (p Provider) GetValue(id string) ([]byte, error) {
-	secretName, fieldName := parseKubernetesSecretID(id)
+	tokens := strings.SplitN(id, "#", 2)
 
+	if len(tokens) != 2 {
+		return nil, fmt.Errorf("Kubernetes secret id must contain secret name and field name in the format secretName#fieldName, received '%s'", id)
+	}
+
+	secretName, fieldName := tokens[0], tokens[1]
 	if fieldName == "" {
 		return nil, fmt.Errorf("name of field missing from Kubernetes secret id '%s'", id)
 	}

@@ -8,7 +8,7 @@ permalink: docs/reference/how-to-deploy/using-kubernetes-secrets.html
 
 ## Using Kubernetes Secrets
 
-### 1. Adding the Secretless Broker sidecar container
+### 1. Adding the Secretless Broker Sidecar Container
 To begin, we start by adding the Secretless Broker sidecar to an existing
 service definition. This includes adding the Secretless Broker container, a
 Kubernetes Secrets volume and a ConfigMap for the Secretless configuration. In

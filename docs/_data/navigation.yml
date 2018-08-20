@@ -25,6 +25,7 @@ main:
   - title: GitHub
     url: https://github.com/cyberark/secretless-broker
     class: gh
+    target: target="_blank" 
 
 chapters:
   - title: Overview

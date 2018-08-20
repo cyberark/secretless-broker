@@ -15,7 +15,7 @@ the [Conjur website](https://www.conjur.org/get-started/). As you're getting set
 up, take note of the hostname used for your Conjur service, as well as the
 account name you're using. These will be needed for the next step.
 
-### 2. Adding the Secretless Broker sidecar container
+### 2. Adding the Secretless Broker Sidecar Container
 Next, we start by adding the Secretless Broker sidecar to an existing service
 definition. This includes adding the Secretless Broker container and a ConfigMap
 for the Secretless Broker configuration. In this example, the Secretless Broker

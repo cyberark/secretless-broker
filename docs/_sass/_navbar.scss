@@ -30,6 +30,9 @@
 		.navbar-brand {
 			visibility: hidden;
 		}
+		.s-badge {
+			margin-left: -150px;
+		}
 		.dropdown-menu {
 			background-color: $sless-blue;
 			border-radius: $border-radius;
@@ -65,15 +68,16 @@
 .icon-bar {
 	background-color: $sless-blue;
 	display: block;
-	width: 22px;
-	height: 2px;
-	border-radius: 1px;
-	margin-top: 4px;
+	width: 2.2rem;
+	height: .2rem;
+	border-radius: .1rem;
+	margin-top: .4rem;
 }
 
 .navbar-brand {
 	color: #fff;
 	min-height: 6.5rem;
+	margin-right: 4rem;
 	background-image: url("../img/secretless_4c_ko_horiz.svg");
 	width: 15rem;
 	text-indent: -999rem;

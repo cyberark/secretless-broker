@@ -14,8 +14,9 @@ Credential Providers, making it easy to use with your existing workflows regardl
 secrets management toolset.
 
 We currently support the following credential providers/vaults:
-- [Conjur](/docs/reference/providers/conjur.html)
+- [CyberArk Conjur](/docs/reference/providers/conjur.html)
 - [Environment](/docs/reference/providers/env.html)
 - [File](/docs/reference/providers/file.html)
+- [HashiCorp Vault](/docs/reference/providers/vault.html)
 - [Keychain](/docs/reference/providers/keychain.html)
 - [Literal](/docs/reference/providers/literal.html)

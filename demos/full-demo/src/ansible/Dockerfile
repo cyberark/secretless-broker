@@ -1,4 +1,4 @@
-FROM secretless-broker:latest as secretless-broker
+FROM cyberark/secretless-broker:latest as secretless-broker
 
 FROM alpine:3.8
 

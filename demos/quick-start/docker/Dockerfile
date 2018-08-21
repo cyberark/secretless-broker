@@ -1,5 +1,4 @@
-# TODO: Use DockerHub account image after public release
-FROM secretless-broker:latest as secretless-broker
+FROM cyberark/secretless-broker:latest as secretless-broker
 
 FROM postgres:9.6.9-alpine
 

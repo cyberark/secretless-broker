@@ -13,6 +13,9 @@ ENTRYPOINT [ "./myapp" ]
 WORKDIR /go/src/myapp
 
 COPY . .
+
+ENV GO111MODULE=on
+
 RUN go mod -sync
 
 RUN go build

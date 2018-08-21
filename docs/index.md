@@ -109,10 +109,7 @@ docker container run \
       <br/>
     </div>
   </div>
-
-  Ready to use Secretless Broker in your Kubernetes environment? Check out our page on <a href="docs/get_started/deploy_to_kubernetes.html">Deploying to Kubernetes</a>!
 </div>
-
 <script>
   $( function() {
     $( "#quick-start-tabs-main" ).tabs();

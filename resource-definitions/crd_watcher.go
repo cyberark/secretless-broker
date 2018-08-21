@@ -17,7 +17,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
-	secretlessClientset "github.com/cyberark/secretless-broker/pkg/client/clientset/versioned"
+	secretlessClientset "github.com/cyberark/secretless-broker/pkg/k8sclient/clientset/versioned"
 )
 
 const (

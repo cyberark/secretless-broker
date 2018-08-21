@@ -452,3 +452,31 @@ figure.highlight {
   border-width: 1rem;
   margin-left: -1rem;
 }
+
+
+// ***********************
+// CTA banner
+// ***********************
+.cta-banner-wrapper {
+	padding: 2rem 0;
+	background-color: #4d8fcc;
+}
+.cta-banner {
+	background-color: #4d8fcc;
+	height: 6.3rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	line-height: 3rem;
+	margin-bottom: 0;
+	padding: 0 4rem;
+	p {
+		color: white;
+		font-size: 2rem;
+		font-weight: normal;
+	}
+	a {
+		color: lighten($sless-blue, 30);
+		font-weight: 600;
+	}
+}

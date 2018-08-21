@@ -3,11 +3,13 @@
 		{% if site.data.navigation.chapters[0] %}
 			{% for chapter in site.data.navigation.chapters %}
 			<h3 class="{% if page.url == chapter.url %}active{% endif %}"><a href="{{ chapter.url }}">{{ chapter.title }}</a></h3>
+	
 				{% if chapter.sections[0] %}
 					<ul class="group-of-sections">
 						{% for section in chapter.sections %}
 							{% if section.entries[0] %}
-							<li class="{% if page.url == section.url %}active {% endif %}section dropdown-btn"><a href="{{ section.url }}">{{ section.page }}</a>
+
+							<li class="{% if page.title == section.page %}active {% endif %}section dropdown-btn"><a href="{{ section.url }}">{{ section.page }}</a>
 							{% if section.page == page.title %}
 								<i class="fa fa-angle-right arrow rotatingArrow"></i>
 							</li>

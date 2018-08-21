@@ -25,7 +25,11 @@ description: Secretless Broker Documentation
         </div>
       </div>
     </div>
+    {% if page.title != 'Deploy to Kubernetes'%}
+      {% include cta-banner-integ.html %}
+    {% endif %}
     {% include footer.html %}
+
     <script src='/javascript/clipboard-buttons.js' type="text/javascript"></script>
     <script src='/javascript/secretless.js' type="text/javascript"></script>
   </body>

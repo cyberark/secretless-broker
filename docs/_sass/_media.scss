@@ -2,6 +2,9 @@
 // Media tags
 // ***********************
 @media (max-width: 1200px) {
+	.about-subitem .inner {
+		min-height: 39rem;
+	}
 }
 @media (max-width: 991px) {
 	.about-subitem .inner {
@@ -22,6 +25,13 @@
 	}
 	.footer-resources {
 		width: 35%
+	}
+	.sub-card {
+		display: flex;
+    	flex-direction: column;
+	}
+	.about-subitem {
+		max-width: 100%;
 	}
 }
 @media (max-width: 768px) {

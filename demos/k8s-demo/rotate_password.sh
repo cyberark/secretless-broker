@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 new_password="$1"
-#new_password="password$RANDOM"
+
 if [[ -z $new_password ]]; then
   echo "usage: $0 [new-password]"
   exit 1
@@ -10,20 +10,38 @@ fi
 . ./utils.sh
 . ./admin_config.sh
 
-# update stored credentials
-update_password_k8s_secret "$new_password"
+# update db credentials
+docker run \
+ --rm \
+ -i \
+ -e PGPASSWORD=${DB_ADMIN_PASSWORD} \
+ postgres:9.6 \
+  psql \
+  -U ${DB_ADMIN_USER} \
+  "postgres://$DB_URL" \
+  -c "
+ALTER ROLE $DB_USER WITH PASSWORD '$new_password';
+"
 
-# wait for stored credentials to be propagated to application workloads
-while [[ ! "$(kubectl --namespace quick-start exec -it $(get_first_pod_for_app quick-start-application quick-start) -c secretless -- cat /etc/secret/password)" == "$new_password" ]] ; do
-    echo "Waiting for secret to be propagated"
-    sleep 10
-done
-echo Ready!
+base64_new_password=$(echo -n "${new_password}" | base64)
+new_password_json='{"data":{"password": "'${base64_new_password}'"}}'
+
+# update stored credentials
+kubectl --namespace quick-start \
+ patch secret \
+ quick-start-backend-credentials \
+ -p="${new_password_json}"
 
 # prune open connections
-docker run --rm -it postgres:9.6 env \
- PGPASSWORD=$DB_ADMIN_PASSWORD psql -U $DB_ADMIN_USER "postgres://$DB_URL" -c "
-ALTER ROLE $DB_USER WITH PASSWORD '$new_password';
+docker run \
+ --rm \
+ -i \
+ -e PGPASSWORD=${DB_ADMIN_PASSWORD} \
+ postgres:9.6 \
+  psql \
+  -U ${DB_ADMIN_USER} \
+  "postgres://$DB_URL" \
+  -c "
 SELECT
     pg_terminate_backend(pid)
 FROM

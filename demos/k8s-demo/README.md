@@ -136,8 +136,6 @@ handlers:
 
 **Note:** None of these steps require the information in `admin_config.sh` - the person deploying the application needs to know _nothing_ about the secret values required to connect to the PostgreSQL database!!
 
-**YOU WILL NEED TO LOG INTO THE PRIVATE DOCKER REGISTRY IN THIS STEP** - this will be required until the images are being pushed to DockerHub.
-
 #### 1. Configure application to access the database at `localhost:5432`
 
 In the application manifest, we set the `DB_URL` to point to `localhost:5432`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
@@ -160,6 +158,7 @@ POST `/pet` to add a pet - the request must include `name` in the JSON body
 APPLICATION_URL=$(. ./admin_config.sh; echo $APPLICATION_URL)
 
 curl \
+  -i \
   -d '{"name": "Mr. Snuggles"}' \
   -H "Content-Type: application/json" \
   $APPLICATION_URL/pet
@@ -169,7 +168,7 @@ GET `/pets` to retrieve notes
 ```
 APPLICATION_URL=$(. ./admin_config.sh; echo $APPLICATION_URL)
 
-curl $APPLICATION_URL/pets
+curl -i $APPLICATION_URL/pets
 ```
 
 #### Rotate application database credentials
@@ -177,11 +176,9 @@ curl $APPLICATION_URL/pets
 In addition to the demo you've seen so far, you can also **rotate the DB credentials** and watch the app continue to perform as expected.
 
 The rotator script:
- + Updates the password in the secrets store
- + Waits for the update to take effect
  + Rotates the credentials in the database
-
-Typically, you would want your rotation to work the other way - update the DB and then your vault - but we're using Kubernetes secrets in this guide, which isn't built to handle secret rotation gracefully. In practice, you would use a more mature secrets management solution, like [Conjur](https://www.conjur.org).
+ + Updates the password in the secrets store
+ + Prunes previously open connections
 
 To see graceful rotation in action, poll the endpoint to retrieve the list of pets (GET `/pets`) in a separate terminal before rotating:
 
@@ -191,16 +188,19 @@ APPLICATION_URL=$(. ./admin_config.sh; echo $APPLICATION_URL)
 while true
 do
     echo "Retrieving pets"
-    curl $APPLICATION_URL/pets
+    curl -i $APPLICATION_URL/pets
     echo ""
-    sleep 1
+    echo ""
+    echo "..."
+    echo ""
+    sleep 3
 done
 ```
 
 To rotate the database password (note: you are acting as an admin user), run the following with your own value for `[new password value]`:
 
 ```
-./rotate_password [new password value]
+./rotate_password.sh [new password value]
 ```
 
 Observe that requests to the application API are not affected by the password rotation - we continue to be able to query the application as usual, without interruption!

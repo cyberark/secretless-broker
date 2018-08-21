@@ -14,5 +14,5 @@ DB_ADMIN_PASSWORD=admin_password
 DB_USER=quick_start
 DB_INITIAL_PASSWORD=quick_start
 
-# Run this to access postgres
-# docker run --rm -it postgres:9.6 env PGPASSWORD=$DB_ADMIN_PASSWORD psql -U $DB_ADMIN_USER "postgres://$DB_URL"
+# Run this to access postgres as admin_user
+# docker run --rm -it -e PGPASSWORD=${DB_ADMIN_PASSWORD} postgres:9.6 psql -U ${DB_ADMIN_USER} "postgres://$DB_URL"

@@ -13,7 +13,7 @@ import (
 )
 
 // ProviderFactories contains the list of built-in provider factories
-var ProviderFactories = map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider{
+var ProviderFactories = map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	"conjur":   conjurProvider.ProviderFactory,
 	"env":      envProvider.ProviderFactory,
 	"file":     fileProvider.ProviderFactory,

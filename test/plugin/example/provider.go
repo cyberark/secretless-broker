@@ -8,18 +8,18 @@ type Provider struct {
 }
 
 // ProviderFactory constructs a mock Provider.
-func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
+func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	return &Provider{
 		Name: options.Name,
-	}
+	}, nil
 }
 
 // GetName returns the name of the provider
-func (provider Provider) GetName() string {
+func (provider *Provider) GetName() string {
 	return provider.Name
 }
 
 // GetValue returns the id + "Provider"
-func (provider Provider) GetValue(id string) ([]byte, error) {
+func (provider *Provider) GetValue(id string) ([]byte, error) {
 	return []byte(id + "Provider"), nil
 }

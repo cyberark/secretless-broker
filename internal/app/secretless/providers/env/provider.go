@@ -14,19 +14,19 @@ type EnvironmentProvider struct {
 
 // ProviderFactory constructs a EnvironmentProvider.
 // No configuration or credentials are required.
-func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
+func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	return &EnvironmentProvider{
 		Name: options.Name,
-	}
+	}, nil
 }
 
 // GetName returns the name of the provider
-func (p EnvironmentProvider) GetName() string {
+func (p *EnvironmentProvider) GetName() string {
 	return p.Name
 }
 
 // GetValue obtains a value by ID. Any environment is a recognized ID.
-func (p EnvironmentProvider) GetValue(id string) (result []byte, err error) {
+func (p *EnvironmentProvider) GetValue(id string) (result []byte, err error) {
 	var found bool
 	envVar, found := os.LookupEnv(id)
 	if found {

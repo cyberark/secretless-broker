@@ -12,13 +12,18 @@ import (
 )
 
 func TestVault_Provider(t *testing.T) {
+	var err error
+	var provider plugin_v1.Provider
 	name := "vault"
 
 	options := plugin_v1.ProviderOptions{
 		Name: name,
 	}
 
-	provider := providers.ProviderFactories[name](options)
+	Convey("Can create the Vault provider", t, func() {
+		provider, err = providers.ProviderFactories[name](options)
+		So(err, ShouldBeNil)
+	})
 
 	Convey("Has the expected provider name", t, func() {
 		So(provider.GetName(), ShouldEqual, "vault")

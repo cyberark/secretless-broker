@@ -87,7 +87,7 @@ func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err
 	}
 
 	// Load all internal Providers
-	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider)
+	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error))
 	for providerID, providerFactory := range secretless.InternalProviders {
 		providerFactories[providerID] = providerFactory
 	}

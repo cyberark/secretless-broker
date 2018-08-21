@@ -13,13 +13,13 @@ import (
 // Resolver is used to instantiate providers and resolve credentials
 type Resolver struct {
 	EventNotifier     plugin_v1.EventNotifier
-	ProviderFactories map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider
+	ProviderFactories map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
 	Providers         map[string]plugin_v1.Provider
 	LogFatalf         func(string, ...interface{})
 }
 
 // NewResolver instantiates providers based on the name and ProviderOptions
-func NewResolver(providerFactories map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider,
+func NewResolver(providerFactories map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error),
 	eventNotifier plugin_v1.EventNotifier,
 	LogFatalFunc func(string, ...interface{})) plugin_v1.Resolver {
 
@@ -58,7 +58,10 @@ func (resolver *Resolver) GetProvider(name string) (provider plugin_v1.Provider,
 	providerFactory := resolver.ProviderFactories[name]
 
 	log.Printf("Instantiating provider '%s'", name)
-	provider = providerFactory(providerOptions)
+	provider, err = providerFactory(providerOptions)
+	if err != nil {
+		return nil, err
+	}
 
 	resolver.Providers[name] = provider
 

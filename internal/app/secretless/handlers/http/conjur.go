@@ -38,7 +38,15 @@ func (h ConjurHandler) Authenticate(values map[string][]byte, r *http.Request) e
 
 // ConjurHandlerFactory instantiates a handler given HandlerOptions
 func ConjurHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
-	return &ConjurHandler{
+	handler := &ConjurHandler{
 		BaseHandler: plugin_v1.NewBaseHandler(options),
 	}
+
+	// Force instantiate the Conjur provider so we can use an access token.
+	// This will fail unless a means of authentication to Conjur is available.
+	if handler.Resolver != nil {
+		handler.Resolver.GetProvider("conjur");
+	}
+
+	return handler
 }

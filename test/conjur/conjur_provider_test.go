@@ -16,14 +16,17 @@ import (
 // as well as secret values.
 func TestConjur_Provider(t *testing.T) {
 	var err error
-
+	var provider plugin_v1.Provider
 	name := "conjur"
 
 	options := plugin_v1.ProviderOptions{
 		Name: name,
 	}
 
-	provider := providers.ProviderFactories[name](options)
+	Convey("Can create the Conjur provider", t, func() {
+		provider, err = providers.ProviderFactories[name](options)
+		So(err, ShouldBeNil)
+	})
 
 	Convey("Has the expected provider name", t, func() {
 		So(provider.GetName(), ShouldEqual, "conjur")

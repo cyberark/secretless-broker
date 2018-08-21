@@ -52,14 +52,14 @@ func hasField(field string, params *map[string]string) (ok bool) {
 // - A path to a file where a Conjur access token is stored
 // - Config info to use the Conjur k8s authenticator client to retrieve an access token
 //   from Conjur (i.e. Conjur version, account, authn url, username, and SSL cert)
-func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
+func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	config := conjurapi.LoadConfig()
 
 	var apiKey, authnURL, tokenFile, username string
 	var authenticator *authenticator.Authenticator
 	var conjur *conjurapi.Client
 	var err error
-	var provider Provider
+	var provider *Provider
 
 	authenticationMutex := &sync.Mutex{}
 
@@ -68,7 +68,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
 	tokenFile = os.Getenv("CONJUR_AUTHN_TOKEN_FILE")
 	authnURL = os.Getenv("CONJUR_AUTHN_URL")
 
-	provider = Provider{
+	provider = &Provider{
 		Name:                options.Name,
 		Config:              config,
 		Username:            username,
@@ -80,19 +80,19 @@ func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
 	if provider.Username != "" && provider.APIKey != "" {
 		log.Printf("Info: Conjur provider using API key-based authentication")
 		if conjur, err = conjurapi.NewClientFromKey(provider.Config, authn.LoginPair{provider.Username, provider.APIKey}); err != nil {
-			log.Fatalf("ERROR: Could not create new Conjur provider: %s", err)
+			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
 	} else if tokenFile != "" {
 		log.Printf("Info: Conjur provider using access token-based authentication")
 		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, tokenFile); err != nil {
-			log.Fatalf("ERROR: Could not create new Conjur provider: %s", err)
+			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
 	} else if provider.AuthnURL != "" && strings.Contains(provider.AuthnURL, "authn-k8s") {
 		log.Printf("Info: Conjur provider using Kubernetes authenticator-based authentication")
 
 		// Load the authenticator with the config from the environment, and log in to Conjur
 		if authenticator, err = loadAuthenticator(provider.AuthnURL, authenticatorTokenFile, provider.Config); err != nil {
-			log.Fatalf("ERROR: Conjur provider could not retrieve access token using the authenticator client: %s", err)
+			return nil, fmt.Errorf("ERROR: Conjur provider could not retrieve access token using the authenticator client: %s", err)
 		}
 		provider.Authenticator = authenticator
 
@@ -101,26 +101,26 @@ func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
 
 		// Once the token file has been loaded, create a new instance of the Conjur client
 		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, authenticatorTokenFile); err != nil {
-			log.Fatalf("ERROR: Could not create new Conjur provider: %s", err)
+			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
 	} else {
-		log.Fatalln("ERROR: Unable to construct a Conjur provider client from the available credentials")
+		return nil, errors.New("ERROR: Unable to construct a Conjur provider client from the available credentials")
 	}
 
 	provider.Conjur = conjur
 
-	return &provider
+	return provider, nil
 }
 
 // GetName returns the name of the provider
-func (p Provider) GetName() string {
+func (p *Provider) GetName() string {
 	return p.Name
 }
 
 // GetValue obtains a value by ID. The recognized IDs are:
 //	* "accessToken"
 // 	* Any Conjur variable ID
-func (p Provider) GetValue(id string) ([]byte, error) {
+func (p *Provider) GetValue(id string) ([]byte, error) {
 	var err error
 
 	if id == "accessToken" {
@@ -131,7 +131,7 @@ func (p Provider) GetValue(id string) ([]byte, error) {
 				p.APIKey,
 			})
 		}
-		return nil, fmt.Errorf("Error: Conjur provider can't provide an accessToken unless username and apiKey credentials are provided")
+		return nil, errors.New("Error: Conjur provider can't provide an accessToken unless username and apiKey credentials are provided")
 	}
 
 	// If using the Conjur Kubernetes authenticator, ensure that the
@@ -247,7 +247,7 @@ func loadAuthenticator(authnURL string, tokenFile string, config conjurapi.Confi
 // refreshAccessToken uses the Conjur Kubernetes authenticator
 // to authenticate with Conjur and retrieve a new time-limited
 // access token in a loop
-func (p Provider) refreshAccessToken() error {
+func (p *Provider) refreshAccessToken() error {
 
 	var err error
 

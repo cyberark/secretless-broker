@@ -2,7 +2,6 @@ package vault
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	vault "github.com/hashicorp/vault/api"
@@ -18,25 +17,25 @@ type Provider struct {
 
 // ProviderFactory constructs a Provider. The API client is configured from
 // environment variables.
-func ProviderFactory(options plugin_v1.ProviderOptions) plugin_v1.Provider {
+func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	config := vault.DefaultConfig()
 
 	var client *vault.Client
 	var err error
 	if client, err = vault.NewClient(config); err != nil {
-		log.Panicf("ERROR: Could not create Vault provider: %s", err)
+		return nil, fmt.Errorf("ERROR: Could not create Vault provider: %s", err)
 	}
 
-	provider := Provider{
+	provider := &Provider{
 		Name:   options.Name,
 		Client: client,
 	}
 
-	return provider
+	return provider, nil
 }
 
 // GetName returns the name of the provider
-func (p Provider) GetName() string {
+func (p *Provider) GetName() string {
 	return p.Name
 }
 
@@ -59,7 +58,7 @@ func parseVaultID(id string) (string, string) {
 // The datatype returned by Vault is map[string]interface{}. Therefore this provider needs
 // to know which field to return from the map. By default, it returns the 'value'.
 // An alternative field can be obtained by appending '#fieldName' to the id argument.
-func (p Provider) GetValue(id string) (value []byte, err error) {
+func (p *Provider) GetValue(id string) (value []byte, err error) {
 	id, fieldName := parseVaultID(id)
 
 	var secret *vault.Secret

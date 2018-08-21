@@ -32,7 +32,7 @@ Examples of protocols which can be brokered:
 -  HTTP via Authorization header
 -  SSH, via MITM or by implementing an ssh-agent   
 
-Any published protocol can be supported in the Secretless Broker. Software code in the Secretless Broker is generally required for each new protocol. See <a href="/docs/reference/handlers.html">Handlers</a>.
+Any published protocol can be supported in the Secretless Broker. Software code in the Secretless Broker is generally required for each new protocol. See <a href="/docs/reference/handlers/overview.html">Handlers</a>.
 
 <!-- TODO - link to handler section of reference page -->
 

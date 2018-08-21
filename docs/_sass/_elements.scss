@@ -98,10 +98,11 @@
 }
 .jumbotron {
 	margin-bottom: 0;
-	margin-top: -7.5rem;
+	margin-top: -11.5rem;
 	padding-top: 10.5rem;
-	background-image: url("../img/secretless_pattern_dark.png");
-	background-repeat: round;
+	background-image: url("../img/slss_bg_pattern_2.svg");
+	background-color: $sless-dark-blue;
+	background-size: 1200px auto;
 	text-align: center;
 	border-radius: 0;
 }
@@ -226,25 +227,6 @@
 // Documentation
 // ***********************
 
-.docs {
-	padding-left: 6rem;
-}
-
-.grid-l-col {
-	display: grid;
-	grid-template-columns: 26rem 1fr;
-	column-gap: 4rem;
-}
-
-@media (max-width: 991px) {
-	.grid-l-col {
-		grid-template-columns: 1fr;
-	}
-	.docs {
-		padding: 0;
-	}
-}
-
 .documentation-content {
 	padding-bottom: 10.0rem;
 	margin-left: 5.0rem;
@@ -282,13 +264,8 @@
 // ***********************
 // Icons
 // ***********************
-.fab {
-	font-size: 1.5rem;
-	margin-right: 1.0rem;
-	color: #4d8fcc;
-}
 
-.far {
+.far, .fas, .fab {
 	font-size: 1.5rem;
 	margin-right: 1.0rem;
 	color: #4d8fcc;
@@ -416,9 +393,11 @@ pre {
 	float: right;
 	&:hover {
 		background: url("/img/clipboard-hover.svg");
+		background-repeat: no-repeat;
 	}
 	&:active {
 		background: url("/img/clipboard-focus.svg");
+		background-repeat: no-repeat;
 	}
 }
 .copy-icon-hover {

@@ -1,6 +1,9 @@
 <nav class="navbar navbar-expand-lg">
 	<div class="container">
 	<a class="navbar-brand" href="/">Secretless Broker</a>
+	<div class="s-badge mr-auto">
+			<p class="badge-title"><i class="fas fa-vial"></i><em>Beta</em></p>
+	</div>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span> </span>
 	</button>
@@ -24,7 +27,7 @@
 				</li>
             {% else %}
                 <li class="top-sub {% if page.url == link.url %}active{% endif %}">
-                    <a href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>
+                    <a {{ link.target }} href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>
                 </li>
             {% endif %}
         {% endfor %}

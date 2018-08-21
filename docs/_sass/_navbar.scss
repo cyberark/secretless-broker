@@ -4,8 +4,9 @@
 // ***********************
 
 #top-navigation {
-	background-image: url("../img/secretless_pattern_dark.png");
+	background-image: url("../img/slss_bg_pattern_2.svg");
 	background-repeat: repeat-y;
+	background-size: 1200px auto;
 	border-radius: 0;
 	margin: 0;
 }
@@ -15,9 +16,9 @@
 }
 
 .navbar {
-	background-image: url("../img/secretless_pattern_dark.png");
-	background-repeat: repeat-y;
-	background-size: cover;
+	background-image: url("../img/slss_bg_pattern_2.svg");
+	background-color: $sless-dark-blue;
+	background-size: 1200px auto;
 	border-radius: 0;
 	margin: 0;
 	min-height: 6.5rem;
@@ -26,6 +27,12 @@
 		padding: 0;
 	}
 	&.home {
+		.navbar-brand {
+			visibility: hidden;
+		}
+		.s-badge {
+			margin-left: -150px;
+		}
 		.dropdown-menu {
 			background-color: $sless-blue;
 			border-radius: $border-radius;
@@ -58,9 +65,19 @@
 	margin-left: -1rem;
 }
 
+.icon-bar {
+	background-color: $sless-blue;
+	display: block;
+	width: 2.2rem;
+	height: .2rem;
+	border-radius: .1rem;
+	margin-top: .4rem;
+}
+
 .navbar-brand {
 	color: #fff;
 	min-height: 6.5rem;
+	margin-right: 4rem;
 	background-image: url("../img/secretless_4c_ko_horiz.svg");
 	width: 15rem;
 	text-indent: -999rem;
@@ -153,7 +170,6 @@
 	border-radius: .4rem;
 	justify-content: center;
 	flex-direction: column;
-	position: sticky;
 	margin-bottom: 8rem;
 	h3 {
 		&.active {
@@ -209,14 +225,12 @@
 		 }
 		 :last-child {
 			margin-bottom: 0;
-			padding-bottom: 0;
 		 }
 		 h3 {
 				padding: 2rem 2.5rem .5rem 2.5rem;
 				color: $sless-blue;
 				border-top: .1rem solid darken($sless-light-blue, 10);
 				font-weight: 800;
-				margin-top: 1rem;
 				font-size: 1.6rem;
 				a:hover {
 					color: darken($sless-blue, 20);
@@ -231,11 +245,11 @@
 	}
 	.group-of-sections {
 		font-weight: 500;
-    padding: 0px 2.5rem;
+    	padding: 0px 2.5rem;
 	}
 
 	.sidenav-sublist {
-    padding: 0rem 2.5rem;
+    	padding: 0rem 2.5rem;
 	}
 
 	.sidenav-subsublist {

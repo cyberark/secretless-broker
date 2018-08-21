@@ -6,7 +6,6 @@ metadata:
   name: pg
   labels:
     app: quick-start-backend
-  namespace: quick-start-db
 spec:
   serviceName: quick-start-backend
   selector:
@@ -26,12 +25,16 @@ spec:
         env:
           - name: POSTGRES_PASSWORD
             value: admin_password
+        readinessProbe:
+          exec:
+            command: ["psql", "-w", "-U", "postgres", "-c", "SELECT 1"]
+          initialDelaySeconds: 15
+          timeoutSeconds: 2
 ---
 kind: Service
 apiVersion: v1
 metadata:
   name: quick-start-backend
-  namespace: quick-start-db
 spec:
   selector:
     app: quick-start-backend

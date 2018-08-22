@@ -3,12 +3,15 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"regexp"
 	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 
 	yaml "gopkg.in/yaml.v2"
+
+	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 )
 
 // Variable is a named secret.
@@ -163,6 +166,23 @@ func LoadFromFile(fileName string) (config Config, err error) {
 		return
 	}
 	return Load(buffer)
+}
+
+// LoadFromCRD loads a configuration from a CRD API Configuration object
+func LoadFromCRD(crdConfig crd_api_v1.Configuration) (config Config, err error) {
+	var specData []byte
+	if specData, err = yaml.Marshal(crdConfig.Spec); err != nil {
+		return
+	}
+
+	log.Println(string(specData))
+	log.Println("Implement me!!")
+
+	if config, err = Load(specData); err != nil {
+		return
+	}
+
+	return config, nil
 }
 
 // Load parses a YAML string into a Config object.

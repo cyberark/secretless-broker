@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"testing"
 
+	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -164,5 +166,49 @@ handlers:
 		config, err := Load([]byte(yaml))
 		So(err, ShouldBeNil)
 		So(config.String(), ShouldContainSubstring, "test_for_secretless_issues_216")
+	})
+
+	Convey("Can generate config from CRD configuration", t, func() {
+		expectedConfigYaml := `
+listeners:
+  - name: http_default
+    protocol: tcp
+    address: 0.0.0.0:1080
+
+handlers:
+  - name: http_default_handler
+    listener: http_default
+    match:
+    - http://*
+`
+
+		// We implicitly rely on Load to work properly for this test to pass
+		expectedConfig, err := Load([]byte(expectedConfigYaml))
+		So(err, ShouldBeNil)
+
+		// Create an API object that would be similar to one used to trigger a config reload
+		crdConfig := crd_api_v1.Configuration{
+			Spec: crd_api_v1.ConfigurationSpec{
+				Handlers: []crd_api_v1.Handler{
+					crd_api_v1.Handler{
+						Name:         "http_default_handler",
+						ListenerName: "http_default",
+						Match: []string{
+							"http://*",
+						},
+					},
+				},
+				Listeners: []crd_api_v1.Listener{
+					crd_api_v1.Listener{
+						Name:     "http_default",
+						Protocol: "tcp",
+						Address:  "0.0.0.0:1080",
+					},
+				},
+			},
+		}
+		config, err := LoadFromCRD(crdConfig)
+		So(err, ShouldBeNil)
+		So(config.String(), ShouldEqual, expectedConfig.String())
 	})
 }

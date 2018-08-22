@@ -10,8 +10,11 @@ import (
 )
 
 const (
+	// START is a signal that indicates that the proxy is instantiating
 	START = iota
+	// RESTART event signals that a reload of configuration is needed
 	RESTART
+	// SHUTDOWN signals that that we are in the process of program exit
 	SHUTDOWN
 )
 

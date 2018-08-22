@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"regexp"
 	"strconv"
 
@@ -174,9 +173,6 @@ func LoadFromCRD(crdConfig crd_api_v1.Configuration) (config Config, err error) 
 	if specData, err = yaml.Marshal(crdConfig.Spec); err != nil {
 		return
 	}
-
-	log.Println(string(specData))
-	log.Println("Implement me!!")
 
 	if config, err = Load(specData); err != nil {
 		return

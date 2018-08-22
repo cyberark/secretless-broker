@@ -40,6 +40,13 @@ func GetProviders() map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provid
 // GetConnectionManagers returns the example connection manager
 func GetConnectionManagers() map[string]func() plugin_v1.ConnectionManager {
 	return map[string]func() plugin_v1.ConnectionManager{
-		"example-plugin-manager": example.ManagerFactory,
+		"example-plugin-connection-manager": example.ConnManagerFactory,
+	}
+}
+
+// GetConfigurationManagers returns the example connection manager
+func GetConfigurationManagers() map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager {
+	return map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager{
+		"example-plugin-config-manager": example.ConfigManagerFactory,
 	}
 }

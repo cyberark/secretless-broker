@@ -7,6 +7,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+// AttachWatcher adds a listener of chenge event to a filepath
 func AttachWatcher(filename string, runner func()) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {

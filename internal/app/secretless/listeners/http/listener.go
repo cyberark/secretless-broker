@@ -20,7 +20,7 @@ import (
 // Listener listens for and handles new connections
 type Listener struct {
 	plugin_v1.BaseListener
-	Transport      *http.Transport
+	Transport *http.Transport
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -207,6 +207,12 @@ func (l *Listener) Listen() {
 	}
 
 	l.Transport = &http.Transport{TLSClientConfig: &tls.Config{RootCAs: caCertPool}}
+
+	// Ensure that we don't try to listen when we got closed before we started
+	if l.IsClosed == true {
+		return
+	}
+
 	http.Serve(l.NetListener, l)
 }
 
@@ -217,5 +223,5 @@ func (l *Listener) GetName() string {
 
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	return &Listener{ BaseListener: plugin_v1.NewBaseListener(options) }
+	return &Listener{BaseListener: plugin_v1.NewBaseListener(options)}
 }

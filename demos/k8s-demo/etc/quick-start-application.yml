@@ -1,4 +1,3 @@
-# SECTION: QUICK START APPLICATION
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -16,6 +15,7 @@ spec:
       labels:
         app: quick-start-application
     spec:
+      serviceAccountName: quick-start-application
       containers:
       - name: quick-start-application
         image: cyberark/demo-app:latest
@@ -42,6 +42,7 @@ spec:
       - name: config
         configMap:
           name: quick-start-application-secretless-config
+
 ---
 kind: Service
 apiVersion: v1

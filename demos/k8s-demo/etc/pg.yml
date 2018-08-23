@@ -1,4 +1,3 @@
-# SECTION: QUICK START PG BACKEND
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -30,6 +29,7 @@ spec:
             command: ["psql", "-w", "-U", "postgres", "-c", "SELECT 1"]
           initialDelaySeconds: 15
           timeoutSeconds: 2
+
 ---
 kind: Service
 apiVersion: v1

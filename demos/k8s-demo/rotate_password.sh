@@ -27,7 +27,7 @@ base64_new_password=$(echo -n "${new_password}" | base64)
 new_password_json='{"data":{"password": "'${base64_new_password}'"}}'
 
 # update stored credentials
-kubectl --namespace quick-start \
+kubectl --namespace quick-start-application-ns \
  patch secret \
  quick-start-backend-credentials \
  -p="${new_password_json}"

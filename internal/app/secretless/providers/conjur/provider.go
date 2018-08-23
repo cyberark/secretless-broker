@@ -16,12 +16,16 @@ import (
 	"github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
 // authenticateCycleDuration is the default time the system waits to
 // reauthenticate on error when using the authenticator client
 const authenticateCycleDuration = 6 * time.Minute
 const authenticatorTokenFile = "/run/conjur/access-token"
+
+// VariableOverrides maps a variable ID to a resolving function
+type VariableOverrides map[string]func()([]byte, error)
 
 // Provider provides data values from the Conjur vault.
 type Provider struct {
@@ -38,6 +42,9 @@ type Provider struct {
 
 	// Authn URL for K8s-authenticator based auth
 	AuthnURL string
+
+	// Special variable ID overrides
+	Overrides VariableOverrides
 }
 
 func hasField(field string, params *map[string]string) (ok bool) {
@@ -75,6 +82,10 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		APIKey:              apiKey,
 		AuthnURL:            authnURL,
 		AuthenticationMutex: authenticationMutex,
+	}
+
+	provider.Overrides = VariableOverrides{
+		"accessToken": provider.getAccessToken,
 	}
 
 	if provider.Username != "" && provider.APIKey != "" {
@@ -117,21 +128,61 @@ func (p *Provider) GetName() string {
 	return p.Name
 }
 
+// GetValues resolves multiple variables into values
+func (p *Provider) GetValues(variables []config.Variable) (map[string][]byte, error) {
+	overrideValues := map[string][]byte{}
+	result := map[string][]byte{}
+	remoteVariables := []config.Variable{}
+
+	// First try to resolve IDs locally, for example 'accessToken'
+	for _, variable := range variables {
+		if override, ok := p.Overrides[variable.ID]; ok {
+			value, err := override()
+			if err != nil {
+				return nil, err
+			}
+			overrideValues[variable.Name] = value
+		} else {
+			remoteVariables = append(remoteVariables, variable)
+		}
+	}
+
+	// Continue to retrieve anything not resolvable locally
+	if len(remoteVariables) > 0 {
+		variableIds := []string{}
+		for _, variable := range remoteVariables {
+			variableIds = append(variableIds, variable.ID)
+		}
+
+		secrets, err := p.Conjur.RetrieveBatchSecrets(variableIds)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, variable := range remoteVariables {
+			id := p.getFullyQualifiedID("variable", variable.ID)
+			if value, ok := secrets[id]; ok {
+				result[variable.Name] = value
+			}
+		}
+	}
+
+	// Merge override & Conjur values
+	for k, v := range overrideValues {
+		result[k] = v
+	}
+
+	return result, nil
+}
+
 // GetValue obtains a value by ID. The recognized IDs are:
 //	* "accessToken"
 // 	* Any Conjur variable ID
 func (p *Provider) GetValue(id string) ([]byte, error) {
 	var err error
 
-	if id == "accessToken" {
-		if p.Username != "" && p.APIKey != "" {
-			// TODO: Use a cached access token from the client, once it's exposed
-			return p.Conjur.Authenticate(authn.LoginPair{
-				p.Username,
-				p.APIKey,
-			})
-		}
-		return nil, errors.New("Error: Conjur provider can't provide an accessToken unless username and apiKey credentials are provided")
+	if override, ok := p.Overrides[id]; ok {
+		return override()
 	}
 
 	// If using the Conjur Kubernetes authenticator, ensure that the
@@ -151,6 +202,23 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 	}
 
 	return p.Conjur.RetrieveSecret(strings.Join(tokens, ":"))
+}
+
+func (p *Provider) getAccessToken() ([]byte, error) {
+	if p.Username != "" && p.APIKey != "" {
+		// TODO: Use a cached access token from the client, once it's exposed
+		return p.Conjur.Authenticate(authn.LoginPair{
+			p.Username,
+			p.APIKey,
+		})
+	}
+	return nil, errors.New("Error: Conjur provider can't provide an accessToken unless username and apiKey credentials are provided")
+}
+
+// getFullyQualifiedID returns the fully qualified resource id for a Conjur
+// resource of a particular type (e.g. dev:variable:foo)
+func (p *Provider) getFullyQualifiedID(resourceType string, id string) string {
+	return fmt.Sprintf("%s:%s:%s", p.Config.Account, resourceType, id)
 }
 
 // loadAuthenticator returns a Conjur Kubernetes authenticator client

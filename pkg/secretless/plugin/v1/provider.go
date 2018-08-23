@@ -1,5 +1,9 @@
 package v1
 
+import (
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+)
+
 // ProviderOptions contains the configuration for the provider instantiation
 type ProviderOptions struct {
 	// Name is the internal name that the provider will have. This may be different from
@@ -12,6 +16,9 @@ type Provider interface {
 	// GetName returns the name that the Provider was instantiated with
 	GetName() string
 
-	// GetValue takes in an id of a variable and returns its resolved value
+	// GetValues takes a slice of variable ids and returns their resolved values
+	GetValues(variables []config.Variable) (map[string][]byte, error)
+
+	// GetValue takes a single variable id and resolves its value
 	GetValue(id string) ([]byte, error)
 }

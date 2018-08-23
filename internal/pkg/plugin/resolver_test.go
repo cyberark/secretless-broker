@@ -83,7 +83,7 @@ func Test_Resolver(t *testing.T) {
 			variableValues, err := resolver.Resolve(variables)
 			So(len(variableValues), ShouldEqual, 0)
 			So(err, ShouldNotBeNil)
-			errorMsg := "ERROR: Resolving variable 'something-not-in-env' from provider 'env' failed: env cannot find environment variable 'something-not-in-env'"
+			errorMsg := "Failed to resolve variable: env cannot find environment variable 'something-not-in-env'"
 			So(err.Error(), ShouldEqual, errorMsg)
 
 		})

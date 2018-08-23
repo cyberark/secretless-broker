@@ -7,6 +7,7 @@ import (
 	vault "github.com/hashicorp/vault/api"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
 // Provider provides data values from the Conjur vault.
@@ -52,6 +53,19 @@ func parseVaultID(id string) (string, string) {
 	default:
 		return tokens[0], tokens[1]
 	}
+}
+
+// GetValues resolves multiple secrets into values
+func (p *Provider) GetValues(variables []config.Variable) (map[string][]byte, error) {
+	result := map[string][]byte{}
+	for _, variable := range variables {
+		value, err := p.GetValue(variable.ID)
+			if err != nil {
+				return nil, err
+			}
+		result[variable.Name] = value
+	}
+	return result, nil
 }
 
 // GetValue obtains a value by id. Any secret which is stored in the vault is recognized.

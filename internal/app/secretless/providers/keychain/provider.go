@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
 // Provider obtains a secret from an OS keychain.
@@ -23,6 +24,19 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 // GetName returns the name of the provider
 func (p *Provider) GetName() string {
 	return p.Name
+}
+
+// GetValues resolves multiple keychain variables into values
+func (p *Provider) GetValues(variables []config.Variable) (map[string][]byte, error) {
+	result := map[string][]byte{}
+	for _, variable := range variables {
+		value, err := p.GetValue(variable.ID)
+			if err != nil {
+				return nil, err
+			}
+		result[variable.Name] = value
+	}
+	return result, nil
 }
 
 // GetValue reads the contents of the identified file.

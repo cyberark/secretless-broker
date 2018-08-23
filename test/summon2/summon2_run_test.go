@@ -11,6 +11,7 @@ import (
 
 	"github.com/cyberark/secretless-broker/internal/app/summon/command"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -22,6 +23,19 @@ type MapProvider struct {
 func (mp MapProvider) GetName() string {
 	return "mapProvider"
 }
+
+func (mp MapProvider) GetValues(variables []config.Variable) (map[string][]byte, error) {
+	result := map[string][]byte{}
+	for _, variable := range variables {
+		if value, ok := mp.Secrets[variable.ID]; ok {
+			result[variable.Name] = value
+		} else {
+			return nil, fmt.Errorf("Value '%s' not found in MapProvider", variable.ID)
+		}
+	}
+	return result, nil
+}
+
 func (mp MapProvider) GetValue(id string) ([]byte, error) {
 	value, ok := mp.Secrets[id]
 	if ok {

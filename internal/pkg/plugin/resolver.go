@@ -48,7 +48,7 @@ func (resolver *Resolver) GetProvider(name string) (provider plugin_v1.Provider,
 
 	// If we don't know what this provider is, it's a critical error
 	if _, ok := resolver.ProviderFactories[name]; !ok {
-		resolver.LogFatalf("ERROR: Provider '%s' cannot be found", name)
+		return nil, fmt.Errorf("ERROR: Provider '%s' cannot be found", name)
 	}
 
 	providerOptions := plugin_v1.ProviderOptions{
@@ -72,41 +72,58 @@ func (resolver *Resolver) GetProvider(name string) (provider plugin_v1.Provider,
 // attempts to obtain the value of each Variable from the appropriate Provider.
 func (resolver *Resolver) Resolve(variables []config.Variable) (map[string][]byte, error) {
 	if variables == nil {
-		resolver.LogFatalf("ERROR! Variables not defined in Resolve call!")
+		return nil, fmt.Errorf("resolver received empty slice of variable ids")
 	}
 
-	result := make(map[string][]byte)
-	errorStrings := make([]string, 0, len(variables))
-
-	var err error
+	// Sort variables by provider for batch retrieval
+	sortedVariables := map[plugin_v1.Provider][]config.Variable{}
 	for _, variable := range variables {
+		var err error
 		var provider plugin_v1.Provider
-		var value []byte
-
 		if provider, err = resolver.GetProvider(variable.Provider); err != nil {
 			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", variable.Provider, err)
 		}
 
-		// This provider cannot resolve the named variable
-		if value, err = provider.GetValue(variable.ID); err != nil {
-			errInfo := fmt.Sprintf("ERROR: Resolving variable '%s' from provider '%s' failed: %v",
-				variable.ID,
-				variable.Provider,
-				err)
-			log.Println(errInfo)
-
-			errorStrings = append(errorStrings, errInfo)
-			continue
-		}
-
-		result[variable.Name] = value
-
-		if resolver.EventNotifier != nil {
-			resolver.EventNotifier.ResolveVariable(provider, variable.Name, value)
+		if slice, ok := sortedVariables[provider]; ok {
+			sortedVariables[provider] = append(slice, variable)
+		} else {
+			sortedVariables[provider] = []config.Variable{variable}
 		}
 	}
 
-	err = nil
+	resultMutex := &sync.Mutex{}
+	errorMutex := &sync.Mutex{}
+	threads := &sync.WaitGroup{}
+	threads.Add(len(sortedVariables))
+	result := map[string][]byte{}
+	errorStrings := make([]string, 0, len(variables))
+	for provider, providerVariables := range sortedVariables {
+		_variables := providerVariables
+		_provider := provider
+
+		go func() {
+			values, err := _provider.GetValues(_variables)
+			if err != nil {
+				errInfo := fmt.Sprintf("Failed to resolve variable: %v", err)
+				errorMutex.Lock()
+				errorStrings = append(errorStrings, errInfo)
+				errorMutex.Unlock()
+				log.Println(errInfo)
+			}
+
+			resultMutex.Lock()
+			for k, v := range values {
+				result[k] = v
+			}
+			resultMutex.Unlock()
+
+			threads.Done()
+		}()
+	}
+
+	threads.Wait();
+
+	var err error
 	if len(errorStrings) > 0 {
 		err = fmt.Errorf(strings.Join(errorStrings, "\n"))
 	}

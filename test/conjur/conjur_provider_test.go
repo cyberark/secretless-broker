@@ -6,6 +6,8 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 
@@ -18,17 +20,11 @@ func TestConjur_Provider(t *testing.T) {
 	var err error
 	var provider plugin_v1.Provider
 	name := "conjur"
+	resolver := plugin.NewResolver(providers.ProviderFactories, nil, nil)
 
-	options := plugin_v1.ProviderOptions{
-		Name: name,
-	}
-
-	Convey("Can create the Conjur provider", t, func() {
-		provider, err = providers.ProviderFactories[name](options)
+	Convey("Can be retrieved from the Resolver", t, func() {
+		provider, err = resolver.GetProvider(name)
 		So(err, ShouldBeNil)
-	})
-
-	Convey("Has the expected provider name", t, func() {
 		So(provider.GetName(), ShouldEqual, "conjur")
 	})
 
@@ -67,6 +63,62 @@ func TestConjur_Provider(t *testing.T) {
 	Convey("Cannot provide an unknown value", t, func() {
 		_, err = provider.GetValue("foobar")
 		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "Variable 'foobar' not found in account 'dev'")
+		So(err.Error(), ShouldEqual, "404 Not Found. Variable 'foobar' not found in account 'dev'.")
+	})
+
+	Convey("Can provide multiple secrets", t, func() {
+		values, err := resolver.Resolve([]config.Variable{
+			config.Variable{
+				Name: "user",
+				Provider: name,
+				ID: "db/user",
+			},
+			config.Variable{
+				Name: "password",
+				Provider: name,
+				ID: "db/password", 
+			},
+		})
+
+		So(err, ShouldBeNil)
+		So(len(values), ShouldEqual, 3)
+		So(string(values["user"]), ShouldEqual, "somewhat-secret")
+		So(string(values["password"]), ShouldEqual, "secret")
+		So(string(values["address"]), ShouldEqual, "not-so-secret")
+	})
+
+	Convey("Can provide multiple secrets including an access token", t, func() {
+		values, err := resolver.Resolve([]config.Variable{
+			config.Variable{
+				Name: "user",
+				Provider: name,
+				ID: "db/user",
+			},
+			config.Variable{
+				Name: "password",
+				Provider: name,
+				ID: "db/password", 
+			},
+			config.Variable{
+				Name: "address",
+				Provider: name,
+				ID: "db/address", 
+			},
+			config.Variable{
+				Name: "accessToken",
+				Provider: name,
+				ID: "accessToken", 
+			},
+		})
+		
+		So(err, ShouldBeNil)
+		So(len(values), ShouldEqual, 4)
+		So(string(values["accessToken"]), ShouldNotBeNil)
+	})
+
+	Convey("Can retrieve a single access token", t, func() {
+		token, err := provider.GetValue("accessToken")
+		So(err, ShouldBeNil)
+		So(token, ShouldNotBeNil)
 	})
 }

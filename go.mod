@@ -9,6 +9,7 @@ require (
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/SAP/go-hdb v0.12.1 // indirect
 	github.com/SermoDigital/jose v0.9.1 // indirect
+	github.com/acroca/go-symbols v0.0.0-20180523203557-953befd75e22 // indirect
 	github.com/armon/go-metrics v0.0.0-20180713145231-3c58d8115a78 // indirect
 	github.com/armon/go-radix v0.0.0-20170727155443-1fca145dffbc // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
@@ -19,7 +20,7 @@ require (
 	github.com/cenkalti/backoff v2.0.0+incompatible
 	github.com/codegangsta/cli v1.20.0
 	github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720 // indirect
-	github.com/cyberark/conjur-api-go v0.0.0-20180212213233-94b5cadf8f90
+	github.com/cyberark/conjur-api-go v0.3.3
 	github.com/cyberark/conjur-authn-k8s-client v0.12.0
 	github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed
 	github.com/davecgh/go-spew v1.1.0 // indirect
@@ -28,6 +29,7 @@ require (
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/duosecurity/duo_api_golang v0.0.0-20180315112207-d0530c80e49a // indirect
 	github.com/fatih/structs v1.0.0 // indirect
+	github.com/fatih/structtag v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -66,6 +68,7 @@ require (
 	github.com/jefferai/jsonx v0.0.0-20160721235117-9cc31c3135ee // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/joho/godotenv v1.2.0
+	github.com/josharian/impl v0.0.0-20180228163738-3d0f908298c4 // indirect
 	github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/keybase/go-crypto v0.0.0-20180627172517-670ebd3adf7a // indirect
@@ -73,6 +76,7 @@ require (
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.3 // indirect
+	github.com/mdempsky/gocode v0.0.0-20180727200127-00e7f5ac290a // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mgutz/logxi v0.0.0-20161027140823-aebf8a7d67ab // indirect
 	github.com/mitchellh/copystructure v0.0.0-20170525013902-d23ffcb85de3 // indirect
@@ -94,6 +98,8 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/ramya-rao-a/go-outline v0.0.0-20170803230019-9e9d089bb61a // indirect
+	github.com/rogpeppe/godef v0.0.0-20170920080713-b692db1de522 // indirect
 	github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735 // indirect
 	github.com/sethgrid/pester v0.0.0-20171127025028-760f8913c048 // indirect
 	github.com/sirupsen/logrus v1.0.6 // indirect
@@ -101,6 +107,7 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20170602164621-9e8dc3f972df
 	github.com/smartystreets/gunit v0.0.0-20180314194857-6f0d6275bdcd // indirect
 	github.com/spf13/pflag v1.0.2 // indirect
+	github.com/sqs/goreturns v0.0.0-20180302073349-83e02874ec12 // indirect
 	github.com/stretchr/testify v1.2.1
 	golang.org/x/crypto v0.0.0-20180119074636-ee41a25c63fb
 	golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b // indirect

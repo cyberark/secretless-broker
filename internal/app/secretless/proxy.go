@@ -131,12 +131,14 @@ func (p *Proxy) Run() {
 		switch msg {
 		case START, RESTART:
 			p.cleanUpListeners()
+			p.Listeners = make([]plugin_v1.Listener, 0)
+
 			// TODO: Delegate logic of this `if` check to connection managers
 			if len(p.Config.Listeners) < 1 {
-				log.Fatalln("ERROR! No listeners specified in config!")
+				log.Println("WARN! No listeners specified in config (wait loop)!")
+				break
 			}
 
-			p.Listeners = make([]plugin_v1.Listener, 0)
 			log.Println("Starting all listeners and handlers...")
 			for _, config := range p.Config.Listeners {
 				listener := p.Listen(config)

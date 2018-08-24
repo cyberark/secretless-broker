@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"io/ioutil"
 	"encoding/json"
 	"testing"
 
@@ -78,6 +80,11 @@ func TestConjur_Provider(t *testing.T) {
 				Provider: name,
 				ID: "db/password", 
 			},
+			config.Variable{
+				Name: "address",
+				Provider: name,
+				ID: "db/address", 
+			},
 		})
 
 		So(err, ShouldBeNil)
@@ -121,4 +128,39 @@ func TestConjur_Provider(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(token, ShouldNotBeNil)
 	})
+}
+
+var result map[string][]byte
+func BenchmarkConjurProvider(b *testing.B) {
+	b.StopTimer()
+
+	log.SetOutput(ioutil.Discard)
+	name := "conjur"
+	resolver := plugin.NewResolver(providers.ProviderFactories, nil, nil)
+	resolver.GetProvider(name)
+	
+	var values map[string][]byte
+
+	b.StartTimer()
+
+	for n := 0; n < b.N; n++ {
+		values, _ = resolver.Resolve([]config.Variable{
+			config.Variable{
+				Name: "user",
+				Provider: name,
+				ID: "db/user",
+			},
+			config.Variable{
+				Name: "password",
+				Provider: name,
+				ID: "db/password", 
+			},
+			config.Variable{
+				Name: "address",
+				Provider: name,
+				ID: "db/address", 
+			},
+		})
+	}
+	result = values
 }

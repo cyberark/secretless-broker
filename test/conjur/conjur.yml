@@ -1,2 +1,3 @@
 - !variable db/user
 - !variable db/password
+- !variable db/address

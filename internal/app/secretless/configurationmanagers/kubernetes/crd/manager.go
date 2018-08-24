@@ -17,7 +17,7 @@ type configurationManager struct {
 }
 
 // Initialize implements plugin_v1.ConfigurationManager
-func (configManager *ConfigurationManager) Initialize(changeHandler plugin_v1.ConfigurationChangedHandler,
+func (configManager *configurationManager) Initialize(changeHandler plugin_v1.ConfigurationChangedHandler,
 	configSpec string) error {
 
 	configManager.ConfigChangedFunc = changeHandler.ConfigurationChanged
@@ -34,7 +34,7 @@ func (configManager *ConfigurationManager) Initialize(changeHandler plugin_v1.Co
 }
 
 // CRDAdded implements crd.ResourceEventHandler
-func (configManager *ConfigurationManager) CRDAdded(crdConfiguration *api_v1.Configuration) {
+func (configManager *configurationManager) CRDAdded(crdConfiguration *api_v1.Configuration) {
 	newConfig, err := config.LoadFromCRD(*crdConfiguration)
 	if err != nil {
 		log.Printf("%s: WARN: New CRD could not be turned into a config.Config!", PluginName)
@@ -45,7 +45,7 @@ func (configManager *ConfigurationManager) CRDAdded(crdConfiguration *api_v1.Con
 }
 
 // CRDDeleted implements crd.ResourceEventHandler
-func (configManager *ConfigurationManager) CRDDeleted(crdConfiguration *api_v1.Configuration) {
+func (configManager *configurationManager) CRDDeleted(crdConfiguration *api_v1.Configuration) {
 	log.Printf("%s: WARN: CRDDeleted - setting empty config!", PluginName)
 
 	// TODO: Do something of value here
@@ -54,7 +54,7 @@ func (configManager *ConfigurationManager) CRDDeleted(crdConfiguration *api_v1.C
 }
 
 // CRDUpdated implements crd.ResourceEventHandler
-func (configManager *ConfigurationManager) CRDUpdated(oldCRDConfiguration *api_v1.Configuration,
+func (configManager *configurationManager) CRDUpdated(oldCRDConfiguration *api_v1.Configuration,
 	newCRDConfiguration *api_v1.Configuration) {
 
 	oldConfig, err := config.LoadFromCRD(*oldCRDConfiguration)
@@ -81,7 +81,7 @@ func (configManager *ConfigurationManager) CRDUpdated(oldCRDConfiguration *api_v
 }
 
 // GetName implements plugin_v1.ConfigurationManager
-func (configManager *ConfigurationManager) GetName() string {
+func (configManager *configurationManager) GetName() string {
 	return configManager.Name
 }
 

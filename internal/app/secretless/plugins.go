@@ -1,7 +1,7 @@
 package secretless
 
 import (
-	"github.com/cyberark/secretless-broker/internal/app/secretless/configuration_managers"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/configurationmanagers"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
@@ -18,7 +18,7 @@ var InternalListeners = listeners.ListenerFactories
 var InternalProviders = providers.ProviderFactories
 
 // InternalConfigurationManagers is the set of built-in configuration managers
-var InternalConfigurationManagers = configuration_managers.ConfigurationManagerFactories
+var InternalConfigurationManagers = configurationmanagers.ConfigurationManagerFactories
 
 // InternalConnectionManagers is empty; there are currently no built-in project managers
 var InternalConnectionManagers = map[string]func() plugin_v1.ConnectionManager{}

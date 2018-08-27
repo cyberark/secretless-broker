@@ -1,25 +1,23 @@
 apiVersion: "secretless.io/v1"
 kind: Configuration
 metadata:
-  name: secretless-example-config
+  name: secretless-example-config2
 spec:
   listeners:
-    - name: http_good_basic_auth
-      debug: true
+    - name: http_config_1_listener
       protocol: http
-      socket: /sock/.s.proxy.8080
+      address: 0.0.0.0:9090
 
   handlers:
-    - name: http_good_basic_auth_handler
+    - name: http_config_1_handler
       type: basic_auth
-      listener: http_good_basic_auth
-      debug: true
+      listener: http_config_1_listener
       match:
         - ^http.*
       credentials:
         - name: username
           provider: literal
-          id: someusername
+          id: user2
         - name: password
           provider: literal
-          id: somepassword
+          id: password2

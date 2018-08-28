@@ -37,7 +37,7 @@ output_xml() {
         current_file=$file
       fi
 
-      echo "    <error line=\"$line\" message=\"$error\"></error>"
+      echo "    <error line=\"$line\" severity=\"error\" message=\"$error\"></error>"
     done <<< "$style_errs"
 
     echo "  </file>"

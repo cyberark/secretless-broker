@@ -1,15 +1,15 @@
-package kubernetes_secrets
+package kubernetessecrets
 
 import (
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/api/core/v1"
 )
 
 // KubeClient represents Kubernetes client and calculated namespace
 type KubeClient struct {
-	clientset *kubernetes.Clientset
+	clientset    *kubernetes.Clientset
 	clientConfig clientcmd.ClientConfig
 }
 
@@ -32,7 +32,7 @@ func NewKubeClient() (*KubeClient, error) {
 	}
 
 	return &KubeClient{
-		clientset: clientset,
+		clientset:    clientset,
 		clientConfig: clientConfig,
 	}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"strconv"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -53,10 +54,13 @@ func TestPGHandler(t *testing.T) {
 		_, err := net.LookupIP("pg")
 		if err == nil {
 			host = "secretless"
-			port = 5432
+			port = 15432
 		} else {
 			host = "localhost"
-			port = 15432
+			port, err = strconv.Atoi(os.Getenv("SECRETLESS_PORT"))
+			if err != nil {
+				t.Error(err)
+			}
 		}
 
 		cmdOut, err := psql(host, port, "", []string{})

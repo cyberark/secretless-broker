@@ -83,7 +83,7 @@ func (manager *connectionManager) Shutdown() {
 	log.Println("Shutdown manager event...")
 }
 
-// ConnectionManagerFactory returns an empty ConnectionManager
+// ConnManagerFactory returns an empty ConnectionManager
 func ConnManagerFactory() plugin_v1.ConnectionManager {
 	return &connectionManager{}
 }

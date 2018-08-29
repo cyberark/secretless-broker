@@ -9,3 +9,6 @@ test/junit.output
 
 # Ignore compose file changes
 docker-compose.yml
+
+# We don't want Docker cache to break on Jenkinsfile changes
+Jenkinsfile

@@ -1,4 +1,4 @@
-package kubernetes_secrets
+package kubernetessecrets
 
 import (
 	"fmt"
@@ -55,12 +55,12 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	secret, err := p.Client.GetSecret(currentNamespace, secretName);
+	secret, err := p.Client.GetSecret(currentNamespace, secretName)
 	if err != nil {
 		return nil, err
 	}
 
-	value, ok := secret.Data[fieldName];
+	value, ok := secret.Data[fieldName]
 	if !ok {
 		return nil, fmt.Errorf("could not find field '%s' in Kubernetes secret '%s'", fieldName, secretName)
 	}

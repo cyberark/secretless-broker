@@ -5,11 +5,25 @@ LABEL id="secretless-test-runner"
 ENTRYPOINT [ "go", "test", "-v", "-timeout", "3m" ]
 WORKDIR /secretless
 
-RUN apk add -u curl gcc git musl-dev
+RUN apk add -u curl \
+               gcc \
+               git \
+               mercurial \
+               musl-dev
 
 COPY go.mod go.sum /secretless/
+
+# There are checksum mismatches in various environments with client-go package
+# so we for now manually remove it from the checksum file. Golang 1.11rc1+ seems
+# to have fixed this issue.
+RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
 
 # https://github.com/golang/go/issues/26610
 RUN go list -e $(go list -f '{{.Path}}' -m all 2>/dev/null)
 
 COPY . .
+
+# There are checksum mismatches in various environments with client-go package
+# so we for now manually remove it from the checksum file. Golang 1.11rc1+ seems
+# to have fixed this issue.
+RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum

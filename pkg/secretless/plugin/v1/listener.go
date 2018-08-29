@@ -87,6 +87,7 @@ func (l *BaseListener) GetListener() net.Listener {
 	return l.NetListener
 }
 
+// GetName returns the internal name given to this listener
 func (l *BaseListener) GetName() string {
 	panic("BaseListener does not implement GetName")
 }

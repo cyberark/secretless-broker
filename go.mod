@@ -1,6 +1,7 @@
 module github.com/cyberark/secretless-broker
 
 require (
+	bitbucket.org/ww/goautoneg v0.0.0-20120707110453-75cd24fc2f2c // indirect
 	cloud.google.com/go v0.25.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Jeffail/gabs v0.0.0-20180420203615-7a0fed31069a // indirect
@@ -26,8 +27,6 @@ require (
 	github.com/docker/go-connections v0.3.0 // indirect
 	github.com/docker/go-units v0.3.3 // indirect
 	github.com/duosecurity/duo_api_golang v0.0.0-20180315112207-d0530c80e49a // indirect
-	github.com/emicklei/go-restful v2.8.0+incompatible // indirect
-	github.com/emicklei/go-restful-swagger12 v0.0.0-20170926063155-7524189396c6 // indirect
 	github.com/fatih/structs v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 // indirect
@@ -38,8 +37,9 @@ require (
 	github.com/gocql/gocql v0.0.0-20180617115710-e06f8c1bcd78 // indirect
 	github.com/gogo/protobuf v1.1.1 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
+	github.com/golang/groupcache v0.0.0-20180513044358-24b0969c4cb7 // indirect
 	github.com/golang/protobuf v1.1.0 // indirect
-	github.com/google/btree v0.0.0-20180124185431-e89373fe6b4a // indirect
+	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/go-github v15.0.0+incompatible // indirect
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
@@ -61,7 +61,6 @@ require (
 	github.com/hashicorp/hcl v0.0.0-20171017181929-23c074d0eceb // indirect
 	github.com/hashicorp/vault v0.0.0-20180117165724-bb45c0637118
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
-	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.6 // indirect
 	github.com/jefferai/jsonx v0.0.0-20160721235117-9cc31c3135ee // indirect
@@ -69,7 +68,6 @@ require (
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
-	github.com/juju/ratelimit v1.0.1 // indirect
 	github.com/keybase/go-crypto v0.0.0-20180627172517-670ebd3adf7a // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
@@ -84,7 +82,6 @@ require (
 	github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180718012357-94122c33edd3 // indirect
-	github.com/nsf/gocode v0.0.0-20180502111240-9d1e0378d35b // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
@@ -106,14 +103,12 @@ require (
 	github.com/spf13/pflag v1.0.2 // indirect
 	github.com/stretchr/testify v1.2.1
 	golang.org/x/crypto v0.0.0-20180119074636-ee41a25c63fb
-	golang.org/x/lint v0.0.0-20180702182130-06c8688daad7 // indirect
 	golang.org/x/net v0.0.0-20180112015858-5ccada7d0a7b // indirect
 	golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
 	golang.org/x/sys v0.0.0-20180727230415-bd9dbc187b6e // indirect
 	golang.org/x/text v0.0.0-20171227012246-e19ae1496984 // indirect
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
-	golang.org/x/tools v0.0.0-20180726173139-0bf5a3224797 // indirect
 	google.golang.org/appengine v1.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20180722052100-02b4e9547331 // indirect
 	google.golang.org/grpc v1.13.0 // indirect
@@ -128,7 +123,9 @@ require (
 	gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0
 	gopkg.in/yaml.v2 v2.2.1
 	gotest.tools v2.1.0+incompatible // indirect
-	k8s.io/api v0.0.0-20180809133242-91bfdbcf0c2c
-	k8s.io/apimachinery v0.0.0-20180810004531-31dade610c053669d8054bfd847da657251e8c1a
-	k8s.io/client-go v0.0.0-20171206195300-23781f4d6632d88e869066eaebb743857aa1ef9b
+	k8s.io/api v0.0.0-20180712090710-2d6f90ab1293
+	k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408
+	k8s.io/apimachinery v0.0.0-20180621070125-103fd098999d
+	k8s.io/client-go v0.0.0-20180806134042-1f13a808da65
+	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
 )

@@ -1,0 +1,37 @@
+#!/bin/bash -e
+
+CURRENT_DIR=$($(dirname $0)/abspath)
+TOPLEVEL_DIR="$CURRENT_DIR/.."
+
+PROJECT_MODULE="github.com/cyberark/secretless-broker"
+CONTAINER_PATH="/go/src/$PROJECT_MODULE"
+IMAGE_NAME="secretless-codegen-builder"
+
+echo "Pre-cleaning..."
+rm -rf "$TOPLEVEL_DIR/github.com"
+
+echo "Building codegen Docker image..."
+docker build -f "${CURRENT_DIR}/Dockerfile.codegen" \
+             -t "${IMAGE_NAME}" \
+             "${TOPLEVEL_DIR}"
+
+runner_cmd="/code-generator/generate-groups.sh all \
+                                               $PROJECT_MODULE/pkg/k8sclient \
+                                               $PROJECT_MODULE/pkg/apis \
+                                               secretless.io:v1 \
+                                               -h ./bin/codegen-utils/boilerplate.go.txt"
+
+echo "Generating API code and client (this may take a few minutes)..."
+docker run --rm \
+           -t \
+           -e GOPATH="" \
+           -v "${TOPLEVEL_DIR}:/secretless" \
+           "${IMAGE_NAME}" $runner_cmd
+
+echo "Moving the code in the right places..."
+cp -r "$TOPLEVEL_DIR/$PROJECT_MODULE/pkg" "$TOPLEVEL_DIR"
+
+echo "Removing temp files..."
+rm -rf "$TOPLEVEL_DIR/github.com"
+
+echo "Code-gen done!"

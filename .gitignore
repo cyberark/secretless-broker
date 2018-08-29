@@ -25,3 +25,6 @@ test/plugin/out/
 
 # We don't use dep anymore
 Gopkg.*
+
+# Ignore auto-generated temporary files
+github.com/cyberark/

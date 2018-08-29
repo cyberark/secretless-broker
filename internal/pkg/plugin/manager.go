@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -35,11 +36,13 @@ func _IsDynamicLibrary(file os.FileInfo) bool {
 // Manager contains the main proxy and all connection managers, listener factories,
 // and handler factories that are available
 type Manager struct {
-	ConnectionManagers map[string]plugin_v1.ConnectionManager
-	HandlerFactories   map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
-	ListenerFactories  map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
-	ProviderFactories  map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
-	Proxy              secretless.Proxy
+	configReloadMutex     sync.Mutex
+	ConfigurationManagers map[string]plugin_v1.ConfigurationManager
+	ConnectionManagers    map[string]plugin_v1.ConnectionManager
+	HandlerFactories      map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
+	ListenerFactories     map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
+	ProviderFactories     map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
+	Proxy                 secretless.Proxy
 }
 
 var _singleton *Manager
@@ -49,20 +52,42 @@ var _once sync.Once
 func GetManager() *Manager {
 	_once.Do(func() {
 		_singleton = &Manager{
-			ConnectionManagers: make(map[string]plugin_v1.ConnectionManager),
-			HandlerFactories:   make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
-			ListenerFactories:  make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
-			ProviderFactories:  make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)),
+			configReloadMutex:     sync.Mutex{},
+			ConfigurationManagers: make(map[string]plugin_v1.ConfigurationManager),
+			ConnectionManagers:    make(map[string]plugin_v1.ConnectionManager),
+			HandlerFactories:      make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
+			ListenerFactories:     make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
+			ProviderFactories:     make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)),
 		}
 	})
 
 	return _singleton
 }
 
+// ConfigurationChanged is an interface adapter for plugin_v1.ConfigurationChangedHandler
+func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig config.Config) error {
+	log.Printf("Configuration manager '%s' provided new configuration...",
+		configManagerName)
+	return manager._ReloadConfig(newConfig)
+}
+
 func (manager *Manager) _ReloadConfig(newConfig config.Config) error {
-	log.Println("----------------------------")
 	log.Println("Reloading...")
+	manager.configReloadMutex.Lock()
+
+	log.Println("----------------------------")
+
 	manager.Proxy.Config = newConfig
+
+	// TODO: Use a more robust and async way to detect when we can change the underlying config
+	go func() {
+		// Since our listeners/handlers might be still starting when the next reload even occurs
+		// changing the underlying configuration is a really bad idea (that causes crashes) so
+		// for now we add a small delay before processing the next reload.
+		time.Sleep(1 * time.Second)
+		manager.configReloadMutex.Unlock()
+	}()
+
 	return manager.Proxy.ReloadListeners()
 }
 
@@ -109,6 +134,7 @@ func (manager *Manager) RegisterSignalHandlers(configFile string) {
 	manager._RegisterReloadSignalHandlers(configFile)
 }
 
+// LoadConfigurationFile creates a configuration instance from a filesystem path
 func (manager *Manager) LoadConfigurationFile(configFile string) config.Config {
 	configuration, err := config.LoadFromFile(configFile)
 
@@ -147,6 +173,34 @@ func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
 	return pluginInfo, nil
 }
 
+// _LoadConfigurationMangers appends all configuration managers from the plugin to the pluginManager
+func _LoadConfigurationMangers(manager *Manager, config config.Config,
+	pluginObj *plugin.Plugin, pluginName string) error {
+
+	rawConfigManagerPluginsFunc, err := pluginObj.Lookup("GetConfigurationManagers")
+	if err != nil {
+		return err
+	}
+
+	// TODO: Handle different interface versions
+	configManagerPluginsFunc, ok := rawConfigManagerPluginsFunc.(func() map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager)
+	if !ok {
+		return errors.New("ERROR: Could not cast GetConfigurationManagers to proper type")
+	}
+	configManagerPlugins := configManagerPluginsFunc()
+
+	for managerID, configManagerPluginFactory := range configManagerPlugins {
+		options := plugin_v1.ConfigurationManagerOptions{
+			Name: managerID,
+		}
+		configManagerPlugin := configManagerPluginFactory(options)
+		manager.ConfigurationManagers[managerID] = configManagerPlugin
+		log.Printf("Configuration manager '%s' added from plugin %s", managerID, pluginName)
+	}
+
+	return nil
+}
+
 // _LoadConnectionManagers appends all managers from the plugin to the pluginManager
 func _LoadConnectionManagers(manager *Manager, config config.Config,
 	pluginObj *plugin.Plugin, pluginName string) error {
@@ -166,7 +220,7 @@ func _LoadConnectionManagers(manager *Manager, config config.Config,
 	for managerID, connManagerPluginFactory := range connManagerPlugins {
 		connManagerPlugin := connManagerPluginFactory()
 		manager.ConnectionManagers[managerID] = connManagerPlugin
-		log.Printf("Manager '%s' added from plugin %s", managerID, pluginName)
+		log.Printf("Connection manager '%s' added from plugin %s", managerID, pluginName)
 	}
 
 	return nil
@@ -262,9 +316,19 @@ func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOption
 }
 
 // Run is the main wait loop once we load all the plugins
-func (manager *Manager) Run(configuration config.Config) error {
+func (manager *Manager) Run(configManagerID string, configManagerSpec string, configuration config.Config) error {
+	// We dont want any reloads happening until we are fully running
+	manager.configReloadMutex.Lock()
+
+	if len(configManagerID) > 0 {
+		manager.InitializeConfigurationManager(configManagerID, configManagerSpec)
+	}
+
 	manager.InitializeConnectionManagers(configuration)
 
+	log.Println("Initialization of plugins done.")
+
+	log.Println("Initializing the proxy...")
 	resolver := NewResolver(manager.ProviderFactories, manager, nil)
 
 	manager.Proxy = secretless.Proxy{
@@ -275,6 +339,8 @@ func (manager *Manager) Run(configuration config.Config) error {
 		RunListenerFunc: manager._RunListener,
 	}
 
+	manager.configReloadMutex.Unlock()
+
 	manager.Proxy.Run()
 
 	return nil
@@ -282,12 +348,20 @@ func (manager *Manager) Run(configuration config.Config) error {
 
 // LoadInternalPlugins loads all handlers/listeners/managers that are included in secretless by default
 func (manager *Manager) LoadInternalPlugins(config config.Config) error {
-	// Load all internal ConnectionManagers
-	for managerID, managerFactory := range secretless.InternalConnectionManagers {
-		manager.ConnectionManagers[managerID] = managerFactory()
+	// Load all internal ConfigurationManagers
+	for configManagerID, configManagerFactory := range secretless.InternalConfigurationManagers {
+		options := plugin_v1.ConfigurationManagerOptions{Name: configManagerID}
+		manager.ConfigurationManagers[configManagerID] = configManagerFactory(options)
 	}
-	managerNames := reflect.ValueOf(manager.ConnectionManagers).MapKeys()
-	log.Printf("- ConnectionManagers: %v", managerNames)
+	configManagerNames := reflect.ValueOf(manager.ConfigurationManagers).MapKeys()
+	log.Printf("- ConfigurationManagers: %v", configManagerNames)
+
+	// Load all internal ConnectionManagers
+	for connectionManagerID, connectionManagerFactory := range secretless.InternalConnectionManagers {
+		manager.ConnectionManagers[connectionManagerID] = connectionManagerFactory()
+	}
+	connectionManagerNames := reflect.ValueOf(manager.ConnectionManagers).MapKeys()
+	log.Printf("- ConnectionManagers: %v", connectionManagerNames)
 
 	// Load all internal Providers
 	for providerID, providerFactory := range secretless.InternalProviders {
@@ -363,7 +437,13 @@ func (manager *Manager) LoadLibraryPlugins(path string, config config.Config) er
 		log.Printf("%s info:", file.Name())
 		log.Println(string(formattedInfo))
 
-		// Load managers
+		// Load configuration managers
+		if err := _LoadConfigurationMangers(manager, config, pluginObj, file.Name()); err != nil {
+			// Log the error but try to load other plugins
+			log.Println(err)
+		}
+
+		// Load connection managers
 		if err := _LoadConnectionManagers(manager, config, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
@@ -391,22 +471,44 @@ func (manager *Manager) LoadLibraryPlugins(path string, config config.Config) er
 	return nil
 }
 
+// InitializeConfigurationManager takes a configuration manager and initializes it
+func (manager *Manager) InitializeConfigurationManager(id string, configSpec string) error {
+	// Ensure that we have this configuration manager
+	if _, ok := manager.ConfigurationManagers[id]; !ok {
+		log.Panicf("Error! Unrecognized configuration manager id '%s'", id)
+	}
+
+	log.Printf("Initializing configuration manager '%s'...", id)
+	configManagerPlugin := manager.ConfigurationManagers[id]
+
+	err := configManagerPlugin.Initialize(manager, configSpec)
+	if err != nil {
+		log.Fatalf("Failed to initialize configuration manager '%s': %s\n",
+			id,
+			err.Error())
+	}
+
+	log.Printf("Configuration manager '%s' initialized (filter: '%s').",
+		id, configSpec)
+
+	return nil
+}
+
 // InitializeConnectionManagers loops through the connection managers and initializes them
 func (manager *Manager) InitializeConnectionManagers(c config.Config) error {
-	log.Println("Initializing managers...")
+	log.Println("Initializing connection managers...")
 	for managerID, connManagerPlugin := range manager.ConnectionManagers {
 		err := connManagerPlugin.Initialize(c, manager._ReloadConfig)
 		if err != nil {
-			log.Printf("Failed to initialize manager '%s': %s\n", managerID, err.Error())
+			log.Printf("Failed to initialize connection manager '%s': %s\n", managerID, err.Error())
 
 			// TODO: Decide if manager initialization erroring is a fatal error.
 			//       For now we treat it as a non-fatal error.
 			delete(manager.ConnectionManagers, managerID)
 			continue
 		}
-		log.Printf("Manager '%s' initialized.", managerID)
+		log.Printf("Connection manager '%s' initialized.", managerID)
 	}
-	log.Println("Initializing managers done.")
 
 	return nil
 }

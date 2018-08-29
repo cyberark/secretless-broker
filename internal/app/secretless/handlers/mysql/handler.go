@@ -96,6 +96,7 @@ func (h *Handler) Run() {
 	h.Pipe()
 }
 
+// Shutdown tries to nicely close our connection
 func (h *Handler) Shutdown() {
 	defer h.BaseHandler.Shutdown()
 

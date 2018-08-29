@@ -10,9 +10,9 @@ services:
       context: .
     environment:
       - ECHO_HOST=echo
-    command: secretless-broker -f /secretless.yml
+    command: secretless-broker -config-mgr example-plugin-config-manager#/secretless-test.yml
     volumes:
-      - ./secretless.yml:/secretless.yml
+      - ./secretless.yml:/secretless-test.yml
     depends_on:
       - echo
 

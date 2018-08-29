@@ -49,7 +49,9 @@ style_errs=$(docker run \
   --rm \
   secretless-dev \
   bash -ec "
-    go get -u golang.org/x/lint/golint
+    # https://github.com/golang/lint/issues/397
+    go get golang.org/x/lint@v0.0.0-20180702182130-06c8688daad
+    go get golang.org/x/lint/golint
     golint ${PROJECT_ROOT}cmd/...
     golint ${PROJECT_ROOT}internal/...
     golint ${PROJECT_ROOT}pkg/...

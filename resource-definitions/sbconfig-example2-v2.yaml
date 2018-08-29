@@ -1,0 +1,23 @@
+apiVersion: "secretless.io/v1"
+kind: Configuration
+metadata:
+  name: secretless-example-config2
+spec:
+  listeners:
+    - name: http_config_1_listener
+      protocol: http
+      address: 0.0.0.0:9090
+
+  handlers:
+    - name: http_config_1_handler
+      type: basic_auth
+      listener: http_config_1_listener
+      match:
+        - ^http.*
+      credentials:
+        - name: username
+          provider: literal
+          id: user2
+        - name: password
+          provider: literal
+          id: password2

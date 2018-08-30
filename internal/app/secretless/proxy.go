@@ -135,7 +135,7 @@ func (p *Proxy) Run() {
 
 			// TODO: Delegate logic of this `if` check to connection managers
 			if len(p.Config.Listeners) < 1 {
-				log.Println("WARN! No listeners specified in config (wait loop)!")
+				log.Println("Waiting for valid configuration to be provided...")
 				break
 			}
 

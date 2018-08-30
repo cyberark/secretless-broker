@@ -2,7 +2,7 @@ version: '3.0'
 
 services:
   nginx:
-    image: nginx:1-alpine
+    image: nginx:stable-alpine
     ports:
       - 8080
     healthcheck:

@@ -2,14 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strings"
 
-	yaml "gopkg.in/yaml.v1"
-
 	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
+
+const configFileManagerPluginID = "configfile"
 
 func parseConfigManagerSpec(configManagerSpecString string) (configManagerID string, configManagerSpec string) {
 	if len(configManagerSpecString) == 0 {
@@ -39,45 +39,51 @@ func main() {
 	configManagerHelp += "(eg '<name>[#<filterSpec>]'). "
 	configManagerHelp += "Default will try to use 'secretless.yml' configuration."
 
-	configFile := flag.String("f", "secretless.yml", "Location of the configuration file.")
-	pluginDir := flag.String("p", "/usr/local/lib/secretless", "Directory containing Secretless plugins")
-	configManagerSpecString := flag.String("config-mgr", "", configManagerHelp)
-	fsWatchSwitch := flag.Bool("watch", false, "Enable automatic reloads when configuration file changes.")
+	configFile := flag.String("f", "", "Location of the configuration file.")
+	configManagerSpecString := flag.String("config-mgr", "configfile", configManagerHelp)
 	debugSwitch := flag.Bool("debug", false, "Enable debug logging.")
+	fsWatchSwitch := flag.Bool("watch", false, "Enable automatic reloads when configuration file changes.")
+	pluginDir := flag.String("p", "/usr/local/lib/secretless", "Directory containing Secretless plugins")
 	flag.Parse()
 
-	configuration := config.Config{}
 	configManagerID, configManagerSpec := parseConfigManagerSpec(*configManagerSpecString)
 
-	if len(*configManagerSpecString) <= 0 {
-		configuration = plugin.GetManager().LoadConfigurationFile(*configFile)
-
-		if *fsWatchSwitch {
-			log.Printf("Watching for changes: %s", *configFile)
-			plugin.GetManager().RegisterConfigFileWatcher(*configFile)
+	// If a configuration file is specified, we don't care what config-mgr the user selected
+	// as we know that we should use the configfile one.
+	if len(*configFile) > 0 {
+		if len(*configManagerSpecString) > 0 {
+			log.Printf("WARN: Config file and config manager specified" +
+				" - forcing 'configfile' configuration manager!")
+			configManagerID = configFileManagerPluginID
 		}
+
+		configManagerSpec = *configFile
+	}
+
+	if *fsWatchSwitch {
+		// If fsWatchSwitch is flipped but our configuration manager plugin is not 'configfile',
+		// the user is requesting an impossible situation
+		if configManagerID != configFileManagerPluginID {
+			log.Fatalf("FATAL: Watch flag enabled on a non-filesystem based configuration" +
+				"manager!")
+		}
+
+		// Attach 'watch' param as a URL query param
+		configManagerSpec = configManagerSpec + fmt.Sprintf("?watch=%v", *fsWatchSwitch)
 	}
 
 	log.Println("Loading internal plugins...")
-	err := plugin.GetManager().LoadInternalPlugins(configuration)
+	err := plugin.GetManager().LoadInternalPlugins()
 	if err != nil {
 		log.Println(err)
 	}
 
 	log.Println("Loading external library plugins...")
-	err = plugin.GetManager().LoadLibraryPlugins(*pluginDir, configuration)
+	err = plugin.GetManager().LoadLibraryPlugins(*pluginDir)
 	if err != nil {
 		log.Println(err)
 	}
 
-	if *debugSwitch {
-		configStr, _ := yaml.Marshal(configuration)
-		log.Printf("Loaded configuration: %s", configStr)
-		for _, handler := range configuration.Handlers {
-			handler.Debug = true
-		}
-	}
-
-	plugin.GetManager().RegisterSignalHandlers(*configFile)
-	plugin.GetManager().Run(configManagerID, configManagerSpec, configuration)
+	plugin.GetManager().RegisterSignalHandlers()
+	plugin.GetManager().Run(configManagerID, configManagerSpec, *debugSwitch)
 }

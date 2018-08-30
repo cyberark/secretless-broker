@@ -16,6 +16,8 @@ import (
 	"syscall"
 	"time"
 
+	yaml "gopkg.in/yaml.v1"
+
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -39,6 +41,7 @@ type Manager struct {
 	configReloadMutex     sync.Mutex
 	ConfigurationManagers map[string]plugin_v1.ConfigurationManager
 	ConnectionManagers    map[string]plugin_v1.ConnectionManager
+	DebugFlag             bool
 	HandlerFactories      map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
 	ListenerFactories     map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
 	ProviderFactories     map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
@@ -55,6 +58,7 @@ func GetManager() *Manager {
 			configReloadMutex:     sync.Mutex{},
 			ConfigurationManagers: make(map[string]plugin_v1.ConfigurationManager),
 			ConnectionManagers:    make(map[string]plugin_v1.ConnectionManager),
+			DebugFlag:             false,
 			HandlerFactories:      make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
 			ListenerFactories:     make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
 			ProviderFactories:     make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)),
@@ -76,6 +80,19 @@ func (manager *Manager) _ReloadConfig(newConfig config.Config) error {
 	manager.configReloadMutex.Lock()
 
 	log.Println("----------------------------")
+
+	if manager.DebugFlag == true {
+		configStr, _ := yaml.Marshal(newConfig)
+		log.Printf("New configuration: %s", configStr)
+
+		// Range uses a struct copy so we can't mod the actual items directly
+		for index := range newConfig.Listeners {
+			newConfig.Listeners[index].Debug = true
+		}
+		for index := range newConfig.Handlers {
+			newConfig.Handlers[index].Debug = true
+		}
+	}
 
 	manager.Proxy.Config = newConfig
 
@@ -113,25 +130,9 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 	}()
 }
 
-func (manager *Manager) _RegisterReloadSignalHandlers(configFile string) {
-	log.Println("Registering reload signal listeners...")
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, syscall.SIGUSR1)
-
-	go func() {
-		for {
-			reloadSignal := <-signalChannel
-			log.Printf("Intercepted reload signal '%v'. Reloading (from file)...", reloadSignal)
-			config := manager.LoadConfigurationFile(configFile)
-			manager._ReloadConfig(config)
-		}
-	}()
-}
-
 // RegisterSignalHandlers registers shutdown and reload signal handlers
-func (manager *Manager) RegisterSignalHandlers(configFile string) {
+func (manager *Manager) RegisterSignalHandlers() {
 	manager._RegisterShutdownSignalHandlers()
-	manager._RegisterReloadSignalHandlers(configFile)
 }
 
 // LoadConfigurationFile creates a configuration instance from a filesystem path
@@ -143,16 +144,6 @@ func (manager *Manager) LoadConfigurationFile(configFile string) config.Config {
 	}
 
 	return configuration
-}
-
-// RegisterConfigFileWatcher adds a configuration file change trigger for reloads
-func (manager *Manager) RegisterConfigFileWatcher(configFile string) {
-	onChangeRunner := func() {
-		log.Println("Sending reload signal (SIGUSR1)...")
-		syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
-	}
-
-	AttachWatcher(configFile, onChangeRunner)
 }
 
 // _IsSupportedPluginAPIVersion returns a boolean indicating if we support
@@ -174,9 +165,7 @@ func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
 }
 
 // _LoadConfigurationMangers appends all configuration managers from the plugin to the pluginManager
-func _LoadConfigurationMangers(manager *Manager, config config.Config,
-	pluginObj *plugin.Plugin, pluginName string) error {
-
+func _LoadConfigurationMangers(manager *Manager, pluginObj *plugin.Plugin, pluginName string) error {
 	rawConfigManagerPluginsFunc, err := pluginObj.Lookup("GetConfigurationManagers")
 	if err != nil {
 		return err
@@ -202,8 +191,7 @@ func _LoadConfigurationMangers(manager *Manager, config config.Config,
 }
 
 // _LoadConnectionManagers appends all managers from the plugin to the pluginManager
-func _LoadConnectionManagers(manager *Manager, config config.Config,
-	pluginObj *plugin.Plugin, pluginName string) error {
+func _LoadConnectionManagers(manager *Manager, pluginObj *plugin.Plugin, pluginName string) error {
 
 	rawManagerPluginsFunc, err := pluginObj.Lookup("GetConnectionManagers")
 	if err != nil {
@@ -227,9 +215,7 @@ func _LoadConnectionManagers(manager *Manager, config config.Config,
 }
 
 // _LoadHandlersFromPlugin appends all handlers from the plugin to the pluginManager
-func _LoadHandlersFromPlugin(manager *Manager, config config.Config,
-	pluginObj *plugin.Plugin, pluginName string) error {
-
+func _LoadHandlersFromPlugin(manager *Manager, pluginObj *plugin.Plugin, pluginName string) error {
 	rawHandlerPluginsFunc, err := pluginObj.Lookup("GetHandlers")
 	if err != nil {
 		return err
@@ -250,9 +236,7 @@ func _LoadHandlersFromPlugin(manager *Manager, config config.Config,
 }
 
 // _LoadListenersFromPlugin appends all listeners from the plugin to the pluginManager
-func _LoadListenersFromPlugin(manager *Manager, config config.Config,
-	pluginObj *plugin.Plugin, pluginName string) error {
-
+func _LoadListenersFromPlugin(manager *Manager, pluginObj *plugin.Plugin, pluginName string) error {
 	rawListenerPluginsFunc, err := pluginObj.Lookup("GetListeners")
 	if err != nil {
 		return err
@@ -273,9 +257,7 @@ func _LoadListenersFromPlugin(manager *Manager, config config.Config,
 }
 
 // _LoadProvidersFromPlugin appends all providers from the plugin to the pluginManager
-func _LoadProvidersFromPlugin(manager *Manager, config config.Config,
-	pluginObj *plugin.Plugin, pluginName string) error {
-
+func _LoadProvidersFromPlugin(manager *Manager, pluginObj *plugin.Plugin, pluginName string) error {
 	rawProviderPluginsFunc, err := pluginObj.Lookup("GetProviders")
 	if err != nil {
 		return err
@@ -316,7 +298,9 @@ func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOption
 }
 
 // Run is the main wait loop once we load all the plugins
-func (manager *Manager) Run(configManagerID string, configManagerSpec string, configuration config.Config) error {
+func (manager *Manager) Run(configManagerID string, configManagerSpec string, debugSwitch bool) error {
+	manager.DebugFlag = debugSwitch
+
 	// We dont want any reloads happening until we are fully running
 	manager.configReloadMutex.Lock()
 
@@ -324,6 +308,7 @@ func (manager *Manager) Run(configManagerID string, configManagerSpec string, co
 		manager.InitializeConfigurationManager(configManagerID, configManagerSpec)
 	}
 
+	configuration := config.Config{}
 	manager.InitializeConnectionManagers(configuration)
 
 	log.Println("Initialization of plugins done.")
@@ -347,7 +332,7 @@ func (manager *Manager) Run(configManagerID string, configManagerSpec string, co
 }
 
 // LoadInternalPlugins loads all handlers/listeners/managers that are included in secretless by default
-func (manager *Manager) LoadInternalPlugins(config config.Config) error {
+func (manager *Manager) LoadInternalPlugins() error {
 	// Load all internal ConfigurationManagers
 	for configManagerID, configManagerFactory := range secretless.InternalConfigurationManagers {
 		options := plugin_v1.ConfigurationManagerOptions{Name: configManagerID}
@@ -389,7 +374,7 @@ func (manager *Manager) LoadInternalPlugins(config config.Config) error {
 }
 
 // LoadLibraryPlugins loads all shared object files in `path`
-func (manager *Manager) LoadLibraryPlugins(path string, config config.Config) error {
+func (manager *Manager) LoadLibraryPlugins(path string) error {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
@@ -438,31 +423,31 @@ func (manager *Manager) LoadLibraryPlugins(path string, config config.Config) er
 		log.Println(string(formattedInfo))
 
 		// Load configuration managers
-		if err := _LoadConfigurationMangers(manager, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadConfigurationMangers(manager, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
 
 		// Load connection managers
-		if err := _LoadConnectionManagers(manager, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadConnectionManagers(manager, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
 
 		// Load providers
-		if err := _LoadProvidersFromPlugin(manager, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadProvidersFromPlugin(manager, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
 
 		// Load handlers
-		if err := _LoadHandlersFromPlugin(manager, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadHandlersFromPlugin(manager, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
 
 		// Load listeners
-		if err := _LoadListenersFromPlugin(manager, config, pluginObj, file.Name()); err != nil {
+		if err := _LoadListenersFromPlugin(manager, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}
@@ -488,7 +473,7 @@ func (manager *Manager) InitializeConfigurationManager(id string, configSpec str
 			err.Error())
 	}
 
-	log.Printf("Configuration manager '%s' initialized (filter: '%s').",
+	log.Printf("Configuration manager '%s' initialized (configSpec: '%s').",
 		id, configSpec)
 
 	return nil

@@ -1,4 +1,4 @@
-FROM golang:1.11beta2
+FROM golang:1.11
 
 EXPOSE 443
 

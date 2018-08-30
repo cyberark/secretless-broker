@@ -1,4 +1,4 @@
-FROM golang:1.11beta2-stretch as secretless-builder
+FROM golang:1.11-stretch as secretless-builder
 MAINTAINER Conjur Inc.
 LABEL builder="secretless-builder"
 

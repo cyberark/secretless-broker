@@ -1,5 +1,4 @@
-# Note: golang:1.11beta2 doesn't create workable binaries
-FROM golang:1.11rc1
+FROM golang:1.11
 
 WORKDIR /
 

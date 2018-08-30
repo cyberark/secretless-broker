@@ -10,21 +10,9 @@ ENV GOOS=linux \
     CGO_ENABLED=1
 
 COPY go.mod go.sum /secretless/
-
-# There are checksum mismatches in various environments with client-go package
-# so we for now manually remove it from the checksum file. Golang 1.11rc1+ seems
-# to have fixed this issue.
-RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
-
-# https://github.com/golang/go/issues/26610
-RUN go list -e $(go list -f '{{.Path}}' -m all 2>/dev/null)
+RUN go mod download
 
 COPY . /secretless
-
-# There are checksum mismatches in various environments with client-go package
-# so we for now manually remove it from the checksum file. Golang 1.11rc1+ seems
-# to have fixed this issue.
-RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
 
 RUN go build -o dist/$GOOS/$GOARCH/secretless-broker ./cmd/secretless-broker && \
     go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2

@@ -1,4 +1,4 @@
-FROM golang:1.11beta2-stretch as mutating-webhook-service-builder
+FROM golang:1.11-stretch as mutating-webhook-service-builder
 
 ENV GO111MODULE=on
 RUN mkdir -p /go/src/github.com/cyberark/secretless-broker/sidecar-injector

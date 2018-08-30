@@ -1,4 +1,4 @@
-FROM golang:1.11beta2-alpine
+FROM golang:1.11-alpine
 MAINTAINER Conjur Inc.
 LABEL id="secretless-test-runner"
 
@@ -12,18 +12,6 @@ RUN apk add -u curl \
                musl-dev
 
 COPY go.mod go.sum /secretless/
-
-# There are checksum mismatches in various environments with client-go package
-# so we for now manually remove it from the checksum file. Golang 1.11rc1+ seems
-# to have fixed this issue.
-RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
-
-# https://github.com/golang/go/issues/26610
-RUN go list -e $(go list -f '{{.Path}}' -m all 2>/dev/null)
+RUN go mod download
 
 COPY . .
-
-# There are checksum mismatches in various environments with client-go package
-# so we for now manually remove it from the checksum file. Golang 1.11rc1+ seems
-# to have fixed this issue.
-RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum

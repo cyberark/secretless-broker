@@ -53,7 +53,7 @@ sed -i '/^k8s.io\/client-go\ /d' go.sum
 
 # Examples
 
-To manually create the CRD, let's fist ensure that we have none already defined:
+To manually create the CRD, let's first ensure that we have none already defined:
 ```
 $ kubectl get crd
 No resources found.

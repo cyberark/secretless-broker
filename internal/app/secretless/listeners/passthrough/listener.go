@@ -1,0 +1,83 @@
+package passthrough
+
+import (
+	"fmt"
+	"log"
+	"net"
+	"strconv"
+
+	"github.com/go-ozzo/ozzo-validation"
+
+	"github.com/cyberark/secretless-broker/internal/pkg/util"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+)
+
+// Listener listens for and handles new connections.
+type Listener struct {
+	plugin_v1.BaseListener
+}
+
+// HandlerHasCredentials validates that a handler has all necessary credentials.
+type handlerHasCredentials struct {
+}
+
+// Validate checks that a handler has all necessary credentials.
+func (hhc handlerHasCredentials) Validate(value interface{}) error {
+	handlers := value.([]config.Handler)
+	errors := validation.Errors{}
+	for i, handler := range handlers {
+		if !handler.HasCredential("address") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'address'")
+		}
+	}
+	return errors.Filter()
+}
+
+// Validate verifies the completeness and correctness of the Listener.
+func (l Listener) Validate() error {
+	return validation.ValidateStruct(&l,
+		validation.Field(&l.HandlerConfigs, validation.Required),
+		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
+	)
+}
+
+// Listen listens on the port or socket and attaches new connections to the handler.
+func (l *Listener) Listen() {
+	for l.IsClosed != true {
+		var client net.Conn
+		var err error
+		if client, err = util.Accept(l); err != nil {
+			log.Printf("WARN: Failed to accept incoming passthrough connection: ", err)
+			continue
+		}
+
+		// Serve the first Handler which is attached to this listener
+		if len(l.HandlerConfigs) > 0 {
+			handlerOptions := plugin_v1.HandlerOptions{
+				HandlerConfig:    l.HandlerConfigs[0],
+				ClientConnection: client,
+				EventNotifier:    l.EventNotifier,
+				Resolver:         l.Resolver,
+				ShutdownNotifier: func(handler plugin_v1.Handler) {
+					l.RemoveHandler(handler)
+				},
+			}
+
+			handler := l.RunHandlerFunc("passthrough", handlerOptions)
+			l.AddHandler(handler)
+		} else {
+			log.Fatalf("FATAL: No handlers specified")
+		}
+	}
+}
+
+// GetName implements plugin_v1.Listener
+func (l *Listener) GetName() string {
+	return "passthrough"
+}
+
+// ListenerFactory returns a Listener created from options
+func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
+	return &Listener{BaseListener: plugin_v1.NewBaseListener(options)}
+}

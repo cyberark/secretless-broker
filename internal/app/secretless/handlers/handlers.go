@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/http"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/passthrough"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssh"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/sshagent"
@@ -15,6 +16,7 @@ var HandlerFactories = map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handl
 	"http/basic_auth": http.BasicAuthHandlerFactory,
 	"http/conjur":     http.ConjurHandlerFactory,
 	"mysql":           mysql.HandlerFactory,
+	"passthrough":     passthrough.HandlerFactory,
 	"pg":              pg.HandlerFactory,
 	"ssh":             ssh.HandlerFactory,
 	"sshagent":        sshagent.HandlerFactory,

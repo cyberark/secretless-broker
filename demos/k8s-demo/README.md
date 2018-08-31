@@ -40,9 +40,9 @@ The tutorial uses an existing [pet store demo application](https://github.com/co
 
 There are additional routes that are also available, but these are the two that we will focus on for this tutorial.
 
-Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `$DB_URL`, `$DB_USERNAME`, and `$DB_PASSWORD` environment variables in the application's environment (following [12-factor principles](https://12factor.net/)).
+Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` environment variables in the application's environment (following [12-factor principles](https://12factor.net/)).
 
-We are going to deploy the application with the Secretless Broker to Kubernetes, configure the Secretless Broker to be able to retrieve the credentials from a secrets store, and configure the application with its `$DB_URL` pointing to the Secretless Broker _and no values set for its `$DB_USERNAME` or `$DB_PASSWORD`_.
+We are going to deploy the application with the Secretless Broker to Kubernetes, configure the Secretless Broker to be able to retrieve the credentials from a secrets store, and configure the application with the `DB_URL` environment variable pointing to the Secretless Broker _and no values set for the `DB_USERNAME` or `DB_PASSWORD` environment variables_.
 
 ### Prerequisites
 
@@ -167,7 +167,7 @@ handlers:
 
 #### 1. Configure application to access the database at `localhost:5432`
 
-In the application manifest, we set the `$DB_URL` to point to `localhost:5432`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
+In the application manifest, we set the `DB_URL` environment variable to `localhost:5432`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
 
 #### 2. Deploy application
 
@@ -194,13 +194,13 @@ That's it! You've configured your application to connect to PostgreSQL via the S
 
 `POST /pet` to add a pet - the request must include `name` in the JSON body
 ```bash
-APPLICATION_URL=$(. ./admin_config.sh; echo $APPLICATION_URL)
+APPLICATION_URL=$(. ./admin_config.sh; echo ${APPLICATION_URL})
 
 curl \
   -i \
   -d '{"name": "Mr. Snuggles"}' \
   -H "Content-Type: application/json" \
-  $APPLICATION_URL/pet
+  ${APPLICATION_URL}/pet
 ```
 ```bash
 HTTP/1.1 201 
@@ -211,9 +211,9 @@ Date: Thu, 23 Aug 2018 12:57:45 GMT
 
 `GET /pets` to retrieve notes
 ```bash
-APPLICATION_URL=$(. ./admin_config.sh; echo $APPLICATION_URL)
+APPLICATION_URL=$(. ./admin_config.sh; echo ${APPLICATION_URL})
 
-curl -i $APPLICATION_URL/pets
+curl -i ${APPLICATION_URL}/pets
 ```
 ```
 HTTP/1.1 200 
@@ -236,12 +236,12 @@ The rotator script:
 To see graceful rotation in action, poll the endpoint to retrieve the list of pets (`GET /pets`) in a separate terminal before rotating:
 
 ```
-APPLICATION_URL=$(. ./admin_config.sh; echo $APPLICATION_URL)
+APPLICATION_URL=$(. ./admin_config.sh; echo ${APPLICATION_URL})
 
 while true
 do
     echo "Retrieving pets"
-    curl -i $APPLICATION_URL/pets
+    curl -i ${APPLICATION_URL}/pets
     echo ""
     echo ""
     echo "..."

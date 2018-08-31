@@ -54,7 +54,9 @@ kubectl --namespace quick-start-application-ns \
   create serviceaccount \
   quick-start-application
 
-# grant quick-start-application service account in quick-start-application-ns namespace access to quick-start-backend-credentials
+# grant quick-start-application service account
+# in quick-start-application-ns namespace
+# access to quick-start-backend-credentials
 kubectl --namespace quick-start-application-ns \
  create \
  -f etc/quick-start-application-entitlements.yml

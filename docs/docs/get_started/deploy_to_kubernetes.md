@@ -70,11 +70,11 @@ The tutorial uses an existing [pet store demo application](https://github.com/co
 
 There are additional routes that are also available, but these are the two that we will focus on for this tutorial.
 
-Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `$DB_URL` environment variable in the application's environment (following [12-factor principles](https://12factor.net/)).
+Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `DB_URL` environment variable in the application's environment (following [12-factor principles](https://12factor.net/)).
 
 See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
 
-The database is **credential-protected**. With the Secretless Broker, we will be able to use a value of `$DB_URL` of the form:  `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
+The database is **credential-protected**. With the Secretless Broker, we will be able to set the `DB_URL` environment variable to a value of the form:  `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
 
 ## Steps for the admin user
 
@@ -143,9 +143,9 @@ kubectl --namespace quick-start-backend-ns apply -f pg.yml
 statefulset.apps/pg created
 </pre>
 
-This StatefulSet uses the [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container image available from DockerHub. When the container is started, the environment variables `$POSTGRES_USER` and `$POSTGRES_PASSWORD` are used to create a user with superuser power.
+This StatefulSet uses the [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container image available from DockerHub. When the container is started, the environment variables `POSTGRES_USER` and `POSTGRES_PASSWORD` are used to create a user with superuser power.
 
-We'll treat these credentials as **admin-credentials** moving forward (i.e. `$REMOTE_DB_ADMIN_USER` and `$REMOTE_DB_ADMIN_PASSWORD` environment variables), to be used for administrative tasks - separate from **application-credentials**.
+We'll treat these credentials as **admin-credentials** moving forward (i.e. `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD` environment variables), to be used for administrative tasks - separate from **application-credentials**.
 
 **3.** To ensure the **PostgresSQL StatefulSet** pod has started and is healthy, run the command:
 ```bash
@@ -186,7 +186,7 @@ kubectl --namespace quick-start-backend-ns  apply -f pg-service.yml
 service/quick-start-backend created
 </pre>
 
-If you used the service definition above, the application should now be available at `$(minikube ip):30001` (referred to as `$REMOTE_DB_URL`, moving forward).
+If you used the service definition above, the application should now be available at `$(minikube ip):30001` (referred to as `REMOTE_DB_URL`, moving forward).
  
 The DB has no content at this point, however you can validate that everything works by simply logging in as the admin-user. Run this command to list the roles in this DB - **psql** will be used to make a connection to the database using admin credentials:
 
@@ -219,8 +219,8 @@ Note that the DB has no content at this point.
 
 In this section, we assume that you have a PostgresSQL backend set up and ready to go. Concretely this means:
 
-+ The PostgresSQL backend is publicly available via some URL. We'll refer to this public URL by the environment variable `$REMOTE_DB_URL`
-+ Admin-level database credentials exist to allow you to create the application user. We'll refer to them as the environment variables `$REMOTE_DB_ADMIN_USER` and `$REMOTE_DB_ADMIN_PASSWORD`
++ The PostgresSQL backend is publicly available via some URL. We'll refer to this public URL by the environment variable `REMOTE_DB_URL`
++ Admin-level database credentials exist to allow you to create the application user. We'll refer to them as the environment variables `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD`
 
 Please ensure the environment variables are set to reflect your environment. For example, if you followed along in the last section and are using minikube for your local K8s cluster, you can run:
 
@@ -231,12 +231,12 @@ export REMOTE_DB_URL="$(minikube ip):30001"
 ```
 
 You will setup and configure the PostgresSQL storage backend by carrying the following steps:
-1. Create a dedicated application database (henceforth referred to by the environment variable `$APPLICATION_DB_NAME`) within the PostgresSQL DBMS, then carry out the rest of the steps within its context
+1. Create a dedicated application database (henceforth referred to by the environment variable `APPLICATION_DB_NAME`) within the PostgresSQL DBMS, then carry out the rest of the steps within its context
 2. Create the application table (i.e. pets)
 3. Create an application user with limited privileges, `SELECT` and `INSERT` on the application table 
-4. Store the application user's credentials (`$APPLICATION_DB_USER` and `$APPLICATION_DB_INITIAL_PASSWORD`) in in a secret store (for the purposes of this demo, we're using Kubernetes secrets). 
+4. Store the application user's credentials (held in the environment variables `APPLICATION_DB_USER` and `APPLICATION_DB_INITIAL_PASSWORD`) in in a secret store (for the purposes of this demo, we're using Kubernetes secrets). 
 
-**Note:** You must set and export the value of `$APPLICATION_DB_NAME`, `$APPLICATION_DB_USER` and `$APPLICATION_DB_INITIAL_PASSWORD` before proceeding, e.g. 
+**Note:** You must set the value of and export the environment variables `APPLICATION_DB_NAME`, `APPLICATION_DB_USER` and `APPLICATION_DB_INITIAL_PASSWORD` before proceeding, e.g. 
 ``` bash
 export APPLICATION_DB_NAME=quick_start_db
 export APPLICATION_DB_USER=app_user
@@ -428,7 +428,7 @@ rolebinding.rbac.authorization.k8s.io/read-quick-start-backend-credentials creat
 
 Close the terminal you've been using to run through all of the previous steps and open a new one for these next few. That terminal window had all of the database configuration stored as environment variables - but none of the steps in this section need any credentials at all. That is, the person deploying the application needs to know _nothing_ about the secret values required to connect to the PostgreSQL database!!
 
-The only environment variable you will need for this next set of steps is `$APPLICATION_DB_NAME`, and you can re-export that as:
+The only environment variable you will need for this next set of steps is `APPLICATION_DB_NAME`, and you can re-export that as:
 
 ```bash
 export APPLICATION_DB_NAME=quick_start_db
@@ -479,7 +479,7 @@ _Note_:
 + An application must connect to the Secretless Broker without SSL, though the actual connection between the Secretless Broker and the target service can leverage SSL. To achieve this we append the query parameters `sslmode=disable` to the connection string, which prevents the PostgresSQL driver from using SSL mode with the Secretless Broker.
 + The Secretless Broker respects the parameters specified in the database connections string.
 
-You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `$DB_URL` environment variable to `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
+You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `DB_URL` environment variable to `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
 
 Add the application container to the base manifest:
 
@@ -525,7 +525,7 @@ volumes:
 #### Completed Application Deployment Manifest
 
 You should now save the application deployment manifest in a file named **quick-start-application.yml**.
-Running the command below will save a completed deployment manifest to **quick-start-application.yml** in your current working directory, using the value of the `$APPLICATION_DB_NAME` environment variable in the executing terminal:
+Running the command below will save a completed deployment manifest to **quick-start-application.yml** in your current working directory, using the value of the `APPLICATION_DB_NAME` environment variable in the executing terminal:
 
 ```bash
 cat << EOF > quick-start-application.yml
@@ -623,13 +623,13 @@ kubectl --namespace quick-start-application-ns \
 service/quick-start-application created
 </pre>
 
-If you used the service definition above, the application should now be available at `$(minikube ip):30002`, (referred to as `$APPLICATION_URL` from now on).
+If you used the service definition above, the application should now be available at `$(minikube ip):30002`, (referred to as environment variable `APPLICATION_URL` from now on).
 
 ## Try The Running Application
 
 That's it! You've configured your application to connect to PostgreSQL via the Secretless Broker, and we can try it out to validate that it's working as expected.
 
-The next steps rely on the presence of `$APPLICATION_URL` in your environment. For example, if you used the service definition in the previous then you would setup your environment as follows:
+The next steps rely on the presence of the `APPLICATION_URL` environment variable. For example, if you used the service definition in the previous then you would setup your environment as follows:
 ```bash
 export APPLICATION_URL=$(minikube ip):30002
 ```
@@ -680,7 +680,7 @@ These are the steps you wil take to rotate the credentials of the dabatase:
 ### Poll Application API [separate terminal]
 Before rotating, **you will run the commands in this section in a new and separate terminal** to poll the retrieve pets endpoint (`GET /pets`). This will allow you to see the request-response cycle of the application. If something goes wrong, like a database connection failure you will see it as a > 400 HTTP status code.
 
-First, setup the environment with `$APPLICATION_URL`. If you're using `minikube`:
+First, setup the environment with the `APPLICATION_URL` environment variable. If you're using `minikube`:
 ```bash
 export APPLICATION_URL=$(minikube ip):30002
 ```

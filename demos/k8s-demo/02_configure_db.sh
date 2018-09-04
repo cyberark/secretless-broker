@@ -6,14 +6,15 @@
 # setup db
 echo ">>--- Set up database"
 
-cat << EOL | docker run \
+docker run \
  --rm \
  -i \
  -e PGPASSWORD=${DB_ADMIN_PASSWORD} \
  postgres:9.6 \
   psql \
   -U ${DB_ADMIN_USER} \
-  "postgres://$DB_URL"
+  "postgres://$DB_URL" \
+  << EOSQL
 /* Create Application User */
 CREATE USER ${DB_USER} PASSWORD '${DB_INITIAL_PASSWORD}';
 
@@ -26,51 +27,36 @@ CREATE TABLE pets (
 /* Grant Permissions */
 GRANT SELECT, INSERT ON public.pets TO ${DB_USER};
 GRANT USAGE, SELECT ON SEQUENCE public.pets_id_seq TO ${DB_USER};
-EOL
+EOSQL
 
 # create namespace
-echo ">>--- Clean up quick-start namespace"
+echo ">>--- Clean up quick-start-application-ns namespace"
 
-kubectl delete namespace quick-start --ignore-not-found=true
-while [[ $(kubectl get namespace quick-start 2>/dev/null) ]] ; do
-  echo "Waiting for quick-start namespace clean up"
+kubectl delete namespace quick-start-application-ns --ignore-not-found=true
+while [[ $(kubectl get namespace quick-start-application-ns 2>/dev/null) ]] ; do
+  echo "Waiting for quick-start-application-ns namespace clean up"
   sleep 5
 done
-kubectl create namespace quick-start
+kubectl create namespace quick-start-application-ns
 
 echo Ready!
 
 # store db credentials
-kubectl --namespace quick-start \
+kubectl --namespace quick-start-application-ns \
  create secret generic \
  quick-start-backend-credentials \
  --from-literal=address="${DB_URL}" \
  --from-literal=username="${DB_USER}" \
  --from-literal=password="${DB_INITIAL_PASSWORD}"
 
-# grant default service account in quick-start namespace access to quick-start-backend-credentials
-cat << EOL | kubectl --namespace quick-start create -f /dev/stdin
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: quick-start-backend-credentials-reader
-rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources: ["secrets"]
-  resourceNames: ["quick-start-backend-credentials"]
-  verbs: ["get"]
----
-# This role binding allows the default serviceAccount to read the "quick-start-backend-credentials" secret in this namespace.
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: read-quick-start-backend-credentials
-subjects:
-- kind: ServiceAccount
-  name: default
-roleRef:
-  kind: Role
-  name: quick-start-backend-credentials-reader
-  apiGroup: rbac.authorization.k8s.io
-EOL
+# create application service account
+kubectl --namespace quick-start-application-ns \
+  create serviceaccount \
+  quick-start-application
+
+# grant quick-start-application service account
+# in quick-start-application-ns namespace
+# access to quick-start-backend-credentials
+kubectl --namespace quick-start-application-ns \
+ create \
+ -f etc/quick-start-application-entitlements.yml

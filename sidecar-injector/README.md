@@ -177,7 +177,7 @@ For this section, you'll work from a test namespace (test-namespace). Later you 
     export http_proxy=localhost:8080
     
     response=$(curl --request GET --url http://scooterlabs.com/echo.json)
-    pretty_resp=$(echo "$response" | jq -r .headers.Authorization)
+    pretty_resp=$(echo "${response}" | jq -r .headers.Authorization)
     echo '"'"$(echo "${pretty_resp##* }" | base64 --decode)"'"' | jq .
     EOL
     ```

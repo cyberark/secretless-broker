@@ -10,6 +10,9 @@ To get started with the Secretless Broker, try working through this tutorial, wh
 
 We have chosen a PostgresSQL database as the target service for this tutorial, however the Secretless Broker comes built-in with support for several other target services; check out our [reference](/docs/reference.html) for more info.
 
+If you'd rather just see **the whole thing working end to end**, check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+
+
 ## Table of Contents
 
 + [Getting Started](#getting-started)
@@ -19,6 +22,7 @@ We have chosen a PostgresSQL database as the target service for this tutorial, h
   + [Setup And Configure Target Service](#setup-and-configure-target-service)
   + [Create Application Namespace and Store Application DB-Credentials](#create-application-namespace-and-store-application-db-credentials)
   + [Create Secretless Broker Configuration ConfigMap](#create-secretless-broker-configuration-configmap)
+  + [Create Application Service Account and Grant Entitlements](#create-application-service-account-and-grant-entitlements)
 + Steps for the non-privileged user (i.e developer)
   + [Build Application Deployment Manifest](#build-application-deployment-manifest)
     + [Add & Configure Application Container](#add--configure-application-container)
@@ -32,9 +36,7 @@ We have chosen a PostgresSQL database as the target service for this tutorial, h
 
 ## Getting started
 
-In this tutorial, we will walk through creating an application that communicates with a password-protected PostgreSQL database via the Secretless Broker. _The application does not need to know anything about the credentials required to connect to the database;_ the admin super-user who provisions and configures the database will also configure the Secretless Broker to be able to communicate with it. The developer writing the application only needs to know the socket or address that the Secretless Broker is listening on to proxy the connection to the PostgreSQL backend.
-
-If you'd rather just see the whole thing working end to end, check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+In this tutorial, we will walk through creating an application that communicates with a password-protected PostgreSQL database **via the Secretless Broker**. _The application does not need to know anything about the credentials required to connect to the database;_ the admin super-user who provisions and configures the database will also configure the Secretless Broker to be able to communicate with it. The developer writing the application only needs to know the socket or address that the Secretless Broker is listening on to proxy the connection to the PostgreSQL backend.
 
 We are going to do the following:
 
@@ -56,7 +58,7 @@ To run through this tutorial, you will need:
 + [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured to point to the cluster
 + [Docker CLI](https://docs.docker.com/install/)
 
-Our Kubernetes deployment manifests assume that you are using minikube, so we use `NodePort` to expose the services; you may prefer to use a `LoadBalancer` for a GKE cluster.
+Our Kubernetes deployment manifests assume that you are using minikube, so we use **NodePort** to expose the services; you may prefer to use a **LoadBalancer** for a GKE cluster.
 
 ## Sample Application
 
@@ -64,7 +66,7 @@ The tutorial uses an existing [pet store demo application](https://github.com/co
 
 - `GET /pets` to list all the pets in inventory
 - `POST /pet` to add a pet
-  - Requires `Content-Type: application/json` header and body that includes `name` data
+  - Requires **Content-Type: application/json** header and body that includes **name** data
 
 There are additional routes that are also available, but these are the two that we will focus on for this tutorial.
 
@@ -72,7 +74,7 @@ Pet data is stored in a PostgreSQL database, and the application may be configur
 
 See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
 
-The database is **credential-protected**. With the Secretless Broker, we will be able to use a value of `DB_URL` of the form:  `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
+The database is **credential-protected**. With the Secretless Broker, we will be able to set the `DB_URL` environment variable to a value of the form:  `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
 
 ## Steps for the admin user
 
@@ -90,12 +92,15 @@ Our PostgresSQL storage backend is stateful. For this reason, we'll use a Statef
 
 To deploy a PostgresSQL StatefulSet, follow these steps:
 
-**1.** To create a dedicated namespace for the storage backend, run the command:
+**1.** To create a dedicated **namespace** for the storage backend, run the command:
 ```bash
-kubectl create namespace quick-start-db
+kubectl create namespace quick-start-backend-ns
 ```
+<pre>
+namespace/quick-start-backend-ns created
+</pre>
 
-**2.** To create and save the pg StatefulSet manifest in a file named `pg.yml` in your current working directory, run the command:
+**2.** To create and save the **PostgresSQL StatefulSet** manifest in a file named **pg.yml** in your current working directory, run the command:
 
 ```bash
 cat << EOF > pg.yml
@@ -130,30 +135,37 @@ spec:
             value: quick_start_admin_password
 EOF
 ```
-**3.** To deploy the PostgresSQL StatefulSet, run the command:
+**3.** To deploy the **PostgresSQL StatefulSet**, run the command:
 ```bash
-kubectl --namespace quick-start-db apply -f pg.yml
+kubectl --namespace quick-start-backend-ns apply -f pg.yml
 ```
+<pre>
+statefulset.apps/pg created
+</pre>
 
-This StatefulSet uses the `postgres:9.6` container image available from DockerHub. When the container is started, the environment variables `POSTGRES_USER` and `POSTGRES_PASSWORD` are used to create a user with superuser power.
+This StatefulSet uses the [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container image available from DockerHub. When the container is started, the environment variables `POSTGRES_USER` and `POSTGRES_PASSWORD` are used to create a user with superuser power.
 
-We'll treat these credentials as `admin-credentials` moving forward (i.e. `$REMOTE_DB_ADMIN_USER` and `$REMOTE_DB_ADMIN_PASSWORD` environment variables), to be used for administrative tasks - separate from `application-credentials`.
+We'll treat these credentials as **admin-credentials** moving forward (i.e. `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD` environment variables), to be used for administrative tasks - separate from **application-credentials**.
 
-**3.** To ensure the `pg` StatefulSet pod has started and is healthy, run the command:
+**3.** To ensure the **PostgresSQL StatefulSet** pod has started and is healthy, run the command:
 ```bash
-kubectl --namespace quick-start-db get pods
+kubectl --namespace quick-start-backend-ns get pods
 ```
+<pre>
+NAME      READY     STATUS    RESTARTS   AGE
+pg-0      1/1       Running   0          6s
+</pre>
 
 #### Expose PostgresSQL Service
 
-Now that the `pg` StatefulSet is up and running, you will need to expose it publicly before you can consume it.
+Now that the **PostgresSQL StatefulSet** is up and running, you will need to expose it publicly before you can consume it.
 
-The service definition below assumes you're using minikube, where `NodePort` is the appropriate type of service to expose the application; you may prefer to use something different e.g. a `LoadBalancer` for a GKE cluster.
+The service definition below assumes you're using minikube, where **NodePort** is the appropriate type of service to expose the application; you may prefer to use something different e.g. a **LoadBalancer** for a GKE cluster.
  
 To expose the database, run the command:
 
 ```bash
-cat << EOF | kubectl --namespace quick-start-db  apply -f -
+cat << EOF > pg-service.yml
 kind: Service
 apiVersion: v1
 metadata:
@@ -167,11 +179,16 @@ spec:
       nodePort: 30001
   type: NodePort
 EOF
-```
 
-If you used the service definition above, the application should now be available at `$(minikube ip):30001` (referred to as `$REMOTE_DB_URL`, moving forward).
+kubectl --namespace quick-start-backend-ns  apply -f pg-service.yml
+```
+<pre>
+service/quick-start-backend created
+</pre>
+
+If you used the service definition above, the application should now be available at `$(minikube ip):30001` (referred to as `REMOTE_DB_URL`, moving forward).
  
-The DB has no content at this point, however you can validate that everything works by simply logging in as the admin-user:
+The DB has no content at this point, however you can validate that everything works by simply logging in as the admin-user. Run this command to list the roles in this DB - **psql** will be used to make a connection to the database using admin credentials:
 
 ```bash
 export REMOTE_DB_ADMIN_USER=quick_start_admin_user
@@ -179,13 +196,22 @@ export REMOTE_DB_ADMIN_PASSWORD=quick_start_admin_password
 export REMOTE_DB_URL=$(minikube ip):30001
 
 docker run \
-  --rm -it \
+  --rm \
+  -it \
+  -e PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} \
   postgres:9.6 \
-  env PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} \
-  psql \
-  -U ${REMOTE_DB_ADMIN_USER} \
-  "postgres://${REMOTE_DB_URL}/postgres"
+    psql \
+    -U ${REMOTE_DB_ADMIN_USER} \
+    "postgres://${REMOTE_DB_URL}/postgres" \
+    -c "\du"
 ```
+<pre>
+                                          List of roles
+       Role name        |                         Attributes                         | Member of 
+------------------------+------------------------------------------------------------+-----------
+ postgres               | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ quick_start_admin_user | Superuser                                                  | {}
+</pre>
 
 Note that the DB has no content at this point.
 
@@ -193,8 +219,8 @@ Note that the DB has no content at this point.
 
 In this section, we assume that you have a PostgresSQL backend set up and ready to go. Concretely this means:
 
-+ The PostgresSQL backend is publicly available via some URL. We'll refer to this public URL by the environment variable `$REMOTE_DB_URL`
-+ Admin-level database credentials exist to allow you to create the application user. We'll refer to them as the environment variables `$REMOTE_DB_ADMIN_USER` and `$REMOTE_DB_ADMIN_PASSWORD`
++ The PostgresSQL backend is publicly available via some URL. We'll refer to this public URL by the environment variable `REMOTE_DB_URL`
++ Admin-level database credentials exist to allow you to create the application user. We'll refer to them as the environment variables `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD`
 
 Please ensure the environment variables are set to reflect your environment. For example, if you followed along in the last section and are using minikube for your local K8s cluster, you can run:
 
@@ -205,12 +231,12 @@ export REMOTE_DB_URL="$(minikube ip):30001"
 ```
 
 You will setup and configure the PostgresSQL storage backend by carrying the following steps:
-1. Create a dedicated application database (henceforth referred to by the environment variable `$APPLICATION_DB_NAME`) within the PostgresSQL DBMS, then carry out the rest of the steps within its context
+1. Create a dedicated application database (henceforth referred to by the environment variable `APPLICATION_DB_NAME`) within the PostgresSQL DBMS, then carry out the rest of the steps within its context
 2. Create the application table (i.e. pets)
 3. Create an application user with limited privileges, `SELECT` and `INSERT` on the application table 
-4. Store the application user's credentials (`$APPLICATION_DB_USER` and `$APPLICATION_DB_INITIAL_PASSWORD`) in in a secret store (for the purposes of this demo, we're using Kubernetes secrets). 
+4. Store the application user's credentials (held in the environment variables `APPLICATION_DB_USER` and `APPLICATION_DB_INITIAL_PASSWORD`) in in a secret store (for the purposes of this demo, we're using Kubernetes secrets). 
 
-**Note:** You must set and export the value of `$APPLICATION_DB_NAME`, `$APPLICATION_DB_USER` and `$APPLICATION_DB_INITIAL_PASSWORD` before proceeding, e.g. 
+**Note:** You must set the value of and export the environment variables `APPLICATION_DB_NAME`, `APPLICATION_DB_USER` and `APPLICATION_DB_INITIAL_PASSWORD` before proceeding, e.g. 
 ``` bash
 export APPLICATION_DB_NAME=quick_start_db
 export APPLICATION_DB_USER=app_user
@@ -221,65 +247,68 @@ To create the application database, application table, application user and gran
 
 ```bash
 docker run \
-  --rm -i \
+  --rm \
+  -i \
+  -e PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} \
   postgres:9.6 \
-  env PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} \
-  psql -U ${REMOTE_DB_ADMIN_USER} "postgres://${REMOTE_DB_URL}/postgres" \
-  << EOSQL
-    /* Create Application Database */
-    CREATE DATABASE ${APPLICATION_DB_NAME};
- 
-    /* Connect to Application Database */
-    \c ${APPLICATION_DB_NAME};
+    psql -U ${REMOTE_DB_ADMIN_USER} "postgres://${REMOTE_DB_URL}/postgres" \
+    << EOSQL
+/* Create Application Database */
+CREATE DATABASE ${APPLICATION_DB_NAME};
 
-    /* Create Application Table */
-    CREATE TABLE pets (
-      id serial primary key,
-      name varchar(256)
-    );
+/* Connect to Application Database */
+\c ${APPLICATION_DB_NAME};
 
-    /* Create Application User */
-    CREATE USER ${APPLICATION_DB_USER} PASSWORD '${APPLICATION_DB_INITIAL_PASSWORD}';
- 
-    /* Grant Permissions */
-    GRANT SELECT, INSERT ON public.pets TO ${APPLICATION_DB_USER};
-    GRANT USAGE, SELECT ON SEQUENCE public.pets_id_seq TO ${APPLICATION_DB_USER};
+/* Create Application Table */
+CREATE TABLE pets (
+  id serial primary key,
+  name varchar(256)
+);
+
+/* Create Application User */
+CREATE USER ${APPLICATION_DB_USER} PASSWORD '${APPLICATION_DB_INITIAL_PASSWORD}';
+
+/* Grant Permissions */
+GRANT SELECT, INSERT ON public.pets TO ${APPLICATION_DB_USER};
+GRANT USAGE, SELECT ON SEQUENCE public.pets_id_seq TO ${APPLICATION_DB_USER};
 EOSQL
 ```
+<pre>
+CREATE DATABASE
+You are now connected to database "quick_start_db" as user "quick_start_admin_user".
+CREATE TABLE
+CREATE ROLE
+GRANT
+GRANT
+</pre>
 
 ### Create Application Namespace and Store Application DB-Credentials
 
 Now that the storage backend is setup and good to go, it's time to set up the namespace where the application will be deployed.
 
-The first step is to decide on an application namespace. This is the namespace in which the application will be scoped. You can pick your own by setting the environment variable `APPLICATION_NAMESPACE`:
-```bash
-export APPLICATION_NAMESPACE=quick-start-app
-```
+The application will be scoped to the **quick-start-application-ns** namespace. 
 
 Run this code to create the namespace:
 
 ```yaml
-kubectl create namespace ${APPLICATION_NAMESPACE}
+kubectl create namespace quick-start-application-ns
 ```
 
-Now that the namespace is created, you will proceed to store the application-user credentials in Kubernetes secrets. This is better than hard-coding them - but in a real deployment you would want to store your secrets in an actual vault, like Conjur.
+Now that the namespace is created, you will proceed to store the application-user credentials in Kubernetes secrets. This is better than hard-coding them - but in a real deployment you would want to store your secrets in a fully-featured vault, like Conjur.
 
 Run this code to store application-user DB-credentials in Kubernetes secrets:
 
 ```bash
-cat << EOF | kubectl --namespace ${APPLICATION_NAMESPACE} apply -f -
----
-apiVersion: v1
-kind: Secret
-metadata:
-    name: quick-start-backend-credentials
-type: Opaque
-data:
-    address: $(echo -n "${REMOTE_DB_URL}" | base64)
-    username: $(echo -n "${APPLICATION_DB_USER}" | base64)
-    password: $(echo -n "${APPLICATION_DB_INITIAL_PASSWORD}" | base64)
-EOF
+kubectl --namespace quick-start-application-ns \
+ create secret generic \
+ quick-start-backend-credentials \
+ --from-literal=address="${REMOTE_DB_URL}" \
+ --from-literal=username="${APPLICATION_DB_USER}" \
+ --from-literal=password="${APPLICATION_DB_INITIAL_PASSWORD}"
 ```
+<pre>
+secret/quick-start-backend-credentials created
+</pre>
 
 ### Create Secretless Broker Configuration ConfigMap
 
@@ -291,56 +320,117 @@ The Secretless Broker configuration file has 2 sections:
 + Listeners, to define how the Secretless Broker should listen for new connection requests for a particular backend
 + Handlers, which are passed new connection requests received by the listeners, and are the part of the Secretless Broker that actually opens up a connection to the target service with credentials that it retrieves using the specified credential provider(s)
 
-In our sample, we create a `secretless.yml` file as follows:
-+ Define a `pg` listener named `pets-pg-listener` that listens on `localhost:5432`
-+ Define a handler named `pets-pg-handler` that uses the `file` provider to retrieve the `address`, `username` and `password` of the remote database. The file provider is used to access Kubernetes secrets made available to the Secretless Broker container via volume mounts. 
-
-  _NOTE: There is a pending feature for a Kubernetes secret provider which will retrieve secrets directly from the Kubernetes API_.
+In our sample, we create a **secretless.yml** file as follows:
++ Define a `pg` type listener named **pets-pg-listener** that listens on `localhost:5432`
++ Define a handler named **pets-pg-handler** that uses the `kubernetes` secrets provider to retrieve the `address`, `username` and `password` of the remote database. The `kubernetes` secrets provider is used to access Kubernetes secrets through the Kubernetes API - authenticating with the service account credentials available from within the pod, as described in [Accessing the Kubernetes API from a pod](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) .
   
 This configuration is shared amongst all Secretless Broker sidecar containers, each residing within an application Pod replica. 
 
-Run the command below to create a Secretless Broker configuration file named `secretless.yml` in your current working directory:
+Run the command below to create a Secretless Broker configuration file named **secretless.yml** in your current working directory:
 
 ```bash
 cat << EOF > secretless.yml
 listeners:
   - name: pets-pg-listener
     protocol: pg
+    debug: true
     address: localhost:5432
+
 handlers:
   - name: pets-pg-handler
     listener: pets-pg-listener
+    debug: true
     credentials:
       - name: address
-        provider: file
-        id: /etc/secret/address
+        provider: kubernetes
+        id: quick-start-backend-credentials#address
       - name: username
-        provider: file
-        id: /etc/secret/username
+        provider: kubernetes
+        id: quick-start-backend-credentials#username
       - name: password
-        provider: file
-        id: /etc/secret/password
+        provider: kubernetes
+        id: quick-start-backend-credentials#password
 EOF
 ```
 
-You will now create a ConfigMap from the `secretless.yml` file. Later this ConfigMap will be made available to each Secretless Broker sidecar container via a volume mount.
+You will now create a ConfigMap from the **secretless.yml** file. Later this ConfigMap will be made available to each Secretless Broker sidecar container via a volume mount.
 
 Create the Secretless Broker Configuration ConfigMap by running the command:
 ```bash
-kubectl --namespace ${APPLICATION_NAMESPACE} \
+kubectl --namespace quick-start-application-ns \
   create configmap \
   quick-start-application-secretless-config \
   --from-file=secretless.yml
 ```
+<pre>
+configmap/quick-start-application-secretless-config created
+</pre>
+
+### Create Application Service Account and Grant Entitlements
+
+In Kubernetes, a service account provides an identity for processes that run in a Pod. 
+
+Let's set up an application service account to provide identity for the application. With identity you're able to grant fine-grained entitlements for the application pod to have access to the Kubernetes secrets holding the database credentials.
+
+Run the command below to create a *quick-start-application* ServiceAccount:
+
+```bash
+kubectl --namespace quick-start-application-ns \
+  create serviceaccount \
+  quick-start-application
+```
+<pre>
+serviceaccount/quick-start-application created
+</pre>
+
+Now you need to grant [get] access to the **quick-start-backend-credentials** secret to this ServiceAccount. This will be a 2 step process:
+1. Create a **Role** with permissions to `[get]` the *quick-start-backend-credentials* secret, named *quick-start-backend-credentials-reader*
+2. Create a **RoleBinding** of the Role in the previous step and application ServiceAccount, named *read-quick-start-backend-credentials*
+
+Run this command to grant the entitlements:
+```bash
+cat << EOF > quick-start-application-entitlements.yml
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: quick-start-backend-credentials-reader
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["quick-start-backend-credentials"]
+  verbs: ["get"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-quick-start-backend-credentials
+subjects:
+- kind: ServiceAccount
+  name: quick-start-application
+roleRef:
+  kind: Role
+  name: quick-start-backend-credentials-reader
+  apiGroup: rbac.authorization.k8s.io
+EOF
+
+kubectl --namespace quick-start-application-ns \
+  apply \
+  -f quick-start-application-entitlements.yml
+```
+<pre>
+role.rbac.authorization.k8s.io/quick-start-backend-credentials-reader created
+rolebinding.rbac.authorization.k8s.io/read-quick-start-backend-credentials created
+</pre>
 
 ## Steps for the non-privileged user (i.e developer)
 
 Close the terminal you've been using to run through all of the previous steps and open a new one for these next few. That terminal window had all of the database configuration stored as environment variables - but none of the steps in this section need any credentials at all. That is, the person deploying the application needs to know _nothing_ about the secret values required to connect to the PostgreSQL database!!
 
-The only environment variables you will need for this next set of steps are the `$APPLICATION_NAMESPACE` and `$APPLICATION_DB_NAME`, and you can re-export them as:
+The only environment variable you will need for this next set of steps is `APPLICATION_DB_NAME`, and you can re-export that as:
 
 ```bash
-export APPLICATION_NAMESPACE=quick-start-app
 export APPLICATION_DB_NAME=quick_start_db
 ```
 
@@ -349,7 +439,7 @@ export APPLICATION_DB_NAME=quick_start_db
 In this section, you build the deployment manifest for the application. The manifest includes a section for specifying the pod template (`$.spec.template`), it is here that we will declare the application container and Secretless Broker sidecar container.
 
 Below is the base manifest that you will be building upon: 
-_quick-start.yml_
+_quick-start-application.yml_
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -367,17 +457,19 @@ spec:
       labels:
         app: quick-start-application
     spec:
+      serviceAccountName: quick-start-application
+      automountServiceAccountToken: true
       containers:
       # to be completed in the following steps
 ```
 
-The manifest should be saved as a file named `quick-start.yml`. As you can see above, to start off the base manifest you declare a deployment of 3 replicas with associated metadata. 
+The manifest should be saved as a file named **quick-start-application.yml**. As you can see above, to start off the base manifest you declare a deployment of 3 replicas with associated metadata, and assign the *quick-start-application* ServiceAccount (that we created earlier) to the pod. 
 
 The additional steps to complete building the manifest are provided to be informative:
 + [Add & Configure Application Container](#add--configure-application-container)
 + [Add & Configure Secretless Broker Sidecar Container](#add--configure-secretless-broker-sidecar-container)
 
-A [Completed Application Deployment Manifest](#completed-application-deployment-manifest) is provided in the last section, where you'll actually create the `quick_start.yml`. 
+A [Completed Application Deployment Manifest](#completed-application-deployment-manifest) is provided in the last section, where you'll actually create the **quick-start-application.yml**. 
 
 #### Add & Configure Application Container
 
@@ -385,14 +477,13 @@ The Secretless Broker sidecar container has a shared network with the applicatio
 
 _Note_: 
 + An application must connect to the Secretless Broker without SSL, though the actual connection between the Secretless Broker and the target service can leverage SSL. To achieve this we append the query parameters `sslmode=disable` to the connection string, which prevents the PostgresSQL driver from using SSL mode with the Secretless Broker.
-+ Some database drivers require the connection string to explicitly specify a user. This is the reason for `..x@localhost...` in `$DB_URL` below.
 + The Secretless Broker respects the parameters specified in the database connections string.
 
-You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `$DB_URL` environment variable to `postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
+You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `DB_URL` environment variable to `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
 
 Add the application container to the base manifest:
 
-_quick-start.yml_
+_quick-start-application.yml_
 ```yaml
 # update the path $.spec.template.spec in the base manifest with the content below
 containers:
@@ -401,7 +492,7 @@ containers:
     env:
       - name: DB_URL
         # don't forget to substitute the actual value of ${APPLICATION_DB_NAME} below !!!
-        value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
+        value: postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
 ```
 
 #### Add & Configure Secretless Broker Sidecar Container
@@ -409,11 +500,9 @@ containers:
 You will now add the Secretless Broker sidecar container to the containers section under `spec` of the pod template. You will need to:
 
 1. Add the Secretless Broker sidecar container definition
-2. Add read-only volume mounts on the Secretless Broker sidecar container for:
-  + Secretless Broker configuration ConfigMap (`quick-start-application-secretless-config`)
-  + Kubernetes secrets containing the application-user DB-credentials (`quick-start-backend-credentials`) 
+2. Add a read-only volume mount on the Secretless Broker sidecar container for the Secretless Broker configuration ConfigMap (`quick-start-application-secretless-config`) 
 
-_quick-start.yml_
+_quick-start-application.yml_
 ```yaml
 # update the path $.spec.template.spec in the base manifest with the content below
 containers:
@@ -424,16 +513,10 @@ containers:
     imagePullPolicy: IfNotPresent
     args: ["-f", "/etc/secretless/secretless.yml"]
     volumeMounts:
-      - name: secret
-        mountPath: /etc/secret
-        readOnly: true
       - name: config
         mountPath: /etc/secretless
         readOnly: true
 volumes:
-  - name: secret
-    secret:
-      secretName: quick-start-backend-credentials
   - name: config
     configMap:
       name: quick-start-application-secretless-config
@@ -441,11 +524,11 @@ volumes:
 
 #### Completed Application Deployment Manifest
 
-You should now save the application deployment manifest in a file named `quick-start.yml`.
-Running the command below will save a completed deployment manifest to `quick-start.yml` in your current working directory, using the value of the `$APPLICATION_DB_NAME` environment variable in the executing terminal:
+You should now save the application deployment manifest in a file named **quick-start-application.yml**.
+Running the command below will save a completed deployment manifest to **quick-start-application.yml** in your current working directory, using the value of the `APPLICATION_DB_NAME` environment variable in the executing terminal:
 
 ```bash
-cat << EOF > quick-start.yml
+cat << EOF > quick-start-application.yml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -462,27 +545,23 @@ spec:
       labels:
         app: quick-start-application
     spec:
+      serviceAccountName: quick-start-application
+      automountServiceAccountToken: true
       containers:
         - name: quick-start-application
           image: cyberark/demo-app:latest
           env:
             - name: DB_URL
-              value: postgresql://x@localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
+              value: postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
         - name: secretless-broker
           image: cyberark/secretless-broker:latest
           imagePullPolicy: IfNotPresent
           args: ["-f", "/etc/secretless/secretless.yml"]
           volumeMounts:
-            - name: secret
-              mountPath: /etc/secret
-              readOnly: true
             - name: config
               mountPath: /etc/secretless
               readOnly: true
       volumes:
-        - name: secret
-          secret:
-            secretName: quick-start-backend-credentials
         - name: config
           configMap:
             name: quick-start-application-secretless-config
@@ -495,24 +574,33 @@ You now have a complete application deployment manifest from the previous sectio
 
 To deploy the application, run this command:
 ```bash
-kubectl --namespace ${APPLICATION_NAMESPACE} apply -f quick-start.yml
+kubectl --namespace quick-start-application-ns apply -f quick-start-application.yml
 ```
+<pre>
+deployment.apps/quick-start-application created
+</pre>
 
 To ensure the application pods have started and are healthy, run this command:
 ```bash
-kubectl --namespace ${APPLICATION_NAMESPACE} get pods
+kubectl --namespace quick-start-application-ns get pods
 ```
+<pre>
+NAME                                       READY     STATUS        RESTARTS   AGE
+quick-start-application-6bd8dbd57f-bshmf   2/2       Running       0          22s
+quick-start-application-6bd8dbd57f-dr962   2/2       Running       0          26s
+quick-start-application-6bd8dbd57f-fgfnh   2/2       Running       0          30s
+</pre>
 
 #### Expose Application Publicly
 
 Now that the application is up and running, you will need to expose it publicly before you can consume the web-service.
 
-The service definition below assumes you're using minikube, where `NodePort` is the appropriate type of service to expose the application; you may prefer to use something different e.g. a `LoadBalancer` for a GKE cluster.
+The service definition below assumes you're using minikube, where **NodePort** is the appropriate type of service to expose the application; you may prefer to use something different e.g. a **LoadBalancer** for a GKE cluster.
  
 To expose the application, run the command:
 
 ```bash
-cat << EOF | kubectl --namespace ${APPLICATION_NAMESPACE} apply -f -
+cat << EOF > quick-start-application-service.yml
 kind: Service
 apiVersion: v1
 metadata:
@@ -526,20 +614,27 @@ spec:
     nodePort: 30002
   type: NodePort
 EOF
-```
 
-If you used the service definition above, the application should now be available at `$(minikube ip):30002`, (referred to as `$APPLICATION_URL` from now on).
+kubectl --namespace quick-start-application-ns \
+ apply \
+ -f quick-start-application-service.yml
+```
+<pre>
+service/quick-start-application created
+</pre>
+
+If you used the service definition above, the application should now be available at `$(minikube ip):30002`, (referred to as environment variable `APPLICATION_URL` from now on).
 
 ## Try The Running Application
 
 That's it! You've configured your application to connect to PostgreSQL via the Secretless Broker, and we can try it out to validate that it's working as expected.
 
-The next steps rely on the presence of `$APPLICATION_URL` in your environment. For example, if you used the service definition in the previous then you would setup your environment as follows:
+The next steps rely on the presence of the `APPLICATION_URL` environment variable. For example, if you used the service definition in the previous then you would setup your environment as follows:
 ```bash
 export APPLICATION_URL=$(minikube ip):30002
 ```
 
-Run the command below to create a pet:
+Run the command below to create a pet (`POST /pet`):
 ```bash
 curl -i -d @- \
  -H "Content-Type: application/json" \
@@ -550,13 +645,27 @@ curl -i -d @- \
 }
 EOF
 ```
-We expect the command above to respond with HTTP status 201.
+<pre>
+HTTP/1.1 201 
+Location: http://192.168.99.100:30002/pet/2
+Content-Length: 0
+Date: Thu, 23 Aug 2018 11:56:27 GMT
+</pre>
+We expect the request responds with a HTTP status 201.
 
-Run the command below to retrieve all the pets:
+Run the command below to retrieve all the pets (`GET /pets`):
 ```bash
 curl -i ${APPLICATION_URL}/pets
 ```
-We expect the command above to respond with a JSON array containing all the pets.
+<pre>
+HTTP/1.1 200 
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 23 Aug 2018 11:57:17 GMT
+
+[{"id":1,"name":"Secretlessly Fluffy"}]
+</pre>
+We expect the request to respond with a JSON array containing all the pets.
 
 There we have it. This application is communicating with a target service without managing any secrets.
 
@@ -564,16 +673,14 @@ There we have it. This application is communicating with a target service withou
 
 In this section, you get to see how an application using the Secretless Broker deals with credential rotation.
 These are the steps you wil take to rotate the credentials of the dabatase:
++ rotate application-user DB-credentials in the database
 + update the application-user DB-credentials in the vault
-+ wait for the update to take effect
-+ rotate the credentials in the database, and prune old connections
-
-Typically, you'd want your rotation to work the other way - update the DB and then your vault - but we're using kubernetes secrets in this guide, which isn't built to handle secret rotation gracefully. For that, you'd want to use a better secrets management solution.
++ prune existing connections established using old credentials
 
 ### Poll Application API [separate terminal]
-Before rotating, **you will run the commands in this section in a new and separate terminal** to poll the retrieve pets endpoint (GET `/pets`). This will allow you to see the request-response cycle of the application. If something goes wrong, like a database connection failure you will see it as a > 400 HTTP status code.
+Before rotating, **you will run the commands in this section in a new and separate terminal** to poll the retrieve pets endpoint (`GET /pets`). This will allow you to see the request-response cycle of the application. If something goes wrong, like a database connection failure you will see it as a > 400 HTTP status code.
 
-First, setup the environment with `$APPLICATION_URL`. If you're using `minikube`:
+First, setup the environment with the `APPLICATION_URL` environment variable. If you're using `minikube`:
 ```bash
 export APPLICATION_URL=$(minikube ip):30002
 ```
@@ -583,16 +690,27 @@ To start polling run this command:
 while true
 do 
   echo "Retrieving pets at $(date):"
-  curl $APPLICATION_URL/pets
+  curl -i ${APPLICATION_URL}/pets
   echo ""
   echo ""
   sleep 3
 done
 ```
+<pre>
+Retrieving pets at Thu 23 Aug 2018 19:55:33 +08:
+HTTP/1.1 200 
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 23 Aug 2018 11:55:33 GMT
+
+[{"id":1,"name":"Secretlessly Fluffy"}]
+
+...
+</pre>
 
 ### Rotate Credentials
 
-You will be using admin-credentials to carry out these steps, pruning existing connections requires elevated privileges.
+You will be using **admin-credentials** to carry out these steps, pruning existing connections requires elevated privileges.
 
 Begin by setting up environment variables (assumes the default setup with `minikube`):
 
@@ -601,98 +719,94 @@ export REMOTE_DB_ADMIN_USER=quick_start_admin_user
 export REMOTE_DB_ADMIN_PASSWORD=quick_start_admin_password
 export REMOTE_DB_URL=$(minikube ip):30001
 
-export APPLICATION_NAMESPACE=quick-start-app
 export APPLICATION_DB_USER=app_user
 # you can specify a different value for the new password below
 export APPLICATION_DB_NEW_PASSWORD=new_app_user_password
 ```
 
-#### Rotate Credentials In Secret Store
-Let us now proceed to rotation.
-
-Run the following command to update the application-user DB-credentials in Kubernetes secrets:
-
-```bash
-cat << EOF | kubectl --namespace ${APPLICATION_NAMESPACE} apply -f -
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: quick-start-backend-credentials
-type: Opaque
-data:
-  address: $(echo -n "${REMOTE_DB_URL}" | base64)
-  username: $(echo -n "${APPLICATION_DB_USER}" | base64)
-  password: $(echo -n "${APPLICATION_DB_NEW_PASSWORD}" | base64)
-EOF
-```
-
-There will be a lag for these credentials to propagate to the volume mount of the application under `/etc/secret`.
-
-You can check that the credential have been propagate by `exec`ing into any one of the application pods and comparing the contents of `/etc/secret/password` against `APPLICATION_DB_NEW_PASSWORD`.
-
-Run the following command to wait for Kubernetes secrets to propagate to the application pod Secretless Broker sidecar container volume mounts:
-
-```bash
-function first_pod {
-  kubectl --namespace ${APPLICATION_NAMESPACE} \
-    get pods \
-    -l=app="quick-start-application" \
-    -o=jsonpath='{$.items[0].metadata.name}'
-}
-
-function first_pod_password {
-  kubectl --namespace ${APPLICATION_NAMESPACE} \
-    exec \
-    -it \
-    -c secretless-broker \
-    $(first_pod) \
-    -- \
-    cat /etc/secret/password
-}
-
-function wait_for_secret_propagation {
-  while [[ ! "$(first_pod_password)" == "${APPLICATION_DB_NEW_PASSWORD}" ]]
-  do
-    echo "Waiting for secret to be propagated"
-    sleep 10
-  done
-
-  echo "Ready!"
-}
-
-wait_for_secret_propagation
-```
-
 #### Rotate Credentials In DB
 Now you can proceed to rotate the credentials in the database. 
 
-You will also need to prune existing connections established using old credentials - this in itself has no noticeable effect on the application because most drivers keep a pool of connections and replenish them as and when needed. 
+Remember, you will be using **admin-credentials** to carry out this step.
 
-Remember, you will be using admin-credentials to carry out these steps, pruning existing connections requires elevated privileges.
-
-To rotate the application DB-user password and prune existing connections, run this command:
+To rotate the application DB-user password, run this command:
 ```bash
 docker run \
-  --rm -it \
-  postgres:9.6 \
-  env PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} \
-  psql -U ${REMOTE_DB_ADMIN_USER} "postgres://${REMOTE_DB_URL}/postgres" \
-  -c "
-    /* Rotate Application User password */
-    ALTER ROLE ${APPLICATION_DB_USER} WITH PASSWORD '${APPLICATION_DB_NEW_PASSWORD}';
-    
-    /* Prune Existing Connections */
-    SELECT
-      pg_terminate_backend(pid)
-    FROM
-      pg_stat_activity
-    WHERE
-      pid <> pg_backend_pid()
-    AND
-      usename='${APPLICATION_DB_USER}';
-"
+ --rm \
+ -i \
+ -e PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} \
+ postgres:9.6 \
+  psql \
+  -U ${REMOTE_DB_ADMIN_USER} \
+  "postgres://${REMOTE_DB_URL}/postgres" \
+  << EOSQL
+/* Rotate Application User password */
+ALTER ROLE ${APPLICATION_DB_USER} WITH PASSWORD '${APPLICATION_DB_NEW_PASSWORD}';
+EOSQL
 ```
+<pre>
+ALTER ROLE
+</pre>
+
+#### Update Credentials In Secret Store
+
+After rotation the password value held in the secret store is stale and requires updating.
+Run the following command to update the application-user DB-credentials password value in Kubernetes secrets:
+
+```bash
+base64_new_password=$(echo -n "${APPLICATION_DB_NEW_PASSWORD}" | base64)
+new_password_json='{"data":{"password": "'${base64_new_password}'"}}'
+
+kubectl --namespace quick-start-application-ns \
+ patch secret \
+ quick-start-backend-credentials \
+ -p="${new_password_json}"
+```
+<pre>
+secret/quick-start-backend-credentials patched
+</pre>
+
+#### Prune Existing Connections In DB
+
+You will also need to prune existing connections established using old credentials - this in itself has no noticeable effect on the application because most drivers keep a pool of connections and replenish them as and when needed.
+
+Note that this step takes place after updating the credentials in the secret store. This ensures immediate attempts to reconnect after this step will use the latest credentials.   
+
+Remember, you will be using **admin-credentials** to carry out this step.
+
+To prune existing connections, run this command:
+```bash
+docker run \
+ --rm \
+ -i \
+ -e PGPASSWORD=${REMOTE_DB_ADMIN_PASSWORD} \
+ postgres:9.6 \
+  psql \
+  -U ${REMOTE_DB_ADMIN_USER} \
+  "postgres://${REMOTE_DB_URL}/postgres" \
+  << EOSQL
+/* Prune Existing Connections */
+SELECT
+  pg_terminate_backend(pid)
+FROM
+  pg_stat_activity
+WHERE
+  pid <> pg_backend_pid()
+AND
+  usename='${APPLICATION_DB_USER}';
+EOSQL
+```
+<pre>
+ pg_terminate_backend 
+----------------------
+ t
+ t
+ t
+ .
+ .
+ .
+(30 rows)
+</pre>
 
 ### Conclusion
 Now return to the polling terminal. Observe that requests to the application API are not affected by the password rotation - we continue to be able to query the application as usual, without interruption!

@@ -1,0 +1,28 @@
+---
+# This role is allow to [get] the quick-start-backend-credentials secret
+# in the namespace where this manifest is applied
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: quick-start-backend-credentials-reader
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["secrets"]
+  resourceNames: ["quick-start-backend-credentials"]
+  verbs: ["get"]
+
+---
+# This role binding allows the quick-start-application serviceAccount to
+# read the "quick-start-backend-credentials" secret
+# in the namespace where this manifest is applied
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-quick-start-backend-credentials
+subjects:
+- kind: ServiceAccount
+  name: quick-start-application
+roleRef:
+  kind: Role
+  name: quick-start-backend-credentials-reader
+  apiGroup: rbac.authorization.k8s.io

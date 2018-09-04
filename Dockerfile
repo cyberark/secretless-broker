@@ -36,8 +36,13 @@ RUN apk add -u shadow libc6-compat && \
     mkdir -p /usr/local/lib/secretless && \
     # Make and setup a directory for sockets at /sock
     mkdir /sock && \
+    # Make and setup a directory for the Conjur client certificate/access token
+    mkdir -p /etc/conjur/ssl && \
+    mkdir -p /run/conjur && \
     chown secretless:secretless /usr/local/lib/secretless \
-                                /sock
+                                /sock \
+                                /etc/conjur/ssl \
+                                /run/conjur
 
 USER secretless
 

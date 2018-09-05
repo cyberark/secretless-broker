@@ -30,6 +30,7 @@ type Provider struct {
 	Authenticator       *authenticator.Authenticator
 	Config              conjurapi.Config
 	Conjur              *conjurapi.Client
+	Version             string
 	Name                string
 
 	// Credentials for API-key based auth
@@ -55,7 +56,7 @@ func hasField(field string, params *map[string]string) (ok bool) {
 func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	config := conjurapi.LoadConfig()
 
-	var apiKey, authnURL, tokenFile, username string
+	var apiKey, authnURL, tokenFile, username, version string
 	var authenticator *authenticator.Authenticator
 	var conjur *conjurapi.Client
 	var err error
@@ -67,6 +68,11 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 	apiKey = os.Getenv("CONJUR_AUTHN_API_KEY")
 	tokenFile = os.Getenv("CONJUR_AUTHN_TOKEN_FILE")
 	authnURL = os.Getenv("CONJUR_AUTHN_URL")
+	version = os.Getenv("CONJUR_VERSION")
+
+	if len(version) == 0 {
+		version = "5"
+	}
 
 	provider = &Provider{
 		Name:                options.Name,
@@ -75,6 +81,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		APIKey:              apiKey,
 		AuthnURL:            authnURL,
 		AuthenticationMutex: authenticationMutex,
+		Version:             version,
 	}
 
 	if provider.Username != "" && provider.APIKey != "" {
@@ -91,7 +98,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		log.Printf("Info: Conjur provider using Kubernetes authenticator-based authentication")
 
 		// Load the authenticator with the config from the environment, and log in to Conjur
-		if authenticator, err = loadAuthenticator(provider.AuthnURL, authenticatorTokenFile, provider.Config); err != nil {
+		if authenticator, err = loadAuthenticator(provider.AuthnURL, provider.Version, authenticatorTokenFile, provider.Config); err != nil {
 			return nil, fmt.Errorf("ERROR: Conjur provider could not retrieve access token using the authenticator client: %s", err)
 		}
 		provider.Authenticator = authenticator
@@ -122,6 +129,7 @@ func (p *Provider) GetName() string {
 // 	* Any Conjur variable ID
 func (p *Provider) GetValue(id string) ([]byte, error) {
 	var err error
+	var resourceID string
 
 	if id == "accessToken" {
 		if p.Username != "" && p.APIKey != "" {
@@ -142,15 +150,33 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 		}
 	}
 
-	tokens := strings.SplitN(id, ":", 3)
-	switch len(tokens) {
-	case 1:
-		tokens = []string{p.Config.Account, "variable", tokens[0]}
-	case 2:
-		tokens = []string{p.Config.Account, tokens[0], tokens[1]}
+	if strings.Compare(p.Version, "5") == 0 {
+
+		// v5 supports tokens of the form "kind:id" or "variable-id"
+		tokens := strings.SplitN(id, ":", 3)
+		switch len(tokens) {
+		case 1:
+			tokens = []string{p.Config.Account, "variable", tokens[0]}
+		case 2:
+			tokens = []string{p.Config.Account, tokens[0], tokens[1]}
+		}
+		resourceID = strings.Join(tokens, ":")
+
+	} else {
+
+		// v4 only supports id values of the form "variable:variable-id" or "variable-id"
+		tokens := strings.SplitN(id, ":", 3)
+		if (len(tokens) == 2 && strings.Compare(tokens[0], "variable") != 0) || len(tokens) > 2 {
+			return nil, fmt.Errorf("Error: Conjur provider can't resolve variable %v", id)
+		}
+		resourceID = tokens[0]
 	}
 
-	return p.Conjur.RetrieveSecret(strings.Join(tokens, ":"))
+	secret, err := p.Conjur.RetrieveSecret(resourceID)
+
+	//log.Printf("variable resolved: %v as %v", resourceID, string(secret))
+
+	return secret, err
 }
 
 // loadAuthenticator returns a Conjur Kubernetes authenticator client
@@ -163,7 +189,7 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 // Currently the deployment manifest for Secretless must also specify
 // MY_POD_NAMESPACE and MY_POD_NAME from the pod metadata, but there is a GH
 // issue logged in the authenticator for doing this via the Kubernetes API
-func loadAuthenticator(authnURL string, tokenFile string, config conjurapi.Config) (*authenticator.Authenticator, error) {
+func loadAuthenticator(authnURL string, version string, tokenFile string, config conjurapi.Config) (*authenticator.Authenticator, error) {
 	var err error
 	var conjurCACert []byte
 
@@ -189,10 +215,6 @@ func loadAuthenticator(authnURL string, tokenFile string, config conjurapi.Confi
 	podName := os.Getenv("MY_POD_NAME")
 	account := os.Getenv("CONJUR_ACCOUNT")
 	authnLogin := os.Getenv("CONJUR_AUTHN_LOGIN")
-	conjurVersion := os.Getenv("CONJUR_VERSION")
-	if len(conjurVersion) == 0 {
-		conjurVersion = "5"
-	}
 
 	// Load CA cert
 	if conjurCACert, err = readSSLCert(); err != nil {
@@ -204,7 +226,7 @@ func loadAuthenticator(authnURL string, tokenFile string, config conjurapi.Confi
 		authenticator.Config{
 			Account:        account,
 			ClientCertPath: clientCertPath,
-			ConjurVersion:  conjurVersion,
+			ConjurVersion:  version,
 			PodName:        podName,
 			PodNamespace:   podNamespace,
 			SSLCertificate: conjurCACert,

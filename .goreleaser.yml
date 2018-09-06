@@ -10,10 +10,10 @@ builds:
   - amd64
   main: ./cmd/summon2/main.go
 - binary: secretless-broker
-  env:               
-  - CGO_ENABLED=0    
-  goos:          
-  - linux        
+  env:
+  - CGO_ENABLED=1
+  goos:
+  - linux
   goarch:
   - amd64
   main: ./cmd/secretless-broker/main.go

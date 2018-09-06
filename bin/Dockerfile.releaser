@@ -6,7 +6,8 @@ CMD [ "--rm-dist" ]
 RUN apk add --no-cache bash \
                        build-base \
                        curl \
-                       git && \
+                       git \
+                       mercurial && \
     go get -u github.com/golang/dep/cmd/dep
 
 RUN go get -d github.com/goreleaser/goreleaser && \

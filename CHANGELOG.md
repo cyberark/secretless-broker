@@ -6,15 +6,45 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.0] 2018-09-06
+
+### Fixed
+
+- Fix for "no matching manifest for linux/amd64 in the manifest" error
+- Linter fixes
+- Fixed fast-restart http listener error
+- Fixed soft-reload 100% CPU bug
+- Cleaned up channel closing in main proxy loop
+- Update pg test to use sslmode=disable
+- Fix Proxy#Run SHUTDOWN event deadlock
+- Secretless shutdown ensures handlers shutdown; inform clients of closed
+  connections
+- Fixed panic when using server plugin with "match" config field
+
 ### Added
-- layouts for blog index and single posts
-- page headings to template
-- Beta badge added to homepage
-- Sticky footer added
+
+- Added support for Conjur Kubernetes authenticator in Conjur provider
+- Added Kubernetes secrets provider
+- Added support for a K8s custom resource definition of Secretless Broker config
+- Updated standard config file reading to be in the form of a config manager
+  plugin
+- Added ability to watch for configuration changes through CRDs
+- Add test for clean listener shutdown
+- Added sidecar injector admission-webhook-controller
+- Add BaseHandler and BaseListener
+- Added Goreleaser for automated binary archive building (for tags)
+- Added http credential zeroization
+- Publish quick start Docker image
 
 ### Changed
-- Updated heading styles and fonts
-- Sidebar styling
+
+- Repo moved to `cyberark`, images pushed to DockerHub
+- Updated K8s demo to use K8s secrets provider
+- Upgraded to Go1.11
+- Conjur handler updated to instantiate Conjur provider
+- Updates to website style, homepage, copy to clipboard, and minor content edits
+- Update demos to use Dockerhub image
+- Name updated to Secretless Broker
 
 ## [0.4.0] 2018-08-02
 
@@ -86,4 +116,4 @@ The first tagged version.
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/0.2.0...0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/0.3.0...0.4.0
-
+[0.5.0]: https://github.com/cyberark/secretless-broker/compare/0.4.0...0.5.0

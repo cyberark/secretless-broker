@@ -3,6 +3,7 @@ package crd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -18,7 +19,7 @@ func createCRD(apiExtClient *apiextensionsclientset.Clientset) error {
 		Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
 			Group: CRDGroupName,
 			Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
-				Kind:       CRDLongName,
+				Kind:       strings.Title(CRDLongName),
 				Plural:     CRDName,
 				ShortNames: CRDShortNames,
 			},

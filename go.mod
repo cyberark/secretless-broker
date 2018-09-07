@@ -19,7 +19,7 @@ require (
 	github.com/cenkalti/backoff v2.0.0+incompatible
 	github.com/codegangsta/cli v1.20.0
 	github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720 // indirect
-	github.com/cyberark/conjur-api-go v0.0.0-20180212213233-94b5cadf8f90
+	github.com/cyberark/conjur-api-go v0.5.0
 	github.com/cyberark/conjur-authn-k8s-client v0.12.0
 	github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed
 	github.com/davecgh/go-spew v1.1.0 // indirect

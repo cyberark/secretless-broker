@@ -54,12 +54,14 @@ func hasField(field string, params *map[string]string) (ok bool) {
 // - Config info to use the Conjur k8s authenticator client to retrieve an access token
 //   from Conjur (i.e. Conjur version, account, authn url, username, and SSL cert)
 func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
-	config := conjurapi.LoadConfig()
+	config, err := conjurapi.LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("ERROR: Conjur provider could not load configuration: %s", err)
+	}
 
 	var apiKey, authnURL, tokenFile, username, version string
 	var authenticator *authenticator.Authenticator
 	var conjur *conjurapi.Client
-	var err error
 	var provider *Provider
 
 	authenticationMutex := &sync.Mutex{}
@@ -129,7 +131,6 @@ func (p *Provider) GetName() string {
 // 	* Any Conjur variable ID
 func (p *Provider) GetValue(id string) ([]byte, error) {
 	var err error
-	var resourceID string
 
 	if id == "accessToken" {
 		if p.Username != "" && p.APIKey != "" {
@@ -150,33 +151,15 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 		}
 	}
 
-	if strings.Compare(p.Version, "5") == 0 {
-
-		// v5 supports tokens of the form "kind:id" or "variable-id"
-		tokens := strings.SplitN(id, ":", 3)
-		switch len(tokens) {
-		case 1:
-			tokens = []string{p.Config.Account, "variable", tokens[0]}
-		case 2:
-			tokens = []string{p.Config.Account, tokens[0], tokens[1]}
-		}
-		resourceID = strings.Join(tokens, ":")
-
-	} else {
-
-		// v4 only supports id values of the form "variable:variable-id" or "variable-id"
-		tokens := strings.SplitN(id, ":", 3)
-		if (len(tokens) == 2 && strings.Compare(tokens[0], "variable") != 0) || len(tokens) > 2 {
-			return nil, fmt.Errorf("Error: Conjur provider can't resolve variable %v", id)
-		}
-		resourceID = tokens[0]
+	tokens := strings.SplitN(id, ":", 3)
+	switch len(tokens) {
+	case 1:
+		tokens = []string{p.Config.Account, "variable", tokens[0]}
+	case 2:
+		tokens = []string{p.Config.Account, tokens[0], tokens[1]}
 	}
 
-	secret, err := p.Conjur.RetrieveSecret(resourceID)
-
-	//log.Printf("variable resolved: %v as %v", resourceID, string(secret))
-
-	return secret, err
+	return p.Conjur.RetrieveSecret(strings.Join(tokens, ":"))
 }
 
 // loadAuthenticator returns a Conjur Kubernetes authenticator client

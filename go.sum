@@ -17,6 +17,7 @@ github.com/cenkalti/backoff v2.0.0+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QH
 github.com/codegangsta/cli v1.20.0/go.mod h1:/qJNoX69yVSKu5o4jLyXAENLRyk1uhi7zkbQ3slBdOA=
 github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720/go.mod h1:GL3xCUCBDV3CZiTSEKksMWbLE66hEyuu9qyDOOqM47Y=
 github.com/cyberark/conjur-api-go v0.0.0-20180212213233-94b5cadf8f90/go.mod h1:492M4gGHnfHHWtuewzmj+1fe0BiLzzsrsdGYcbP2lU8=
+github.com/cyberark/conjur-api-go v0.5.0/go.mod h1:492M4gGHnfHHWtuewzmj+1fe0BiLzzsrsdGYcbP2lU8=
 github.com/cyberark/conjur-authn-k8s-client v0.12.0/go.mod h1:hjpUeTkRMUCSR0EAEIko2RCp4+dncNeiIWHNJeLFuRg=
 github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed/go.mod h1:EDdy0BSD9OwcV/Rvz32HsX/QM44Zmi0P8tpdbQ6QwHY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -1,9 +1,9 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: secretless-sidecar-injector-webhook-cfg
+  name: cyberark-sidecar-injector-webhook-cfg
   labels:
-    app: secretless-sidecar-injector
+    app: cyberark-sidecar-injector
 webhooks:
   - name: sidecar-injector.cyberark.com
     clientConfig:
@@ -19,4 +19,4 @@ webhooks:
         resources: ["pods"]
     namespaceSelector:
       matchLabels:
-        secretless-sidecar-injector: enabled
+        cyberark-sidecar-injector: enabled

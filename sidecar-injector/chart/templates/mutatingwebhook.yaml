@@ -1,0 +1,25 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "cyberark-sidecar-injector.fullname" . }}-cfg
+  labels:
+    app: {{ include "cyberark-sidecar-injector.name" . }}
+    chart: {{ include "cyberark-sidecar-injector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+webhooks:
+  - name: sidecar-injector.cyberark.com
+    clientConfig:
+      service:
+        name: {{ include "cyberark-sidecar-injector.fullname" . | quote }}
+        namespace: {{ .Release.Namespace | quote }}
+        path: "/mutate"
+      caBundle: {{ (required "A valid .Values.caBundle entry required!" .Values.caBundle) | b64enc | quote }}
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        cyberark-sidecar-injector: enabled

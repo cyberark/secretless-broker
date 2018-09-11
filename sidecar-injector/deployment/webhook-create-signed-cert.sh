@@ -46,8 +46,8 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-[ -z ${service} ] && service=secretless-sidecar-injector-webhook-svc
-[ -z ${secret} ] && secret=secretless-sidecar-injector-webhook-certs
+[ -z ${service} ] && service=cyberark-sidecar-injector-webhook-svc
+[ -z ${secret} ] && secret=cyberark-sidecar-injector-webhook-certs
 [ -z ${namespace} ] && namespace=default
 
 if [ ! -x "$(command -v openssl)" ]; then

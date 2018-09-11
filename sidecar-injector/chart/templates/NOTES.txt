@@ -1,0 +1,9 @@
+1. Annotate your application as follows
+
+sidecar-injector.cyberark.com/inject: "yes"
+sidecar-injector.cyberark.com/config: "secretless-config"
+sidecar-injector.cyberark.com/injectType: "secretless"
+sidecar-injector.cyberark.com/containerMode: "yes-mode"
+sidecar-injector.cyberark.com/containerName: "yes-container"
+
+2. Webhook intercepts and injects containers as needed

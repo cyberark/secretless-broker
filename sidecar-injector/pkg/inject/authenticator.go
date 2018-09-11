@@ -49,7 +49,6 @@ func generateAuthenticatorSidecarConfig(authConfig AuthenticatorSidecarConfig) *
                 VolumeMounts: []corev1.VolumeMount{
                     {
                         Name:      "conjur-access-token",
-                        ReadOnly:  true,
                         MountPath: "/run/conjur",
                     },
                 },

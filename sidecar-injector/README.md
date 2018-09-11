@@ -40,8 +40,8 @@ Create a namespace "secretless", where you will deploy the Secretless Broker Sid
 1. Create a signed cert/key pair and store it in a Kubernetes `secret` that will be consumed by sidecar deployment
     ```bash
     ~$ ./deployment/webhook-create-signed-cert.sh \
-        --service secretless-sidecar-injector-webhook-svc \
-        --secret secretless-sidecar-injector-webhook-certs \
+        --service cyberark-sidecar-injector-webhook-svc \
+        --secret cyberark-sidecar-injector-webhook-certs \
         --namespace secretless
     ```
 
@@ -49,7 +49,7 @@ Create a namespace "secretless", where you will deploy the Secretless Broker Sid
     ```bash
     ~$ cat deployment/mutatingwebhook.yaml | \
         deployment/webhook-patch-ca-bundle.sh \
-          --service secretless-sidecar-injector-webhook-svc \
+          --service cyberark-sidecar-injector-webhook-svc \
           --namespace secretless > \
         deployment/mutatingwebhook-ca-bundle.yaml
     ```
@@ -69,32 +69,32 @@ Create a namespace "secretless", where you will deploy the Secretless Broker Sid
     ```
     ```
     NAME                                                  READY     STATUS    RESTARTS   AGE
-    secretless-sidecar-injector-webhook-deployment-bbb689d69-882dd   1/1       Running   0          5m
+    cyberark-sidecar-injector-webhook-deployment-bbb689d69-882dd   1/1       Running   0          5m
     ```
     ```bash
     ~$ kubectl -n secretless get deployment
     ```
     ```
     NAME                                  DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-    secretless-sidecar-injector-webhook-deployment   1         1         1            1           5m
+    cyberark-sidecar-injector-webhook-deployment   1         1         1            1           5m
     ```
 
 ## Deploy test application
 
-For this section, you'll work from a test namespace (test-namespace). Later you will label this namespace with `secretless-sidecar-injector=enabled` so as to allow the secretless-sidecar-injector to operate on pods created in this namespace.
+For this section, you'll work from a test namespace (test-namespace). Later you will label this namespace with `cyberark-sidecar-injector=enabled` so as to allow the cyberark-sidecar-injector to operate on pods created in this namespace.
 
 1. Create test namespace
     ```bash
     ~$ kubectl create namespace test-namespace
     ```
 
-2. Label the default namespace with `secretless-sidecar-injector=enabled`
+2. Label the default namespace with `cyberark-sidecar-injector=enabled`
     ```bash
-    ~$ kubectl label namespace test-namespace secretless-sidecar-injector=enabled
-    ~$ kubectl get namespace -L secretless-sidecar-injector
+    ~$ kubectl label namespace test-namespace cyberark-sidecar-injector=enabled
+    ~$ kubectl get namespace -L cyberark-sidecar-injector
     ```
     ```
-    NAME          STATUS    AGE       SECRETLESS-SIDECAR-INJECTOR
+    NAME          STATUS    AGE       CYBERARK-SIDECAR-INJECTOR
     default       Active    18h       enabled
     kube-public   Active    18h
     kube-system   Active    18h

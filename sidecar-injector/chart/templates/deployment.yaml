@@ -1,0 +1,45 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "cyberark-sidecar-injector.fullname" . }}
+  labels:
+    app: {{ include "cyberark-sidecar-injector.name" . }}
+    chart: {{ include "cyberark-sidecar-injector.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "cyberark-sidecar-injector.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "cyberark-sidecar-injector.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+#      securityContext:
+#        runAsUser: 0
+      containers:
+        - name: cyberark-sidecar-injector
+          image: cyberark/sidecar-injector:test
+          imagePullPolicy: Always
+          args:
+            - -tlsCertFile=/etc/webhook/certs/cert.pem
+            - -tlsKeyFile=/etc/webhook/certs/key.pem
+            - -port=8080
+            - -alsologtostderr
+            - -v=4
+            - 2>&1
+          ports:
+            - containerPort: 8080
+              name: https
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /etc/webhook/certs
+              readOnly: true
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: "{{ include "cyberark-sidecar-injector.fullname" . }}-certs"

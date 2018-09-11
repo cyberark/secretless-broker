@@ -22,6 +22,7 @@ const (
 func createPatch(pod *corev1.Pod, sidecarConfig *PatchConfig, annotations map[string]string) ([]byte, error) {
 	var patch []rfc6902PatchOperation
 
+	patch = append(patch, addContainer(pod.Spec.InitContainers, sidecarConfig.InitContainers, "/spec/initContainers")...)
 	patch = append(patch, addContainer(pod.Spec.Containers, sidecarConfig.Containers, "/spec/containers")...)
 	patch = append(patch, addVolume(pod.Spec.Volumes, sidecarConfig.Volumes, "/spec/volumes")...)
 	patch = append(patch, updateAnnotation(pod.Annotations, annotations)...)

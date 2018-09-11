@@ -14,3 +14,6 @@ vendor/*
 
 deployment/mutatingwebhook-ca-bundle.yaml
 examples/test-conjur.yaml
+examples/test-secretless.yaml
+examples/test-secretless-conjur.yaml
+

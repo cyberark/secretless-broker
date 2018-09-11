@@ -5,7 +5,23 @@ import (
 )
 
 // generateSecretlessSidecarConfig generates PatchConfig from a given secretlessConfigMapName
-func generateSecretlessSidecarConfig(secretlessConfigMapName string) *PatchConfig {
+func generateSecretlessSidecarConfig(secretlessConfigMapName, conjurConnConfigMapName, conjurAuthConfigMapName string) *PatchConfig {
+    envvars := []corev1.EnvVar{
+        envVarFromFieldPath("MY_POD_NAME", "metadata.name"),
+        envVarFromFieldPath("MY_POD_NAMESPACE", "metadata.namespace"),
+        envVarFromFieldPath("MY_POD_IP", "status.podIP"),
+    }
+
+    if conjurConnConfigMapName != "" || conjurAuthConfigMapName != "" {
+        envvars = append(envvars,
+            envVarFromConfigMap("CONJUR_VERSION", conjurConnConfigMapName),
+            envVarFromConfigMap("CONJUR_APPLIANCE_URL", conjurConnConfigMapName),
+            envVarFromConfigMap("CONJUR_AUTHN_URL", conjurConnConfigMapName),
+            envVarFromConfigMap("CONJUR_ACCOUNT", conjurConnConfigMapName),
+            envVarFromConfigMap("CONJUR_SSL_CERTIFICATE", conjurConnConfigMapName),
+            envVarFromConfigMap("CONJUR_AUTHN_LOGIN", conjurAuthConfigMapName))
+    }
+
     return &PatchConfig{
         Containers: []corev1.Container{
             {
@@ -20,6 +36,7 @@ func generateSecretlessSidecarConfig(secretlessConfigMapName string) *PatchConfi
                         MountPath: "/etc/secretless",
                     },
                 },
+                Env: envvars,
             },
         },
         Volumes: []corev1.Volume{

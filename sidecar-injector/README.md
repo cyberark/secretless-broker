@@ -138,8 +138,9 @@ For this section, you'll work from a test namespace (test-namespace). Later you 
       template:
         metadata:
           annotations:
-            sidecar-injector.secretless.io/inject: "yes"
-            sidecar-injector.secretless.io/config: "sleep-secretless-config"
+            sidecar-injector.cyberark.com/inject: "yes"
+            sidecar-injector.cyberark.com/config: "sleep-secretless-config"
+            sidecar-injector.cyberark.com/injectType: "secretless"
           labels:
             app: sleep
         spec:

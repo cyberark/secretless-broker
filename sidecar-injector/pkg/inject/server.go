@@ -25,12 +25,6 @@ var (
 	defaulter = runtime.ObjectDefaulter(runtimeScheme)
 )
 
-const (
-	admissionWebhookAnnotationInjectKey = "sidecar-injector.secretless.io/inject"
-	admissionWebhookAnnotationConfigKey = "sidecar-injector.secretless.io/config"
-	admissionWebhookAnnotationStatusKey = "sidecar-injector.secretless.io/status"
-)
-
 
 func init() {
 	_ = corev1.AddToScheme(runtimeScheme)
@@ -84,28 +78,53 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 
 	// determine whether to perform mutation
 	if !mutationRequired(ignoredNamespaces, &pod.ObjectMeta) {
-		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
+		glog.Infof("Skipping mutation for %s/%s due to policy check", req.Namespace, pod.Name)
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
 	}
 
-	secretlessConfigMapName, hasKey := getSecretlessConfigMapName(&pod.ObjectMeta)
-	if !hasKey {
-		errorMsg := fmt.Sprintf("Mutation failed for %s/%s due to missing annotation %s", pod.Namespace, pod.Name, admissionWebhookAnnotationConfigKey)
+    configMapName, err := getAnnotation(&pod.ObjectMeta, annotationConfigKey)
+    if err != nil {
+        errMsg := fmt.Sprintf("Mutation failed for pod %s, in namespace %s, due to %s", pod.Name, req.Namespace, err.Error())
 
-		glog.Infof(errorMsg)
-		return &v1beta1.AdmissionResponse{
-			Result: &metav1.Status{
-				Message: errorMsg,
-			},
-		}
-	}
-	sidecarConfig := generateSidecarConfig(secretlessConfigMapName)
+        glog.Infof(errMsg)
+        return &v1beta1.AdmissionResponse{
+            Result: &metav1.Status{
+                Message: errMsg,
+            },
+        }
+    }
+
+    injectType, err := getAnnotation(&pod.ObjectMeta, annotationInjectTypeKey)
+    containerMode, err := getAnnotation(&pod.ObjectMeta, annotationContainerModeKey)
+    containerName, err := getAnnotation(&pod.ObjectMeta, annotationContainerNameKey)
+
+    var sidecarConfig *PatchConfig
+    switch injectType {
+    case "secretless":
+        sidecarConfig = generateSecretlessSidecarConfig(configMapName)
+        break;
+    case "authenticator":
+        sidecarConfig = generateAuthenticatorSidecarConfig(AuthenticatorSidecarConfig{
+            connectionConfigMap: configMapName,
+            containerMode:       containerMode,
+            containerName:       containerName,
+        })
+        break;
+    default:
+        errMsg := fmt.Sprintf("Mutation failed for pod %s, in namespace %s, due to invalid inject type annotation value = %s", pod.Name, req.Namespace, injectType)
+        glog.Infof(errMsg)
+        return &v1beta1.AdmissionResponse{
+            Result: &metav1.Status{
+                Message: errMsg,
+            },
+        }
+    }
 
 	// Workaround: https://github.com/kubernetes/kubernetes/issues/57982
 	applyDefaultsWorkaround(sidecarConfig.Containers, sidecarConfig.Volumes)
-	annotations := map[string]string{admissionWebhookAnnotationStatusKey: "injected"}
+	annotations := map[string]string{annotationStatusKey: "injected"}
 	patchBytes, err := createPatch(&pod, sidecarConfig, annotations)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{

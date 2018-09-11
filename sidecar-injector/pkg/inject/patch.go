@@ -19,7 +19,7 @@ const (
 )
 
 // create mutation patch for resources
-func createPatch(pod *corev1.Pod, sidecarConfig *Config, annotations map[string]string) ([]byte, error) {
+func createPatch(pod *corev1.Pod, sidecarConfig *PatchConfig, annotations map[string]string) ([]byte, error) {
 	var patch []rfc6902PatchOperation
 
 	patch = append(patch, addContainer(pod.Spec.Containers, sidecarConfig.Containers, "/spec/containers")...)

@@ -83,6 +83,13 @@ chapters:
           url: /docs/reference/providers/keychain.html
         - page: Literal
           url: /docs/reference/providers/literal.html
+      - page: Configuration Managers
+        url: /docs/reference/config-managers/overview.html
+        entries:
+        - page: Configuration File
+          url: /docs/reference/config-managers/configfile.html
+        - page: Kubernetes CRD
+          url: /docs/reference/config-managers/k8s/crd.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
       - page: How to Deploy

@@ -18,7 +18,7 @@ type ConfigurationManagerOptions struct {
 	Name string
 }
 
-// ConfigurationManager is the interface used to obtain ocnfiguration data and
+// ConfigurationManager is the interface used to obtain configuration data and
 // to trigger updates
 type ConfigurationManager interface {
 	// Initialize is called to instantiate the ConfigurationManager and provide

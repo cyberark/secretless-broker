@@ -8,6 +8,7 @@ Supported plugin types:
   -Listeners
   -Handlers
   -Providers
+  -Configuration managers
   -Connection managers
 
 There is also an additional EventNotifier class used to bubble up events from listeners and handlers up
@@ -21,17 +22,26 @@ All plugins are currently loaded in the following manner:
   - Each shared library plugin is searched for these variables:
     - PluginAPIVersion
     - PluginInfo
-    - GetListeners
     - GetHandlers
+    - GetListeners
     - GetProviders
+    - GetConfigurationManagers
     - GetConnectionManagers
-  - Handlers are added to handler factory map.
-  - Listeners are added to listener factory map.
-  - Providers are added to provider factory map.
-  - Managers are added to manager factory map.
-  - Managers are instantiated.
-  - Providers are instantiated.
-  - Listeners and handlers are instantiated by id whenever a configuration references them.
+
+  - All plugin factories are enumerated:
+    - Handler plugins are added to handler factory map.
+    - Listener plugins are added to listener factory map.
+    - Provider plugins are added to provider factory map.
+    - Connection manager plugins are added to connection manager factory map.
+    - Configuration manager plugins are added to configuration manager factory map.
+
+  - Connection manager plugins are instantiated
+  - Chosen configuration manager plugin is instantiated
+  - Program waits for a valid configuration to be provided
+
+  - After the configuration is provided and loaded:
+    - Providers are instantiated.
+    - Listeners/handlers are instantiated as needed
 
 
 PluginAPIVersion
@@ -71,12 +81,16 @@ accept v1.ProviderOptions when invoked and return a new v1.Provider.
 
 GetConnectionManagers
 
-
-Returns a map of provided manager ids to their factory methods (`map[string]func() v1.ConnectionManager`) that
+Returns a map of provided connection manager ids to their factory methods (`map[string]func() v1.ConnectionManager`) that
 return a new v1.ConnectionManager connection manager when invoked.
 
 Note: There is a high likelihood that this method will also have `v1.ConnectionManagerOptions` as the
 factory parameter like the rest of the factory maps in the future releases
+
+GetConfigurationManagers
+
+Returns a map of provided configuration manager ids to their factory methods (`map[string]func() v1.ConfigurationManager`) that
+return a new v1.ConfigurationManager manager when invoked.
 
 Example plugin
 
@@ -121,10 +135,17 @@ The following shows a sample plugin that conforms to the expected API:
   	}
   }
 
+  // GetConfigurationManagers returns the example configuration manager
+  func GetConfigurationManagers() map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager {
+  	return map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager{
+  		"example-plugin-config-manager": example.ConfigManagerFactory,
+  	}
+  }
+
   // GetConnectionManagers returns the example connection manager
   func GetConnectionManagers() map[string]func() plugin_v1.ConnectionManager {
   	return map[string]func() plugin_v1.ConnectionManager{
-  		"example-plugin-manager": example.ManagerFactory,
+  		"example-plugin-connection-manager": example.ManagerFactory,
   	}
   }
 

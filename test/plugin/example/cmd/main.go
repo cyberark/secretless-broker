@@ -44,7 +44,7 @@ func GetConnectionManagers() map[string]func() plugin_v1.ConnectionManager {
 	}
 }
 
-// GetConfigurationManagers returns the example connection manager
+// GetConfigurationManagers returns the example configuration manager
 func GetConfigurationManagers() map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager {
 	return map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager{
 		"example-plugin-config-manager": example.ConfigManagerFactory,

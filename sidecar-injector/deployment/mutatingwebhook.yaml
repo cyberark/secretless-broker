@@ -5,7 +5,7 @@ metadata:
   labels:
     app: secretless-sidecar-injector
 webhooks:
-  - name: sidecar-injector.secretless.io
+  - name: sidecar-injector.cyberark.com
     clientConfig:
       service:
         name: ${service}

@@ -7,7 +7,8 @@ RUN apk add --no-cache bash \
                        build-base \
                        curl \
                        git \
-                       mercurial && \
+                       mercurial \
+                       rpm && \
     go get -u github.com/golang/dep/cmd/dep
 
 RUN go get -d github.com/goreleaser/goreleaser && \

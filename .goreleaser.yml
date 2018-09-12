@@ -12,10 +12,12 @@ builds:
 - binary: secretless-broker
   env:
   - CGO_ENABLED=1
+  flags: --tags netgo
   goos:
   - linux
   goarch:
   - amd64
+  ldflags: -s -w -linkmode external -extldflags "-static"
   main: ./cmd/secretless-broker/main.go
 
 archive:
@@ -36,6 +38,20 @@ dist: ./dist/goreleaser
 
 git:
   short_hash: true
+
+nfpm:
+  bindir: /usr/bin
+  description: Secures your apps by making them Secretless
+  empty_folders:
+  - /usr/local/lib/secretless
+  formats:
+  - deb
+  - rpm
+  homepage: https://secretless.io
+  license: "Apache 2.0"
+  maintainer: CyberArk Maintainers <conj_maintainers@cyberark.com>
+  name_template: "{{.ProjectName}}_{{.Version}}_{{.Arch}}"
+  vendor: CyberArk
 
 snapshot:
   name_template: "{{ .Tag }}-next"

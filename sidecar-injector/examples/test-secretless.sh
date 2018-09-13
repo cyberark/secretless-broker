@@ -1,6 +1,6 @@
 # proceed after 4_store_conjur_cert.sh of the kubernetes-conjur-demo
 
-cd $(dirname $0)/..
+cd $(dirname $0)
 . .env
 
 cat << EOL > test-secretless.yaml

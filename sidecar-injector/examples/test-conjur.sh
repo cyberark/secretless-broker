@@ -2,7 +2,7 @@
 
 containerMode=${1:-sidecar}
 
-cd $(dirname $0)/..
+cd $(dirname $0)
 . .env
 
 CONJUR_NAMESPACE_NAME=conjur-ktanekha

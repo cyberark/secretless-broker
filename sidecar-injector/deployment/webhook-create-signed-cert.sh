@@ -46,9 +46,9 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-[ -z ${service} ] && service=cyberark-sidecar-injector-webhook-svc
-[ -z ${secret} ] && secret=cyberark-sidecar-injector-webhook-certs
-[ -z ${namespace} ] && namespace=default
+[ -z ${service} ] && usage
+[ -z ${secret} ] && usage
+[ -z ${namespace} ] && usage
 
 if [ ! -x "$(command -v openssl)" ]; then
     echo "openssl not found"

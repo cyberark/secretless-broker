@@ -1,6 +1,6 @@
 # proceed after 6_deploy_test_app.sh (because this needs the backend) of the kubernetes-conjur-demo
 
-cd $(dirname $0)/..
+cd $(dirname $0)
 . .env
 
 # derived values

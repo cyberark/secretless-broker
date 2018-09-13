@@ -1,9 +1,33 @@
-1. Annotate your application as follows
+## Instructions
+
+{{- if .Values.csrEnabled }}
+0. Approve CSR
+
+### Watch initContainer logs for when CSR is created
+kubectl -n {{ .Release.Namespace }} logs deployment/{{ include "cyberark-sidecar-injector.fullname" . }} -c init-webhook -f
+
+### Check CSR
+kubectl get csr "{{ include "cyberark-sidecar-injector.fullname" . }}.{{ .Release.Namespace }}"
+
+### Approve
+kubectl certificate approve "{{ include "cyberark-sidecar-injector.fullname" . }}.{{ .Release.Namespace }}"
+{{- end }}
+
+1. Annotate your application in the following format:
 
 sidecar-injector.cyberark.com/inject: "yes"
-sidecar-injector.cyberark.com/config: "secretless-config"
-sidecar-injector.cyberark.com/injectType: "secretless"
-sidecar-injector.cyberark.com/containerMode: "yes-mode"
-sidecar-injector.cyberark.com/containerName: "yes-container"
+sidecar-injector.cyberark.com/secretlessConfig: "secretless-config"
+sidecar-injector.cyberark.com/conjurConnConfig: "conjur-conn-config"
+sidecar-injector.cyberark.com/conjurAuthConfig: "conjur-auth-config"
+sidecar-injector.cyberark.com/injectType: "secretless|authenticator"
+sidecar-injector.cyberark.com/containerMode: "init|sidecar"
+sidecar-injector.cyberark.com/containerName: "sidecar-name"
 
 2. Webhook intercepts and injects containers as needed
+
+Enjoy.
+
+## Inspect release
+
+### Retrieve deployment logs
+kubectl -n {{ .Release.Namespace }} logs deployment/{{ include "cyberark-sidecar-injector.fullname" . }}

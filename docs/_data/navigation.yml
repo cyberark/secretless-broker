@@ -8,12 +8,12 @@ main:
       subsublinks:
       - title: Why the Secretless Broker?
         url: /docs/overview/why_secretless.html
+      - title: Key Terms
+        url: /docs/overview/key_terms.html
       - title: How Does It Work?
         url: /docs/overview/how_it_works.html
       - title: Security
         url: /docs/overview/security.html
-      - title: Key Terms
-        url: /docs/overview/key_terms.html
     - title: Get Started
       url: /docs/get_started.html
     - title: Reference
@@ -25,7 +25,7 @@ main:
   - title: GitHub
     url: https://github.com/cyberark/secretless-broker
     class: gh
-    target: target="_blank" 
+    target: target="_blank"
 
 chapters:
   - title: Overview
@@ -33,12 +33,12 @@ chapters:
     sections:
       - page: Why the Secretless Broker?
         url: /docs/overview/why_secretless.html
+      - page: Key Terms
+        url: /docs/overview/key_terms.html
       - page: How Does It Work?
         url: /docs/overview/how_it_works.html
       - page: Security
         url: /docs/overview/security.html
-      - page: Key Terms
-        url: /docs/overview/key_terms.html
   - title: Get Started
     url: /docs/get_started.html
     sections:

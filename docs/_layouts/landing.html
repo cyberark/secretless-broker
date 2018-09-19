@@ -8,28 +8,27 @@ layout: default
 				<div class="inner">
 					<div class ="in-line-frame">
 						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<h3>Work on Features, not Security</h3>
+						<h3>Build Faster Without Secrets</h3>
 					</div>
-					<p class="inner-text-description">Let developers focus on delivering business value. You can stop building bespoke integrations with vault-specific APIs or integration tools, because Secretless Broker integrates with your vault of choice automatically.</p>
+					<p class="inner-text-description">Eliminate secrets management from the application development process and speed up time to market. Secretless Broker transparently manages secrets so you don't have to. Abstracting secrets management means you don’t need to learn vault APIs or update application code to fetch secrets.</p>
 				</div>
 			</div>
 			<div class="col-md-4 col-sm-12 about-subitem">
 				<div class="inner">
 					<div class ="in-line-frame">
 						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<h3>Prevent Loss and Theft of Secrets</h3>
+						<h3>Prevent Secret Leaks</h3>
 					</div>
-					<p class="inner-text-description">Credentials carry privilege, so don't allow your applications to manage any more sensitive information than necessary.<br>With the Secretless Broker, your applications can connect securely to target services, without becoming part of the secrets management threat surface.</p>
+					<p class="inner-text-description">Applications cannot leak what they don’t have. Even short-lived secrets could be exposed or accidentally leaked. Secretless Broker eliminates the risk of credential theft from your applications and transparently handles runtime changes to secret values.</p>
 				</div>
 			</div>
 			<div class="col-md-4 col-sm-12 about-subitem">
 				<div class="inner">
 					<div class ="in-line-frame">
 						<i class="fa fa-angle-double-right btn-arrow-right" aria-hidden="true"></i>
-						<h3>Handle Secret Rotations Seamlessly</h3>
+						<h3>Use Open Source</h3>
 					</div>
-					<p class="inner-text-description">
-					Until now, applications usually required additional logic and disruptive restarts to handle credential rotation. With the Secretless Broker, no code changes are necessary and no application restarts are needed for secret rotations - the Secretless Broker handles it all for you!</p>
+					<p class="inner-text-description">Secretless Broker is open source, and its code is open and available to review. It is designed to be pluggable, so it’s easy to add support for additional services or vaults. It is natively integrated with Kubernetes for operational simplicity.</p>
 				</div>
 			</div>
 		</div>
@@ -38,38 +37,35 @@ layout: default
 
 <div class="container">
 	<div class="arch">
-		
+
 		<div class="row">
 			<div class="col-md-6">
-				<h2>Traditional Architecture</h2>
+				<h2>The Old Way</h2>
 				<img class="arch-img" src="/img/traditional_architecture.svg" alt="Traditional Architecture">
 				<h3>Developer Responsibilities</h3>
 				<ul class="arch-list">
-					<li>Retrieve secrets from vault​</li>
-					<li>Securely handle retrieved secrets within app​</li>
+					<li>Fetch secrets from vault​</li>
+					<li>Securely handle fetched secrets within app​</li>
 					<li>Resiliently handle secret rotations</li>
 					<li>Manage connection disruptions</li>
+					<li>Connect to target services using fetched secrets</li>
 				</ul>
 			</div>
 			<div class="col-md-6">
-				<h2>Secretless Broker Architecture</h2>
+				<h2>With Secretless Broker</h2>
 				<img class="arch-img" src="/img/secretless_architecture.svg" alt="Secretless Broker Architecture">
-				<h3>Broker Responsibilities</h3>
-				<ul class="arch-list">
-					<li>Retrieve secrets from vault​</li>
-					<li>Securely handle retrieved secrets​</li>
-					<li>Transparently handle secret rotations</li>
-				</ul>
 				<h3>Developer Responsibilities</h3>
 				<ul class="arch-list">
 					<li>Manage connection disruptions</li>
 					<li>Connect to target services using local sockets and URLs</li>
 				</ul>
+				<br><br>
+				<h3><em>Secretless Broker Automates the Rest</em></h3>
 			</div>
 		</div>
-	
+
 	</div>
-</div> 
+</div>
 
 
 

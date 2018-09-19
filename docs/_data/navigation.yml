@@ -44,8 +44,8 @@ chapters:
     sections:
       - page: Quick Start
         url: /docs/get_started/quick_start.html
-      - page: Deploying to Kubernetes
-        url: /docs/get_started/deploy_to_kubernetes.html
+      - page: Kubernetes Tutorial
+        url: /docs/get_started/kubernetes_tutorial.html
   - title: Reference
     url: /docs/reference.html
     sections:

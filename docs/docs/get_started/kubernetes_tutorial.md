@@ -1,16 +1,16 @@
 ---
-title: Deploy to Kubernetes
-id: deploy_to_kubernetes
+title: Kubernetes Tutorial
+id: kubernetes_tutorial
 layout: docs
 description: Secretless Broker Documentation
-permalink: /docs/get_started/deploy_to_kubernetes.html
+permalink: /docs/get_started/kubernetes_tutorial.html
 ---
 
 To get started with the Secretless Broker, try working through this tutorial, which goes through deploying the Secretless Broker with a sample application that uses a PostgresSQL database for backend storage.
 
 We have chosen a PostgresSQL database as the target service for this tutorial, however the Secretless Broker comes built-in with support for several other target services; check out our [reference](/docs/reference.html) for more info.
 
-If you'd rather just see **the whole thing working end to end**, check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+If you'd rather just see **the whole thing working end to end**, check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps yourself and configurable to suit your needs.
 
 
 ## Table of Contents

@@ -1,5 +1,5 @@
 ---
-title: Why the Secretless Broker?
+title: Why Secretless?
 id: docs
 layout: docs
 description: Secretless Broker Documentation

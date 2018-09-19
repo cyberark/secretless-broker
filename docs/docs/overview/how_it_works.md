@@ -1,5 +1,5 @@
 ---
-title: How does it work?
+title: How Does It Work?
 id: how_it_works
 layout: docs
 description: Secretless Broker Documentation

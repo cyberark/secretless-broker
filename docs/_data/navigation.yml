@@ -6,12 +6,12 @@ main:
     - title: Overview
       url: /docs/overview.html
       subsublinks:
-      - title: Why the Secretless Broker?
+      - title: Why Secretless?
         url: /docs/overview/why_secretless.html
-      - title: Key Terms
-        url: /docs/overview/key_terms.html
       - title: How Does It Work?
         url: /docs/overview/how_it_works.html
+      - title: Key Terms
+        url: /docs/overview/key_terms.html
       - title: Security
         url: /docs/overview/security.html
     - title: Get Started
@@ -31,12 +31,12 @@ chapters:
   - title: Overview
     url: /docs/overview.html
     sections:
-      - page: Why the Secretless Broker?
+      - page: Why Secretless?
         url: /docs/overview/why_secretless.html
-      - page: Key Terms
-        url: /docs/overview/key_terms.html
       - page: How Does It Work?
         url: /docs/overview/how_it_works.html
+      - page: Key Terms
+        url: /docs/overview/key_terms.html
       - page: Security
         url: /docs/overview/security.html
   - title: Get Started

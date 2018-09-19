@@ -10,6 +10,6 @@ To get started trying out the Secretless Broker, you can run through our [quick 
 that allow you to try it out with PostgreSQL, SSH, or an HTTP web service.
 
 If you are looking for a more detailed introduction to how the Secretless Broker works in
-practice, please look at our introduction to [deploying to Kubernetes](/docs/get_started/deploy_to_kubernetes.html).
+practice, please look at our [Kubernetes tutorial](/docs/get_started/kubernetes_tutorial.html).
 
 The Secretless Broker is currently in **beta**.

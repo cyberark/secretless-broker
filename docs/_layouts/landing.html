@@ -39,9 +39,9 @@ layout: default
 	<div class="arch">
 
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-6 arch-col">
 				<h2>The Old Way</h2>
-				<img class="arch-img" src="/img/traditional_architecture.svg" alt="Traditional Architecture">
+				<img class="arch-img" src="/img/secretless_trad_architecture.svg" alt="Traditional Architecture">
 				<h3>Developer Responsibilities</h3>
 				<ul class="arch-list">
 					<li>Fetch secrets from vault​</li>
@@ -51,7 +51,7 @@ layout: default
 					<li>Connect to target services using fetched secrets</li>
 				</ul>
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-6 arch-col arch-col-r">
 				<h2>With Secretless Broker</h2>
 				<img class="arch-img" src="/img/secretless_architecture.svg" alt="Secretless Broker Architecture">
 				<h3>Developer Responsibilities</h3>
@@ -59,8 +59,7 @@ layout: default
 					<li>Manage connection disruptions</li>
 					<li>Connect to target services using local sockets and URLs</li>
 				</ul>
-				<br><br>
-				<h3><em>Secretless Broker Automates the Rest</em></h3>
+				<span class="arch-callout">Secretless Broker Automates the Rest</span>
 			</div>
 		</div>
 

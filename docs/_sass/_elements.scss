@@ -193,8 +193,18 @@
 }
 
 .arch-img {
-	padding: 3rem;
-	width: 100%;
+	padding: 0;
+	margin: 2rem 0 3rem 0;
+	height: 30rem;
+}
+
+.arch-callout {
+	font-size: 1.5rem;
+	color: #fff;
+	background-color: $sless-blue;
+	padding: 5px 13px;
+	border-radius: 6px;
+	margin-top: 4rem;
 }
 
 .docs-img {
@@ -203,11 +213,20 @@
 	text-align: center;
 }
 
-@media (min-width: 700px) {
+@media (max-width: 767px) {
+	.arch-col-r {
+		border-top: 1px solid $sless-blue;
+		margin-top: 3rem;
+		padding-top: 2rem;
+	}
 	.arch-img {
-		max-height: 30rem;
-		margin: 2rem 0;
-		padding: 0;
+		height: 40rem;
+	}
+}
+
+@media (max-width: 991px) {
+	.arch-img {
+		width: 90%;
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/golang/glog"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"fmt"
 )
 
 // mutationRequired determines if target resource requires mutation
@@ -18,23 +19,18 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 		}
 	}
 
-	annotations := metadata.GetAnnotations()
-	if annotations == nil {
-		annotations = map[string]string{}
-	}
-
-	status := annotations[admissionWebhookAnnotationStatusKey]
+	status, _ := getAnnotation(metadata, annotationStatusKey)
 
 	// determine whether to perform mutation based on annotation for the target resource
 	var required bool
 	if strings.ToLower(status) == "injected" {
 		required = false;
 	} else {
-		switch strings.ToLower(annotations[admissionWebhookAnnotationInjectKey]) {
-		default:
-			required = false
+		switch injectValue, _ := getAnnotation(metadata, annotationInjectKey); strings.ToLower(injectValue) {
 		case "y", "yes", "true", "on":
 			required = true
+		default:
+			required = false
 		}
 	}
 
@@ -42,50 +38,41 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	return required
 }
 
-// generateSidecarConfig generates Config from a given secretlessConfigMapName
-func generateSidecarConfig(secretlessConfigMapName string) *Config {
-	return &Config{
-		Containers: []corev1.Container{
-			{
-				Name:            "secretless",
-				Image:           "cyberark/secretless-broker:latest",
-				Args:            []string{"-f", "/etc/secretless/secretless.yml"},
-				ImagePullPolicy: "Always",
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "secretless-config",
-						ReadOnly:  true,
-						MountPath: "/etc/secretless",
-					},
+func envVarFromConfigMap(envVarName, configMapName string) corev1.EnvVar {
+	return corev1.EnvVar{
+		Name: envVarName,
+		ValueFrom: &corev1.EnvVarSource{
+
+			ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name:  configMapName,
 				},
-			},
-		},
-		Volumes: []corev1.Volume{
-			{
-				Name: "secretless-config",
-				VolumeSource: corev1.VolumeSource{
-					ConfigMap: &corev1.ConfigMapVolumeSource{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: secretlessConfigMapName,
-						},
-					},
-				},
+				Key: envVarName,
 			},
 		},
 	}
 }
 
-// getSecretlessConfigMapName attempts to find the string value of
-// the admissionWebhookAnnotationConfigKey annotation inside a given ObjectMeta.
-// It returns a tuple (string, bool):
-// the string value (or empty) and a boolean of whether the annotation was present
-func getSecretlessConfigMapName(metadata *metav1.ObjectMeta) (string, bool) {
+func envVarFromFieldPath(envVarName, fieldPath string) corev1.EnvVar {
+	return corev1.EnvVar{
+		Name:      envVarName,
+		ValueFrom: &corev1.EnvVarSource{
+			FieldRef:    &corev1.ObjectFieldSelector{
+				FieldPath:  fieldPath,
+			},
+		},
+	}
+}
+
+func getAnnotation(metadata *metav1.ObjectMeta, key string) (string, error) {
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
 	}
 
-	value, hasKey := annotations[admissionWebhookAnnotationConfigKey]
-
-	return value, hasKey
+	value, hasKey := annotations[key]
+	if !hasKey {
+		return "", fmt.Errorf("missing annotation %s", key)
+	}
+	return value, nil
 }

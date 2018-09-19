@@ -1,0 +1,60 @@
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}-certs-reader"
+rules:
+{{- if .Values.csrEnabled }}
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["secrets"]
+  resourceNames: [{{ include "cyberark-sidecar-injector.fullname" . | quote }}]
+  verbs: ["get", "patch"]
+{{- else }}
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["secrets"]
+  resourceNames: [{{ include "cyberark-sidecar-injector.fullname" . | quote }}]
+  verbs: ["get"]
+{{- end }}
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}-certs-reader"
+subjects:
+- kind: ServiceAccount
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}"
+roleRef:
+  kind: Role
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}-certs-reader"
+  apiGroup: rbac.authorization.k8s.io
+
+{{- if .Values.csrEnabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}.{{ .Release.Namespace }}"
+rules:
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["certificatesigningrequests"]
+  resourceNames: ["{{ include "cyberark-sidecar-injector.fullname" . }}.{{ .Release.Namespace }}"]
+  verbs: ["get", "watch", "delete"]
+- apiGroups: ["certificates.k8s.io"]
+  resources: ["certificatesigningrequests"]
+  verbs: ["create"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}.{{ .Release.Namespace }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}.{{ .Release.Namespace }}"
+subjects:
+- kind: ServiceAccount
+  name: "{{ include "cyberark-sidecar-injector.fullname" . }}"
+  namespace: {{ .Release.Namespace | quote }}
+{{- end }}

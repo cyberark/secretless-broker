@@ -1,23 +1,24 @@
-# CyberArk Sidecar Injector MutatingAdmissionWebhook
+# CyberArk Sidecar Injector
 
-This document shows how to build, deploy and use the CyberArk Broker Sidecar Injector [MutatingAdmissionWebhook](https://kubernetes.io/docs/admin/admission-controllers/#mutatingadmissionwebhook-beta-in-19) which injects sidecar container/s into a pod prior to persistence of the underlying object.
+This document shows how to deploy and use the CyberArk Broker Sidecar Injector [MutatingAdmissionWebhook](https://kubernetes.io/docs/admin/admission-controllers/#mutatingadmissionwebhook-beta-in-19) Server which injects sidecar container/s into a pod prior to persistence of the underlying object.
 
-* [Prerequisites](#prerequisites)
-* [Docker image](#docker-image)
-* [Installing the Sidecar Injector (Manually)](#installing-the-sidecar-injector-manually)
-  + [Dedicated Namespace](#dedicated-namespace)
-  + [Deploy Sidecar Injector](#deploy-sidecar-injector)
-  + [Verify Sidecar Injector Installation](#verify-sidecar-injector-installation)
-* [Installing the Sidecar Injector (Helm)](#installing-the-sidecar-injector-helm)
-* [Using the Sidecar Injector](#using-the-sidecar-injector)
-  + [Configuration](#configuration)
-    - [sidecar-injector.cyberark.com/secretlessConfig](#sidecar-injectorcyberarkcomsecretlessconfig)
-    - [sidecar-injector.cyberark.com/conjurConnConfig](#sidecar-injectorcyberarkcomconjurconnconfig)
-    - [sidecar-injector.cyberark.com/conjurAuthConfig](#sidecar-injectorcyberarkcomconjurauthconfig)
-* [Secretless Sidecar Injection Example](#secretless-sidecar-injection-example)
-* [Conjur Authenticator/Secretless Sidecar Injection Example](#conjur-authenticatorsecretless-sidecar-injection-example)
-  + [Deploy Authenticator Sidecar](#deploy-authenticator-sidecar)
-  + [Deploy Secretless Sidecar](#deploy-secretless-sidecar)
+  * [Prerequisites](#prerequisites)
+    + [Mandatory TLS](#mandatory-tls)
+  * [Docker image](#docker-image)
+  * [Installing the Sidecar Injector (Manually)](#installing-the-sidecar-injector-manually)
+    + [Dedicated Namespace](#dedicated-namespace)
+    + [Deploy Sidecar Injector](#deploy-sidecar-injector)
+    + [Verify Sidecar Injector Installation](#verify-sidecar-injector-installation)
+  * [Installing the Sidecar Injector (Helm)](#installing-the-sidecar-injector-helm)
+  * [Using the Sidecar Injector](#using-the-sidecar-injector)
+    + [Configuration](#configuration)
+      - [sidecar-injector.cyberark.com/secretlessConfig](#sidecar-injectorcyberarkcomsecretlessconfig)
+      - [sidecar-injector.cyberark.com/conjurConnConfig](#sidecar-injectorcyberarkcomconjurconnconfig)
+      - [sidecar-injector.cyberark.com/conjurAuthConfig](#sidecar-injectorcyberarkcomconjurauthconfig)
+  * [Secretless Sidecar Injection Example](#secretless-sidecar-injection-example)
+  * [Conjur Authenticator/Secretless Sidecar Injection Example](#conjur-authenticatorsecretless-sidecar-injection-example)
+    + [Deploy Authenticator Sidecar](#deploy-authenticator-sidecar)
+    + [Deploy Secretless Sidecar](#deploy-secretless-sidecar)
 
 ## Prerequisites
 
@@ -37,9 +38,22 @@ If using `minikube`, start your cluster as follows:
 ~$ minikube start --memory=8192 --kubernetes-version=v1.10.0
 ```
 
-## Docker image
+### Mandatory TLS
 
-The docker image for the mutating webhook admission controller is publicly available on Dockerhub as [cyberark/sidecar-injector](https://hub.docker.com/r/cyberark/sidecar-injector/) .
+Supporting TLS for external webhook server is required because admission is a high security operation. As part of the installation proceed, we need to create a TLS certificate signed by a trusted CA (shown below is the Kubernetes CA but you can use your own) to secure the communication between the webhook server and apiserver. For the complete steps of creating and approving Certificate Signing Requests(CSR), please refer to [Managing TLS in a cluster](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/).
+
+
+## Docker Image
+
+The docker image for the mutating admission webhook server is publicly available on Dockerhub as [cyberark/sidecar-injector](https://hub.docker.com/r/cyberark/sidecar-injector/).
+
+The docker image entrypoint is the server binary. The binary supports the following flags:
+```bash
+-tlsCertFile=/etc/webhook/certs/cert.pem
+-tlsKeyFile=/etc/webhook/certs/key.pem            
+-port=8080                       
+```
+It also supports glog flags e.g. `-v` for verbosity of logs
 
 ## Installing the Sidecar Injector (Manually)
 
@@ -98,7 +112,7 @@ Create a namespace "cyberark-sidecar-injector", where you will deploy the CyberA
 
 ## Installing the Sidecar Injector (Helm)
 
-+ Helm is **required**
++ [Helm](https://docs.helm.sh/using_helm/) is **required**
 
 To install the sidecar injector in the "injectors" namespace run the following:
 
@@ -106,7 +120,6 @@ To install the sidecar injector in the "injectors" namespace run the following:
 helm --namespace injectors \
  install \
  --set "caBundle=$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}')" \
- --set csrEnabled=true \
  ./charts/cyberark-sidecar-injector/
 ```
 

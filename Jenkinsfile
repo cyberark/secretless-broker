@@ -11,6 +11,7 @@ pipeline {
   stages {
     stage('Push Sidecar') {
       steps {
+        sh './sidecar-injector/bin/build test'
         sh './sidecar-injector/bin/publish test'
       }
     }

@@ -11,5 +11,5 @@ nameOverride: ""
 fullnameOverride: ""
 
 # caBundle:
-csrEnabled: false
+csrEnabled: true
 # certsSecret:

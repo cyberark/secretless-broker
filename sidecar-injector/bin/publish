@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# Build and push CyberArk sidecar injector mutating webhook service
+# Push CyberArk sidecar injector mutating webhook service
 # usage: ./bin/publish
 set -ex
 
@@ -8,5 +8,5 @@ if [ -z "$1" ]; then echo "tag not provided"; exit 1; fi
 
 cd $(dirname $0)/..
 
-docker build -t cyberark/sidecar-injector:$1 .
 docker push cyberark/sidecar-injector:$1
+

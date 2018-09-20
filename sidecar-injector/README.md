@@ -1,6 +1,6 @@
-# Secretless Broker Sidecar Injector MutatingAdmissionWebhook
+# CyberArk Sidecar Injector MutatingAdmissionWebhook
 
-This document shows how to build and deploy the Secretless Broker Sidecar Injector [MutatingAdmissionWebhook](https://kubernetes.io/docs/admin/admission-controllers/#mutatingadmissionwebhook-beta-in-19) which injects a Secretless-broker sidecar container into a pod prior to persistence of the underlying object.
+This document shows how to build, deploy and use the CyberArk Broker Sidecar Injector [MutatingAdmissionWebhook](https://kubernetes.io/docs/admin/admission-controllers/#mutatingadmissionwebhook-beta-in-19) which injects sidecar container/s into a pod prior to persistence of the underlying object.
 
 ## Prerequisites
 

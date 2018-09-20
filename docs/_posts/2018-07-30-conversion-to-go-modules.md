@@ -31,7 +31,7 @@ Since there has been no one official solution that addresses all of these issues
 
 ## `vgo` and the new Go modules
 
-Despite the growing acceptance of `dep` as _the_ dependency management tool for Golang, in mid-2018 a [new proposal](https://blog.golang.org/versioning-proposal) emerged for managing Golang project dependencies, known as `vgo` or Versioned Go Modules. The proposal was accepted, and as of [`Go1.11`](https://tip.golang.org/doc/go1.11#modules) modules will be available as an alternative to `GOPATH`, with integrated support for versioning and package distribution. Go modules are currently available as part of `golang:1.11beta2` ([docker image](https://hub.docker.com/_/golang/)) and are expected to become available in the GA version of `Go1.11` around August 1st (a day after this posting).
+Despite the growing acceptance of `dep` as _the_ dependency management tool for Golang, in mid-2018 a [new proposal](https://blog.golang.org/versioning-proposal) emerged for managing Golang project dependencies, known as `vgo` or Versioned Go Modules. The proposal was accepted, and as of [`Go v1.11`](https://tip.golang.org/doc/go1.11#modules) modules are available as an alternative to `GOPATH`, with integrated support for versioning and package distribution.
 
 ## Conversion of the Secretless Broker
 
@@ -65,7 +65,7 @@ The instructions below should work even if you don't currently have `dep` as you
 To convert to using Go modules, you run the following command from your project root:
 
 ```
-$ go mod -v -init -module github.com/cyberark/secretless-broker
+$ go mod init github.com/cyberark/secretless-broker
 go: creating new go.mod: module github.com/cyberark/secretless-broker
 go: copying requirements from Gopkg.lock
 ```
@@ -75,7 +75,7 @@ After running this command, you should have a new `go.mod` file in your reposito
 You may also want to remove the `vendor/` directory; though it is currently still supported, it is expected that it [will be deprecated](https://github.com/golang/proposal/blob/master/design/24301-versioned-go.md#proposal) going forward.
 
 #### Things to watch out for
-- If you’re running this inside a container, make sure that you have `git` installed beforehand.
+- If you’re running this inside a container, make sure that you have `git` (and possibly Mercurial depending on your dependencies) installed beforehand.
 - If you skipped step one and your code still resides in the `GOPATH`, `go mod` will give you a warning when you run this step!
 - If you have local modules that your code depends on, you may need to manually add things to your `go.mod` file.
 
@@ -91,15 +91,19 @@ You may also want to remove the `vendor/` directory; though it is currently stil
 
 ### Step #3 - Sync Your Dependencies
 
-Now that we have our module file, it is time to get the dependencies downloaded with `go mod -sync` and ensure that we don’t have any junk in the `go.mod` file:
+Now that we have our module file, it is time to get the dependencies cleaned up and downloaded locally:
 ```
-$ go mod -sync
+$ go mod tidy
+go: finding github.com/conjurinc/secretless/internal/app/secretless/providers latest
+…
+
+$ go mod download
 go: finding golang.org/x/text v0.0.0-20171227012246-e19ae1496984
 …
 go: downloading golang.org/x/text v0.0.0-20171227012246-e19ae1496984
 ```
 
-This stage will create `go.sum`, which will contain verification hashes of modules that you synced. It will also remove unused imports from `go.mod`, so make sure to commit these two files again or amend the previous commit.
+This stage will create `go.sum`, which will contain verification hashes of modules that you synced. `go.mod` and `go.sum` files are likely to change, so make sure to commit these two files again or amend the previous commit.
 
 
 ### Step #4 - Run Your Code!
@@ -115,7 +119,7 @@ _Note: If you did not run the sync command, `go run` and `go build` will fetch a
 
 ## Conclusion
 
-While our conversion was not as trivial as many other blogs have led us to believe, we were able to do this in about 16 dev-hours for two codebases. The changeover has reduced bloat and made dependencies much simpler/faster, and we are in good shape on this for the forseeable future. The project is in its early stages (still in beta), so there are still issues to resolve and ways to make the process even smoother, but in general `vgo` is looking like a much needed step in the right direction for Golang tooling.
+While our conversion was not as trivial as many other blogs have led us to believe, we were able to do this in about 16 dev-hours for two codebases. The changeover has reduced bloat and made dependencies much simpler/faster, and we are in good shape on this for the forseeable future. The project is in its early stages, so there are still issues to resolve and ways to make the process even smoother, but in general `vgo` is looking like a much needed step in the right direction for Golang tooling.
 
 ## Addendum
 
@@ -125,12 +129,12 @@ Adding dependencies works incredibly simple just by using `go get <path>`. It wi
 
 #### Listing dependencies
 
-To list all the modules listed as dependencies in `go.mod`, run the following: `go list -m all`.
+To list all the modules listed as dependencies in `go.mod`, run the following: `go mod graph`.
 
 #### Removing dependencies
 
-Removing modules is a touch trickier but still pretty simple: `go mod -droprequire=<path>` or manually editing `go.mod`.
+Removing modules is a touch trickier but still pretty simple: `go get <path>@none` or manually editing `go.mod`.
 
 #### Docker dependency caching
 
-If you built Go or Node modules within Docker and you do it often, you might know that caching the downloaded modules in a separate Docker layer can improve your build time by a large amount. Unlike with `dep`, current support for this is clunky now with the new modules ([GitHub issue](https://github.com/golang/go/issues/26610)). The current way to fetch all the dependencies with only `go.mod` and `go.sum` files is `go list -e $(go list -m all 2>/dev/null | awk '{print $1}’)` but keep an eye out on the issue linked as this may get fixed at some point.
+If you built Go or Node modules within Docker and you do it often, you might know that caching the downloaded modules in a separate Docker layer can improve your build time by a large amount. Just like with `dep`, you copy the relevant files (`go.mod` and `go.sum`) and run a simple command: `go mod download`.

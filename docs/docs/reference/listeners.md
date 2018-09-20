@@ -54,3 +54,5 @@ Regardless of the connection strategy, the operating system provides security be
 The Listener configuration governs the _client to Secretless_ connection. The connection from Secretless to the PostgreSQL server is defined in the Handler configuration, where the actual address and credential information for the connection to the PostgreSQL server is defined.
 
 At this time, the Secretless-to-target-service connection always happens over TCP by default.
+
+You can read more about Secretless Broker security model [here](/docs/overview/security.html).

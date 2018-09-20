@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: cyberark-sidecar-injector-webhook-deployment
+  name: cyberark-sidecar-injector
   labels:
     app: cyberark-sidecar-injector
 spec:
@@ -18,14 +18,18 @@ spec:
           args:
             - -tlsCertFile=/etc/webhook/certs/cert.pem
             - -tlsKeyFile=/etc/webhook/certs/key.pem
+            - -port=8080
             - -alsologtostderr
             - -v=4
             - 2>&1
+          ports:
+            - containerPort: 8080
+              name: https
           volumeMounts:
-            - name: webhook-certs
+            - name: certs
               mountPath: /etc/webhook/certs
               readOnly: true
       volumes:
-        - name: webhook-certs
+        - name: certs
           secret:
-            secretName: cyberark-sidecar-injector-webhook-certs
+            secretName: cyberark-sidecar-injector

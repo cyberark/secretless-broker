@@ -26,6 +26,7 @@ set +e
 psql \
   --host quickstart \
   --port 5454 \
+  --set=sslmode=disable \
   --username secretless \
   -d quickstart \
   -c 'select * from counties;'

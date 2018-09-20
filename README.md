@@ -111,7 +111,11 @@ psql: FATAL:  password authentication failed for user "postgres"
 But the Secretless Broker is listening on port 5454, and will add authentication credentials (both username and password) to our connection request and proxy our connection to the PostgreSQL server:
 
 ```sh-session
-$ psql -h localhost -p 5454 -d quickstart
+$ psql \
+  -h localhost \
+  -p 5454 \
+  --set=sslmode=disable \
+  -d quickstart
 psql (10.3, server 9.6.9)
 Type "help" for help.
 

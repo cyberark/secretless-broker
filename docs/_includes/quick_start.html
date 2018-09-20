@@ -8,7 +8,7 @@
     <li>
       <p>Download and run the Secretless Broker quick-start as a Docker container:</p>
       <pre>
-docker container run \
+$ docker container run \
 --rm \
 -p 5432:5432 \
 -p 5454:5454 \
@@ -20,12 +20,15 @@ cyberark/secretless-broker-quickstart</pre>
       have the credentials required to connect (even if you know the
       username):</p>
       <pre>
-psql \
+$ psql \
 --host localhost \
 --port 5432 \
 --username secretless \
 -d quickstart \
--c 'select * from counties;'</pre>
+-c 'select * from counties;'
+
+Password for user secretless:
+psql: FATAL:  password authentication failed for user "secretless"</pre>
     </li>
     <li>
       <p>The good news is that you don't need any credentials! Instead, you
@@ -33,38 +36,30 @@ psql \
       Secretless Broker on port <code>5454</code>, <i>without knowing the
       password.</i> Give it a try:</p>
       <pre>
-psql \
+$ psql \
 --host localhost \
 --port 5454 \
 --username secretless \
 -d quickstart \
--c 'select * from counties;'</pre>
-    </li>
-  </ol>
-</div>
-<div id="tabs-demo-http-main">
-  <ol>
-    <li>
-      <p>Download and run the Secretless Broker quick-start as a Docker container:</p>
-      <pre>
-docker container run \
---rm \
--p 8080:80 \
--p 8081:8081 \
-cyberark/secretless-broker-quickstart</pre>
-    </li>
-    <li>
-      <p>The service we're trying to connect to is listening on port
-      <code>8080</code>. If you try to access it, the service will inform
-      you that you're unauthorized:</p>
-      <pre>curl -i localhost:8080</pre>
-    </li>
-    <li>
-      <p>Instead, you can make an authenticated HTTP request by proxying
-      through the Secretless Broker on port <code>8081</code>. The Secretless Broker
-      will inject the proper credentials into the request <i>without you
-      needing to know what they are</i>. Give it a try:</p>
-      <pre>http_proxy=localhost:8081 curl -i localhost:8080</pre>
+-c 'select * from counties;'
+
+id |    name
+----+------------
+ 1 | Middlesex
+ 2 | Worcester
+ 3 | Essex
+ 4 | Suffolk
+ 5 | Norfolk
+ 6 | Bristol
+ 7 | Plymouth
+ 8 | Hampden
+ 9 | Barnstable
+10 | Hampshire
+11 | Berkshire
+12 | Franklin
+13 | Dukes
+14 | Nantucket
+(14 rows)</pre>
     </li>
   </ol>
 </div>
@@ -73,7 +68,7 @@ cyberark/secretless-broker-quickstart</pre>
     <li>
       <p>Download and run the Secretless Broker quick-start as a Docker container:</p>
       <pre>
-docker container run \
+$ docker container run \
 --rm \
 -p 2221:22 \
 -p 2222:2222 \
@@ -83,13 +78,81 @@ cyberark/secretless-broker-quickstart</pre>
       <p>The default SSH service is exposed over port <code>2221</code>. You
       can try opening an SSH connection to the server, but you don't have
       the credentials to log in:</p>
-      <pre>ssh -p 2221 user@localhost</pre>
+      <pre>
+$ ssh -p 2221 user@localhost
+
+The authenticity of host '[localhost]:2221 ([127.0.0.1]:2221)' can't be established.
+ECDSA key fingerprint is SHA256:FLnEsQ6aa1qEQopwywlWXI0LeNb04An72BThZZ8GNy8.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '[localhost]:2221' (ECDSA) to the list of known hosts.
+Permission denied (publickey,keyboard-interactive).</pre>
     </li>
     <li>
       <p>The good news is that you don't need credentials! You can establish
       an SSH connection through the Secretless Broker on port
       <code>2222</code> <i>without any credentials</i>. Give it a try:</p>
-      <pre>ssh -p 2222 user@localhost</pre>
+      <pre>
+$ ssh -p 2222 user@localhost
+
+The authenticity of host '[localhost]:2222 ([127.0.0.1]:2222)' can't be established.
+RSA key fingerprint is SHA256:fSn95WSqzC9JpAdZNs3iAEuRQckQSts26dJM9Hqwwh8.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '[localhost]:2222' (RSA) to the list of known hosts.
+
+You've established an SSH connection via Secretless!
+
+Check out https://secretless.io for more information.
+
+bdfe24ac8aaf:~$</pre>
+    </li>
+  </ol>
+</div>
+<div id="tabs-demo-http-main">
+  <ol>
+    <li>
+      <p>Download and run the Secretless Broker quick-start as a Docker container:</p>
+      <pre>
+$ docker container run \
+--rm \
+-p 8080:80 \
+-p 8081:8081 \
+cyberark/secretless-broker-quickstart</pre>
+    </li>
+    <li>
+      <p>The service we're trying to connect to is listening on port
+      <code>8080</code>. If you try to access it, the service will inform
+      you that you're unauthorized:</p>
+      <pre>
+$ curl -i localhost:8080
+
+HTTP/1.1 401 Unauthorized
+Server: nginx/1.14.0
+Date: Thu, 20 Sep 2018 16:11:44 GMT
+Content-Type: text/plain
+Content-Length: 26
+Connection: keep-alive
+WWW-Authenticate: Basic realm="Authentication required"
+
+You are not authenticated.
+</pre>
+    </li>
+    <li>
+      <p>Instead, you can make an authenticated HTTP request by proxying
+      through the Secretless Broker on port <code>8081</code>. The Secretless Broker
+      will inject the proper credentials into the request <i>without you
+      needing to know what they are</i>. Give it a try:</p>
+      <pre>
+$ http_proxy=localhost:8081 curl -i localhost:8080
+
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 35
+Content-Type: text/plain
+Date: Thu, 20 Sep 2018 16:12:25 GMT
+Server: nginx/1.14.0
+
+You are successfully authenticated.
+</pre>
     </li>
   </ol>
 </div>

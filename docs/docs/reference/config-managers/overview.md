@@ -14,7 +14,7 @@ Managers and a plugin API so that almost any configuration source can be easily 
 of the specific configuration manager plugin is done through the `-config-mgr <manager_id>[#<config_spec>]`
 CLI flag. If no specific configuration managers are specified, `configfile` plugin is used.
 
-Note: Secretless Broker CLI is tightly integrated with `configfile` plugin so its use is different
+Note: Secretless Broker CLI is tightly integrated with the `configfile` plugin so its use is different
 from other plugins.
 
 Currently built-in configuration manager plugins are:

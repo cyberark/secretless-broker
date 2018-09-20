@@ -8,7 +8,7 @@ permalink: docs/reference/handlers/overview.html
 
 ## Overview
 
-When the Secretless Broker receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless Broker configuration for processing. Each Listener in the Secretless Broker configuration should therefore have a corresponding Handler.
+When the Secretless Broker receives a new request on a defined Listener, it automatically passes the request on to the Handler defined in the Secretless Broker configuration. The Listener receives the request, but the Handler processes the request. Each Listener in the Secretless Broker configuration should therefore have a corresponding Handler.
 
 The Handler configuration specifies the Listener that the Handler is handling connections for and any credentials that will be needed for that connection. Several credential sources are currently supported; see the [Credential Providers](/docs/reference/providers/overview.html) section for more information.
 
@@ -31,7 +31,7 @@ handlers:
 
 In production you would want your credential information to be pulled from a vault, and the Secretless Broker currently supports multiple vault Credential Providers.
 
-When a Handler receives a new connection requests, it retrieves any required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there, the Handler simply transparently shuttles data between the client and service.
+When a Handler receives a new connection request, it retrieves any required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there, the Handler simply transparently shuttles data between the client and service.
 
 Select the Handler you are interested in below to learn about its usage and configuration. Are we missing something vital?
 Please check our [GitHub issues](https://github.com/cyberark/secretless-broker/issues) to see if the Target Service you are

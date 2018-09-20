@@ -14,7 +14,7 @@ requests made to an arbitrary service requiring basic authentication.
 ### Handler Parameters
 - `type`  
 _Required_  
-This parameter indicates the type of service proxied by the handler. For AWS,
+This parameter indicates the type of service proxied by the handler. For basic auth,
 the value of `type` should always be `basic_auth`.  
 
 - `match`  

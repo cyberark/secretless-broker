@@ -47,3 +47,18 @@ Internally, when the Secretless Broker receives a new connection request:
 1. The Handler retrieves credentials using a Credential Provider
 1. The Handler injects the credentials into a new connection request and opens a new connection to the Target Service
 1. The Handler streams the connection
+
+## Secretless Broker Configuration
+
+The Secretless Broker relies on its configuration to determine which Target Services
+it can connect to and how it should retrieve the access credentials to authenticate
+with those services.
+
+Each Secretless Broker configuration includes two sections:
+
+* `listeners`: A list of protocol Listeners, each one on a Unix socket or TCP port.
+* `handlers`: A list of Handlers to process the requests received by each Listener. Handlers implement the protocol for the Target Services and are configured to obtain the backend connection credentials from one or more Credential Providers.
+
+The [Configuration Managers](/docs/reference/config-managers/overview.html) section
+in the Secretless Broker reference has more information about how to provide the Broker with
+its configuration in practice.

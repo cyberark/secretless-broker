@@ -45,8 +45,9 @@ In general, there are currently two strategies to redirect your client to connec
 
 - **Proxy**
     <br/>
-    HTTP services support an environment variable or configuration setting `http_proxy=[url]` which will cause outbound traffic to route through the proxy URL on its way to the destination. The Secretless Broker can operate as an HTTP forward proxy, in which case it will place the proper authorization header on the outbound request. It can also optionally forward the connection using HTTPS. The client should always use plain `http://` URLs, otherwise Secretless cannot read the network traffic because it will encrypted.
+    HTTP services support an environment variable or configuration setting `http_proxy=[url]` which will cause outbound traffic to route through the proxy URL on its way to the destination. The Secretless Broker can operate as an HTTP forward proxy, in which case it will place the proper authorization header on the outbound request. It can also optionally forward the connection using HTTPS. The client should always use plain `http://` URLs, otherwise Secretless cannot read the network traffic because it will be encrypted.
 
+## Listener Security
 
 Regardless of the connection strategy, the operating system provides security between the client and Secretless. It's important to configure the OS properly so that unauthorized processes and clients can't connect to Secretless. With Unix domain sockets, operating system file permissions protect the socket. With TCP connections, Secretless should be listening only on localhost.
 

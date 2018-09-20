@@ -14,7 +14,7 @@ to Conjur without revealing credentials to the consumer.
 ### Handler Parameters
 - `type`  
 _Required_  
-This parameter indicates the type of service proxied by the handler. For AWS,
+This parameter indicates the type of service proxied by the handler. For Conjur,
 the value of `type` should always be `conjur`.  
 
 - `match`  

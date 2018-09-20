@@ -29,6 +29,7 @@ connect:
 psql \
   --host localhost \
   --port 5432 \
+  --set=sslmode=disable \
   --username secretless \
   -d quickstart \
   -c 'select * from counties;'
@@ -40,6 +41,7 @@ on port `5454`, _without knowing the password_. Give it a try:
 psql \
   --host localhost \
   --port 5454 \
+  --set=sslmode=disable \
   --username secretless \
   -d quickstart \
   -c 'select * from counties;'

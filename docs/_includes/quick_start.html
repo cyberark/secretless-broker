@@ -23,6 +23,7 @@ cyberark/secretless-broker-quickstart</pre>
 $ psql \
 --host localhost \
 --port 5432 \
+--set=sslmode=disable \
 --username secretless \
 -d quickstart \
 -c 'select * from counties;'
@@ -39,6 +40,7 @@ psql: FATAL:  password authentication failed for user "secretless"</pre>
 $ psql \
 --host localhost \
 --port 5454 \
+--set=sslmode=disable \
 --username secretless \
 -d quickstart \
 -c 'select * from counties;'

@@ -41,7 +41,7 @@ In general, there are currently two strategies to redirect your client to connec
 
 - **Connection URL**
     <br/>
-    Connections to the backend service are established by a connection URL. For example, PostgreSQL supports connection URLs such as `postgres://user@password:hostname:port/database`. `hostname:port` can also be a path to a Unix socket, and it can be omitted to use the default PostgreSQL socket `/var/run/postgresql/.s.PGSQL.5432`.
+    Connections to the backend service are established by a connection URL. For example, PostgreSQL supports connection URLs such as `postgres://user@password:hostname:port/database?sslmode=disable`. `hostname:port` can also be a path to a Unix socket, and it can be omitted to use the default PostgreSQL socket `/var/run/postgresql/.s.PGSQL.5432`.
 
 - **Proxy**
     <br/>

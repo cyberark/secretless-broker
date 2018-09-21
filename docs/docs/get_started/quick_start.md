@@ -6,8 +6,8 @@ description: Secretless Broker Documentation
 permalink: docs/get_started/quick_start.html
 ---
 
-Try out the Secretless Broker brokering a connection to a PostgreSQL database, an SSH connection,
-or a connection to an HTTP service authenticating with basic auth.
+Try a simple example which uses the Secretless Broker to connect to a PostgreSQL database, open an SSH connection, or authenticate to an HTTP service protected with basic auth.
+
 
 <div id="quick-start-tabs">
   {% include quick_start.html %}

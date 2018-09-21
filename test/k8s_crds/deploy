@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+CURRENT_DIR=$(dirname $0)
+
+echo "Stopping deployment..."
+./stop_deployment || true
+
+echo "Deploying..."
+kubectl apply -f $CURRENT_DIR/deployment.yaml
+
+echo "Deployment done!"

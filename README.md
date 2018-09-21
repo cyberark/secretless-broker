@@ -537,6 +537,13 @@ to the Mac OSX Keychain. You will be prompted for your password when running
 this test, as it temporarily adds a generic password to your account, and
 verifies that it can retrieve the value.
 
+Kubernetes CRD loading test
+```sh-session
+cd test/k8s_crds
+./deploy
+```
+This test currently does not run as part of the test suite.
+
 ## Plugins
 
 Plugins can be used to extend the functionality of the Secretless Broker via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:

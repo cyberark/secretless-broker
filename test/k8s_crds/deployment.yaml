@@ -1,0 +1,106 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: secretless-crd
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - create
+  - get
+  - watch
+  - list
+- apiGroups: [""]
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - secretless.io
+  resources:
+  - configurations
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: secretless-crd
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: secretless-crd
+  # This only grants permissions within the "default" namespace.
+  # namespace: default
+subjects:
+- kind: ServiceAccount
+  name: secretless-crd
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: secretless-crd
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secretless-k8s-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secretless-k8s-test
+  template:
+    metadata:
+      labels:
+        app: secretless-k8s-test
+    spec:
+      serviceAccountName: secretless-crd
+      containers:
+      - name: secretless
+        args: [ "-config-mgr", "k8s/crd#first" ]
+        env:
+        - name: DEBUG_CONTAINER
+          value: "false"
+        image: secretless-broker:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secretless-broker
+spec:
+  ports:
+  - name: "http"
+    port: 80
+    targetPort: 8080
+  selector:
+    app: secretless-k8s-test
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secretless-broker-external
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 31080
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: secretless-k8s-test

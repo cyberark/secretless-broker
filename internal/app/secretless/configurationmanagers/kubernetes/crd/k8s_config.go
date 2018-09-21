@@ -23,10 +23,14 @@ func NewKubernetesConfig() (config *rest.Config, err error) {
 	var kubeConfig string
 	if home := getHomeDir(); home != "" {
 		log.Printf("%s: Using home dir config...", PluginName)
-		kubeConfig = filepath.Join(home, ".kube", "config")
 
-		if config, err = clientcmd.BuildConfigFromFlags("", kubeConfig); err != nil {
-			return
+		kubeConfig = filepath.Join(home, ".kube", "config")
+		if _, ok := os.Stat(kubeConfig); ok == nil {
+			if config, err = clientcmd.BuildConfigFromFlags("", kubeConfig); err != nil {
+				return
+			}
+		} else {
+			log.Printf("%s: Skipping home dir config since %s does not exist", PluginName, kubeConfig)
 		}
 	}
 

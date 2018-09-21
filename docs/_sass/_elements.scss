@@ -292,6 +292,7 @@
 
 .slss-icon {
 	color: lighten($sless-text, 70);
+	font-size: 3rem;
 }
 
 // ***********************
@@ -482,13 +483,13 @@ figure.highlight {
 }
 .cta-banner {
 	background-color: #4d8fcc;
-	height: 6.3rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	line-height: 3rem;
 	margin-bottom: 0;
-	padding: 0 4rem;
+	padding: 1rem 4rem;
+	text-align: center;
 	p {
 		color: white;
 		font-size: 2rem;

@@ -5,7 +5,7 @@
 .posts {
   padding: 0;
   margin: 4rem 0;
-  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  //grid-template-columns: fit-content(100%); //repeat(auto-fill, minmax(300px, 1fr));
   grid-column-gap: 2rem;
   grid-row-gap: 2rem;
   display: grid;

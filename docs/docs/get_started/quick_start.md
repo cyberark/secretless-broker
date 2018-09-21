@@ -1,9 +1,9 @@
 ---
-title: Quick Start
-id: quick_start
+title: Quick Demo
+id: quick_demo
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/get_started/quick_start.html
+permalink: docs/get_started/quick_demo.html
 ---
 
 Try out the Secretless Broker brokering a connection to a PostgreSQL database, an SSH connection,

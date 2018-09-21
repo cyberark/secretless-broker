@@ -42,8 +42,8 @@ chapters:
   - title: Get Started
     url: /docs/get_started.html
     sections:
-      - page: Quick Start
-        url: /docs/get_started/quick_start.html
+      - page: Quick Demo
+        url: /docs/get_started/quick_demo.html
       - page: Kubernetes Tutorial
         url: /docs/get_started/kubernetes_tutorial.html
   - title: Reference

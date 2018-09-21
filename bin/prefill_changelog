@@ -50,6 +50,10 @@ rm -f "${tmp_file}"
 echo "Appending link to diff..."
 echo -e "[${desired_version}]: https://github.com/cyberark/secretless-broker/compare/${latest_tag}...${desired_version}\n" >> CHANGELOG.md.tmp
 
+sed -i .bak \
+    "s/^\[Unreleased\]: .*/[Unreleased]: https:\/\/github.com\/cyberark\/secretless-broker\/compare\/${desired_version}...HEAD/" \
+    CHANGELOG.md.tmp
+
 if [[ "${dry_run}" == "true" ]]; then
   cat CHANGELOG.md.tmp
   rm -rf CHANGELOG.md.tmp

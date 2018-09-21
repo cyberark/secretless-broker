@@ -20,6 +20,9 @@ test/plugin/out/
 # Remove common editors' swapfiles
 *.sw[po]
 
+# Remove sed tempfiles
+*.bak
+
 # Remove OSX-specific temp files
 .DS_Store
 

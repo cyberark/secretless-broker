@@ -9,7 +9,7 @@ permalink: docs/overview/why_secretless.html
 Secretless Broker is primarily designed to solve two problems. The first is
 **loss or theft of credentials from applications and services**, which can occur by:
 
-- Accidental credential leakage (e.g. credential checked into source control, etc)
+- Accidental credential leakage (e.g. credential written to a log file, checked into source control, etc)
 - An attack on a privileged user (e.g. phishing, developer machine compromises, etc)
 - A vulnerability in an application (e.g. remote code execution, environment variable dump, etc)
 
@@ -18,7 +18,7 @@ vaults**. This often requires code to be changed to fetch needed credentials,
 and time spent implementing and maintaining connections to vaults could be better
 spent delivering business value.
 
-## Prevent Credential Theft
+## Prevent Credential Loss and Theft
 
 Keeping secrets in a vault is a good practice. However, when a client “checks out” a secret from a vault, where does it go? Often, directly into unprotected application memory at which point that client app has now part of the threat surface. There are a stringent set of best practices and recommendations that should be be followed by every user and application which checks secrets out of a vault, but even if you harden the app in every possible way it does not protect you from 0-day vulnerabilities in the app, underlying framework, and/or the programming language used.
 

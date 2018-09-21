@@ -7,7 +7,7 @@ permalink: docs/get_started.html
 ---
 
 To get started trying out the Secretless Broker, you can run through our [quick start](/docs/get_started/quick_start.html)
-that allows you to try it out with a simple example using PostgreSQL, SSH, or an HTTP web service.
+that allows you to try some simple examples using PostgreSQL, SSH, or an HTTP web service.
 
 If you are looking for a more detailed introduction to how the Secretless Broker works in
 practice, please look at our [Kubernetes tutorial](/docs/get_started/kubernetes_tutorial.html).

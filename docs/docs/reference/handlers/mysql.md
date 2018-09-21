@@ -7,9 +7,10 @@ permalink: docs/reference/handlers/mysql.html
 ---
 
 ## MySQL
-### Overview
 The MySQL handler authenticates incoming connections for a particular
 listener.
+
+**Handler in alpha - not suitable for production** 
 
 ### Credentials
 - `host`  

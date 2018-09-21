@@ -1,0 +1,23 @@
+apiVersion: "secretless.io/v1"
+kind: Configuration
+metadata:
+  name: first
+spec:
+  listeners:
+    - name: http_config_1_listener
+      protocol: http
+      address: 127.0.0.1:8080
+
+  handlers:
+    - name: http_config_1_handler
+      type: basic_auth
+      listener: http_config_1_listener
+      match:
+        - ^http.*
+      credentials:
+        - name: username
+          provider: literal
+          id: ohnoeswechangedit
+        - name: password
+          provider: literal
+          id: supersecretpassword

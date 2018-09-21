@@ -38,7 +38,7 @@ cat $DOCS_DIR/godoc_packages.txt | while read package; do
   echo "---
 layout: docs
 id: ${sanitized_package_name}
-title: Documentation
+title: Plugin Reference
 description: Secretless Broker Documentation
 godoc: True
 godoc_repository: ${REPOSITORY}

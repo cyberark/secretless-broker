@@ -15,8 +15,6 @@ There is also an additional EventNotifier class used to bubble up events from li
 to the plugin manager but this class may be removed as we move more of the abstract functionality to the plugin manager
 itself.
 
-Basic overview
-
 All plugins are currently loaded in the following manner:
   - Directory in `/usr/local/lib/secretless` is listed and any `*.so` files are iterated over. Sub-directory traversal is not supported at this time.
   - Each shared library plugin is searched for these variables:

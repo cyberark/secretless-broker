@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Announcing Secretless"
-date: 2018-09-20 09:00:00 -0400
+date: 2018-09-18 09:00:00 -0400
 author: Dustin Byrne
 categories: blog
 published: true

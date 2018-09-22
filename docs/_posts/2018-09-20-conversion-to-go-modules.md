@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Converting the Secretless Broker to Golang modules"
-date: 2018-07-30 09:00:00 -0600
+date: 2018-09-20 09:00:00 -0600
 author: Srdjan Grubor
 categories: blog
 published: true

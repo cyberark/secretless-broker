@@ -4,7 +4,7 @@ title: "Announcing Secretless"
 date: 2018-09-18 09:00:00 -0400
 author: Dustin Byrne
 categories: blog
-published: true
+published: false
 excerpt: "CyberArk is incredibly pleased to announce Secretless, a new open source project that changes the way applications consume privileged credentials."
 ---
 

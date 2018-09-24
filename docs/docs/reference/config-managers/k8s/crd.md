@@ -7,13 +7,85 @@ permalink: docs/reference/config-managers/k8s/crd.html
 ---
 
 ## Kubernetes Custom Resource Definition (CRD)
+
 The Kubernetes CRD plugin (`k8s/crd`) allows the use of Kubernetes-specific
 custom resource definitions to trigger and specify the configuration for Secretless Broker.
 
 By default, the CRD we use for the Secretless Broker is under `configurations.secretless.io`.
 
+## Kubernetes API Permissions
+
 **Note: For this plugin to work, the broker must have [ServiceAccount privileges](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
 on the deployment.**
+
+The basic role configuration which allows Secretless Broker to work within a Kubernetes cluster without full cluster administrator permissions is below:
+```
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: secretless-crd
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - create
+  - get
+  - watch
+  - list
+- apiGroups: [""]
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - secretless.io
+  resources:
+  - configurations
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: secretless-crd
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: secretless-crd
+subjects:
+- kind: ServiceAccount
+  name: secretless-crd
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: secretless-crd
+  apiGroup: rbac.authorization.k8s.io
+```
+
+After defining the `ServiceAccount`, `ClusterRole`, and `ClusterRoleBinding`, you can then use it in your deployment with a `serviceAccountName` parameter:
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secretless-k8s-test
+spec:
+  ...
+  template:
+    ...
+    spec:
+      serviceAccountName: secretless-crd
+      containers:
+      ...
+```
 
 ## Examples
 

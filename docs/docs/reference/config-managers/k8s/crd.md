@@ -11,7 +11,13 @@ permalink: docs/reference/config-managers/k8s/crd.html
 The Kubernetes CRD plugin (`k8s/crd`) allows the use of Kubernetes-specific
 custom resource definitions to trigger and specify the configuration for Secretless Broker.
 
-By default, the CRD we use for the Secretless Broker is under `configurations.secretless.io`.
+### Operation
+
+When this configuration manager plugin starts, a new CRD is registered (if not already available)
+as `configurations.secretless.io` after which the configuration ID specified by the name after the `#`
+symbol on the CLI will be watched in that CRD namespace. As soon as the configuration with that ID is
+defined or updated in Kubernetes, Secretless will notify the main daemon to load the new configuration
+and soft-reload itself. Any number of Secretless Broker instances can watch the same configuration ID.
 
 ## Kubernetes API Permissions
 

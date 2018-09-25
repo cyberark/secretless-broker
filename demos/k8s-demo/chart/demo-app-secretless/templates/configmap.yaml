@@ -1,0 +1,32 @@
+{{- if .Values.withSecretless }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "demo-app-secretless.fullname" . }}
+  labels:
+    app: {{ include "demo-app-secretless.name" . }}
+    chart: {{ include "demo-app-secretless.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  secretless.yml: |
+    listeners:
+      - name: pg
+        protocol: pg
+        address: localhost:5432
+
+    handlers:
+      - name: pg
+        listener: pg
+        debug: true
+        credentials:
+          - name: address
+            provider: kubernetes
+            id: {{ include "demo-app-secretless.fullname" . }}-credentials#address
+          - name: username
+            provider: kubernetes
+            id: {{ include "demo-app-secretless.fullname" . }}-credentials#username
+          - name: password
+            provider: kubernetes
+            id: {{ include "demo-app-secretless.fullname" . }}-credentials#password
+{{- end }}

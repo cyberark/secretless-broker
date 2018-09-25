@@ -7,21 +7,25 @@ if [[ -z $new_password ]]; then
   exit 1
 fi
 
-. ./utils.sh
 . ./admin_config.sh
+. ./utils.sh
+REMOTE_DB_URL=$(get_REMOTE_DB_URL)
 
 # update db credentials
-docker run \
+kubectl run \
  --rm \
  -i \
- -e PGPASSWORD=${DB_ADMIN_PASSWORD} \
- postgres:9.6 \
-  psql \
-  -U ${DB_ADMIN_USER} \
-  "postgres://$DB_URL" \
-  -c "
+ update-db-credentials-db-client-${RANDOM} \
+   --env PGPASSWORD=${DB_ADMIN_PASSWORD} \
+   --image=postgres:9.6 \
+   --restart=Never \
+   --command \
+   -- psql \
+     -U ${DB_ADMIN_USER} \
+     "postgres://$REMOTE_DB_URL" \
+     << EOL
 ALTER ROLE $DB_USER WITH PASSWORD '$new_password';
-"
+EOL
 
 base64_new_password=$(echo -n "${new_password}" | base64)
 new_password_json='{"data":{"password": "'${base64_new_password}'"}}'
@@ -33,15 +37,18 @@ kubectl --namespace quick-start-application-ns \
  -p="${new_password_json}"
 
 # prune open connections
-docker run \
+kubectl run \
  --rm \
  -i \
- -e PGPASSWORD=${DB_ADMIN_PASSWORD} \
- postgres:9.6 \
-  psql \
-  -U ${DB_ADMIN_USER} \
-  "postgres://$DB_URL" \
-  -c "
+ prune-open-connections-db-client-${RANDOM} \
+   --env PGPASSWORD=${DB_ADMIN_PASSWORD} \
+   --image=postgres:9.6 \
+   --restart=Never \
+   --command \
+   -- psql \
+     -U ${DB_ADMIN_USER} \
+     "postgres://$REMOTE_DB_URL" \
+     << EOL
 SELECT
     pg_terminate_backend(pid)
 FROM
@@ -50,4 +57,4 @@ WHERE
     pid <> pg_backend_pid()
 AND
     usename='$DB_USER';
-"
+EOL

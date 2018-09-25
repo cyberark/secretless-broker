@@ -1,10 +1,16 @@
 #!/bin/bash -e
 
 # application url accessible to local machine
-APPLICATION_URL=192.168.99.100:30002 # CHANGE to reflect endpoint exposed by application service
+get_APPLICATION_URL() { # CHANGE to reflect endpoint exposed by application service
+  local url=$(minikube service -n quick-start-application-ns quick-start-application --url)
+  echo "${url#"http://"}"
+}
 
 # database url accessible to kubernetes cluster and local machine
-DB_URL=192.168.99.100:30001/quick_start_db # CHANGE to reflect endpoint exposed by db service
+get_REMOTE_DB_URL() { # CHANGE to reflect endpoint exposed by db service
+  local url=$(minikube service -n quick-start-backend-ns quick-start-backend --url)
+  echo "${url#"http://"}"/quick_start_db
+}
 
 # admin-user credentials
 DB_ADMIN_USER=postgres
@@ -15,4 +21,7 @@ DB_USER=quick_start
 DB_INITIAL_PASSWORD=quick_start
 
 # Run this to access postgres as admin_user
-# docker run --rm -it -e PGPASSWORD=${DB_ADMIN_PASSWORD} postgres:9.6 psql -U ${DB_ADMIN_USER} "postgres://$DB_URL"
+#
+# kubectl run --rm -it \
+# psql-client --env PGPASSWORD=${DB_ADMIN_PASSWORD} --image=postgres:9.6 --restart=Never \
+# --command -- psql     -U ${DB_ADMIN_USER} "postgres://$DB_URL"

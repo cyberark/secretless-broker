@@ -1,0 +1,30 @@
+{{- if .Values.withSecretless }}
+---
+# This role is allow to [get] the credentials secret
+# in the namespace where this manifest is applied
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "demo-app-secretless.fullname" . }}-credentials-reader"
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["secrets"]
+  resourceNames: ["{{ include "demo-app-secretless.fullname" . }}-credentials"]
+  verbs: ["get"]
+
+---
+# This role binding allows the application serviceAccount to
+# read the credentials secret
+# in the namespace where this manifest is applied
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ include "demo-app-secretless.fullname" . }}-backend-credentials"
+subjects:
+- kind: ServiceAccount
+  name: "{{ include "demo-app-secretless.fullname" . }}-application"
+roleRef:
+  kind: Role
+  name: "{{ include "demo-app-secretless.fullname" . }}-credentials-reader"
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

@@ -50,9 +50,8 @@ To run through this tutorial, you will need:
 
 + A running Kubernetes cluster (you can use [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) to run a cluster locally)
 + [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured to point to the cluster
-+ [Docker CLI](https://docs.docker.com/install/)
 
-Our Kubernetes deployment manifests assume that you are using Minikube, so that for example **./etc/pg.yml** and **./etc/quick-start.yml** use **NodePort** to expose the services; you may prefer to use a **LoadBalancer** for a GKE cluster.
+Our Kubernetes deployment manifests assume that you are using Minikube, so that for example **./etc/pg.yml** and **./etc/quick-start.yml** use **LoadBalancer** to expose the services; you may prefer to use an **Ingress** for a GKE cluster.
 
 #### Suggested modifications for advanced demos
 
@@ -102,7 +101,9 @@ These steps make use of the **admin_config.sh** file, which stores the database 
   + Update the `DB_` env vars in **./admin_config.sh**. For example (with Amazon RDS):
 
     ```bash
-    DB_URL=quick-start-backend-example.xyzjshd3bdk3.us-east-1.rds.amazonaws.com:5432/quick_start_db
+    get_REMOTE_DB_URL() { 
+      echo "quick-start-backend-example.xyzjshd3bdk3.us-east-1.rds.amazonaws.com:5432/quick_start_db"
+    }
     DB_ADMIN_USER=quick_start_db
     DB_ADMIN_PASSWORD=quick_start_db
     DB_USER=quick_start_user
@@ -194,7 +195,7 @@ That's it! You've configured your application to connect to PostgreSQL via the S
 
 `POST /pet` to add a pet - the request must include `name` in the JSON body
 ```bash
-APPLICATION_URL=$(. ./admin_config.sh; echo ${APPLICATION_URL})
+APPLICATION_URL=$(. ./admin_config.sh; get_APPLICATION_URL)
 
 curl \
   -i \
@@ -211,7 +212,7 @@ Date: Thu, 23 Aug 2018 12:57:45 GMT
 
 `GET /pets` to retrieve notes
 ```bash
-APPLICATION_URL=$(. ./admin_config.sh; echo ${APPLICATION_URL})
+APPLICATION_URL=$(. ./admin_config.sh; get_APPLICATION_URL)
 
 curl -i ${APPLICATION_URL}/pets
 ```
@@ -236,7 +237,7 @@ The rotator script:
 To see graceful rotation in action, poll the endpoint to retrieve the list of pets (`GET /pets`) in a separate terminal before rotating:
 
 ```
-APPLICATION_URL=$(. ./admin_config.sh; echo ${APPLICATION_URL})
+APPLICATION_URL=$(. ./admin_config.sh; get_APPLICATION_URL)
 
 while true
 do

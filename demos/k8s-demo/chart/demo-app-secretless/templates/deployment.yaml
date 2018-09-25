@@ -1,0 +1,74 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "demo-app-secretless.fullname" . }}
+  labels:
+    app: {{ include "demo-app-secretless.name" . }}
+    chart: {{ include "demo-app-secretless.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "demo-app-secretless.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "demo-app-secretless.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: "{{ include "demo-app-secretless.fullname" . }}-application"
+      containers:
+{{- if .Values.withSecretless }}
+        - name: application
+          image: "{{ .Values.applicationImage.repository }}:{{ .Values.applicationImage.tag }}"
+          imagePullPolicy: {{ .Values.applicationImage.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.applicationPort }}
+              protocol: TCP
+          env:
+            - name: DB_URL
+              value: postgresql://localhost:5432/quick_start_db?sslmode=disable
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+        - name: secretless
+          image: "{{ .Values.secretlessImage.repository }}:{{ .Values.secretlessImage.tag }}"
+          imagePullPolicy: IfNotPresent
+          args: ["-f", "/etc/secretless/secretless.yml"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/secretless
+              readOnly: true
+{{- else }}
+        - name: application
+          image: "{{ .Values.applicationImage.repository }}:{{ .Values.applicationImage.tag }}"
+          imagePullPolicy: {{ .Values.applicationImage.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.applicationPort }}
+              protocol: TCP
+          env:
+            - name: DB_URL
+              value: "postgresql://{{.Values.applicationDBAddress}}"
+            - name: DB_USERNAME
+              value: "{{.Values.applicationDBUsername}}"
+            - name: DB_PASSWORD
+              value: "{{.Values.applicationDBPassword}}"
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+{{- end }}
+{{- if .Values.withSecretless }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "demo-app-secretless.fullname" . }}
+{{- end }}

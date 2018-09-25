@@ -4,6 +4,9 @@ This document shows how to deploy and use the CyberArk Broker Sidecar Injector [
 
   * [Prerequisites](#prerequisites)
     + [Mandatory TLS](#mandatory-tls)
+  * [Available Sidecars](#available-sidecars)
+    + [Secretless](#secretless)
+    + [Authenticator](#authenticator)
   * [Installation](#installation)
     + [Installing the Sidecar Injector (Manually)](#installing-the-sidecar-injector-manually)
       - [Dedicated Namespace](#dedicated-namespace)
@@ -37,6 +40,29 @@ If using `minikube`, start your cluster as follows:
 ```bash
 ~$ minikube start --kubernetes-version=v1.10.0
 ```
+
+### Available Sidecars
+
+This section enumerates the available sidecars. The choice of sidecar is made via annotations - see the [Configuration](#configuration) section for details.
+
+1. [Secretless](#secretless)
+1. [Authenticator](#authenticator)
+
+#### Secretless
+See the [README](https://github.com/cyberark/secretless-broker)
+
+Injects: 
+  + a configurable **Secretless container** with
+  + a **Volume Mount** at `/etc/secretless` directed to
+  + a newly created **Volume** named `secretless-config` sourced from a ConfigMap
+
+#### Authenticator
+See the [README](https://github.com/cyberark/conjur-authn-k8s-client)
+
+Injects: 
+  + a configurable **Authenticator container** with
+  + a **Volume Mount** at `/run/conjur` directed to
+  + a newly created shareable **in-memory Volume** named `conjur-access-token` used to store the access token
 
 ### Mandatory TLS
 

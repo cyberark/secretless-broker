@@ -1,12 +1,12 @@
 package inject
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/golang/glog"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"fmt"
 )
 
 // mutationRequired determines if target resource requires mutation
@@ -22,10 +22,8 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 	status, _ := getAnnotation(metadata, annotationStatusKey)
 
 	// determine whether to perform mutation based on annotation for the target resource
-	var required bool
-	if strings.ToLower(status) == "injected" {
-		required = false;
-	} else {
+	required := strings.ToLower(status) != "injected"
+	if required {
 		switch injectValue, _ := getAnnotation(metadata, annotationInjectKey); strings.ToLower(injectValue) {
 		case "y", "yes", "true", "on":
 			required = true

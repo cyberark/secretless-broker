@@ -1,6 +1,6 @@
 # cyberark-sidecar-injector
 
-CyberArk Broker Sidecar Injector is a [MutatingAdmissionWebhook](https://kubernetes.io/docs/admin/admission-controllers/#mutatingadmissionwebhook-beta-in-19) server which injects configurable sidecar container/s into a pod prior to persistence of the underlying object.
+CyberArk Broker Sidecar Injector is a [MutatingAdmissionWebhook](https://kubernetes.io/docs/admin/admission-controllers/#mutatingadmissionwebhook-beta-in-19) server which injects configurable sidecar container(s) into a pod prior to persistence of the underlying object.
 
   * [TL;DR;](#tl-dr-)
   * [Introduction](#introduction)
@@ -28,7 +28,7 @@ This chart bootstraps a deployment of a CyberArk Broker Sidecar Injector Mutatin
 
 ### Mandatory TLS
 
-Supporting TLS for external webhook server is required because admission is a high security operation. As part of the installation proceed, we need to create a TLS certificate signed by a trusted CA (shown below is the Kubernetes CA but you can use your own) to secure the communication between the webhook server and apiserver. For the complete steps of creating and approving Certificate Signing Requests(CSR), please refer to [Managing TLS in a cluster](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/).
+Supporting TLS for external webhook server is required because admission is a high security operation. As part of the installation process, we need to create a TLS certificate signed by a trusted CA (shown below is the Kubernetes CA but you can use your own) to secure the communication between the webhook server and apiserver. For the complete steps of creating and approving Certificate Signing Requests(CSR), please refer to [Managing TLS in a cluster](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/).
 
 ## Installing the Chart
 
@@ -36,7 +36,11 @@ To install the chart with the release name `my-release`, follow the instructions
 
 ```bash
 $ helm install --name my-release \
-  --set caBundle="$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}')" \
+  --set caBundle="$(kubectl -n kube-system \
+    get configmap \
+    extension-apiserver-authentication \
+    -o=jsonpath='{.data.client-ca-file}' \
+  )" \
  .
 ```
 
@@ -107,7 +111,7 @@ The above command creates a sidecar injector deployment, retrieves the private k
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
 ```bash
-$ helm install --name my-release -f values.yaml https://raw.githubusercontent.com/cyberark/secretless-broker/k8s-demo-helm-chart/demos/k8s-demo/chart/demo-app-secretless-0.1.0.tgz
+$ helm install --name my-release -f values.yaml .
 ```
 
 ### certsSecret
@@ -130,5 +134,8 @@ The private key and certificate will be stored in a secret created as part of th
 The `caBundle` in this case is the Kubernetes cluster CA certificate. This can be retrieve as follows:
 
 ```
-$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}')
+kubectl -n kube-system \
+  get configmap \
+  extension-apiserver-authentication \
+  -o=jsonpath='{.data.client-ca-file}'
 ```

@@ -35,9 +35,10 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-[ -z ${service} ] && usage
-[ -z ${namespace} ] && usage
-
+if [ -z ${service} ] || [ -z ${namespace} ]
+then
+    usage
+fi
 
 ROOT=$(cd $(dirname $0)/../../; pwd)
 

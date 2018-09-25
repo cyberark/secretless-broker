@@ -22,4 +22,3 @@ This is the general workflow:
 2. Webhook intercepts and injects containers as needed
 
 Enjoy.
-

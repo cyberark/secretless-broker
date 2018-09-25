@@ -4,9 +4,12 @@
 # usage: ./bin/publish
 set -ex
 
-if [ -z "$1" ]; then echo "tag not provided"; exit 1; fi
+if [ -z "$1" ]
+then
+    echo "tag not provided";
+    exit 1;
+fi
 
 cd $(dirname $0)/..
 
 docker push cyberark/sidecar-injector:$1
-

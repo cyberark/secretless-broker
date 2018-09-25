@@ -34,7 +34,7 @@ In production you would want your credential information to be pulled from a vau
 When a Handler receives a new connection request, it retrieves any required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there, the Handler simply transparently shuttles data between the client and service.
 
 Select the Handler you are interested in below to learn about its usage and configuration. Are we missing something vital?
-Please check our [GitHub issues](https://github.com/cyberark/secretless-broker/issues) to see if the Target Service you are
+Please check our [GitHub issues](https://github.com/cyberark/secretless-broker/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+label%3Akind%2Fepic+label%3Acomponent%2Fsecretless-handlers) to see if the Target Service you are
 interested in is on our radar, and request it by opening a GitHub issue if not.
 
 - [AWS](/docs/reference/handlers/http/aws.html)

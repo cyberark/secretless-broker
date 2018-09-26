@@ -101,7 +101,7 @@ Create a namespace `injectors`, where you will deploy the CyberArk Sidecar Injec
 
 #### Deploy Sidecar Injector
 
-1. Create a signed cert/key pair and store it in a Kubernetes `secret` that will be consumed by sidecar deployment
+1. Create a signed cert/key pair and store it in a Kubernetes `secret` that will be consumed by sidecar injector deployment
     ```bash
     ~$ ./deployment/webhook-create-signed-cert.sh \
         --service cyberark-sidecar-injector \
@@ -369,12 +369,8 @@ For this section, you'll work from a test namespace `$TEST_APP_NAMESPACE_NAME` (
 
 1. Load Conjur policy to create a host for the service account `$TEST_APP_SERVICE_ACCOUNT` - e.g. `test-app-secretless` is made available by walking through [kubernetes-conjur-demo](https://github.com/conjurdemos/kubernetes-conjur-demo) up to and including `./3_init_conjur_cert_authority.sh`
 
-1. Set up environment variables modify to suite your needs e.g. use the same values from [kubernetes-conjur-demo](https://github.com/conjurdemos/kubernetes-conjur-demo)
+1. Set up environment variables, if not already set from [kubernetes-conjur-demo](https://github.com/conjurdemos/kubernetes-conjur-demo
     ```bash
-    # REQUIRED values
-    export TEST_APP_SERVICE_ACCOUNT=test-app-secretless
-    export containerMode=sidecar
- 
     # REQUIRED values, identical to those used for
     # kubernetes-conjur-deploy and kubernetes-conjur-demo
     export CONJUR_VERSION=...
@@ -382,7 +378,17 @@ For this section, you'll work from a test namespace `$TEST_APP_NAMESPACE_NAME` (
     export CONJUR_ACCOUNT=...
     export AUTHENTICATOR_ID=...
     export TEST_APP_NAMESPACE_NAME=...
+    ```
 
+1. Set up pod-specific environment variables - modify to match your environment
+    ```bash
+    # REQUIRED values
+    export TEST_APP_SERVICE_ACCOUNT=test-app-secretless
+    export containerMode=sidecar
+    ```
+
+1. Generate derived Conjur connection environment variables
+    ```bash
     # derived values
     ## CONJUR_APPLIANCE_URL
     CONJUR_APPLIANCE_URL="https://conjur-follower.${CONJUR_NAMESPACE_NAME}.svc.cluster.local/api"

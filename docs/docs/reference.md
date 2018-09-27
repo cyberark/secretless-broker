@@ -14,9 +14,9 @@ In the pages that follow you will find information on:
   - [Credential Providers](/docs/reference/providers/overview.html)
   - [Configuration Managers](/docs/reference/config-managers/overview.html)
 - [Plugin Reference](/generated/pkg_secretless_plugin_v1.html) - Documentation of Secretless Broker's Go Plugin Package
-- [How to Deploy](/docs/reference/how-to-deploy/overview.html):
-  - [Using Conjur](/docs/reference/how-to-deploy/using-conjur.html) as the Credential Provider
-  - [Using Kubernetes Secrets](/docs/reference/how-to-deploy/using-kubernetes-secrets.html)
+- [How to Deploy](/docs/get_started/how-to-deploy/overview.html):
+  - [Using Conjur](/docs/get_started/how-to-deploy/using-conjur.html) as the Credential Provider
+  - [Using Kubernetes Secrets](/docs/get_started/how-to-deploy/using-kubernetes-secrets.html)
     as the Credential Provider
 
 To learn more about the role that each of the configurable components play in the

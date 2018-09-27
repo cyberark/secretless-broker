@@ -46,6 +46,15 @@ chapters:
         url: /docs/get_started/quick_start.html
       - page: Kubernetes Tutorial
         url: /docs/get_started/kubernetes_tutorial.html
+      - page: Configuration
+        url: /docs/get_started/configuration.html
+      - page: How to Deploy
+        url: /docs/get_started/how-to-deploy/overview.html
+        entries:
+        - page: Using Conjur
+          url: /docs/get_started/how-to-deploy/using-conjur.html
+        - page: Using Kubernetes Secrets
+          url: /docs/get_started/how-to-deploy/using-kubernetes-secrets.html
   - title: Reference
     url: /docs/reference.html
     sections:
@@ -92,12 +101,5 @@ chapters:
           url: /docs/reference/config-managers/k8s/crd.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
-      - page: How to Deploy
-        url: /docs/reference/how-to-deploy/overview.html
-        entries:
-        - page: Using Conjur
-          url: /docs/reference/how-to-deploy/using-conjur.html
-        - page: Using Kubernetes Secrets
-          url: /docs/reference/how-to-deploy/using-kubernetes-secrets.html
   - title: FAQ
     url: /docs/faq.html

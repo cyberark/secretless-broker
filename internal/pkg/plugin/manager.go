@@ -164,8 +164,8 @@ func _GetPluginInfo(pluginObj *plugin.Plugin) (map[string]string, error) {
 	return pluginInfo, nil
 }
 
-// _LoadConfigurationMangers appends all configuration managers from the plugin to the pluginManager
-func _LoadConfigurationMangers(manager *Manager, pluginObj *plugin.Plugin, pluginName string) error {
+// _LoadConfigurationManagers appends all configuration managers from the plugin to the pluginManager
+func _LoadConfigurationManagers(manager *Manager, pluginObj *plugin.Plugin, pluginName string) error {
 	rawConfigManagerPluginsFunc, err := pluginObj.Lookup("GetConfigurationManagers")
 	if err != nil {
 		return err
@@ -423,7 +423,7 @@ func (manager *Manager) LoadLibraryPlugins(path string) error {
 		log.Println(string(formattedInfo))
 
 		// Load configuration managers
-		if err := _LoadConfigurationMangers(manager, pluginObj, file.Name()); err != nil {
+		if err := _LoadConfigurationManagers(manager, pluginObj, file.Name()); err != nil {
 			// Log the error but try to load other plugins
 			log.Println(err)
 		}

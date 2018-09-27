@@ -3,7 +3,7 @@ title: How to Deploy
 id: how_to_deploy
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/how-to-deploy/using-conjur.html
+permalink: docs/get_started/how-to-deploy/using-conjur.html
 ---
 
 ## Using CyberArk Conjur
@@ -49,7 +49,7 @@ metadata:
       - name: config
         mountPath: "/etc/secretless"
         readOnly: true
-    
+
     # <-- Add your own container definition here -->
     # - name: my-service
     #   image: my-service:latest
@@ -112,7 +112,7 @@ which defines our application, its credentials and permissions.
   - !grant
     role: !layer
     member: !host
-  
+
   - !permit
     role: !layer
     privileges: [ read, execute ]

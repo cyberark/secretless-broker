@@ -3,7 +3,7 @@ title: How to Deploy
 id: how_to_deploy
 layout: docs
 description: Secretless Broker Documentation
-permalink: docs/reference/how-to-deploy/using-kubernetes-secrets.html
+permalink: docs/get_started/how-to-deploy/using-kubernetes-secrets.html
 ---
 
 ## Using Kubernetes Secrets
@@ -38,7 +38,7 @@ metadata:
       - name: config
         mountPath: "/etc/secretless"
         readOnly: true
-    
+
     # <-- Add your own container definition here -->
     # - name: my-service
     #   image: my-service:latest
@@ -112,6 +112,6 @@ kubectl apply -f my-service.yml
 ### 4. Next
 We've just completed a quick deployment of the Secretless Broker to an existing
 application using Kubernetes Secrets.
-- Learn how to [deploy Secretless Broker with Conjur](/docs/reference/how-to-deploy/using-conjur.html)
+- Learn how to [deploy Secretless Broker with Conjur](/docs/get_started/how-to-deploy/using-conjur.html)
 - Learn about the different [Credential Providers](/docs/reference/providers/overview.html)
 - Learn about other [Handlers](/docs/reference/handlers/overview.html)

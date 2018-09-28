@@ -1,104 +1,132 @@
 /*
-Package v1 plugins are ways to add extended functionality to the Secretless Broker
+Package v1 plugins are ways to add extended functionality to the Secretless Broker.
 
-WARNING: Given the speed of development, there will likely be cases of outdated documentation so please use this document
-as a reference point and use the source code in this folder as the true representation of the API state!
+Note: Given the speed of development, it is possible this documentation may become
+outdated. Please use this document as a reference, but rely on the GitHub source
+code as the source of truth.
 
-Supported plugin types:
-  -Listeners
-  -Handlers
-  -Providers
-  -Configuration managers
-  -Connection managers
+Supported Plugin Types
 
-There is also an additional EventNotifier class used to bubble up events from listeners and handlers up
-to the plugin manager but this class may be removed as we move more of the abstract functionality to the plugin manager
-itself.
+The following types of plugins are currently supported:
+  - Listeners
+  - Handlers
+  - Providers
+  - Configuration managers
+  - Connection managers
 
-All plugins are currently loaded in the following manner:
-  - Directory in `/usr/local/lib/secretless` is listed and any `*.so` files are iterated over. Sub-directory traversal is not supported at this time.
-  - Each shared library plugin is searched for these variables:
-    - PluginAPIVersion
-    - PluginInfo
-    - GetHandlers
-    - GetListeners
-    - GetProviders
-    - GetConfigurationManagers
-    - GetConnectionManagers
+There is additionally an EventNotifier class that is currently  used to propagate
+events from listeners and handlers to the plugin manager. Since it is expected
+that this class may be removed as we move more of the abstract functionality to
+the plugin manager itself, the EventNotifier class is only minimally covered in
+this documentation.
 
-  - All plugin factories are enumerated:
-    - Handler plugins are added to handler factory map.
-    - Listener plugins are added to listener factory map.
-    - Provider plugins are added to provider factory map.
-    - Connection manager plugins are added to connection manager factory map.
-    - Configuration manager plugins are added to configuration manager factory map.
+Loading Plugins on Secretless Broker Start
 
-  - Connection manager plugins are instantiated
-  - Chosen configuration manager plugin is instantiated
-  - Program waits for a valid configuration to be provided
+When you start Secretless Broker, it will by default look in /usr/local/lib/secretless
+for any plugin shared library files to load. You can specify an alternate directory
+at startup by using the plugin directory flag:
 
-  - After the configuration is provided and loaded:
-    - Providers are instantiated.
-    - Listeners/handlers are instantiated as needed
+  ./secretless-broker -p /etc/lib/secretless
 
+When Secretless Broker starts, all plugins are currently loaded in the following manner:
 
-PluginAPIVersion
+1. The plugin directory (by default set to /usr/local/lib/secretless) is checked
+for any shared library (*.so) files. Sub-directory traversal is not supported
+at this time.
 
-`PluginAPIVersion` (returns string) indicates the target API version of the Secretless Broker and must match the
-supported version found at https://github.com/cyberark/secretless-broker/blob/master/internal/pkg/plugin/manager.go#L108 list in the
-main daemon.
+2. Each plugin shared library is loaded and validated to ensure it contains
+all required variables and methods. In the "Plugin Minimum Requirements"
+section below we discuss these requirements in greater detail. To briefly summarize,
+Secretless Broker expects any plugin to include definitions for the following
+variables and methods:
+  - var PluginAPIVersion
+  - var PluginInfo
+  - func GetHandlers
+  - func GetListeners
+  - func GetProviders
+  - func GetConfigurationManagers
+  - func GetConnectionManagers
 
-PluginInfo
+3. For each plugin, every component factory is enumerated:
+  - Handler plugins are added to handler factory map
+  - Listener plugins are added to listener factory map
+  - Provider plugins are added to provider factory map
+  - Connection manager plugins are added to connection manager factory map
+  - Configuration manager plugins are added to configuration manager factory map
 
-This `string->string` map (returns `map[string]string`) has information about the plugin that the daemon might use for logging, prioritization, and masking.
-While extraneous keys in the map are ignored, the map _must_ contain the following keys:
+4. Connection manager plugins are instantiated
 
-  - `version`
-  Indicates the plugin version
-  - `id`
-  A computer-friendly id of the plugin. Naming should be constrained to short, spaceless ASCII lowercase alphanumeric set with a limited set of special characters (`-`, `_`, and `/`).
-  - `name`
-  User-friendly name of the plugin. This name will be used in most user-facing messages about the plugin and should be constrained in length to <30 chars.
-  - `description`
-  A longer description of the plugin though it should not exceed 100 characters.
+5. The chosen configuration manager plugin is instantiated
 
-GetListeners
+6. The program waits for a valid configuration to be provided
 
-Returns a map of provided listener ids to their factory methods (`map[string]func(v1.ListenerOptions) v1.Listener`) that
-accept v1.ListenerOptions when invoked and return a new v1.Listener.
+7. After the configuration is provided and loaded, providers and listeners/handlers
+are instantiated as needed
 
-GetHandlers
+Plugin Minimum Requirements
 
-Returns a map of provided handler ids to their factory methods (`map[string]func(v1.HandlerOptions) v1.Handler`) that
-accept v1.HandlerOptions when invoked and return a new v1.Handler.
+In this section, we will go over the minimum requirements for the variables and
+methods that every custom plugin must include in order to be properly loaded
+into the Secretless Broker.
 
-GetProviders
+  // PluginAPIVersion is the target API version of the Secretless Broker and must
+  // match the supported version defined in
+  // internal/pkg/plugin/manager.go:_IsSupportedPluginAPIVersion
+  string PluginAPIVersion
 
-Returns a map of provided provider ids to their factory methods (`map[string]func(v1.ProviderOptions) v1.Provider`) that
-accept v1.ProviderOptions when invoked and return a new v1.Provider.
+  // PluginInfo is a map that has information about the plugin that the daemon
+  // might use for logging, prioritization, and masking.
+  // While extraneous keys in the map are ignored, the map must contain the
+  // following keys:
+  // - "version": indicates the version of the plugin
+  // - "id": a computer-friendly plugin ID. Naming should be constrained to
+  //         short, spaceless ASCII lowercase alphanumeric set with a limited
+  //         set of special characters (`-`, `_`, and `/`).
+  // - "name": a user-friendly plugin name. This name will be used in most
+  //           user-facing messages about the plugin and should be constrained
+  //           in length to <30 chars.
+  // - "description": a plugin description; should be less than 30 characters.
+  map[string]string PluginInfo
 
-GetConnectionManagers
+  // GetListeners returns a map of listener IDs to their factory methods
+  // The factory methods accept v1.ListenerOptions when invoked and return a
+  // new v1.Listener
+  func GetListeners() map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
 
-Returns a map of provided connection manager ids to their factory methods (`map[string]func() v1.ConnectionManager`) that
-return a new v1.ConnectionManager connection manager when invoked.
+  // GetHandlers returns a map of handler IDs to their factory methods
+  // The factory methods accept v1.HandlerOptions when invoked and return a
+  // new v1.Handler
+  func GetHandlers() map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
 
-Note: There is a high likelihood that this method will also have `v1.ConnectionManagerOptions` as the
-factory parameter like the rest of the factory maps in the future releases
+  // GetProviders returns a map of provider IDs to their factory methods
+  // The factory methods accept v1.ProviderOptions when invoked and return a
+  // new v1.Provider (and/or an error)
+  func GetProviders() map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
 
-GetConfigurationManagers
+  // GetConnectionManagers returns a map of connection manager IDs to their
+  // factory methods
+  // The factory methods return a new v1.ConnectionManager when invoked
+  // Note: it is expected that the factory methods will also eventually have
+  //       v1.ConnectionManagerOptions as an argument when invoked, for
+  //       eventual consistency with the other factory maps
+  func GetConnectionManagers() map[string]func() plugin_v1.ConnectionManager
 
-Returns a map of provided configuration manager ids to their factory methods (`map[string]func() v1.ConfigurationManager`) that
-return a new v1.ConfigurationManager manager when invoked.
+  // GetConfigurationManagers returns a map of configuration manager IDs to their
+  // factory methods
+  // The factory methods accept v1.ConfigurationManagerOptions when invoked and
+  // return a new v1.ConfigurationManager
+  func GetConfigurationManagers() map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager
 
 Example plugin
 
-The following shows a sample plugin that conforms to the expected API:
+The following shows a sample plugin that conforms to the expected API. The full
+sample plugin is available in GitHub at https://github.com/cyberark/secretless-broker/tree/master/test/plugin/example.
 
   package main
 
   import (
-  	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-  	"github.com/cyberark/secretless-broker/test/plugin/example"
+    plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+    "github.com/cyberark/secretless-broker/test/plugin/example"
   )
 
   // PluginAPIVersion is the API version being used
@@ -106,45 +134,45 @@ The following shows a sample plugin that conforms to the expected API:
 
   // PluginInfo describes the plugin
   var PluginInfo = map[string]string{
-  	"version":     "0.0.8",
-  	"id":          "example-plugin",
-  	"name":        "Example Plugin",
-  	"description": "Example plugin to demonstrate plugin functionality",
+    "version":     "0.0.8",
+    "id":          "example-plugin",
+    "name":        "Example Plugin",
+    "description": "Example plugin to demonstrate plugin functionality",
   }
 
   // GetListeners returns the echo listener
   func GetListeners() map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener {
-  	return map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener{
-  		"echo": example.ListenerFactory,
-  	}
+    return map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener{
+      "echo": example.ListenerFactory,
+    }
   }
 
   // GetHandlers returns the example handler
   func GetHandlers() map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler {
-  	return map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler{
-  		"example-handler": example.HandlerFactory,
-  	}
+    return map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler{
+      "example-handler": example.HandlerFactory,
+    }
   }
 
   // GetProviders returns the example provider
-  func GetProviders() map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider {
-  	return map[string]func(plugin_v1.ProviderOptions) plugin_v1.Provider{
-  		"example-provider": example.ProviderFactory,
-  	}
-  }
-
-  // GetConfigurationManagers returns the example configuration manager
-  func GetConfigurationManagers() map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager {
-  	return map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager{
-  		"example-plugin-config-manager": example.ConfigManagerFactory,
-  	}
+  func GetProviders() map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
+    return map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error){
+      "example-provider": example.ProviderFactory,
+    }
   }
 
   // GetConnectionManagers returns the example connection manager
   func GetConnectionManagers() map[string]func() plugin_v1.ConnectionManager {
-  	return map[string]func() plugin_v1.ConnectionManager{
-  		"example-plugin-connection-manager": example.ManagerFactory,
-  	}
+    return map[string]func() plugin_v1.ConnectionManager{
+      "example-plugin-connection-manager": example.ConnManagerFactory,
+    }
+  }
+
+  // GetConfigurationManagers returns the example configuration manager
+  func GetConfigurationManagers() map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager {
+    return map[string]func(plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager{
+      "example-plugin-config-manager": example.ConfigManagerFactory,
+    }
   }
 
 */

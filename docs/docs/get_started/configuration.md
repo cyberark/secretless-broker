@@ -22,7 +22,7 @@ each of the [quick start demos](/docs/get_started/quick_start.html). For ease of
 understanding we've broken them up into three separate configurations. In practice
 you can configure Secretless Broker to handle as many types of connections as you
 need; to see how we configured Secretless Broker to handle all three of these
-connection types at once, check out the [actual configuration](https://github.com/cyberark/secretless-broker/blob/sidecar-injector/demos/quick-start/docker/etc/secretless.yml)
+connection types at once, check out the [actual configuration](https://github.com/cyberark/secretless-broker/blob/master/demos/quick-start/docker/etc/secretless.yml)
 we used in building the quick start Docker image.
 
 <div id="configuration-examples">

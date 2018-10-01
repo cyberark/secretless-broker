@@ -52,17 +52,17 @@ This section enumerates the available sidecars. The choice of sidecar is made vi
 See the [README](https://github.com/cyberark/secretless-broker)
 
 Injects: 
-  + a configurable **Secretless container** with
-  + a **Volume Mount** at `/etc/secretless` directed to
   + a newly created **Volume** named `secretless-config` sourced from a ConfigMap
+  + a configurable **Secretless container** with:
+    + a **Volume Mount** at `/etc/secretless` of the `secretless-config` Volume
 
 #### Authenticator
 See the [README](https://github.com/cyberark/conjur-authn-k8s-client)
 
-Injects: 
-  + a configurable **Authenticator container** with
-  + a **Volume Mount** at `/run/conjur` directed to
-  + a newly created shareable **in-memory Volume** named `conjur-access-token` used to store the access token
+Injects:
+  + a newly created shareable **in-memory Volume** named `conjur-access-token` used to store the access token 
+  + a configurable **Authenticator container** with:
+    + a **Volume Mount** at `/run/conjur` of the `conjur-access-token` Volume
 
 ### Mandatory TLS
 
@@ -467,7 +467,7 @@ For this section, you'll work from a test namespace `$TEST_APP_NAMESPACE_NAME` (
 
 1. You can now leverage Conjur by either
    1. [Deploying the Authenticator Sidecar](#deploy-authenticator-sidecar) or
-   1. [Deploying the Secretless Sidecar](#deploy-authenticator-sidecar) 
+   1. [Deploying the Secretless Sidecar](#deploy-secretless-sidecar) 
 
 ### Deploy Authenticator Sidecar
 

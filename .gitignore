@@ -1,4 +1,5 @@
 .env
+bench.*
 debug
 debug.*
 .vscode/

@@ -29,23 +29,14 @@ var endpointToEnv = map[Endpoint]string{
 	Secretless: "SECRETLESS_ADDRESS",
 }
 
-func getConnection(endpoint Endpoint) (*sql.DB, error) {
+func getConnection() (*sql.DB, error) {
 	var ok bool
-	var envAddress string
-	if envAddress, ok = endpointToEnv[endpoint]; ok == false {
-		return nil, fmt.Errorf("got unknown endpoint %v", endpoint)
-	}
-
 	var address string
-	if address, ok = os.LookupEnv(envAddress); ok == false {
-		return nil, fmt.Errorf("%s is not set", envAddress)
+	if address, ok = os.LookupEnv("BENCH_ADDRESS"); ok == false {
+		return nil, fmt.Errorf("%s is not set", "BENCH_ADDRESS")
 	}
 
-	if endpoint == Postgres {
-		address = fmt.Sprintf("test@%s", address)
-	}
-
-	connStr := fmt.Sprintf("postgresql://%s/postgres?sslmode=disable", address)
+	connStr := fmt.Sprintf("postgresql://test@%s/postgres?sslmode=disable", address)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
@@ -67,9 +58,9 @@ func runQuery(db *sql.DB, query string, b *testing.B) {
 	rows.Close()
 }
 
-func benchmarkQuery(endpoint Endpoint, query string, b *testing.B) {
+func benchmarkQuery(query string, b *testing.B) {
 	b.StopTimer()
-	db, err := getConnection(endpoint)
+	db, err := getConnection()
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -80,42 +71,22 @@ func benchmarkQuery(endpoint Endpoint, query string, b *testing.B) {
 	}
 }
 
-func BenchmarkBaseline_Select1(b *testing.B) {
-	benchmarkQuery(Postgres, select1Query, b)
+func Benchmark_Select1(b *testing.B) {
+	benchmarkQuery(select1Query, b)
 }
 
-func BenchmarkBaseline_Select10(b *testing.B) {
-	benchmarkQuery(Postgres, select10Query, b)
+func Benchmark_Select10(b *testing.B) {
+	benchmarkQuery(select10Query, b)
 }
 
-func BenchmarkBaseline_Select100(b *testing.B) {
-	benchmarkQuery(Postgres, select100Query, b)
+func Benchmark_Select100(b *testing.B) {
+	benchmarkQuery(select100Query, b)
 }
 
-func BenchmarkBaseline_Select1000(b *testing.B) {
-	benchmarkQuery(Postgres, select1000Query, b)
+func Benchmark_Select1000(b *testing.B) {
+	benchmarkQuery(select1000Query, b)
 }
 
-func BenchmarkBaseline_Select10000(b *testing.B) {
-	benchmarkQuery(Postgres, select10000Query, b)
-}
-
-func BenchmarkSecretless_Select1(b *testing.B) {
-	benchmarkQuery(Secretless, select1Query, b)
-}
-
-func BenchmarkSecretless_Select10(b *testing.B) {
-	benchmarkQuery(Secretless, select10Query, b)
-}
-
-func BenchmarkSecretless_Select100(b *testing.B) {
-	benchmarkQuery(Secretless, select100Query, b)
-}
-
-func BenchmarkSecretless_Select1000(b *testing.B) {
-	benchmarkQuery(Secretless, select1000Query, b)
-}
-
-func BenchmarkSecretless_Select10000(b *testing.B) {
-	benchmarkQuery(Secretless, select10000Query, b)
+func Benchmark_Select10000(b *testing.B) {
+	benchmarkQuery(select10000Query, b)
 }

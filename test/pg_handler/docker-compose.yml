@@ -16,6 +16,7 @@ services:
     build:
       context: ../..
     environment:
+      PG_ADDRESS:
       PG_PASSWORD: test
     ports:
       - 15432
@@ -27,10 +28,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: go test -v ./test/pg_handler
     environment:
-      PG_ADDRESS: pg:5432
-      SECRETLESS_ADDRESS: secretless:15432
+      PG_ADDRESS:
+      SECRETLESS_ADDRESS:
     volumes:
       - pg-socket:/sock
     depends_on:

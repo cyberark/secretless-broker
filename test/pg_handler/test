@@ -1,9 +1,11 @@
 #!/bin/bash -ex
 
 local_test=false
-while getopts :l opt; do
+benchmark=false
+while getopts ":lb" opt; do
     case $opt in
         l) local_test=true ;;
+        b) benchmark=true ;;
        \?) echo "Unknown option -$OPTARG"; exit 1;;
     esac
 done
@@ -13,8 +15,44 @@ if $local_test; then
   docker_args="-v $(cd ../..; pwd):/go/src/github.com/cyberark/secretless-broker"
 fi
 
-docker-compose run \
-  --rm \
-  --no-deps \
-  $docker_args \
-  test
+if $benchmark; then
+  # first set PG_ADDRESS and SECRETLESS_ADDRESS
+  pg_cid=$(docker-compose ps -q pg)
+  secretless_cid=$(docker-compose ps -q secretless)
+  pg_ip=$(docker inspect \
+    -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $pg_cid)
+  secretless_ip=$(docker inspect \
+    -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $secretless_cid)
+
+  export PG_ADDRESS=$pg_ip:5432
+  export SECRETLESS_ADDRESS=$secretless_ip:15432
+
+  echo "++++++++++++++++++++++++++++++++++++++"
+  echo ""
+  echo "Running PostgreSQL benchmarks ..."
+  echo ""
+  echo "++++++++++++++++++++++++++++++++++++++"
+
+  docker-compose run \
+    --rm \
+    --no-deps \
+    $docker_args \
+    test \
+    bash -c '
+      echo "--- QUERYING POSTGRES DIRECTLY ---" && \
+      BENCH_ADDRESS=$PG_ADDRESS go test -v -bench=. -test.benchtime=10s ./test/pg_handler/bench_test.go | tee bench.old && \
+
+      echo "--- QUERYING VIA SECRETLESS ---" && \
+      BENCH_ADDRESS=$SECRETLESS_ADDRESS go test -v -bench=. -test.benchtime=10s ./test/pg_handler/bench_test.go | tee bench.new && \
+
+      echo "--- COMPARING BENCHMARKS ---" && \
+      benchcmp bench.old bench.new
+    '
+else
+  docker-compose run \
+    --rm \
+    --no-deps \
+    $docker_args \
+    test \
+    go test -v ./test/pg_handler
+fi

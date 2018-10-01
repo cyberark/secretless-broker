@@ -1,0 +1,15 @@
+# Default values for cyberark-sidecar-injector.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# helm install --namespace default --name meow .
+#
+
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+# caBundle:
+csrEnabled: true
+# certsSecret:

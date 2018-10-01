@@ -56,6 +56,17 @@ pipeline {
       }
     }
 
+    stage('Push Sidecar Injector Images') {
+      when {
+        branch 'master'
+      }
+
+      steps {
+        sh './sidecar-injector/bin/build latest'
+        sh './sidecar-injector/bin/publish latest'
+      }
+    }
+
     stage('Fix Website Flags (staging)') {
       when {
         branch 'staging'

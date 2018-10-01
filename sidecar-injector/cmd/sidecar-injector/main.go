@@ -44,6 +44,7 @@ func main() {
 
 	// start webhook server in goroutine
 	go func() {
+		glog.Infof("Serving webhook admission controller on %s", whsvr.Server.Addr)
 		if err := whsvr.Server.ListenAndServeTLS("", ""); err != nil {
 			glog.Errorf("Failed to listen and serve webhook server: %v", err)
 			os.Exit(1)

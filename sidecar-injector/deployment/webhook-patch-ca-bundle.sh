@@ -4,7 +4,7 @@ set -e
 
 usage() {
     cat <<EOF >&2
-Generate MutatingWebhookConfiguration for Secretless sidecar-injector webhook service.
+Generate MutatingWebhookConfiguration for CyberArk sidecar injector webhook service.
 
 This script uses generates a MutatingWebhookConfiguration using the provided service name of the webhook and the namespace where the webhook service resides.
 
@@ -35,9 +35,10 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-[ -z ${service} ] && usage
-[ -z ${namespace} ] && usage
-
+if [ -z ${service} ] || [ -z ${namespace} ]
+then
+    usage
+fi
 
 ROOT=$(cd $(dirname $0)/../../; pwd)
 

@@ -10,24 +10,12 @@ import (
 )
 
 const (
-	select1Query     = "SELECT 1"
-	select10Query    = "SELECT generate_series(0, 9)"
-	select100Query   = "SELECT generate_series(0, 99)"
-	select1000Query  = "SELECT generate_series(0, 999)"
-	select10000Query = "SELECT generate_series(0, 9999)"
+	select1Query     = "SELECT * FROM test.test WHERE id < 1"
+	select10Query    = "SELECT * FROM test.test WHERE id < 10"
+	select100Query   = "SELECT * FROM test.test WHERE id < 100"
+	select1000Query  = "SELECT * FROM test.test WHERE id < 1000"
+	select10000Query = "SELECT * FROM test.test WHERE id < 10000"
 )
-
-type Endpoint int
-
-const (
-	Postgres Endpoint = iota
-	Secretless
-)
-
-var endpointToEnv = map[Endpoint]string{
-	Postgres:   "PG_ADDRESS",
-	Secretless: "SECRETLESS_ADDRESS",
-}
 
 func getConnection() (*sql.DB, error) {
 	var ok bool
@@ -49,26 +37,29 @@ func getConnection() (*sql.DB, error) {
 
 // runQuery executes a query. Expects the timer to already have been stopped.
 func runQuery(db *sql.DB, query string, b *testing.B) {
-	b.StartTimer()
 	rows, err := db.Query(query)
 	if err != nil {
 		b.Fatal(err)
 	}
-	b.StopTimer()
 	rows.Close()
 }
 
 func benchmarkQuery(query string, b *testing.B) {
+
+	// stop time while the connection is opened
 	b.StopTimer()
+
 	db, err := getConnection()
 	if err != nil {
 		b.Fatal(err)
 	}
 	defer db.Close()
 
+	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		runQuery(db, query, b)
 	}
+	b.StopTimer()
 }
 
 func Benchmark_Select1(b *testing.B) {

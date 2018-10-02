@@ -11,6 +11,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 30s
+    volumes:
+      - psql-data:/var/lib/postgresql/data
 
   secretless:
     build:
@@ -50,3 +52,4 @@ services:
 
 volumes:
   pg-socket:
+  psql-data:

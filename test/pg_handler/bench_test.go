@@ -9,14 +9,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	select1Query     = "SELECT * FROM test.test WHERE id < 1"
-	select10Query    = "SELECT * FROM test.test WHERE id < 10"
-	select100Query   = "SELECT * FROM test.test WHERE id < 100"
-	select1000Query  = "SELECT * FROM test.test WHERE id < 1000"
-	select10000Query = "SELECT * FROM test.test WHERE id < 10000"
-)
-
 func getConnection() (*sql.DB, error) {
 	var ok bool
 	var address string
@@ -44,10 +36,12 @@ func runQuery(db *sql.DB, query string, b *testing.B) {
 	rows.Close()
 }
 
-func benchmarkQuery(query string, b *testing.B) {
+func benchmarkQuery(queryMax int, b *testing.B) {
 
 	// stop time while the connection is opened
 	b.StopTimer()
+
+	query := fmt.Sprintf("SELECT * FROM test.test WHERE id < %d", queryMax)
 
 	db, err := getConnection()
 	if err != nil {
@@ -63,21 +57,25 @@ func benchmarkQuery(query string, b *testing.B) {
 }
 
 func Benchmark_Select1(b *testing.B) {
-	benchmarkQuery(select1Query, b)
+	benchmarkQuery(1, b)
 }
 
 func Benchmark_Select10(b *testing.B) {
-	benchmarkQuery(select10Query, b)
+	benchmarkQuery(10, b)
 }
 
 func Benchmark_Select100(b *testing.B) {
-	benchmarkQuery(select100Query, b)
+	benchmarkQuery(100, b)
 }
 
 func Benchmark_Select1000(b *testing.B) {
-	benchmarkQuery(select1000Query, b)
+	benchmarkQuery(1000, b)
 }
 
 func Benchmark_Select10000(b *testing.B) {
-	benchmarkQuery(select10000Query, b)
+	benchmarkQuery(10000, b)
+}
+
+func Benchmark_Select100000(b *testing.B) {
+	benchmarkQuery(100000, b)
 }

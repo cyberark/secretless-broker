@@ -99,8 +99,8 @@ website:
   only:
     - branches
 
-.auto_devops: &auto_devops |
-  # Auto DevOps variables and functions
+.utils: &utils |
+  # variables and functions
   [[ "$TRACE" ]] && set -x
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   export CI_APPLICATION_TAG=$CI_COMMIT_SHA
@@ -158,10 +158,10 @@ website:
     done
   }
 
-  echo "loaded"
+  echo "loaded utils"
 
 before_script:
   - apk add --no-cache bash
   - apk add --no-cache py-pip
   - pip install docker-compose
-  - *auto_devops
+  - *utils

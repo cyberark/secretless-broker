@@ -13,6 +13,8 @@ services:
       timeout: 30s
     environment:
       MYSQL_ROOT_PASSWORD: securerootpass
+    volumes:
+      - mysql-data:/var/lib/mysql
 
   secretless:
     build:
@@ -46,3 +48,4 @@ services:
 
 volumes:
   mysql-socket:
+  mysql-data:

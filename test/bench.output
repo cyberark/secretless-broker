@@ -1,0 +1,45 @@
+++++++++++++++++++++++++++++++++++++++
+
+Running MySQL benchmarks ...
+
+++++++++++++++++++++++++++++++++++++++
+--- QUERYING MYSQL DIRECTLY ---
+goos: linux
+goarch: amd64
+Benchmark_Select1-4           	  100000	    210217 ns/op
+Benchmark_Select10-4          	  100000	    218508 ns/op
+Benchmark_Select100-4         	  100000	    236585 ns/op
+Benchmark_Select1000-4        	  100000	    214403 ns/op
+Benchmark_Select10000-4       	  100000	    208026 ns/op
+Benchmark_Select100000-4      	  100000	    204101 ns/op
+Benchmark_Select1000000-4     	  100000	    216123 ns/op
+Benchmark_Select10000000-4    	  100000	    212912 ns/op
+Benchmark_Select100000000-4   	  100000	    243454 ns/op
+PASS
+ok  	command-line-arguments	216.289s
+--- QUERYING VIA SECRETLESS ---
+goos: linux
+goarch: amd64
+Benchmark_Select1-4           	   50000	    328266 ns/op
+Benchmark_Select10-4          	   50000	    334076 ns/op
+Benchmark_Select100-4         	   50000	    319861 ns/op
+Benchmark_Select1000-4        	   50000	    332429 ns/op
+Benchmark_Select10000-4       	   50000	    335393 ns/op
+Benchmark_Select100000-4      	   50000	    327583 ns/op
+Benchmark_Select1000000-4     	   50000	    330522 ns/op
+Benchmark_Select10000000-4    	   50000	    314713 ns/op
+Benchmark_Select100000000-4   	   50000	    325802 ns/op
+PASS
+ok  	command-line-arguments	178.469s
+--- COMPARING BENCHMARKS ---
+benchmark                       old ns/op     new ns/op     delta
+Benchmark_Select1-4             210217        328266        +56.16%
+Benchmark_Select10-4            218508        334076        +52.89%
+Benchmark_Select100-4           236585        319861        +35.20%
+Benchmark_Select1000-4          214403        332429        +55.05%
+Benchmark_Select10000-4         208026        335393        +61.23%
+Benchmark_Select100000-4        204101        327583        +60.50%
+Benchmark_Select1000000-4       216123        330522        +52.93%
+Benchmark_Select10000000-4      212912        314713        +47.81%
+Benchmark_Select100000000-4     243454        325802        +33.82%
+Unknown option -b

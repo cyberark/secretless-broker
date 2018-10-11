@@ -1,8 +1,3 @@
-<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.6.0/dist/instantsearch.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.6.0/dist/instantsearch.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.6.0/dist/instantsearch-theme-algolia.min.css">
-
 <script>
 const search = instantsearch({
   appId: '{{ site.algolia.application_id }}',
@@ -33,7 +28,7 @@ const hitTemplate = function(hit) {
     <div class="post-item">
       <span class="post-meta">${date}</span>
       <h2><a class="post-link" href="${url}">${title}</a></h2>
-
+      {{#breadcrumbs}}<a href="${url}" class="post-breadcrumbs">${breadcrumbs}</a>{{/breadcrumbs}}
       <div class="post-snippet">${content}</div>
     </div>
   `;
@@ -43,7 +38,7 @@ const hitTemplate = function(hit) {
 search.addWidget(
   instantsearch.widgets.searchBox({
     container: '#search-searchbar',
-    placeholder: 'Search Secretless...',
+    placeholder: 'Search into posts...',
     poweredBy: true // This is required if you're on the free Community plan
   })
 );
@@ -59,38 +54,3 @@ search.addWidget(
 
 search.start();
 </script>
-
-<style>
-.ais-search-box {
-  max-width: 100%;
-  margin-bottom: 15px;
-}
-.post-item {
-  margin-bottom: 30px;
-}
-.post-link .ais-Highlight {
-  color: #111;
-  font-style: normal;
-  text-decoration: underline;
-}
-.post-breadcrumbs {
-  color: #424242;
-  display: block;
-}
-.post-breadcrumb {
-  font-size: 18px;
-  color: #424242;
-}
-.post-breadcrumb .ais-Highlight {
-  font-weight: bold;
-  font-style: normal;
-}
-.post-snippet .ais-Highlight {
-  color: #2a7ae2;
-  font-style: normal;
-  font-weight: bold;
-}
-.post-snippet img {
-  display: none;
-}
-</style>

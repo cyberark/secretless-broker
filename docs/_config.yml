@@ -18,4 +18,5 @@ liquid:
 
 algolia:
   application_id: F14CP7WA0Q
-  index_name:     secretless 
+  index_name: secretless
+  search_only_api_key: 6f5fcbd181449afb3d2e8fce4bae79e0

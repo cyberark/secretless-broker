@@ -1,0 +1,167 @@
+image: docker:stable-git
+
+variables:
+  IMAGE_TAGS: |
+    secretless-broker
+    secretless-dev
+    secretless-broker-quickstart
+
+stages:
+  - build
+  - test
+  - website
+
+build:
+  stage: build
+  services:
+  - docker:stable-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - setup_docker
+    - ./bin/build
+    - save_images
+  only:
+    - branches
+
+check_style:
+  stage: test
+  services:
+  - docker:stable-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - setup_docker
+    - get_images
+    - ./bin/check_style
+  only:
+    - branches
+  artifacts:
+    paths:
+      - test/golint.xml
+
+test_unit:
+  stage: test
+  services:
+  - docker:stable-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - setup_docker
+    - get_images
+    - ./bin/test_unit
+  only:
+    - branches
+  artifacts:
+    reports:
+      junit: test/junit.xml
+
+test_integration:
+  stage: test
+  services:
+  - docker:stable-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - setup_docker
+    - get_images
+    - ./bin/test_integration
+  only:
+    - branches
+  artifacts:
+    reports:
+      junit: test/junit.xml
+
+test_quickstart:
+  stage: test
+  services:
+  - docker:stable-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - setup_docker
+    - get_images
+    - ./bin/test_quickstart
+  only:
+    - branches
+
+website:
+  stage: website
+  services:
+  - docker:stable-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - setup_docker
+    - get_images
+    - ./bin/build_website
+    - ./bin/check_website_links
+  only:
+    - branches
+
+.utils: &utils |
+  # variables and functions
+  [[ "$TRACE" ]] && set -x
+  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
+  export CI_APPLICATION_TAG=$CI_COMMIT_SHA
+  export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
+
+  export ALL_TAGS="";
+  VERSION=$(cat VERSION);
+
+  ALL_TAGS=$(echo "$IMAGE_TAGS" | sed '/^$/d' | while read -r line; do
+    echo "$line:latest"
+    echo "$line:$VERSION"
+  done
+  )
+
+  function login_ci_registry() {
+    if [[ -n "$CI_REGISTRY_USER" ]]; then
+      echo "Logging to GitLab Container Registry with CI credentials..."
+      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+      echo ""
+    fi
+  }
+
+  function setup_docker() {
+    login_ci_registry
+  }
+  
+  function save_image() {
+    tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
+    docker tag $1 "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
+    docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
+  }
+  
+  function get_image() {
+    tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
+
+    docker pull "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
+    docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag" $1
+  }
+  
+  function save_images() {
+    echo "$ALL_TAGS" | while read -r line; do
+      save_image "$line"; 
+    done
+  }
+  
+  function optional_get_images() {
+    echo "$ALL_TAGS" | while read -r line; do
+      get_image "$line" 2> /dev/null || true; 
+    done
+  }
+  
+  function get_images() {
+    echo "$ALL_TAGS" | while read -r line; do
+      get_image "$line"; 
+    done
+  }
+
+  echo "loaded utils"
+
+before_script:
+  - apk add --no-cache bash
+  - apk add --no-cache py-pip
+  - pip install docker-compose
+  - *utils

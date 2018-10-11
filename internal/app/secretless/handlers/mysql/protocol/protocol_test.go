@@ -22,14 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package protocol
 
 import (
 	"bytes"
 	"encoding/binary"
 	"testing"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,7 +38,7 @@ func TestUnpackOkResponse(t *testing.T) {
 		Packet   []byte
 		HasError bool
 		Error    error
-		protocol.OkResponse
+		OkResponse
 	}
 
 	testData := []*UnpackOkResponseAssert{
@@ -52,7 +51,7 @@ func TestUnpackOkResponse(t *testing.T) {
 			},
 			false,
 			nil,
-			protocol.OkResponse{
+			OkResponse{
 				PacketType:   0x00,
 				AffectedRows: uint64(1),
 				LastInsertID: uint64(0),
@@ -63,7 +62,7 @@ func TestUnpackOkResponse(t *testing.T) {
 			[]byte{0x07, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00},
 			false,
 			nil,
-			protocol.OkResponse{
+			OkResponse{
 				PacketType:   0x00,
 				AffectedRows: uint64(0),
 				LastInsertID: uint64(0),
@@ -74,7 +73,7 @@ func TestUnpackOkResponse(t *testing.T) {
 			[]byte{0x07, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, 0x02, 0x00, 0x00, 0x00},
 			false,
 			nil,
-			protocol.OkResponse{
+			OkResponse{
 				PacketType:   0x00,
 				AffectedRows: uint64(1),
 				LastInsertID: uint64(2),
@@ -84,7 +83,7 @@ func TestUnpackOkResponse(t *testing.T) {
 	}
 
 	for _, asserted := range testData {
-		decoded, err := protocol.UnpackOkResponse(asserted.Packet)
+		decoded, err := UnpackOkResponse(asserted.Packet)
 
 		assert.Nil(t, err)
 
@@ -104,7 +103,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 		Packet   []byte
 		HasError bool
 		Error    error
-		protocol.HandshakeV10
+		HandshakeV10
 		CapabilitiesMap map[uint32]bool
 	}
 
@@ -119,7 +118,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 			},
 			false,
 			nil,
-			protocol.HandshakeV10{
+			HandshakeV10{
 				ProtocolVersion:    byte(10),
 				ServerVersion:      "5.5.56",
 				ConnectionID:       uint32(1630),
@@ -129,13 +128,13 @@ func TestUnpackHandshakeV10(t *testing.T) {
 					0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a},
 			},
 			map[uint32]bool{
-				protocol.ClientLongPassword: true, protocol.ClientFoundRows: true, protocol.ClientLongFlag: true,
-				protocol.ClientConnectWithDB: true, protocol.ClientNoSchema: true, protocol.ClientCompress: true, protocol.ClientODBC: true,
-				protocol.ClientLocalFiles: true, protocol.ClientIgnoreSpace: true, protocol.ClientProtocol41: true, protocol.ClientInteractive: true,
-				protocol.ClientSSL: false, protocol.ClientIgnoreSIGPIPE: true, protocol.ClientTransactions: true, protocol.ClientMultiStatements: true,
-				protocol.ClientMultiResults: true, protocol.ClientPSMultiResults: true, protocol.ClientPluginAuth: true, protocol.ClientConnectAttrs: false,
-				protocol.ClientPluginAuthLenEncClientData: false, protocol.ClientCanHandleExpiredPasswords: false,
-				protocol.ClientSessionTrack: false, protocol.ClientDeprecateEOF: false},
+				ClientLongPassword: true, ClientFoundRows: true, ClientLongFlag: true,
+				ClientConnectWithDB: true, ClientNoSchema: true, ClientCompress: true, ClientODBC: true,
+				ClientLocalFiles: true, ClientIgnoreSpace: true, ClientProtocol41: true, ClientInteractive: true,
+				ClientSSL: false, ClientIgnoreSIGPIPE: true, ClientTransactions: true, ClientMultiStatements: true,
+				ClientMultiResults: true, ClientPSMultiResults: true, ClientPluginAuth: true, ClientConnectAttrs: false,
+				ClientPluginAuthLenEncClientData: false, ClientCanHandleExpiredPasswords: false,
+				ClientSessionTrack: false, ClientDeprecateEOF: false},
 		},
 		{
 			[]byte{
@@ -147,7 +146,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 			},
 			false,
 			nil,
-			protocol.HandshakeV10{
+			HandshakeV10{
 				ProtocolVersion:    byte(10),
 				ServerVersion:      "5.7.18",
 				ConnectionID:       uint32(15),
@@ -157,18 +156,18 @@ func TestUnpackHandshakeV10(t *testing.T) {
 					0x0a, 0x28, 0x06, 0x4a, 0x12, 0x5e, 0x45, 0x18, 0x05},
 			},
 			map[uint32]bool{
-				protocol.ClientLongPassword: true, protocol.ClientFoundRows: true, protocol.ClientLongFlag: true,
-				protocol.ClientConnectWithDB: true, protocol.ClientNoSchema: true, protocol.ClientCompress: true, protocol.ClientODBC: true,
-				protocol.ClientLocalFiles: true, protocol.ClientIgnoreSpace: true, protocol.ClientProtocol41: true, protocol.ClientInteractive: true,
-				protocol.ClientSSL: true, protocol.ClientIgnoreSIGPIPE: true, protocol.ClientTransactions: true, protocol.ClientMultiStatements: true,
-				protocol.ClientMultiResults: true, protocol.ClientPSMultiResults: true, protocol.ClientPluginAuth: true, protocol.ClientConnectAttrs: true,
-				protocol.ClientPluginAuthLenEncClientData: true, protocol.ClientCanHandleExpiredPasswords: true,
-				protocol.ClientSessionTrack: true, protocol.ClientDeprecateEOF: true},
+				ClientLongPassword: true, ClientFoundRows: true, ClientLongFlag: true,
+				ClientConnectWithDB: true, ClientNoSchema: true, ClientCompress: true, ClientODBC: true,
+				ClientLocalFiles: true, ClientIgnoreSpace: true, ClientProtocol41: true, ClientInteractive: true,
+				ClientSSL: true, ClientIgnoreSIGPIPE: true, ClientTransactions: true, ClientMultiStatements: true,
+				ClientMultiResults: true, ClientPSMultiResults: true, ClientPluginAuth: true, ClientConnectAttrs: true,
+				ClientPluginAuthLenEncClientData: true, ClientCanHandleExpiredPasswords: true,
+				ClientSessionTrack: true, ClientDeprecateEOF: true},
 		},
 	}
 
 	for _, asserted := range testData {
-		decoded, err := protocol.UnpackHandshakeV10(asserted.Packet)
+		decoded, err := UnpackHandshakeV10(asserted.Packet)
 
 		if err != nil {
 			assert.Equal(t, asserted.Error, err)
@@ -195,7 +194,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 }
 
 func TestUnpackHandshakeResponse41(t *testing.T) {
-	expected := protocol.HandshakeResponse41{
+	expected := HandshakeResponse41{
 		Header:          []byte{0xaa, 0x0, 0x0, 0x1},
 		CapabilityFlags: uint32(33464965),
 		MaxPacketSize:   uint32(1073741824),
@@ -233,7 +232,7 @@ func TestUnpackHandshakeResponse41(t *testing.T) {
 		0x2e, 0x32, 0x30, 0x9, 0x5f, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f,
 		0x72, 0x6d, 0x6, 0x78, 0x38, 0x36, 0x5f, 0x36, 0x34}
 
-	output, err := protocol.UnpackHandshakeResponse41(input)
+	output, err := UnpackHandshakeResponse41(input)
 
 	assert.Equal(t, expected, *output)
 	assert.Equal(t, nil, err)
@@ -250,7 +249,7 @@ func TestInjectCredentials(t *testing.T) {
 	expectedHeader := []byte{0xa4, 0x0, 0x0, 0x1}
 
 	// test with handshake response that already has auth set to another value
-	handshake := protocol.HandshakeResponse41{
+	handshake := HandshakeResponse41{
 		AuthLength: int64(20),
 		AuthResponse: []byte{0xc0, 0xb, 0xbc, 0xb6, 0x6, 0xf5, 0x4f, 0x4e,
 			0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae, 0xc4, 0x49, 0x7c, 0x46, 0xf3},
@@ -258,7 +257,7 @@ func TestInjectCredentials(t *testing.T) {
 		Header:   []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 
-	err := protocol.InjectCredentials(&handshake, salt, username, password)
+	err := InjectCredentials(&handshake, salt, username, password)
 
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
@@ -268,14 +267,14 @@ func TestInjectCredentials(t *testing.T) {
 
 	// test with handshake response with empty auth
 	expectedHeader = []byte{0xb8, 0x0, 0x0, 0x1}
-	handshake = protocol.HandshakeResponse41{
+	handshake = HandshakeResponse41{
 		AuthLength:   0,
 		AuthResponse: []byte{},
 		Username:     "madeupusername",
 		Header:       []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 
-	err = protocol.InjectCredentials(&handshake, salt, username, password)
+	err = InjectCredentials(&handshake, salt, username, password)
 
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
@@ -285,7 +284,7 @@ func TestInjectCredentials(t *testing.T) {
 }
 
 func TestPackHandshakeResponse41(t *testing.T) {
-	input := protocol.HandshakeResponse41{
+	input := HandshakeResponse41{
 		Header:          []byte{0xaa, 0x0, 0x0, 0x1},
 		CapabilityFlags: uint32(33464965),
 		MaxPacketSize:   uint32(1073741824),
@@ -323,7 +322,7 @@ func TestPackHandshakeResponse41(t *testing.T) {
 		0x2e, 0x32, 0x30, 0x9, 0x5f, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f,
 		0x72, 0x6d, 0x6, 0x78, 0x38, 0x36, 0x5f, 0x36, 0x34}
 
-	output, err := protocol.PackHandshakeResponse41(&input)
+	output, err := PackHandshakeResponse41(&input)
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)
@@ -334,7 +333,7 @@ func TestGetLenEncodedIntegerSize(t *testing.T) {
 	expectedArray := []byte{2, 3, 8, 1}
 
 	for k, v := range inputArray {
-		output := protocol.GetLenEncodedIntegerSize(v)
+		output := GetLenEncodedIntegerSize(v)
 
 		assert.Equal(t, expectedArray[k], output)
 	}
@@ -344,7 +343,7 @@ func TestReadLenEncodedInteger(t *testing.T) {
 	expected := uint64(251)
 	input := bytes.NewReader([]byte{0xfc, 0xfb, 0x00})
 
-	output, err := protocol.ReadLenEncodedInteger(input)
+	output, err := ReadLenEncodedInteger(input)
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)
@@ -356,7 +355,7 @@ func TestReadLenEncodedString(t *testing.T) {
 		0x15, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4b, 0x4c, 0x4d, 0x4f, 0x4e, 0x50,
 		0x51, 0x52, 0x53, 0x54, 0x59, 0x57})
 
-	decoded, length, err := protocol.ReadLenEncodedString(packet)
+	decoded, length, err := ReadLenEncodedString(packet)
 
 	assert.Equal(t, expected, decoded)
 	assert.Equal(t, len(expected), int(length))
@@ -370,14 +369,14 @@ func TestReadEOFLengthString(t *testing.T) {
 		0x49, 0x43, 0x54, 0x5f, 0x54, 0x52, 0x41, 0x4e, 0x53, 0x5f, 0x54, 0x41, 0x42, 0x4c, 0x45, 0x53, 0x27,
 	}
 
-	decoded := protocol.ReadEOFLengthString(encoded)
+	decoded := ReadEOFLengthString(encoded)
 
 	assert.Equal(t, expected, decoded)
 }
 
 func TestReadNullTerminatedString(t *testing.T) {
 	x := bytes.NewReader([]byte{0x35, 0x2e, 0x37, 0x2e, 0x31, 0x38, 0x00})
-	assert.Equal(t, "5.7.18", protocol.ReadNullTerminatedString(x))
+	assert.Equal(t, "5.7.18", ReadNullTerminatedString(x))
 }
 
 func TestReadNullTerminatedBytes(t *testing.T) {
@@ -388,7 +387,7 @@ func TestReadNullTerminatedBytes(t *testing.T) {
 	expected := []byte{0x1d, 0xc, 0x61, 0x4f, 0x5c, 0x69, 0x65, 0x6f,
 		0x25, 0x66, 0x7c, 0x64}
 
-	output := protocol.ReadNullTerminatedBytes(input)
+	output := ReadNullTerminatedBytes(input)
 
 	assert.Equal(t, expected, output)
 }
@@ -404,7 +403,7 @@ func TestGetPacketHeader(t *testing.T) {
 		0x72, 0x64, 0x0})
 	expected := []byte{0x4a, 0x0, 0x0, 0x0}
 
-	output, err := protocol.GetPacketHeader(input)
+	output, err := GetPacketHeader(input)
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)
@@ -414,7 +413,7 @@ func TestCheckPacketLength(t *testing.T) {
 	inputLength := 4
 	inputPacket := []byte{0xf, 0xf8, 0xe1, 0xa3}
 
-	err := protocol.CheckPacketLength(inputLength, inputPacket)
+	err := CheckPacketLength(inputLength, inputPacket)
 
 	assert.Equal(t, nil, err)
 }
@@ -426,7 +425,7 @@ func TestNativePassword(t *testing.T) {
 	inputSalt := []byte{0x2f, 0x50, 0x25, 0x34, 0x78, 0x17, 0x1, 0x44,
 		0x1d, 0xc, 0x61, 0x4f, 0x5c, 0x69, 0x65, 0x6f, 0x25, 0x66, 0x7c, 0x64}
 
-	output, err := protocol.NativePassword(inputPassword, inputSalt)
+	output, err := NativePassword(inputPassword, inputSalt)
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)
@@ -438,7 +437,7 @@ func TestUpdateHeaderPayloadLength(t *testing.T) {
 	inputHeader := []byte{173, 0, 0, 0}
 	inputLength := int32(-3)
 
-	output, err := protocol.UpdateHeaderPayloadLength(inputHeader, inputLength)
+	output, err := UpdateHeaderPayloadLength(inputHeader, inputLength)
 
 	assert.Equal(t, expectedHeader, output)
 	assert.Equal(t, nil, err)
@@ -448,7 +447,7 @@ func TestUpdateHeaderPayloadLength(t *testing.T) {
 	inputHeader = []byte{173, 0, 0, 0}
 	inputLength = int32(3)
 
-	output, err = protocol.UpdateHeaderPayloadLength(inputHeader, inputLength)
+	output, err = UpdateHeaderPayloadLength(inputHeader, inputLength)
 
 	assert.Equal(t, expectedHeader, output)
 	assert.Equal(t, nil, err)
@@ -457,7 +456,7 @@ func TestUpdateHeaderPayloadLength(t *testing.T) {
 	inputHeader = []byte{173, 0, 0, 0}
 	inputLength = int32(-180)
 
-	output, err = protocol.UpdateHeaderPayloadLength(inputHeader, inputLength)
+	output, err = UpdateHeaderPayloadLength(inputHeader, inputLength)
 
 	assert.EqualError(t, err, "Malformed packet")
 }
@@ -466,7 +465,7 @@ func TestReadUint24(t *testing.T) {
 	expected := uint32(173)
 	input := []byte{173, 0, 0}
 
-	output, err := protocol.ReadUint24(input)
+	output, err := ReadUint24(input)
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)
@@ -476,7 +475,7 @@ func TestWriteUint24(t *testing.T) {
 	expected := []byte{173, 0, 0}
 	input := uint32(173)
 
-	output := protocol.WriteUint24(input)
+	output := WriteUint24(input)
 
 	assert.Equal(t, expected, output)
 }

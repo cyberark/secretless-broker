@@ -7,7 +7,16 @@
 const search = instantsearch({
   appId: '{{ site.algolia.application_id }}',
   apiKey: '{{ site.algolia.search_only_api_key }}',
-  indexName: '{{ site.algolia.index_name }}'
+  indexName: '{{ site.algolia.index_name }}',
+  //hide results if search box is empty
+  searchFunction: function(helper) {
+    if (helper.state.query.length === 0) {
+        return; // do not trigger search
+    }
+
+    helper.search(); // trigger search
+  }
+  
 });
 
 const hitTemplate = function(hit) {
@@ -54,27 +63,6 @@ search.addWidget(
     templates: {
       item: hitTemplate
     }
-  })
-);
-
-// initialize currentRefinedValues
-search.addWidget(
-  instantsearch.widgets.currentRefinedValues({
-    container: '#current-refined-values',
-    // This widget can also contain a clear all link to remove all filters,
-    // we disable it in this example since we use `clearAll` widget on its own.
-    clearAll: false
-  })
-);
-
-// initialize clearAll
-search.addWidget(
-  instantsearch.widgets.clearAll({
-    container: '#clear-all',
-    templates: {
-      link: 'Reset everything'
-    },
-    autoHideContainer: false
   })
 );
 

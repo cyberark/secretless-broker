@@ -11,6 +11,10 @@ docker-compose up \
 ./wait-for-pg
 
 # start secretless once pg is running
+pg_cid=$(docker-compose ps -q pg)
+pg_ip=$(docker inspect \
+  -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $pg_cid)
+export PG_ADDRESS=$pg_ip:5432
 docker-compose up \
   -d \
   secretless

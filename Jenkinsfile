@@ -23,25 +23,37 @@ pipeline {
       }
     }
 
-    stage('Unit tests') {
-      steps {
-        sh './bin/test_unit'
+    stage('Run Tests') {
+      parallel {
+        stage('Unit tests') {
+          steps {
+            sh './bin/test_unit'
 
-        junit 'test/junit.xml'
-      }
-    }
+            junit 'test/junit.xml'
+          }
+        }
 
-    stage('Integration tests') {
-      steps {
-        sh './bin/test_integration'
+        stage('Integration tests') {
+          steps {
+            sh './bin/test_integration'
 
-        junit 'test/junit.xml'
-      }
-    }
+            junit 'test/junit.xml'
+          }
+        }
 
-    stage('Demo tests') {
-      steps {
-        sh './bin/test_quickstart'
+        stage('Demo tests') {
+          steps {
+            sh './bin/test_quickstart'
+          }
+        }
+
+        stage('Benchmarks') {
+          steps {
+            sh './bin/test_benchmarks'
+
+            junit 'test/bench.xml'
+          }
+        }
       }
     }
 

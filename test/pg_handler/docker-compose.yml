@@ -11,11 +11,14 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 30s
+    volumes:
+      - psql-data:/var/lib/postgresql/data
 
   secretless:
     build:
       context: ../..
     environment:
+      PG_ADDRESS:
       PG_PASSWORD: test
     ports:
       - 15432
@@ -27,10 +30,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: go test -v ./test/pg_handler
     environment:
-      PG_ADDRESS: pg:5432
-      SECRETLESS_ADDRESS: secretless:15432
+      PG_ADDRESS:
+      SECRETLESS_ADDRESS:
     volumes:
       - pg-socket:/sock
     depends_on:
@@ -50,3 +52,4 @@ services:
 
 volumes:
   pg-socket:
+  psql-data:

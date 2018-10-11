@@ -8,6 +8,7 @@ const search = instantsearch({
   appId: '{{ site.algolia.application_id }}',
   apiKey: '{{ site.algolia.search_only_api_key }}',
   indexName: '{{ site.algolia.index_name }}',
+  urlSync: true,
   //hide results if search box is empty
   searchFunction: function(helper) {
     if (helper.state.query.length === 0) {
@@ -16,7 +17,6 @@ const search = instantsearch({
 
     helper.search(); // trigger search
   }
-  
 });
 
 const hitTemplate = function(hit) {
@@ -48,7 +48,6 @@ const hitTemplate = function(hit) {
   `;
 }
 
-
 search.addWidget(
   instantsearch.widgets.searchBox({
     container: '#search-searchbar',
@@ -61,6 +60,7 @@ search.addWidget(
   instantsearch.widgets.hits({
     container: '#search-hits',
     templates: {
+      empty: '<p class="info">Sorry, no results were found.</p>',
       item: hitTemplate
     }
   })

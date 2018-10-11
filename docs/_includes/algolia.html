@@ -1,0 +1,30 @@
+<!-- Including InstantSearch.js library and styling -->
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.6.0/dist/instantsearch.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.6.0/dist/instantsearch.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.6.0/dist/instantsearch-theme-algolia.min.css">
+
+<script>
+// Instanciating InstantSearch.js with Algolia credentials
+const search = instantsearch({
+  appId: 'F14CP7WA0Q',
+  indexName: 'secretless',
+  apiKey: '6f5fcbd181449afb3d2e8fce4bae79e0'
+});
+
+// Adding searchbar and results widgets
+search.addWidget(
+  instantsearch.widgets.searchBox({
+    container: '#search-searchbar',
+    placeholder: 'Search Secretless...',
+    poweredBy: true // This is required if you're on the free Community plan
+  })
+);
+search.addWidget(
+  instantsearch.widgets.hits({
+    container: '#search-hits'
+  })
+);
+
+// Starting the search
+search.start();
+</script>

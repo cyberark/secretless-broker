@@ -15,3 +15,7 @@ liquid:
   error_mode:       strict
   strict_filters:   true
   strict_variables: false
+
+algolia:
+  application_id: F14CP7WA0Q
+  index_name:     secretless 

@@ -17,6 +17,9 @@ pushd test
         continue
       fi
 
+      # set up the containers to run in their own namespace
+      export COMPOSE_PROJECT_NAME="$(basename $PWD)_$(openssl rand -hex 3)"
+
       # Start the needed prerequisites. Assumes that start pre-cleans the env
       ./start
 

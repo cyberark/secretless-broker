@@ -57,6 +57,37 @@ search.addWidget(
   })
 );
 
+// initialize currentRefinedValues
+search.addWidget(
+  instantsearch.widgets.currentRefinedValues({
+    container: '#current-refined-values',
+    // This widget can also contain a clear all link to remove all filters,
+    // we disable it in this example since we use `clearAll` widget on its own.
+    clearAll: false
+  })
+);
+
+// initialize clearAll
+search.addWidget(
+  instantsearch.widgets.clearAll({
+    container: '#clear-all',
+    templates: {
+      link: 'Reset everything'
+    },
+    autoHideContainer: false
+  })
+);
+
+// initialize pagination
+search.addWidget(
+  instantsearch.widgets.pagination({
+    container: '#pagination',
+    maxPages: 20,
+    // default is to scroll to 'body', here we disable this behavior
+    scrollTo: false
+  })
+);
+
 search.start();
 </script>
 

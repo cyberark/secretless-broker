@@ -14,16 +14,8 @@ if $local_test; then
   docker_args="-v $(cd ../..; pwd):/secretless"
 fi
 
-docker-compose build test
-
 if $benchmark; then
   # first set MYSQL_ADDRESS and SECRETLESS_ADDRESS
-  mysql_cid=$(docker-compose ps -q mysql)
-  secretless_cid=$(docker-compose ps -q secretless)
-  mysql_ip=$(docker inspect \
-    -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $mysql_cid)
-  secretless_ip=$(docker inspect \
-    -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $secretless_cid)
 	export MYSQL_ADDRESS=mysql:3306
 	export SECRETLESS_ADDRESS=secretless:3306
 

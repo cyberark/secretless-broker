@@ -6,6 +6,7 @@ project_dir=$PWD
 rm -f $project_dir/test/bench.output
 touch $project_dir/test/bench.output
 
+
 pushd test
   exit_status="0"
   for dir in */; do
@@ -16,6 +17,15 @@ pushd test
         popd 2>/dev/null
         continue
       fi
+
+      # This bug in the current version of compose causes problems in
+      # Jenkins:
+      # https://github.com/docker/compose/issues/5929. docker-compose will
+      # malfunction if it's run in a directory that has a name starting with
+      # '_' or '-'. Until we get the fix, set COMPOSE_PROJECT_NAME
+      COMPOSE_PROJECT_NAME="$(basename $PWD | sed 's/^[_-]*\(.*\)/\1/')"
+      # Setup to allow compose to run in an isolated namespace
+      export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}_$(openssl rand -hex 3)"
 
       # Start the needed prerequisites. Assumes that start pre-cleans the env
       ./start

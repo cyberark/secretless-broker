@@ -27,7 +27,8 @@ config.Config
 
 ### Entrypoint
 [./cmd/secretless-broker/main.go](./cmd/secretless-broker/main.go)
-obtains the following via flags:
+
+At the entrpoiny, some parameters are obtained via flags:
 
 + -f secretless config file
 + -p plugin directory
@@ -35,11 +36,11 @@ obtains the following via flags:
 + --debug toggles debug information
 + --config-mgr strategy to provide secretless configuration
 
-plugins manager:
-  + loads internal [plugins](#plugins)
-  + loads external [plugins](#plugins) from the plugin directory
+Execution shifts to the [Plugin Manager](#pluginmanager):
+  + load internal [plugins](#plugins)
+  + load external [plugins](#plugins) from the plugin directory
   + registers signal handlers
-  + runs Proxy
+  + run
 
 ### PluginManager 
 plugin.Manager

@@ -48,11 +48,24 @@ const hitTemplate = function(hit) {
   `;
 }
 
+// search.addWidget(
+//   instantsearch.widgets.searchBox({
+//     container: '#search-searchbar',
+//     placeholder: 'Search Secretless...',
+//     poweredBy: true,
+//     reset: true
+//   })
+// );
+
+// Instantsearch
 search.addWidget(
   instantsearch.widgets.searchBox({
     container: '#search-searchbar',
     placeholder: 'Search Secretless...',
-    poweredBy: true // This is required if you're on the free Community plan
+    autofocus: false,
+    poweredBy: true,
+    reset: true,
+    loadingIndicator: false
   })
 );
 
@@ -78,38 +91,3 @@ search.addWidget(
 
 search.start();
 </script>
-
-<style>
-.ais-search-box {
-  max-width: 100%;
-  margin-bottom: 15px;
-}
-.post-item {
-  margin-bottom: 30px;
-}
-.post-link .ais-Highlight {
-  color: #111;
-  font-style: normal;
-  text-decoration: underline;
-}
-.post-breadcrumbs {
-  color: #424242;
-  display: block;
-}
-.post-breadcrumb {
-  font-size: 18px;
-  color: #424242;
-}
-.post-breadcrumb .ais-Highlight {
-  font-weight: bold;
-  font-style: normal;
-}
-.post-snippet .ais-Highlight {
-  color: #2a7ae2;
-  font-style: normal;
-  font-weight: bold;
-}
-.post-snippet img {
-  display: none;
-}
-</style>

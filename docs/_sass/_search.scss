@@ -1,0 +1,46 @@
+// ***********************
+// Search
+// ***********************
+
+#search-searchbar {
+  margin: 1rem 0 3rem 0;
+
+  .ais-search-box {
+    max-width: 100%;
+    margin-bottom: 15px;
+  }
+
+}
+
+.post-item {
+  margin-bottom: 30px;
+}
+.post-link .ais-Highlight {
+  background-color: $sless-teal;
+  color: #fff;
+  padding: 0 3px;
+  font-style: normal;
+  font-weight: bold;
+}
+.post-breadcrumbs {
+  color: #424242;
+  display: block;
+}
+.post-breadcrumb {
+  font-size: 18px;
+  color: #424242;
+}
+.post-breadcrumb .ais-Highlight {
+  font-weight: bold;
+  font-style: normal;
+}
+.post-snippet .ais-Highlight {
+  background-color: $sless-teal;
+  color: #fff;
+  padding: 0 3px;
+  font-style: normal;
+  font-weight: bold;
+}
+.post-snippet img {
+  display: none;
+}

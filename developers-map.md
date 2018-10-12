@@ -1,4 +1,8 @@
-## binaries
+# Developer Map
+
+This document is meant to provide a mapping from the conceptual model of Secretless to the codebase.
+
+## Binaries
 
 The entrypoints to binaries exist in "./cmd/${binary_name}"
 

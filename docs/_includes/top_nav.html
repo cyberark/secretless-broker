@@ -31,6 +31,9 @@
                 </li>
             {% endif %}
         {% endfor %}
+			<li class="top-sub {% if page.url == link.url %}active{% endif %}">
+				<a {{ link.target }} href="{{ site.baseurl }}/search.html"><i class="fas fa-search"></i></a>
+			</li>
 		</ul>
 	</div>
 	</div>

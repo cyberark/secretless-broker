@@ -2,6 +2,21 @@
 // Search
 // ***********************
 
+// search icon in top nav 
+.slss-search .fas {
+  color: #fff;
+  &:hover {
+    color: $sless-blue;
+    transition: all 0.4s;
+  }
+}
+
+//Pagination
+#pagination .ais-pagination--item__active {
+  background: $sless-blue;
+}
+
+//search bar
 #search-searchbar {
   margin: 1rem 0 3rem 0;
 
@@ -43,4 +58,14 @@
 }
 .post-snippet img {
   display: none;
+}
+
+//Results styling
+.ais-hits--item {
+  border-bottom: 1px solid $sless-light-blue;
+  padding: 2rem;
+  &:last-of-type {
+    border: none;
+    margin-bottom: 2rem;
+  }
 }

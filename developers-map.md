@@ -2,6 +2,13 @@
 
 This document is meant to provide a mapping from the conceptual model of Secretless to the codebase.
 
+## Directories
+
++ [./cmd](./cmd) - binary entrypoints
++ [./internal/app](./internal/app) - internal implementations of plugins
++ [./internal/pkg](./internal/pkg) - plugin manager and resolver
++ [./pkg/secretless](./pkg/secretless) - secretless config and plugin interfaces
+
 ## Binaries
 
 The entrypoints to binaries exist in "./cmd/${binary_name}"

@@ -97,6 +97,7 @@ Plugins are used as a mechanism for extending Secretless functionality beyond th
 
 ### EventNotifier
 interface: [./pkg/secretless/plugin/v1/event_notifier.go](./pkg/secretless/plugin/v1/event_notifier.go)
+
 implementation: [./internal/pkg/plugin/manager.go](./internal/pkg/plugin/manager.go)
 
 + mechanism for bubbling up events such as new connection/handler/listener
@@ -134,6 +135,7 @@ secretless.Proxy
 
 ### Listener 
 - interface: [./pkg/secretless/plugin/v1/listener.go](./pkg/secretless/plugin/v1/listener.go)
+
 - implementations: [./internal/app/secretless/listeners/](./internal/app/secretless/listeners/)
 
 + can be built on top of BaseListener in [./pkg/secretless/plugin/v1/listener.go](./pkg/secretless/plugin/v1/listener.go)
@@ -144,6 +146,7 @@ secretless.Proxy
 
 ### Handler 
 - interface: [./pkg/secretless/plugin/v1/handler.go](./pkg/secretless/plugin/v1/handler.go)
+
 - implementations: [./internal/app/secretless/handlers/](./internal/app/secretless/handlers/)
 
 + can be built on top of built on top of BaseHandler in [./pkg/secretless/plugin/v1/handler.go](./pkg/secretless/plugin/v1/handler.go)
@@ -156,6 +159,7 @@ secretless.Proxy
 
 ### Resolver
 - interface: [./pkg/secretless/plugin/v1/resolver.go](./pkg/secretless/plugin/v1/resolver.go)
+
 - implementation: [./internal/pkg/plugin/resolver.go](./internal/pkg/plugin/resolver.go)
 
 + manages Providers and provides convenient interface to obtain multiple values from multiple secret vault backends

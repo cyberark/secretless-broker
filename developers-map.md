@@ -32,7 +32,8 @@ obtains the following via flags:
 + -f secretless config file
 + -p plugin directory
 + --watch condition to reload when config file changes
-+ --debug to provide debug information
++ --debug toggles debug information
++ --config-mgr strategy to provide secretless configuration
 
 plugins manager:
   + loads internal [plugins](#plugins)

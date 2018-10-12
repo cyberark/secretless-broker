@@ -4,7 +4,7 @@ This document is meant to provide a mapping from the conceptual model of Secretl
 
 ## Directories
 
-+ [./cmd](./cmd) - binary entrypoints
++ [./cmd](./cmd) - entrypoints for [binaries](#binaries)
 + [./internal/app](./internal/app) - internal implementations of [plugins](#plugins)
 + [./internal/pkg](./internal/pkg) - [plugin manager](#pluginmanager) and [resolver](#resolver)
 + [./pkg/secretless](./pkg/secretless) - secretless [config](#config) and [plugin interfaces](#plugins)

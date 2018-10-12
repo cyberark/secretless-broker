@@ -1,0 +1,150 @@
+## binaries
+
+The entrypoints to binaries exist in "./cmd/${binary_name}"
+
+2 binaries are provided in the secretless repo.
++ [secretless](#secretless)
++ summon2
+
+## Secretless
+
+### Configuration
+config.Config
+./pkg/secretless/config/config.go
+
++ represents the secretless configuration as struct
+
+### Entrypoint
+
+obtains the following via flags:
+
++ -f secretless config file
++ -p plugin directory
++ --watch condition to reload when config file changes
++ --debug to provide debug information
+
+plugins manager:
+  + loads internal plugins
+  + loads external plugins from the plugin directory
+  + registers signal handlers
+  + runs Proxy
+
+### PluginManager 
+plugin.Manager
+
+./internal/pkg/plugin/manager.go
+
++ is a singleton
++ loads and holds plugins
++ creates
+  + [Resolver](#resolver)
+  + [Proxy](#proxy)
++ root of
+  + RunHandlerFunc
+  + RunListenerFunc
++ manages all the plugins 
++ initialises and runs proxy
++ implements EventNotifier (only one in the whole repo)
+
+### EventNotifier
+interface
+./pkg/secretless/plugin/v1/event_notifier.go
+
++ mechanism for bubbling up events such as new connection/handler/listener
++ plugin manager is the only implementation
++ threaded from plugin manager to relevant children
++ used by
+  + Listener
+  + Handler
+  + Resolver
+  + Proxy
+
+### Proxy 
+secretless.Proxy
+
+./internal/app/secretless/proxy.go
+
++ takes
+  + EventNotifier
+  + [Resolver](#resolver)
+  + RunListenerFunc - ListenerFactory
+    + takes 
+      + listener id
+      + ListenerOptions
+    + returns Listener interface pointer
+  + RunHandlerFunc - HandlerFactory, passed to listener
+    + NOTE: HandlerFactories run Handlers before returning them.
+    + takes 
+      + handler id
+      + HandlerOptions
+    + returns Listener interface pointer
++ manages Listener lifecycles
+  + in #Listen, for each listener 
+    + creates net.Listener based on config.Config
+    + creates Listener interface pointer using RunListenerFunc
+
+### Listener 
+./internal/app/secretless/handlers
+
++ can be built on top of BaseListener in ./pkg/secretless/plugin/v1/listener.go
++ accepts client connections and passes them to relevant handler 
+  + in most cases one handler that matches the protocol, http is the exception
++ manages Handler lifecycles
+  + creates Handler interface pointer using RunHandlerFunc
+
+### Handler 
+./internal/app/secretless/handlers
+
++ can be built on top of built on top of BaseHandler in ./pkg/secretless/plugin/v1/handler.go
++ receives client connection and connects to a backend and streams connection. 
++ lifecycle
+  + startup
+  + configure and connect to backend
+  + stream
+  + shutdown
+
+### Resolver
+plugin.Resolver
+
+./internal/pkg/plugin/resolver.go
+
++ takes
+  + ProviderFactories
+  + EventNotifier
+
+## Plugins
+Plugins are used as a mechanism for extending Secretless functionality beyond the core. These are expressed as interfaces. They are versioned in anticipation of growth.
+
++ v1 interfaces are defined at `./pkg/secretless/plugin/v1`
++ list of interfaces
+  + ConfigurationManager 
+    - pushes configuration data and triggers updates
+    - interface: ./pkg/secretless/plugin/v1/configuration_manager.go
+    - implementation: ./internal/app/secretless/configurationmanagers/configfile
+  + ConnectionManager
+    - manages connections for handlers and listeners
+    - interface: ./pkg/secretless/plugin/v1/connection_manager.go
+  + EventNotifier 
+    - passes events to plugin manager
+    - interface: ./pkg/secretless/plugin/v1/event_notifier.go
+    - implementation: ./internal/pkg/plugin/manager.go
+  + Listener 
+    - listens and accepts client connections and passes them to a handler
+    - interface: ./pkg/secretless/plugin/v1/listener.go
+    - implementation: ./internal/app/secretless/listeners/pg/listener.go
+  + Handler 
+    - receives client connection, connect it to a backend and streams connection.
+    - interface: ./pkg/secretless/plugin/v1/handler.go
+    - implementation: ./internal/app/secretless/handlers/pg/handler.go
+  + Provider
+    - used to obtain values from a secret vault backend
+    - interface: ./pkg/secretless/plugin/v1/provider.go
+    - implementation: ./internal/app/secretless/providers/env/provider.go
+  + Resolver
+    - manages Providers and provides convenient interface to obtain multiple values from multiple secret vault backends
+    - interface: ./pkg/secretless/plugin/v1/resolver.go
+    - implementation: ./internal/pkg/plugin/resolver.go
+ 
++ internal implementations of most plugin interfaces
+  + located at ./internal/app/secretless
+  + most plugins are exposed as factories, where the key is the identifier and the value is an interface pointer e.g. map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler

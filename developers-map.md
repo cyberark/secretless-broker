@@ -134,9 +134,9 @@ secretless.Proxy
     + creates Listener interface pointer using RunListenerFunc
 
 ### Listener 
-- interface: [./pkg/secretless/plugin/v1/listener.go](./pkg/secretless/plugin/v1/listener.go)
+interface: [./pkg/secretless/plugin/v1/listener.go](./pkg/secretless/plugin/v1/listener.go)
 
-- implementations: [./internal/app/secretless/listeners/](./internal/app/secretless/listeners/)
+implementations: [./internal/app/secretless/listeners/](./internal/app/secretless/listeners/)
 
 + can be built on top of BaseListener in [./pkg/secretless/plugin/v1/listener.go](./pkg/secretless/plugin/v1/listener.go)
 + accepts client connections and passes them to relevant handler 
@@ -145,9 +145,9 @@ secretless.Proxy
   + creates Handler interface pointer using RunHandlerFunc
 
 ### Handler 
-- interface: [./pkg/secretless/plugin/v1/handler.go](./pkg/secretless/plugin/v1/handler.go)
+interface: [./pkg/secretless/plugin/v1/handler.go](./pkg/secretless/plugin/v1/handler.go)
 
-- implementations: [./internal/app/secretless/handlers/](./internal/app/secretless/handlers/)
+implementations: [./internal/app/secretless/handlers/](./internal/app/secretless/handlers/)
 
 + can be built on top of built on top of BaseHandler in [./pkg/secretless/plugin/v1/handler.go](./pkg/secretless/plugin/v1/handler.go)
 + receives client connection and connects to a backend and streams connection. 
@@ -158,9 +158,9 @@ secretless.Proxy
   + shutdown
 
 ### Resolver
-- interface: [./pkg/secretless/plugin/v1/resolver.go](./pkg/secretless/plugin/v1/resolver.go)
+interface: [./pkg/secretless/plugin/v1/resolver.go](./pkg/secretless/plugin/v1/resolver.go)
 
-- implementation: [./internal/pkg/plugin/resolver.go](./internal/pkg/plugin/resolver.go)
+implementation: [./internal/pkg/plugin/resolver.go](./internal/pkg/plugin/resolver.go)
 
 + manages Providers and provides convenient interface to obtain multiple values from multiple secret vault backends
 + takes

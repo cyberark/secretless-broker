@@ -1,3 +1,5 @@
+[![pipeline status](https://gitlab.com/cyberark/secretless-broker/badges/master/pipeline.svg)](https://gitlab.com/cyberark/secretless-broker/commits/master)
+
 ***
 
 **Status**: Beta

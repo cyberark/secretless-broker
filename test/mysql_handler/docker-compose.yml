@@ -20,10 +20,12 @@ services:
     build:
       context: ../..
     environment:
-      MYSQL_HOST: mysql
+      MYSQL_HOST: 
       MYSQL_PORT: 3306
       MYSQL_USER: testuser
       MYSQL_PASSWORD: testpass
+    ports:
+      - 13306
     volumes:
       - ./secretless.yml:/secretless.yml
       - mysql-socket:/sock
@@ -32,7 +34,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: go test -v ./test/mysql_handler
+    environment:
+      MYSQL_ADDRESS:
+      SECRETLESS_ADDRESS:
     volumes:
       - mysql-socket:/secretless/test/mysql_handler/sock
     depends_on:

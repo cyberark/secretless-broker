@@ -485,7 +485,7 @@ First, clone `https://github.com/cyberark/secretless-broker`. If you're new to G
 about where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
 is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which 
 require either that you clone this repository outside of your `GOPATH` or you set the `GO111MODULE` environment variable to
-`off`. We recommend cloning this repository outside of your `GOPATH`.
+`on`. We recommend cloning this repository outside of your `GOPATH`.
 
 Once you've cloned the repository, you can build the Secretless Broker.
 

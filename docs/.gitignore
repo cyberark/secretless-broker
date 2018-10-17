@@ -6,3 +6,6 @@ generated/*.html
 
 # Ignore the sass cache
 .sass-cache
+
+# Ignore the auto-generated benchmark file
+_includes/auto_benchmarks.html

@@ -3,9 +3,15 @@
 set -eo pipefail
 
 project_dir=$PWD
+auto_bench_file="docs/_includes/auto_benchmarks.html"
+
 rm -f $project_dir/test/bench.output
 touch $project_dir/test/bench.output
 
+rm -f $project_dir/$auto_bench_file
+touch $project_dir/$auto_bench_file
+
+# test benchmarks in each directory
 pushd test
   exit_status="0"
   for dir in */; do
@@ -52,5 +58,44 @@ pushd test
       cat ./test/output/bench.output | go-junit-report > ./test/output/bench.xml
     "
 popd || true
+
+# gather auto benchmark data for website
+
+# container size
+container_size=$(docker images -q \
+  --filter=reference='cyberark/secretless-broker' \
+   --format="{{ .Size }}")
+
+echo '<h3>Docker Image Size</h3>
+<p>The Docker image size is auto-updated on this page with every build of the
+project. You may also visit our
+<a href="https://hub.docker.com/r/cyberark/secretless-broker/">DockerHub</a>.</p>' \
+  | tee -a $project_dir/$auto_bench_file
+echo "<p>Docker image size: ${container_size}</p>" \
+  | tee -a $project_dir/$auto_bench_file
+
+echo "Container size: $container_size\n" \
+  | tee -a $project_dir/test/bench.output
+
+# lines of code count
+echo '<h2>Code Metrics</h2>
+<h3>Lines of Code</h3>
+<p>Code line counts were generated with
+<a href="https:github.com/hhatto/gocloc">gocloc</a> and are auto-updated
+with every build of this project.
+<pre>' \
+  | tee -a $project_dir/$auto_bench_file
+
+docker run --rm \
+  -v $project_dir/docs/_includes/:/secretless/docs/_includes/ \
+  secretless-dev \
+  bash -exc "
+    go get -u github.com/hhatto/gocloc/cmd/gocloc
+    gocloc . | tee -a ./${auto_bench_file}
+  " \
+  | tee -a $project_dir/test/bench.output
+
+echo "</pre></p>" \
+  | tee -a $project_dir/$auto_bench_file
 
 exit $exit_status

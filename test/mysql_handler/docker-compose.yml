@@ -38,7 +38,7 @@ services:
       MYSQL_ADDRESS:
       SECRETLESS_ADDRESS:
     volumes:
-      - mysql-socket:/secretless/test/mysql_handler/sock
+      - mysql-socket:/sock
     depends_on:
       - secretless
 

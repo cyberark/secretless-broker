@@ -14,7 +14,9 @@ func getConnection() (*sql.DB, error) {
 	if address, ok = os.LookupEnv("BENCH_ADDRESS"); !ok {
 		return nil, fmt.Errorf("%s is not set", "BENCH_ADDRESS")
 	}
-	db, err := sql.Open("mysql", fmt.Sprintf("testuser:testpass@tcp(%s)/?tls=false", address))
+
+	connStr := fmt.Sprintf("testuser:testpass@tcp(%s)/testdb", address)
+	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		return nil, err
 	}

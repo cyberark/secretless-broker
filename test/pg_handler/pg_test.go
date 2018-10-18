@@ -68,4 +68,19 @@ func TestPGHandler(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(cmdOut, ShouldContainSubstring, "1 row")
 	})
+
+	Convey("Connect over TCP with TLS downstream", t, func() {
+		_, err := net.LookupIP("pg")
+		if err != nil {
+			t.Error(err)
+		}
+
+		host := "secretless"
+		port := 25432
+
+		cmdOut, err := psql(host, port, "", []string{})
+
+		So(err, ShouldBeNil)
+		So(cmdOut, ShouldContainSubstring, "1 row")
+	})
 }

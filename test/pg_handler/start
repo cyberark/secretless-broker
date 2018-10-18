@@ -4,6 +4,10 @@
 
 docker-compose build
 
+cd ./etc
+  ./cert.sh
+cd ..
+
 docker-compose up \
   -d \
   pg
@@ -15,6 +19,7 @@ pg_cid=$(docker-compose ps -q pg)
 pg_ip=$(docker inspect \
   -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $pg_cid)
 export PG_ADDRESS=$pg_ip:5432
+export PG_ADDRESS_TLS=$pg_ip:5432?sslmode=require
 docker-compose up \
   -d \
   secretless

@@ -13,6 +13,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 )
 
+// Common error types
 var (
 	ErrSSLNotSupported           = errors.New("pq: SSL is not enabled on the server")
 	ErrSSLKeyHasWorldPermissions = errors.New("pq: Private key file has group or world access. Permissions should be u=rw (0600) or less")
@@ -95,7 +96,7 @@ func ssl(connection net.Conn, o values) (net.Conn, error) {
 	if len(response) > 0 && response[0] != 'S' {
 		fmt.Println(string(response))
 		connection.Close()
-		return nil, fmt.Errorf("The backend does not allow SSL connections.")
+		return nil, fmt.Errorf("the backend does not allow SSL connections")
 	}
 	// End SSL Check
 

@@ -1,16 +1,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.2/dist/instantsearch.min.css">
-<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.2"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.2/dist/instantsearch-theme-algolia.min.css">
-
-
+<script src='/javascript/instantsearch.js' type="text/javascript"></script>
+<link rel="stylesheet" href="/css/algolia-theme.css">
 
 <script>
 const search = instantsearch({
   appId: '{{ site.algolia.application_id }}',
   apiKey: '{{ site.algolia.search_only_api_key }}',
   indexName: '{{ site.algolia.index_name }}',
-  urlSync: true,
+  routing: true,
   //hide results if search box is empty
   searchFunction: function(helper) {
     if (helper.state.query.length === 0) {
@@ -54,7 +52,7 @@ const hitTemplate = function(hit) {
 search.addWidget(
   instantsearch.widgets.searchBox({
     container: '#search-searchbar',
-    placeholder: 'Search Secretless...',
+    placeholder: 'Search...',
     autofocus: false,
     poweredBy: true,
     reset: true,

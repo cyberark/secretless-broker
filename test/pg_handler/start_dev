@@ -2,7 +2,6 @@
 
 export DOCKER_COMPOSE_FILE=docker-compose.dev.yml
 
-./etc/cert.sh
 . ./start
 
 cat << EOL

@@ -14,8 +14,6 @@ services:
       timeout: 30s
     volumes:
       - psql-data:/var/lib/postgresql/data
-      - ./etc/server.crt:/var/lib/postgresql/server.crt
-      - ./etc/server.key:/var/lib/postgresql/server.key
 
   secretless:
     build:

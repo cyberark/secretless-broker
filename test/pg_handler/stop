@@ -3,3 +3,12 @@
 rm -rf .env
 docker-compose down -v
 rm -rf run/postgresql/.s.PGSQL.5432
+
+rm -f ./etc/server.crt
+rm -f ./etc/server.csr
+rm -f ./etc/server.key
+rm -f ./etc/rootCA.crt
+rm -f ./etc/rootCA.csr
+rm -f ./etc/rootCA.key
+rm -f ./etc/rootCA.srl
+rm -f ./etc/.srl

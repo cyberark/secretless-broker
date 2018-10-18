@@ -27,6 +27,7 @@ type BackendConfig struct {
 	Password string
 	Database string
 	Options  map[string]string
+	QueryStrings  map[string]string
 }
 
 // Handler connects a client to a backend. It uses the handler Config and Providers to
@@ -60,20 +61,24 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	buffer := make([]byte, 4096)
 
 	var length int
-	var err error
+	var readErr error
+	var writeErr error
 
 	for {
 
-		length, err = source.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
+		length, readErr = source.Read(buffer)
+		// this ensures the source packet is sent to the destination before we quit
+		// e.g with secretless --- TLS --- target service
+		// psql "postgres://secretless:15432/postgres/x/y/z?sslmode=disable"
+		_, writeErr = dest.Write(buffer[:length])
+		if readErr != nil {
+			if readErr == io.EOF {
 				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
 			}
 			return
 		}
 
-		_, err = dest.Write(buffer[:length])
-		if err != nil {
+		if writeErr != nil {
 			return
 		}
 

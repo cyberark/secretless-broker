@@ -1,0 +1,19 @@
+#!/bin/bash -ex
+
+export DOCKER_COMPOSE_FILE=docker-compose.dev.yml
+
+./etc/cert.sh
+. ./start
+
+cat << EOL
+build with:
+
+export DOCKER_COMPOSE_FILE=docker-compose.dev.yml
+PG_ADDRESS=pg:5432?sslmode=require
+docker-compose exec secretless env PG_ADDRESS="${PG_ADDRESS}" go run cmd/secretless-broker/main.go -f /secretless.yml
+
+test with:
+
+export DOCKER_COMPOSE_FILE=docker-compose.dev.yml
+docker-compose run --rm dev psql "postgres://secretless:15432/postgres/sdf?sslmode=disable"
+EOL

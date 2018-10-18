@@ -1,0 +1,57 @@
+version: '3.0'
+
+services:
+  pg:
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+    ports:
+      - 5432
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 30s
+    volumes:
+      - psql-data:/var/lib/postgresql/data
+      - ./etc/server.crt:/var/lib/postgresql/server.crt
+      - ./etc/server.key:/var/lib/postgresql/server.key
+
+  secretless:
+    image: secretless-dev
+    command: ["sleep", "infinity"]
+    environment:
+      PG_ADDRESS:
+      PG_PASSWORD: test
+    ports:
+      - 15432
+    volumes:
+      - ../..:/secretless
+      - ./secretless.yml:/secretless.yml
+      - pg-socket:/sock
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      PG_ADDRESS:
+      SECRETLESS_ADDRESS:
+    volumes:
+      - pg-socket:/sock
+    depends_on:
+      - secretless
+
+  dev:
+    image: postgres:9.3
+    environment:
+      PG_PASSWORD: test
+      PG_ADDRESS: pg:5432
+      SECRETLESS_ADDRESS: secretless:15432
+    volumes:
+      - ../..:/secretless
+      - pg-socket:/sock
+
+volumes:
+  pg-socket:
+  psql-data:

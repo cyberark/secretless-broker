@@ -18,6 +18,8 @@ main:
       url: /docs/get_started.html
     - title: Reference
       url: /docs/reference.html
+    - title: FAQ
+      url: /docs/faq.html
   - title: Community
     url: /community.html
   - title: Blog

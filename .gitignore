@@ -3,6 +3,7 @@ bench.*
 debug
 debug.*
 .vscode/
+.idea
 vendor
 /demo/godoc
 /secretless

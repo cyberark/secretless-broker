@@ -16,7 +16,7 @@
 							{% if link.sublinks %}
 					<li class="dropdown top-sub {% if page.url contains link.section %}active{% endif %}">
 						<a href="{{ site.baseurl }}{{ link.url }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ link.title }} <span class="caret"></span></a>
-						<ul class="dropdown-menu">
+						<ul class="dropdown-menu arrow_box">
 							{% for sublink in link.sublinks %}
 								<li class="top-drop {% if page.url == sublink.url %}active{% endif %}">
 									<a href="{{ site.baseurl }}{{ sublink.url }}">{{ sublink.title }}</a>

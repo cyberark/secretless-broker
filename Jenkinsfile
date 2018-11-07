@@ -43,7 +43,7 @@ pipeline {
 
         stage('Demo tests') {
           steps {
-            sh './bin/test_quickstart'
+            sh './bin/test_demo'
           }
         }
 

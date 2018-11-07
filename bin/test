@@ -1,17 +1,14 @@
-#!/usr/bin/env bash -e
-# Requires Bash v4+ for the associative array to be available
+#!/usr/bin/env bash
+set -e
 
-CURRENT_DIR=$(dirname $0)
+CURRENT_DIR=$(dirname "$0")
 
-declare -A TESTS=(
-  [unit]="unit tests"
-  [integration]="integration tests"
-  [quickstart]="Quick Start demo tests"
-)
+test_dirs=(unit integration demo)
 
-for test_key in "${!TESTS[@]}"; do
-  echo "Running ${TESTS[$test_key]}..."
-  $CURRENT_DIR/test_$test_key
+for test_dir in "${test_dirs[@]}"; do
+  echo "*********************"
+  echo "Running ${test_dir} tests..."
+  "$CURRENT_DIR"/test_"${test_dir}"
 done
 
 echo "Done"

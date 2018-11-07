@@ -3,13 +3,12 @@ set -e
 
 CURRENT_DIR=$(dirname "$0")
 
-test_dirs=(unit integration quickstart)
-test_names=("unit tests" "integration tests" "quickstart demo tests")
+test_dirs=(unit integration demo)
 
-for i in "${!test_dirs[@]}"; do
+for test_dir in "${test_dirs[@]}"; do
   echo "*********************"
-  echo "Running ${test_names[$i]}..."
-  "$CURRENT_DIR"/test_"${test_dirs[$i]}"
+  echo "Running ${test_dir} tests..."
+  "$CURRENT_DIR"/test_"${test_dir}"
 done
 
 echo "Done"

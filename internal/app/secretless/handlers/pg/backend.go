@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/pkg/util"
 )
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
@@ -60,23 +61,20 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	if h.GetConfig().Debug {
-		log.Print("Sending startup message")
-	}
+	debug := util.OptionalDebug(h.GetConfig().Debug)
+	debug("Sending startup message")
+
 	startupMessage := protocol.CreateStartupMessage(h.BackendConfig.Username, h.ClientOptions.Database, h.BackendConfig.Options)
 
 	connection.Write(startupMessage)
 
-	if h.GetConfig().Debug {
-		log.Print("Authenticating to the backend")
-	}
+	debug("Authenticating to the backend")
+
 	if err = protocol.HandleAuthenticationRequest(h.BackendConfig.Username, h.BackendConfig.Password, connection); err != nil {
 		return
 	}
 
-	if h.GetConfig().Debug {
-		log.Printf("Successfully connected to '%s'", h.BackendConfig.Address)
-	}
+	debug("Successfully connected to '%s'", h.BackendConfig.Address)
 
 	if _, err = h.GetClientConnection().Write(protocol.CreateAuthenticationOKMessage()); err != nil {
 		return

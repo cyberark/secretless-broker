@@ -2,32 +2,34 @@
 
 set -eo pipefail
 
-CURRENT_DIR=$($(dirname $0)/abspath)
-TOPLEVEL_DIR="$CURRENT_DIR/.."
+current_dir=$("$(dirname "$0")"/abspath)
+toplevel_dir=$current_dir/..
+junit_output_file=$toplevel_dir/test/junit.output
 
-rm -f $TOPLEVEL_DIR/test/junit.output
-touch $TOPLEVEL_DIR/test/junit.output
+rm -f "$junit_output_file"
+touch "$junit_output_file"
 
 echo "Building unit test image..."
-docker build "$TOPLEVEL_DIR" \
+docker build "$toplevel_dir" \
              -t secretless-unit-test-runner:latest \
-             -f $TOPLEVEL_DIR/Dockerfile.test
+             -f "$toplevel_dir"/Dockerfile.test
 
 echo "Running unit tests..."
 set +e
   # TODO: Use `go vet` too
-  docker run --rm \
-             -t \
-             secretless-unit-test-runner:latest -vet=off \
-                                                ./cmd/... \
-                                                ./internal/... \
-                                                ./pkg/... | tee -a $TOPLEVEL_DIR/test/junit.output
+  docker run --rm -t secretless-unit-test-runner:latest \
+             -vet=off \
+             ./cmd/... \
+             ./internal/... \
+             ./pkg/... \
+             | tee -a "$junit_output_file"
   echo "Unit test exit status: $?"
 set -e
 
-rm -f $TOPLEVEL_DIR/test/junit.xml
+rm -f "$toplevel_dir"/test/junit.xml
+
 docker run --rm \
-  -v $TOPLEVEL_DIR/test/:/secretless/test/output/ \
+  -v "$toplevel_dir"/test/:/secretless/test/output/ \
   secretless-dev \
   bash -exc "
     go get -u github.com/jstemmer/go-junit-report

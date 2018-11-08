@@ -7,13 +7,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-// KubeClient represents a Kubernetes client
-type KubeClient struct {
-	Client    kubernetes.Interface
-}
-
-// NewKubeClient creates new Kubernetes API client
-func NewKubeClient() (*KubeClient, error) {
+// NewKubeClient creates a Kubernetes API client using in-cluster config
+func NewKubeClient() (kubernetes.Interface, error) {
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -25,12 +20,10 @@ func NewKubeClient() (*KubeClient, error) {
 		return nil, err
 	}
 
-	return &KubeClient{
-		Client: clientset,
-	}, nil
+	return clientset, nil
 }
 
 // GetSecret fetches a Secret with a given name
-func (c *KubeClient) GetSecret(name string) (*v1.Secret, error) {
-	return c.Client.CoreV1().Secrets("").Get(name, metav1.GetOptions{})
+func GetSecret(kc kubernetes.Interface, name string) (*v1.Secret, error) {
+	return kc.CoreV1().Secrets("").Get(name, metav1.GetOptions{})
 }

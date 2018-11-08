@@ -44,7 +44,7 @@ func TestKubernetes_Provider(t *testing.T) {
 		kubernetesProvider, ok = provider.(*kubernetessecrets.Provider)
 		So(ok, ShouldBeTrue)
 
-		kubernetesProvider.KubeClient.Client = testClientSet
+		kubernetesProvider.Client = testClientSet
 	})
 
 	Convey("Has the expected provider name", t, func() {

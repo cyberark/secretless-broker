@@ -92,7 +92,7 @@
 	.dropdown-menu {
 		width: 100%;
 		.top-drop {
-			border-bottom: 1px solid #ffffff1a;
+			border-bottom: .1rem solid #ffffff1a;
 			&:last-of-type {
 				border-bottom: none;
 			}
@@ -128,7 +128,6 @@
 	.navbar-nav {
 		.dropdown-menu {
 			background-color: $sless-blue;
-			//margin-bottom: 2rem;
 			border-radius: $border-radius;
 			li {
 				transition: all 0.4s;

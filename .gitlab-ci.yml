@@ -72,7 +72,7 @@ test_integration:
     reports:
       junit: test/junit.xml
 
-test_quickstart:
+test_demo:
   stage: test
   services:
   - docker:stable-dind
@@ -81,7 +81,7 @@ test_quickstart:
   script:
     - setup_docker
     - get_images
-    - ./bin/test_quickstart
+    - ./bin/test_demo
   only:
     - branches
 

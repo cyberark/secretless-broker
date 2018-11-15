@@ -40,11 +40,6 @@
 			margin-top: 1rem;
 			margin-bottom: 1rem;
 		}
-		.dropdown.show {
-			.dropdown-toggle::after {
-				opacity: 0;
-			}
-		}
 	}
 }
 
@@ -121,6 +116,10 @@
 	.dropdown-menu li a {
 		color: #fff;
 	}
+}
+
+.dropdown.top-sub:focus, .dropdown.top-sub a:focus {
+	outline: none;
 }
 
 @media (max-width: 991px) {

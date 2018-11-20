@@ -5,20 +5,22 @@ import (
 	"strings"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 )
 
 // Provider provides data values from Kubernetes Secrets.
 type Provider struct {
 	Name   string
-	Client *KubeClient
+	Client kubernetes.Interface
 }
 
 // ProviderFactory constructs a Provider. The API client is configured from
 // in-cluster environment variables and files.
 func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
-	var client *KubeClient
-	var err error
-	if client, err = NewKubeClient(); err != nil {
+	client, err := NewKubeClient()
+
+	if err != nil {
 		return nil, fmt.Errorf("ERROR: Could not create Kubernetes Secrets provider: %s", err)
 	}
 
@@ -47,16 +49,14 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 
 	secretName, fieldName := tokens[0], tokens[1]
 	if fieldName == "" {
-		return nil, fmt.Errorf("name of field missing from Kubernetes secret id '%s'", id)
+		return nil, fmt.Errorf("field name missing from Kubernetes secret id '%s'", id)
 	}
 
-	currentNamespace, err := p.Client.CurrentNamespace()
+	secret, err := GetSecret(p.Client, secretName)
 	if err != nil {
-		return nil, err
-	}
-
-	secret, err := p.Client.GetSecret(currentNamespace, secretName)
-	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil, fmt.Errorf("could not find Kubernetes secret from '%s'", id)
+		}
 		return nil, err
 	}
 

@@ -4,36 +4,36 @@
 # usage: ./bin/build
 set -ex
 
+. bin/build_utils
+
 CURRENT_DIR=$($(dirname $0)/abspath)
 TOPLEVEL_DIR="$CURRENT_DIR/.."
+KEEP_ALIVE=${KEEP_ALIVE:-}
 
-VERSION=$(cat $TOPLEVEL_DIR/VERSION)
+TAG="$(version_tag)"
 QUICK_START_DIR="$TOPLEVEL_DIR/demos/quick-start/docker"
 
 DOCKER_FLAGS=""
 if [ "${KEEP_ALIVE}" != "" ]; then
-  DOCKER_FLAGS="${DOCKER_FLAGS} -rm=false"
+  DOCKER_FLAGS="${DOCKER_FLAGS} --rm=false"
 else
   DOCKER_FLAGS="${DOCKER_FLAGS} --force-rm"
 fi
 
-echo "Building Docker image"
-docker build -t "secretless-broker:${VERSION}" \
-             -t "secretless-broker:latest" \
+echo "Building secretless-broker:$TAG Docker image"
+docker build -t "secretless-broker:${TAG}" \
              $DOCKER_FLAGS \
              -f $TOPLEVEL_DIR/Dockerfile \
              $TOPLEVEL_DIR
 
-echo "Building Docker dev image"
-docker build -t "secretless-dev:${VERSION}" \
-             -t "secretless-dev:latest" \
+echo "Building secretless-dev:$TAG Docker image"
+docker build -t "secretless-dev:${TAG}" \
              $DOCKER_FLAGS \
              -f $TOPLEVEL_DIR/Dockerfile.dev \
              $TOPLEVEL_DIR
 
-echo "Building Docker Quick-Start image"
-docker build -t "secretless-broker-quickstart:${VERSION}" \
-             -t "secretless-broker-quickstart:latest" \
+echo "Building secretless-broker-quickstart:$TAG Docker image"
+docker build -t "secretless-broker-quickstart:${TAG}" \
              $DOCKER_FLAGS \
              -f "$QUICK_START_DIR/Dockerfile" \
              "$QUICK_START_DIR"

@@ -1,6 +1,0 @@
-rootCA.crt
-rootCA.key
-server.crt
-server.csr
-server.key
-.srl

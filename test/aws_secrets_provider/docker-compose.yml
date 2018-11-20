@@ -1,0 +1,5 @@
+version: '2'
+services:
+  test:
+    image: secretless-dev
+    command: go test -v ./test/aws_secrets_provider

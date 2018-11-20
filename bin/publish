@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+. bin/build_utils
+
+readonly TAG="${1:-$(version_tag)}"
 readonly VERSION="$(cat VERSION)"
 readonly REGISTRY="${1:-cyberark}"
 
@@ -14,15 +17,18 @@ readonly TAGS=(
 )
 
 for image_name in "${IMAGES[@]}"; do
-  # Tag images
-  for tag in "${TAGS[@]}"; do
-    echo "Tagging $REGISTRY/$image_name:$tag"
-    docker tag "$image_name:$VERSION" "$REGISTRY/$image_name:$tag"
-  done
+  # always push the tag with the commit hash
+  echo "Pushing $REGISTRY/$image_name:${TAG}"
+  docker push "$REGISTRY/$image_name:$TAG"
 
-  # Push images
-  for tag in "${TAGS[@]}"; do
-    echo "Pushing $REGISTRY/$image_name:$tag"
-    docker push "$REGISTRY/$image_name:$tag"
-  done
+  # if the tag matches the VERSION, push VERSION and latest releases
+  # and x and x.y releases
+  if [ "$(git_description)" = "v${VERSION}" ]; then
+    echo "Revision $(git_description) matches version $VERSION exactly. Pushing to Dockerhub..."
+
+    for tag in "${TAGS[@]}" $(gen_versions $VERSION); do
+      echo "Tagging and pushing $REGISTRY/$image_name:$tag"
+      tag_and_push $tag $REGISTRY/$image_name
+    done
+  fi
 done

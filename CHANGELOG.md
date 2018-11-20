@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.1] 2018-11-20
+
+### Added
+- Tests for Kubernetes Secrets provider
+- Initial benchmark data is compiled during build
+- Project now builds in GitLab
+- Goreleaser support for deb/rpm packages
+- Initial implementation of AWS Secrets provider
+
+### Changed
+- Removed bash4 dependency
+- Documentation updates
+- Updated Jekyll dependency to use version 3.8.4
+
+### Removed
+- Moved the sidecar injector functionality to its [own repo](https://github.com/cyberark/sidecar-injector)
+
 ## [0.5.0] 2018-09-06
 
 ### Fixed
@@ -112,8 +129,9 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.5.1...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
-[0.3.0]: https://github.com/cyberark/secretless-broker/compare/0.2.0...0.3.0
-[0.4.0]: https://github.com/cyberark/secretless-broker/compare/0.3.0...0.4.0
-[0.5.0]: https://github.com/cyberark/secretless-broker/compare/0.4.0...0.5.0
+[0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
+[0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
+[0.5.0]: https://github.com/cyberark/secretless-broker/compare/v0.4.0...v0.5.0
+[0.5.1]: https://github.com/cyberark/secretless-broker/compare/v0.5.0...v0.5.1

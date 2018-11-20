@@ -12,7 +12,7 @@ require (
 	github.com/armon/go-metrics v0.0.0-20180713145231-3c58d8115a78 // indirect
 	github.com/armon/go-radix v0.0.0-20170727155443-1fca145dffbc // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
-	github.com/aws/aws-sdk-go v0.0.0-20180117070446-ac0ef4d494da
+	github.com/aws/aws-sdk-go v1.15.79
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
@@ -64,7 +64,6 @@ require (
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/imdario/mergo v0.3.6 // indirect
 	github.com/jefferai/jsonx v0.0.0-20160721235117-9cc31c3135ee // indirect
-	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect

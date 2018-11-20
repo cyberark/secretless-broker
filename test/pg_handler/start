@@ -2,10 +2,6 @@
 
 ./stop
 
-cd ./etc
-  ./cert.sh
-cd ..
-
 docker-compose build
 
 docker-compose up \

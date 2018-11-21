@@ -24,6 +24,7 @@ The Secretless Broker is currently in beta.
   - [Building](#building)
   - [Testing](#testing)
   - [Plugins](#plugins)
+  - [Releasing](#releasing)
 - [License](#license)
 
 
@@ -481,9 +482,9 @@ We welcome contributions of all kinds to the Secretless Broker. See our [contrib
 
 ## Building
 
-First, clone `https://github.com/cyberark/secretless-broker`. If you're new to Go, be aware that Go can be very selective 
+First, clone `https://github.com/cyberark/secretless-broker`. If you're new to Go, be aware that Go can be very selective
 about where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
-is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which 
+is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which
 require either that you clone this repository outside of your `GOPATH` or you set the `GO111MODULE` environment variable to
 `on`. We recommend cloning this repository outside of your `GOPATH`.
 
@@ -560,6 +561,22 @@ Currently, these API definitions reside [here](pkg/secretless/plugin/v1) and an 
 You can read more about how to make plugins and the underlying architecture in the [API directory](pkg/secretless/plugin).
 
 _Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
+
+## Releasing
+
+1. Based on the unreleased content, determine the new version number and update
+   the [VERSION](VERSION) file.
+1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
+   the changes included in the release.
+1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message.
+1. Once your changes have been reviewed and merged into master, tag the version
+   using `git tag -s v0.1.1`. Note this requires you to be  able to sign releases.
+   Consult the [github documentation on signing commits](https://help.github.com/articles/signing-commits-with-gpg/)
+   on how to set this up. `vx.y.z` is an acceptable tag message.
+1. Push the tag: `git push vx.y.z` (or `git push origin vx.y.z` if you are working
+   from your local machine).
+1. From a **clean checkout of master** run `./bin/build_release` to generate
+   the release artifacts. Upload these to the GitHub release.
 
 # License
 

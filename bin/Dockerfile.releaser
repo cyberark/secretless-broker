@@ -8,12 +8,10 @@ RUN apk add --no-cache bash \
                        curl \
                        git \
                        mercurial \
-                       rpm && \
-    go get -u github.com/golang/dep/cmd/dep
+                       rpm
 
 RUN go get -d github.com/goreleaser/goreleaser && \
     cd $GOPATH/src/github.com/goreleaser/goreleaser && \
-    dep ensure -vendor-only && \
     make setup build
 
 WORKDIR "/secretless-broker"

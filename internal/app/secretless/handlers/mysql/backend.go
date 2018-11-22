@@ -1,9 +1,11 @@
 package mysql
 
 import (
+	"crypto/tls"
 	"log"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 )
@@ -82,16 +84,29 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
+	// TODO: if SSL requested but server doesn't support FAIL
+	// serverHandshake.ServerCapabilities&protocol.ClientSSL > 0
+
 	// Intercept response from client
 	handshakeResponsePacket, err := protocol.ReadPacket(h.GetClientConnection())
 	if err != nil {
 		return
 	}
+	// Track clientSequenceID
+	clientSequenceID := handshakeResponsePacket[3]
 
 	// Parse intercepted client response
 	handshakeResponse, err := protocol.UnpackHandshakeResponse41(handshakeResponsePacket)
 	if err != nil {
 		return
+	}
+
+	// TODO: handle other scenarios beyond skip-verify by providing configuration tls
+	requestedSSL := strings.ToLower(h.BackendConfig.Options["sslmode"]) == "required"
+
+	// Ensure CapabilityFlag is set when using TLS
+	if requestedSSL {
+		handshakeResponse.CapabilityFlags |= protocol.ClientSSL
 	}
 
 	// Inject credentials into client response
@@ -100,13 +115,46 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// Pack client response with injected configuration
-	clientPacket, err := protocol.PackHandshakeResponse41(handshakeResponse)
+	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(handshakeResponse)
+
 	if err != nil {
 		return
 	}
 
+	if requestedSSL {
+		// Send TLS / SSL request packet
+
+		// Copy a truncated HandshakeResponse to create SSLRequest
+		// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest
+		tmp := packedHandshakeRespPacket[:(4+4+1+23)+4]
+		sslPacket := make([]byte, len(tmp))
+		copy(sslPacket, tmp)
+
+		// Update packet length for truncated packet
+		pktLen := len(sslPacket) - 4
+		sslPacket[0] = byte(pktLen)
+		sslPacket[1] = byte(pktLen >> 8)
+		sslPacket[2] = byte(pktLen >> 16)
+
+		// Send TLS / SSL request packet
+		if _, err = protocol.WritePacket(sslPacket, backend); err != nil {
+			return
+		}
+		// Increment sequenceID in anticipation of subsequent write to backend
+		packedHandshakeRespPacket[3]++;
+
+		// Switch to TLS
+		tlsClient := tls.Client(backend, &tls.Config{
+			InsecureSkipVerify: true,
+		})
+		if err := tlsClient.Handshake(); err != nil {
+			return err
+		}
+		backend = tlsClient
+	}
+
 	// Send configured client response packet to server
-	if _, err = protocol.WritePacket(clientPacket, backend); err != nil {
+	if _, err = protocol.WritePacket(packedHandshakeRespPacket, backend); err != nil {
 		return
 	}
 
@@ -122,6 +170,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// Proxy OK packet to client
+	packet[3] = clientSequenceID + 1 // ensure usage of incremented clientSequenceID
 	if _, err = protocol.WritePacket(packet, h.GetClientConnection()); err != nil {
 		return
 	}

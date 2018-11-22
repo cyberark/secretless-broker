@@ -189,5 +189,21 @@ func TestMySQLHandler(t *testing.T) {
 
 			So(err, ShouldBeError)
 		})
+
+		Convey("Connect over TCP with TLS downstream", func() {
+			var host string
+			var port int
+			options := make(map[string]string)
+			_, err := net.LookupIP("secretless")
+			host = "secretless"
+			port = 4306
+
+			options["--password"] = ""
+
+			cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
+
+			So(err, ShouldBeNil)
+			So(cmdOut, ShouldContainSubstring, "2")
+		})
 	})
 }

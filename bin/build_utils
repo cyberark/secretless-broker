@@ -24,18 +24,6 @@ function gen_versions() {
 # Functions to facilitate publishing images
 ###
 
-# tag_and_publish tag image1 image2 ...
-function tag_and_push() {
-  local tag="$1"
-  shift
-
-  for image in $*; do
-    local target="$image:$tag"
-    docker tag "$SOURCE_IMAGE" "$target"
-    docker push "$target"
-  done
-}
-
 # Return the results of git describe
 function git_description() {
   echo "$(git describe)"

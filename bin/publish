@@ -1,6 +1,11 @@
 #!/bin/bash -e
 
-. bin/build_utils
+CURRENT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}); pwd)
+
+# source build utilities
+pushd ${CURRENT_DIR}
+  . ./build_utils
+popd || true
 
 readonly TAG="${1:-$(version_tag)}"
 readonly VERSION="$(cat VERSION)"

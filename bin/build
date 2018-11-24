@@ -4,11 +4,14 @@
 # usage: ./bin/build
 set -ex
 
-. bin/build_utils
-
-CURRENT_DIR=$($(dirname $0)/abspath)
+CURRENT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}); pwd)
 TOPLEVEL_DIR="$CURRENT_DIR/.."
 KEEP_ALIVE=${KEEP_ALIVE:-}
+
+# source build utilities
+pushd ${CURRENT_DIR}
+  . ./build_utils
+popd || true
 
 TAG="$(version_tag)"
 QUICK_START_DIR="$TOPLEVEL_DIR/demos/quick-start/docker"

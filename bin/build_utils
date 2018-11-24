@@ -19,12 +19,3 @@ function gen_versions() {
     echo $version
   done
 }
-
-###
-# Functions to facilitate publishing images
-###
-
-# Return the results of git describe
-function git_description() {
-  echo "$(git describe)"
-}

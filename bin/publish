@@ -18,6 +18,8 @@ readonly TAGS=(
 
 for image_name in "${IMAGES[@]}"; do
   # always push the tag with the commit hash
+  echo "Tagging $REGISTRY/$image_name:${TAG}"
+  docker tag "$image_name:$TAG" "$REGISTRY/$image_name:$TAG"
   echo "Pushing $REGISTRY/$image_name:${TAG}"
   docker push "$REGISTRY/$image_name:$TAG"
 
@@ -28,7 +30,9 @@ for image_name in "${IMAGES[@]}"; do
 
     for tag in "${TAGS[@]}" $(gen_versions $VERSION); do
       echo "Tagging and pushing $REGISTRY/$image_name:$tag"
-      tag_and_push $tag $REGISTRY/$image_name
+
+      docker tag "$image_name:$TAG" "$REGISTRY/$image_name:$tag"
+      docker push "$REGISTRY/$image_name:$tag"
     done
   fi
 done

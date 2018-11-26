@@ -20,8 +20,9 @@ func TestKubernetes_Provider(t *testing.T) {
 		kubernetesProvider *kubernetessecrets.Provider
 	)
 
-	var testClientSet = testclient.NewSimpleClientset()
-	testClientSet.CoreV1().Secrets("").Create(&v1.Secret{
+	var testSecretsClient = testclient.NewSimpleClientset().CoreV1().Secrets("some-namespace")
+
+	testSecretsClient.Create(&v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "database",
 		},
@@ -44,7 +45,7 @@ func TestKubernetes_Provider(t *testing.T) {
 		kubernetesProvider, ok = provider.(*kubernetessecrets.Provider)
 		So(ok, ShouldBeTrue)
 
-		kubernetesProvider.Client = testClientSet
+		kubernetesProvider.SecretsClient = testSecretsClient
 	})
 
 	Convey("Has the expected provider name", t, func() {

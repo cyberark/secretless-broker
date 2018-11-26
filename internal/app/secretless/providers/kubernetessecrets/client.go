@@ -1,29 +1,38 @@
 package kubernetessecrets
 
 import (
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	typedv1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
-// NewKubeClient creates a Kubernetes API client using in-cluster config
-func NewKubeClient() (kubernetes.Interface, error) {
+// NewSecretsClient creates a SecretsClient for working with Secrets
+// in the pod namespace.
+// A SecretsClient uses an underlying Kubernetes API client
+// initialised with in-cluster config.
+func NewSecretsClient() (typedv1.SecretInterface, error) {
 	// creates the in-cluster config
-	config, err := rest.InClusterConfig()
+	rules := clientcmd.NewDefaultClientConfigLoadingRules()
+	overrides := &clientcmd.ConfigOverrides{}
+
+	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, overrides)
+
+	config, err := clientConfig.ClientConfig()
 	if err != nil {
 		return nil, err
 	}
+
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return clientset, nil
-}
+	// determine pod namespace
+	namespace, _, err := clientConfig.Namespace()
+	if err != nil {
+		return nil, err
+	}
 
-// GetSecret fetches a Secret with a given name
-func GetSecret(kc kubernetes.Interface, name string) (*v1.Secret, error) {
-	return kc.CoreV1().Secrets("").Get(name, metav1.GetOptions{})
+	return clientset.CoreV1().Secrets(namespace), nil
 }

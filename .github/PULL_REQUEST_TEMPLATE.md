@@ -2,8 +2,13 @@
 #### What ticket does this PR close?
 Connected to [relevant GitHub issues, eg #76]
 #### Where should the reviewer start?
-#### How should this be manually tested?
-#### Have you completed the following manual tests?
+#### What is the status of the manual tests?
+For any new manual tests that should be run to test this feature, have you created/updated a folder in `test/manual` that includes:
+- [ ] An updated README with instructions on how to manually test this feature
+- [ ] Utility `start` and `stop` scripts to spin up and tear down the test environments
+- [ ] A `test` script to run some basic manual tests (optional; if does not exist, the README should have detailed instructions)
+
+In addition, have you run the following manual tests to verify existing functionality continues to function as expected?
 - [ ] Manually tested [K8s CRDs](https://github.com/cyberark/secretless-broker/tree/master/test/k8s_crds)
 - [ ] Manually tested [Keychain provider](https://github.com/cyberark/secretless-broker/tree/master/test/keychain_provider)
 - [ ] Manually run the [K8s demo](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo)

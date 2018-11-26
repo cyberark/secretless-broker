@@ -111,7 +111,6 @@ website:
 
   ALL_TAGS=$(echo "$IMAGE_TAGS" | sed '/^$/d' | while read -r line; do
     echo "$line:latest"
-    echo "$line:$VERSION"
   done
   )
 

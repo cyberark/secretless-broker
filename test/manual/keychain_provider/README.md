@@ -8,6 +8,10 @@ The OS X Keychain Provider is meant for interactive use by a user; this dialog i
 
 To run the test locally if you are working on a Mac, just run
 ```
-go test -v keychain_provider_test.go
+./start
+./test
 ```
-from this directory.
+from this directory. The `start` script prepares your local
+environment by adding a secret to your OSX Keyring. Note that you may be
+prompted to grant access to your OSX Keyring in order for this test to run
+properly. To clean up after running the test, you can run `./stop`.

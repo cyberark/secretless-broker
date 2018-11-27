@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# clear out previously created test variables
+./stop
+
+# load the environment with the test config
+source load_test_env_vars
+
+# add secrets to keychain
+security add-generic-password \
+  -a $ACCOUNT \
+  -s $SERVICE \
+  -w $SECRET
+
+# verify that the secret has been loaded successfully
+secret=$(security find-generic-password -a $ACCOUNT -s $SERVICE -w)
+if [[ "$secret" == "$SECRET" ]]; then
+  echo "Secret has been loaded"
+else
+  echo "Error loading secret"
+  exit 1
+fi

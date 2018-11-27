@@ -533,8 +533,9 @@ $ ./bin/test
 
 If you are on a Mac, you may also test the OSX Keychain provider:
 ```sh-session
-cd test/keychain_provider/
-go test -v keychain_provider_test.go
+cd test/manual/keychain_provider/
+./start
+./test
 ```
 This test will not be run as part of the test suite, since it requires access
 to the Mac OSX Keychain. You will be prompted for your password when running

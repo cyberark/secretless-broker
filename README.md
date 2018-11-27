@@ -544,7 +544,7 @@ verifies that it can retrieve the value.
 
 Kubernetes CRD loading test
 ```sh-session
-cd test/k8s_crds
+cd test/manual/k8s_crds
 ./deploy
 ```
 This test currently does not run as part of the test suite.

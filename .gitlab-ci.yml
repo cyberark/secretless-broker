@@ -1,10 +1,4 @@
-image: docker:stable-git
-
-variables:
-  IMAGE_TAGS: |
-    secretless-broker
-    secretless-dev
-    secretless-broker-quickstart
+image: codebykumbi/docker-compose-bash:stable-git
 
 stages:
   - build
@@ -99,68 +93,5 @@ website:
   only:
     - branches
 
-.utils: &utils |
-  # variables and functions
-  [[ "$TRACE" ]] && set -x
-  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
-  export CI_APPLICATION_TAG=$CI_COMMIT_SHA
-  export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
-
-  export ALL_TAGS="";
-  VERSION=$(cat VERSION);
-
-  ALL_TAGS=$(echo "$IMAGE_TAGS" | sed '/^$/d' | while read -r line; do
-    echo "$line:latest"
-  done
-  )
-
-  function login_ci_registry() {
-    if [[ -n "$CI_REGISTRY_USER" ]]; then
-      echo "Logging to GitLab Container Registry with CI credentials..."
-      docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-      echo ""
-    fi
-  }
-
-  function setup_docker() {
-    login_ci_registry
-  }
-  
-  function save_image() {
-    tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
-    docker tag $1 "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
-    docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
-  }
-  
-  function get_image() {
-    tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
-
-    docker pull "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
-    docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag" $1
-  }
-  
-  function save_images() {
-    echo "$ALL_TAGS" | while read -r line; do
-      save_image "$line"; 
-    done
-  }
-  
-  function optional_get_images() {
-    echo "$ALL_TAGS" | while read -r line; do
-      get_image "$line" 2> /dev/null || true; 
-    done
-  }
-  
-  function get_images() {
-    echo "$ALL_TAGS" | while read -r line; do
-      get_image "$line"; 
-    done
-  }
-
-  echo "loaded utils"
-
 before_script:
-  - apk add --no-cache bash
-  - apk add --no-cache py-pip
-  - pip install docker-compose
-  - *utils
+  - . ./bin/build_utils_gitlab

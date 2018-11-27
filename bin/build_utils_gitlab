@@ -1,0 +1,63 @@
+#!/bin/bash -e
+
+if [[ "${TRACE}" ]]; then
+  set -x;
+fi
+
+CONTAINER_IMAGES=(
+  secretless-broker
+  secretless-dev
+  secretless-broker-quickstart
+)
+export REQ_CONTAINER_IMAGE_TAGS=();
+for CONTAINER_IMAGE in ${CONTAINER_IMAGES[@]}; do
+    REQ_CONTAINER_IMAGE_TAGS+=("${CONTAINER_IMAGE}:latest");
+done
+
+# variables and functions
+export CI_APPLICATION_REPOSITORY=${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_SLUG}
+export CI_APPLICATION_TAG=${CI_COMMIT_SHA}
+export CI_CONTAINER_NAME=ci_job_build_${CI_JOB_ID}
+
+function login_ci_registry() {
+  if [[ -n "${CI_REGISTRY_USER}" ]]; then
+    echo "Logging to GitLab Container Registry with CI credentials..."
+    docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    echo ""
+  fi
+}
+
+function setup_docker() {
+  login_ci_registry
+}
+
+function save_image() {
+  tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
+  docker tag $1 "${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}-${tag}"
+  docker push "${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}-${tag}"
+}
+
+function get_image() {
+  tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
+
+  docker pull "${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}-${tag}"
+  docker tag "${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}-${tag}" $1
+}
+
+function save_images() {
+  echo "Saving required container images..."
+  for CONTAINER_IMAGE_TAG in ${REQ_CONTAINER_IMAGE_TAGS[@]}; do
+    echo "Saving ${CONTAINER_IMAGE_TAG}...";
+    save_image "${CONTAINER_IMAGE_TAG}";
+  done
+}
+
+function get_images() {
+  echo "Getting required container images..."
+  for CONTAINER_IMAGE_TAG in ${REQ_CONTAINER_IMAGE_TAGS[@]}; do
+    echo "Getting ${CONTAINER_IMAGE_TAG}...";
+    get_image "${CONTAINER_IMAGE_TAG}";
+  done
+}
+
+echo "Loaded utilities"

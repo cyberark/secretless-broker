@@ -26,10 +26,10 @@ func ssl(connection net.Conn, o values) (net.Conn, error) {
 	verifyCaOnly := false
 	tlsConf := tls.Config{}
 	switch mode := o["sslmode"]; mode {
-	// "disable" is the default.
-	case "", "disable":
+	case "disable":
 		return connection, nil
-	case "require":
+	// "require" is the default.
+	case "", "require":
 		// We must skip TLS's own verification since it requires full
 		// verification since Go 1.3.
 		tlsConf.InsecureSkipVerify = true

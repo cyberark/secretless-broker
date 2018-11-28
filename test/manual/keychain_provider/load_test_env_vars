@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -euo pipefail
+
+export SERVICE="Secretless_Test"
+export ACCOUNT="KeychainProvider"
+export SECRET="secret"

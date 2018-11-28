@@ -29,7 +29,7 @@ func release(ref C.CFTypeRef) {
 }
 
 // GetGenericPassword returns password data for service and account
-func GetGenericPassword(service, account string) ([]byte, error) {
+func GetGenericPassword(service string, account string) ([]byte, error) {
 	serviceC := C.CString(service)
 	accountC := C.CString(account)
 

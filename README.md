@@ -533,8 +533,9 @@ $ ./bin/test
 
 If you are on a Mac, you may also test the OSX Keychain provider:
 ```sh-session
-cd test/keychain_provider/
-go test -v keychain_provider_test.go
+cd test/manual/keychain_provider/
+./start
+./test
 ```
 This test will not be run as part of the test suite, since it requires access
 to the Mac OSX Keychain. You will be prompted for your password when running
@@ -543,7 +544,7 @@ verifies that it can retrieve the value.
 
 Kubernetes CRD loading test
 ```sh-session
-cd test/k8s_crds
+cd test/manual/k8s_crds
 ./deploy
 ```
 This test currently does not run as part of the test suite.

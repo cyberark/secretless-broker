@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# load the environment with the test config
+source load_test_env_vars
+
+# run the test
+go test -v keychain_provider_test.go

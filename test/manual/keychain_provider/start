@@ -3,6 +3,7 @@
 set -euo pipefail
 
 # clear out previously created test variables
+echo "Deleting prior password values stored for this test..."
 ./stop
 
 # load the environment with the test config

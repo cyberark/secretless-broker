@@ -5,9 +5,18 @@ set -euo pipefail
 # load the environment with the test config
 source load_test_env_vars
 
-# delete the password if it exists, and swallow errors if not
-security delete-generic-password \
-  -a $ACCOUNT \
-  -s $SERVICE \
-  &>/dev/null \
-  || true
+# delete the password if it exists, and send stderr to stdout
+# do not die if the request errors
+delete_output="$(security delete-generic-password \
+                -a $ACCOUNT \
+                -s $SERVICE 2>&1)" || true
+
+# if output includes "SecKeychainSearchCopyNext", password does not exist
+# overwrite output messages for clarity / simplicity
+if [[ $delete_output == *"SecKeychainSearchCopyNext"* ]]; then
+  echo "Password does not exist."
+elif [[ $delete_output == *"password has been deleted"* ]]; then
+  echo "Password has been deleted."
+else
+  echo "$delete_output"
+fi

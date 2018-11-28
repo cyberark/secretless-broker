@@ -10,7 +10,7 @@ permalink: docs/reference/handlers/postgres.html
 The PostgreSQL handler authenticates incoming connections for a particular
 listener.
 
-**Handler in alpha - not suitable for production** 
+**WARNING: Handler in alpha - not suitable for production**
 
 ### Credentials
 - `address`  

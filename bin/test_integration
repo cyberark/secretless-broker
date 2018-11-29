@@ -2,13 +2,46 @@
 
 set -eo pipefail
 
+help_and_exit() {
+  local retval=${1:-1}
+  cat <<EOF
+${0##*/} [-l|--local] [test_folder1] [test_folder2] [test_folder3] ...
+
+Runs suite of integration tests by calling ./start and ./stop scripts, if found, for subdirectories in the test subdirectory of the project root.
+Names of subdirectories of the project root can be optionally specified as arguments to limit the subdirectories whose test cases will be run.
+
+Options:
+  -l, --local sets the local flag when the test is called in the test folder
+EOF
+  exit "$retval"
+}
+
+non_flag_args=( )
+test_flag="";
+while (( $# )); do
+  case $1 in
+    -h|--help)   help_and_exit 0 ;;
+    -l|--local)  test_flag="-l" ;;
+    -*)          echo "Unknown option: $1";
+                 echo "";
+                 help_and_exit 1 ;;
+    *)           non_flag_args+=( "$1" ) ;;
+  esac
+  shift
+done
+
 project_dir=$PWD
-rm -f $project_dir/test/junit.output
-touch $project_dir/test/junit.output
+rm -f "${project_dir}/test/junit.output"
+touch "${project_dir}/test/junit.output"
 
 pushd test
+  test_folders=( */ );
+  if [[ ${#non_flag_args[@]} -gt 0 ]]; then
+    test_folders=( "${non_flag_args[@]}" )
+  fi
   exit_status="0"
-  for dir in */; do
+
+  for dir in "${test_folders[@]}"; do
     pushd "$dir" 2>/dev/null
       # Bail if the folder doesn't have a start script
       if [[ ! -f start ]]; then
@@ -21,7 +54,7 @@ pushd test
 
       # Run the tests
       set +e
-        ./test | tee -a $project_dir/test/junit.output
+        ./test "${test_flag}" | tee -a "${project_dir}/test/junit.output"
         last_status="$?"
 
         # Only save first failure exit code
@@ -38,9 +71,9 @@ pushd test
     popd
   done
 
-  rm -f $project_dir/test/junit.xml
+  rm -f "${project_dir}/test/junit.xml"
   docker run --rm \
-    -v $project_dir/test/:/secretless/test/output/ \
+    -v "${project_dir}/test/:/secretless/test/output/" \
     secretless-dev \
     bash -exc "
       go get -u github.com/jstemmer/go-junit-report

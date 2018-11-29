@@ -17,6 +17,7 @@ import (
 	"time"
 
 	yaml "gopkg.in/yaml.v1"
+	"github.com/pkg/profile"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -109,6 +110,9 @@ func (manager *Manager) _ReloadConfig(newConfig config.Config) error {
 }
 
 func (manager *Manager) _RegisterShutdownSignalHandlers() {
+	// FINDME:PROFILER CPU profiling by default
+	profilecleaner := profile.Start(profile.NoShutdownHook)
+
 	log.Println("Registering shutdown signal listeners...")
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel,
@@ -124,7 +128,8 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
 
 		manager.Shutdown()
-
+		// FINDME:PROFILER cleanup the profiler
+		profilecleaner.Stop()
 		log.Printf("Exiting...")
 		os.Exit(0)
 	}()

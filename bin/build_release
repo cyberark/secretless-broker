@@ -3,14 +3,20 @@
 CURRENT_DIR=$($(dirname $0)/abspath)
 TOPLEVEL_DIR="$CURRENT_DIR/.."
 
+GORELEASER_IMAGE="goreleaser/goreleaser:latest-cgo"
+
+GORELEASER_ARGS="--rm-dist"
+if [[ "${SNAPSHOT}" == "true" ]]; then
+  GORELEASER_ARGS+=" --snapshot"
+fi
+
 echo "Current dir: $CURRENT_DIR"
 
-docker build -f "$CURRENT_DIR/Dockerfile.releaser" \
-             -t secretless-broker-releaser \
-             "$TOPLEVEL_DIR"
+docker pull "${GORELEASER_IMAGE}"
 
-docker run --rm \
-           -v "$TOPLEVEL_DIR":/secretless-broker \
-           secretless-broker-releaser
+docker run --rm -it \
+  -v "$CURRENT_DIR/..:/secretless-broker" \
+  -w /secretless-broker \
+  "${GORELEASER_IMAGE}" ${GORELEASER_ARGS}
 
 echo "Releases built. Archives can be found in dist/goreleaser"

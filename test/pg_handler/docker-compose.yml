@@ -50,6 +50,9 @@ services:
       - pg-socket:/sock
     depends_on:
       - secretless
+    environment:
+      PG_ADDRESS:
+      SECRETLESS_ADDRESS:
 
   dev:
     build:

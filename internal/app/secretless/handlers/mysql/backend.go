@@ -178,6 +178,10 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// Proxy OK packet to client
+	// TODO: refactor to wrap conn in struct that can
+	// keep track of clientSequenceID
+	// be custodian of client connection logic
+	// https://github.com/siddontang/mixer/blob/master/proxy/conn.go
 	packet[3] = clientSequenceID + 1 // ensure usage of incremented clientSequenceID
 	if _, err = protocol.WritePacket(packet, h.GetClientConnection()); err != nil {
 		return

@@ -90,7 +90,7 @@ func TestMySQLHandler(t *testing.T) {
 
 	Convey("Connect over TCP", t, func() {
 
-		Convey("Without SSL", func() {
+		Convey("No TLS Upstream, TLS Downstream and sslmode default", func() {
 
 			Convey("With username, wrong password", func() {
 
@@ -168,7 +168,7 @@ func TestMySQLHandler(t *testing.T) {
 			})
 		})
 
-		Convey("With SSL", func() {
+		Convey("Upstream SSL", func() {
 
 			var host string
 			var port int
@@ -190,20 +190,36 @@ func TestMySQLHandler(t *testing.T) {
 			So(err, ShouldBeError)
 		})
 
-		Convey("Connect over TCP with TLS downstream", func() {
-			var host string
-			var port int
-			options := make(map[string]string)
-			_, err := net.LookupIP("secretless")
-			host = "secretless"
-			port = 4306
+		Convey("sslmode default", func() {
+			Convey("Connect over TCP to server with TLS support", func() {
+				var host string
+				var port int
+				options := make(map[string]string)
+				host = "secretless"
+				port = 3306
 
-			options["--password"] = ""
+				options["--password"] = ""
 
-			cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
+				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
 
-			So(err, ShouldBeNil)
-			So(cmdOut, ShouldContainSubstring, "2")
+				So(err, ShouldBeNil)
+				So(cmdOut, ShouldContainSubstring, "2")
+			})
+
+			Convey("Connect over TCP to server without TLS support", func() {
+				var host string
+				var port int
+				options := make(map[string]string)
+				host = "secretless"
+				port = 4306
+
+				options["--password"] = ""
+
+				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
+
+				So(err, ShouldNotBeNil)
+				So(cmdOut, ShouldContainSubstring, "ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it")
+			})
 		})
 	})
 }

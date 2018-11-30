@@ -2,12 +2,17 @@ package mysql
 
 import (
 	"crypto/tls"
+	"errors"
 	"log"
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
+)
+
+// Various errors the handler might return
+var (
+	ErrNoTLS = errors.New("SSL connection error: SSL is required but the server doesn't support it")
 )
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
@@ -84,8 +89,17 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	// TODO: if SSL requested but server doesn't support FAIL
-	// serverHandshake.ServerCapabilities&protocol.ClientSSL > 0
+	requestedSSL := true
+
+	// requested SSL but server doesn't support it
+	if requestedSSL && serverHandshake.ServerCapabilities&protocol.ClientSSL == 0 {
+		return &protocol.Error{
+			Code:     protocol.CRSSLConnectionError,
+			SQLSTATE: protocol.ErrorCodeInternalError,
+			Message:  ErrNoTLS.Error(),
+			SequenceID: 2,
+		}
+	}
 
 	// Intercept response from client
 	handshakeResponsePacket, err := protocol.ReadPacket(h.GetClientConnection())
@@ -100,9 +114,6 @@ func (h *Handler) ConnectToBackend() (err error) {
 	if err != nil {
 		return
 	}
-
-	// TODO: handle other scenarios beyond skip-verify by providing configuration tls
-	requestedSSL := strings.ToLower(h.BackendConfig.Options["sslmode"]) == "required"
 
 	// Ensure CapabilityFlag is set when using TLS
 	if requestedSSL {
@@ -147,9 +158,6 @@ func (h *Handler) ConnectToBackend() (err error) {
 		tlsClient := tls.Client(backend, &tls.Config{
 			InsecureSkipVerify: true,
 		})
-		if err := tlsClient.Handshake(); err != nil {
-			return err
-		}
 		backend = tlsClient
 	}
 

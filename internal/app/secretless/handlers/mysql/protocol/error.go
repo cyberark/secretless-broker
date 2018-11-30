@@ -1,14 +1,15 @@
 package protocol
 
 import (
-	"bytes"
 	"fmt"
 )
 
 /* MySQL Error Codes */
 const (
-	CRUnknownError  = "2000"
-	malformedPacket = "2027"
+	CRUnknownError  = 2000
+	malformedPacket = 2027
+	// CRSSLConnectionError is CR_SSL_CONNECTION_ERROR
+	CRSSLConnectionError = 2026
 )
 
 const (
@@ -18,66 +19,37 @@ const (
 
 // Error is a MySQL processing error.
 type Error struct {
-	Code     string
-	SQLSTATE string
-	Message  string
+	Code        uint16
+	SQLSTATE    string
+	Message     string
+	SequenceID  byte
 }
 
 func (e *Error) Error() string {
 	return fmt.Sprintf("ERROR: %s (%s): %s", e.Code, e.SQLSTATE, e.Message)
 }
 
+const ERR_HEADER = 0xff
 // GetMessage formats an Error into a protocol message.
+// https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
 func (e *Error) GetMessage() []byte {
-	msg := NewMessageBuffer([]byte{})
+	data := make([]byte, 4, 16+len(e.Message))
 
-	msg.WriteString("Error: ")
-	msg.WriteString(e.Code)
+	data = append(data, ERR_HEADER)
+	data = append(data, byte(e.Code), byte(e.Code>>8))
 
-	msg.WriteString("SQLSTATE: ")
-	msg.WriteString(e.SQLSTATE)
+	// TODO: for client41
+	//data = append(data, '#')
+	//data = append(data, e.SQLSTATE...)
 
-	msg.WriteString("Message: ")
-	msg.WriteString(e.Message)
+	data = append(data, e.Message...)
 
-	msg.WriteByte(0x00) // null terminate the message
+	// prepare message
+	length := len(data) - 4
+	data[0] = byte(length)
+	data[1] = byte(length >> 8)
+	data[2] = byte(length >> 16)
+	data[3] = e.SequenceID
 
-	return msg.Bytes()
-}
-
-// ParseError takes in stream and returns error
-func ParseError(data []byte) (e *Error) {
-	e = &Error{}
-
-	buf := bytes.NewBuffer(data)
-	if _, err := buf.ReadByte(); err != nil {
-		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
-	}
-
-	// read error code
-	codeBuf := make([]byte, 2)
-	if _, err := buf.Read(codeBuf); err != nil {
-		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
-	}
-	e.Code = string(codeBuf)
-
-	// read sql state
-	if _, err := buf.ReadByte(); err != nil {
-		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
-	}
-
-	sqlStateBuf := make([]byte, 5)
-	if _, err := buf.Read(sqlStateBuf); err != nil {
-		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
-	}
-	e.SQLSTATE = string(sqlStateBuf)
-
-	// read error message
-	messageBuf := make([]byte, buf.Len())
-	if _, err := buf.Read(messageBuf); err != nil {
-		return &Error{malformedPacket, "CR_MALFORMED_PACKET", "Malformed packet"}
-	}
-	e.Message = string(messageBuf)
-
-	return
+	return data
 }

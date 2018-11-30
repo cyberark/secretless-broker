@@ -9,6 +9,7 @@ builds:
   goarch:
   - amd64
   main: ./cmd/summon2/main.go
+
 - binary: secretless-broker
   env:
   - CGO_ENABLED=1
@@ -36,9 +37,6 @@ checksum:
 
 dist: ./dist/goreleaser
 
-git:
-  short_hash: true
-
 nfpm:
   bindir: /usr/bin
   description: Secures your apps by making them Secretless
@@ -58,3 +56,4 @@ snapshot:
 
 release:
   disable: true
+  prerelease: auto

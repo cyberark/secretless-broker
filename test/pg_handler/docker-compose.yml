@@ -31,6 +31,7 @@ services:
   secretless:
     build:
       context: ../..
+# env vars required for testing
     environment:
       PG_TLS_ADDRESS:
       PG_NO_TLS_ADDRESS:
@@ -50,6 +51,7 @@ services:
       - pg-socket:/sock
     depends_on:
       - secretless
+# env vars required for benchmarking
     environment:
       PG_ADDRESS:
       SECRETLESS_ADDRESS:

@@ -32,11 +32,16 @@ type Handler struct {
 
 func (h *Handler) abort(err error) {
 	if h.GetClientConnection() != nil {
-		mysqlError := protocol.Error{
-			Code:     protocol.CRUnknownError,
-			SQLSTATE: protocol.ErrorCodeInternalError,
-			Message:  err.Error(),
+		var mysqlError *protocol.Error
+		var ok bool
+		if mysqlError, ok = err.(*protocol.Error); !ok {
+			mysqlError = &protocol.Error{
+				Code:     protocol.CRUnknownError,
+				SQLSTATE: protocol.ErrorCodeInternalError,
+				Message:  err.Error(),
+			}
 		}
+
 		h.GetClientConnection().Write(mysqlError.GetMessage())
 	}
 }

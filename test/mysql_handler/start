@@ -6,9 +6,10 @@ docker-compose build
 
 docker-compose up \
   -d \
-  mysql
+  mysql mysql_no_tls
 
-./wait-for-mysql
+./wait-for-mysql mysql_no_tls
+./wait-for-mysql mysql
 
 # start secretless once mysql is running
 docker-compose up \

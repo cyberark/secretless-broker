@@ -549,6 +549,76 @@ cd test/manual/k8s_crds
 ```
 This test currently does not run as part of the test suite.
 
+## Profiling
+Benchmarks have been integrated to measure the impact of Secretless on CPU and Memory consumption.
+
+**Prerequisites:**
+- Homebrew (to install graphviz and visually view profiling results),```$ brew install graphviz```
+
+In order to configure individual profiles properly and receive desired results, perform the following:
+1. Navigate to `bin>internal>pkg>plugin>manager.go`
+2. Under the `_RegisterShutdownSignalHandlers` function, uncomment the desired profile in all of its relevant locations in file
+
+**NOTE:** Ensure to measure a single profile at a time. Otherwise, the profiles will conflict with each other and the results returned will be untrue.
+
+3. Build Secretless locally: ``` $ ./bin/build_darwin```
+
+4. Navigate to: ``` $ cd test/pg_handler```, build the sample Postgres image: ```$ docker build -t sample-pg -f Dockerfile.pg .```, and run it: ```$ docker run -d -p 5432:5432 sample-pg```
+
+5. Check that the Postgres database is running:```$ psql -h localhost -p 5432 -U test dbname=postgres``` and preform a test query: ```select count(*) from test.test;```
+
+**NOTE:** to exit the DB bash, ```\q```.
+
+6. Create a sample secretless.yml file in the project root that has:
+```
+listeners:
+  - name: pg_tcp
+    protocol: pg
+    address: 0.0.0.0:15432
+
+handlers:
+  - name: pg_via_tcp
+    listener: pg_tcp
+    debug: true
+    credentials:
+      - name: address
+        provider: env
+        id: PG_ADDRESS
+      - name: username
+        provider: literal
+        id: test
+      - name: password
+        provider: env
+        id: PG_PASSWORD
+```
+7. Run Secretless by calling:
+```
+$ PG_ADDRESS=localhost:5432/postgres PG_PASSWORD=test ./dist/darwin/amd64/secretless-broker -f secretless.yml
+```
+8. Once Secretless is running, the type of profiling should state that it has been enabled. Like so:
+```
+2018/11/21 10:17:13 profile: cpu profiling enabled, /var/folders/wy/f9qn852d5_d4s_g06s1kwjcr0000gn/T/profile789228879/cpu.pprof
+```
+**NOTE:** The hash observed will be different each time a profile is run.
+
+9. Once Postgres DB and Secretless are spun up, make sample queries to the DB according to the different profiles.
+
+Example (CPU):
+```
+$ psql -h localhost -p 15432 sslmode=disable postgres -c "select count(*) from test.test"
+```
+Example (Memory):
+```
+psql -h localhost -p 15432 sslmode=disable postgres -c "delete from test where test.id=0"
+```
+```
+psql -h localhost -p 15432 sslmode=disable postgres -c "insert into test(id) values(0)"
+```
+10. Observe results in a .PDF format by running:
+```
+go tool pprof --pdf ~/go/bin/yourbinary /var/path/to/cpu.pprof > file.pdf
+```
+
 ## Plugins
 
 Plugins can be used to extend the functionality of the Secretless Broker via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:

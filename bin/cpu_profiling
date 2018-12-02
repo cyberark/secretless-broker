@@ -1,6 +1,0 @@
-#!/bin/bash -e
-
-for i in {1..1000}; do
-  psql -h localhost -p 5432 -U test -c "select count(*) from test.test" postgres
-  sleep 10
-done

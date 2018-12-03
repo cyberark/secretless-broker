@@ -1,4 +1,6 @@
-# TLS Support for Database Handlers
+# Downstream TLS Support for Database Handlers
+
+To improve the security of the Secretless Broker when opening connections to a database backend, the connection opened between the broker and the target service should happen over SSL.
 
 ## General approach
 + Extract sslmode params from credentials into backend connection options

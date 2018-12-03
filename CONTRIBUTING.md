@@ -13,11 +13,15 @@ Thanks for your interest in the Secretless Broker. Before contributing, please t
 
 Our [Waffle.io][waffle] is synchronized with GitHub and helps you navigate this workflow more easily.
 
+In addition to technical workflow descriptions available in Waffle / GitHub,
+some of the project's technical design documents can be found in the project [design][design] folder.
+
 ## Style guide
 
 Use [this guide][style] to maintain consistent style across the Secretless Broker project.
 
+[design]: https://github.com/cyberark/secretless-broker/tree/master/design
+[issues]: https://github.com/cyberark/secretless-broker/issues
 [style]: STYLE.md
 [tests]: README.md#testing
 [waffle]: https://waffle.io/cyberark/secretless
-[issues]: https://github.com/cyberark/secretless-broker/issues

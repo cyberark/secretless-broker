@@ -125,23 +125,57 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	// Pack client response with injected configuration
+	// This format of this packet is described here:
+	//
+	//   https://dev.mysql.com/doc/internals/en/mysql-packet.html
+	//
+	//  +-------------+----------------+---------------------------------------------+
+	//  |    Type     |      Name      |                 Description                 |
+	//	+-------------+----------------+---------------------------------------------+
+	//  | int<3>      | payload_length | Length of the payload. The number of bytes  |
+	//  |             |                | in the packet beyond the initial 4 bytes    |
+	//  |             |                | that make up the packet header.             |
+	//  | int<1>      | sequence_id    | Sequence ID                                 |
+	//  | string<var> | payload        | [len=payload_length] payload of the packet  |
+	//  +-------------+----------------+---------------------------------------------+
 	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(handshakeResponse)
 
 	if err != nil {
 		return
 	}
 
+	// Send TLS / SSL request packet
+	//
 	if requestedSSL {
-		// Send TLS / SSL request packet
-
-		// Copy a truncated HandshakeResponse to create SSLRequest
+		// The SSLRequest packet is created by copying the HandshakeResponse,
+		// but truncating the username and everything after the username in
+		// the payload, as described here:
+		//
 		// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest
+		//
+		// The payload itself breaks down as follows:
+		//
+		//  +------------+-----------------------------------------+
+		//  | Num Bytes  |               Description               |
+		//	+------------+-----------------------------------------+
+		//  | 4          | capability flags, CLIENT_SSL always set |
+		//  | 4          | max-packet size                         |
+		//  | 1          | character set                           |
+		//  | string[23] | reserved (all [0])                      |
+		//	+------------+-----------------------------------------+
+		//
+		//  Hence by taking the first (4+4+1+23) bytes we take everything in
+		//  the payload up to, but not including, the username.  The final
+		//  +4 in (4+4+1+23)+4 accounts for the header section before the
+		//  payload, ie, the payload_length and the sequence_id, as described
+		//  in the comment above this one.
+		//
 		tmp := packedHandshakeRespPacket[:(4+4+1+23)+4]
 		sslPacket := make([]byte, len(tmp))
 		copy(sslPacket, tmp)
 
-		// Update packet length for truncated packet
+		// This sets the payload_length bytes in the header portion of the packet
+		// to reflect the new length of the truncated packet.
 		pktLen := len(sslPacket) - 4
 		sslPacket[0] = byte(pktLen)
 		sslPacket[1] = byte(pktLen >> 8)
@@ -152,7 +186,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 			return
 		}
 		// Increment sequenceID in anticipation of subsequent write to backend
-		packedHandshakeRespPacket[3]++;
+		packedHandshakeRespPacket[3]++
 
 		// Switch to TLS
 		tlsClient := tls.Client(backend, &tls.Config{

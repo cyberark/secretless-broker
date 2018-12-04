@@ -37,7 +37,7 @@ $ apt update
 $ apt install mercurial
 ```
 
-### Go.sum fixes for `k8s/client-go`
+### A note on go.sum fixes for `k8s/client-go`
 
 `k8s/client-go` downloads a package with mismatching `go.sum` which may present itself
 as something like this during builds or attempts to run the code:
@@ -53,6 +53,9 @@ repository-provided file with the following code and retry your build/run comman
 ```
 sed -i '/^k8s.io\/client-go\ /d' go.sum
 ```
+
+In general, we get around this problem for now by editing the go.sum lines related
+to `k8s.io/client-go` in the Secretless Broker Dockerfiles.
 
 ## Pull Request Workflow
 

@@ -29,6 +29,11 @@ RUN go get -u github.com/jstemmer/go-junit-report && \
     go get golang.org/x/tools/cmd/goimports
 
 COPY go.mod go.sum /secretless/
+
+# There are checksum mismatches in various environments with client-go package
+# so we for now manually remove it from the checksum file.
+RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
+
 RUN go mod download
 
 # TODO: Expand this with build args when we support other arches
@@ -37,6 +42,10 @@ ENV GOOS=linux \
     CGO_ENABLED=1
 
 COPY . .
+
+# There are checksum mismatches in various environments with client-go package
+# so we for now manually remove it from the checksum file.
+RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
 
 # Not strictly needed but we might as well do this step too since
 # the dev may want to run the binary

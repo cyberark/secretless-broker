@@ -20,39 +20,39 @@ var (
 func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{Options: make(map[string]string)}
 
-	var values map[string][]byte
-	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
+	var connectionDetails map[string][]byte
+	if connectionDetails, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
 		return
 	}
 
 	if h.GetConfig().Debug {
-		log.Printf("MySQL backend connection parameters: %s", values)
+		log.Printf("MySQL backend connection parameters: %s", connectionDetails)
 	}
 
-	if host := values["host"]; host != nil {
-		result.Host = string(values["host"])
+	if host := connectionDetails["host"]; host != nil {
+		result.Host = string(connectionDetails["host"])
 	}
 
-	if values["port"] != nil {
-		port64, _ := strconv.ParseUint(string(values["port"]), 10, 64)
+	if connectionDetails["port"] != nil {
+		port64, _ := strconv.ParseUint(string(connectionDetails["port"]), 10, 64)
 		result.Port = uint(port64)
 	}
 
-	if values["username"] != nil {
-		result.Username = string(values["username"])
+	if connectionDetails["username"] != nil {
+		result.Username = string(connectionDetails["username"])
 	}
 
-	if values["password"] != nil {
-		result.Password = string(values["password"])
+	if connectionDetails["password"] != nil {
+		result.Password = string(connectionDetails["password"])
 	}
 
-	delete(values, "host")
-	delete(values, "port")
-	delete(values, "username")
-	delete(values, "password")
+	delete(connectionDetails, "host")
+	delete(connectionDetails, "port")
+	delete(connectionDetails, "username")
+	delete(connectionDetails, "password")
 
 	result.Options = make(map[string]string)
-	for k, v := range values {
+	for k, v := range connectionDetails {
 		result.Options[k] = string(v)
 	}
 

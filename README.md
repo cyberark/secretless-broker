@@ -21,10 +21,6 @@ The Secretless Broker is currently in beta.
 - [Community](#community)
 - [Performance](#performance)
 - [Development](#development)
-  - [Building](#building)
-  - [Testing](#testing)
-  - [Plugins](#plugins)
-  - [Releasing](#releasing)
 - [License](#license)
 
 
@@ -478,106 +474,10 @@ Changing the `-c` (number of clients) and `-j` (number of threads) didn't have m
 
 # Development
 
-We welcome contributions of all kinds to the Secretless Broker. See our [contributing guide](CONTRIBUTING.md).
-
-## Building
-
-First, clone `https://github.com/cyberark/secretless-broker`. If you're new to Go, be aware that Go can be very selective
-about where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
-is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which
-require either that you clone this repository outside of your `GOPATH` or you set the `GO111MODULE` environment variable to
-`on`. We recommend cloning this repository outside of your `GOPATH`.
-
-Once you've cloned the repository, you can build the Secretless Broker.
-
-### Docker containers
-
-```sh-session
-$ # From Secretless Broker repository root
-$ ./bin/build
-```
-
-This should create a Docker container with tag `secretless-broker:latest` in your local registry.
-
-### Binaries
-#### Linux
-```sh-session
-$ # From Secretless Broker repository root
-$ go build -o ./secretless-broker ./cmd/secretless-broker
-```
-
-#### OSX
-
-```sh-session
-$ # From Secretless Broker repository root
-$ ./bin/build_darwin
-```
-
-## Testing
-
-**Prerequisites**
-
-* **Docker** You need Docker to run the tests.
-
-Build the project by running:
-
-```sh-session
-$ ./bin/build
-```
-
-Then run the test cases:
-
-```sh-session
-$ ./bin/test
-```
-
-If you are on a Mac, you may also test the OSX Keychain provider:
-```sh-session
-cd test/manual/keychain_provider/
-./start
-./test
-```
-This test will not be run as part of the test suite, since it requires access
-to the Mac OSX Keychain. You will be prompted for your password when running
-this test, as it temporarily adds a generic password to your account, and
-verifies that it can retrieve the value.
-
-Kubernetes CRD loading test
-```sh-session
-cd test/manual/k8s_crds
-./deploy
-```
-This test currently does not run as part of the test suite.
-
-## Plugins
-
-Plugins can be used to extend the functionality of the Secretless Broker via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
-
-- Listener plugins
-- Handler plugins
-- Connection management plugins
-
-Currently, these API definitions reside [here](pkg/secretless/plugin/v1) and an example plugin can be found in the [`test/plugin`](test/plugin) directory.
-
-You can read more about how to make plugins and the underlying architecture in the [API directory](pkg/secretless/plugin).
-
-_Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
-
-## Releasing
-
-1. Based on the unreleased content, determine the new version number and update
-   the [VERSION](VERSION) file.
-1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
-   the changes included in the release.
-1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message.
-1. Once your changes have been reviewed and merged into master, tag the version
-   using `git tag -s v0.1.1`. Note this requires you to be  able to sign releases.
-   Consult the [github documentation on signing commits](https://help.github.com/articles/signing-commits-with-gpg/)
-   on how to set this up. `vx.y.z` is an acceptable tag message.
-1. Push the tag: `git push vx.y.z` (or `git push origin vx.y.z` if you are working
-   from your local machine).
-1. From a **clean checkout of master** run `./bin/build_release` to generate
-   the release artifacts. Upload these to the GitHub release.
+We welcome contributions of all kinds to the Secretless Broker. For instructions on
+how to get started and descriptions of our development workflows, please see our
+[contributing guide](CONTRIBUTING.md). This document includes guidelines for
+writing plugins to extend the functionality of Secretless Broker.
 
 # License
 

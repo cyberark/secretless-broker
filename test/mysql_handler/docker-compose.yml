@@ -29,6 +29,19 @@ services:
       NO_SSL: "true"
       MYSQL_ROOT_PASSWORD: securerootpass
 
+  secretless-dev:
+    image: secretless-dev
+    command: go run cmd/secretless-broker/main.go -f /secretless.yml
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpass
+    volumes:
+      - ../../:/secretless
+      - ./secretless.yml:/secretless.yml
+      - mysql-socket:/sock
+
   secretless:
     build:
       context: ../..
@@ -48,8 +61,6 @@ services:
     command: go test -v ./test/mysql_handler
     volumes:
       - mysql-socket:/secretless/test/mysql_handler/sock
-    depends_on:
-      - secretless
 
   dev:
     build:

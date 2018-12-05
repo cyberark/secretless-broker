@@ -3,6 +3,7 @@ package mysql
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -110,9 +111,21 @@ func (h *Handler) ConnectToBackend() (err error) {
 	clientSequenceID := handshakeResponsePacket[3]
 
 	// Parse intercepted client response
+	// TODO: client requesting SSL results ERROR 2026 (HY000): SSL connection error: protocol version mismatch
 	handshakeResponse, err := protocol.UnpackHandshakeResponse41(handshakeResponsePacket)
 	if err != nil {
 		return
+	}
+
+	// client requesting SSL, we don't support it
+	clientRequestedSSL := handshakeResponse.CapabilityFlags & protocol.ClientSSL > 0
+	if clientRequestedSSL {
+		return &protocol.Error{
+			Code:     protocol.CRSSLConnectionError,
+			SQLSTATE: protocol.ErrorCodeInternalError,
+			Message:  fmt.Sprintf("SECRETLESS HATES TLS"),
+			SequenceID: 2,
+		}
 	}
 
 	// Ensure CapabilityFlag is set when using TLS

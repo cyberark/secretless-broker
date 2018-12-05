@@ -52,9 +52,9 @@ func runTestQuery(host string, port int, user string, environment []string, opti
 	args = append(args, "-e")
 	args = append(args, "select count(*) from testdb.test")
 
-	log.Println(strings.Join(append([]string{"execute_test_query"}, args...), " "))
+	log.Println(strings.Join(append([]string{"mysql"}, args...), " "))
 
-	cmd := exec.Command("execute_test_query", args...)
+	cmd := exec.Command("mysql", args...)
 	env := os.Environ()
 	for _, v := range environment {
 		env = append(env, v)
@@ -71,7 +71,7 @@ func TestMySQLHandler(t *testing.T) {
 		Convey("With username, wrong password", func() {
 
 			options := map[string]string{
-				"--socket":   "sock/execute_test_query.sock",
+				"--socket":   "sock/mysql.sock",
 				"--password": "wrongpassword",
 			}
 
@@ -84,7 +84,7 @@ func TestMySQLHandler(t *testing.T) {
 		Convey("With wrong username, wrong password", func() {
 
 			options := map[string]string{
-				"--socket":   "sock/execute_test_query.sock",
+				"--socket":   "sock/mysql.sock",
 				"--password": "wrongpassword",
 			}
 
@@ -97,7 +97,7 @@ func TestMySQLHandler(t *testing.T) {
 		Convey("With empty username, empty password", func() {
 
 			options := map[string]string{
-				"--socket":   "sock/execute_test_query.sock",
+				"--socket":   "sock/mysql.sock",
 				"--password": "",
 			}
 

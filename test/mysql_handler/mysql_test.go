@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -12,175 +11,164 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-// Secretless will either be secretless:3306 (in Docker) or
-// localhost:<mapped-port> (on the local machine)
-func mysqlConfiguration() (host string, port int, options map[string]string) {
-	// localhost:<mapped-port> (on the local machine)
-	options = make(map[string]string)
-	_, err := net.LookupIP("secretless")
-	if err == nil {
-		host = "secretless"
-		port = 3306
-	} else {
-		host = "localhost"
-		port = 13306
-		options["--ssl-mode"] = "DISABLED"
+const SecretlessHost = "secretless"
+
+func init() {
+	_, err := net.LookupIP(SecretlessHost)
+	if err != nil {
+		panic(err)
 	}
-	return host, port, options
 }
 
-func runTestQuery(host string, port int, user string, environment []string, options map[string]string, flags []string) (string, error) {
-	var args []string
-	if host != "" {
-		args = append(args, "-h")
-		args = append(args, host)
-	}
-	if port != 0 {
-		args = append(args, "-P")
-		args = append(args, fmt.Sprintf("%d", port))
-	}
-	if user != "" {
-		args = append(args, "-u")
-		args = append(args, user)
-	}
-	for k, v := range options {
-		args = append(args, fmt.Sprintf("%s=%s", k, v))
-	}
+func runTestQuery(flags []string) (string, error) {
+	args := []string{ "-e", "select count(*) from testdb.test" }
+
+	// non-separated flags: ["-u test", "--ssl-mode=DISABLE"]
 	for _, v := range flags {
 		args = append(args, v)
 	}
-	args = append(args, "-e")
-	args = append(args, "select count(*) from testdb.test")
 
 	log.Println(strings.Join(append([]string{"mysql"}, args...), " "))
 
-	cmd := exec.Command("mysql", args...)
-	env := os.Environ()
-	for _, v := range environment {
-		env = append(env, v)
+	cmdOut, err := exec.Command("mysql", args...).CombinedOutput()
+
+	if err != nil {
+		fmt.Println("ERROR: ", err.Error())
+		fmt.Println("OUTPUT: ", string(cmdOut))
 	}
-	cmd.Env = env
-	cmdOut, err := cmd.CombinedOutput()
+
 	return string(cmdOut), err
 }
 
-func TestMySQLHandler(t *testing.T) {
-
+func TestUnixSocketMySQLHandler(t *testing.T) {
 	Convey("Connect over a UNIX socket", t, func() {
+		testCases := SharedTestCases()
 
-		Convey("With username, wrong password", func() {
+		for testName, testCase := range testCases {
+			Convey(testName, func() {
 
-			options := map[string]string{
-				"--socket":   "sock/mysql.sock",
-				"--password": "wrongpassword",
-			}
+				testCase.Flags = append(testCase.Flags, "--socket=sock/mysql.sock")
+				cmdOut, err := runTestQuery(testCase.Flags)
 
-			cmdOut, err := runTestQuery("", 0, "testuser", []string{}, options, []string{})
+				if testCase.AssertFailure {
+					So(err, ShouldNotBeNil)
+				} else {
+					So(err, ShouldBeNil)
+				}
 
-			So(err, ShouldBeNil)
-			So(cmdOut, ShouldContainSubstring, "2")
-		})
-
-		Convey("With wrong username, wrong password", func() {
-
-			options := map[string]string{
-				"--socket":   "sock/mysql.sock",
-				"--password": "wrongpassword",
-			}
-
-			cmdOut, err := runTestQuery("", 0, "wrongusername", []string{}, options, []string{})
-
-			So(err, ShouldBeNil)
-			So(cmdOut, ShouldContainSubstring, "2")
-		})
-
-		Convey("With empty username, empty password", func() {
-
-			options := map[string]string{
-				"--socket":   "sock/mysql.sock",
-				"--password": "",
-			}
-
-			cmdOut, err := runTestQuery("", 0, "", []string{}, options, []string{})
-
-			So(err, ShouldBeNil)
-			So(cmdOut, ShouldContainSubstring, "2")
-		})
+				if testCase.CmdOutput != nil {
+					So(cmdOut, ShouldContainSubstring, *testCase.CmdOutput)
+				}
+			})
+		}
 	})
+}
 
-	Convey("Connect over TCP", t, func() {
+func TestTCPMySQLHandler(t *testing.T) {
+	Convey("Connect over TCP secretless->server TLS support and sslmode default", t, func() {
+		testCases := SharedTestCases()
 
-		// Geri suggests: No TLS Upstream, TLS Downstream and sslmode default
-		//
-		Convey("No TLS Upstream, TLS Downstream and sslmode default", func() {
+		for testName, testCase := range testCases {
+			Convey(testName, func() {
+				testCase.Flags = append(testCase.Flags, "--port=3306")
+				testCase.Flags = append(testCase.Flags, fmt.Sprintf("--host=%s", SecretlessHost))
+				cmdOut, err := runTestQuery(testCase.Flags)
 
-			Convey("With username, wrong password", func() {
+				if testCase.AssertFailure {
+					So(err, ShouldNotBeNil)
+				} else {
+					So(err, ShouldBeNil)
+				}
 
-				host, port, options := mysqlConfiguration()
-				options["--password"] = "wrongpassword"
+				if testCase.CmdOutput != nil {
+					So(cmdOut, ShouldContainSubstring, *testCase.CmdOutput)
+				}
 
-				cmdOut, err := runTestQuery(host, port, "testuser", []string{}, options, []string{})
-
-				So(err, ShouldBeNil)
-				So(cmdOut, ShouldContainSubstring, "2")
 			})
+		}
+	})
+}
 
-			Convey("With wrong username, wrong password", func() {
+func stringPointer(s string) *string {
+	return &s
+}
+// TestCase represents the conditions and expected outcomes of a test
+//
+// For AssertFailure, we assume success without explicit failure
+//
+// For CmdOutput, there are two cases we need:
+// 1. Don't assert on the command output
+// 2. Assert the command output is empty, or otherwise
+// A string pointer distinguishes between those cases
+type TestCase struct {
+	Flags         []string
+	AssertFailure bool
+	CmdOutput     *string
+}
+func SharedTestCases() map[string]TestCase  {
+	testCases := map[string]TestCase{
+		"With username, wrong password": {
+			Flags: []string{
+				"--user=testuser",
+				"--password=wrongpassword",
+			},
+			CmdOutput: stringPointer("2"),
+		},
+		"With wrong username, wrong password": {
+			Flags: []string{
+				"--user=wrongusername",
+				"--password=wrongpassword",
+			},
+			CmdOutput: stringPointer("2"),
+		},
+		"With empty username, empty password": {
+			Flags: []string{
+				"--user=",
+				"--password=",
+			},
+			CmdOutput: stringPointer("2"),
+		},
+		"Client is not able to connect to Secretless via TLS": {
+			Flags: []string{
+				"--user=",
+				"--password=",
+				"--ssl",
+			},
+			AssertFailure: true,
+		},
+	}
 
-				host, port, options := mysqlConfiguration()
-				options["--password"] = "wrongpassword"
+	return testCases
+}
 
-				cmdOut, err := runTestQuery(host, port, "notatestuser", []string{}, options, []string{})
 
-				So(err, ShouldBeNil)
-				So(cmdOut, ShouldContainSubstring, "2")
-			})
-
-			Convey("With empty username, empty password", func() {
-
-				host, port, options := mysqlConfiguration()
-				options["--password"] = ""
-
-				cmdOut, err := runTestQuery(host, port, "", []string{}, options, []string{})
-
-				So(err, ShouldBeNil)
-				So(cmdOut, ShouldContainSubstring, "2")
-			})
-		})
-
-		Convey("Upstream SSL", func() {
-
-			host, port, options := mysqlConfiguration()
-			options["--password"] = ""
-			flags := []string{"--ssl"}
-
-			_, err := runTestQuery(host, port, "", []string{}, options, flags)
-
-			So(err, ShouldBeError)
-		})
+func TestTLSMySQLHandler(t *testing.T) {
+	Convey("TLS: sslmode default", t, func() {
 
 		Convey("sslmode default", func() {
-			Convey("Connect over TCP to server with TLS support", func() {
-
-				options := make(map[string]string)
-				options["--password"] = ""
-				host := "secretless"
-				port := 3306
-
-				cmdOut, err := runTestQuery(host, port, "", []string{}, options, []string{})
+			Convey("Connect to server with TLS support", func() {
+				cmdOut, err := runTestQuery(
+					[]string{
+						"--user=",
+						"--password=",
+						fmt.Sprintf("--host=%s", SecretlessHost),
+						"--port=3306",
+					},
+				)
 
 				So(err, ShouldBeNil)
 				So(cmdOut, ShouldContainSubstring, "2")
 			})
 
-			Convey("Connect over TCP to server without TLS support", func() {
-
-				options := make(map[string]string)
-				options["--password"] = ""
-				host := "secretless"
-				port := 4306
-
-				cmdOut, err := runTestQuery(host, port, "", []string{}, options, []string{})
+			Convey("Fail to connect to server without TLS support", func() {
+				cmdOut, err := runTestQuery(
+					[]string{
+						"--user=",
+						"--password=",
+						fmt.Sprintf("--host=%s", SecretlessHost),
+						"--port=4306",
+					},
+				)
 
 				So(err, ShouldNotBeNil)
 				So(cmdOut, ShouldContainSubstring, "ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it")

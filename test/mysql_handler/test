@@ -1,9 +1,10 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 local_test=false
-while getopts :l opt; do
+while getopts :ld opt; do
     case $opt in
         l) local_test=true ;;
+        d) local_dev=true;;
        \?) echo "Unknown option -$OPTARG"; exit 1;;
     esac
 done
@@ -12,6 +13,14 @@ docker_args=""
 if $local_test; then
   docker_args="-v $(cd ../..; pwd):/secretless"
 fi
+
+if $local_dev; then
+  #
+  docker-compose run --rm test rm -f /secretless/test/mysql_handler/sock/mysql.sock
+  docker-compose up --force-recreate -d secretless-dev
+fi
+
+sleep 5
 
 docker-compose run \
   --rm \

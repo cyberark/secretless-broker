@@ -12,8 +12,6 @@ docker-compose up \
 ./wait-for-mysql mysql
 
 # start secretless-dev once mysql is running
-docker-compose up \
-  -d \
-  secretless-dev
+docker-compose up -d secretless-dev
 
 sleep 2

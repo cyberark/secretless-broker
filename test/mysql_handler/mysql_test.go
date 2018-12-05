@@ -14,7 +14,7 @@ import (
 
 // Secretless will either be secretless:3306 (in Docker) or
 // localhost:<mapped-port> (on the local machine)
-func secretlessConfiguration() (host string, port int, options map[string]string) {
+func mysqlConfiguration() (host string, port int, options map[string]string) {
 	// localhost:<mapped-port> (on the local machine)
 	options = make(map[string]string)
 	_, err := net.LookupIP("secretless")
@@ -29,7 +29,7 @@ func secretlessConfiguration() (host string, port int, options map[string]string
 	return host, port, options
 }
 
-func mysql(host string, port int, user string, environment []string, options map[string]string, flags []string) (string, error) {
+func runTestQuery(host string, port int, user string, environment []string, options map[string]string, flags []string) (string, error) {
 	var args []string
 	if host != "" {
 		args = append(args, "-h")
@@ -52,9 +52,9 @@ func mysql(host string, port int, user string, environment []string, options map
 	args = append(args, "-e")
 	args = append(args, "select count(*) from testdb.test")
 
-	log.Println(strings.Join(append([]string{"mysql"}, args...), " "))
+	log.Println(strings.Join(append([]string{"execute_test_query"}, args...), " "))
 
-	cmd := exec.Command("mysql", args...)
+	cmd := exec.Command("execute_test_query", args...)
 	env := os.Environ()
 	for _, v := range environment {
 		env = append(env, v)
@@ -70,12 +70,12 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("With username, wrong password", func() {
 
-			options :=map[string]string {
-				"--socket": "sock/mysql.sock",
+			options := map[string]string{
+				"--socket":   "sock/execute_test_query.sock",
 				"--password": "wrongpassword",
 			}
 
-			cmdOut, err := mysql("", 0, "testuser", []string{}, options, []string{})
+			cmdOut, err := runTestQuery("", 0, "testuser", []string{}, options, []string{})
 
 			So(err, ShouldBeNil)
 			So(cmdOut, ShouldContainSubstring, "2")
@@ -83,12 +83,12 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("With wrong username, wrong password", func() {
 
-			options :=map[string]string {
-				"--socket": "sock/mysql.sock",
+			options := map[string]string{
+				"--socket":   "sock/execute_test_query.sock",
 				"--password": "wrongpassword",
 			}
 
-			cmdOut, err := mysql("", 0, "wrongusername", []string{}, options, []string{})
+			cmdOut, err := runTestQuery("", 0, "wrongusername", []string{}, options, []string{})
 
 			So(err, ShouldBeNil)
 			So(cmdOut, ShouldContainSubstring, "2")
@@ -96,12 +96,12 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("With empty username, empty password", func() {
 
-			options :=map[string]string {
-				"--socket": "sock/mysql.sock",
+			options := map[string]string{
+				"--socket":   "sock/execute_test_query.sock",
 				"--password": "",
 			}
 
-			cmdOut, err := mysql("", 0, "", []string{}, options, []string{})
+			cmdOut, err := runTestQuery("", 0, "", []string{}, options, []string{})
 
 			So(err, ShouldBeNil)
 			So(cmdOut, ShouldContainSubstring, "2")
@@ -110,14 +110,16 @@ func TestMySQLHandler(t *testing.T) {
 
 	Convey("Connect over TCP", t, func() {
 
+		// Geri suggests: No TLS Upstream, TLS Downstream and sslmode default
+		//
 		Convey("No TLS Upstream, TLS Downstream and sslmode default", func() {
 
 			Convey("With username, wrong password", func() {
 
-				host, port, options := secretlessConfiguration()
+				host, port, options := mysqlConfiguration()
 				options["--password"] = "wrongpassword"
 
-				cmdOut, err := mysql(host, port, "testuser", []string{}, options, []string{})
+				cmdOut, err := runTestQuery(host, port, "testuser", []string{}, options, []string{})
 
 				So(err, ShouldBeNil)
 				So(cmdOut, ShouldContainSubstring, "2")
@@ -125,10 +127,10 @@ func TestMySQLHandler(t *testing.T) {
 
 			Convey("With wrong username, wrong password", func() {
 
-				host, port, options := secretlessConfiguration()
+				host, port, options := mysqlConfiguration()
 				options["--password"] = "wrongpassword"
 
-				cmdOut, err := mysql(host, port, "notatestuser", []string{}, options, []string{})
+				cmdOut, err := runTestQuery(host, port, "notatestuser", []string{}, options, []string{})
 
 				So(err, ShouldBeNil)
 				So(cmdOut, ShouldContainSubstring, "2")
@@ -136,10 +138,10 @@ func TestMySQLHandler(t *testing.T) {
 
 			Convey("With empty username, empty password", func() {
 
-				host, port, options := secretlessConfiguration()
+				host, port, options := mysqlConfiguration()
 				options["--password"] = ""
 
-				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
+				cmdOut, err := runTestQuery(host, port, "", []string{}, options, []string{})
 
 				So(err, ShouldBeNil)
 				So(cmdOut, ShouldContainSubstring, "2")
@@ -148,11 +150,11 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("Upstream SSL", func() {
 
-			host, port, options := secretlessConfiguration()
+			host, port, options := mysqlConfiguration()
 			options["--password"] = ""
 			flags := []string{"--ssl"}
 
-			_, err := mysql(host, port, "", []string{}, options, flags)
+			_, err := runTestQuery(host, port, "", []string{}, options, flags)
 
 			So(err, ShouldBeError)
 		})
@@ -161,11 +163,11 @@ func TestMySQLHandler(t *testing.T) {
 			Convey("Connect over TCP to server with TLS support", func() {
 
 				options := make(map[string]string)
+				options["--password"] = ""
 				host := "secretless"
 				port := 3306
-				options["--password"] = ""
 
-				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
+				cmdOut, err := runTestQuery(host, port, "", []string{}, options, []string{})
 
 				So(err, ShouldBeNil)
 				So(cmdOut, ShouldContainSubstring, "2")
@@ -174,11 +176,11 @@ func TestMySQLHandler(t *testing.T) {
 			Convey("Connect over TCP to server without TLS support", func() {
 
 				options := make(map[string]string)
+				options["--password"] = ""
 				host := "secretless"
 				port := 4306
-				options["--password"] = ""
 
-				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
+				cmdOut, err := runTestQuery(host, port, "", []string{}, options, []string{})
 
 				So(err, ShouldNotBeNil)
 				So(cmdOut, ShouldContainSubstring, "ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it")

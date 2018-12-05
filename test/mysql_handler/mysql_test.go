@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -11,19 +12,36 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-const SecretlessHost = "secretless"
+var SecretlessHost string
+
 
 func init() {
+	// Allows us to specify a different host when doing development, for
+	// faster code reloading.  See the "dev" script in this folder.
+	//
+	if host := os.Getenv("SECRETLESS_HOST"); host != "" {
+		SecretlessHost = host
+	} else {
+		// Default value when running tests (on Jenkins, eg)
+		SecretlessHost = "secretless"
+	}
+
+	// If the SecretlessHost is unavailable, bail out...
+	//
 	_, err := net.LookupIP(SecretlessHost)
 	if err != nil {
+		fmt.Printf("ERROR: The secretless host '%s' wasn't found\n", SecretlessHost)
 		panic(err)
 	}
 }
 
+// Flags is an array of strings passed directly to the mysql CLI. Eg:
+//
+//     []string{"-u test", "--password=wrongpassword"}
+//
 func runTestQuery(flags []string) (string, error) {
 	args := []string{ "-e", "select count(*) from testdb.test" }
 
-	// non-separated flags: ["-u test", "--ssl-mode=DISABLE"]
 	for _, v := range flags {
 		args = append(args, v)
 	}

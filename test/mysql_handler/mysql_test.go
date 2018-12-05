@@ -12,8 +12,25 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+// Secretless will either be secretless:3306 (in Docker) or
+// localhost:<mapped-port> (on the local machine)
+func secretlessConfiguration() (host string, port int, options map[string]string) {
+	// localhost:<mapped-port> (on the local machine)
+	options = make(map[string]string)
+	_, err := net.LookupIP("secretless")
+	if err == nil {
+		host = "secretless"
+		port = 3306
+	} else {
+		host = "localhost"
+		port = 13306
+		options["--ssl-mode"] = "DISABLED"
+	}
+	return host, port, options
+}
+
 func mysql(host string, port int, user string, environment []string, options map[string]string, flags []string) (string, error) {
-	args := []string{}
+	var args []string
 	if host != "" {
 		args = append(args, "-h")
 		args = append(args, host)
@@ -53,9 +70,10 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("With username, wrong password", func() {
 
-			options := make(map[string]string)
-			options["--socket"] = "sock/mysql.sock"
-			options["--password"] = "wrongpassword"
+			options :=map[string]string {
+				"--socket": "sock/mysql.sock",
+				"--password": "wrongpassword",
+			}
 
 			cmdOut, err := mysql("", 0, "testuser", []string{}, options, []string{})
 
@@ -65,9 +83,10 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("With wrong username, wrong password", func() {
 
-			options := make(map[string]string)
-			options["--socket"] = "sock/mysql.sock"
-			options["--password"] = "wrongpassword"
+			options :=map[string]string {
+				"--socket": "sock/mysql.sock",
+				"--password": "wrongpassword",
+			}
 
 			cmdOut, err := mysql("", 0, "wrongusername", []string{}, options, []string{})
 
@@ -77,9 +96,10 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("With empty username, empty password", func() {
 
-			options := make(map[string]string)
-			options["--socket"] = "sock/mysql.sock"
-			options["--password"] = ""
+			options :=map[string]string {
+				"--socket": "sock/mysql.sock",
+				"--password": "",
+			}
 
 			cmdOut, err := mysql("", 0, "", []string{}, options, []string{})
 
@@ -94,21 +114,7 @@ func TestMySQLHandler(t *testing.T) {
 
 			Convey("With username, wrong password", func() {
 
-				// Secretless will either be secretless:3306 (in Docker) or
-				// localhost:<mapped-port> (on the local machine)
-				var host string
-				var port int
-				options := make(map[string]string)
-				_, err := net.LookupIP("secretless")
-				if err == nil {
-					host = "secretless"
-					port = 3306
-				} else {
-					host = "localhost"
-					port = 13306
-					options["--ssl-mode"] = "DISABLED"
-				}
-
+				host, port, options := secretlessConfiguration()
 				options["--password"] = "wrongpassword"
 
 				cmdOut, err := mysql(host, port, "testuser", []string{}, options, []string{})
@@ -119,21 +125,7 @@ func TestMySQLHandler(t *testing.T) {
 
 			Convey("With wrong username, wrong password", func() {
 
-				// Secretless will either be secretless:3306 (in Docker) or
-				// localhost:<mapped-port> (on the local machine)
-				var host string
-				var port int
-				options := make(map[string]string)
-				_, err := net.LookupIP("secretless")
-				if err == nil {
-					host = "secretless"
-					port = 3306
-				} else {
-					host = "localhost"
-					port = 13306
-					options["--ssl-mode"] = "DISABLED"
-				}
-
+				host, port, options := secretlessConfiguration()
 				options["--password"] = "wrongpassword"
 
 				cmdOut, err := mysql(host, port, "notatestuser", []string{}, options, []string{})
@@ -144,21 +136,7 @@ func TestMySQLHandler(t *testing.T) {
 
 			Convey("With empty username, empty password", func() {
 
-				// Secretless will either be secretless:3306 (in Docker) or
-				// localhost:<mapped-port> (on the local machine)
-				var host string
-				var port int
-				options := make(map[string]string)
-				_, err := net.LookupIP("secretless")
-				if err == nil {
-					host = "secretless"
-					port = 3306
-				} else {
-					host = "localhost"
-					port = 13306
-					options["--ssl-mode"] = "DISABLED"
-				}
-
+				host, port, options := secretlessConfiguration()
 				options["--password"] = ""
 
 				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
@@ -170,34 +148,21 @@ func TestMySQLHandler(t *testing.T) {
 
 		Convey("Upstream SSL", func() {
 
-			var host string
-			var port int
-			options := make(map[string]string)
-			_, err := net.LookupIP("secretless")
-			if err == nil {
-				host = "secretless"
-				port = 3306
-			} else {
-				host = "localhost"
-				port = 13306
-			}
-
+			host, port, options := secretlessConfiguration()
 			options["--password"] = ""
 			flags := []string{"--ssl"}
 
-			_, err = mysql(host, port, "", []string{}, options, flags)
+			_, err := mysql(host, port, "", []string{}, options, flags)
 
 			So(err, ShouldBeError)
 		})
 
 		Convey("sslmode default", func() {
 			Convey("Connect over TCP to server with TLS support", func() {
-				var host string
-				var port int
-				options := make(map[string]string)
-				host = "secretless"
-				port = 3306
 
+				options := make(map[string]string)
+				host := "secretless"
+				port := 3306
 				options["--password"] = ""
 
 				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})
@@ -207,12 +172,10 @@ func TestMySQLHandler(t *testing.T) {
 			})
 
 			Convey("Connect over TCP to server without TLS support", func() {
-				var host string
-				var port int
-				options := make(map[string]string)
-				host = "secretless"
-				port = 4306
 
+				options := make(map[string]string)
+				host := "secretless"
+				port := 4306
 				options["--password"] = ""
 
 				cmdOut, err := mysql(host, port, "", []string{}, options, []string{})

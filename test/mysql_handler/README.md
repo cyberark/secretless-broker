@@ -105,21 +105,6 @@ to connect via Unix socket.
 
 ## Running the test suite
 
-#### Run the tests locally
-Run MySQL in Docker:
-```sh-session
-$ docker-compose up -d mysql
-```
-
-Run Secretless Broker locally and execute tests:
-```sh-session
-$ ./run_dev_test
-...
-ok      github.com/cyberark/secretless-broker/test/mysql_handler   0.048s
-2018/01/11 15:06:56 Caught signal terminated: shutting down.
-```
-
-
 #### Run the tests in Docker
 Make sure you have built updated Secretless Broker binaries for Linux and updated Docker images before running the test suite.
 

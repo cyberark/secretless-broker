@@ -11,8 +11,13 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-// Default value when running tests (on Jenkins, eg)
-var SecretlessHost = "secretless"
+// TODO: move this to a util folder somewhere
+func stringPointer(s string) *string {
+	return &s
+}
+
+// ENV Configuration: Verbose output mode
+//
 var Verbose = func() bool {
 	debug := os.Getenv("VERBOSE")
 	for _, truthyVal := range []string{"true", "yes", "t", "y"} {
@@ -23,22 +28,82 @@ var Verbose = func() bool {
 	return false
 }()
 
-
-func init() {
-	// Allows us to specify a different host when doing development, for
-	// faster code reloading.  See the "dev" script in this folder.
-	//
+// ENV Configuration: Name of Secretless host to use
+//
+// Allows us to specify a different host when doing development, for
+// faster code reloading.  See the "dev" script in this folder.
+//
+var SecretlessHost = func() string {
 	if host, ok := os.LookupEnv("SECRETLESS_HOST"); ok {
-		SecretlessHost = host
+		return host
 	}
+	return "secretless"
+}()
 
-	// If the SecretlessHost is unavailable, bail out...
+// If the SecretlessHost is unavailable, bail out...
+//
+func init() {
 	_, err := net.LookupIP(SecretlessHost)
 	if err != nil {
 		fmt.Printf("ERROR: The secretless host '%s' wasn't found\n", SecretlessHost)
 		panic(err)
 	}
 }
+
+// TestCase allows us to treat similar tests with variations as data.
+//
+// By default, a TestCase is assumed not to error.  When we expect
+// an error, however, we can set AssertFailure = true.
+//
+// For CmdOutput, there are two cases we need:
+//
+// 1. Make no assertions on the command output (nil)
+// 2. Assert the command output is empty, or some specific string.
+//
+// A string pointer, with its possible nil value, lets us distinguish
+// those cases. A string would not.
+//
+type TestCase struct {
+	Flags         []string
+	AssertFailure bool
+	CmdOutput     *string
+}
+var SharedTestCases = func() map[string]TestCase  {
+	genericOutput := stringPointer("2")
+	return map[string]TestCase{
+		"With username, wrong password": {
+			Flags: []string{
+				"--user=testuser",
+				"--password=wrongpassword",
+			},
+			CmdOutput: genericOutput,
+		},
+		"With wrong username, wrong password": {
+			Flags: []string{
+				"--user=wrongusername",
+				"--password=wrongpassword",
+			},
+			CmdOutput: genericOutput,
+		},
+		"With empty username, empty password": {
+			Flags: []string{
+				"--user=",
+				"--password=",
+			},
+			CmdOutput: genericOutput,
+		},
+		"Client is not able to connect to Secretless via TLS": {
+			Flags: []string{
+				"--user=",
+				"--password=",
+				"--ssl-verify-server-cert=TRUE",
+				"--ssl",
+			},
+			AssertFailure: true,
+			CmdOutput: stringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
+		},
+	}
+}()
 
 // Flags is an array of strings passed directly to the mysql CLI. Eg:
 //
@@ -76,9 +141,8 @@ func runTestQuery(flags []string) (string, error) {
 
 func TestUnixSocketMySQLHandler(t *testing.T) {
 	Convey("Connect over a UNIX socket", t, func() {
-		testCases := SharedTestCases()
 
-		for testName, testCase := range testCases {
+		for testName, testCase := range SharedTestCases {
 			Convey(testName, func() {
 
 				testCase.Flags = append(testCase.Flags, "--socket=sock/mysql.sock")
@@ -100,9 +164,8 @@ func TestUnixSocketMySQLHandler(t *testing.T) {
 
 func TestTCPMySQLHandler(t *testing.T) {
 	Convey("Connect over TCP secretless->server TLS support and sslmode default", t, func() {
-		testCases := SharedTestCases()
 
-		for testName, testCase := range testCases {
+		for testName, testCase := range SharedTestCases{
 			Convey(testName, func() {
 				testCase.Flags = append(testCase.Flags, "--port=3306")
 				testCase.Flags = append(testCase.Flags, fmt.Sprintf("--host=%s", SecretlessHost))
@@ -123,60 +186,6 @@ func TestTCPMySQLHandler(t *testing.T) {
 	})
 }
 
-func stringPointer(s string) *string {
-	return &s
-}
-// TestCase represents the conditions and expected outcomes of a test
-//
-// For AssertFailure, we assume success without explicit failure
-//
-// For CmdOutput, there are two cases we need:
-// 1. Don't assert on the command output
-// 2. Assert the command output is empty, or otherwise
-// A string pointer distinguishes between those cases
-type TestCase struct {
-	Flags         []string
-	AssertFailure bool
-	CmdOutput     *string
-}
-func SharedTestCases() map[string]TestCase  {
-	genericOutput := stringPointer("2")
-	testCases := map[string]TestCase{
-		"With username, wrong password": {
-			Flags: []string{
-				"--user=testuser",
-				"--password=wrongpassword",
-			},
-			CmdOutput: genericOutput,
-		},
-		"With wrong username, wrong password": {
-			Flags: []string{
-				"--user=wrongusername",
-				"--password=wrongpassword",
-			},
-			CmdOutput: genericOutput,
-		},
-		"With empty username, empty password": {
-			Flags: []string{
-				"--user=",
-				"--password=",
-			},
-			CmdOutput: genericOutput,
-		},
-		"Client is not able to connect to Secretless via TLS": {
-			Flags: []string{
-				"--user=",
-				"--password=",
-				"--ssl-verify-server-cert=TRUE",
-				"--ssl",
-			},
-			AssertFailure: true,
-			CmdOutput: stringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
-		},
-	}
-
-	return testCases
-}
 
 
 func TestTLSMySQLHandler(t *testing.T) {

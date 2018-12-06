@@ -2,7 +2,7 @@
 
 ./stop
 
-docker-compose build mysql mysql_no_tls test
+docker-compose build mysql mysql_no_tls test > /dev/null
 
 docker-compose up \
   -d \

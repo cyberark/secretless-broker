@@ -282,6 +282,87 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}, nil
 }
 
+// Removes Client SSL Capability from Server Handshake Packet
+func RemoveSSLFromHandshakeV10(packet []byte) ([]byte, error) {
+	r := bytes.NewReader(packet)
+	initialLen := r.Len()
+
+	// Skip packet header
+	if _, err := GetPacketHeader(r); err != nil {
+		return nil, err
+	}
+
+	// Read ProtocolVersion
+	r.ReadByte()
+
+	// Read ServerVersion
+	ReadNullTerminatedString(r)
+
+	// Read ConnectionID
+	connectionIDBuf := make([]byte, 4)
+	if _, err := r.Read(connectionIDBuf); err != nil {
+		return nil, err
+	}
+
+	// Read AuthPluginDataPart1
+	var salt []byte
+	salt8 := make([]byte, 8)
+	if _, err := r.Read(salt8); err != nil {
+		return nil, err
+	}
+	salt = append(salt, salt8...)
+
+	// Skip filler
+	if _, err := r.ReadByte(); err != nil {
+		return nil, err
+	}
+
+	serverCapabilitiesIndex := initialLen - r.Len()
+	// Read ServerCapabilities
+	serverCapabilitiesLowerBuf := make([]byte, 2)
+	if _, err := r.Read(serverCapabilitiesLowerBuf); err != nil {
+		return nil, err
+	}
+
+	// Skip ServerDefaultCollation and StatusFlags
+	if _, err := r.Seek(3, io.SeekCurrent); err != nil {
+		return nil, err
+	}
+
+	// Read ExServerCapabilities
+	exServerCapabilitiesIndex := initialLen - r.Len()
+	serverCapabilitiesHigherBuf := make([]byte, 2)
+	if _, err := r.Read(serverCapabilitiesHigherBuf); err != nil {
+		return nil, err
+	}
+
+	newPacket := make([]byte, len(packet))
+	copy(newPacket, packet)
+
+	// Compose ServerCapabilities from 2 bufs
+	var serverCapabilitiesBuf []byte
+	serverCapabilitiesBuf = append(serverCapabilitiesBuf, serverCapabilitiesLowerBuf...)
+	serverCapabilitiesBuf = append(serverCapabilitiesBuf, serverCapabilitiesHigherBuf...)
+	serverCapabilities := binary.LittleEndian.Uint32(serverCapabilitiesBuf)
+
+	// Remove ClientSSL from serverCapabilities
+	serverCapabilities = serverCapabilities ^ ClientSSL
+
+	// update Lower part of the capability flags.
+	writeUint16(newPacket, serverCapabilitiesIndex, uint16(serverCapabilities))
+
+	// update Upper part of the capability flags.
+	writeUint16(newPacket, exServerCapabilitiesIndex, uint16(serverCapabilities>>16))
+
+	return newPacket, nil
+}
+
+// writes Uint16 starting from a given position in a byte slice
+func writeUint16(data []byte, pos int, value uint16) {
+	data[pos] = byte(value)
+	data[pos+1] = byte(value >> 8)
+}
+
 // HandshakeResponse41 represents handshake response packet sent by 4.1+ clients supporting clientProtocol41 capability,
 // if the server announced it in its initial handshake packet.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeResponse41
@@ -319,6 +400,12 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	// Check that the server is using protocol 4.1
 	if capabilityFlags&ClientProtocol41 == 0 {
 		return nil, errors.New("Protocol mismatch")
+	}
+
+	// client requesting SSL, we don't support it
+	clientRequestedSSL := capabilityFlags&ClientSSL > 0
+	if clientRequestedSSL {
+		return nil, errors.New("SSL Protocol mismatch")
 	}
 
 	// Read MaxPacketSize

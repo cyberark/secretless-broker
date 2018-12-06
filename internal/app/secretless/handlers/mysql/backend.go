@@ -3,7 +3,6 @@ package mysql
 import (
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -79,9 +78,20 @@ func (h *Handler) ConnectToBackend() (err error) {
 	// Proxy initial packet from server to client
 	// TODO can we skip this step and still compute client packet?
 	// how can we check the client accepts the protocol if we do?
-	packet, err := protocol.ProxyPacket(backend, h.GetClientConnection())
+	packet, err := protocol.ReadPacket(backend)
 	if err != nil {
-		return
+		return err
+	}
+
+	// Remove Client SSL Capability from Server Handshake Packet
+	packetWithNoSSL, err := protocol.RemoveSSLFromHandshakeV10(packet)
+	if err != nil {
+		return err
+	}
+
+	_, err = protocol.WritePacket(packetWithNoSSL, h.GetClientConnection())
+	if err != nil {
+		return err
 	}
 
 	// Unpack server packet
@@ -115,17 +125,6 @@ func (h *Handler) ConnectToBackend() (err error) {
 	handshakeResponse, err := protocol.UnpackHandshakeResponse41(handshakeResponsePacket)
 	if err != nil {
 		return
-	}
-
-	// client requesting SSL, we don't support it
-	clientRequestedSSL := handshakeResponse.CapabilityFlags & protocol.ClientSSL > 0
-	if clientRequestedSSL {
-		return &protocol.Error{
-			Code:     protocol.CRSSLConnectionError,
-			SQLSTATE: protocol.ErrorCodeInternalError,
-			Message:  fmt.Sprintf("SECRETLESS HATES TLS"),
-			SequenceID: 2,
-		}
 	}
 
 	// Ensure CapabilityFlag is set when using TLS

@@ -33,17 +33,17 @@ const ERR_HEADER = 0xff
 // GetMessage formats an Error into a protocol message.
 // https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
 func (e *Error) GetMessage() []byte {
-	data := make([]byte, 4, 16+len(e.Message))
-
+	data := make([]byte, 4, 4 + 1 + 2 + 1 + 5 + len(e.Message))
 	data = append(data, ERR_HEADER)
 	data = append(data, byte(e.Code), byte(e.Code>>8))
 
 	// TODO: for client41
-	//data = append(data, '#')
-	//data = append(data, e.SQLSTATE...)
+	data = append(data, '#')
+	data = append(data, e.SQLSTATE...)
 
 	data = append(data, e.Message...)
 
+	fmt.Println("well", e.Message)
 	// prepare message
 	length := len(data) - 4
 	data[0] = byte(length)

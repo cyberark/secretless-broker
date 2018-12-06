@@ -224,6 +224,9 @@ Date: Thu, 23 Aug 2018 12:58:16 GMT
 [{"id":1,"name":"Mr. Snuggles"}]
 ```
 
+For convenience, we've provided the `04_test_deployment.sh` script for you to
+test adding a pet and retrieving the list of pets.
+
 #### Rotate application database credentials
 
 In addition to the demo you've seen so far, you can also **rotate the DB credentials** and watch the app continue to perform as expected.

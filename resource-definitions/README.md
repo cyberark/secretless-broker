@@ -9,47 +9,9 @@ For more information about CRDs, you can find more information
 
 # Pre-requisites
 
-This functionality requires use of Kubernetes as well as Golang modules. Since current
-Kubernetes support is barely there, you will need a few things in the code to support
-running the code here (and in the examples) if you are using the `crd_watcher` and
-`crd_injector`:
-
-### Mercurial (`hg`)
-
-One of the modules that `k8s/client-go` uses requires Mercurial (`hg` on the CLI) to
-download it so you will need to make sure you have this pacakge on your system.
-
-macOS:
-```
-$ brew install mercurial
-```
-
-Linux:
-```
-# Alpine
-$ apk add -u mercurial
-
-# Debian-based
-$ apt update
-$ apt install mercurial
-```
-
-### Go.sum fixes for `k8s/client-go`
-
-`k8s/client-go` downloads a package with mismatching `go.sum` which may present itself
-as something like this during builds or attempts to run the code:
-```
-go: verifying k8s.io/client-go@v0.0.0-20180806134042-1f13a808da65: checksum mismatch
-    downloaded: h1:wQUEIVcXYxsDE8RXfUufo1nfnkeH/BEPhT175YIzea4=
-    go.sum:     h1:3w7osyUaXe5a1wxJrqkfjRhqYMfi9pCiB64J9bmtszk=
-```
-
-If you see this problem, you need to remove the `k8s/client-go` checksum from the
-repository-provided file with the following code and retry your build/run command:
-
-```
-sed -i '/^k8s.io\/client-go\ /d' go.sum
-```
+In order to work with this module, as well as if you are using the `crd_watcher`
+and `crd_injector`, you will need to be sure you have installed the
+[development prerequisites](../CONTRIBUTING.md#prerequisites).
 
 # Examples
 

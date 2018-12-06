@@ -12,6 +12,16 @@ RUN apk add -u curl \
                musl-dev
 
 COPY go.mod go.sum /secretless/
+
+# There are checksum mismatches in various environments with client-go package
+# so we for now manually remove it from the checksum file.
+# Related gh issue: https://github.com/kubernetes/kubernetes/issues/69040
+RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
+
 RUN go mod download
 
 COPY . .
+
+# There are checksum mismatches in various environments with client-go package
+# so we for now manually remove it from the checksum file.
+RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum

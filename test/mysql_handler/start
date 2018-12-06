@@ -16,4 +16,5 @@ docker-compose up \
   -d \
   secretless
 
-sleep 2
+./wait-for-secretless secretless
+

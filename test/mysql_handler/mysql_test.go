@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -12,22 +11,28 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var SecretlessHost string
+// Default value when running tests (on Jenkins, eg)
+var SecretlessHost = "secretless"
+var Verbose = func() bool {
+	debug := os.Getenv("VERBOSE")
+	for _, truthyVal := range []string{"true", "yes", "t", "y"} {
+		if truthyVal == debug {
+			return true
+		}
+	}
+	return false
+}()
 
 
 func init() {
 	// Allows us to specify a different host when doing development, for
 	// faster code reloading.  See the "dev" script in this folder.
 	//
-	if host := os.Getenv("SECRETLESS_HOST"); host != "" {
+	if host, ok := os.LookupEnv("SECRETLESS_HOST"); ok {
 		SecretlessHost = host
-	} else {
-		// Default value when running tests (on Jenkins, eg)
-		SecretlessHost = "secretless"
 	}
 
 	// If the SecretlessHost is unavailable, bail out...
-	//
 	_, err := net.LookupIP(SecretlessHost)
 	if err != nil {
 		fmt.Printf("ERROR: The secretless host '%s' wasn't found\n", SecretlessHost)
@@ -40,20 +45,31 @@ func init() {
 //     []string{"-u test", "--password=wrongpassword"}
 //
 func runTestQuery(flags []string) (string, error) {
-	args := []string{ "-e", "select count(*) from testdb.test" }
+	args := []string{"-e", "select count(*) from testdb.test"}
 
 	for _, v := range flags {
 		args = append(args, v)
 	}
 
-	log.Println(strings.Join(append([]string{"mysql"}, args...), " "))
+	// Pre command logs
+	Println("")
+	Println("---<< EXECUTED")
+	Println(strings.Join(append([]string{"mysql"}, args...), " "))
 
 	cmdOut, err := exec.Command("mysql", args...).CombinedOutput()
 
-	if err != nil {
-		fmt.Println("ERROR: ", err.Error())
-		fmt.Println("OUTPUT: ", string(cmdOut))
+	// Post command logs
+	if Verbose {
+		if err != nil {
+			Println("--->> RESULTS")
+			Println("----- ERROR: ")
+			Println(err.Error())
+		}
+		Println("----- OUTPUT: ")
+		Println(string(cmdOut))
 	}
+	Println("---<< END")
+	Println("")
 
 	return string(cmdOut), err
 }
@@ -124,35 +140,38 @@ type TestCase struct {
 	CmdOutput     *string
 }
 func SharedTestCases() map[string]TestCase  {
+	genericOutput := stringPointer("2")
 	testCases := map[string]TestCase{
 		"With username, wrong password": {
 			Flags: []string{
 				"--user=testuser",
 				"--password=wrongpassword",
 			},
-			CmdOutput: stringPointer("2"),
+			CmdOutput: genericOutput,
 		},
 		"With wrong username, wrong password": {
 			Flags: []string{
 				"--user=wrongusername",
 				"--password=wrongpassword",
 			},
-			CmdOutput: stringPointer("2"),
+			CmdOutput: genericOutput,
 		},
 		"With empty username, empty password": {
 			Flags: []string{
 				"--user=",
 				"--password=",
 			},
-			CmdOutput: stringPointer("2"),
+			CmdOutput: genericOutput,
 		},
 		"Client is not able to connect to Secretless via TLS": {
 			Flags: []string{
 				"--user=",
 				"--password=",
+				"--ssl-verify-server-cert=TRUE",
 				"--ssl",
 			},
 			AssertFailure: true,
+			CmdOutput: stringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 		},
 	}
 

@@ -59,6 +59,9 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     command: go test -v ./test/mysql_handler
+    environment:
+      SECRETLESS_HOST:
+      VERBOSE:
     volumes:
       - mysql-socket:/secretless/test/mysql_handler/sock
 

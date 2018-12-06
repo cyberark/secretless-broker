@@ -39,6 +39,7 @@ func (h *Handler) abort(err error) {
 				Code:     protocol.CRUnknownError,
 				SQLSTATE: protocol.ErrorCodeInternalError,
 				Message:  err.Error(),
+				SequenceID: 1,
 			}
 		}
 

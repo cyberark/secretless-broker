@@ -43,7 +43,6 @@ func (e *Error) GetMessage() []byte {
 
 	data = append(data, e.Message...)
 
-	fmt.Println("well", e.Message)
 	// prepare message
 	length := len(data) - 4
 	data[0] = byte(length)

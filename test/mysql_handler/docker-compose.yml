@@ -31,7 +31,7 @@ services:
 
   secretless-dev:
     image: secretless-dev
-    command: go run cmd/secretless-broker/main.go -f /secretless.yml
+    command: ./bin/reflex
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306

@@ -24,10 +24,17 @@ RUN groupadd -r secretless \
     chown secretless:secretless /usr/local/lib/secretless \
                                 /sock
 
+# these are binaries necessary for development
+# the happen to be written in Go:
+#
+# go-junit-report => Convert go test output to junit xml
+# goconvey => Go testing tool
+# reflex => Utility for watching files and executing process in response to changes
 RUN go get -u github.com/jstemmer/go-junit-report && \
     go get github.com/smartystreets/goconvey && \
-    go get golang.org/x/tools/cmd/goimports
+    go get github.com/cespare/reflex
 
+# go mod dependency management for the secretless project
 COPY go.mod go.sum /secretless/
 RUN go mod download
 

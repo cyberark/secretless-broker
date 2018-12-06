@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+# watch for changes to source files then rebuild and run secretless-broker
+reflex -r '\.go$' -R '\_test.go$' -s -- \
+  go run cmd/secretless-broker/main.go -f /secretless.yml --watch

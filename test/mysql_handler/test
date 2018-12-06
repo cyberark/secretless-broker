@@ -1,27 +1,26 @@
 #!/bin/bash -e
 
 local_test=false
-local_dev=false
 hot_test=false
 
 help_and_exit() {
   local retval=${1:-1}
   cat <<EOF
 Options:
-  -d for running the latest secretless code; mounts secretless source directory and recreates secretless-dev container when running the tests
-  -h hot testing; use secretless-dev but DO not recreate secretless-dev container (only work with -d)
+  -d runs tests against secretless-dev container
   -l mount the test folder when running the tests
   -v verbose mode; provides more verbose output for test cases
 EOF
   exit "$retval"
 }
 
-while getopts :ldhv opt; do
+export SECRETLESS_HOST=secretless
+export VERBOSE=false
+while getopts :dlv opt; do
     case $opt in
-        d) local_dev=true;;
-        h) hot_test=true;;
+        d) SECRETLESS_HOST=secretless-dev;;
         l) local_test=true;;
-        v) export VERBOSE=true;;
+        v) VERBOSE=true;;
        \?) echo "Unknown option -$OPTARG"; help_and_exit 1;;
     esac
 done
@@ -29,16 +28,6 @@ done
 docker_args=""
 if $local_test; then
   docker_args="-v $(cd ../..; pwd):/secretless"
-fi
-
-export SECRETLESS_HOST=secretless
-if [[ $local_dev = true ]]; then
-  if [[ ! $hot_test = true ]]; then
-    docker-compose run --rm test rm -f /secretless/test/mysql_handler/sock/mysql.sock
-    docker-compose up --force-recreate -d secretless-dev
-    ./wait-for-secretless secretless-dev
-  fi
-  export SECRETLESS_HOST=secretless-dev
 fi
 
 docker-compose run \

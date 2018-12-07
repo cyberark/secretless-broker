@@ -1,14 +1,10 @@
 #!/bin/bash -e
 
-local_test=false
-hot_test=false
-
 help_and_exit() {
   local retval=${1:-1}
   cat <<EOF
 Options:
   -d runs tests against secretless-dev container
-  -l mount the test folder when running the tests
   -v verbose mode; provides more verbose output for test cases
 EOF
   exit "$retval"
@@ -16,22 +12,15 @@ EOF
 
 export SECRETLESS_HOST=secretless
 export VERBOSE=false
-while getopts :dlv opt; do
+while getopts :dv opt; do
     case $opt in
         d) SECRETLESS_HOST=secretless-dev;;
-        l) local_test=true;;
         v) VERBOSE=true;;
        \?) echo "Unknown option -$OPTARG"; help_and_exit 1;;
     esac
 done
 
-docker_args=""
-if $local_test; then
-  docker_args="-v $(cd ../..; pwd):/secretless"
-fi
-
 docker-compose run \
   --rm \
   --no-deps \
-  $docker_args \
   test

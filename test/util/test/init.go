@@ -1,22 +1,33 @@
-package pkg
+package test
 
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
 
 // ENV Configuration: Verbose output mode
 //
 var Verbose = func() bool {
-	debug := os.Getenv("VERBOSE")
+	debug := os.Getenv("DB_PROTOCOL")
 	for _, truthyVal := range []string{"true", "yes", "t", "y"} {
 		if truthyVal == debug {
 			return true
 		}
 	}
 	return false
+}()
+
+// ENV Configuration: Database protocol
+//
+var DBProtocol = func() string {
+	dBProtocol := os.Getenv("TEST_DB_PROTOCOL")
+	if dBProtocol == "" {
+		fmt.Printf("ERROR: $TEST_DB_PROTOCOL envvar wasn't found\n")
+		panic("$TEST_DB_PROTOCOL")
+	}
+
+	return dBProtocol
 }()
 
 // ENV Configuration: Name of Secretless host to use
@@ -31,16 +42,17 @@ var SecretlessHost = func() string {
 	return "secretless"
 }()
 
-var TestDir string
+// TODO: explain the reasoning behind the below
+// NOTE: fixtures are generated in bash script
+// this requires coordination between the bash and the Go code
 func init() {
-	secretlessRoot, ok := os.LookupEnv("PROJECT_ROOT")
+	testRoot, ok := os.LookupEnv("TEST_ROOT")
 	if !ok {
-		fmt.Printf("ERROR: Secretless $PROJECT_ROOT envvar wasn't found\n")
-		panic("$PROJECT_ROOT")
+		fmt.Printf("ERROR: $TEST_ROOT envvar wasn't found\n")
+		panic("$TEST_ROOT")
 	}
 
-	TestDir = filepath.Join(secretlessRoot, "./test/mysql_handler")
-	os.Chdir(TestDir)
+	os.Chdir(testRoot)
 
 	// set valid-ca fixture
 	validCABytes, err := ioutil.ReadFile("./fixtures/valid-ca.pem")

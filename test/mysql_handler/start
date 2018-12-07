@@ -20,15 +20,19 @@ docker-compose up \
 ./wait-for-mysql mysql
 
 # generate fixtures
+#
+# NOTE: the tests depend on
+# + secretless.yml auto-generation (also depended on by the secretless container)
+# + fixture generation
+# so there needs to be coordination of this bash script and the go files
+#
 ## valid-ca.pem
 ## NOTE this should come before secretless.yml because it is required by the autogen
 docker-compose exec -T mysql cat /var/lib/mysql/ca.pem > fixtures/valid-ca.pem
 ## secretless.yml
-touch fixtures/secretless.yml
 docker-compose run --rm test \
   bash -c "
-  cd test/mysql_handler && \
-  go run cmd/generate_secretless_config.go
+  go run ./test/util/test/cmd/generate_secretless_yml.go
 "
 
 # start secretless once mysql is running

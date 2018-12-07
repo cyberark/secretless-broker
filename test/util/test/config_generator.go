@@ -1,4 +1,4 @@
-package pkg
+package test
 
 import (
 	"fmt"
@@ -11,17 +11,17 @@ func sharedCredentials() []config.Variable {
 		{
 			Name:     "port",
 			Provider: "env",
-			ID:       "MYSQL_PORT",
+			ID:       "DB_PORT",
 		},
 		{
 			Name:     "username",
-			Provider: "literal",
-			ID:       "testuser",
+			Provider: "env",
+			ID:       "DB_USER",
 		},
 		{
 			Name:     "password",
 			Provider: "env",
-			ID:       "MYSQL_PASSWORD",
+			ID:       "DB_PASSWORD",
 		},
 	}
 }
@@ -85,7 +85,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 					listener := config.Listener{
 						Name: fmt.Sprintf("listener_%v", portNumber),
 						// TODO: grab value from envvar for flexibility
-						Protocol: "mysql",
+						Protocol: DBProtocol,
 						Debug: true,
 					}
 					handler := config.Handler{
@@ -113,7 +113,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 					// serverTLSTypeValue
 					hostVariable := config.Variable{
 						Name:     "host",
-						Provider: "literal",
+						Provider: "env",
 						ID: 	  string(serverTLSTypeValue),
 					}
 					handler.Credentials = append(handler.Credentials, hostVariable)

@@ -5,7 +5,7 @@
 //     function to return all possible values
 //     methods on the type
 //
-package pkg
+package test
 
 import "github.com/cyberark/secretless-broker/pkg/secretless/config"
 
@@ -21,8 +21,8 @@ func ListenerTypeValues()[]ListenerType {
 type ServerTLSType string
 // TODO: turn to var and grab values from envvars for flexibility
 const (
-	TLS ServerTLSType = "mysql"
-	NoTLS = "mysql_no_tls"
+	TLS ServerTLSType = "DB_HOST_TLS"
+	NoTLS = "DB_HOST_NO_TLS"
 )
 func ServerTLSTypeValues()[]ServerTLSType {
 	return []ServerTLSType{TLS, NoTLS}

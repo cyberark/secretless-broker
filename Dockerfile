@@ -12,7 +12,11 @@ ENV GOOS=linux \
 COPY go.mod go.sum /secretless/
 RUN go mod download
 
-COPY . /secretless
+# secretless source files
+COPY ./cmd /secretless/cmd
+COPY ./internal /secretless/internal
+COPY ./pkg /secretless/pkg
+COPY ./resource-definitions /secretless/resource-definitions
 
 RUN go build -o dist/$GOOS/$GOARCH/secretless-broker ./cmd/secretless-broker && \
     go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2

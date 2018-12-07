@@ -71,6 +71,12 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 
 	liveConfigurations := make(LiveConfigurations, 0)
 
+	// TODO: Create a utility xprod function similar to the one here:
+	//     https://stackoverflow.com/questions/29002724/implement-ruby-style-cartesian-product-in-go
+	// so we can avoid the nested for loops
+	//
+	// TODO: Remove "Value" suffixes -- no need for them, the lower case first letter
+	// distinguishes them from the type itself, so it only degrades readability.
 	portNumber := 3306
 	for _, serverTLSTypeValue := range ServerTLSTypeValues() {
 		for _, listenerTypeValue := range ListenerTypeValues() {
@@ -108,13 +114,11 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 					}
 
 					//sslModeTypeValue
+					// TODO: Make this same "toConfigVariable" refactoring for the other types
+					// TODO: Treating Default separately is a special case smell.  Can we avoid it?
+					//
 					if sslModeTypeValue != Default {
-						sslModeVariable := config.Variable{
-							Name:     "sslmode",
-							Provider: "literal",
-							ID:		   string(sslModeTypeValue),
-						}
-						handler.Credentials = append(handler.Credentials, sslModeVariable)
+						handler.Credentials = append(handler.Credentials, sslModeTypeValue.toConfigVariable())
 					}
 
 					// serverTLSTypeValue

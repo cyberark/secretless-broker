@@ -58,12 +58,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: go test -v ./test/mysql_handler
+    command: go test -v ./test/mysql_handler/tests
     environment:
       SECRETLESS_HOST:
       VERBOSE:
     volumes:
-      - mysql-socket:/secretless/test/mysql_handler/sock
+      - mysql-socket:/sock
 
   dev:
     build:

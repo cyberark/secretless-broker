@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"crypto/tls"
 	"errors"
 	"log"
 	"net"
@@ -65,6 +64,13 @@ func (h *Handler) ConfigureBackend() (err error) {
 func (h *Handler) ConnectToBackend() (err error) {
 	var backend net.Conn
 
+	// resolve TLS Configuration from BackendConfig Options
+	tlsConf, err := protocol.ResolveTLSConfig(h.BackendConfig.Options)
+	requestedSSL := tlsConf.UseTLS
+	if err != nil {
+		return
+	}
+
 	address := h.BackendConfig.Host + ":" + strconv.FormatUint(uint64(h.BackendConfig.Port), 10)
 
 	if backend, err = net.Dial("tcp", address); err != nil {
@@ -99,8 +105,6 @@ func (h *Handler) ConnectToBackend() (err error) {
 	if err != nil {
 		return
 	}
-
-	requestedSSL := true
 
 	// requested SSL but server doesn't support it
 	if requestedSSL && serverHandshake.ServerCapabilities&protocol.ClientSSL == 0 {
@@ -201,10 +205,10 @@ func (h *Handler) ConnectToBackend() (err error) {
 		packedHandshakeRespPacket[3]++
 
 		// Switch to TLS
-		tlsClient := tls.Client(backend, &tls.Config{
-			InsecureSkipVerify: true,
-		})
-		backend = tlsClient
+		backend, err = protocol.HandleSSLUpgrade(backend, tlsConf)
+		if err != nil {
+			return
+		}
 	}
 
 	// Send configured client response packet to server

@@ -4,6 +4,14 @@
 
 docker-compose build
 
+# autogen secretless.yml
+touch secretless.yml
+docker-compose run --rm secretless-dev \
+  bash -c "
+  cd test/mysql_handler && \
+  go run cmd/generate_secretless_config.go
+"
+
 docker-compose up \
   -d \
   mysql mysql_no_tls
@@ -17,4 +25,3 @@ docker-compose up \
   secretless
 
 ./wait-for-secretless secretless
-

@@ -1,10 +1,9 @@
 package main
 
 import (
+	. "github.com/cyberark/secretless-broker/test/mysql_handler/pkg"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-
-	. "github.com/cyberark/secretless-broker/test/mysql_handler/pkg"
 )
 
 func main()  {
@@ -13,5 +12,5 @@ func main()  {
 	if err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile("secretless.yml", d, 0644)
+	ioutil.WriteFile("./fixtures/secretless.yml", d, 0644)
 }

@@ -94,7 +94,7 @@ You can also run:
 ```
 cd test/mysql_handler/
 ./start
-docker-compose run --rm dev
+docker-compose run --rm secretless-dev
 ```
 
 Then, to connect with MySQL you can run either

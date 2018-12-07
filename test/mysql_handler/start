@@ -25,10 +25,10 @@ docker-compose up \
 docker-compose exec -T mysql cat /var/lib/mysql/ca.pem > fixtures/valid-ca.pem
 ## secretless.yml
 touch fixtures/secretless.yml
-docker-compose run --rm secretless-dev \
+docker-compose run --rm test \
   bash -c "
   cd test/mysql_handler && \
-  go run cmd/generate_secretless_config.go fixtures/secretless.yml
+  go run cmd/generate_secretless_config.go
 "
 
 # start secretless once mysql is running

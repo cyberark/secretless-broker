@@ -1,3 +1,10 @@
+// Code formatting/organization on this page is like this:
+//
+//     type def
+//     type values
+//     function to return all possible values
+//     methods on the type
+//
 package pkg
 
 import "github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -34,6 +41,8 @@ func SSlModeTypeValues()[]SSLModeType {
 	return []SSLModeType{Default, Disable, Require, VerifyCA, VerifyFull}
 }
 
+// For Secretless, sslmode="" is equivalent to not setting sslmode at all.
+// Therefore, this will work for the "Default" case too.
 func (sslMode SSLModeType) toConfigVariable() config.Variable {
 	return config.Variable{
 		Name:     "sslmode",
@@ -43,13 +52,21 @@ func (sslMode SSLModeType) toConfigVariable() config.Variable {
 }
 
 type SSLRootCertType string
-// TODO: turn to var and grab values from envvars for flexibility
 var (
 	Undefined SSLRootCertType = ""
-	Valid     SSLRootCertType = "TODO: add valid"
+	Valid     SSLRootCertType = "Dynamically Set: Valid"
 	Malformed SSLRootCertType = "malformed"
-	Invalid   SSLRootCertType = "TODO: add invalid"
+	Invalid   SSLRootCertType = "Dynamically Set: Invalid"
 )
+
 func SSLRootCertTypeValues()[]SSLRootCertType {
 	return []SSLRootCertType{Undefined, Valid, Invalid, Malformed}
+}
+
+func (sslRootCertType SSLRootCertType) toConfigVariable() config.Variable {
+	return config.Variable{
+		Name:     "sslrootcert",
+		Provider: "literal",
+		ID:		   string(sslRootCertType),
+	}
 }

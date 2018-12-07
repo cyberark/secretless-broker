@@ -104,22 +104,11 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 					}
 
 					// sslRootCertTypeValue
-					if sslRootCertTypeValue != Undefined {
-						sslRootCertVariable := config.Variable{
-							Name:     "sslrootcert",
-							Provider: "literal",
-							ID:		   string(sslRootCertTypeValue),
-						}
-						handler.Credentials = append(handler.Credentials, sslRootCertVariable)
-					}
+					handler.Credentials = append(handler.Credentials, sslRootCertTypeValue.toConfigVariable())
 
 					//sslModeTypeValue
 					// TODO: Make this same "toConfigVariable" refactoring for the other types
-					// TODO: Treating Default separately is a special case smell.  Can we avoid it?
-					//
-					if sslModeTypeValue != Default {
-						handler.Credentials = append(handler.Credentials, sslModeTypeValue.toConfigVariable())
-					}
+					handler.Credentials = append(handler.Credentials, sslModeTypeValue.toConfigVariable())
 
 					// serverTLSTypeValue
 					hostVariable := config.Variable{

@@ -6,15 +6,22 @@ docker-compose build
 
 docker-compose up \
   -d \
-  pg
+  pg pg_no_tls
 
-./wait-for-pg
+./wait-for-pg pg
+./wait-for-pg pg_no_tls
 
 # start secretless once pg is running
 pg_cid=$(docker-compose ps -q pg)
 pg_ip=$(docker inspect \
   -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $pg_cid)
-export PG_ADDRESS=$pg_ip:5432
+
+pg_no_tls_cid=$(docker-compose ps -q pg_no_tls)
+pg_no_tls_ip=$(docker inspect \
+  -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $pg_no_tls_cid)
+
+export PG_NO_TLS_ADDRESS=$pg_no_tls_ip:5432
+export PG_TLS_ADDRESS=$pg_ip:5432
 docker-compose up \
   -d \
   secretless

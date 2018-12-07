@@ -1,9 +1,10 @@
 package pg
 
 import (
+	"fmt"
 	"log"
 	"net"
-	"strings"
+	"net/url"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
@@ -13,6 +14,8 @@ import (
 // BackendConfig field.
 func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{Options: make(map[string]string)}
+	result.Options = make(map[string]string)
+	result.QueryStrings = make(map[string]string)
 
 	var values map[string][]byte
 	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
@@ -24,11 +27,17 @@ func (h *Handler) ConfigureBackend() (err error) {
 	}
 
 	if address := values["address"]; address != nil {
-		// Form of url is : 'dbcluster.myorg.com:5432/reports'
-		tokens := strings.SplitN(string(address), "/", 2)
-		result.Address = tokens[0]
-		if len(tokens) == 2 {
-			result.Database = tokens[1]
+		u, err := url.Parse(fmt.Sprintf("postgres://%s", address))
+		if err != nil {
+			return err
+		}
+
+		result.Address = u.Host
+		result.Database = u.Path
+		for k, v := range u.Query() {
+			if len(v) > 0 {
+				result.QueryStrings[k] = string(v[0])
+			}
 		}
 	}
 
@@ -43,7 +52,6 @@ func (h *Handler) ConfigureBackend() (err error) {
 	delete(values, "username")
 	delete(values, "password")
 
-	result.Options = make(map[string]string)
 	for k, v := range values {
 		result.Options[k] = string(v)
 	}
@@ -63,6 +71,11 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	debug := util.OptionalDebug(h.GetConfig().Debug)
 	debug("Sending startup message")
+
+	connection, err = ssl(connection, h.BackendConfig.QueryStrings)
+	if err != nil {
+		return
+	}
 
 	startupMessage := protocol.CreateStartupMessage(h.BackendConfig.Username, h.ClientOptions.Database, h.BackendConfig.Options)
 

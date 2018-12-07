@@ -68,4 +68,36 @@ func TestPGHandler(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(cmdOut, ShouldContainSubstring, "1 row")
 	})
+
+	Convey("TLS defaults", t, func() {
+		Convey("Connect over TCP to server with TLS support", func() {
+			_, err := net.LookupIP("pg")
+			if err != nil {
+				t.Error(err)
+			}
+
+			host := "secretless"
+			port := 15432
+
+			cmdOut, err := psql(host, port, "", []string{})
+
+			So(err, ShouldBeNil)
+			So(cmdOut, ShouldContainSubstring, "1 row")
+		})
+
+		Convey("Connect over TCP to server without TLS support", func() {
+			_, err := net.LookupIP("pg")
+			if err != nil {
+				t.Error(err)
+			}
+
+			host := "secretless"
+			port := 25432
+
+			cmdOut, err := psql(host, port, "", []string{})
+
+			So(err, ShouldNotBeNil)
+			So(cmdOut, ShouldContainSubstring, "psql: FATAL:  the backend does not allow SSL connections")
+		})
+	})
 }

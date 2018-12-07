@@ -68,14 +68,8 @@ services:
       VERBOSE:
     volumes:
       - mysql-socket:/sock
-
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ../..:/secretless
-      - mysql-socket:/sock
+      # NOTE: fixtures are dynamically generated and don't exist in the secretless
+      - ./fixtures:/secretless/test/mysql_handler/fixtures
 
 volumes:
   mysql-socket:

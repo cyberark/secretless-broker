@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Meet Us at KubeCon!"
-date: 2018-09-21 09:00:00 -0600
+date: 2018-12-06 09:00:00 -0600
 author: Geri Jennings
 categories: blog
 published: true

@@ -13,7 +13,6 @@ we hope to see you there!"
   <img src="/img/secretless_at_kubecon_2018.png" alt="Meet us at KubeCon!">
 </div>
 
-# Meet us at KubeCon NA!
 The CyberArk development team responsible for the Secretless Broker project is excited
 to be traveling to KubeCon in Seattle next week! CyberArk is a proud sponsor of KubeCon
 North America 2018 from December 10 to December 13. CyberArk will also be

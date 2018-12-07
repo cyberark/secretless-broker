@@ -3,16 +3,17 @@ package tests
 import (
 	"testing"
 
-	. "github.com/cyberark/secretless-broker/test/mysql_handler/pkg"
+	. "github.com/cyberark/secretless-broker/test/util/test"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestSSLMySQLHandler(t *testing.T) {
+func TestSSL(t *testing.T) {
 
 	testCases := []TestCase{
 		{
-			TestData: TestData{
+			TestDefinition: TestDefinition{
 				Description:   "server_tls, sslmode=default",
+				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -21,8 +22,9 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
+			TestDefinition: TestDefinition{
 				Description:   "server_tls, sslmode=disable",
+				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -31,8 +33,9 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
+			TestDefinition: TestDefinition{
 				Description:   "server_tls, sslmode=require, sslrootcert=none",
+				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -41,10 +44,10 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
-				Description:   "server_tls, sslmode=require, sslrootcert=invalid",
-				AssertFailure: true,
-				CmdOutput:     StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
+			TestDefinition: TestDefinition{
+				Description: "server_tls, sslmode=require, sslrootcert=invalid",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -54,10 +57,10 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
-				Description:   "server_tls, sslmode=require, sslrootcert=malformed",
-				AssertFailure: true,
-				CmdOutput:     StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
+			TestDefinition: TestDefinition{
+				Description: "server_tls, sslmode=require, sslrootcert=malformed",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -67,10 +70,10 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
-				Description:   "server_tls, sslmode=verify-ca, sslrootcert=none",
-				AssertFailure: true,
-				CmdOutput:     StringPointer("ERROR 2000 (HY000): x509: certificate signed by unknown authority"),
+			TestDefinition: TestDefinition{
+				Description: "server_tls, sslmode=verify-ca, sslrootcert=none",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer("ERROR 2000 (HY000): x509: certificate signed by unknown authority"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -80,8 +83,9 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
+			TestDefinition: TestDefinition{
 				Description:   "server_tls, sslmode=verify-ca, sslrootcert=valid",
+				ShouldPass:    true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -91,10 +95,10 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
-				Description:   "server_tls, sslmode=verify-ca, sslrootcert=invalid",
-				AssertFailure: true,
-				CmdOutput:     StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
+			TestDefinition: TestDefinition{
+				Description: "server_tls, sslmode=verify-ca, sslrootcert=invalid",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -104,10 +108,10 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
-				Description:   "server_tls, sslmode=verify-ca, sslrootcert=malformed",
-				AssertFailure: true,
-				CmdOutput:     StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
+			TestDefinition: TestDefinition{
+				Description: "server_tls, sslmode=verify-ca, sslrootcert=malformed",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -117,10 +121,10 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
-				Description:   "server_no_tls, sslmode=default",
-				AssertFailure: true,
-				CmdOutput:     StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it"),
+			TestDefinition: TestDefinition{
+				Description: "server_no_tls, sslmode=default",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
@@ -130,8 +134,9 @@ func TestSSLMySQLHandler(t *testing.T) {
 			},
 		},
 		{
-			TestData: TestData{
+			TestDefinition: TestDefinition{
 				Description:   "server_no_tls, sslmode=disable",
+				ShouldPass:    true,
 				Flags:         nil,
 			},
 			AbstractConfiguration: AbstractConfiguration{
@@ -145,7 +150,7 @@ func TestSSLMySQLHandler(t *testing.T) {
 
 	Convey("SSL functionality", t, func() {
 		for _, testCase := range testCases {
-			Runner(testCase)
+			MyRunTestCase(testCase)
 		}
 	})
 }

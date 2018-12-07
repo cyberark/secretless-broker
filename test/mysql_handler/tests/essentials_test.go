@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/cyberark/secretless-broker/test/mysql_handler/pkg"
+	. "github.com/cyberark/secretless-broker/test/util/test"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestCommonMySQLHandler(t *testing.T) {
-	testCases := []TestData{
+func TestEssentials(t *testing.T) {
+	testCases := []TestDefinition{
 		{
 			Description: "with username, wrong password",
+			ShouldPass: true,
 			Flags: []string{
 				"--user=testuser",
 				"--password=wrongpassword",
@@ -19,6 +20,7 @@ func TestCommonMySQLHandler(t *testing.T) {
 		},
 		{
 			Description: "with wrong username, wrong password",
+			ShouldPass: true,
 			Flags: []string{
 				"--user=wrongusername",
 				"--password=wrongpassword",
@@ -26,6 +28,7 @@ func TestCommonMySQLHandler(t *testing.T) {
 		},
 		{
 			Description: "with empty username, empty password",
+			ShouldPass: true,
 			Flags: []string{
 				"--user=",
 				"--password=",
@@ -33,14 +36,14 @@ func TestCommonMySQLHandler(t *testing.T) {
 		},
 		{
 			Description: "client -> TLS -> secretless",
+			ShouldPass: false,
 			Flags: []string{
 				"--user=",
 				"--password=",
 				"--ssl-verify-server-cert=TRUE",
 				"--ssl",
 			},
-			AssertFailure: true,
-			CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
+			CmdOutput:  StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 		},
 	}
 
@@ -55,9 +58,9 @@ func TestCommonMySQLHandler(t *testing.T) {
 						SSLModeType:     Default,
 						SSLRootCertType: Undefined,
 					},
-					TestData: testCaseData,
+					TestDefinition: testCaseData,
 				}
-				Runner(tc)
+				MyRunTestCase(tc)
 			}
 		})
 	}

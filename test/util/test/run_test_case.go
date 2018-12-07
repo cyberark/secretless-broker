@@ -1,0 +1,45 @@
+package test
+
+import (
+	"fmt"
+	"github.com/smartystreets/goconvey/convey"
+)
+
+// set by importer of this file
+const successOutput = "2"
+func NewRunTestCase(runQuery RunQuery, testSuiteConfigurations LiveConfigurations) RunTestCase {
+	return func (testCase TestCase) {
+		var expectation = "throws"
+		if testCase.ShouldPass {
+			expectation = "succeeds"
+		}
+
+		convey.Convey(fmt.Sprintf("%s: %s", expectation, testCase.Description), func() {
+			// TODO: possibly move this logic into testCase
+			liveConfiguration := testSuiteConfigurations.Find(testCase.AbstractConfiguration)
+			testCase.Flags = append(testCase.Flags, liveConfiguration.ConnectionFlags()...)
+
+			cmdOut, err := runQuery(testCase.Flags)
+
+			if testCase.ShouldPass {
+				convey.So(err, convey.ShouldBeNil)
+				convey.So(cmdOut, convey.ShouldContainSubstring, successOutput)
+			} else {
+				convey.So(err, convey.ShouldNotBeNil)
+			}
+
+			if testCase.CmdOutput != nil {
+				convey.So(cmdOut, convey.ShouldContainSubstring, *testCase.CmdOutput)
+			}
+
+		})
+	}
+}
+
+// Flags is an array of strings passed directly to the database CLI. Eg:
+//
+//     []string{"-u test", "--password=wrongpassword"}
+//
+// allows us to treat queries in mysql and postgres via a common abstraction
+type RunQuery func(flags []string) (string, error)
+type RunTestCase func(testCase TestCase)

@@ -9,9 +9,9 @@ import (
 )
 
 func Runner(testCase TestCase) {
-	var expectation = "✅ succeeds"
+	var expectation = "succeeds"
 	if testCase.AssertFailure {
-		expectation = "❎ throws"
+		expectation = "throws"
 	}
 
 	convey.Convey(fmt.Sprintf("%s: %s", expectation, testCase.Description), func() {

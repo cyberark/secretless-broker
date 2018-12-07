@@ -1,5 +1,7 @@
 package pkg
 
+import "github.com/cyberark/secretless-broker/pkg/secretless/config"
+
 type ListenerType string
 const (
 	TCP ListenerType = "TCP"
@@ -27,8 +29,17 @@ const (
 	VerifyCA = "verify-ca"
 	VerifyFull = "verify-full"
 )
+
 func SSlModeTypeValues()[]SSLModeType {
 	return []SSLModeType{Default, Disable, Require, VerifyCA, VerifyFull}
+}
+
+func (sslMode SSLModeType) toConfigVariable() config.Variable {
+	return config.Variable{
+		Name:     "sslmode",
+		Provider: "literal",
+		ID:		   string(sslMode),
+	}
 }
 
 type SSLRootCertType string

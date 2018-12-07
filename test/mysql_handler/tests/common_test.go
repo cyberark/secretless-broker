@@ -44,7 +44,7 @@ func TestCommonMySQLHandler(t *testing.T) {
 		},
 	}
 
-	for _, listenerTypeValue := range ListenerTypeValues {
+	for _, listenerTypeValue := range ListenerTypeValues() {
 		Convey(fmt.Sprintf("Connect over %s", listenerTypeValue), t, func() {
 
 			for _, testCaseData := range testCases {

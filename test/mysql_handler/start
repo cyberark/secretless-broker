@@ -1,16 +1,16 @@
 #!/bin/bash -ex
 
+SECRETLESS_HOST=secretless
+while getopts :d opt; do
+    case $opt in
+        d) SECRETLESS_HOST=secretless-dev;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
 ./stop
 
 docker-compose build
-
-# autogen secretless.yml
-touch secretless.yml
-docker-compose run --rm secretless-dev \
-  bash -c "
-  cd test/mysql_handler && \
-  go run cmd/generate_secretless_config.go
-"
 
 docker-compose up \
   -d \
@@ -19,9 +19,21 @@ docker-compose up \
 ./wait-for-mysql mysql_no_tls
 ./wait-for-mysql mysql
 
+# generate fixtures
+## valid-ca.pem
+## NOTE this should come before secretless.yml because it is required by the autogen
+docker-compose exec -T mysql cat /var/lib/mysql/ca.pem > fixtures/valid-ca.pem
+## secretless.yml
+touch fixtures/secretless.yml
+docker-compose run --rm secretless-dev \
+  bash -c "
+  cd test/mysql_handler && \
+  go run cmd/generate_secretless_config.go fixtures/secretless.yml
+"
+
 # start secretless once mysql is running
 docker-compose up \
   -d \
-  secretless
+  ${SECRETLESS_HOST}
 
-./wait-for-secretless secretless
+./wait-for-secretless ${SECRETLESS_HOST}

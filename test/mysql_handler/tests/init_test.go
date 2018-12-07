@@ -16,5 +16,6 @@ func init() {
 		panic(err)
 	}
 
+	// generate TestSuiteLiveConfigurations
 	_, TestSuiteLiveConfigurations = GenerateConfigurations()
 }

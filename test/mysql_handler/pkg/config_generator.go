@@ -72,10 +72,10 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 	liveConfigurations := make(LiveConfigurations, 0)
 
 	portNumber := 3306
-	for _, serverTLSTypeValue := range ServerTLSTypeValues {
-		for _, listenerTypeValue := range ListenerTypeValues {
-			for _, sslModeTypeValue := range SSlModeTypeValues {
-				for _, sslRootCertTypeValue := range SSLRootCertTypeValue {
+	for _, serverTLSTypeValue := range ServerTLSTypeValues() {
+		for _, listenerTypeValue := range ListenerTypeValues() {
+			for _, sslModeTypeValue := range SSlModeTypeValues() {
+				for _, sslRootCertTypeValue := range SSLRootCertTypeValues() {
 					listener := config.Listener{
 						Name: fmt.Sprintf("listener_%v", portNumber),
 						// TODO: grab value from envvar for flexibility

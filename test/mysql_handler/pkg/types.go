@@ -5,8 +5,9 @@ const (
 	TCP ListenerType = "TCP"
 	Socket = "Unix Socket"
 )
-var ListenerTypeValues = []ListenerType{TCP, Socket}
-
+func ListenerTypeValues()[]ListenerType {
+	return []ListenerType{TCP, Socket}
+}
 
 type ServerTLSType string
 // TODO: turn to var and grab values from envvars for flexibility
@@ -14,8 +15,9 @@ const (
 	TLS ServerTLSType = "mysql"
 	NoTLS = "mysql_no_tls"
 )
-var ServerTLSTypeValues = []ServerTLSType{TLS, NoTLS}
-
+func ServerTLSTypeValues()[]ServerTLSType {
+	return []ServerTLSType{TLS, NoTLS}
+}
 
 type SSLModeType string
 const (
@@ -25,14 +27,18 @@ const (
 	VerifyCA = "verify-ca"
 	VerifyFull = "verify-full"
 )
-var SSlModeTypeValues = []SSLModeType{Default, Disable, Require, VerifyCA, VerifyFull}
-
+func SSlModeTypeValues()[]SSLModeType {
+	return []SSLModeType{Default, Disable, Require, VerifyCA, VerifyFull}
+}
 
 type SSLRootCertType string
 // TODO: turn to var and grab values from envvars for flexibility
-const (
+var (
 	Undefined SSLRootCertType = ""
-	Valid = "TODO: add valid"
-	Invalid = "TODO: add invalid"
+	Valid     SSLRootCertType = "TODO: add valid"
+	Malformed SSLRootCertType = "malformed"
+	Invalid   SSLRootCertType = "TODO: add invalid"
 )
-var SSLRootCertTypeValue = []SSLRootCertType{Undefined, Valid, Invalid}
+func SSLRootCertTypeValues()[]SSLRootCertType {
+	return []SSLRootCertType{Undefined, Valid, Invalid, Malformed}
+}

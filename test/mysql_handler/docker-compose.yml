@@ -33,13 +33,14 @@ services:
     image: secretless-dev
     command: ./bin/reflex
     environment:
+      PROJECT_ROOT: /secretless
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_USER: testuser
       MYSQL_PASSWORD: testpass
     volumes:
       - ../../:/secretless
-      - ./secretless.yml:/secretless.yml
+      - ./fixtures/secretless.yml:/secretless.yml
       - mysql-socket:/sock
 
   secretless:
@@ -51,7 +52,7 @@ services:
       MYSQL_USER: testuser
       MYSQL_PASSWORD: testpass
     volumes:
-      - ./secretless.yml:/secretless.yml
+      - ./fixtures/secretless.yml:/secretless.yml
       - mysql-socket:/sock
 
   test:
@@ -60,6 +61,7 @@ services:
       dockerfile: Dockerfile.dev
     command: go test -v ./test/mysql_handler/tests
     environment:
+      PROJECT_ROOT: /secretless
       SECRETLESS_HOST:
       VERBOSE:
     volumes:

@@ -26,5 +26,5 @@ htpasswd \
 /usr/sbin/nginx
 /usr/sbin/sshd
 su -c 'secretless-broker -f /etc/secretless.yml' secretless &
-su -c '/docker-entrypoint.sh postgres' postgres &
+su -c '/docker-entrypoint.sh postgres -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key' postgres &
 wait

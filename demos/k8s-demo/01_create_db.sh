@@ -15,6 +15,13 @@ kubectl create namespace quick-start-backend-ns
 
 echo Ready!
 
+# add pg certificates to kubernetes secrets
+kubectl --namespace quick-start-backend-ns \
+  create secret generic \
+  quick-start-backend-certs \
+  --from-file=etc/pg_server.crt \
+  --from-file=etc/pg_server.key
+
 # create database
 echo ">>--- Create database"
 

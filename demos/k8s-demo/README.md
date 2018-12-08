@@ -24,7 +24,7 @@ To accomplish this, we are going to do the following:
 1. Provision protected resources
 1. Configure protected resources for usage by application and add credentials to a secret store
 1. Configure the Secretless Broker to broker the connection using credentials from the secret store
-1. Create application identity and grant entitlements to provide access to credentials from the secret store 
+1. Create application identity and grant entitlements to provide access to credentials from the secret store
 
 **As the application developer:**
 1. Configure the application to connect to protected resource through the interface exposed by the Secretless Broker
@@ -76,7 +76,8 @@ These steps make use of the **admin_config.sh** file, which stores the database 
 
   **[Option 1] PostgreSQL inside k8s**
 
-  Run the following script to deploy a PostgreSQL instance  using a **StatefulSet** in the **quick-start-backend-ns** namespace:
+  Run the following script to deploy a PostgreSQL instance  using a **StatefulSet**
+  in the **quick-start-backend-ns** namespace:
 
   ```bash
   ./01_create_db.sh
@@ -84,20 +85,27 @@ These steps make use of the **admin_config.sh** file, which stores the database 
     ```
     >>--- Clean up quick-start-backend-ns namespace
     Error from server (NotFound): namespaces "quick-start-backend-ns" not found
-    namespace/quick-start-backend-ns created
+    namespace "quick-start-backend-ns" created
     Ready!
+    secret "quick-start-backend-certs" created
     >>--- Create database
-    statefulset.apps/pg created
-    service/quick-start-backend created
+    statefulset "pg" created
+    service "quick-start-backend" created
     Waiting for quick-start-backend to be ready
     ...
     Ready!
     CREATE DATABASE
     ```
+    Note that the PostgreSQL instance is deployed configured for SSL. We provide
+    simple test certificates in this demo that we upload to the PostgreSQL container
+    using Kubernetes Secrets. In practice, you will have your own certificates; for
+    guidelines on creating the certificates for your PostgreSQL instance, check out
+    the [PostgreSQL documentation](https://www.postgresql.org/docs/9.6/ssl-tcp.html).
 
   **[Option 2] Remote PostgreSQL server**
 
   + Ensure your Kubernetes cluster is able to access your remote DB.
+  + Ensure your remote instance supports SSL
   + Ensure the remote instance has a database called **quick_start_db**
   + Update the `DB_` env vars in **./admin_config.sh**. For example (with Amazon RDS):
 
@@ -160,6 +168,8 @@ handlers:
         provider: kubernetes
         id: quick-start-backend-credentials#password
 ```
+Note: we don't specify an `sslmode` in the Secretless Broker config, so it will
+use the default `require` value.
 
 ### Steps for the non-privileged user (i.e. developer)
 
@@ -203,7 +213,7 @@ curl \
   ${APPLICATION_URL}/pet
 ```
 ```bash
-HTTP/1.1 201 
+HTTP/1.1 201
 Location: http://192.168.99.100:30002/pet/1
 Content-Length: 0
 Date: Thu, 23 Aug 2018 12:57:45 GMT
@@ -216,7 +226,7 @@ APPLICATION_URL=$(. ./admin_config.sh; echo ${APPLICATION_URL})
 curl -i ${APPLICATION_URL}/pets
 ```
 ```
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 Transfer-Encoding: chunked
 Date: Thu, 23 Aug 2018 12:58:16 GMT
@@ -254,7 +264,7 @@ done
 ```
 ```
 Retrieving pets
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 Transfer-Encoding: chunked
 Date: Thu, 23 Aug 2018 12:58:43 GMT
@@ -274,7 +284,7 @@ To rotate the database password (note: you are acting as an admin user), run the
 ```
 ALTER ROLE
 secret/quick-start-backend-credentials patched
- pg_terminate_backend 
+ pg_terminate_backend
 ----------------------
  t
  t

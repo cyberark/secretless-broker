@@ -38,6 +38,14 @@ RUN go get -u github.com/jstemmer/go-junit-report && \
 COPY go.mod go.sum /secretless/
 RUN go mod download
 
+# TODO: all the stuff below this line is not needed
+# this image should just be a development environment for Secretless
+# and not be a snapshot of the repository
+# the repo should be volume mounted
+# NOTE: don't forget all the parts of the repo that are dependent on the definition
+# of secretless-dev as dev environment + secretless repo snapshot +
+# binaries, you'll need to fix them all
+
 # TODO: Expand this with build args when we support other arches
 ENV GOOS=linux \
     GOARCH=amd64 \

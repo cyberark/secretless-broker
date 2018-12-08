@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/cyberark/secretless-broker/test/mysql_handler/pkg"
+	"github.com/cyberark/secretless-broker/test/pg2_handler/pkg"
 	"github.com/cyberark/secretless-broker/test/util/test"
 )
 

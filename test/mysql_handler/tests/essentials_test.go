@@ -60,7 +60,7 @@ func TestEssentials(t *testing.T) {
 					},
 					TestDefinition: testCaseData,
 				}
-				MyRunTestCase(tc)
+				RunTestCase(tc)
 			}
 		})
 	}

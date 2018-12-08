@@ -28,6 +28,8 @@ type LiveConfiguration struct {
 	socket string
 }
 
+// TODO this should generate ConnectionParams and leave the consumer to implement the flags
+// flags is not the first class interface
 func (c LiveConfiguration) ConnectionFlags() []string {
 
 	c.validate()

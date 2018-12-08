@@ -117,6 +117,16 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 						ID: 	  string(serverTLSTypeValue),
 					}
 					handler.Credentials = append(handler.Credentials, hostVariable)
+					// serverTLSTypeValue
+					// TODO: postgres and mysql should both have address
+					// This is a hack and is forcing DB_HOST_NO_TLS
+					// and DB_HOST_TLS to have host and port
+					addressVariable := config.Variable{
+						Name:     "address",
+						Provider: "env",
+						ID: 	  string(serverTLSTypeValue),
+					}
+					handler.Credentials = append(handler.Credentials, addressVariable)
 
 					// listenerTypeValue
 					switch listenerTypeValue {

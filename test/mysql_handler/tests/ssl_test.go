@@ -146,7 +146,7 @@ func TestSSL(t *testing.T) {
 
 	Convey("SSL functionality", t, func() {
 		for _, testCase := range testCases {
-			MyRunTestCase(testCase)
+			RunTestCase(testCase)
 		}
 	})
 }

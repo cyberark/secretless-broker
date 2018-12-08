@@ -1,0 +1,73 @@
+version: '3.0'
+
+services:
+  pg:
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+    ports:
+    - 5432
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 30s
+
+  pg_no_tls:
+    build:
+      context: .
+      dockerfile: Dockerfile.pg
+    ports:
+    - 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 30s
+
+  secretless-dev:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.dev
+    command: ./bin/reflex
+    environment:
+      DB_HOST_NO_TLS: pg_no_tls:5432
+      DB_HOST_TLS: pg:5432
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+    volumes:
+      - ../../:/secretless
+      - ./fixtures/secretless.yml:/secretless.yml
+      - pg-socket:/sock
+
+  secretless:
+    build:
+      context: ../..
+    environment:
+      DB_HOST_NO_TLS: pg_no_tls:5432
+      DB_HOST_TLS: pg:5432
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+    volumes:
+      - ./fixtures/secretless.yml:/secretless.yml
+      - pg-socket:/sock
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: go test -v ./test/pg2_handler/tests
+    environment:
+      TEST_ROOT: /secretless/test/pg2_handler
+      TEST_DB_PROTOCOL: pg
+      SECRETLESS_HOST:
+      VERBOSE:
+    volumes:
+      - pg-socket:/sock
+      # NOTE: fixtures are dynamically generated and don't exist in the secretless-dev snapshot
+      # NOTE: volume mount to get latest secretless source instead of relying on snapshot
+      - ../..:/secretless
+
+volumes:
+  pg-socket:

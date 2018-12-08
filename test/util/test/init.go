@@ -9,7 +9,7 @@ import (
 // ENV Configuration: Verbose output mode
 //
 var Verbose = func() bool {
-	debug := os.Getenv("DB_PROTOCOL")
+	debug := os.Getenv("VERBOSE")
 	for _, truthyVal := range []string{"true", "yes", "t", "y"} {
 		if truthyVal == debug {
 			return true

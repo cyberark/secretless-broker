@@ -52,6 +52,15 @@ func (h *Handler) ConfigureBackend() (err error) {
 	delete(values, "username")
 	delete(values, "password")
 
+	// TODO: remove because of hack
+
+	// TODO: what are options for, it's weird that any additonal
+	// credentials are passed to postgres as options
+	delete(values, "port")
+	delete(values, "host")
+	delete(values, "sslrootcert")
+	delete(values, "sslmode")
+
 	for k, v := range values {
 		result.Options[k] = string(v)
 	}

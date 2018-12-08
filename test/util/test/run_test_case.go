@@ -5,9 +5,10 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 )
 
-// set by importer of this file
-const successOutput = "2"
-func NewRunTestCase(runQuery RunQuery, testSuiteConfigurations LiveConfigurations) RunTestCase {
+
+// TODO: make ConnectionParams an interface and pass it to RunTestCase
+// all flag generation and combination can happen here
+func NewRunTestCase(runQuery RunQueryType, testSuiteConfigurations LiveConfigurations) RunTestCaseType {
 	return func (testCase TestCase) {
 		var expectation = "throws"
 		if testCase.ShouldPass {
@@ -23,7 +24,6 @@ func NewRunTestCase(runQuery RunQuery, testSuiteConfigurations LiveConfiguration
 
 			if testCase.ShouldPass {
 				convey.So(err, convey.ShouldBeNil)
-				convey.So(cmdOut, convey.ShouldContainSubstring, successOutput)
 			} else {
 				convey.So(err, convey.ShouldNotBeNil)
 			}
@@ -41,5 +41,5 @@ func NewRunTestCase(runQuery RunQuery, testSuiteConfigurations LiveConfiguration
 //     []string{"-u test", "--password=wrongpassword"}
 //
 // allows us to treat queries in mysql and postgres via a common abstraction
-type RunQuery func(flags []string) (string, error)
-type RunTestCase func(testCase TestCase)
+type RunQueryType func(flags []string) (string, error)
+type RunTestCaseType func(testCase TestCase)

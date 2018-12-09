@@ -17,6 +17,7 @@ import (
 	"time"
 
 	yaml "gopkg.in/yaml.v1"
+	"github.com/pkg/profile"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -42,6 +43,7 @@ type Manager struct {
 	ConfigurationManagers map[string]plugin_v1.ConfigurationManager
 	ConnectionManagers    map[string]plugin_v1.ConnectionManager
 	DebugFlag             bool
+	ProfileFlag           string
 	HandlerFactories      map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler
 	ListenerFactories     map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener
 	ProviderFactories     map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
@@ -59,6 +61,7 @@ func GetManager() *Manager {
 			ConfigurationManagers: make(map[string]plugin_v1.ConfigurationManager),
 			ConnectionManagers:    make(map[string]plugin_v1.ConnectionManager),
 			DebugFlag:             false,
+			ProfileFlag:           "",
 			HandlerFactories:      make(map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler),
 			ListenerFactories:     make(map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener),
 			ProviderFactories:     make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)),
@@ -68,13 +71,18 @@ func GetManager() *Manager {
 	return _singleton
 }
 
+// Setter method for profile flags
+func (manager *Manager) SetFlag(profFlag string, debugFlag bool) {
+	manager.ProfileFlag = profFlag
+	manager.DebugFlag = debugFlag
+}
+
 // ConfigurationChanged is an interface adapter for plugin_v1.ConfigurationChangedHandler
 func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig config.Config) error {
 	log.Printf("Configuration manager '%s' provided new configuration...",
 		configManagerName)
 	return manager._ReloadConfig(newConfig)
 }
-
 func (manager *Manager) _ReloadConfig(newConfig config.Config) error {
 	log.Println("Reloading...")
 	manager.configReloadMutex.Lock()
@@ -109,6 +117,15 @@ func (manager *Manager) _ReloadConfig(newConfig config.Config) error {
 }
 
 func (manager *Manager) _RegisterShutdownSignalHandlers() {
+	var ProfileCleaner interface {
+		Stop()
+	}
+	if (manager.ProfileFlag == "cpu") {
+		ProfileCleaner = profile.Start(profile.NoShutdownHook)
+	} else if (manager.ProfileFlag == "memory") {
+		ProfileCleaner = profile.Start(profile.MemProfile, profile.NoShutdownHook)
+	}
+
 	log.Println("Registering shutdown signal listeners...")
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel,
@@ -122,9 +139,14 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 	go func() {
 		exitSignal := <-signalChannel
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
-
 		manager.Shutdown()
 
+		if (manager.ProfileFlag == "cpu") {
+			ProfileCleaner.Stop()
+			// PROFILER cleanup the profiler
+		} else if (manager.ProfileFlag == "memory") {
+			ProfileCleaner.Stop()
+		}
 		log.Printf("Exiting...")
 		os.Exit(0)
 	}()
@@ -298,8 +320,7 @@ func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOption
 }
 
 // Run is the main wait loop once we load all the plugins
-func (manager *Manager) Run(configManagerID string, configManagerSpec string, debugSwitch bool) error {
-	manager.DebugFlag = debugSwitch
+func (manager *Manager) Run(configManagerID string, configManagerSpec string) error {
 
 	// We dont want any reloads happening until we are fully running
 	manager.configReloadMutex.Lock()

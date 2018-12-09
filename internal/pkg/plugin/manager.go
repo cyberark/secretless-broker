@@ -143,7 +143,6 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 
 		if (manager.ProfileFlag == "cpu") {
 			ProfileCleaner.Stop()
-			// PROFILER cleanup the profiler
 		} else if (manager.ProfileFlag == "memory") {
 			ProfileCleaner.Stop()
 		}

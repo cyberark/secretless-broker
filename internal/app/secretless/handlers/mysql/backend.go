@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"errors"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
 	"log"
 	"net"
 	"strconv"
@@ -65,7 +66,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	var backend net.Conn
 
 	// resolve TLS Configuration from BackendConfig Options
-	tlsConf, err := protocol.ResolveTLSConfig(h.BackendConfig.Options)
+	tlsConf, err := ssl.ResolveTLSConfig(h.BackendConfig.Options, false)
 	requestedSSL := tlsConf.UseTLS
 	if err != nil {
 		return
@@ -205,7 +206,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		packedHandshakeRespPacket[3]++
 
 		// Switch to TLS
-		backend, err = protocol.HandleSSLUpgrade(backend, tlsConf)
+		backend, err = ssl.HandleSSLUpgrade(backend, tlsConf)
 		if err != nil {
 			return
 		}

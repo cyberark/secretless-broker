@@ -8,7 +8,9 @@ import (
 
 // TODO: make ConnectionParams an interface and pass it to RunTestCase
 // all flag generation and combination can happen here
-func NewRunTestCase(runQuery RunQueryType, testSuiteConfigurations LiveConfigurations) RunTestCaseType {
+func NewRunTestCase(runQuery RunQueryType) RunTestCaseType {
+	_, testSuiteConfigurations := GenerateConfigurations()
+
 	return func (testCase TestCase) {
 		var expectation = "throws"
 		if testCase.ShouldPass {
@@ -18,9 +20,8 @@ func NewRunTestCase(runQuery RunQueryType, testSuiteConfigurations LiveConfigura
 		convey.Convey(fmt.Sprintf("%s: %s", expectation, testCase.Description), func() {
 			// TODO: possibly move this logic into testCase
 			liveConfiguration := testSuiteConfigurations.Find(testCase.AbstractConfiguration)
-			testCase.Flags = append(testCase.Flags, liveConfiguration.ConnectionFlags()...)
 
-			cmdOut, err := runQuery(testCase.Flags)
+			cmdOut, err := runQuery(testCase.ClientConfiguration, liveConfiguration.ConnectionPort)
 
 			if testCase.ShouldPass {
 				convey.So(err, convey.ShouldBeNil)
@@ -41,5 +42,5 @@ func NewRunTestCase(runQuery RunQueryType, testSuiteConfigurations LiveConfigura
 //     []string{"-u test", "--password=wrongpassword"}
 //
 // allows us to treat queries in mysql and postgres via a common abstraction
-type RunQueryType func(flags []string) (string, error)
+type RunQueryType func(ClientConfiguration, ConnectionPort) (string, error)
 type RunTestCaseType func(testCase TestCase)

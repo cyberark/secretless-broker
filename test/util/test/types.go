@@ -28,6 +28,43 @@ func ServerTLSTypeValues()[]ServerTLSType {
 	return []ServerTLSType{TLS, NoTLS}
 }
 
+func (tlsType ServerTLSType) toConfigVariables(dbConfig TestDBConfigType) []config.Variable  {
+	variables := []config.Variable{}
+	var host string
+	switch tlsType {
+	case TLS:
+		host = dbConfig.DB_HOST_TLS
+	case NoTLS:
+		host = dbConfig.DB_HOST_NO_TLS
+	default:
+		panic("Invalid ServerTLSType provided")
+	}
+
+	switch dbConfig.DB_PROTOCOL {
+	case "pg":
+		variables = append(variables, config.Variable{
+			Name:     "address",
+			Provider: "literal",
+			ID:		  host + ":" + dbConfig.DB_PORT,
+		})
+	case "mysql":
+		variables = append(variables, config.Variable{
+			Name:     "host",
+			Provider: "literal",
+			ID:		  host,
+		})
+		variables = append(variables, config.Variable{
+			Name:     "port",
+			Provider: "literal",
+			ID:		  dbConfig.DB_PORT,
+		})
+	default:
+		panic("Invalid DB_PROTOCOL provided")
+	}
+
+	return variables
+}
+
 type SSLModeType string
 const (
 	Default SSLModeType = ""

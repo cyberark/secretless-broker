@@ -20,7 +20,6 @@ func init() {
 	}
 
 	// generate TestSuiteLiveConfigurations
-	_, testSuiteLiveConfigurations := test.GenerateConfigurations()
-	RunTestCase = test.NewRunTestCase(pkg.RunQuery, testSuiteLiveConfigurations)
+	RunTestCase = test.NewRunTestCase(pkg.RunQuery)
 
 }

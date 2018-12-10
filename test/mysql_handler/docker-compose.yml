@@ -48,12 +48,6 @@ services:
   secretless:
     build:
       context: ../..
-    environment:
-      DB_HOST_NO_TLS: mysql_no_tls
-      DB_HOST_TLS: mysql
-      DB_PORT: 3306
-      DB_USER: testuser
-      DB_PASSWORD: testpass
     volumes:
       - ./fixtures/secretless.yml:/secretless.yml
       - mysql-socket:/sock
@@ -65,7 +59,12 @@ services:
     command: go test -v ./test/mysql_handler/tests
     environment:
       TEST_ROOT: /secretless/test/mysql_handler
-      TEST_DB_PROTOCOL: mysql
+      DB_PROTOCOL: mysql
+      DB_HOST_TLS: mysql
+      DB_HOST_NO_TLS: mysql_no_tls
+      DB_PORT: 3306
+      DB_USER: testuser
+      DB_PASSWORD: testpass
       SECRETLESS_HOST:
       VERBOSE:
     volumes:

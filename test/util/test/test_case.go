@@ -15,7 +15,7 @@ package test
 //
 type TestDefinition struct {
 	Description string
-	Flags       []string
+	ClientConfiguration
 	ShouldPass  bool
 	CmdOutput   *string
 }

@@ -29,12 +29,6 @@ services:
       context: ../..
       dockerfile: Dockerfile.dev
     command: ./bin/reflex
-    environment:
-      DB_HOST_NO_TLS: pg_no_tls:5432
-      DB_HOST_TLS: pg:5432
-      DB_PORT: 5432
-      DB_USER: test
-      DB_PASSWORD: test
     volumes:
       - ../../:/secretless
       - ./fixtures/secretless.yml:/secretless.yml
@@ -43,12 +37,6 @@ services:
   secretless:
     build:
       context: ../..
-    environment:
-      DB_HOST_NO_TLS: pg_no_tls:5432
-      DB_HOST_TLS: pg:5432
-      DB_PORT: 5432
-      DB_USER: test
-      DB_PASSWORD: test
     volumes:
       - ./fixtures/secretless.yml:/secretless.yml
       - pg-socket:/sock
@@ -60,9 +48,17 @@ services:
     command: go test -v ./test/pg2_handler/tests
     environment:
       TEST_ROOT: /secretless/test/pg2_handler
-      TEST_DB_PROTOCOL: pg
+      DB_PROTOCOL: pg
+      DB_HOST_TLS: pg
+      DB_HOST_NO_TLS: pg_no_tls
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
       SECRETLESS_HOST:
       VERBOSE:
+# env vars required for benchmarking
+      PG_ADDRESS:
+      SECRETLESS_ADDRESS:
     volumes:
       - pg-socket:/sock
       # NOTE: fixtures are dynamically generated and don't exist in the secretless-dev snapshot

@@ -10,12 +10,39 @@ import (
 )
 
 
-func RunQuery(flags []string) (string, error) {
+func RunQuery(clientConfig test.ClientConfiguration, connectPort test.ConnectionPort) (string, error) {
 	args := []string{"-c", "select count(*) from test.test"}
+	connectionParams := []string{"dbname=postgres"}
 
-	for _, v := range flags {
-		args = append(args, v)
+	sslmode := "disable"
+	if clientConfig.SSL != nil && *clientConfig.SSL {
+		sslmode = "require"
 	}
+	connectionParams = append(connectionParams, fmt.Sprintf("sslmode=%s", sslmode))
+
+	if clientConfig.Username != nil {
+		args = append(args, fmt.Sprintf("--username=%s", *clientConfig.Username))
+	}
+	if clientConfig.Password != nil {
+		connectionParams = append(connectionParams, fmt.Sprintf("password=%s", *clientConfig.Password))
+	}
+
+	args = append(args, fmt.Sprintf("--port=%s", connectPort.ToPortString()))
+
+	var host string
+	switch connectPort.ListenerType {
+	case test.TCP:
+		host = connectPort.Host()
+	case test.Socket:
+		host = connectPort.ToSocketDir()
+	default:
+		panic("Listener Type can only be TCP or Socket")
+	}
+	args = append(args, fmt.Sprintf("--host=%s", host))
+
+	// join connection params
+	args = append(args, strings.Join(connectionParams, " "))
+
 
 	// Pre command logs
 	convey.Println("")
@@ -45,23 +72,4 @@ type ConnectionParams struct {
 	Username string
 	Password string
 	SSLMode string
-}
-
-func (cp ConnectionParams) ToFlags() []string  {
-	var flags []string
-
-	var (
-		SSLMode = "disable"
-	)
-
-	if cp.SSLMode != "" {
-		SSLMode = cp.SSLMode
-	}
-	flags = append(flags,
-		fmt.Sprintf("dbname=postgres sslmode=%s password=%s", SSLMode, cp.Password),
-	)
-
-	flags = append(flags, fmt.Sprintf("--username=%s", cp.Username))
-
-	return flags
 }

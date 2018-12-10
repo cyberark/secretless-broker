@@ -55,10 +55,6 @@ func TestEssentials(t *testing.T) {
 			})
 		}
 
-		// TODO: check client net.conn for mysql and postgres
-		// if connected via socket then there's no need to check if the client wants TLS
-		// assume no TLS between client and secretless
-		// NOTE: this is the default behaviour of psql not mysql
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    Socket,
@@ -68,13 +64,12 @@ func TestEssentials(t *testing.T) {
 			},
 			TestDefinition: TestDefinition{
 				Description: "Socket, client -> TLS -> secretless",
-				ShouldPass:  false,
+				ShouldPass:  true,
 				ClientConfiguration: ClientConfiguration{
 					Username: StringPointer("wrongusername"),
 					Password: StringPointer("wrongpassword"),
 					SSL:      BoolPointer(true),
 				},
-				CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 			},
 		})
 
@@ -93,7 +88,7 @@ func TestEssentials(t *testing.T) {
 					Password: StringPointer("wrongpassword"),
 					SSL:      BoolPointer(true),
 				},
-				CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
+				CmdOutput: StringPointer("SSL not supported"),
 			},
 		})
 	})

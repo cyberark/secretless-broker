@@ -4,3 +4,7 @@ package test
 func StringPointer(s string) *string {
 	return &s
 }
+
+func BoolPointer(s bool) *bool {
+	return &s
+}

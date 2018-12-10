@@ -1,6 +1,0 @@
-#!/bin/bash -ex
-
-rm -rf .env
-docker-compose down -v
-rm -rf sock/*
-rm -rf fixtures/*

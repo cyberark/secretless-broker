@@ -1,5 +1,13 @@
 #!/bin/bash -ex
 
+SECRETLESS_HOST=secretless
+while getopts :d opt; do
+    case $opt in
+        d) SECRETLESS_HOST=secretless-dev;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
 ./stop
 
 docker-compose build
@@ -8,22 +16,29 @@ docker-compose up \
   -d \
   pg pg_no_tls
 
-./wait-for-pg pg
 ./wait-for-pg pg_no_tls
+./wait-for-pg pg
+
+# generate fixtures
+#
+# NOTE: the tests depend on
+# + secretless.yml auto-generation (also depended on by the secretless container)
+# + fixture generation
+# so there needs to be coordination of this bash script and the go files
+#
+## valid-ca.pem
+## NOTE this should come before secretless.yml because it is required by the autogen
+# TODO: have actual valid CA
+cp ./etc/rootCA.crt ./fixtures/valid-ca.pem
+## secretless.yml
+docker-compose run --rm test \
+  bash -c "
+  go run ./test/util/test/cmd/generate_secretless_yml.go
+"
 
 # start secretless once pg is running
-pg_cid=$(docker-compose ps -q pg)
-pg_ip=$(docker inspect \
-  -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $pg_cid)
-
-pg_no_tls_cid=$(docker-compose ps -q pg_no_tls)
-pg_no_tls_ip=$(docker inspect \
-  -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $pg_no_tls_cid)
-
-export PG_NO_TLS_ADDRESS=$pg_no_tls_ip:5432
-export PG_TLS_ADDRESS=$pg_ip:5432
 docker-compose up \
   -d \
-  secretless
+  ${SECRETLESS_HOST}
 
-sleep 2
+./wait-for-secretless ${SECRETLESS_HOST}

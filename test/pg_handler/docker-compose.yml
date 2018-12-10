@@ -6,69 +6,64 @@ services:
       context: .
       dockerfile: Dockerfile.pg
     ports:
-      - 5432
+    - 5432
     command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 30s
-    volumes:
-      - psql-data_tls:/var/lib/postgresql/data
 
   pg_no_tls:
     build:
       context: .
       dockerfile: Dockerfile.pg
     ports:
-      - 5432
+    - 5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 30s
+
+  secretless-dev:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.dev
+    command: ./bin/reflex
     volumes:
-      - psql-data_no_tls:/var/lib/postgresql/data
+      - ../../:/secretless
+      - ./fixtures/secretless.yml:/secretless.yml
+      - pg-socket:/sock
 
   secretless:
     build:
       context: ../..
-# env vars required for testing
-    environment:
-      PG_TLS_ADDRESS:
-      PG_NO_TLS_ADDRESS:
-      PG_PASSWORD: test
-    ports:
-      - 15432
-      - 25432
     volumes:
-      - ./secretless.yml:/secretless.yml
+      - ./fixtures/secretless.yml:/secretless.yml
       - pg-socket:/sock
 
   test:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    volumes:
-      - pg-socket:/sock
-    depends_on:
-      - secretless
-# env vars required for benchmarking
+    command: go test -v ./test/pg2_handler/tests
     environment:
+      TEST_ROOT: /secretless/test/pg2_handler
+      DB_PROTOCOL: pg
+      DB_HOST_TLS: pg
+      DB_HOST_NO_TLS: pg_no_tls
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+      SECRETLESS_HOST:
+      VERBOSE:
+# env vars required for benchmarking
       PG_ADDRESS:
       SECRETLESS_ADDRESS:
-
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    environment:
-      PG_PASSWORD: test
-      PG_ADDRESS: pg:5432
-      SECRETLESS_ADDRESS: secretless:15432
     volumes:
-      - ../..:/secretless
       - pg-socket:/sock
+      # NOTE: fixtures are dynamically generated and don't exist in the secretless-dev snapshot
+      # NOTE: volume mount to get latest secretless source instead of relying on snapshot
+      - ../..:/secretless
 
 volumes:
   pg-socket:
-  psql-data_tls:
-  psql-data_no_tls:

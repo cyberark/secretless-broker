@@ -2,4 +2,5 @@
 
 rm -rf .env
 docker-compose down -v
-rm -rf run/postgresql/.s.PGSQL.5432
+rm -rf sock/*
+rm -rf fixtures/*

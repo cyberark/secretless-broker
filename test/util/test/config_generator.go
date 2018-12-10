@@ -9,24 +9,20 @@ import (
 func sharedCredentials() []config.Variable {
 	return []config.Variable{
 		{
-			Name:     "port",
-			Provider: "env",
-			ID:       "DB_PORT",
-		},
-		{
 			Name:     "username",
-			Provider: "env",
-			ID:       "DB_USER",
+			Provider: "literal",
+			ID:       TestDBConfig.DB_USER,
 		},
 		{
 			Name:     "password",
-			Provider: "env",
-			ID:       "DB_PASSWORD",
+			Provider: "literal",
+			ID:       TestDBConfig.DB_PASSWORD,
 		},
 	}
 }
 
 
+// TODO: consider parametrising ConnectPort generator
 func GenerateConfigurations() (config.Config, LiveConfigurations) {
 	// initialised with health-check listener and handler
 	secretlessConfig := config.Config{
@@ -36,6 +32,12 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 				Name:        "health-check",
 				Protocol:    "mysql",
 				Socket:      "/sock/mysql.sock",
+			},
+			{
+				Debug:       true,
+				Name:        "pg-bench",
+				Protocol:    "pg",
+				Address:     "0.0.0.0:5432",
 			},
 		},
 		Handlers:  []config.Handler{
@@ -66,6 +68,28 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 					},
 				},
 			},
+			{
+				Name:         "pg-bench",
+				ListenerName: "pg-bench",
+				Debug:        true,
+				Credentials:  []config.Variable{
+					{
+						Name:     "address",
+						Provider: "literal",
+						ID:       fmt.Sprintf("%s:5432", TestDBConfig.DB_HOST_TLS),
+					},
+					{
+						Name:     "username",
+						Provider: "literal",
+						ID:       TestDBConfig.DB_USER,
+					},
+					{
+						Name:     "password",
+						Provider: "literal",
+						ID:       TestDBConfig.DB_PASSWORD,
+					},
+				},
+			},
 		},
 	}
 
@@ -77,21 +101,27 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 	//
 	// TODO: Remove "Value" suffixes -- no need for them, the lower case first letter
 	// distinguishes them from the type itself, so it only degrades readability.
-	portNumber := 3306
+	portNumber := 3307
 	for _, serverTLSTypeValue := range ServerTLSTypeValues() {
 		for _, listenerTypeValue := range ListenerTypeValues() {
 			for _, sslModeTypeValue := range SSlModeTypeValues() {
 				for _, sslRootCertTypeValue := range SSLRootCertTypeValues() {
+					connectionPort := ConnectionPort{
+						// TODO: perhaps resolve this duplication of listener type
+						ListenerType: listenerTypeValue,
+						Port:         portNumber,
+					}
+
 					listener := config.Listener{
-						Name: fmt.Sprintf("listener_%v", portNumber),
+						Name: "listener_" + connectionPort.ToPortString(),
 						// TODO: grab value from envvar for flexibility
-						Protocol: DBProtocol,
+						Protocol: TestDBConfig.DB_PROTOCOL,
 						Debug: true,
 					}
 					handler := config.Handler{
-						Name: fmt.Sprintf("handler_%v", portNumber),
+						Name: "handler_" + connectionPort.ToPortString(),
 						Debug: true,
-						ListenerName: fmt.Sprintf("listener_%v", portNumber),
+						ListenerName: "listener_" + connectionPort.ToPortString(),
 						Credentials: sharedCredentials(),
 					}
 					liveConfiguration := LiveConfiguration{
@@ -101,6 +131,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 							SSLModeType:     sslModeTypeValue,
 							SSLRootCertType: sslRootCertTypeValue,
 						},
+						ConnectionPort: connectionPort,
 					}
 
 					// sslRootCertTypeValue
@@ -111,32 +142,14 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 					handler.Credentials = append(handler.Credentials, sslModeTypeValue.toConfigVariable())
 
 					// serverTLSTypeValue
-					hostVariable := config.Variable{
-						Name:     "host",
-						Provider: "env",
-						ID: 	  string(serverTLSTypeValue),
-					}
-					handler.Credentials = append(handler.Credentials, hostVariable)
-					// serverTLSTypeValue
-					// TODO: postgres and mysql should both have address
-					// This is a hack and is forcing DB_HOST_NO_TLS
-					// and DB_HOST_TLS to have host and port
-					addressVariable := config.Variable{
-						Name:     "address",
-						Provider: "env",
-						ID: 	  string(serverTLSTypeValue),
-					}
-					handler.Credentials = append(handler.Credentials, addressVariable)
+					handler.Credentials = append(handler.Credentials, serverTLSTypeValue.toConfigVariables(TestDBConfig)...)
 
 					// listenerTypeValue
 					switch listenerTypeValue {
 					case TCP:
-						listener.Address = fmt.Sprintf("0.0.0.0:%v", portNumber)
-						liveConfiguration.port = fmt.Sprintf("%v", portNumber)
+						listener.Address = "0.0.0.0:" + connectionPort.ToPortString()
 					case Socket:
-						socket := fmt.Sprintf("/sock/db%v.sock", portNumber)
-						listener.Socket = socket
-						liveConfiguration.socket = socket
+						listener.Socket = connectionPort.ToSocketPath()
 					}
 
 					secretlessConfig.Listeners = append(secretlessConfig.Listeners, listener)

@@ -18,16 +18,41 @@ var Verbose = func() bool {
 	return false
 }()
 
-// ENV Configuration: Database protocol
+// ENV Configuration: DBConfig
 //
-var DBProtocol = func() string {
-	dBProtocol := os.Getenv("TEST_DB_PROTOCOL")
-	if dBProtocol == "" {
-		fmt.Printf("ERROR: $TEST_DB_PROTOCOL envvar wasn't found\n")
-		panic("$TEST_DB_PROTOCOL")
+type TestDBConfigType struct {
+	DB_HOST_TLS string
+	DB_HOST_NO_TLS string
+	DB_PORT string
+	DB_USER string
+	DB_PASSWORD string
+	DB_PROTOCOL string
+}
+var TestDBConfig = func() TestDBConfigType {
+	fields := []string{
+		"DB_HOST_TLS",
+		"DB_HOST_NO_TLS",
+		"DB_PORT",
+		"DB_USER",
+		"DB_PASSWORD",
+		"DB_PROTOCOL",
 	}
 
-	return dBProtocol
+	for _, field := range fields {
+		if _, found := os.LookupEnv(field); !found  {
+			fmt.Printf("ERROR: $%v envvar wasn't found\n", field)
+			panic("$" + field)
+		}
+	}
+
+	return TestDBConfigType{
+		DB_HOST_TLS: os.Getenv("DB_HOST_TLS"),
+		DB_HOST_NO_TLS: os.Getenv("DB_HOST_NO_TLS"),
+		DB_PORT: os.Getenv("DB_PORT"),
+		DB_USER: os.Getenv("DB_USER"),
+		DB_PASSWORD: os.Getenv("DB_PASSWORD"),
+		DB_PROTOCOL: os.Getenv("DB_PROTOCOL"),
+	}
 }()
 
 // ENV Configuration: Name of Secretless host to use

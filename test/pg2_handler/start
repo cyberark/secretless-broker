@@ -29,7 +29,7 @@ docker-compose up \
 ## valid-ca.pem
 ## NOTE this should come before secretless.yml because it is required by the autogen
 # TODO: have actual valid CA
-cp ./etc/server.crt ./fixtures/valid-ca.pem
+cp ./etc/rootCA.crt ./fixtures/valid-ca.pem
 ## secretless.yml
 docker-compose run --rm test \
   bash -c "

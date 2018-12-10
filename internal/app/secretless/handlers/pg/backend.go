@@ -2,6 +2,7 @@ package pg
 
 import (
 	"fmt"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
 	"log"
 	"net"
 	"net/url"
@@ -86,7 +87,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	debug := util.OptionalDebug(h.GetConfig().Debug)
 	debug("Sending startup message")
 
-	tlsConf, err := protocol.ResolveTLSConfig(h.BackendConfig.QueryStrings)
+	tlsConf, err := ssl.ResolveTLSConfig(h.BackendConfig.QueryStrings, true)
 	if err != nil {
 		return
 	}
@@ -138,7 +139,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		// the default configuration of older versions has it enabled. Redshift
 		// also initiates renegotiations and cannot be reconfigured.
 		// Switch to TLS
-		connection, err = protocol.HandleSSLUpgrade(connection, tlsConf)
+		connection, err = ssl.HandleSSLUpgrade(connection, tlsConf)
 		if err != nil {
 			return err
 		}

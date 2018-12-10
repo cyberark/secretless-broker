@@ -1,4 +1,4 @@
-package protocol
+package ssl
 
 import (
 	"crypto/tls"
@@ -16,7 +16,7 @@ type TLSConfigWrapper struct {
 	Options options
 }
 
-func ResolveTLSConfig(o options) (TLSConfigWrapper, error) {
+func ResolveTLSConfig(o options, requireCanVerifyCAOnly bool) (TLSConfigWrapper, error) {
 	tlsConf := TLSConfigWrapper{Options:o, UseTLS: true}
 
 	switch mode := o["sslmode"]; mode {
@@ -37,7 +37,10 @@ func ResolveTLSConfig(o options) (TLSConfigWrapper, error) {
 		// server certificate is validated against the CA. Relying on this
 		// behavior is discouraged, and applications that need certificate
 		// validation should always use verify-ca or verify-full.
-		if len(o["sslrootcert"]) > 0 {
+
+		// MySQL on the other hand notes in its docs that it ignores
+		// SSL certs if supplied in REQUIRED sslmode.
+		if requireCanVerifyCAOnly && len(o["sslrootcert"]) > 0 {
 			tlsConf.VerifyCaOnly = true
 		}
 	case "verify-ca":
@@ -71,7 +74,6 @@ func HandleSSLUpgrade(connection net.Conn, tlsConf TLSConfigWrapper) (net.Conn, 
 	// Renegotiation was deprecated then removed from PostgreSQL 9.5, but
 	// the default configuration of older versions has it enabled. Redshift
 	// also initiates renegotiations and cannot be reconfigured.
-	// TODO: what does mysql require for this ?
 	tlsConf.Renegotiation = tls.RenegotiateFreelyAsClient
 
 	client := tls.Client(connection, &tlsConf.Config)

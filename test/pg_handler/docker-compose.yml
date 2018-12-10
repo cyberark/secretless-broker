@@ -45,9 +45,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: go test -v ./test/pg2_handler/tests
+    command: go test -v ./test/pg_handler/tests
     environment:
-      TEST_ROOT: /secretless/test/pg2_handler
+      TEST_ROOT: /secretless/test/pg_handler
       DB_PROTOCOL: pg
       DB_HOST_TLS: pg
       DB_HOST_NO_TLS: pg_no_tls

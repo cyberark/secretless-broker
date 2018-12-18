@@ -15,17 +15,13 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 	connectionParams := []string{"dbname=postgres"}
 
 	sslmode := "disable"
-	if clientConfig.SSL != nil && *clientConfig.SSL {
+	if clientConfig.SSL {
 		sslmode = "require"
 	}
 	connectionParams = append(connectionParams, fmt.Sprintf("sslmode=%s", sslmode))
 
-	if clientConfig.Username != nil {
-		args = append(args, fmt.Sprintf("--username=%s", *clientConfig.Username))
-	}
-	if clientConfig.Password != nil {
-		connectionParams = append(connectionParams, fmt.Sprintf("password=%s", *clientConfig.Password))
-	}
+	args = append(args, fmt.Sprintf("--username=%s", clientConfig.Username))
+	connectionParams = append(connectionParams, fmt.Sprintf("password=%s", clientConfig.Password))
 
 	args = append(args, fmt.Sprintf("--port=%s", connectPort.ToPortString()))
 

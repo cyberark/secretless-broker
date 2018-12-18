@@ -14,24 +14,27 @@ func TestEssentials(t *testing.T) {
 			Description: "with username, wrong password",
 			ShouldPass: true,
 			ClientConfiguration: ClientConfiguration{
-				Username: StringPointer("testuser"),
-				Password: StringPointer("wrongpassword"),
+				Username: "testuser",
+				Password: "wrongpassword",
+				SSL: false,
 			},
 		},
 		{
 			Description: "with wrong username, wrong password",
 			ShouldPass: true,
 			ClientConfiguration: ClientConfiguration{
-				Username: StringPointer("wrongusername"),
-				Password: StringPointer("wrongpassword"),
+				Username: "wrongusername",
+				Password: "wrongpassword",
+				SSL: false,
 			},
 		},
 		{
 			Description: "with empty username, empty password",
 			ShouldPass: true,
 			ClientConfiguration: ClientConfiguration{
-				Username: StringPointer(""),
-				Password: StringPointer(""),
+				Username: "",
+				Password: "",
+				SSL: false,
 			},
 		},
 	}
@@ -66,9 +69,9 @@ func TestEssentials(t *testing.T) {
 				Description: "Socket, client -> TLS -> secretless",
 				ShouldPass:  true,
 				ClientConfiguration: ClientConfiguration{
-					Username: StringPointer("wrongusername"),
-					Password: StringPointer("wrongpassword"),
-					SSL:      BoolPointer(true),
+					Username: "wrongusername",
+					Password: "wrongpassword",
+					SSL: true,
 				},
 			},
 		})
@@ -84,9 +87,9 @@ func TestEssentials(t *testing.T) {
 				Description: "TCP, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: StringPointer("wrongusername"),
-					Password: StringPointer("wrongpassword"),
-					SSL:      BoolPointer(true),
+					Username: "wrongusername",
+					Password: "wrongpassword",
+					SSL: true,
 				},
 				CmdOutput: StringPointer("SSL not supported"),
 			},

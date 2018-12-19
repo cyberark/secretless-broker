@@ -66,7 +66,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	var backend net.Conn
 
 	// resolve TLS Configuration from BackendConfig Options
-	tlsConf, err := ssl.ResolveTLSConfig(h.BackendConfig.Options, false)
+	tlsConf, err := ssl.NewSecretlessTLSConfig(h.BackendConfig.Options, false)
 	requestedSSL := tlsConf.UseTLS
 	if err != nil {
 		return

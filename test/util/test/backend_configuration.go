@@ -5,7 +5,7 @@ import (
 )
 
 // Represents a simultanous configuration of Secretless and a
-// MySQL Server.  This defines a purely logical configuration,
+// Database Server.  This defines a purely logical configuration,
 // as opposed to a "live" one which is actually running and
 // listening on a port or socket
 type AbstractConfiguration struct {
@@ -16,7 +16,7 @@ type AbstractConfiguration struct {
 }
 
 // Represents a "live," running configuration of Secretless and
-// MySQL listening on a port or socket.
+// a database listening on a port or socket.
 //
 // Rather than creating an "either" type to represent the
 // abstract concept of "general portlike thing" -- ie, something

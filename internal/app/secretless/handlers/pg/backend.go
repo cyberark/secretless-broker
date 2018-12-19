@@ -87,7 +87,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	debug := util.OptionalDebug(h.GetConfig().Debug)
 	debug("Sending startup message")
 
-	tlsConf, err := ssl.ResolveTLSConfig(h.BackendConfig.QueryStrings, true)
+	tlsConf, err := ssl.NewSecretlessTLSConfig(h.BackendConfig.QueryStrings, true)
 	if err != nil {
 		return
 	}

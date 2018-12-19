@@ -9,15 +9,25 @@ import (
 
 type options map[string]string
 
-type TLSConfigWrapper struct {
-	UseTLS bool
+type SecretlessTLSConfig struct {
 	tls.Config
+	UseTLS bool
 	VerifyCaOnly bool
 	Options options
 }
 
-func ResolveTLSConfig(o options, requireCanVerifyCAOnly bool) (TLSConfigWrapper, error) {
-	tlsConf := TLSConfigWrapper{Options:o, UseTLS: true}
+func NewSecretlessTLSConfig(o options, requireCanVerifyCAOnly bool) (SecretlessTLSConfig, error) {
+	// NOTE for the "require" case:
+	//
+	// From http://www.postgresql.org/docs/current/static/libpq-ssl.html:
+	//
+	// Note: For backwards compatibility with earlier versions of
+	// PostgreSQL, if a root CA file exists, the behavior of
+	// sslmode=require will be the same as that of verify-ca, meaning the
+	// server certificate is validated against the CA. Relying on this
+	// behavior is discouraged, and applications that need certificate
+	// validation should always use verify-ca or verify-full.
+	tlsConf := SecretlessTLSConfig{Options: o, UseTLS: true}
 
 	switch mode := o["sslmode"]; mode {
 	case "disable":
@@ -25,8 +35,7 @@ func ResolveTLSConfig(o options, requireCanVerifyCAOnly bool) (TLSConfigWrapper,
 		return tlsConf, nil
 		// "require" is the default.
 	case "", "require":
-		// We must skip TLS's own verification since it requires full
-		// verification since Go 1.3.
+		// Skip TLS's own verification: it requires full verification since Go 1.3.
 		tlsConf.InsecureSkipVerify = true
 
 		// From http://www.postgresql.org/docs/current/static/libpq-ssl.html:
@@ -44,22 +53,21 @@ func ResolveTLSConfig(o options, requireCanVerifyCAOnly bool) (TLSConfigWrapper,
 			tlsConf.VerifyCaOnly = true
 		}
 	case "verify-ca":
-		// We must skip TLS's own verification since it requires full
-		// verification since Go 1.3.
+		// Skip TLS's own verification: it requires full verification since Go 1.3.
 		tlsConf.InsecureSkipVerify = true
 		tlsConf.VerifyCaOnly = true
 	//case "verify-full":
 	//	tlsConf.ServerName = o["host"]
 	default:
 		// TODO add verify-full below
-		return TLSConfigWrapper{}, fmt.Errorf(`unsupported sslmode %q; only "require" (default), "verify-ca", and "disable" supported`, mode)
+		return SecretlessTLSConfig{}, fmt.Errorf(`unsupported sslmode %q; only "require" (default), "verify-ca", and "disable" supported`, mode)
 	}
 
 	return tlsConf, nil
 }
 
-// HandleSSLUpgrade upgrades a net.Conn using TLSConfigWrapper
-func HandleSSLUpgrade(connection net.Conn, tlsConf TLSConfigWrapper) (net.Conn, error) {
+// HandleSSLUpgrade upgrades a net.Conn using SecretlessTLSConfig
+func HandleSSLUpgrade(connection net.Conn, tlsConf SecretlessTLSConfig) (net.Conn, error) {
 	err := sslClientCertificates(&tlsConf.Config, tlsConf.Options)
 	if err != nil {
 		return nil, err

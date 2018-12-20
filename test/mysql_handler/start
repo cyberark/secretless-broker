@@ -20,7 +20,8 @@ docker-compose up \
 ./wait-for-mysql mysql
 
 # generate fixtures
-#
+mkdir fixtures
+
 # NOTE: the tests depend on
 # + secretless.yml auto-generation (also depended on by the secretless container)
 # + fixture generation

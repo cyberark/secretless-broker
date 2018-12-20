@@ -13,14 +13,14 @@ import (
 func RunQuery(clientConfig test.ClientConfiguration, connectPort test.ConnectionPort) (string, error) {
 	args := []string{"-e", "select count(*) from testdb.test"}
 
-	if clientConfig.SSL != nil && *clientConfig.SSL {
+	if clientConfig.SSL {
 		args = append(args, "--ssl", "--ssl-verify-server-cert=TRUE")
 	}
-	if clientConfig.Username != nil {
-		args = append(args, fmt.Sprintf("--user=%s", *clientConfig.Username))
+	if clientConfig.Username != "" {
+		args = append(args, fmt.Sprintf("--user=%s", clientConfig.Username))
 	}
-	if clientConfig.Password != nil {
-		args = append(args, fmt.Sprintf("--password=%s", *clientConfig.Password))
+	if clientConfig.Password != "" {
+		args = append(args, fmt.Sprintf("--password=%s", clientConfig.Password))
 	}
 	switch connectPort.ListenerType {
 	case test.TCP:

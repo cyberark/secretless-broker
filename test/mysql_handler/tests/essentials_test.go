@@ -14,24 +14,24 @@ func TestEssentials(t *testing.T) {
 			Description: "with username, wrong password",
 			ShouldPass: true,
 			ClientConfiguration: ClientConfiguration{
-				Username: StringPointer("testuser"),
-				Password: StringPointer("wrongpassword"),
+				Username: "testuser",
+				Password: "wrongpassword",
 			},
 		},
 		{
 			Description: "with wrong username, wrong password",
 			ShouldPass: true,
 			ClientConfiguration: ClientConfiguration{
-				Username: StringPointer("wrongusername"),
-				Password: StringPointer("wrongpassword"),
+				Username: "wrongusername",
+				Password: "wrongpassword",
 			},
 		},
 		{
 			Description: "with empty username, empty password",
 			ShouldPass: true,
 			ClientConfiguration: ClientConfiguration{
-				Username: StringPointer(""),
-				Password: StringPointer(""),
+				Username: "",
+				Password: "",
 			},
 		},
 	}
@@ -70,9 +70,9 @@ func TestEssentials(t *testing.T) {
 				Description: "Socket, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: StringPointer("wrongusername"),
-					Password: StringPointer("wrongpassword"),
-					SSL:      BoolPointer(true),
+					Username: "wrongusername",
+					Password: "wrongpassword",
+					SSL:      true,
 				},
 				CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 			},
@@ -89,9 +89,9 @@ func TestEssentials(t *testing.T) {
 				Description: "TCP, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: StringPointer("wrongusername"),
-					Password: StringPointer("wrongpassword"),
-					SSL:      BoolPointer(true),
+					Username: "wrongusername",
+					Password: "wrongpassword",
+					SSL:      true,
 				},
 				CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 			},

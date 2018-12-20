@@ -45,28 +45,24 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			TestDefinition: TestDefinition{
-				Description: "server_tls, sslmode=require, sslrootcert=invalid",
-				ShouldPass:  false,
-				CmdOutput:   StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
+				Description: "server_tls, sslmode=require, sslrootcert=invalid (ignored)",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
 				ServerTLSType:   TLS,
 				SSLModeType:     Require,
-				SSLRootCertType: Invalid,
 			},
 		},
 		{
 			TestDefinition: TestDefinition{
-				Description: "server_tls, sslmode=require, sslrootcert=malformed",
-				ShouldPass:  false,
-				CmdOutput:   StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
+				Description: "server_tls, sslmode=require, sslrootcert=malformed (ignored)",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				ListenerType:    TCP,
 				ServerTLSType:   TLS,
 				SSLModeType:     Require,
-				SSLRootCertType: Malformed,
 			},
 		},
 		{

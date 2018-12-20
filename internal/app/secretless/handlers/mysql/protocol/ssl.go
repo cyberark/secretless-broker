@@ -28,18 +28,6 @@ func ResolveTLSConfig(o options) (TLSConfigWrapper, error) {
 		// We must skip TLS's own verification since it requires full
 		// verification since Go 1.3.
 		tlsConf.InsecureSkipVerify = true
-
-		// From http://www.postgresql.org/docs/current/static/libpq-ssl.html:
-		//
-		// Note: For backwards compatibility with earlier versions of
-		// PostgreSQL, if a root CA file exists, the behavior of
-		// sslmode=require will be the same as that of verify-ca, meaning the
-		// server certificate is validated against the CA. Relying on this
-		// behavior is discouraged, and applications that need certificate
-		// validation should always use verify-ca or verify-full.
-		if len(o["sslrootcert"]) > 0 {
-			tlsConf.VerifyCaOnly = true
-		}
 	case "verify-ca":
 		// We must skip TLS's own verification since it requires full
 		// verification since Go 1.3.
@@ -67,10 +55,6 @@ func HandleSSLUpgrade(connection net.Conn, tlsConf TLSConfigWrapper) (net.Conn, 
 	}
 
 	// Accept renegotiation requests initiated by the backend.
-	//
-	// Renegotiation was deprecated then removed from PostgreSQL 9.5, but
-	// the default configuration of older versions has it enabled. Redshift
-	// also initiates renegotiations and cannot be reconfigured.
 	tlsConf.Renegotiation = tls.RenegotiateFreelyAsClient
 
 	client := tls.Client(connection, &tlsConf.Config)

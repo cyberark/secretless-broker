@@ -35,8 +35,8 @@ services:
       dockerfile: Dockerfile.dev
     command: ./bin/reflex
     environment:
-      DB_HOST_NO_TLS: mysql
-      DB_HOST_TLS: mysql_no_tls
+      DB_HOST_NO_TLS: mysql_no_tls
+      DB_HOST_TLS: mysql
       DB_PORT: 3306
       DB_USER: testuser
       DB_PASSWORD: testpass

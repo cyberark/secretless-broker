@@ -90,7 +90,7 @@ func main() {
 	}
 
 	// for CPU and Memory profiling
-	plugin.GetManager().SetFlag(*profileSwitch, *debugSwitch)
+	plugin.GetManager().SetFlags(*profileSwitch, *debugSwitch)
 
 	plugin.GetManager().RegisterSignalHandlers()
 	plugin.GetManager().Run(configManagerID, configManagerSpec)

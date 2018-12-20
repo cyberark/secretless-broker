@@ -13,6 +13,7 @@ to enforce its license terms. Please email a signed copy to
 - [Style Guide](#style-guide)
 - [Building](#building)
 - [Testing](#testing)
+- [Profiling](#profiling)
 - [Plugins](#plugins)
 - [Releasing](#releasing)
 
@@ -158,35 +159,23 @@ Profiling can be used to monitor the impact of Secretless on CPU and Memory cons
 - [Postgresql](https://www.postgresql.org/download/) to install Postgres
 
 In order to configure individual profiles properly and receive desired results, perform the following:
-1. [Build](https://github.com/cyberark/secretless-broker/blob/master/CONTRIBUTING.md#building) Secretless locally
-2. Run a Postgres container named ```pg-test``` and wait for it to become ready:
+1. [Build](https://conjurhq.slack.com/archives/G7XCMCEAV/p1544522629029800) Secretless locally
+2. Run a Postgres backend named ```sample-pg```:
 ```
-docker run -d --name pg-test -p 5432:55432  postgres:9.3;
-
-# wait for pg-test
-docker exec pg-test bash -c "
- while ! pg_isready -U postgres > /dev/null 2>&1;
-   do
-     >&2 echo "."
-     sleep 1
- done
- echo 'Postgres is up and ready'
-"
+pushd test/pg_handler
+  docker build -t sample-pg -f Dockerfile.pg .
+  docker run -d -p 5432:5432 sample-pg
+popd
 ```
 
-3. Create and populate a database named test:
+3. Check if Postgres is running and query the database:
 ```
-docker exec pg-test psql -U postgres  -c "
-CREATE USER test PASSWORD 'test';
-
-CREATE SCHEMA test;
-CREATE TABLE test.test ( id INTEGER PRIMARY KEY );
-INSERT INTO test.test VALUES ( generate_series(0, 99999) );
-
-GRANT ALL ON SCHEMA test TO test;
-GRANT ALL ON test.test TO test;
-"
+psql -h localhost -p 5432 -U test dbname=postgres
 ```
+```
+select count(*) from test.test;
+```
+Note: run `\q` to exit Postgres CLI
 4. Create a sample secretless.yml file in the project root that has:
 
 ```
@@ -212,12 +201,13 @@ handlers:
 ```
 5. The type of profiling is explicitly defined in the initial command that runs Secretless. Run Secretless with the profile desired like so:
 ```
-$ PG_ADDRESS=localhost:5432/postgres PG_PASSWORD=test ./dist/darwin/amd64/secretless-broker -profile=cpu -f secretless.yml
+$ PG_ADDRESS=localhost:5432/postgres \
+  PG_PASSWORD=test \
+  ./dist/darwin/amd64/secretless-broker \
+  -profile=<cpu or memory> \
+  -f secretless.yml
 ```
-or
-```
-$ PG_ADDRESS=localhost:5432/postgres PG_PASSWORD=test ./dist/darwin/amd64/secretless-broker -profile=memory -f secretless.yml
-```
+Note: the location of the binary might vary across different OS
 
 6. Once Secretless is running, the type of profiling defined in the previous step should state that it has been enabled. Like so:
 ```
@@ -225,21 +215,19 @@ $ PG_ADDRESS=localhost:5432/postgres PG_PASSWORD=test ./dist/darwin/amd64/secret
 ```
 **NOTE:** The hash observed will be different each time a profile is run.
 
-7. Once the Postgres database and Secretless are spun up, query the database.
+7. Once the Postgres database and Secretless are spun up, query the database through Secretless by running the provided scripts.
 
-Example (CPU):
-```
-$ docker exec pg-test psql -U postgres  -c "select count(*) from test.test"
-```
-Example (Memory):
-```
-$ docker exec pg-test psql -U postgres  -c "delete from test.test where test.id=0"
-```
+Script for CPU profile: `./bin/cpu_profiling`
 
-8. Observe results in a PDF format by running:
+Script for Memory profile: `./bin/memory_profiling`
+
+Note: ensure that these scripts are given the proper permissions to run
+
+Observe results in a PDF format by running:
 ```
-go tool pprof --pdf ~/go/bin/yourbinary /var/path/to/cpu.pprof > file.pdf
+go tool pprof --pdf dist/darwin/amd64/secretless-broker /var/path/to/cpu.pprof > file.pdf
 ```
+Note: the location of the binary might vary across different OS
 
 ## Plugins
 

@@ -8,24 +8,22 @@ permalink: docs/reference/handlers/postgres.html
 
 ## PostgreSQL
 
-**WARNING: Handler in alpha - not suitable for production**
-
-The PostgreSQL handler authenticates and brokers connections to a postgres
+The PostgreSQL handler authenticates and brokers connections to a PostgreSQL
 database.
 
-To secure connections, we support all the postgres SSL options you're familar
+To secure connections, we support all the PostgreSQL SSL options you're familar
 with. See the `sslmode` option below for details.
 
 Note that, unlike most clients, the default `sslmode` for Secretless is
 `required`, since nearly all use cases require TLS.  If you do need to turn it
-off, however, and know you can do so safely, you can. 
+off, however, and know you can do so safely, you can.
 
 ### Configuring the Handler
 
 You tell Secretless where to find your database connection details in the yaml
 file's `credentials` section.
 
-There you specify where to find your database's address, your username and password, 
+There you specify where to find your database's address, your username and password,
 as well as the `sslmode` details, including the location of any relevant certificates
 and revocation lists, if applicable.
 
@@ -48,16 +46,14 @@ The options are as follows:
 
 - `sslmode`
   _Optional_
-  
-  **WARNING: this option is currently not supported and the default is sslmode=require**
 
   This option determines if the connection between Secretless and your database
   will be protected by SSL.
-  
+
   NOTE: As mentioned above, the default is `require` as opposed to `prefer`,
   forcing SSL unless you explicitly turn it off.
 
-  The Postgres documentation website provides detail on the [levels of protection](https://www.postgresql.org/docs/9.1/libpq-ssl.html#LIBPQ-SSL-PROTECTION)
+  The PostgreSQL documentation website provides detail on the [levels of protection](https://www.postgresql.org/docs/9.1/libpq-ssl.html#LIBPQ-SSL-PROTECTION)
   provided by different values for the sslmode parameter.
 
   There are [six modes](https://www.postgresql.org/docs/9.1/libpq-connect.html#LIBPQ-CONNECT-SSLMODE):
@@ -65,10 +61,10 @@ The options are as follows:
   + `disable`
   only try a non-SSL connection
 
-  + `allow`
+  + `allow` (not yet supported)
   first try a non-SSL connection; if that fails, try an SSL connection
 
-  + `prefer`
+  + `prefer` (not yet supported)
   first try an SSL connection; if that fails, try a non-SSL connection
 
   + `require` (default)
@@ -77,7 +73,7 @@ The options are as follows:
   + `verify-ca`
   only try an SSL connection, and verify that the server certificate is issued by a trusted certificate authority (CA).
 
-  + `verify-full`
+  + `verify-full` (not yet supported)
   only try an SSL connection, verify that the server certificate is issued by a trusted CA and that the server host name matches that in the certificate
 
 _NOTE_: If `sslmode` is set to `require`, `verify-ca`, or `verify-full`, it may
@@ -106,7 +102,7 @@ depend on your use case.
   server's certificate will be verified to be signed by one of these
   authorities.
 
-+ `sslcrl`
++ `sslcrl` (not yet supported)
   _Optional_
 
   This content of this parameter specifies the SSL certificate revocation list
@@ -122,6 +118,28 @@ listeners:
   - name: pg_listener
     protocol: pg
     address: 0.0.0.0:5432
+
+handlers:
+  - name: pg_handler
+    listener: pg_listener
+    credentials:
+      - name: address
+        provider: literal
+        id: postgres.my-service.internal:5432
+      - name: username
+        provider: literal
+        id: my-service
+      - name: password
+        provider: env
+        id: PG_PASSWORD
+```
+---
+**Listening on a Unix-domain socket with default `sslmode` of `require`**
+``` yaml
+listeners:
+  - name: pg_listener
+    protocol: pg
+    socket: /sock/.s.PGSQL.5432
 
 handlers:
   - name: pg_handler
@@ -161,7 +179,7 @@ handlers:
       - name: sslmode
         provider: literal
         id: verify-full
-      # NOTE: if your CA is stored in the environment 
+      # NOTE: if your CA is stored in the environment
       # or a secret store, rather than a file, you can
       # use the appropriate provider
       - name: sslrootcert
@@ -176,26 +194,4 @@ handlers:
       - name: sslcrl
         provider: file
         id: /etc/pg/root.crl
-```
----
-**Listening on a Unix-domain socket**
-``` yaml
-listeners:
-  - name: pg_listener
-    protocol: pg
-    socket: /sock/.s.PGSQL.5432
-
-handlers:
-  - name: pg_handler
-    listener: pg_listener
-    credentials:
-      - name: address
-        provider: literal
-        id: postgres.my-service.internal:5432
-      - name: username
-        provider: literal
-        id: my-service
-      - name: password
-        provider: env
-        id: PG_PASSWORD
 ```

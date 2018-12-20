@@ -1,16 +1,3 @@
 #!/bin/bash -ex
 
-./stop
-
-docker-compose build mysql mysql_no_tls test > /dev/null
-
-docker-compose up \
-  -d \
-  mysql mysql_no_tls
-
-./wait-for-mysql mysql_no_tls
-./wait-for-mysql mysql
-
-# start secretless-dev once mysql is running
-docker-compose up -d secretless-dev
-./wait-for-secretless secretless-dev
+./start -d

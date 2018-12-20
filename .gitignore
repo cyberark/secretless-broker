@@ -4,6 +4,7 @@ debug
 debug.*
 .vscode/
 .idea
+.keep
 vendor
 /demo/godoc
 /secretless

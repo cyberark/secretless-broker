@@ -40,6 +40,11 @@ func main() {
 	configManagerHelp += "Default will try to use 'secretless.yml' configuration."
 
 	configFile := flag.String("f", "", "Location of the configuration file.")
+
+	// for CPU and Memory profiling
+	// Acceptable values to input: cpu or memory
+	profileSwitch := flag.String("profile", "", "Enable and set the profiling mode to the value provided. Acceptable values are 'cpu' or 'memory'.");
+
 	configManagerSpecString := flag.String("config-mgr", "configfile", configManagerHelp)
 	debugSwitch := flag.Bool("debug", false, "Enable debug logging.")
 	fsWatchSwitch := flag.Bool("watch", false, "Enable automatic reloads when configuration file changes.")
@@ -84,6 +89,9 @@ func main() {
 		log.Println(err)
 	}
 
+	// for CPU and Memory profiling
+	plugin.GetManager().SetFlags(*profileSwitch, *debugSwitch)
+
 	plugin.GetManager().RegisterSignalHandlers()
-	plugin.GetManager().Run(configManagerID, configManagerSpec, *debugSwitch)
+	plugin.GetManager().Run(configManagerID, configManagerSpec)
 }

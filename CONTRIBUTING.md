@@ -13,6 +13,7 @@ to enforce its license terms. Please email a signed copy to
 - [Style Guide](#style-guide)
 - [Building](#building)
 - [Testing](#testing)
+- [Profiling](#profiling)
 - [Plugins](#plugins)
 - [Releasing](#releasing)
 
@@ -149,6 +150,87 @@ cd test/manual/k8s_crds
 ./deploy
 ```
 This test currently does not run as part of the test suite.
+
+## Profiling
+Profiling can be used to monitor the impact of Secretless on CPU and Memory consumption. Currently, Secretless supports two types- CPU and Memory.
+
+**Prerequisites:**
+- [Graphviz](https://graphviz.gitlab.io/download/) to visualize profiling results
+- [Postgresql](https://www.postgresql.org/download/) to install Postgres
+
+We've provided sample instructions below for profiling the PostgreSQL handler.
+Note that if you are running through these instructions yourself, you'll want to
+replace `<GOOS>/<GOARCH>` with your particular operating system and compilation architecture.
+
+1. [Build](#building) Secretless locally
+1. Run a Postgres backend named ```sample-pg```:
+   ```
+   pushd test/pg_handler
+     docker build -t sample-pg -f Dockerfile.pg .
+     docker run -d -p 5432:5432 sample-pg
+   popd
+   ```
+
+1. Check if Postgres is running and query the database:
+   ```
+   $ psql -h localhost -p 5432 -U test dbname=postgres -c "select count(*) from test.test;"
+    count  
+   --------
+    100000
+   (1 row)
+   ```
+
+1. Create a sample secretless.yml file in the project root that has:
+
+   ```
+   listeners:
+     - name: pg_tcp
+       protocol: pg
+       address: 0.0.0.0:15432
+
+   handlers:
+     - name: pg_via_tcp
+       listener: pg_tcp
+       credentials:
+         - name: address
+           provider: env
+           id: PG_ADDRESS
+         - name: username
+           provider: literal
+           id: test
+         - name: password
+           provider: env
+           id: PG_PASSWORD
+    ```
+
+1. The type of profiling is explicitly defined in the initial command that runs Secretless. Run Secretless with the profile desired like so:
+   ```
+   $ PG_ADDRESS=localhost:5432/postgres \
+       PG_PASSWORD=test \
+       ./dist/<GOOS>/<GOARCH>/secretless-broker \
+       -profile=<cpu or memory> \
+       -f secretless.yml
+   ```
+   Note: the location of the binary might vary across different OS
+
+1. Once Secretless is running, the type of profiling defined in the previous step should state that it has been enabled. It should look something like:
+   ```
+   2018/11/21 10:17:13 profile: cpu profiling enabled, /var/folders/wy/f9qn852d5_d4s_g06s1kwjcr0000gn/T/profile789228879/cpu.pprof
+   ```
+   **NOTE:** The hash observed will be different each time a profile is run.
+
+1. Once the Postgres database and Secretless are spun up, query the database through Secretless by running the provided scripts.
+
+   Script for CPU profile: `./bin/cpu_profiling`
+
+   Script for Memory profile: `./bin/memory_profiling`
+
+   Note: ensure that these scripts are given the proper permissions to run
+
+1. Observe results in a PDF format by running:
+   ```
+   go tool pprof --pdf dist/<GOOS>/<GOARCH>/secretless-broker /var/path/to/cpu.pprof > file.pdf
+   ```
 
 ## Plugins
 

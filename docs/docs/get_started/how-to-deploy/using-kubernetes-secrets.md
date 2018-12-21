@@ -82,6 +82,9 @@ handlers:
         provider: file
         id: /etc/secret/password
 ```
+Note: by default Secretless Broker will connect to PostgreSQL using
+`sslmode=require`. For information on additional `sslmode` values available,
+please see the [handler documentation](/docs/reference/handlers/overview.html).
 ---
 Create a new ConfigMap in Kubernetes using the newly created `secretless.yml`.
 ``` bash

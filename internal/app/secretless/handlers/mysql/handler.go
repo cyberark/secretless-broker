@@ -32,11 +32,17 @@ type Handler struct {
 
 func (h *Handler) abort(err error) {
 	if h.GetClientConnection() != nil {
-		mysqlError := protocol.Error{
-			Code:     protocol.CRUnknownError,
-			SQLSTATE: protocol.ErrorCodeInternalError,
-			Message:  err.Error(),
+		var mysqlError *protocol.Error
+		var ok bool
+		if mysqlError, ok = err.(*protocol.Error); !ok {
+			mysqlError = &protocol.Error{
+				Code:     protocol.CRUnknownError,
+				SQLSTATE: protocol.ErrorCodeInternalError,
+				Message:  err.Error(),
+				SequenceID: 1,
+			}
 		}
+
 		h.GetClientConnection().Write(mysqlError.GetMessage())
 	}
 }
@@ -50,19 +56,23 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 	buffer := make([]byte, 4096)
 
 	var length int
-	var err error
+	var readErr error
+	var writeErr error
 
 	for {
-		length, err = source.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
+		length, readErr = source.Read(buffer)
+
+		// Ensure the source packet is sent to the destination prior to inspecting errors
+		_, writeErr = dest.Write(buffer[:length])
+
+		if readErr != nil {
+			if readErr == io.EOF {
 				log.Printf("source %s closed for destination %s", source.RemoteAddr(), dest.RemoteAddr())
 			}
 			return
 		}
 
-		_, err = dest.Write(buffer[:length])
-		if err != nil {
+		if writeErr != nil {
 			return
 		}
 

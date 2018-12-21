@@ -18,7 +18,11 @@ RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
 
 RUN go mod download
 
-COPY . /secretless
+# secretless source files
+COPY ./cmd /secretless/cmd
+COPY ./internal /secretless/internal
+COPY ./pkg /secretless/pkg
+COPY ./resource-definitions /secretless/resource-definitions
 
 # There are checksum mismatches in various environments with client-go package
 # so we for now manually remove it from the checksum file.

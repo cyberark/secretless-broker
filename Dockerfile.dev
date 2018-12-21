@@ -24,10 +24,17 @@ RUN groupadd -r secretless \
     chown secretless:secretless /usr/local/lib/secretless \
                                 /sock
 
+# these are binaries necessary for development
+# the happen to be written in Go:
+#
+# go-junit-report => Convert go test output to junit xml
+# goconvey => Go testing tool
+# reflex => Utility for watching files and executing process in response to changes
 RUN go get -u github.com/jstemmer/go-junit-report && \
     go get github.com/smartystreets/goconvey && \
-    go get golang.org/x/tools/cmd/goimports
+    go get github.com/cespare/reflex
 
+# go mod dependency management for the secretless project
 COPY go.mod go.sum /secretless/
 
 # There are checksum mismatches in various environments with client-go package
@@ -37,12 +44,24 @@ RUN sed -i '/^k8s.io\/client-go\ /d' /secretless/go.sum
 
 RUN go mod download
 
+# TODO: all the stuff below this line is not needed
+# this image should just be a development environment for Secretless
+# and not be a snapshot of the repository
+# the repo should be volume mounted
+# NOTE: don't forget all the parts of the repo that are dependent on the definition
+# of secretless-dev as dev environment + secretless repo snapshot +
+# binaries, you'll need to fix them all
+
 # TODO: Expand this with build args when we support other arches
 ENV GOOS=linux \
     GOARCH=amd64 \
     CGO_ENABLED=1
 
-COPY . .
+# secretless source files
+COPY ./cmd ./cmd
+COPY ./internal ./internal
+COPY ./pkg ./pkg
+COPY ./resource-definitions ./resource-definitions
 
 # There are checksum mismatches in various environments with client-go package
 # so we for now manually remove it from the checksum file.
@@ -54,3 +73,5 @@ RUN go build -o dist/$GOOS/$GOARCH/secretless-broker ./cmd/secretless-broker && 
     go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2 && \
     ln -s $ROOT_DIR/dist/$GOOS/$GOARCH/secretless-broker /usr/local/bin/ && \
     ln -s $ROOT_DIR/dist/$GOOS/$GOARCH/summon2 /usr/local/bin/
+
+COPY . .

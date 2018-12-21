@@ -1,5 +1,5 @@
 # Postgresql Handler Development
-
+# TODO: UPDATE WITH LATEST DEV FLOW
 ## Quick Test (Laptop environment)
 
 Run Postgres in Docker:

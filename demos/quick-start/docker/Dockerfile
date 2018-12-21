@@ -11,8 +11,13 @@ ENTRYPOINT ["/sbin/tini", "--"]
 CMD [ "/entrypoint" ]
 
 COPY bin/entrypoint                 /
+
 COPY bin/pg-init.sh                 /docker-entrypoint-initdb.d/
+COPY etc/pg_server.key              /var/lib/postgresql/server.key
+COPY etc/pg_server.crt              /var/lib/postgresql/server.crt
+
 COPY etc/nginx.conf                 /etc/nginx/
+
 COPY etc/secretless.yml etc/motd    /etc/
 
 RUN apk add --no-cache apache2-utils \
@@ -29,6 +34,9 @@ RUN apk add --no-cache apache2-utils \
     && passwd -u user \
     && sed \
         -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' \
-        /etc/ssh/sshd_config
+        /etc/ssh/sshd_config \
+    && chown postgres:postgres /var/lib/postgresql/server.key \
+    && chown postgres:postgres /var/lib/postgresql/server.crt \
+    && chmod 0600 /var/lib/postgresql/server.key
 
 COPY --from=secretless-broker /usr/local/bin/secretless-broker /usr/local/bin/

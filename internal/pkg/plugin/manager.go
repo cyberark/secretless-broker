@@ -71,15 +71,14 @@ func GetManager() *Manager {
 	return _singleton
 }
 
-// Setter method for profile flags
+// SetFlags allows you to set the value of the debug and profile flags
 func (manager *Manager) SetFlags(profileFlag string, debugFlag bool) {
 	if (!(profileFlag == "cpu" || profileFlag == "memory" || profileFlag == "")) {
-		log.Fatal("Could not recognize inputted profile flag")
+		log.Fatal("ERROR: Invalid profile flag. Acceptable values are 'cpu' or 'memory'.")
 	}
 	manager.ProfileFlag = profileFlag
 	manager.DebugFlag = debugFlag
 }
-
 
 // ConfigurationChanged is an interface adapter for plugin_v1.ConfigurationChangedHandler
 func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig config.Config) error {

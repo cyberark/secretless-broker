@@ -176,6 +176,7 @@ psql -h localhost -p 5432 -U test dbname=postgres
 select count(*) from test.test;
 ```
 Note: run `\q` to exit Postgres CLI
+
 4. Create a sample secretless.yml file in the project root that has:
 
 ```
@@ -209,7 +210,7 @@ $ PG_ADDRESS=localhost:5432/postgres \
 ```
 Note: the location of the binary might vary across different OS
 
-6. Once Secretless is running, the type of profiling defined in the previous step should state that it has been enabled. Like so:
+6. Once Secretless is running, the type of profiling defined in the previous step should state that it has been enabled. It should look something like:
 ```
 2018/11/21 10:17:13 profile: cpu profiling enabled, /var/folders/wy/f9qn852d5_d4s_g06s1kwjcr0000gn/T/profile789228879/cpu.pprof
 ```

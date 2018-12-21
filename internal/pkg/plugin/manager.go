@@ -73,13 +73,13 @@ func GetManager() *Manager {
 
 // Setter method for profile flags
 func (manager *Manager) SetFlags(profileFlag string, debugFlag bool) {
-	if (profileFlag == "cpu" || profileFlag == "memory" || profileFlag == "") {
-		manager.ProfileFlag = profileFlag
-		manager.DebugFlag = debugFlag
-	} else {
-		log.Printf("Could not recognize inputted profile flag")
+	if (!(profileFlag == "cpu" || profileFlag == "memory" || profileFlag == "")) {
+		log.Fatal("Could not recognize inputted profile flag")
 	}
+	manager.ProfileFlag = profileFlag
+	manager.DebugFlag = debugFlag
 }
+
 
 // ConfigurationChanged is an interface adapter for plugin_v1.ConfigurationChangedHandler
 func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig config.Config) error {

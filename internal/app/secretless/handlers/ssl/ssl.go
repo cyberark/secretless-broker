@@ -27,28 +27,19 @@ func NewSecretlessTLSConfig(o options, requireCanVerifyCAOnly bool) (SecretlessT
 	// server certificate is validated against the CA. Relying on this
 	// behavior is discouraged, and applications that need certificate
 	// validation should always use verify-ca or verify-full.
+	//
+	// MySQL on the other hand notes in its docs that it ignores
+	// SSL certs if supplied in REQUIRED sslmode.
 	tlsConf := SecretlessTLSConfig{Options: o, UseTLS: true}
 
 	switch mode := o["sslmode"]; mode {
 	case "disable":
 		tlsConf.UseTLS = false
 		return tlsConf, nil
-		// "require" is the default.
+	// "require" is the default.
 	case "", "require":
 		// Skip TLS's own verification: it requires full verification since Go 1.3.
 		tlsConf.InsecureSkipVerify = true
-
-		// From http://www.postgresql.org/docs/current/static/libpq-ssl.html:
-		//
-		// Note: For backwards compatibility with earlier versions of
-		// PostgreSQL, if a root CA file exists, the behavior of
-		// sslmode=require will be the same as that of verify-ca, meaning the
-		// server certificate is validated against the CA. Relying on this
-		// behavior is discouraged, and applications that need certificate
-		// validation should always use verify-ca or verify-full.
-
-		// MySQL on the other hand notes in its docs that it ignores
-		// SSL certs if supplied in REQUIRED sslmode.
 		if requireCanVerifyCAOnly && len(o["sslrootcert"]) > 0 {
 			tlsConf.VerifyCaOnly = true
 		}

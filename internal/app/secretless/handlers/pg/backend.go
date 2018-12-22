@@ -3,38 +3,87 @@ package pg
 import (
 	"fmt"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
-	"log"
 	"net"
 	"net/url"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
-	"github.com/cyberark/secretless-broker/internal/pkg/util"
 )
+
+//TODO move this to another file
+
+type PgAddress struct {
+	*url.URL
+	SslMode string
+	SslRootCert string
+}
+
+func NewPgAddress(address string) (*PgAddress, error) {
+	url, err := url.Parse(fmt.Sprintf("postgres://%s", address))
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := &PgAddress{URL: url, SslMode: "", SslRootCert: ""}
+
+	for k, v := range url.Query() {
+		if k == "sslmode" {
+			result.SslMode = string(v[0])
+		}
+		if k == "sslrootcert" {
+			result.SslRootCert = string(v[0])
+		}
+	}
+
+	return result, nil
+}
+
+
+//func (url *string) (url.URL, error) {
+//	if url == nil {
+//		return errors.
+//
+//	}
+//		u, err := url.Parse(fmt.Sprintf("postgres://%s", address))
+//		if err != nil {
+//			return err
+//		}
+//
+//}
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
 // BackendConfig field.
-func (h *Handler) ConfigureBackend() (err error) {
-	result := BackendConfig{Options: make(map[string]string)}
+func (h *Handler) ConfigureBackend() error {
+
+	result := BackendConfig{}
 	result.Options = make(map[string]string)
 	result.QueryStrings = make(map[string]string)
 
-	var values map[string][]byte
-	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
-		return
+	// Fetch credentials
+	rawCredentials, err := h.Credentials()
+	if err != nil {
+		return err
 	}
 
-	if h.GetConfig().Debug {
-		log.Printf("PG backend connection parameters: %s", values)
+	// Convert to strings
+	credentials := make(map[string]string)
+	for k, v := range rawCredentials {
+		credentials[k] = string(v)
 	}
 
-	if address := values["address"]; address != nil {
+	h.Debugf("PG backend connection parameters: %s", credentials)
+
+	// sslmode and sslrootcert are first taken from credentials
+	// the overridden by the query string
+	if address := rawCredentials["address"]; address != nil {
 		u, err := url.Parse(fmt.Sprintf("postgres://%s", address))
 		if err != nil {
 			return err
 		}
+		pgAddress, err := NewPgAddress(string(address))
 
-		result.Address = u.Host
-		result.Database = u.Path
+		result.Address = pgAddress.Host
+		result.Database = pgAddress.Path
 		for k, v := range u.Query() {
 			if len(v) > 0 {
 				result.QueryStrings[k] = string(v[0])
@@ -42,38 +91,39 @@ func (h *Handler) ConfigureBackend() (err error) {
 		}
 	}
 
-	if values["username"] != nil {
-		result.Username = string(values["username"])
-	}
-	if values["password"] != nil {
-		result.Password = string(values["password"])
-	}
-	if values["sslrootcert"] != nil {
-		sslrootcert := string(values["sslrootcert"])
+	//TODO: Why were these previously surrounded by nil checks?
+	//
+	result.Username = credentials["username"]
+	result.Password = credentials["password"]
+
+	if rawCredentials["sslrootcert"] != nil {
+		sslrootcert := credentials["sslrootcert"]
 		if sslrootcert != "" {
 			result.QueryStrings["sslrootcert"] = sslrootcert
 		}
 	}
-	if values["sslmode"] != nil {
-		sslmode := string(values["sslmode"])
+	if rawCredentials["sslmode"] != nil {
+		sslmode := credentials["sslmode"]
 		if sslmode != "" {
 			result.QueryStrings["sslmode"] = sslmode
 		}
 	}
 
-	delete(values, "address")
-	delete(values, "username")
-	delete(values, "password")
-	delete(values, "sslrootcert")
-	delete(values, "sslmode")
+	// Remove the keys we've already captured
+	delete(credentials, "address")
+	delete(credentials, "username")
+	delete(credentials, "password")
+	delete(credentials, "sslrootcert")
+	delete(credentials, "sslmode")
 
-	for k, v := range values {
-		result.Options[k] = string(v)
+	// Everything else is an "option"
+	for k, v := range credentials {
+		result.Options[k] = v
 	}
 
 	h.BackendConfig = &result
 
-	return
+	return nil
 }
 
 // ConnectToBackend establishes the connection to the backend database and sets the Backend field.
@@ -84,14 +134,14 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	debug := util.OptionalDebug(h.GetConfig().Debug)
-	debug("Sending startup message")
+	h.Debugf("Sending startup message")
 
 	tlsConf, err := ssl.NewSecretlessTLSConfig(h.BackendConfig.QueryStrings, true)
 	if err != nil {
 		return
 	}
 
+	//TODO: this does't belong here
 	if tlsConf.UseTLS {
 		// Start SSL Check
 		/*
@@ -149,13 +199,13 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	connection.Write(startupMessage)
 
-	debug("Authenticating to the backend")
+	h.Debugf("Authenticating to the backend")
 
 	if err = protocol.HandleAuthenticationRequest(h.BackendConfig.Username, h.BackendConfig.Password, connection); err != nil {
 		return
 	}
 
-	debug("Successfully connected to '%s'", h.BackendConfig.Address)
+	h.Debugf("Successfully connected to '%s'", h.BackendConfig.Address)
 
 	if _, err = h.GetClientConnection().Write(protocol.CreateAuthenticationOKMessage()); err != nil {
 		return

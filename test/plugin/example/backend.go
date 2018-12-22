@@ -12,6 +12,7 @@ func (h *Handler) abort(err error) {
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
 // BackendConfig field.
+// TODO: what is the file doing here?  what is this an example of?
 func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{}
 

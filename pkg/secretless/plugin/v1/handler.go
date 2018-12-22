@@ -1,9 +1,9 @@
 package v1
 
 import (
+	"log"
 	"net"
 	"net/http"
-	"log"
 	"sync"
 
 	"golang.org/x/crypto/ssh"
@@ -85,6 +85,17 @@ func (h *BaseHandler) GetClientConnection() net.Conn {
 // GetBackendConnection implements plugin_v1.Handler
 func (h *BaseHandler) GetBackendConnection() net.Conn {
 	return h.BackendConnection
+}
+
+func (h *BaseHandler) Debugf(msg string, args ...interface{}) {
+	if !h.GetConfig().Debug {
+		return
+	}
+	log.Printf(msg, args...)
+}
+
+func (h *BaseHandler) Credentials() (map[string][]byte, error) {
+	return h.Resolver.Resolve(h.GetConfig().Credentials)
 }
 
 // LoadKeys implements plugin_v1.Handler

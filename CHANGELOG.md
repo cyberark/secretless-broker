@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+#### Added
+- Added `/ready` and `/live` endpoints on port 5335 for checking if the broker is ready/live
+
 ## [0.6.0] 2018-12-20
 
 ### Added

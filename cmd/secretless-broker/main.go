@@ -43,7 +43,7 @@ func main() {
 
 	// for CPU and Memory profiling
 	// Acceptable values to input: cpu or memory
-	profileSwitch := flag.String("profile", "", "Enable and set the profiling mode to the value provided. Acceptable values are 'cpu' or 'memory'.");
+	profileSwitch := flag.String("profile", "", "Enable and set the profiling mode to the value provided. Acceptable values are 'cpu' or 'memory'.")
 
 	configManagerSpecString := flag.String("config-mgr", "configfile", configManagerHelp)
 	debugSwitch := flag.Bool("debug", false, "Enable debug logging.")

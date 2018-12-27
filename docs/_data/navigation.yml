@@ -103,5 +103,7 @@ chapters:
           url: /docs/reference/config-managers/k8s/crd.html
       - page: Plugin Reference
         url: /generated/pkg_secretless_plugin_v1.html
+      - page: Health Check
+        url: /docs/reference/health-check/overview.html
   - title: FAQ
     url: /docs/faq.html

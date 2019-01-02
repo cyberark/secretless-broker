@@ -25,7 +25,7 @@ with Conjur (activating the first non-empty method in this order):
   + Requires identical configuration environment variables as [authn-k8s-client](https://github.com/cyberark/conjur-authn-k8s-client)
   + See [Conjur docs](https://docs.conjur.org/Latest/en/Content/Integrations/Kubernetes_deployApplicationApplication.htm) for additional information on configuration
 
-Both methods also require `CONJUR_APPLIANCE_URL` and `CONJUR_ACCOUNT` to
+These methods also require `CONJUR_APPLIANCE_URL` and `CONJUR_ACCOUNT` to
 be set in the environment of the Secretless Broker. You may optionally
 also include any other configuration environment variables that are
 allowed by the [Conjur Go Client Library](https://github.com/cyberark/conjur-api-go).

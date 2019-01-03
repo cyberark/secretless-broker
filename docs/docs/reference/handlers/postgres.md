@@ -1,7 +1,6 @@
 ---
 title: Handlers
 id: postgres
-layout: docs
 description: Secretless Broker Documentation
 permalink: docs/reference/handlers/postgres.html
 redirect_to: https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm

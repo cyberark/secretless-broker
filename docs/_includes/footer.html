@@ -8,7 +8,7 @@
 				<div class="row">
 					<div class="col-md-4 col-xs-12">
 						<ul class="link-col">
-							<p class="footer-title"><a href="docs/overview.html">Docs</a></p>
+							<p class="footer-title"><a href="https://docs.secretless.io/Latest/en/Content/Resources/_TopNav/cc_Home.htm">Docs</a></p>
 							{% assign footer = site.data.navigation.footer-docs %}
 							{% for link in footer %}
 									<li class="footer-resource {% if page.url == sublink.url %}active{% endif %}">
@@ -19,7 +19,7 @@
 					<div class="col-md-4 col-xs-12">
 						<ul class="link-col">
 							<p class="footer-title">Resources</p>
-							{% assign footer = site.data.navigation.footer-res %}
+							{% assign footer = site.data.navigation.footer-resources %}
 							{% for link in footer %}
 							<li class="footer-resource {% if page.url == sublink.url %}active{% endif %}">
 								<a {{ link.target }} href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>

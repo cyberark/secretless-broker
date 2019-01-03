@@ -5,6 +5,7 @@ import (
 	"net"
 	"sync"
 
+	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
@@ -130,10 +131,20 @@ func (p *Proxy) Run() {
 	for msg := range p.runEventChan {
 		switch msg {
 		case START, RESTART:
+			// Set the health check to show that we are ready
+			if msg == START {
+				util.SetAppInitializedFlag()
+			}
+
+			// Mark app as "live"
+			util.SetAppIsLive(false)
+
 			p.cleanUpListeners()
 			p.Listeners = make([]plugin_v1.Listener, 0)
 
 			// TODO: Delegate logic of this `if` check to connection managers
+			// XXX: App is not marked as live if we are not listening to anything. This
+			//      may need clarification later.
 			if len(p.Config.Listeners) < 1 {
 				log.Println("Waiting for valid configuration to be provided...")
 				break
@@ -144,6 +155,9 @@ func (p *Proxy) Run() {
 				listener := p.Listen(config)
 				p.Listeners = append(p.Listeners, listener)
 			}
+
+			util.SetAppIsLive(true)
+
 		case SHUTDOWN:
 			log.Println("Shutdown requested. Waiting for cleanup...")
 			// Block forever until explicit os.Exit and prevent processing

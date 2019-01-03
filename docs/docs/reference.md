@@ -1,3 +1,3 @@
 ---
-redirect_to:
+redirect_to: https://docs.secretless.io
 ---

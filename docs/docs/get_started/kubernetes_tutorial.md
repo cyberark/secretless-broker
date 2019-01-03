@@ -1,7 +1,6 @@
 ---
 title: Kubernetes Tutorial
 id: kubernetes_tutorial
-layout: docs
 description: Secretless Broker Documentation
 permalink: /docs/get_started/kubernetes_tutorial.html
 ---

@@ -24,6 +24,8 @@ github.com/codegangsta/cli v1.20.0/go.mod h1:/qJNoX69yVSKu5o4jLyXAENLRyk1uhi7zkb
 github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720/go.mod h1:GL3xCUCBDV3CZiTSEKksMWbLE66hEyuu9qyDOOqM47Y=
 github.com/cyberark/conjur-api-go v0.5.0 h1:bN3arforgaE5E0GcZKyxWg6v7U/51ha2TZiqL6wPQ1M=
 github.com/cyberark/conjur-api-go v0.5.0/go.mod h1:492M4gGHnfHHWtuewzmj+1fe0BiLzzsrsdGYcbP2lU8=
+github.com/cyberark/conjur-api-go v0.5.1-0.20190103154352-bb43c2b86d76 h1:OIT4kCMaPGzpBNYl7umVqKvkKm5AzaJom4aszgzGXPM=
+github.com/cyberark/conjur-api-go v0.5.1-0.20190103154352-bb43c2b86d76/go.mod h1:492M4gGHnfHHWtuewzmj+1fe0BiLzzsrsdGYcbP2lU8=
 github.com/cyberark/conjur-authn-k8s-client v0.12.0 h1:mwtVQzKjlax67HRnDxY4ogS5lvszV7VVonxPItxi+iQ=
 github.com/cyberark/conjur-authn-k8s-client v0.12.0/go.mod h1:hjpUeTkRMUCSR0EAEIko2RCp4+dncNeiIWHNJeLFuRg=
 github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed h1:0HPMF9Oa2FiN6inNtxlAL5iobtWygfhYlhv/T10RWFU=
@@ -80,8 +82,6 @@ github.com/hashicorp/go-memdb v0.0.0-20180223233045-1289e7fffe71/go.mod h1:kbfIt
 github.com/hashicorp/go-multierror v0.0.0-20171204182908-b7773ae21874 h1:em+tTnzgU7N22woTBMcSJAOW7tRHAkK597W+MD/CpK8=
 github.com/hashicorp/go-multierror v0.0.0-20171204182908-b7773ae21874/go.mod h1:JMRHfdO9jKNzS/+BTlxCjKNQHg/jZAft8U7LloJvN7I=
 github.com/hashicorp/go-plugin v0.0.0-20180331002553-e8d22c780116/go.mod h1:JSqWYsict+jzcj0+xElxyrBQRPNoiWQuddnxArJ7XHQ=
-github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90 h1:VBj0QYQ0u2MCJzBfeYXGexnAl17GsH1yidnoxCqqD9E=
-github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90/go.mod h1:o4zcYY1e0GEZI6eSEr+43QDYmuGglw1qSO6qdHUHCgg=
 github.com/hashicorp/go-uuid v0.0.0-20180228145832-27454136f036/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/golang-lru v0.0.0-20180201235237-0fb14efe8c47 h1:UnszMmmmm5vLwWzDjTFVIkfhvWF1NdrmChl8L2NUDCw=
 github.com/hashicorp/golang-lru v0.0.0-20180201235237-0fb14efe8c47/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
@@ -200,7 +200,6 @@ k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408 h1:GcrrWo5PlDj
 k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408/go.mod h1:IxkesAMoaCRoLrPJdZNZUQp9NfZnzqaVzLhb2VEQzXE=
 k8s.io/apimachinery v0.0.0-20180621070125-103fd098999d h1:MZjlsu9igBoVPZkXpIGoxI6EonqNsXXZU7hhvfQLkd4=
 k8s.io/apimachinery v0.0.0-20180621070125-103fd098999d/go.mod h1:ccL7Eh7zubPUSh9A3USN90/OzHNSVN6zxzde07TDCL0=
-k8s.io/client-go v0.0.0-20180806134042-1f13a808da65 h1:kQX7jEIMYrWV9XqFN4usRaBLzCu7fd/qsCXxbgf3+9g=
 k8s.io/client-go v0.0.0-20180806134042-1f13a808da65/go.mod h1:7vJpHMYJwNQCWgzmNV+VYUl1zCObLyodBc8nIyt8L5s=
 k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c h1:3KSCztE7gPitlZmWbNwue/2U0YruD65DqX3INopDAQM=
 k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c/go.mod h1:BXM9ceUBTj2QnfH2MK1odQs778ajze1RxcmP6S8RVVc=

@@ -4,7 +4,9 @@ id: kubernetes_tutorial
 layout: docs
 description: Secretless Broker Documentation
 permalink: /docs/get_started/kubernetes_tutorial.html
+redirect_to: https://docs.secretless.io/Latest/en/Content/Get%20Started/kube_tut_get_started.htm
 ---
+<<<<<<< HEAD
 
 To get started with the Secretless Broker, try working through this tutorial, which goes through deploying the Secretless Broker with a sample application that uses a PostgreSQL database for backend storage.
 
@@ -865,3 +867,5 @@ Now return to the polling terminal. Observe that requests to the application API
 ## Review Complete Tutorial With Scripts
 
 Check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps of the tutorial yourself and configurable to suit your needs.
+=======
+>>>>>>> b909749... Add redirect links for previously deleted files

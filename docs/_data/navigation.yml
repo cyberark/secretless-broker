@@ -1,6 +1,6 @@
 main:
   - title: Docs
-    url: https://docs.secretless.io/
+    url: https://docs.secretless.io/Latest/en/Content/Resources/_TopNav/cc_Home.htm
     target: target="_blank" rel="noopener noreferrer"
     section: /docs/
   - title: Community
@@ -10,4 +10,29 @@ main:
   - title: GitHub
     url: https://github.com/cyberark/secretless-broker
     class: gh
+    target: target="_blank" rel="noopener noreferrer"
+
+footer-docs:
+  - title: Why Secretless?
+    url: /docs/overview/why_secretless.html
+    target: target="_blank" rel="noopener noreferrer"
+  - title: How Does It Work?
+    url: /docs/overview/how_it_works.html
+    target: target="_blank" rel="noopener noreferrer"
+  - title: Key Terms
+    url: /docs/overview/key_terms.html
+    target: target="_blank" rel="noopener noreferrer"
+  - title: Reference
+    url: /docs/reference.html
+    target: target="_blank" rel="noopener noreferrer"
+
+footer-res:
+  - title: Community
+    url: /community.html
+    target: target="_blank" rel="noopener noreferrer"
+  - title: Blog
+    url: /blog.html
+    target: target="_blank" rel="noopener noreferrer"
+  - title: FAQ
+    url: /docs/faq.html
     target: target="_blank" rel="noopener noreferrer"

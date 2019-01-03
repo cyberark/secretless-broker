@@ -30,3 +30,6 @@ gem "wdm", "~> 0.1.0" if Gem.win_platform?
 
 # Rouge handles syntax highlighting for Markdown code blocks.
 gem "rouge", "~> 3.1"
+
+# Link redirection
+gem 'jekyll-redirect-from'

@@ -40,6 +40,8 @@ func (h BasicAuthHandler) Authenticate(values map[string][]byte, r *http.Request
 	rawAuthString = append(rawAuthString, []byte(":")...)
 	rawAuthString = append(rawAuthString, password...)
 
+	log.Println("Value: %s", username)
+	log.Println("Value: %s", password)
 	r.Header.Set("Authorization", fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(rawAuthString)))
 
 	return nil

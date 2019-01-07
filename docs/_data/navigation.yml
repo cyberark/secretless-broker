@@ -14,16 +14,16 @@ main:
 
 footer-docs:
   - title: Why Secretless?
-    url: /docs/overview/why_secretless.html
+    url: https://docs-staging.secretless.io/Latest/en/Content/Overview/WhySecretless.htm
     target: target="_blank" rel="noopener noreferrer"
   - title: How Does It Work?
-    url: /docs/overview/how_it_works.html
+    url: https://docs-staging.secretless.io/Latest/en/Content/Overview/how_it_works.htm
     target: target="_blank" rel="noopener noreferrer"
   - title: Key Terms
-    url: /docs/overview/key_terms.html
+    url: https://docs-staging.secretless.io/Latest/en/Content/Overview/key_terms.htm
     target: target="_blank" rel="noopener noreferrer"
   - title: Reference
-    url: /docs/reference.html
+    url: https://docs-staging.secretless.io/Latest/en/Content/Resources/_TopNav/cc_Home.htm
     target: target="_blank" rel="noopener noreferrer"
 
 footer-res:
@@ -34,5 +34,5 @@ footer-res:
     url: /blog.html
     target: target="_blank" rel="noopener noreferrer"
   - title: FAQ
-    url: /docs/faq.html
+    url: https://docs-staging.secretless.io/Latest/en/Content/FAQ/faq.htm
     target: target="_blank" rel="noopener noreferrer"

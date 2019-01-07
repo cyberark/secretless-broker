@@ -1,7 +1,7 @@
 ---
 title: Handlers
 id: aws
-layout: docs
 description: Secretless Broker Documentation
+permalink: docs/reference/handlers/http/aws.html
 redirect_to: https://docs.secretless.io/Latest/en/Content/References/handlers/http/aws.htm
 ---

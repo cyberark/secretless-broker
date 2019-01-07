@@ -1,0 +1,19 @@
+{
+    "CN": "test-server",
+    "hosts": [
+        "localhost",
+        "www.example.net"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "US",
+            "ST": "CA",
+            "L": "San Francisco"
+        }
+    ]
+}
+

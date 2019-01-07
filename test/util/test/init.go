@@ -2,7 +2,6 @@ package test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
@@ -67,10 +66,8 @@ var SecretlessHost = func() string {
 	return "secretless"
 }()
 
-// TODO: explain the reasoning behind the below
-// NOTE: fixtures are generated in bash script
-// this requires coordination between the bash and the Go code
 func init() {
+	// TEST_ROOT is used to direct where secretless.yml gets generated
 	testRoot, ok := os.LookupEnv("TEST_ROOT")
 	if !ok {
 		fmt.Printf("ERROR: $TEST_ROOT envvar wasn't found\n")
@@ -78,20 +75,4 @@ func init() {
 	}
 
 	os.Chdir(testRoot)
-
-	// set valid-ca fixture
-	validCABytes, err := ioutil.ReadFile("./fixtures/valid-ca.pem")
-	if err != nil {
-		fmt.Printf("ERROR: valid-ca.pem wasn't found\n")
-		panic(err)
-	}
-	Valid = SSLRootCertType(validCABytes)
-
-	// set invalid-ca fixture
-	invalidCABytes, err := ioutil.ReadFile("./fixtures_static/invalid-ca.pem")
-	if err != nil {
-		fmt.Printf("ERROR: invalid-ca.pem wasn't found\n")
-		panic(err)
-	}
-	Invalid = SSLRootCertType(invalidCABytes)
 }

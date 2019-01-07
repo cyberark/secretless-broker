@@ -141,6 +141,50 @@ func TestSSL(t *testing.T) {
 				SSLRootCertType: Undefined,
 			},
 		},
+		{
+			TestDefinition: TestDefinition{
+				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=malformed, sslcert=malformed",
+				ShouldPass:          false,
+				CmdOutput:           StringPointer("ERROR 2000 (HY000): tls: failed to find any PEM data in certificate input"),
+			},
+			AbstractConfiguration: AbstractConfiguration{
+				ListenerType:      TCP,
+				ServerTLSType:     TLS,
+				SSLModeType:       VerifyCA,
+				SSLRootCertType:   Valid,
+				SSLPrivateKeyType: PrivateKeyMalformed,
+				SSLPublicCertType: PublicCertMalformed,
+			},
+		},
+		{
+			TestDefinition: TestDefinition{
+				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=valid, sslcert=valid",
+				ShouldPass:          true,
+			},
+			AbstractConfiguration: AbstractConfiguration{
+				ListenerType:      TCP,
+				ServerTLSType:     TLS,
+				SSLModeType:       VerifyCA,
+				SSLRootCertType:   Valid,
+				SSLPrivateKeyType: PrivateKeyValid,
+				SSLPublicCertType: PublicCertValid,
+			},
+		},
+		{
+			TestDefinition: TestDefinition{
+				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=notsignedbyca, sslcert=notsignedbyca",
+				ShouldPass:          false,
+				CmdOutput:           StringPointer("ERROR 2000 (HY000): remote error: tls: unknown certificate authority"),
+			},
+			AbstractConfiguration: AbstractConfiguration{
+				ListenerType:      TCP,
+				ServerTLSType:     TLS,
+				SSLModeType:       VerifyCA,
+				SSLRootCertType:   Valid,
+				SSLPrivateKeyType: PrivateKeyNotSignedByCA,
+				SSLPublicCertType: PublicCertNotSignedByCA,
+			},
+		},
 	}
 
 	Convey("SSL functionality", t, func() {

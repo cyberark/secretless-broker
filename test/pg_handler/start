@@ -10,7 +10,11 @@ done
 
 ./stop
 
+# ./ssl is REQUIRED during the build phase to make test ssl cert artifacts available to the docker context
+rm -rf ssl
+cp -rf ../util/ssl ssl
 docker-compose build
+rm -rf ssl
 
 docker-compose up \
   -d \
@@ -27,10 +31,6 @@ mkdir fixtures
 # + fixture generation
 # so there needs to be coordination of this bash script and the go files
 #
-## valid-ca.pem
-## NOTE this should come before secretless.yml because it is required by the autogen
-# TODO: have actual valid CA
-cp ./etc/rootCA.crt ./fixtures/valid-ca.pem
 ## secretless.yml
 docker-compose run --rm test \
   bash -c "

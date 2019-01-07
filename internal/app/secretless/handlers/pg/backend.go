@@ -11,12 +11,20 @@ import (
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 )
 
+var sslOptions = []string{
+	"sslrootcert",
+	"sslmode",
+	"sslkey",
+	"sslcert",
+}
+
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
 // BackendConfig field.
 func (h *Handler) ConfigureBackend() (err error) {
-	result := BackendConfig{Options: make(map[string]string)}
-	result.Options = make(map[string]string)
-	result.QueryStrings = make(map[string]string)
+	result := BackendConfig{
+		Options:      make(map[string]string),
+		QueryStrings: make(map[string]string),
+	}
 
 	var values map[string][]byte
 	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
@@ -48,24 +56,20 @@ func (h *Handler) ConfigureBackend() (err error) {
 	if values["password"] != nil {
 		result.Password = string(values["password"])
 	}
-	if values["sslrootcert"] != nil {
-		sslrootcert := string(values["sslrootcert"])
-		if sslrootcert != "" {
-			result.QueryStrings["sslrootcert"] = sslrootcert
+
+	for _, sslOption := range sslOptions {
+		if values[sslOption] != nil {
+			value := string(values[sslOption])
+			if value != "" {
+				result.QueryStrings[sslOption] = value
+			}
 		}
-	}
-	if values["sslmode"] != nil {
-		sslmode := string(values["sslmode"])
-		if sslmode != "" {
-			result.QueryStrings["sslmode"] = sslmode
-		}
+		delete(values, sslOption)
 	}
 
 	delete(values, "address")
 	delete(values, "username")
 	delete(values, "password")
-	delete(values, "sslrootcert")
-	delete(values, "sslmode")
 
 	for k, v := range values {
 		result.Options[k] = string(v)

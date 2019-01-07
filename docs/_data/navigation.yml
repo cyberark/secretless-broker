@@ -1,6 +1,6 @@
 main:
   - title: Docs
-    url: https://docs.secretless.io/
+    url: https://docs.secretless.io/Latest/en/Content/Resources/_TopNav/cc_Home.htm
     target: target="_blank" rel="noopener noreferrer"
     section: /docs/
   - title: Community

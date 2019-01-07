@@ -1,0 +1,36 @@
+---
+title: Docs
+id: docs
+description: Secretless Broker Documentation
+---
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+  {% include head.html %}
+
+  <body>
+
+    {% include top_nav.html %}
+
+    <div class="container">
+      <div class="grid-l-col">
+        <div class="sidebar">
+          {% include side_navigation.html %}
+        </div>
+    
+        <div class="docs">
+            <h1 class="page-title" >{{ page.title }}</h1>
+          {{ content }}
+        </div>
+      </div>
+    </div>
+    {% if page.title != 'Deploy to Kubernetes'%}
+      {% include cta-banner-integ.html %}
+    {% endif %}
+    {% include footer.html %}
+
+    <script src='/javascript/clipboard-buttons.js' type="text/javascript"></script>
+    <script src='/javascript/secretless.js' type="text/javascript"></script>
+  </body>
+</html>

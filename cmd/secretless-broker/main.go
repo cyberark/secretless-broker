@@ -45,8 +45,10 @@ func main() {
 	// Acceptable values to input: cpu or memory
 	profileSwitch := flag.String("profile", "", "Enable and set the profiling mode to the value provided. Acceptable values are 'cpu' or 'memory'.")
 
-	configManagerSpecString := flag.String("config-mgr", "configfile", configManagerHelp)
+	// For development use only; enable more verbose debug logging
 	debugSwitch := flag.Bool("debug", false, "Enable debug logging.")
+
+	configManagerSpecString := flag.String("config-mgr", "configfile", configManagerHelp)
 	fsWatchSwitch := flag.Bool("watch", false, "Enable automatic reloads when configuration file changes.")
 	pluginDir := flag.String("p", "/usr/local/lib/secretless", "Directory containing Secretless plugins")
 	flag.Parse()

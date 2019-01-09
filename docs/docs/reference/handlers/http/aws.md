@@ -50,7 +50,6 @@ handlers:
     type: aws
     match:
       - .*
-    debug: true
     credentials:
       - name: accessKeyId
         value:
@@ -73,7 +72,6 @@ handlers:
     type: aws
     match:
       - ^https\:\/\/ec2\..*\.amazonaws.com
-    debug: true
     credentials:
       - name: accessKeyId
         provider: env

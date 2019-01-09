@@ -31,7 +31,6 @@ services:
 
   ansible_secretless:
     image: secretless-broker
-    command: "-debug"
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
@@ -64,7 +63,6 @@ services:
 
   myapp_secretless:
     image: secretless-broker
-    command: "-debug"
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev

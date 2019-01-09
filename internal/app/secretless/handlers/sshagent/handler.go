@@ -87,9 +87,12 @@ func (h *Handler) LoadKeys(keyring agent.Agent) (err error) {
 		}
 	}
 
-	if h.GetConfig().Debug {
-		log.Printf("ssh-agent adding key : %s", key)
-	}
+	// TODO: Ensure that we don't print credentials here before uncommenting
+	// Issue: https://github.com/cyberark/secretless-broker/issues/593
+	//
+	// if h.GetConfig().Debug {
+	// 	log.Printf("ssh-agent adding key : %s", key)
+	// }
 
 	err = keyring.Add(key)
 	return

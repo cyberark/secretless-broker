@@ -162,9 +162,12 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r.RequestURI = "" // this must be reset when serving a request with the client
 
-	if listenerDebug || handlerDebug {
-		log.Printf("Sending request %v", r)
-	}
+	// TODO: Ensure that we don't print credentials here before uncommenting
+	// Issue: https://github.com/cyberark/secretless-broker/issues/593
+	//
+	// if listenerDebug || handlerDebug {
+	// 	log.Printf("Sending request %v", r)
+	// }
 
 	resp, err := l.Transport.RoundTrip(r)
 	if err != nil {

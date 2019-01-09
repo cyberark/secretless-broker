@@ -384,13 +384,11 @@ cat << EOF > secretless.yml
 listeners:
   - name: pets-pg-listener
     protocol: pg
-    debug: true
     address: localhost:5432
 
 handlers:
   - name: pets-pg-handler
     listener: pets-pg-listener
-    debug: true
     credentials:
       - name: address
         provider: kubernetes

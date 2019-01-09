@@ -6,12 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Sanitized remaining listeners/handlers from dumping data on the CLI when debug mode is on
+
 ## [0.6.1] 2019-01-08
 
 ### Changed
 - Updated conjur-api-go dependency
 
-#### Added
+### Added
 - Added `/ready` and `/live` endpoints on port 5335 for checking if the broker is ready/live
 
 ## [0.6.0] 2018-12-20

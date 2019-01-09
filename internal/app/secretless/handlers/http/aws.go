@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
 
@@ -99,10 +98,15 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	serviceName := matches[2]
 
 	signer := v4.NewSigner(creds)
-	if h.GetConfig().Debug {
-		signer.Debug = aws.LogDebugWithSigning
-		signer.Logger = aws.NewDefaultLogger()
-	}
+
+	// TODO: Make this dependent on a build flag instead of handler flag
+	// https://github.com/cyberark/secretless-broker/issues/593
+	//
+	// if h.GetConfig().Debug {
+	// 	signer.Debug = aws.LogDebugWithSigning
+	// 	signer.Logger = aws.NewDefaultLogger()
+	// }
+
 	if _, err := signer.Sign(r, bytes.NewReader(bodyBytes), serviceName, region, amzDate); err != nil {
 		return err
 	}

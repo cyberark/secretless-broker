@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/url"
+	"reflect"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
@@ -24,7 +25,8 @@ func (h *Handler) ConfigureBackend() (err error) {
 	}
 
 	if h.GetConfig().Debug {
-		log.Printf("PG backend connection parameters: %s", values)
+		keys := reflect.ValueOf(values).MapKeys()
+		log.Printf("%s backend connection parameters: %s", h.GetConfig().Name, keys)
 	}
 
 	if address := values["address"]; address != nil {
@@ -95,12 +97,12 @@ func (h *Handler) ConnectToBackend() (err error) {
 	if tlsConf.UseTLS {
 		// Start SSL Check
 		/*
-		* First determine if SSL is allowed by the backend. To do this, send an
-		* SSL request. The response from the backend will be a single byte
-		* message. If the value is 'S', then SSL connections are allowed and an
-		* upgrade to the connection should be attempted. If the value is 'N',
-		* then the backend does not support SSL connections.
-		*/
+		 * First determine if SSL is allowed by the backend. To do this, send an
+		 * SSL request. The response from the backend will be a single byte
+		 * message. If the value is 'S', then SSL connections are allowed and an
+		 * upgrade to the connection should be attempted. If the value is 'N',
+		 * then the backend does not support SSL connections.
+		 */
 
 		/* Create the SSL request message. */
 		message := protocol.NewMessageBuffer([]byte{})

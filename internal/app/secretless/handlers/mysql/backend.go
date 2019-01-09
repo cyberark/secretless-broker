@@ -5,6 +5,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
 	"log"
 	"net"
+	"reflect"
 	"strconv"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
@@ -26,7 +27,8 @@ func (h *Handler) ConfigureBackend() (err error) {
 	}
 
 	if h.GetConfig().Debug {
-		log.Printf("MySQL backend connection parameters: %s", connectionDetails)
+		keys := reflect.ValueOf(connectionDetails).MapKeys()
+		log.Printf("%s backend connection parameters: %s", h.GetConfig().Name, keys)
 	}
 
 	if host := connectionDetails["host"]; host != nil {
@@ -110,9 +112,9 @@ func (h *Handler) ConnectToBackend() (err error) {
 	// requested SSL but server doesn't support it
 	if requestedSSL && serverHandshake.ServerCapabilities&protocol.ClientSSL == 0 {
 		return &protocol.Error{
-			Code:     protocol.CRSSLConnectionError,
-			SQLSTATE: protocol.ErrorCodeInternalError,
-			Message:  ErrNoTLS.Error(),
+			Code:       protocol.CRSSLConnectionError,
+			SQLSTATE:   protocol.ErrorCodeInternalError,
+			Message:    ErrNoTLS.Error(),
 			SequenceID: 2,
 		}
 	}

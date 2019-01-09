@@ -22,13 +22,16 @@ type ServerConfig struct {
 // Handler contains the configuration and channels
 type Handler struct {
 	plugin_v1.BaseHandler
-	Channels      <-chan ssh.NewChannel
+	Channels <-chan ssh.NewChannel
 }
 
 func (h *Handler) serverConfig() (config ServerConfig, err error) {
 	var values map[string][]byte
 
-	log.Printf("%s", h.GetConfig().Credentials)
+	// TODO: Ensure that we don't print credentials here before uncommenting
+	// Issue: https://github.com/cyberark/secretless-broker/issues/593
+	//
+	// log.Printf("%s", h.GetConfig().Credentials)
 
 	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
 		return
@@ -94,9 +97,12 @@ func (h *Handler) Run() {
 		log.Fatalf("ERROR: Could not resolve server config\n", err)
 	}
 
-	if h.HandlerConfig.Debug {
-		log.Printf("Using config\n%v", serverConfig.ClientConfig)
-	}
+	// TODO: Ensure that we don't print credentials here before uncommenting
+	// Issue: https://github.com/cyberark/secretless-broker/issues/593
+	//
+	// if h.HandlerConfig.Debug {
+	// 	log.Printf("Using config\n%v", serverConfig.ClientConfig)
+	// }
 
 	if server, err = ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {
 		log.Printf("Failed to dial SSH backend '%s': %s", serverConfig.Address, err)
@@ -193,7 +199,7 @@ func (h *Handler) Run() {
 func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	handler := &Handler{
 		BaseHandler: plugin_v1.NewBaseHandler(options),
-		Channels:      options.Channels,
+		Channels:    options.Channels,
 	}
 
 	handler.Run()

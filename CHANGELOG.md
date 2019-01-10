@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Permissions have been fixed for OpenShift non-root integration and use
+
 ## [0.6.2] 2019-01-09
 
 ### Added

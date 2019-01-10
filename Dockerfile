@@ -53,10 +53,16 @@ RUN apk add -u shadow libc6-compat && \
     # Make and setup a directory for the Conjur client certificate/access token
     mkdir -p /etc/conjur/ssl && \
     mkdir -p /run/conjur && \
-    chown secretless:secretless /usr/local/lib/secretless \
-                                /sock \
-                                /etc/conjur/ssl \
-                                /run/conjur
+    # Use GID of 0 since that is what OpenShift will want to be able to read things
+    chown secretless:0 /usr/local/lib/secretless \
+                       /sock \
+                       /etc/conjur/ssl \
+                       /run/conjur && \
+    # We need open group permissions in these directories since OpenShift won't
+    # match our UID when we try to write files to them
+    chmod 770 /sock \
+              /etc/conjur/ssl \
+              /run/conjur
 
 USER secretless
 

@@ -138,21 +138,23 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 								ConnectionPort: connectionPort,
 							}
 
-							// sslRootCertTypeValue
-							handler.Credentials = append(handler.Credentials, sslRootCertTypeValue.toConfigVariable())
 
-							//sslModeTypeValue
-							// TODO: Make this same "toConfigVariable" refactoring for the other types
-							handler.Credentials = append(handler.Credentials, sslModeTypeValue.toConfigVariable())
-
-							//sslPrivateKeyTypeValue
-							handler.Credentials = append(handler.Credentials, sslPrivateKeyValue.toConfigVariable())
-
-							//sslPublicCertTypeValue
-							handler.Credentials = append(handler.Credentials, sslPublicCertValue.toConfigVariable())
-
+							handler.Credentials = append(
+								handler.Credentials,
+								// sslRootCertTypeValue
+								sslRootCertTypeValue.toConfigVariable(),
+								//sslModeTypeValue
+								sslModeTypeValue.toConfigVariable(),
+								//sslPrivateKeyTypeValue
+								sslPrivateKeyValue.toConfigVariable(),
+								//sslPublicCertTypeValue
+								sslPublicCertValue.toConfigVariable(),
+								)
 							// serverTLSTypeValue
-							handler.Credentials = append(handler.Credentials, serverTLSTypeValue.toConfigVariables(TestDBConfig)...)
+							handler.Credentials = append(
+								handler.Credentials,
+								serverTLSTypeValue.toConfigVariables(TestDBConfig)...
+							)
 
 							// listenerTypeValue
 							switch listenerTypeValue {

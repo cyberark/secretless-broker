@@ -13,6 +13,8 @@ type AbstractConfiguration struct {
 	ServerTLSType
 	SSLModeType
 	SSLRootCertType
+	SSLPrivateKeyType
+	SSLPublicCertType
 }
 
 // Represents a "live," running configuration of Secretless and

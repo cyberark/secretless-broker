@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
+# This script requires reflex - https://github.com/cespare/reflex
+# to be installed
+# Reflex allows us to watch for changes to source files, then respond by rebuilding and running secretless-broker
 
-# watch for changes to source files then rebuild and run secretless-broker
 reflex -r '\.go$' -R '\_test.go$' -s -- \
-  bash -c "rm -rf /sock/*; go run cmd/secretless-broker/main.go -f /secretless.yml --watch"
+  bash -c "rm -rf /sock/*; rm -rf /sock/.s*; go run cmd/secretless-broker/main.go -f /secretless.yml --watch"

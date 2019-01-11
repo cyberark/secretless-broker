@@ -105,59 +105,73 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 	for _, serverTLSTypeValue := range ServerTLSTypeValues() {
 		for _, listenerTypeValue := range ListenerTypeValues() {
 			for _, sslModeTypeValue := range SSlModeTypeValues() {
-				for _, sslRootCertTypeValue := range SSLRootCertTypeValues() {
-					connectionPort := ConnectionPort{
-						// TODO: perhaps resolve this duplication of listener type
-						ListenerType: listenerTypeValue,
-						Port:         portNumber,
+				for _, sslPublicCertValue := range SSLPublicCertTypeValues() {
+					for _, sslPrivateKeyValue := range SSLPrivateKeyTypeValues() {
+						for _, sslRootCertTypeValue := range SSLRootCertTypeValues() {
+							connectionPort := ConnectionPort{
+								// TODO: perhaps resolve this duplication of listener type
+								ListenerType: listenerTypeValue,
+								Port:         portNumber,
+							}
+
+							listener := config.Listener{
+								Name: "listener_" + connectionPort.ToPortString(),
+								// TODO: grab value from envvar for flexibility
+								Protocol: TestDBConfig.DB_PROTOCOL,
+								Debug:    true,
+							}
+							handler := config.Handler{
+								Name:         "handler_" + connectionPort.ToPortString(),
+								Debug:        true,
+								ListenerName: "listener_" + connectionPort.ToPortString(),
+								Credentials:  sharedCredentials(),
+							}
+							liveConfiguration := LiveConfiguration{
+								AbstractConfiguration: AbstractConfiguration{
+									ListenerType:    listenerTypeValue,
+									ServerTLSType:   serverTLSTypeValue,
+									SSLModeType:     sslModeTypeValue,
+									SSLRootCertType: sslRootCertTypeValue,
+									SSLPrivateKeyType: sslPrivateKeyValue,
+									SSLPublicCertType: sslPublicCertValue,
+								},
+								ConnectionPort: connectionPort,
+							}
+
+
+							handler.Credentials = append(
+								handler.Credentials,
+								// sslRootCertTypeValue
+								sslRootCertTypeValue.toConfigVariable(),
+								//sslModeTypeValue
+								sslModeTypeValue.toConfigVariable(),
+								//sslPrivateKeyTypeValue
+								sslPrivateKeyValue.toConfigVariable(),
+								//sslPublicCertTypeValue
+								sslPublicCertValue.toConfigVariable(),
+								)
+							// serverTLSTypeValue
+							handler.Credentials = append(
+								handler.Credentials,
+								serverTLSTypeValue.toConfigVariables(TestDBConfig)...
+							)
+
+							// listenerTypeValue
+							switch listenerTypeValue {
+							case TCP:
+								listener.Address = "0.0.0.0:" + connectionPort.ToPortString()
+							case Socket:
+								listener.Socket = connectionPort.ToSocketPath()
+							}
+
+							secretlessConfig.Listeners = append(secretlessConfig.Listeners, listener)
+							secretlessConfig.Handlers = append(secretlessConfig.Handlers, handler)
+
+							liveConfigurations = append(liveConfigurations, liveConfiguration)
+
+							portNumber++
+						}
 					}
-
-					listener := config.Listener{
-						Name: "listener_" + connectionPort.ToPortString(),
-						// TODO: grab value from envvar for flexibility
-						Protocol: TestDBConfig.DB_PROTOCOL,
-						Debug: true,
-					}
-					handler := config.Handler{
-						Name: "handler_" + connectionPort.ToPortString(),
-						Debug: true,
-						ListenerName: "listener_" + connectionPort.ToPortString(),
-						Credentials: sharedCredentials(),
-					}
-					liveConfiguration := LiveConfiguration{
-						AbstractConfiguration: AbstractConfiguration{
-							ListenerType:    listenerTypeValue,
-							ServerTLSType:   serverTLSTypeValue,
-							SSLModeType:     sslModeTypeValue,
-							SSLRootCertType: sslRootCertTypeValue,
-						},
-						ConnectionPort: connectionPort,
-					}
-
-					// sslRootCertTypeValue
-					handler.Credentials = append(handler.Credentials, sslRootCertTypeValue.toConfigVariable())
-
-					//sslModeTypeValue
-					// TODO: Make this same "toConfigVariable" refactoring for the other types
-					handler.Credentials = append(handler.Credentials, sslModeTypeValue.toConfigVariable())
-
-					// serverTLSTypeValue
-					handler.Credentials = append(handler.Credentials, serverTLSTypeValue.toConfigVariables(TestDBConfig)...)
-
-					// listenerTypeValue
-					switch listenerTypeValue {
-					case TCP:
-						listener.Address = "0.0.0.0:" + connectionPort.ToPortString()
-					case Socket:
-						listener.Socket = connectionPort.ToSocketPath()
-					}
-
-					secretlessConfig.Listeners = append(secretlessConfig.Listeners, listener)
-					secretlessConfig.Handlers = append(secretlessConfig.Handlers, handler)
-
-					liveConfigurations = append(liveConfigurations, liveConfiguration)
-
-					portNumber++
 				}
 			}
 		}

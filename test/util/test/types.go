@@ -19,7 +19,6 @@ func ListenerTypeValues()[]ListenerType {
 }
 
 type ServerTLSType string
-// TODO: turn to var and grab values from envvars for flexibility
 const (
 	TLS ServerTLSType = "DB_HOST_TLS"
 	NoTLS = "DB_HOST_NO_TLS"
@@ -89,11 +88,11 @@ func (sslMode SSLModeType) toConfigVariable() config.Variable {
 }
 
 type SSLRootCertType string
-var (
+const (
 	Undefined SSLRootCertType = ""
-	Valid     SSLRootCertType = "Dynamically Set: Valid"
+	Valid     SSLRootCertType = "/secretless/test/util/ssl/ca.pem"
 	Malformed SSLRootCertType = "malformed"
-	Invalid   SSLRootCertType = "Dynamically Set: Invalid"
+	Invalid   SSLRootCertType = "/secretless/test/util/ssl/ca-invalid.pem"
 )
 
 func SSLRootCertTypeValues()[]SSLRootCertType {
@@ -101,9 +100,67 @@ func SSLRootCertTypeValues()[]SSLRootCertType {
 }
 
 func (sslRootCertType SSLRootCertType) toConfigVariable() config.Variable {
+	provider := "literal"
+	switch sslRootCertType {
+	case Valid, Invalid:
+		provider = "file"
+	}
+
 	return config.Variable{
 		Name:     "sslrootcert",
-		Provider: "literal",
+		Provider: provider,
 		ID:		   string(sslRootCertType),
+	}
+}
+
+type SSLPrivateKeyType string
+const (
+	PrivateKeyUndefined SSLPrivateKeyType = ""
+	PrivateKeyValid SSLPrivateKeyType = "/secretless/test/util/ssl/client-valid-key.pem"
+	PrivateKeyNotSignedByCA SSLPrivateKeyType = "/secretless/test/util/ssl/client-different-ca-key.pem"
+	PrivateKeyMalformed SSLPrivateKeyType = "malformed"
+)
+
+func SSLPrivateKeyTypeValues()[]SSLPrivateKeyType {
+	return []SSLPrivateKeyType{PrivateKeyUndefined, PrivateKeyValid, PrivateKeyNotSignedByCA, PrivateKeyMalformed}
+}
+
+func (sslPrivateKeyType SSLPrivateKeyType) toConfigVariable() config.Variable {
+	provider := "literal"
+	switch sslPrivateKeyType {
+	case PrivateKeyValid, PrivateKeyNotSignedByCA:
+		provider = "file"
+	}
+
+	return config.Variable{
+		Name:     "sslkey",
+		Provider: provider,
+		ID:		   string(sslPrivateKeyType),
+	}
+}
+
+type SSLPublicCertType string
+const (
+	PublicCertUndefined SSLPublicCertType = ""
+	PublicCertValid     SSLPublicCertType = "/secretless/test/util/ssl/client-valid.pem"
+	PublicCertNotSignedByCA SSLPublicCertType = "/secretless/test/util/ssl/client-different-ca.pem"
+	PublicCertMalformed SSLPublicCertType = "malformed"
+)
+
+func SSLPublicCertTypeValues()[]SSLPublicCertType {
+	return []SSLPublicCertType{PublicCertUndefined, PublicCertValid, PublicCertNotSignedByCA, PublicCertMalformed}
+}
+
+func (sslPublicCertType SSLPublicCertType) toConfigVariable() config.Variable {
+	provider := "literal"
+	switch sslPublicCertType {
+	case PublicCertValid, PublicCertNotSignedByCA:
+		provider = "file"
+	}
+
+	return config.Variable{
+		Name:     "sslcert",
+		Provider: provider,
+		ID:		   string(sslPublicCertType),
 	}
 }

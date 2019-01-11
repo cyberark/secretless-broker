@@ -1,2 +1,3 @@
 fixtures/*
 !.keep
+ssl/*

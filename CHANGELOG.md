@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.3] 2019-01-11
+
+### Added
+- Database handlers support private-key pair as sslkey and sslcert
+
 ### Changed
 - Permissions have been fixed for OpenShift non-root integration and use
 
@@ -168,7 +173,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -178,3 +183,4 @@ The first tagged version.
 [0.6.0]: https://github.com/cyberark/secretless-broker/compare/v0.5.2...v0.6.0
 [0.6.1]: https://github.com/cyberark/secretless-broker/compare/v0.6.0...v0.6.1
 [0.6.2]: https://github.com/cyberark/secretless-broker/compare/v0.6.1...v0.6.2
+[0.6.3]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...v0.6.3

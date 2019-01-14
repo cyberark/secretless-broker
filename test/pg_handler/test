@@ -14,10 +14,12 @@ EOF
 export SECRETLESS_HOST=secretless
 export VERBOSE=false
 benchmark=false
+devmode=false
+
 while getopts :bdv opt; do
     case $opt in
         b) benchmark=true;;
-        d) SECRETLESS_HOST=secretless-dev;;
+        d) SECRETLESS_HOST=secretless-dev; devmode=true;;
         v) VERBOSE=true;;
        \?) echo "Unknown option -$OPTARG"; help_and_exit 1;;
     esac
@@ -55,10 +57,15 @@ if $benchmark; then
       echo "--- COMPARING BENCHMARKS ---" && \
       benchcmp bench.old bench.new
     '
+elif [[ "$devmode" = true ]]; then
+  echo "Running tests in dev mode..."
+  docker-compose exec \
+    -e SECRETLESS_HOST="$SECRETLESS_HOST" \
+    test bash -c "go test -v ./test/pg_handler/tests"
 else
-  docker-compose run \
-  --rm \
-  --no-deps \
-  test
+  #TODO make sure this still works
+  docker-compose run --rm --no-deps \
+    -e SECRETLESS_HOST="$SECRETLESS_HOST" \
+    test bash -c "go test -v ./test/pg_handler/tests"
 fi
 

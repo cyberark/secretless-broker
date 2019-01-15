@@ -3,11 +3,13 @@
 help_and_exit() {
   local retval=${1:-1}
   cat <<EOF
-This script will automatically detects if you're in "dev" mode
-based on the existence of the secretless-dev container.  If so,
-all tests will be run against this container and will not be
-torn down.  If not, they will be run in a fresh test container
-which will be torn down afterward.
+This script detects if you're in "dev" mode by the existence of
+the secretless-dev container.  That container will exist only if
+the development process was started using the "./dev" command.
+
+If in dev mode, all tests will be run against the "secretless-dev"
+container, which will not be torn down.  If not, they will be run
+in a fresh test container which will be torn down afterward.
 
 Options:
   -b runs benchmarks
@@ -19,7 +21,7 @@ EOF
 export SECRETLESS_HOST=secretless
 export VERBOSE=false
 benchmark=false
-devmode=false
+docker_compose_cmd="docker-compose run --rm --no-deps"
 
 while getopts :bdv opt; do
     case $opt in
@@ -34,15 +36,18 @@ done
 # your workflow using `./dev` if you are developing, and this
 # command will use the secretless-dev container.
 
+
 if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
   export SECRETLESS_HOST=secretless-dev
-  devmode=true
+
+  # use exec because the container is already running
+  docker_compose_cmd="docker-compose exec"
 fi
 
-# TODO: the benchmark code needs to handle both the dev and nondev cases
-#
 if $benchmark; then
-  # first set PG_ADDRESS and SECRETLESS_ADDRESS
+
+  # get the container ids and ip address
+  #
   pg_cid=$(docker-compose ps -q pg)
   secretless_cid=$(docker-compose ps -q $SECRETLESS_HOST)
   pg_ip=$(docker inspect \
@@ -59,11 +64,9 @@ if $benchmark; then
   echo ""
   echo "++++++++++++++++++++++++++++++++++++++"
   echo "working with $SECRETLESS_HOST"
-  docker-compose run \
-    --rm \
-    --no-deps \
-    test \
-    bash -c '
+
+  docker-compose run --rm --no-deps \
+    test bash -c '
       echo "--- QUERYING POSTGRES DIRECTLY ---" && \
       BENCH_ADDRESS=$PG_ADDRESS go test -v -bench=. -test.benchtime=10s ./test/pg_handler/bench_test.go | tee bench.old && \
 
@@ -73,14 +76,8 @@ if $benchmark; then
       echo "--- COMPARING BENCHMARKS ---" && \
       benchcmp bench.old bench.new
     '
-elif [[ "$devmode" = true ]]; then
-  echo "Running tests in dev mode..."
-  docker-compose exec \
-    -e SECRETLESS_HOST="$SECRETLESS_HOST" \
-    test bash -c "go test -v ./test/pg_handler/tests"
 else
-  #TODO make sure this still works
-  docker-compose run --rm --no-deps \
+  ${docker_compose_cmd} \
     -e SECRETLESS_HOST="$SECRETLESS_HOST" \
     test bash -c "go test -v ./test/pg_handler/tests"
 fi

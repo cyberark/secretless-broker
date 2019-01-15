@@ -3,8 +3,13 @@
 help_and_exit() {
   local retval=${1:-1}
   cat <<EOF
+This script will automatically detects if you're in "dev" mode
+based on the existence of the secretless-dev container.  If so,
+all tests will be run against this container and will not be
+torn down.  If not, they will be run in a fresh test container
+which will be torn down afterward.
+
 Options:
-  -d runs tests against secretless-dev container
   -b runs benchmarks
   -v verbose mode; provides more verbose output for test cases
 EOF
@@ -19,12 +24,23 @@ devmode=false
 while getopts :bdv opt; do
     case $opt in
         b) benchmark=true;;
-        d) SECRETLESS_HOST=secretless-dev; devmode=true;;
         v) VERBOSE=true;;
        \?) echo "Unknown option -$OPTARG"; help_and_exit 1;;
     esac
 done
 
+# Automatically detect if we're devmode based on the existence
+# of the secretless-dev container.  We assume that you started
+# your workflow using `./dev` if you are developing, and this
+# command will use the secretless-dev container.
+
+if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
+  export SECRETLESS_HOST=secretless-dev
+  devmode=true
+fi
+
+# TODO: the benchmark code needs to handle both the dev and nondev cases
+#
 if $benchmark; then
   # first set PG_ADDRESS and SECRETLESS_ADDRESS
   pg_cid=$(docker-compose ps -q pg)

@@ -22,7 +22,7 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 	if clientConfig.Password != "" {
 		args = append(args, fmt.Sprintf("--password=%s", clientConfig.Password))
 	}
-	switch connectPort.ListenerType {
+	switch connectPort.SocketType {
 	case test.TCP:
 		args = append(args, fmt.Sprintf("--host=%s", connectPort.Host()))
 		args = append(args, fmt.Sprintf("--port=%s", connectPort.ToPortString()))

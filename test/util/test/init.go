@@ -1,7 +1,7 @@
 package test
 
 import (
-	"fmt"
+	"log"
 	"os"
 )
 
@@ -17,18 +17,30 @@ var Verbose = func() bool {
 	return false
 }()
 
-// ENV Configuration: DBConfig
+// Holds configuration information for a database
 //
-type TestDBConfigType struct {
-	DB_HOST_TLS string
-	DB_HOST_NO_TLS string
-	DB_PORT string
-	DB_USER string
-	DB_PASSWORD string
-	DB_PROTOCOL string
+type DBConfig struct {
+	HostWithTLS string
+	HostWithoutTLS string
+	Port string
+	User string
+	Password string
+	Protocol string
 }
-var TestDBConfig = func() TestDBConfigType {
-	fields := []string{
+
+// Creates a new DbConfig from ENV variables.  The variables assumed
+// to exist are:
+//
+//     DB_HOST_TLS
+//     DB_HOST_NO_TLS
+//     DB_PORT
+//     DB_USER
+//     DB_PASSWORD
+//     DB_PROTOCOL
+//
+func NewDbConfigFromEnv() DBConfig {
+
+	requiredEnvVars := []string{
 		"DB_HOST_TLS",
 		"DB_HOST_NO_TLS",
 		"DB_PORT",
@@ -37,22 +49,26 @@ var TestDBConfig = func() TestDBConfigType {
 		"DB_PROTOCOL",
 	}
 
-	for _, field := range fields {
+	// Validate they exist
+	for _, field := range requiredEnvVars {
 		if _, found := os.LookupEnv(field); !found  {
-			fmt.Printf("ERROR: $%v envvar wasn't found\n", field)
-			panic("$" + field)
+			log.Panicf("ERROR: $%v envvar wasn't found\n", field)
 		}
 	}
 
-	return TestDBConfigType{
-		DB_HOST_TLS: os.Getenv("DB_HOST_TLS"),
-		DB_HOST_NO_TLS: os.Getenv("DB_HOST_NO_TLS"),
-		DB_PORT: os.Getenv("DB_PORT"),
-		DB_USER: os.Getenv("DB_USER"),
-		DB_PASSWORD: os.Getenv("DB_PASSWORD"),
-		DB_PROTOCOL: os.Getenv("DB_PROTOCOL"),
+	// Read them into the DBConfig
+	return DBConfig{
+		HostWithTLS: os.Getenv("DB_HOST_TLS"),
+		HostWithoutTLS: os.Getenv("DB_HOST_NO_TLS"),
+		Port: os.Getenv("DB_PORT"),
+		User: os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		Protocol: os.Getenv("DB_PROTOCOL"),
 	}
-}()
+}
+
+var CurrentDBConfig = NewDbConfigFromEnv()
+
 
 // ENV Configuration: Name of Secretless host to use
 //
@@ -70,8 +86,7 @@ func init() {
 	// TEST_ROOT is used to direct where secretless.yml gets generated
 	testRoot, ok := os.LookupEnv("TEST_ROOT")
 	if !ok {
-		fmt.Printf("ERROR: $TEST_ROOT envvar wasn't found\n")
-		panic("$TEST_ROOT")
+		panic("ERROR: $TEST_ROOT envvar wasn't found\n")
 	}
 
 	os.Chdir(testRoot)

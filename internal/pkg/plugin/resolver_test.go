@@ -28,8 +28,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Can resolve variables", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			variables := make([]config.StoredSecret, 1, 1)
+			variables[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "literal",
 				ID:       "bar",
@@ -43,7 +43,7 @@ func Test_Resolver(t *testing.T) {
 		Convey("Exits if variable resolution array is empty", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
+			variables := make([]config.StoredSecret, 1, 1)
 
 			resolveVarFunc := func() {
 				resolver.Resolve(variables)
@@ -56,8 +56,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Exits if provider cannot be found", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			variables := make([]config.StoredSecret, 1, 1)
+			variables[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "nope-not-found",
 				ID:       "bar",
@@ -73,8 +73,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Exits if variable can't be resolved", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			variables := make([]config.StoredSecret, 1, 1)
+			variables[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "env",
 				ID:       "something-not-in-env",
@@ -91,8 +91,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Can resolve variables2", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			variables := make([]config.StoredSecret, 1, 1)
+			variables[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "literal",
 				ID:       "bar",

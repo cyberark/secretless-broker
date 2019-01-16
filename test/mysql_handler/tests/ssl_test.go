@@ -16,9 +16,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Default,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      Default,
 			},
 		},
 		{
@@ -27,9 +27,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Disable,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      Disable,
 			},
 		},
 		{
@@ -38,9 +38,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Require,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      Require,
 			},
 		},
 		{
@@ -49,9 +49,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Require,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      Require,
 			},
 		},
 		{
@@ -60,9 +60,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Require,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      Require,
 			},
 		},
 		{
@@ -72,10 +72,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer("ERROR 2000 (HY000): x509: certificate signed by unknown authority"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Undefined,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      VerifyCA,
+				SSLRootCertType:  Undefined,
 			},
 		},
 		{
@@ -84,10 +84,10 @@ func TestSSL(t *testing.T) {
 				ShouldPass:    true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Valid,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      VerifyCA,
+				SSLRootCertType:  Valid,
 			},
 		},
 		{
@@ -97,10 +97,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Invalid,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      VerifyCA,
+				SSLRootCertType:  Invalid,
 			},
 		},
 		{
@@ -110,10 +110,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Malformed,
+				SocketType:       TCP,
+				ServerTLSSetting: TLS,
+				SSLModeType:      VerifyCA,
+				SSLRootCertType:  Malformed,
 			},
 		},
 		{
@@ -123,10 +123,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   NoTLS,
-				SSLModeType:     Default,
-				SSLRootCertType: Undefined,
+				SocketType:       TCP,
+				ServerTLSSetting: NoTLS,
+				SSLModeType:      Default,
+				SSLRootCertType:  Undefined,
 			},
 		},
 		{
@@ -135,10 +135,10 @@ func TestSSL(t *testing.T) {
 				ShouldPass:    true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   NoTLS,
-				SSLModeType:     Disable,
-				SSLRootCertType: Undefined,
+				SocketType:       TCP,
+				ServerTLSSetting: NoTLS,
+				SSLModeType:      Disable,
+				SSLRootCertType:  Undefined,
 			},
 		},
 		{
@@ -148,8 +148,8 @@ func TestSSL(t *testing.T) {
 				CmdOutput:           StringPointer("ERROR 2000 (HY000): tls: failed to find any PEM data in certificate input"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:      TCP,
-				ServerTLSType:     TLS,
+				SocketType:        TCP,
+				ServerTLSSetting:  TLS,
 				SSLModeType:       VerifyCA,
 				SSLRootCertType:   Valid,
 				SSLPrivateKeyType: PrivateKeyMalformed,
@@ -162,8 +162,8 @@ func TestSSL(t *testing.T) {
 				ShouldPass:          true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:      TCP,
-				ServerTLSType:     TLS,
+				SocketType:        TCP,
+				ServerTLSSetting:  TLS,
 				SSLModeType:       VerifyCA,
 				SSLRootCertType:   Valid,
 				SSLPrivateKeyType: PrivateKeyValid,
@@ -177,8 +177,8 @@ func TestSSL(t *testing.T) {
 				CmdOutput:           StringPointer("ERROR 2000 (HY000): remote error: tls: unknown certificate authority"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:      TCP,
-				ServerTLSType:     TLS,
+				SocketType:        TCP,
+				ServerTLSSetting:  TLS,
 				SSLModeType:       VerifyCA,
 				SSLRootCertType:   Valid,
 				SSLPrivateKeyType: PrivateKeyNotSignedByCA,

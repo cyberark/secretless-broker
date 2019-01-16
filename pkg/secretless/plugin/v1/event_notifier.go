@@ -20,8 +20,9 @@ type EventNotifier interface {
 	// CreateListener is called for every listener created by Proxy
 	CreateListener(Listener)
 
-	// ResolveVariable is called when a provider resolves a variable
-	ResolveVariable(provider Provider, id string, value []byte)
+	// ResolveSecret is called when a provider resolves a variable
+	// TODO: unclear why we're reimplementing the StoredSecret functionality here...
+	ResolveSecret(provider Provider, id string, value []byte)
 
 	// ServerData is called for each inbound packet from the backend
 	ServerData(net.Conn, []byte)

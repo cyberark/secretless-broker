@@ -28,8 +28,8 @@ type ConnectionManager interface {
 	// DestroyHandler is called before a handler is removed
 	DestroyHandler(Handler)
 
-	// ResolveVariable is called when a provider resolves a variable
-	ResolveVariable(provider Provider, id string, value []byte)
+	// ResolveSecret is called when a provider resolves a variable
+	ResolveSecret(provider Provider, id string, value []byte)
 
 	// ClientData is called for each inbound packet from clients
 	ClientData(net.Conn, []byte)

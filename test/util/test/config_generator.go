@@ -6,17 +6,17 @@ import (
 )
 
 // TODO: standardise on DB_PORT, DB_USER, DB_PASSWORD for flexibility
-func sharedCredentials() []config.Variable {
-	return []config.Variable{
+func sharedCredentials() []config.StoredSecret {
+	return []config.StoredSecret{
 		{
 			Name:     "username",
 			Provider: "literal",
-			ID:       TestDBConfig.DB_USER,
+			ID:       CurrentDBConfig.User,
 		},
 		{
 			Name:     "password",
 			Provider: "literal",
-			ID:       TestDBConfig.DB_PASSWORD,
+			ID:       CurrentDBConfig.Password,
 		},
 	}
 }
@@ -45,7 +45,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 				Name:         "health-check",
 				ListenerName: "health-check",
 				Debug:        true,
-				Credentials:  []config.Variable{
+				Credentials:  []config.StoredSecret{
 					{
 						Name:     "host",
 						Provider: "literal",
@@ -72,21 +72,21 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 				Name:         "pg-bench",
 				ListenerName: "pg-bench",
 				Debug:        true,
-				Credentials:  []config.Variable{
+				Credentials:  []config.StoredSecret{
 					{
 						Name:     "address",
 						Provider: "literal",
-						ID:       fmt.Sprintf("%s:5432", TestDBConfig.DB_HOST_TLS),
+						ID:       fmt.Sprintf("%s:5432", CurrentDBConfig.HostWithTLS),
 					},
 					{
 						Name:     "username",
 						Provider: "literal",
-						ID:       TestDBConfig.DB_USER,
+						ID:       CurrentDBConfig.User,
 					},
 					{
 						Name:     "password",
 						Provider: "literal",
-						ID:       TestDBConfig.DB_PASSWORD,
+						ID:       CurrentDBConfig.Password,
 					},
 				},
 			},
@@ -102,22 +102,22 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 	// TODO: Remove "Value" suffixes -- no need for them, the lower case first letter
 	// distinguishes them from the type itself, so it only degrades readability.
 	portNumber := 3307
-	for _, serverTLSTypeValue := range ServerTLSTypeValues() {
-		for _, listenerTypeValue := range ListenerTypeValues() {
+	for _, serverTLSTypeValue := range AllServerTLSSettings() {
+		for _, listenerTypeValue := range AllSocketTypes() {
 			for _, sslModeTypeValue := range SSlModeTypeValues() {
 				for _, sslPublicCertValue := range SSLPublicCertTypeValues() {
 					for _, sslPrivateKeyValue := range SSLPrivateKeyTypeValues() {
 						for _, sslRootCertTypeValue := range SSLRootCertTypeValues() {
 							connectionPort := ConnectionPort{
 								// TODO: perhaps resolve this duplication of listener type
-								ListenerType: listenerTypeValue,
-								Port:         portNumber,
+								SocketType: listenerTypeValue,
+								Port:       portNumber,
 							}
 
 							listener := config.Listener{
 								Name: "listener_" + connectionPort.ToPortString(),
 								// TODO: grab value from envvar for flexibility
-								Protocol: TestDBConfig.DB_PROTOCOL,
+								Protocol: CurrentDBConfig.Protocol,
 								Debug:    true,
 							}
 							handler := config.Handler{
@@ -128,10 +128,10 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 							}
 							liveConfiguration := LiveConfiguration{
 								AbstractConfiguration: AbstractConfiguration{
-									ListenerType:    listenerTypeValue,
-									ServerTLSType:   serverTLSTypeValue,
-									SSLModeType:     sslModeTypeValue,
-									SSLRootCertType: sslRootCertTypeValue,
+									SocketType:        listenerTypeValue,
+									ServerTLSSetting:  serverTLSTypeValue,
+									SSLModeType:       sslModeTypeValue,
+									SSLRootCertType:   sslRootCertTypeValue,
 									SSLPrivateKeyType: sslPrivateKeyValue,
 									SSLPublicCertType: sslPublicCertValue,
 								},
@@ -153,7 +153,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 							// serverTLSTypeValue
 							handler.Credentials = append(
 								handler.Credentials,
-								serverTLSTypeValue.toConfigVariables(TestDBConfig)...
+								serverTLSTypeValue.toSecrets(CurrentDBConfig)...
 							)
 
 							// listenerTypeValue

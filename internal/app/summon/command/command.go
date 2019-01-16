@@ -94,7 +94,7 @@ func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err
 
 	resolver := plugin.NewResolver(providerFactories, nil, nil)
 
-	if subcommand.Provider, err = resolver.GetProvider(options.Provider); err != nil {
+	if subcommand.Provider, err = resolver.Provider(options.Provider); err != nil {
 		return
 	}
 

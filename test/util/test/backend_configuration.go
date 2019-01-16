@@ -9,8 +9,8 @@ import (
 // as opposed to a "live" one which is actually running and
 // listening on a port or socket
 type AbstractConfiguration struct {
-	ListenerType
-	ServerTLSType
+	SocketType
+	ServerTLSSetting
 	SSLModeType
 	SSLRootCertType
 	SSLPrivateKeyType
@@ -41,7 +41,7 @@ func (lcs LiveConfigurations) Find(ac AbstractConfiguration) (LiveConfiguration)
 }
 
 type ConnectionPort struct {
-	ListenerType
+	SocketType
 	Port int
 }
 

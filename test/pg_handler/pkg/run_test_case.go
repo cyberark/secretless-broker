@@ -26,7 +26,7 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 	args = append(args, fmt.Sprintf("--port=%s", connectPort.ToPortString()))
 
 	var host string
-	switch connectPort.ListenerType {
+	switch connectPort.SocketType {
 	case test.TCP:
 		host = connectPort.Host()
 	case test.Socket:

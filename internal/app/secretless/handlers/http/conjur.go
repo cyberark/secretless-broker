@@ -45,7 +45,7 @@ func ConjurHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 	// Force instantiate the Conjur provider so we can use an access token.
 	// This will fail unless a means of authentication to Conjur is available.
 	if handler.Resolver != nil {
-		handler.Resolver.GetProvider("conjur");
+		handler.Resolver.Provider("conjur");
 	}
 
 	return handler

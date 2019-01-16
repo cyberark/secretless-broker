@@ -1,7 +1,6 @@
 module github.com/cyberark/secretless-broker
 
 require (
-	bitbucket.org/ww/goautoneg v0.0.0-20120707110453-75cd24fc2f2c // indirect
 	cloud.google.com/go v0.25.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Jeffail/gabs v0.0.0-20180420203615-7a0fed31069a // indirect
@@ -31,7 +30,6 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-ini/ini v1.32.0 // indirect
 	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
 	github.com/gocql/gocql v0.0.0-20180617115710-e06f8c1bcd78 // indirect
@@ -104,6 +102,7 @@ require (
 	github.com/spf13/pflag v1.0.2 // indirect
 	github.com/stretchr/testify v1.2.1
 	golang.org/x/crypto v0.0.0-20180119074636-ee41a25c63fb
+	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 	golang.org/x/oauth2 v0.0.0-20180724155351-3d292e4d0cdc // indirect
 	golang.org/x/sys v0.0.0-20180727230415-bd9dbc187b6e // indirect
 	golang.org/x/text v0.0.0-20171227012246-e19ae1496984 // indirect
@@ -111,11 +110,11 @@ require (
 	google.golang.org/appengine v1.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20180722052100-02b4e9547331 // indirect
 	google.golang.org/grpc v1.13.0 // indirect
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
-	gopkg.in/ini.v1 v1.38.1 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
 	gopkg.in/ory-am/dockertest.v3 v3.3.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect

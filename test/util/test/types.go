@@ -88,6 +88,7 @@ func (sslMode SSLModeType) toConfigVariable() config.Variable {
 }
 
 type SSLRootCertType string
+
 const (
 	Undefined SSLRootCertType = ""
 	Valid     SSLRootCertType = "/secretless/test/util/ssl/ca.pem"

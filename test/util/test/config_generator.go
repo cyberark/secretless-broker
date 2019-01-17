@@ -11,12 +11,12 @@ func sharedCredentials() []config.StoredSecret {
 		{
 			Name:     "username",
 			Provider: "literal",
-			ID:       DbConfigForTests.User,
+			ID:       TestDbConfig.User,
 		},
 		{
 			Name:     "password",
 			Provider: "literal",
-			ID:       DbConfigForTests.Password,
+			ID:       TestDbConfig.Password,
 		},
 	}
 }
@@ -76,17 +76,17 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 					{
 						Name:     "address",
 						Provider: "literal",
-						ID:       fmt.Sprintf("%s:5432", DbConfigForTests.HostWithTLS),
+						ID:       fmt.Sprintf("%s:5432", TestDbConfig.HostWithTLS),
 					},
 					{
 						Name:     "username",
 						Provider: "literal",
-						ID:       DbConfigForTests.User,
+						ID:       TestDbConfig.User,
 					},
 					{
 						Name:     "password",
 						Provider: "literal",
-						ID:       DbConfigForTests.Password,
+						ID:       TestDbConfig.Password,
 					},
 				},
 			},
@@ -118,7 +118,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 							listener := config.Listener{
 								Name: "listener_" + connectionPort.ToPortString(),
 								// TODO: grab value from envvar for flexibility
-								Protocol: DbConfigForTests.Protocol,
+								Protocol: TestDbConfig.Protocol,
 								Debug:    true,
 							}
 							handler := config.Handler{
@@ -154,7 +154,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 							// serverTLSSetting
 							handler.Credentials = append(
 								handler.Credentials,
-								serverTLSSetting.toSecrets(DbConfigForTests)...
+								serverTLSSetting.toSecrets(TestDbConfig)...
 							)
 
 							// socketType

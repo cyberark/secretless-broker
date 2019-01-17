@@ -67,7 +67,9 @@ func NewDbConfigFromEnv() DBConfig {
 	}
 }
 
-var DbConfigForTests = NewDbConfigFromEnv()
+//TODO: Make sure this warning goes away when we rename the package
+//
+var TestDbConfig = NewDbConfigFromEnv()
 
 
 // ENV Configuration: Name of Secretless host to use

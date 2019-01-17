@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -48,10 +47,6 @@ func TestPluginProvider(t *testing.T) {
 
 	Convey("Can create and inject variables into the requests", t, func() {
 		lines := fetchPage(expectedListener)
-		fmt.Println("JONAH**********")
-		for _, l := range lines {
-			fmt.Println(l)
-		}
-		So(lines, ShouldContain, "Example-Provider-Variable: exampleVariableProvider")
+		So(lines, ShouldContain, "Example-Provider-Secret: exampleVariableProvider")
 	})
 }

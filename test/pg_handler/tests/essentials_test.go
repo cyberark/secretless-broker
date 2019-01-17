@@ -46,10 +46,10 @@ func TestEssentials(t *testing.T) {
 				for _, testCaseData := range testCases {
 					tc := TestCase{
 						AbstractConfiguration: AbstractConfiguration{
-							SocketType:       listenerTypeValue,
-							ServerTLSSetting: TLS,
-							SSLModeType:      Default,
-							SSLRootCertType:  Undefined,
+							SocketType:     listenerTypeValue,
+							TLSSetting:     TLS,
+							SSLMode:        Default,
+							RootCertStatus: Undefined,
 						},
 						TestDefinition: testCaseData,
 					}
@@ -60,10 +60,10 @@ func TestEssentials(t *testing.T) {
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
-				SocketType:       Socket,
-				ServerTLSSetting: TLS,
-				SSLModeType:      Default,
-				SSLRootCertType:  Undefined,
+				SocketType:     Socket,
+				TLSSetting:     TLS,
+				SSLMode:        Default,
+				RootCertStatus: Undefined,
 			},
 			TestDefinition: TestDefinition{
 				Description: "Socket, client -> TLS -> secretless",
@@ -78,10 +78,10 @@ func TestEssentials(t *testing.T) {
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
-				SocketType:       TCP,
-				ServerTLSSetting: TLS,
-				SSLModeType:      Default,
-				SSLRootCertType:  Undefined,
+				SocketType:     TCP,
+				TLSSetting:     TLS,
+				SSLMode:        Default,
+				RootCertStatus: Undefined,
 			},
 			TestDefinition: TestDefinition{
 				Description: "TCP, client -> TLS -> secretless",

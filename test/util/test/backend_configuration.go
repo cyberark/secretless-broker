@@ -10,11 +10,11 @@ import (
 // listening on a port or socket
 type AbstractConfiguration struct {
 	SocketType
-	ServerTLSSetting
-	SSLModeType
-	SSLRootCertType
-	SSLPrivateKeyType
-	SSLPublicCertType
+	TLSSetting
+	SSLMode
+	RootCertStatus
+	PrivateKeyStatus
+	PublicCertStatus
 }
 
 // Represents a "live," running configuration of Secretless and

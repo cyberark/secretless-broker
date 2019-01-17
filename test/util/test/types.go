@@ -20,27 +20,29 @@ func AllSocketTypes()[]SocketType {
 	return []SocketType{TCP, Socket}
 }
 
-type ServerTLSSetting string
-const (
-	TLS   ServerTLSSetting = "DB_HOST_TLS"
-	NoTLS                  = "DB_HOST_NO_TLS"
-)
-func AllServerTLSSettings()[]ServerTLSSetting {
+type TLSSetting string
 
-	return []ServerTLSSetting{TLS, NoTLS}
+const (
+	TLS   TLSSetting = "DB_HOST_TLS"
+	NoTLS            = "DB_HOST_NO_TLS"
+)
+func AllTLSSettings()[]TLSSetting {
+	return []TLSSetting{TLS, NoTLS}
 }
 
-func (tlsType ServerTLSSetting) toSecrets(dbConfig DBConfig) []config.StoredSecret {
+//TODO: Something is still quite wrong with the design here:
+//      Should pg/mysql logic live here?  It feels wrong...
+func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []config.StoredSecret {
 	var secrets []config.StoredSecret
 	var host string
 
-	switch tlsType {
+	switch tlsSetting {
 	case TLS:
 		host = dbConfig.HostWithTLS
 	case NoTLS:
 		host = dbConfig.HostWithoutTLS
 	default:
-		panic("Invalid ServerTLSSetting provided")
+		panic("Invalid TLSSetting")
 	}
 
 	switch dbConfig.Protocol {
@@ -68,22 +70,22 @@ func (tlsType ServerTLSSetting) toSecrets(dbConfig DBConfig) []config.StoredSecr
 	return secrets
 }
 
-type SSLModeType string
+type SSLMode string
 const (
-	Default SSLModeType = ""
-	Disable = "disable"
-	Require = "require"
-	VerifyCA = "verify-ca"
-	VerifyFull = "verify-full"
+	Default    SSLMode = ""
+	Disable            = "disable"
+	Require            = "require"
+	VerifyCA           = "verify-ca"
+	VerifyFull         = "verify-full"
 )
 
-func SSlModeTypeValues()[]SSLModeType {
-	return []SSLModeType{Default, Disable, Require, VerifyCA, VerifyFull}
+func AllSSLModes()[]SSLMode {
+	return []SSLMode{Default, Disable, Require, VerifyCA, VerifyFull}
 }
 
 // For Secretless, sslmode="" is equivalent to not setting sslmode at all.
 // Therefore, this will work for the "Default" case too.
-func (sslMode SSLModeType) toConfigVariable() config.StoredSecret {
+func (sslMode SSLMode) toSecret() config.StoredSecret {
 	return config.StoredSecret{
 		Name:     "sslmode",
 		Provider: "literal",
@@ -91,21 +93,22 @@ func (sslMode SSLModeType) toConfigVariable() config.StoredSecret {
 	}
 }
 
-type SSLRootCertType string
+type RootCertStatus string
 
 const (
-	Undefined SSLRootCertType = ""
-	Valid     SSLRootCertType = "/secretless/test/util/ssl/ca.pem"
-	Malformed SSLRootCertType = "malformed"
-	Invalid   SSLRootCertType = "/secretless/test/util/ssl/ca-invalid.pem"
+	Undefined RootCertStatus = ""
+	Valid                    = "/secretless/test/util/ssl/ca.pem"
+	Malformed                = "malformed"
+	Invalid                  = "/secretless/test/util/ssl/ca-invalid.pem"
 )
 
-func SSLRootCertTypeValues()[]SSLRootCertType {
-	return []SSLRootCertType{Undefined, Valid, Invalid, Malformed}
+func AllRootCertStatuses()[]RootCertStatus {
+	return []RootCertStatus{Undefined, Valid, Invalid, Malformed}
 }
 
-func (sslRootCertType SSLRootCertType) toConfigVariable() config.StoredSecret {
+func (sslRootCertType RootCertStatus) toSecret() config.StoredSecret {
 	provider := "literal"
+
 	switch sslRootCertType {
 	case Valid, Invalid:
 		provider = "file"
@@ -114,58 +117,63 @@ func (sslRootCertType SSLRootCertType) toConfigVariable() config.StoredSecret {
 	return config.StoredSecret{
 		Name:     "sslrootcert",
 		Provider: provider,
-		ID:		   string(sslRootCertType),
+		ID:		  string(sslRootCertType),
 	}
 }
 
-type SSLPrivateKeyType string
+type PrivateKeyStatus string
 const (
-	PrivateKeyUndefined SSLPrivateKeyType = ""
-	PrivateKeyValid SSLPrivateKeyType = "/secretless/test/util/ssl/client-valid-key.pem"
-	PrivateKeyNotSignedByCA SSLPrivateKeyType = "/secretless/test/util/ssl/client-different-ca-key.pem"
-	PrivateKeyMalformed SSLPrivateKeyType = "malformed"
+	PrivateKeyUndefined     PrivateKeyStatus = ""
+	PrivateKeyValid                          = "/secretless/test/util/ssl/client-valid-key.pem"
+	PrivateKeyNotSignedByCA                  = "/secretless/test/util/ssl/client-different-ca-key.pem"
+	PrivateKeyMalformed                      = "malformed"
 )
 
-func SSLPrivateKeyTypeValues()[]SSLPrivateKeyType {
-	return []SSLPrivateKeyType{PrivateKeyUndefined, PrivateKeyValid, PrivateKeyNotSignedByCA, PrivateKeyMalformed}
+func AllPrivateKeyStatuses() []PrivateKeyStatus {
+	return []PrivateKeyStatus{
+		PrivateKeyUndefined, PrivateKeyValid, PrivateKeyNotSignedByCA, PrivateKeyMalformed,
+	}
 }
 
-func (sslPrivateKeyType SSLPrivateKeyType) toConfigVariable() config.StoredSecret {
+func (status PrivateKeyStatus) toSecret() config.StoredSecret {
+
 	provider := "literal"
-	switch sslPrivateKeyType {
-	case PrivateKeyValid, PrivateKeyNotSignedByCA:
+	if status == PrivateKeyValid || status == PrivateKeyNotSignedByCA {
 		provider = "file"
 	}
 
 	return config.StoredSecret{
 		Name:     "sslkey",
 		Provider: provider,
-		ID:		   string(sslPrivateKeyType),
+		ID:       string(status),
 	}
 }
 
-type SSLPublicCertType string
+type PublicCertStatus string
+
 const (
-	PublicCertUndefined SSLPublicCertType = ""
-	PublicCertValid     SSLPublicCertType = "/secretless/test/util/ssl/client-valid.pem"
-	PublicCertNotSignedByCA SSLPublicCertType = "/secretless/test/util/ssl/client-different-ca.pem"
-	PublicCertMalformed SSLPublicCertType = "malformed"
+	PublicCertUndefined     PublicCertStatus = ""
+	PublicCertValid                          = "/secretless/test/util/ssl/client-valid.pem"
+	PublicCertNotSignedByCA                  = "/secretless/test/util/ssl/client-different-ca.pem"
+	PublicCertMalformed                      = "malformed"
 )
 
-func SSLPublicCertTypeValues()[]SSLPublicCertType {
-	return []SSLPublicCertType{PublicCertUndefined, PublicCertValid, PublicCertNotSignedByCA, PublicCertMalformed}
+func AllPublicCertStatuses() []PublicCertStatus {
+	return []PublicCertStatus{
+		PublicCertUndefined, PublicCertValid, PublicCertNotSignedByCA, PublicCertMalformed,
+	}
 }
 
-func (sslPublicCertType SSLPublicCertType) toConfigVariable() config.StoredSecret {
+func (status PublicCertStatus) toSecret() config.StoredSecret {
+
 	provider := "literal"
-	switch sslPublicCertType {
-	case PublicCertValid, PublicCertNotSignedByCA:
+	if status == PublicCertValid || status == PublicCertNotSignedByCA {
 		provider = "file"
 	}
 
 	return config.StoredSecret{
 		Name:     "sslcert",
 		Provider: provider,
-		ID:		   string(sslPublicCertType),
+		ID:       string(status),
 	}
 }

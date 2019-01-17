@@ -67,6 +67,6 @@ func TestConjur_Provider(t *testing.T) {
 	Convey("Cannot provide an unknown value", t, func() {
 		_, err = provider.GetValue("foobar")
 		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "404 Not Found. Variable 'foobar' not found in account 'dev'.")
+		So(err.Error(), ShouldEqual, "404 Not Found. Secret 'foobar' not found in account 'dev'.")
 	})
 }

@@ -102,15 +102,16 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 	// TODO: Remove "Value" suffixes -- no need for them, the lower case first letter
 	// distinguishes them from the type itself, so it only degrades readability.
 	portNumber := 3307
-	for _, serverTLSTypeValue := range AllServerTLSSettings() {
-		for _, listenerTypeValue := range AllSocketTypes() {
-			for _, sslModeTypeValue := range SSlModeTypeValues() {
-				for _, sslPublicCertValue := range SSLPublicCertTypeValues() {
-					for _, sslPrivateKeyValue := range SSLPrivateKeyTypeValues() {
-						for _, sslRootCertTypeValue := range SSLRootCertTypeValues() {
+	for _, serverTLSSetting := range AllTLSSettings() {
+		for _, socketType := range AllSocketTypes() {
+			for _, sslMode := range AllSSLModes() {
+				for _, publicCertStatus := range AllPublicCertStatuses() {
+					for _, privateKeyStatus := range AllPrivateKeyStatuses() {
+						for _, rootCertStatus := range AllRootCertStatuses() {
+
 							connectionPort := ConnectionPort{
 								// TODO: perhaps resolve this duplication of listener type
-								SocketType: listenerTypeValue,
+								SocketType: socketType,
 								Port:       portNumber,
 							}
 
@@ -128,12 +129,12 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 							}
 							liveConfiguration := LiveConfiguration{
 								AbstractConfiguration: AbstractConfiguration{
-									SocketType:        listenerTypeValue,
-									ServerTLSSetting:  serverTLSTypeValue,
-									SSLModeType:       sslModeTypeValue,
-									SSLRootCertType:   sslRootCertTypeValue,
-									SSLPrivateKeyType: sslPrivateKeyValue,
-									SSLPublicCertType: sslPublicCertValue,
+									SocketType:       socketType,
+									TLSSetting:       serverTLSSetting,
+									SSLMode:          sslMode,
+									RootCertStatus:   rootCertStatus,
+									PrivateKeyStatus: privateKeyStatus,
+									PublicCertStatus: publicCertStatus,
 								},
 								ConnectionPort: connectionPort,
 							}
@@ -141,23 +142,23 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 
 							handler.Credentials = append(
 								handler.Credentials,
-								// sslRootCertTypeValue
-								sslRootCertTypeValue.toConfigVariable(),
-								//sslModeTypeValue
-								sslModeTypeValue.toConfigVariable(),
+								// rootCertStatus
+								rootCertStatus.toSecret(),
+								//sslMode
+								sslMode.toSecret(),
 								//sslPrivateKeyTypeValue
-								sslPrivateKeyValue.toConfigVariable(),
+								privateKeyStatus.toSecret(),
 								//sslPublicCertTypeValue
-								sslPublicCertValue.toConfigVariable(),
+								publicCertStatus.toSecret(),
 								)
-							// serverTLSTypeValue
+							// serverTLSSetting
 							handler.Credentials = append(
 								handler.Credentials,
-								serverTLSTypeValue.toSecrets(CurrentDBConfig)...
+								serverTLSSetting.toSecrets(CurrentDBConfig)...
 							)
 
-							// listenerTypeValue
-							switch listenerTypeValue {
+							// socketType
+							switch socketType {
 							case TCP:
 								listener.Address = "0.0.0.0:" + connectionPort.ToPortString()
 							case Socket:

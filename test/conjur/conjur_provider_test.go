@@ -7,7 +7,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	pluginV1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -16,10 +16,10 @@ import (
 // as well as secret values.
 func TestConjur_Provider(t *testing.T) {
 	var err error
-	var provider plugin_v1.Provider
+	var provider pluginV1.Provider
 	name := "conjur"
 
-	options := plugin_v1.ProviderOptions{
+	options := pluginV1.ProviderOptions{
 		Name: name,
 	}
 

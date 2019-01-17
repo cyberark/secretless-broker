@@ -67,7 +67,7 @@ func NewDbConfigFromEnv() DBConfig {
 	}
 }
 
-var CurrentDBConfig = NewDbConfigFromEnv()
+var DbConfigForTests = NewDbConfigFromEnv()
 
 
 // ENV Configuration: Name of Secretless host to use

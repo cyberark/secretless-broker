@@ -47,7 +47,6 @@ func TestPluginProvider(t *testing.T) {
 
 	Convey("Can create and inject variables into the requests", t, func() {
 		lines := fetchPage(expectedListener)
-
-		So(lines, ShouldContain, "Example-Provider-Secret: exampleVariableProvider")
+		So(lines, ShouldContain, "Example-Provider-Variable: exampleVariableProvider")
 	})
 }

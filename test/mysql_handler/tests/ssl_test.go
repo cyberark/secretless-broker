@@ -1,9 +1,9 @@
 package tests
 
 import (
-	"testing"
-
 	. "github.com/cyberark/secretless-broker/test/util/test"
+	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestSSL(t *testing.T) {

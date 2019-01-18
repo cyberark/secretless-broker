@@ -83,7 +83,7 @@ func Test_Resolver(t *testing.T) {
 			secretValues, err := resolver.Resolve(secrets)
 			So(len(secretValues), ShouldEqual, 0)
 			So(err, ShouldNotBeNil)
-			errorMsg := "ERROR: Resolving secret 'something-not-in-env' from provider 'env' failed: env cannot find environment secret 'something-not-in-env'"
+			errorMsg := "ERROR: Resolving variable 'something-not-in-env' from provider 'env' failed: env cannot find environment secret 'something-not-in-env'"
 			So(err.Error(), ShouldEqual, errorMsg)
 
 		})

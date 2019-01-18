@@ -40,16 +40,16 @@ func TestEssentials(t *testing.T) {
 	}
 
 	Convey("Essentials", t, func() {
-		for _, listenerTypeValue := range ListenerTypeValues() {
+		for _, listenerTypeValue := range AllSocketTypes() {
 			Convey(fmt.Sprintf("Connect over %s", listenerTypeValue), func() {
 
 				for _, testCaseData := range testCases {
 					tc := TestCase{
 						AbstractConfiguration: AbstractConfiguration{
-							ListenerType:    listenerTypeValue,
-							ServerTLSType:   TLS,
-							SSLModeType:     Default,
-							SSLRootCertType: Undefined,
+							SocketType:     listenerTypeValue,
+							TLSSetting:     TLS,
+							SSLMode:        Default,
+							RootCertStatus: Undefined,
 						},
 						TestDefinition: testCaseData,
 					}
@@ -60,10 +60,10 @@ func TestEssentials(t *testing.T) {
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    Socket,
-				ServerTLSType:   TLS,
-				SSLModeType:     Default,
-				SSLRootCertType: Undefined,
+				SocketType:     Socket,
+				TLSSetting:     TLS,
+				SSLMode:        Default,
+				RootCertStatus: Undefined,
 			},
 			TestDefinition: TestDefinition{
 				Description: "Socket, client -> TLS -> secretless",
@@ -78,10 +78,10 @@ func TestEssentials(t *testing.T) {
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Default,
-				SSLRootCertType: Undefined,
+				SocketType:     TCP,
+				TLSSetting:     TLS,
+				SSLMode:        Default,
+				RootCertStatus: Undefined,
 			},
 			TestDefinition: TestDefinition{
 				Description: "TCP, client -> TLS -> secretless",

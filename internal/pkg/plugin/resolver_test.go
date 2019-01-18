@@ -25,28 +25,28 @@ func newInstance() plugin_v1.Resolver {
 
 func Test_Resolver(t *testing.T) {
 	Convey("Resolve", t, func() {
-		Convey("Can resolve variables", func() {
+		Convey("Can resolve secrets", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			secrets := make([]config.StoredSecret, 1, 1)
+			secrets[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "literal",
 				ID:       "bar",
 			}
 
-			values, err := resolver.Resolve(variables)
+			values, err := resolver.Resolve(secrets)
 			So(err, ShouldBeNil)
 			So(len(values), ShouldEqual, 1)
 		})
 
-		Convey("Exits if variable resolution array is empty", func() {
+		Convey("Exits if secret resolution array is empty", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
+			secrets := make([]config.StoredSecret, 1, 1)
 
 			resolveVarFunc := func() {
-				resolver.Resolve(variables)
+				resolver.Resolve(secrets)
 			}
 
 			So(resolveVarFunc, ShouldPanic)
@@ -56,49 +56,49 @@ func Test_Resolver(t *testing.T) {
 		Convey("Exits if provider cannot be found", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			secrets := make([]config.StoredSecret, 1, 1)
+			secrets[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "nope-not-found",
 				ID:       "bar",
 			}
 
 			resolveVarFunc := func() {
-				resolver.Resolve(variables)
+				resolver.Resolve(secrets)
 			}
 			So(resolveVarFunc, ShouldPanic)
 			So(len(fatalErrors), ShouldEqual, 1)
 		})
 
-		Convey("Exits if variable can't be resolved", func() {
+		Convey("Exits if secret can't be resolved", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			secrets := make([]config.StoredSecret, 1, 1)
+			secrets[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "env",
 				ID:       "something-not-in-env",
 			}
 
-			variableValues, err := resolver.Resolve(variables)
-			So(len(variableValues), ShouldEqual, 0)
+			secretValues, err := resolver.Resolve(secrets)
+			So(len(secretValues), ShouldEqual, 0)
 			So(err, ShouldNotBeNil)
 			errorMsg := "ERROR: Resolving variable 'something-not-in-env' from provider 'env' failed: env cannot find environment variable 'something-not-in-env'"
 			So(err.Error(), ShouldEqual, errorMsg)
 
 		})
 
-		Convey("Can resolve variables2", func() {
+		Convey("Can resolve secret2", func() {
 			resolver := newInstance()
 
-			variables := make([]config.Variable, 1, 1)
-			variables[0] = config.Variable{
+			secrets := make([]config.StoredSecret, 1, 1)
+			secrets[0] = config.StoredSecret{
 				Name:     "foo",
 				Provider: "literal",
 				ID:       "bar",
 			}
 
-			values, err := resolver.Resolve(variables)
+			values, err := resolver.Resolve(secrets)
 			So(err, ShouldBeNil)
 			So(len(values), ShouldEqual, 1)
 		})

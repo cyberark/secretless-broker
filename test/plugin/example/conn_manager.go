@@ -63,9 +63,9 @@ func (manager *connectionManager) DestroyHandler(h plugin_v1.Handler) {
 	log.Println("Destroy handler manager event...")
 }
 
-// ResolveVariable is called when a provider resolves a variable
-func (manager *connectionManager) ResolveVariable(provider plugin_v1.Provider, id string, value []byte) {
-	log.Printf("Example-plugin ConnectionManager: Resolve variable manager event: %s = %s", id, string(value))
+// ResolveSecret is called when a provider resolves a variable
+func (manager *connectionManager) ResolveSecret(provider plugin_v1.Provider, id string, value []byte) {
+	log.Printf("Example-plugin ConnectionManager: Resolve secret manager event: %s = %s", id, string(value))
 }
 
 // ClientData is called for each inbound packet from clients

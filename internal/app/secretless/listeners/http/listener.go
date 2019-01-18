@@ -77,14 +77,14 @@ func copyHeaders(dst, src http.Header) {
 	}
 }
 
-// zeroizeVariable zeroizes credentials in the fetched variables. We don't want to
+// Zeroizes credentials in the fetched variables. We don't want to
 // rely on garbage collection for this (it might be slow and/or only free them) so
 // we manually clear
-func zeroizeVariables(backendVariables map[string][]byte) {
-	for _, rawCredential := range reflect.ValueOf(backendVariables).MapKeys() {
+func zeroizeSecrets(backendSecrets map[string][]byte) {
+	for _, rawCredential := range reflect.ValueOf(backendSecrets).MapKeys() {
 		credential := rawCredential.String()
-		for byteIndex := range backendVariables[credential] {
-			backendVariables[credential][byteIndex] = 0
+		for byteIndex := range backendSecrets[credential] {
+			backendSecrets[credential][byteIndex] = 0
 		}
 	}
 }
@@ -137,18 +137,18 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler := l.LookupHandler(r)
 
 	if handler != nil {
-		var backendVariables map[string][]byte
-		if backendVariables, err = l.Resolver.Resolve(handler.GetConfig().Credentials); err != nil {
+		var backendSecrets map[string][]byte
+		if backendSecrets, err = l.Resolver.Resolve(handler.GetConfig().Credentials); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
 		if listenerDebug || handler.GetConfig().Debug {
-			keys := reflect.ValueOf(backendVariables).MapKeys()
+			keys := reflect.ValueOf(backendSecrets).MapKeys()
 			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, keys)
 		}
 
-		err = handler.Authenticate(backendVariables, r)
-		zeroizeVariables(backendVariables)
+		err = handler.Authenticate(backendSecrets, r)
+		zeroizeSecrets(backendSecrets)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return

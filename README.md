@@ -6,6 +6,8 @@
 
 The Secretless Broker is currently in beta.
 
+Naming and API's are still subject to *breaking* changes.
+
 ***
 
 # Table of Contents

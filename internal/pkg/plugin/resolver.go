@@ -35,8 +35,8 @@ func NewResolver(providerFactories map[string]func(plugin_v1.ProviderOptions) (p
 	}
 }
 
-// GetProvider finds or creates a named provider.
-func (resolver *Resolver) GetProvider(name string) (provider plugin_v1.Provider, err error) {
+// Provider finds or creates a named provider.
+func (resolver *Resolver) Provider(name string) (provider plugin_v1.Provider, err error) {
 	mutex := &sync.Mutex{}
 
 	mutex.Lock()
@@ -68,22 +68,22 @@ func (resolver *Resolver) GetProvider(name string) (provider plugin_v1.Provider,
 	return
 }
 
-// Resolve accepts an list of Providers and a list of Variables and
-// attempts to obtain the value of each Variable from the appropriate Provider.
-func (resolver *Resolver) Resolve(variables []config.Variable) (map[string][]byte, error) {
-	if variables == nil {
-		resolver.LogFatalf("ERROR! Variables not defined in Resolve call!")
+// Resolve accepts an list of Providers and a list of StoredSecrets and
+// attempts to obtain the value of each StoredSecret from the appropriate Provider.
+func (resolver *Resolver) Resolve(secrets []config.StoredSecret) (map[string][]byte, error) {
+	if secrets == nil {
+		resolver.LogFatalf("ERROR! StoredSecrets not defined in Resolve call!")
 	}
 
 	result := make(map[string][]byte)
-	errorStrings := make([]string, 0, len(variables))
+	errorStrings := make([]string, 0, len(secrets))
 
 	var err error
-	for _, variable := range variables {
+	for _, variable := range secrets {
 		var provider plugin_v1.Provider
 		var value []byte
 
-		if provider, err = resolver.GetProvider(variable.Provider); err != nil {
+		if provider, err = resolver.Provider(variable.Provider); err != nil {
 			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", variable.Provider, err)
 		}
 
@@ -102,7 +102,7 @@ func (resolver *Resolver) Resolve(variables []config.Variable) (map[string][]byt
 		result[variable.Name] = value
 
 		if resolver.EventNotifier != nil {
-			resolver.EventNotifier.ResolveVariable(provider, variable.Name, value)
+			resolver.EventNotifier.ResolveSecret(provider, variable.Name, value)
 		}
 	}
 

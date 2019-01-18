@@ -13,13 +13,21 @@ import (
 	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 )
 
-// Variable is a named secret.
-type Variable struct {
-	// Name is the name by which the variable will be used by the client.
+// This represents not the value of a "secret," but the abstract concept of
+// "a secret stored somewhere".
+//
+// Note that "Name" will by the key that maps to this secret's actual value
+// in the map[string][]byte when the "StoredSecret" itself is looked up by a
+// Resolver.
+//
+type StoredSecret struct {
+	// How client code will refer to the secret's actual value at runtime.
+	// Specifically, the key to the secret's value in the map[string][]byte
+	// returned by a Resolver.
 	Name string
-	// Provider is the provider name.
 	Provider string
-	// Value is the identifier of the secret that the Provider will load.
+	// The identifier within the context of a Provider.  Ie, how a provider
+	// refers to this secret.  Eg, a database primary key.
 	ID string
 }
 
@@ -43,7 +51,7 @@ type Handler struct {
 	Debug        bool
 	Match        []string         `yaml:"match"`
 	Patterns     []*regexp.Regexp `yaml:"-"`
-	Credentials  []Variable
+	Credentials  []StoredSecret
 }
 
 // Config is the main configuration structure for Secretless.

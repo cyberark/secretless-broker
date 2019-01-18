@@ -1,10 +1,9 @@
 package tests
 
 import (
-	"testing"
-
 	. "github.com/cyberark/secretless-broker/test/util/test"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestSSL(t *testing.T) {
@@ -16,9 +15,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Default,
+				SocketType: TCP,
+				TLSSetting: TLS,
+				SSLMode:    Default,
 			},
 		},
 		{
@@ -27,9 +26,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Disable,
+				SocketType: TCP,
+				TLSSetting: TLS,
+				SSLMode:    Disable,
 			},
 		},
 		{
@@ -38,9 +37,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass: true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Require,
+				SocketType: TCP,
+				TLSSetting: TLS,
+				SSLMode:    Require,
 			},
 		},
 		{
@@ -49,9 +48,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Require,
+				SocketType: TCP,
+				TLSSetting: TLS,
+				SSLMode:    Require,
 			},
 		},
 		{
@@ -60,9 +59,9 @@ func TestSSL(t *testing.T) {
 				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     Require,
+				SocketType: TCP,
+				TLSSetting: TLS,
+				SSLMode:    Require,
 			},
 		},
 		{
@@ -72,10 +71,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer("ERROR 2000 (HY000): x509: certificate signed by unknown authority"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Undefined,
+				SocketType:     TCP,
+				TLSSetting:     TLS,
+				SSLMode:        VerifyCA,
+				RootCertStatus: Undefined,
 			},
 		},
 		{
@@ -84,10 +83,10 @@ func TestSSL(t *testing.T) {
 				ShouldPass:    true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Valid,
+				SocketType:     TCP,
+				TLSSetting:     TLS,
+				SSLMode:        VerifyCA,
+				RootCertStatus: Valid,
 			},
 		},
 		{
@@ -97,10 +96,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Invalid,
+				SocketType:     TCP,
+				TLSSetting:     TLS,
+				SSLMode:        VerifyCA,
+				RootCertStatus: Invalid,
 			},
 		},
 		{
@@ -110,10 +109,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   TLS,
-				SSLModeType:     VerifyCA,
-				SSLRootCertType: Malformed,
+				SocketType:     TCP,
+				TLSSetting:     TLS,
+				SSLMode:        VerifyCA,
+				RootCertStatus: Malformed,
 			},
 		},
 		{
@@ -123,10 +122,10 @@ func TestSSL(t *testing.T) {
 				CmdOutput:   StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   NoTLS,
-				SSLModeType:     Default,
-				SSLRootCertType: Undefined,
+				SocketType:     TCP,
+				TLSSetting:     NoTLS,
+				SSLMode:        Default,
+				RootCertStatus: Undefined,
 			},
 		},
 		{
@@ -135,10 +134,10 @@ func TestSSL(t *testing.T) {
 				ShouldPass:    true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:    TCP,
-				ServerTLSType:   NoTLS,
-				SSLModeType:     Disable,
-				SSLRootCertType: Undefined,
+				SocketType:     TCP,
+				TLSSetting:     NoTLS,
+				SSLMode:        Disable,
+				RootCertStatus: Undefined,
 			},
 		},
 		{
@@ -148,12 +147,12 @@ func TestSSL(t *testing.T) {
 				CmdOutput:           StringPointer("ERROR 2000 (HY000): tls: failed to find any PEM data in certificate input"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:      TCP,
-				ServerTLSType:     TLS,
-				SSLModeType:       VerifyCA,
-				SSLRootCertType:   Valid,
-				SSLPrivateKeyType: PrivateKeyMalformed,
-				SSLPublicCertType: PublicCertMalformed,
+				SocketType:       TCP,
+				TLSSetting:       TLS,
+				SSLMode:          VerifyCA,
+				RootCertStatus:   Valid,
+				PrivateKeyStatus: PrivateKeyMalformed,
+				PublicCertStatus: PublicCertMalformed,
 			},
 		},
 		{
@@ -162,12 +161,12 @@ func TestSSL(t *testing.T) {
 				ShouldPass:          true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:      TCP,
-				ServerTLSType:     TLS,
-				SSLModeType:       VerifyCA,
-				SSLRootCertType:   Valid,
-				SSLPrivateKeyType: PrivateKeyValid,
-				SSLPublicCertType: PublicCertValid,
+				SocketType:       TCP,
+				TLSSetting:       TLS,
+				SSLMode:          VerifyCA,
+				RootCertStatus:   Valid,
+				PrivateKeyStatus: PrivateKeyValid,
+				PublicCertStatus: PublicCertValid,
 			},
 		},
 		{
@@ -177,12 +176,12 @@ func TestSSL(t *testing.T) {
 				CmdOutput:           StringPointer("ERROR 2000 (HY000): remote error: tls: unknown certificate authority"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
-				ListenerType:      TCP,
-				ServerTLSType:     TLS,
-				SSLModeType:       VerifyCA,
-				SSLRootCertType:   Valid,
-				SSLPrivateKeyType: PrivateKeyNotSignedByCA,
-				SSLPublicCertType: PublicCertNotSignedByCA,
+				SocketType:       TCP,
+				TLSSetting:       TLS,
+				SSLMode:          VerifyCA,
+				RootCertStatus:   Valid,
+				PrivateKeyStatus: PrivateKeyNotSignedByCA,
+				PublicCertStatus: PublicCertNotSignedByCA,
 			},
 		},
 	}

@@ -34,8 +34,8 @@ func buildEnvironment(secrets map[string]string, secretsMap secretsyml.SecretsMa
 	return
 }
 
-// resolveVariables obtains the value of each requested secret.
-func resolveVariables(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
+// resolveSecrets obtains the value of each requested secret.
+func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
 	result = make(map[string]string)
 	for key, spec := range secretsMap {
 		var value string
@@ -98,7 +98,7 @@ func (sc *Subcommand) Run() (err error) {
 	}
 	defer sc.TempFactory.Cleanup()
 
-	if secrets, err = resolveVariables(sc.Provider, sc.SecretsMap); err != nil {
+	if secrets, err = resolveSecrets(sc.Provider, sc.SecretsMap); err != nil {
 		return
 	}
 	if env, err = buildEnvironment(secrets, sc.SecretsMap, sc.TempFactory); err != nil {

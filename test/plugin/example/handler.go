@@ -90,7 +90,7 @@ func streamWithTransform(source, dest net.Conn, config *BackendConfig, callback 
 		insertIndex := 2
 		copy(newLines[insertIndex+2:], newLines[insertIndex:])
 		newLines[insertIndex] = "Example-Header: IsSet"
-		newLines[insertIndex+1] = "Example-Provider-Variable: " + config.ProviderVariable
+		newLines[insertIndex+1] = "Example-Provider-Secret: " + config.ProviderVariable
 
 		newContent := strings.Join(newLines, "\r\n")
 

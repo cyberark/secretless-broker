@@ -75,10 +75,10 @@ In order to meet requirement 2., Secretless needs a mechanism of:
 
 The recommendation per Secret usage session is as follows:
 
-Use `context.Context` to store a registry for all the Secret derivatives via `context.WithValue`. 
-Access to the registry needs to be thread/goroutine safe - perhaps use mutex.
-Thread context through the **journey of Secrets**
-Once the Secret has been used:
+- [ ] Use `context.Context` to store a registry for all the Secret derivatives via `context.WithValue`. 
+- [ ] Access to the registry needs to be thread/goroutine safe - perhaps use mutex.
+- [ ] Thread context through the **journey of Secrets**. This will require the modification of some of our interfaces. NOTE: this is something that needs to happen anyway, the handler interface is currently a hodge podge of no at all universal functions
+- [ ] Once the Secret has been used:
   + Use `context.WithCancel` and call `cancel` so that interested party can carry out an clean up logic
   + Zeroize collection of Secret derivatives stored in context.
 

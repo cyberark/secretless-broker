@@ -12,9 +12,11 @@ Ideally, 2 would happen in a centralized fashion to avoid the need for repeated 
 ## Journey of Secrets
 It is worth noting the journey of Secrets in Secretless.
 
-Resolver.#Resolve -> Provider.#GetValue -> Handler -> Listener -> Target Backend
-                                        -> EventNotifier.#ResolveSecret
-
+```
+Resolver.#Resolve -> Provider.#GetValue |-> Handler -> Listener -> Target Backend
+                                        |
+					|-> EventNotifier.#ResolveSecret
+```
 ## Considerations
 
 Below are some of the considerations made in coming together with this proposal. Some of these need to be validated.

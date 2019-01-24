@@ -26,6 +26,11 @@ type BackendConfig struct {
 //
 // Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
+	// SequenceIds keep track of packet no. for client and backend
+	// MySQL uses this to ensure packets arrive in order
+	// values indicate appropriate value to use on subsequent write
+	clientSequenceId byte
+	backendSequenceId byte
 	plugin_v1.BaseHandler
 	BackendConfig *BackendConfig
 }
@@ -39,11 +44,10 @@ func (h *Handler) abort(err error) {
 				Code:     protocol.CRUnknownError,
 				SQLSTATE: protocol.ErrorCodeInternalError,
 				Message:  err.Error(),
-				SequenceID: 0,
 			}
 		}
 
-		h.GetClientConnection().Write(mysqlError.GetMessage())
+		h.ClientWrite(mysqlError.GetMessage())
 	}
 }
 

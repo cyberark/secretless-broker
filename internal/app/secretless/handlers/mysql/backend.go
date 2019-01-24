@@ -63,9 +63,53 @@ func (h *Handler) ConfigureBackend() (err error) {
 	return
 }
 
+
+// Read and Write
+func (h *Handler) BackendWrite(pkt []byte) (int, error) {
+	// use current backendSequenceId onWrite
+	pkt[3] = h.backendSequenceId
+	n, err := protocol.WritePacket(pkt, h.GetBackendConnection())
+
+	// increment backendSequenceId in anticipation of subsequent write
+	h.backendSequenceId++
+
+	return n, err
+}
+
+func (h *Handler) BackendRead() ([]byte, error) {
+	pkt, err := protocol.ReadPacket(h.GetBackendConnection())
+	if err == nil {
+		// increment backendSequenceId in anticipation of subsequent write
+		h.backendSequenceId = pkt[3] + 1
+	}
+	return pkt, err
+}
+
+func (h *Handler) ClientWrite(pkt []byte) (int, error) {
+	// use current clientSequenceId onWrite
+	pkt[3] = h.clientSequenceId
+	n, err := protocol.WritePacket(pkt, h.GetClientConnection())
+
+	// increment clientSequenceId in anticipation of subsequent write
+	h.clientSequenceId++
+
+	return n, err
+}
+
+func (h *Handler) ClientRead() ([]byte, error) {
+	pkt, err := protocol.ReadPacket(h.GetClientConnection())
+	if err == nil {
+		// increment clientSequenceId in anticipation of subsequent write
+		h.clientSequenceId = pkt[3] + 1
+	}
+	return pkt, err
+}
+
 // ConnectToBackend establishes the connection to the backend database and sets the Backend field.
 func (h *Handler) ConnectToBackend() (err error) {
-	var backend net.Conn
+
+	h.clientSequenceId = 0 // starts at with ServerGreeting or ServerGreetingError
+	h.backendSequenceId = 1 // start at 1 with LoginRequest or SSLRequestModifiedLoginRequest
 
 	// resolve TLS Configuration from BackendConfig Options
 	tlsConf, err := ssl.NewSecretlessTLSConfig(h.BackendConfig.Options, false)
@@ -76,7 +120,8 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	address := h.BackendConfig.Host + ":" + strconv.FormatUint(uint64(h.BackendConfig.Port), 10)
 
-	if backend, err = net.Dial("tcp", address); err != nil {
+	h.BackendConnection, err = net.Dial("tcp", address)
+	if err != nil {
 		return
 	}
 
@@ -84,10 +129,11 @@ func (h *Handler) ConnectToBackend() (err error) {
 		log.Print("Processing handshake")
 	}
 
+// STEP: ServerGreeting. Backend => Secretless
 	// Proxy initial packet from server to client
 	// TODO can we skip this step and still compute client packet?
 	// how can we check the client accepts the protocol if we do?
-	packet, err := protocol.ReadPacket(backend)
+	packet, err := h.BackendRead()
 	if err != nil {
 		return err
 	}
@@ -98,7 +144,8 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return err
 	}
 
-	_, err = protocol.WritePacket(packetWithNoSSL, h.GetClientConnection())
+// STEP: ServerGreeting. Secretless => Client
+	_, err = h.ClientWrite(packetWithNoSSL)
 	if err != nil {
 		return err
 	}
@@ -109,29 +156,28 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
+// STEP: LoginRequest. Client => Secretless
+	// Intercept response from client
+	handshakeResponsePacket, err := h.ClientRead()
+
 	// requested SSL but server doesn't support it
 	if requestedSSL && serverHandshake.ServerCapabilities&protocol.ClientSSL == 0 {
 		return &protocol.Error{
 			Code:       protocol.CRSSLConnectionError,
 			SQLSTATE:   protocol.ErrorCodeInternalError,
 			Message:    ErrNoTLS.Error(),
-			SequenceID: 2,
 		}
 	}
-
-	// Intercept response from client
-	handshakeResponsePacket, err := protocol.ReadPacket(h.GetClientConnection())
-	if err != nil {
-		return
-	}
-	// Track clientSequenceID
-	clientSequenceID := handshakeResponsePacket[3]
 
 	// Parse intercepted client response
 	// TODO: client requesting SSL results ERROR 2026 (HY000): SSL connection error: protocol version mismatch
 	handshakeResponse, err := protocol.UnpackHandshakeResponse41(handshakeResponsePacket)
 	if err != nil {
-		return
+		return &protocol.Error{
+			Code:       protocol.CRSSLConnectionError,
+			SQLSTATE:   protocol.ErrorCodeInternalError,
+			Message:    ErrNoTLS.Error(),
+		}
 	}
 
 	// Ensure CapabilityFlag is set when using TLS
@@ -200,51 +246,53 @@ func (h *Handler) ConnectToBackend() (err error) {
 		sslPacket[1] = byte(pktLen >> 8)
 		sslPacket[2] = byte(pktLen >> 16)
 
+// STEP: SSLRequestModifiedLoginRequest. Secretless => Backend
 		// Send TLS / SSL request packet
-		if _, err = protocol.WritePacket(sslPacket, backend); err != nil {
+		if _, err = h.BackendWrite(sslPacket); err != nil {
 			return
 		}
-		// Increment sequenceID in anticipation of subsequent write to backend
-		packedHandshakeRespPacket[3]++
 
 		// Switch to TLS
-		backend, err = ssl.HandleSSLUpgrade(backend, tlsConf)
+// STEP: TLSUpgrade. Secretless => Backend
+		h.BackendConnection, err = ssl.HandleSSLUpgrade(h.BackendConnection, tlsConf)
 		if err != nil {
 			return
 		}
 	}
 
+// STEP: LoginRequest. Secretless => Backend
 	// Send configured client response packet to server
-	if _, err = protocol.WritePacket(packedHandshakeRespPacket, backend); err != nil {
+	if _, err = h.BackendWrite(packedHandshakeRespPacket); err != nil {
 		return
 	}
 
+// TODO: AuthSwitchRequest, AuthSwitchResponse
+// https://dev.mysql.com/doc/refman/8.0/en/authentication-plugins.html
+
+
+// STEP: LoginResponse. Backend => Secretless
 	// Proxy server response
-	packet, err = protocol.ReadPacket(backend)
-	if err != nil {
+	if packet, err = h.BackendRead(); err != nil {
 		return
 	}
 
-	_, err = protocol.UnpackOkResponse(packet)
-	if err != nil {
+	if _, err = protocol.UnpackOkResponse(packet); err != nil {
 		return
 	}
 
+// STEP: LoginResponse. Secretless => Client
 	// Proxy OK packet to client
 	// TODO: refactor to wrap conn in struct that can
 	// keep track of clientSequenceID
 	// be custodian of client connection logic
 	// https://github.com/siddontang/mixer/blob/master/proxy/conn.go
-	packet[3] = clientSequenceID + 1 // ensure usage of incremented clientSequenceID
-	if _, err = protocol.WritePacket(packet, h.GetClientConnection()); err != nil {
+	if _, err = h.ClientWrite(packet); err != nil {
 		return
 	}
 
 	if h.GetConfig().Debug {
 		log.Printf("Successfully connected to '%s:%d'", h.BackendConfig.Host, h.BackendConfig.Port)
 	}
-
-	h.BackendConnection = backend
 
 	return
 }

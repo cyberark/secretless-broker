@@ -399,7 +399,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 
 	// Check that the server is using protocol 4.1
 	if capabilityFlags&ClientProtocol41 == 0 {
-		return nil, errors.New("Protocol mismatch")
+		return nil, errors.New("Client Protocol mismatch")
 	}
 
 	// client requesting SSL, we don't support it
@@ -455,11 +455,12 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 
 	// check whether the auth method was specified
 	if capabilityFlags&ClientPluginAuth > 0 {
-		authPluginName := ReadNullTerminatedString(r)
+		ReadNullTerminatedString(r)
 
-		if authPluginName != defaultAuthPluginName {
-			return nil, errors.New("Error in server handshake")
-		}
+		// TODO: determine if there's a failure case as a result of authPlugin mismatch
+		//if authPluginName != defaultAuthPluginName {
+		//	return nil, errors.New("Error in server handshake " + authPluginName)
+		//}
 	}
 
 	// get the rest of the packet

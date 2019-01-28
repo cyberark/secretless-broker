@@ -57,7 +57,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: go test -v ./test/mysql_handler/tests
+    command: sleep 999d
     environment:
       TEST_ROOT: /secretless/test/mysql_handler
       DB_PROTOCOL: mysql

@@ -38,7 +38,8 @@ if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
   export SECRETLESS_HOST=secretless-dev
 
   # use exec because the container is already running
-  docker_compose_cmd="docker-compose exec"
+  #TODO uncomment below when i figure out why reflex is failing...
+  # docker_compose_cmd="docker-compose exec"
 fi
 
 ${docker_compose_cmd} \

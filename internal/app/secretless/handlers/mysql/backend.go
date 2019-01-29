@@ -11,6 +11,18 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 )
 
+// TODO: move to another file? perhaps into packet?
+//
+type mysqlPacket []byte
+
+func (pkt *mysqlPacket) SequenceId() byte {
+	return (*pkt)[3]
+}
+
+func (pkt *mysqlPacket) SetSequenceId(id byte) {
+	(*pkt)[3] = id
+}
+
 // Various errors the handler might return
 var (
 	ErrNoTLS = errors.New("SSL connection error: SSL is required but the server doesn't support it")
@@ -64,72 +76,28 @@ func (h *Handler) ConfigureBackend() (err error) {
 }
 
 
-// Read and Write
-func (h *Handler) BackendWrite(pkt []byte) (int, error) {
-	// use current backendSequenceId onWrite
-	pkt[3] = h.backendSequenceId
-	n, err := protocol.WritePacket(pkt, h.GetBackendConnection())
-
-	// increment backendSequenceId in anticipation of subsequent write
-	h.backendSequenceId++
-
-	return n, err
-}
-
-func (h *Handler) BackendRead() ([]byte, error) {
-	pkt, err := protocol.ReadPacket(h.GetBackendConnection())
-	if err == nil {
-		// increment backendSequenceId in anticipation of subsequent write
-		h.backendSequenceId = pkt[3] + 1
-	}
-	return pkt, err
-}
-
-func (h *Handler) ClientWrite(pkt []byte) (int, error) {
-	// use current clientSequenceId onWrite
-	pkt[3] = h.clientSequenceId
-	n, err := protocol.WritePacket(pkt, h.GetClientConnection())
-
-	// increment clientSequenceId in anticipation of subsequent write
-	h.clientSequenceId++
-
-	return n, err
-}
-
-func (h *Handler) ClientRead() ([]byte, error) {
-	pkt, err := protocol.ReadPacket(h.GetClientConnection())
-	if err == nil {
-		// increment clientSequenceId in anticipation of subsequent write
-		h.clientSequenceId = pkt[3] + 1
-	}
-	return pkt, err
-}
-
 // ConnectToBackend establishes the connection to the backend database and sets the Backend field.
 func (h *Handler) ConnectToBackend() (err error) {
 
-	h.clientSequenceId = 0 // starts at with ServerGreeting or ServerGreetingError
-	h.backendSequenceId = 1 // start at 1 with LoginRequest or SSLRequestModifiedLoginRequest
+	h.ResetSequenceIds()
 
 	// resolve TLS Configuration from BackendConfig Options
 	tlsConf, err := ssl.NewSecretlessTLSConfig(h.BackendConfig.Options, false)
+	if err != nil {
+		return
+	}
 	requestedSSL := tlsConf.UseTLS
+
+	err = h.OpenBackendConnection()
 	if err != nil {
 		return
 	}
 
-	address := h.BackendConfig.Host + ":" + strconv.FormatUint(uint64(h.BackendConfig.Port), 10)
+	h.PrintDebug("Processing handshake")
 
-	h.BackendConnection, err = net.Dial("tcp", address)
-	if err != nil {
-		return
-	}
+	// STEP: ServerGreeting. Backend => Secretless
+	//////////////////////////////////////////////
 
-	if h.GetConfig().Debug {
-		log.Print("Processing handshake")
-	}
-
-// STEP: ServerGreeting. Backend => Secretless
 	// Proxy initial packet from server to client
 	// TODO can we skip this step and still compute client packet?
 	// how can we check the client accepts the protocol if we do?
@@ -144,7 +112,8 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return err
 	}
 
-// STEP: ServerGreeting. Secretless => Client
+	// STEP: ServerGreeting. Secretless => Client
+	//////////////////////////////////////////////
 	_, err = h.ClientWrite(packetWithNoSSL)
 	if err != nil {
 		return err
@@ -152,16 +121,18 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	// Unpack server packet
 	serverHandshake, err := protocol.UnpackHandshakeV10(packet)
+	serverDoesntSupportSSL := serverHandshake.ServerCapabilities & protocol.ClientSSL == 0
 	if err != nil {
 		return
 	}
 
-// STEP: LoginRequest. Client => Secretless
-	// Intercept response from client
-	handshakeResponsePacket, err := h.ClientRead()
+	// STEP: LoginRequest. Client => Secretless
+	//////////////////////////////////////////////
 
-	// requested SSL but server doesn't support it
-	if requestedSSL && serverHandshake.ServerCapabilities&protocol.ClientSSL == 0 {
+	// Intercept response from client
+	clientHandshakeResponsePacket, err := h.ClientRead()
+
+	if requestedSSL && serverDoesntSupportSSL {
 		return &protocol.Error{
 			Code:       protocol.CRSSLConnectionError,
 			SQLSTATE:   protocol.ErrorCodeInternalError,
@@ -171,7 +142,9 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	// Parse intercepted client response
 	// TODO: client requesting SSL results ERROR 2026 (HY000): SSL connection error: protocol version mismatch
-	handshakeResponse, err := protocol.UnpackHandshakeResponse41(handshakeResponsePacket)
+
+	clientHandshakeResponse, err := protocol.UnpackHandshakeResponse41(clientHandshakeResponsePacket)
+	// TODO: how do we know this an SSL error?
 	if err != nil {
 		return &protocol.Error{
 			Code:       protocol.CRSSLConnectionError,
@@ -182,11 +155,11 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	// Ensure CapabilityFlag is set when using TLS
 	if requestedSSL {
-		handshakeResponse.CapabilityFlags |= protocol.ClientSSL
+		clientHandshakeResponse.CapabilityFlags |= protocol.ClientSSL
 	}
 
 	// Inject credentials into client response
-	if err = protocol.InjectCredentials(handshakeResponse, serverHandshake.Salt, h.BackendConfig.Username, h.BackendConfig.Password); err != nil {
+	if err = protocol.InjectCredentials(clientHandshakeResponse, serverHandshake.Salt, h.BackendConfig.Username, h.BackendConfig.Password); err != nil {
 		return
 	}
 
@@ -203,7 +176,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	//  | int<1>      | sequence_id    | Sequence ID                                 |
 	//  | string<var> | payload        | [len=payload_length] payload of the packet  |
 	//  +-------------+----------------+---------------------------------------------+
-	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(handshakeResponse)
+	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(clientHandshakeResponse)
 
 	if err != nil {
 		return
@@ -295,4 +268,69 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	return
+}
+
+// Read and Write
+func (h *Handler) BackendWrite(pkt mysqlPacket) (int, error) {
+	h.CopyBackendSequenceIdIntoPacket(&pkt)
+	h.IncrementBackendSequenceId()
+	return protocol.WritePacket(pkt, h.GetBackendConnection())
+}
+
+func (h *Handler) BackendRead() ([]byte, error) {
+	pkt, err := protocol.ReadPacket(h.GetBackendConnection())
+	if err != nil {
+		return nil, err
+	}
+	h.SetBackendSequenceIdFromPacket(pkt)
+	h.IncrementBackendSequenceId()
+	return pkt, err
+}
+
+func (h *Handler) ClientWrite(pkt mysqlPacket) (int, error) {
+	h.CopyClientSequenceIdIntoPacket(&pkt)
+	h.IncrementClientSequenceId()
+	return protocol.WritePacket(pkt, h.GetClientConnection())
+}
+
+func (h *Handler) ClientRead() ([]byte, error) {
+	pkt, err := protocol.ReadPacket(h.GetClientConnection())
+	if err != nil {
+		return nil, err
+	}
+	//h.clientSequenceId = pkt[3] + 1
+	// TODO verify: is below line same as above line?
+	// we shouldn't need to re-read the sequence id from the packet,
+	// because it's already stored
+	h.IncrementClientSequenceId()
+	return pkt, err
+}
+
+func (h *Handler) ResetSequenceIds() {
+	h.clientSequenceId = 0 // starts at with ServerGreeting or ServerGreetingError
+	h.backendSequenceId = 1 // start at 1 with LoginRequest or SSLRequestModifiedLoginRequest
+}
+
+func (h *Handler) IncrementClientSequenceId() {
+	h.clientSequenceId++
+}
+
+func (h *Handler) IncrementBackendSequenceId() {
+	h.backendSequenceId++
+}
+
+func (h *Handler) CopyClientSequenceIdIntoPacket(pkt *mysqlPacket) {
+	pkt.SetSequenceId(h.clientSequenceId)
+}
+
+func (h *Handler) CopyBackendSequenceIdIntoPacket(pkt *mysqlPacket) {
+	pkt.SetSequenceId(h.backendSequenceId)
+}
+
+func (h *Handler) SetBackendSequenceIdFromPacket(pkt mysqlPacket) {
+	h.backendSequenceId = pkt.SequenceId()
+}
+func (h *Handler) OpenBackendConnection() (err error) {
+	h.BackendConnection, err = net.Dial("tcp", h.BackendConfig.Address())
+	return err
 }

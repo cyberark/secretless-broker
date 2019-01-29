@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -18,6 +19,10 @@ type BackendConfig struct {
 	Username string
 	Password string
 	Options  map[string]string
+}
+
+func (bc *BackendConfig) Address() string {
+	return bc.Host + ":" + strconv.FormatUint(uint64(bc.Port), 10)
 }
 
 // Handler connects a client to a backend. It uses the handler Config and Providers to

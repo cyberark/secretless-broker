@@ -16,6 +16,7 @@ require (
 	github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/cenkalti/backoff v2.0.0+incompatible
+	github.com/cespare/reflex v0.2.0 // indirect
 	github.com/codegangsta/cli v1.20.0
 	github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720 // indirect
 	github.com/cyberark/conjur-api-go v0.5.1-0.20190103154352-bb43c2b86d76
@@ -65,6 +66,7 @@ require (
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/keybase/go-crypto v0.0.0-20180627172517-670ebd3adf7a // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
@@ -79,6 +81,7 @@ require (
 	github.com/mitchellh/reflectwalk v0.0.0-20170726202117-63d60e9d0dbc // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180718012357-94122c33edd3 // indirect
+	github.com/ogier/pflag v0.0.1 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect

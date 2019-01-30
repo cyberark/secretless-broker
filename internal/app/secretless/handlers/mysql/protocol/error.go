@@ -25,7 +25,7 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("ERROR: %s (%s): %s", e.Code, e.SQLSTATE, e.Message)
+	return fmt.Sprintf("ERROR: %v (%s): %s", e.Code, e.SQLSTATE, e.Message)
 }
 
 const ERR_HEADER = 0xff

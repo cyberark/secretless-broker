@@ -131,6 +131,9 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	// Intercept response from client
 	clientHandshakeResponsePacket, err := h.ClientRead()
+	if err != nil {
+		return err
+	}
 
 	if requestedSSL && serverDoesntSupportSSL {
 		return &protocol.Error{
@@ -144,14 +147,16 @@ func (h *Handler) ConnectToBackend() (err error) {
 	// TODO: client requesting SSL results ERROR 2026 (HY000): SSL connection error: protocol version mismatch
 
 	clientHandshakeResponse, err := protocol.UnpackHandshakeResponse41(clientHandshakeResponsePacket)
-	// TODO: how do we know this an SSL error?
 	if err != nil {
-		return &protocol.Error{
-			Code:       protocol.CRSSLConnectionError,
-			SQLSTATE:   protocol.ErrorCodeInternalError,
-			Message:    ErrNoTLS.Error(),
-		}
+		return err
 	}
+
+	// TODO: add tests cases for authentication plugins support
+	// Disable CapabilityFlag for authentication plugins support
+	clientHandshakeResponse.CapabilityFlags ^= protocol.ClientPluginAuth
+	// TODO: add tests cases for client secure connection
+	// Enable CapabilityFlag for client secure connection
+	clientHandshakeResponse.CapabilityFlags |= protocol.ClientSecureConnection
 
 	// Ensure CapabilityFlag is set when using TLS
 	if requestedSSL {

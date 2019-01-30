@@ -373,7 +373,7 @@ type HandshakeResponse41 struct {
 	ClientCharset   uint8
 	Username        string
 	AuthLength      int64
-	AuthnPluginName string
+	AuthPluginName  string
 	AuthResponse    []byte
 	Database        string
 	PacketTail      []byte
@@ -458,11 +458,6 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	var authPluginName string
 	if capabilityFlags&ClientPluginAuth > 0 {
 		authPluginName = ReadNullTerminatedString(r)
-
-		// TODO: determine if there's a failure case as a result of authPlugin mismatch
-		//if authPluginName != defaultAuthPluginName {
-		//	return nil, errors.New("Error in server handshake " + authPluginName)
-		//}
 	}
 
 	// get the rest of the packet
@@ -482,7 +477,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		ClientCharset:   charset,
 		Username:        username,
 		AuthLength:      authLength,
-		AuthnPluginName: authPluginName,
+		AuthPluginName:  authPluginName,
 		AuthResponse:    auth,
 		Database:        database,
 		PacketTail:      packetTail}, nil
@@ -502,7 +497,7 @@ func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, userna
 	// Reset the payload length for the packet
 	payloadLengthDiff := int32(len(username) - len(clientHandshake.Username))
 	payloadLengthDiff += int32(len(authResponse) - int(clientHandshake.AuthLength))
-	payloadLengthDiff += int32(len(defaultAuthPluginName) - len(clientHandshake.AuthnPluginName))
+	payloadLengthDiff += int32(len(defaultAuthPluginName) - len(clientHandshake.AuthPluginName))
 
 	clientHandshake.Header, err = UpdateHeaderPayloadLength(clientHandshake.Header, payloadLengthDiff)
 	if err != nil {

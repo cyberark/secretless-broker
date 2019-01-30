@@ -201,6 +201,7 @@ func TestUnpackHandshakeResponse41(t *testing.T) {
 		ClientCharset:   uint8(8),
 		Username:        "roger",
 		AuthLength:      int64(20),
+		AuthPluginName:  "mysql_native_password",
 		AuthResponse: []byte{0xc0, 0xb, 0xbc, 0xb6, 0x6, 0xf5,
 			0x4f, 0x4e, 0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae,
 			0xc4, 0x49, 0x7c, 0x46, 0xf3},
@@ -250,7 +251,8 @@ func TestInjectCredentials(t *testing.T) {
 
 	// test with handshake response that already has auth set to another value
 	handshake := HandshakeResponse41{
-		AuthLength: int64(20),
+		AuthLength:     int64(20),
+		AuthPluginName: "mysql_native_password",
 		AuthResponse: []byte{0xc0, 0xb, 0xbc, 0xb6, 0x6, 0xf5, 0x4f, 0x4e,
 			0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae, 0xc4, 0x49, 0x7c, 0x46, 0xf3},
 		Username: "madeupusername",
@@ -268,10 +270,11 @@ func TestInjectCredentials(t *testing.T) {
 	// test with handshake response with empty auth
 	expectedHeader = []byte{0xb8, 0x0, 0x0, 0x1}
 	handshake = HandshakeResponse41{
-		AuthLength:   0,
-		AuthResponse: []byte{},
-		Username:     "madeupusername",
-		Header:       []byte{0xaa, 0x0, 0x0, 0x1},
+		AuthLength:     0,
+		AuthPluginName: "mysql_native_password",
+		AuthResponse:   []byte{},
+		Username:       "madeupusername",
+		Header:         []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 
 	err = InjectCredentials(&handshake, salt, username, password)

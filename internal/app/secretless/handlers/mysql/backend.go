@@ -153,7 +153,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 	// TODO: add tests cases for authentication plugins support
 	// Disable CapabilityFlag for authentication plugins support
-	clientHandshakeResponse.CapabilityFlags &= ~protocol.ClientPluginAuth
+	clientHandshakeResponse.CapabilityFlags &^= protocol.ClientPluginAuth
 
 	// TODO: add tests cases for client secure connection
 	// Enable CapabilityFlag for client secure connection

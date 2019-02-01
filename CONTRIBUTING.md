@@ -234,7 +234,7 @@ _Please note: Plugin API interface signatures and supported plugin API version(s
 
 1. Based on the unreleased content, determine the new version number and update
    the [VERSION](VERSION) file.
-1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
+1. Run `./bin/prefill_changelog $(cat VERSION)` to populate the [changelog](CHANGELOG.md) with
    the changes included in the release.
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message.
 1. Once your changes have been reviewed and merged into master, tag the version

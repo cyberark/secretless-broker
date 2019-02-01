@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.4] 2019-02-01
+
+### Added
+- Added a design proposal for credential zeroization
+- Improved dev functionality in handler integration tests
+
+### Changed
+- Removed checksum hacks for client-go from Dockerfiles, since this is fixed
+  in Go 1.11.4
+- Improved and refactored database integration test suite
+
+### Fixed
+- Updated MySQL handler to handle authPluginName mismatch and to have consistent
+  sequenceIds
+
 ## [0.6.3] 2019-01-11
 
 ### Added
@@ -173,7 +188,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -184,3 +199,4 @@ The first tagged version.
 [0.6.1]: https://github.com/cyberark/secretless-broker/compare/v0.6.0...v0.6.1
 [0.6.2]: https://github.com/cyberark/secretless-broker/compare/v0.6.1...v0.6.2
 [0.6.3]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...v0.6.3
+[0.6.4]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...v0.6.4

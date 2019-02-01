@@ -77,6 +77,13 @@ func (h *BaseHandler) GetConfig() config.Handler {
 	return h.HandlerConfig
 }
 
+// Debug: Print only if Debug is enabled
+func (h *BaseHandler) PrintDebug(msg string) {
+	if h.GetConfig().Debug {
+		log.Print(msg)
+	}
+}
+
 // GetClientConnection implements plugin_v1.Handler
 func (h *BaseHandler) GetClientConnection() net.Conn {
 	return h.ClientConnection

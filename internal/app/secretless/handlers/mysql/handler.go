@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -20,12 +21,21 @@ type BackendConfig struct {
 	Options  map[string]string
 }
 
+func (bc *BackendConfig) Address() string {
+	return bc.Host + ":" + strconv.FormatUint(uint64(bc.Port), 10)
+}
+
 // Handler connects a client to a backend. It uses the handler Config and Providers to
 // establish the BackendConfig, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 //
 // Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
+	// SequenceIds keep track of packet no. for client and backend
+	// MySQL uses this to ensure packets arrive in order
+	// values indicate appropriate value to use on subsequent write
+	clientSequenceId byte
+	backendSequenceId byte
 	plugin_v1.BaseHandler
 	BackendConfig *BackendConfig
 }
@@ -39,11 +49,10 @@ func (h *Handler) abort(err error) {
 				Code:     protocol.CRUnknownError,
 				SQLSTATE: protocol.ErrorCodeInternalError,
 				Message:  err.Error(),
-				SequenceID: 1,
 			}
 		}
 
-		h.GetClientConnection().Write(mysqlError.GetMessage())
+		h.ClientWrite(mysqlError.GetMessage())
 	}
 }
 

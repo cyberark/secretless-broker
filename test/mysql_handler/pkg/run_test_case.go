@@ -32,6 +32,9 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 		panic("Listener Type can only be TCP or Socket")
 	}
 
+	// ensures mysql can handle non-native auth
+	args = append(args, "--default-auth=mysql_clear_password")
+
 	// Pre command logs
 	convey.Println("")
 	convey.Println("---<< EXECUTED")

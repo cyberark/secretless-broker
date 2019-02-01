@@ -22,11 +22,10 @@ type Error struct {
 	Code        uint16
 	SQLSTATE    string
 	Message     string
-	SequenceID  byte
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("ERROR: %s (%s): %s", e.Code, e.SQLSTATE, e.Message)
+	return fmt.Sprintf("ERROR: %v (%s): %s", e.Code, e.SQLSTATE, e.Message)
 }
 
 const ERR_HEADER = 0xff
@@ -48,7 +47,9 @@ func (e *Error) GetMessage() []byte {
 	data[0] = byte(length)
 	data[1] = byte(length >> 8)
 	data[2] = byte(length >> 16)
-	data[3] = e.SequenceID
+	//sequenceID defaults to 0
+	//expected to be overwritten by writer
+	data[3] = byte(0)
 
 	return data
 }

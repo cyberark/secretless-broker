@@ -201,6 +201,7 @@ func TestUnpackHandshakeResponse41(t *testing.T) {
 		ClientCharset:   uint8(8),
 		Username:        "roger",
 		AuthLength:      int64(20),
+		AuthPluginName:  "mysql_native_password",
 		AuthResponse: []byte{0xc0, 0xb, 0xbc, 0xb6, 0x6, 0xf5,
 			0x4f, 0x4e, 0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae,
 			0xc4, 0x49, 0x7c, 0x46, 0xf3},
@@ -239,21 +240,23 @@ func TestUnpackHandshakeResponse41(t *testing.T) {
 }
 
 func TestInjectCredentials(t *testing.T) {
-	username := "testuser"
+	username := "testuser" // 8
 	password := "testpass"
 	salt := []byte{0x2f, 0x50, 0x25, 0x34, 0x78, 0x17, 0x1, 0x44, 0x1d,
 		0xc, 0x61, 0x4f, 0x5c, 0x69, 0x65, 0x6f, 0x25, 0x66, 0x7c, 0x64}
 	expectedAuth := []byte{0xf, 0xf8, 0xe1, 0xa3, 0xe7, 0xe3, 0x5f, 0xd2,
 		0xb1, 0x69, 0x8c, 0x39, 0x5b, 0xfa, 0x99, 0x4f, 0x53, 0xdd, 0xe5,
-		0x35}
-	expectedHeader := []byte{0xa4, 0x0, 0x0, 0x1}
+		0x35} // 20
+	expectedHeader := []byte{0x99, 0x0, 0x0, 0x1}
+	// expectedHeader[0] = 0xaa + (8 - 14) + (20 - 20) + (21 - 32)
 
 	// test with handshake response that already has auth set to another value
 	handshake := HandshakeResponse41{
-		AuthLength: int64(20),
+		AuthLength:     int64(20),
+		AuthPluginName: "non_native_mysql_native_password", // 32
 		AuthResponse: []byte{0xc0, 0xb, 0xbc, 0xb6, 0x6, 0xf5, 0x4f, 0x4e,
-			0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae, 0xc4, 0x49, 0x7c, 0x46, 0xf3},
-		Username: "madeupusername",
+			0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae, 0xc4, 0x49, 0x7c, 0x46, 0xf3}, // 20
+		Username: "madeupusername", // 14
 		Header:   []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 
@@ -265,13 +268,15 @@ func TestInjectCredentials(t *testing.T) {
 	assert.Equal(t, expectedHeader, handshake.Header)
 	assert.Equal(t, nil, err)
 
-	// test with handshake response with empty auth
+	// test with handshake response with empty auth and mysql_native_password
 	expectedHeader = []byte{0xb8, 0x0, 0x0, 0x1}
+	// expectedHeader[0] = 0xaa + (8 - 14) + (20 - 0) + (21 - 21)
 	handshake = HandshakeResponse41{
-		AuthLength:   0,
-		AuthResponse: []byte{},
-		Username:     "madeupusername",
-		Header:       []byte{0xaa, 0x0, 0x0, 0x1},
+		AuthLength:     0,
+		AuthPluginName: "mysql_native_password", // 21
+		AuthResponse:   []byte{}, // 0
+		Username:       "madeupusername", // 14
+		Header:         []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 
 	err = InjectCredentials(&handshake, salt, username, password)

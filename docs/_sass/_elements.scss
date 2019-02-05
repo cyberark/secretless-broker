@@ -368,7 +368,7 @@ pre {
 .ui-tabs .ui-tabs-panel {
 	display: block;
 	border-width: 0;
-	padding: 2rem 2rem 2rem 0; 
+	padding: 2rem 2rem 2rem 0;
 	background: $sless-light-blue;
 }
 
@@ -377,7 +377,7 @@ pre {
 }
 
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
-	background: #fff; 
+	background: #fff;
 }
 
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default, .ui-button, html .ui-button.ui-state-disabled:hover, html .ui-button.ui-state-disabled:active {
@@ -507,5 +507,26 @@ figure.highlight {
 	a {
 		color: lighten($sless-blue, 30);
 		font-weight: 600;
+	}
+}
+
+// ***********************
+// 404 page
+// ***********************
+.four-o-four-wrapper {
+	text-align: center;
+}
+.four-o-four-container {
+	background-image: url("/img/secretless_dash_pattern_blue_05.svg");
+	margin-bottom: 4rem;
+	padding: 4rem;
+}
+.four-o-four-img {
+	display: flex;
+	justify-content: center;
+	padding: 5rem;
+	img {
+		width: 37rem;
+		height: 15rem;
 	}
 }

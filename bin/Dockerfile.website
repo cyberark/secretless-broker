@@ -1,7 +1,6 @@
 FROM ruby:2.5-alpine
 
-RUN apk add --update alpine-sdk \
-                     go-tools && \
+RUN apk add --update alpine-sdk && \
     mkdir -p /tmp/gems
 
 WORKDIR /tmp/gems

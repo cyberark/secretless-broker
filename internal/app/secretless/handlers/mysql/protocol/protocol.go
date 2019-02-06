@@ -130,12 +130,15 @@ func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 // HandshakeV10 represents sever's initial handshake packet
 // See https://mariadb.com/kb/en/mariadb/1-connecting-connecting/#initial-handshake-packet
 type HandshakeV10 struct {
-	ProtocolVersion    byte
-	ServerVersion      string
-	ConnectionID       uint32
-	ServerCapabilities uint32
-	AuthPlugin         string
-	Salt               []byte
+	Header    		       []byte
+	ProtocolVersion        byte
+	ServerVersion          string
+	ConnectionID           uint32
+	ServerDefaultCollation uint8
+	StatusFlags            uint16
+	ServerCapabilities     uint32
+	AuthPlugin             string
+	Salt                   []byte
 }
 
 // UnpackHandshakeV10 decodes initial handshake request from server.
@@ -173,8 +176,9 @@ type HandshakeV10 struct {
 func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
-	// Skip packet header
-	if _, err := GetPacketHeader(r); err != nil {
+	// Read packet header
+	header, err := GetPacketHeader(r)
+	if err != nil {
 		return nil, err
 	}
 
@@ -210,10 +214,20 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		return nil, err
 	}
 
-	// Skip ServerDefaultCollation and StatusFlags
-	if _, err := r.Seek(3, io.SeekCurrent); err != nil {
+	// Read ServerDefaultCollation
+	serverDefaultCollationByte, err := r.ReadByte()
+	if err != nil {
 		return nil, err
 	}
+	serverDefaultCollation := uint8(serverDefaultCollationByte)
+
+
+	// Read StatusFlags
+	statusFlagsBuf := make([]byte, 2)
+	if _, err := r.Read(statusFlagsBuf); err != nil {
+		return nil, err
+	}
+	statusFlags := binary.LittleEndian.Uint16(statusFlagsBuf)
 
 	// Read ExServerCapabilities
 	serverCapabilitiesHigherBuf := make([]byte, 2)
@@ -273,88 +287,89 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	return &HandshakeV10{
-		ProtocolVersion:    protoVersion,
-		ServerVersion:      serverVersion,
-		ConnectionID:       connectionID,
-		ServerCapabilities: serverCapabilities,
-		AuthPlugin:         authPlugin,
-		Salt:               salt,
+		Header:                 header,
+		ProtocolVersion:        protoVersion,
+		ServerVersion:          serverVersion,
+		ServerDefaultCollation: serverDefaultCollation,
+		StatusFlags:            statusFlags,
+		ConnectionID:           connectionID,
+		ServerCapabilities:     serverCapabilities,
+		AuthPlugin:             authPlugin,
+		Salt:                   salt,
 	}, nil
 }
 
-// Removes Client SSL Capability from Server Handshake Packet
-func RemoveSSLFromHandshakeV10(packet []byte) ([]byte, error) {
-	r := bytes.NewReader(packet)
-	initialLen := r.Len()
 
-	// Skip packet header
-	if _, err := GetPacketHeader(r); err != nil {
+// PackHandshakeV10 takes in a HandshakeV10 object and
+// returns a handshake packet
+func PackHandshakeV10(handshake *HandshakeV10) (packet []byte, err error) {
+
+	var buf bytes.Buffer
+
+	// Write Header (same as the original)
+	buf.Write(handshake.Header)
+
+	// Write ProtocolVersion
+	buf.WriteByte(handshake.ProtocolVersion)
+
+	// Write ServerVersion
+	if err := WriteNullTerminatedString(&buf, handshake.ServerVersion); err != nil {
 		return nil, err
 	}
 
-	// Read ProtocolVersion
-	r.ReadByte()
-
-	// Read ServerVersion
-	ReadNullTerminatedString(r)
-
-	// Read ConnectionID
+	// Write Connection ID
 	connectionIDBuf := make([]byte, 4)
-	if _, err := r.Read(connectionIDBuf); err != nil {
-		return nil, err
+	binary.LittleEndian.PutUint32(connectionIDBuf, handshake.ConnectionID)
+	buf.Write(connectionIDBuf)
+
+	// Write AuthnPluginDataPart1
+	buf.Write(handshake.Salt[:8])
+
+	// Filler
+	buf.WriteByte(0)
+
+	// write ServerCapabilities
+	buf.Write([]byte{
+		byte(handshake.ServerCapabilities),
+		byte(handshake.ServerCapabilities >> 8),
+	})
+
+	// Write ServerDefaultCollation
+	buf.WriteByte(handshake.ServerDefaultCollation)
+
+	// Write StatusFlags
+	statusFlagsBuf := make([]byte, 2)
+	binary.LittleEndian.PutUint16(statusFlagsBuf, handshake.StatusFlags)
+	buf.Write(statusFlagsBuf)
+
+	// write ExServerCapabilities
+	buf.Write([]byte{
+		byte(handshake.ServerCapabilities >> 16),
+		byte(handshake.ServerCapabilities >> 24),
+	})
+
+	// Write AuthnPluginData length
+	if handshake.ServerCapabilities&ClientPluginAuth > 0 {
+		buf.WriteByte(uint8(len(handshake.Salt) + 1))
+	} else {
+		buf.WriteByte(0)
 	}
 
-	// Read AuthPluginDataPart1
-	var salt []byte
-	salt8 := make([]byte, 8)
-	if _, err := r.Read(salt8); err != nil {
-		return nil, err
-	}
-	salt = append(salt, salt8...)
+	// Skip reserved (all 0x00)
+	buf.Write(make([]byte, 10))
 
-	// Skip filler
-	if _, err := r.ReadByte(); err != nil {
-		return nil, err
-	}
+	// Write AuthnPluginDataPart2
+	buf.Write(handshake.Salt[8:])
+	buf.WriteByte(0)
 
-	serverCapabilitiesIndex := initialLen - r.Len()
-	// Read ServerCapabilities
-	serverCapabilitiesLowerBuf := make([]byte, 2)
-	if _, err := r.Read(serverCapabilitiesLowerBuf); err != nil {
-		return nil, err
+	// Write AuthPluginName
+	if handshake.ServerCapabilities&ClientPluginAuth != 0 {
+		if err := WriteNullTerminatedString(&buf, handshake.AuthPlugin); err != nil {
+			return nil, err
+		}
 	}
 
-	// Skip ServerDefaultCollation and StatusFlags
-	if _, err := r.Seek(3, io.SeekCurrent); err != nil {
-		return nil, err
-	}
-
-	// Read ExServerCapabilities
-	exServerCapabilitiesIndex := initialLen - r.Len()
-	serverCapabilitiesHigherBuf := make([]byte, 2)
-	if _, err := r.Read(serverCapabilitiesHigherBuf); err != nil {
-		return nil, err
-	}
-
-	newPacket := make([]byte, len(packet))
-	copy(newPacket, packet)
-
-	// Compose ServerCapabilities from 2 bufs
-	var serverCapabilitiesBuf []byte
-	serverCapabilitiesBuf = append(serverCapabilitiesBuf, serverCapabilitiesLowerBuf...)
-	serverCapabilitiesBuf = append(serverCapabilitiesBuf, serverCapabilitiesHigherBuf...)
-	serverCapabilities := binary.LittleEndian.Uint32(serverCapabilitiesBuf)
-
-	// Remove ClientSSL from serverCapabilities
-	serverCapabilities = serverCapabilities ^ ClientSSL
-
-	// update Lower part of the capability flags.
-	writeUint16(newPacket, serverCapabilitiesIndex, uint16(serverCapabilities))
-
-	// update Upper part of the capability flags.
-	writeUint16(newPacket, exServerCapabilitiesIndex, uint16(serverCapabilities>>16))
-
-	return newPacket, nil
+	return buf.Bytes(), nil
 }
 
 // writes Uint16 starting from a given position in a byte slice
@@ -671,6 +686,14 @@ func ReadNullTerminatedString(r *bytes.Reader) string {
 
 		str = append(str, b)
 	}
+}
+
+func WriteNullTerminatedString(buf *bytes.Buffer, contents string) error {
+	if _, err := buf.WriteString(contents); err != nil {
+		return err
+	}
+
+	return buf.WriteByte(0)
 }
 
 // ReadNullTerminatedBytes reads bytes from reader until 0x00 byte

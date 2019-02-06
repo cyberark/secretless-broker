@@ -106,24 +106,27 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return err
 	}
 
-	// Remove Client SSL Capability from Server Handshake Packet
-	packetWithNoSSL, err := protocol.RemoveSSLFromHandshakeV10(packet)
-	if err != nil {
-		return err
-	}
-
 	// STEP: ServerGreeting. Secretless => Client
 	//////////////////////////////////////////////
-	_, err = h.ClientWrite(packetWithNoSSL)
-	if err != nil {
-		return err
-	}
 
 	// Unpack server packet
 	serverHandshake, err := protocol.UnpackHandshakeV10(packet)
 	serverDoesntSupportSSL := serverHandshake.ServerCapabilities & protocol.ClientSSL == 0
 	if err != nil {
 		return
+	}
+
+	// Remove Client SSL Capability from Server Handshake Packet
+	serverHandshake.ServerCapabilities &^= protocol.ClientSSL
+	packetWithNoSSL, err := protocol.PackHandshakeV10(serverHandshake)
+	if err != nil {
+		return err
+	}
+
+	// Write Handshake to Client
+	_, err = h.ClientWrite(packetWithNoSSL)
+	if err != nil {
+		return err
 	}
 
 	// STEP: LoginRequest. Client => Secretless

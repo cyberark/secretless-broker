@@ -54,7 +54,7 @@ godoc_package: ${package}
   docker run --rm \
              -t \
              -v "${TOPLEVEL_DIR}:/go/src/${REPOSITORY}" \
-             "${IMAGE_NAME}" godoc -html \
+             golang:1.11.4-stretch godoc -html \
                                    -links=false \
                                    "/go/src/${REPOSITORY}/${package}" | sed 1,19d >> "${output_file}"
 

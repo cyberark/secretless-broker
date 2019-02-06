@@ -130,8 +130,8 @@ func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 // HandshakeV10 represents sever's initial handshake packet
 // See https://mariadb.com/kb/en/mariadb/1-connecting-connecting/#initial-handshake-packet
 type HandshakeV10 struct {
-	Header    		       []byte
-	ProtocolVersion        byte
+    Header                 []byte
+    ProtocolVersion        byte
 	ServerVersion          string
 	ConnectionID           uint32
 	ServerDefaultCollation uint8
@@ -303,10 +303,13 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 // PackHandshakeV10 takes in a HandshakeV10 object and
 // returns a handshake packet
 func PackHandshakeV10(handshake *HandshakeV10) (packet []byte, err error) {
+	if len(handshake.Header) != 4 {
+		return nil, errors.New("#PackHandshakeV10: malformed header")
+	}
 
 	var buf bytes.Buffer
 
-	// Write Header (same as the original)
+	// Write Header (same as the original), ensure 4 bytes
 	buf.Write(handshake.Header)
 
 	// Write ProtocolVersion
@@ -369,7 +372,12 @@ func PackHandshakeV10(handshake *HandshakeV10) (packet []byte, err error) {
 		}
 	}
 
-	return buf.Bytes(), nil
+	result := buf.Bytes()
+
+	// Update payload length
+	binary.LittleEndian.PutUint32(result, uint32(buf.Len() - 4))
+
+	return result, nil
 }
 
 // writes Uint16 starting from a given position in a byte slice

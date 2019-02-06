@@ -101,7 +101,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	// Proxy initial packet from server to client
 	// TODO can we skip this step and still compute client packet?
 	// how can we check the client accepts the protocol if we do?
-	packet, err := h.BackendRead()
+	serverHandshakePacket, err := h.BackendRead()
 	if err != nil {
 		return err
 	}
@@ -110,21 +110,20 @@ func (h *Handler) ConnectToBackend() (err error) {
 	//////////////////////////////////////////////
 
 	// Unpack server packet
-	serverHandshake, err := protocol.UnpackHandshakeV10(packet)
+	serverHandshake, err := protocol.UnpackHandshakeV10(serverHandshakePacket)
 	serverDoesntSupportSSL := serverHandshake.ServerCapabilities & protocol.ClientSSL == 0
 	if err != nil {
 		return
 	}
 
-	// Remove Client SSL Capability from Server Handshake Packet
-	serverHandshake.ServerCapabilities &^= protocol.ClientSSL
-	packetWithNoSSL, err := protocol.PackHandshakeV10(serverHandshake)
+	serverHandshake.RemoveClientSSL()
+	serverHandshakePacketWithNoSSL, err := serverHandshake.Pack()
 	if err != nil {
 		return err
 	}
 
 	// Write Handshake to Client
-	_, err = h.ClientWrite(packetWithNoSSL)
+	_, err = h.ClientWrite(serverHandshakePacketWithNoSSL)
 	if err != nil {
 		return err
 	}
@@ -254,11 +253,12 @@ func (h *Handler) ConnectToBackend() (err error) {
 
 // STEP: LoginResponse. Backend => Secretless
 	// Proxy server response
-	if packet, err = h.BackendRead(); err != nil {
+	loginResponsePacket, err := h.BackendRead();
+	if err != nil {
 		return
 	}
 
-	if _, err = protocol.UnpackOkResponse(packet); err != nil {
+	if _, err = protocol.UnpackOkResponse(loginResponsePacket); err != nil {
 		return
 	}
 
@@ -268,7 +268,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	// keep track of clientSequenceID
 	// be custodian of client connection logic
 	// https://github.com/siddontang/mixer/blob/master/proxy/conn.go
-	if _, err = h.ClientWrite(packet); err != nil {
+	if _, err = h.ClientWrite(loginResponsePacket); err != nil {
 		return
 	}
 

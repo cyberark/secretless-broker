@@ -130,8 +130,8 @@ func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 // HandshakeV10 represents sever's initial handshake packet
 // See https://mariadb.com/kb/en/mariadb/1-connecting-connecting/#initial-handshake-packet
 type HandshakeV10 struct {
-    Header                 []byte
-    ProtocolVersion        byte
+	Header                 []byte
+	ProtocolVersion        byte
 	ServerVersion          string
 	ConnectionID           uint32
 	ServerDefaultCollation uint8
@@ -140,6 +140,90 @@ type HandshakeV10 struct {
 	AuthPlugin             string
 	Salt                   []byte
 }
+
+// RemoveClientSSL removes Client SSL Capability from Server Handshake
+func (serverHandshake *HandshakeV10) RemoveClientSSL() {
+	serverHandshake.ServerCapabilities &^= ClientSSL
+}
+
+func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
+	if len(serverHandshake.Header) != 4 {
+		return nil, errors.New("HandshakeV10#Pack: malformed header")
+	}
+
+	var buf bytes.Buffer
+
+	// Write Header (same as the original), ensure 4 bytes
+	buf.Write(serverHandshake.Header)
+
+	// Write ProtocolVersion
+	buf.WriteByte(serverHandshake.ProtocolVersion)
+
+	// Write ServerVersion
+	if err := WriteNullTerminatedString(&buf, serverHandshake.ServerVersion); err != nil {
+		return nil, err
+	}
+
+	// Write Connection ID
+	connectionIDBuf := make([]byte, 4)
+	binary.LittleEndian.PutUint32(connectionIDBuf, serverHandshake.ConnectionID)
+	buf.Write(connectionIDBuf)
+
+	// Write AuthnPluginDataPart1
+	buf.Write(serverHandshake.Salt[:8])
+
+	// Filler
+	buf.WriteByte(0)
+
+	// write ServerCapabilities
+	buf.Write([]byte{
+		byte(serverHandshake.ServerCapabilities),
+		byte(serverHandshake.ServerCapabilities >> 8),
+	})
+
+	// Write ServerDefaultCollation
+	buf.WriteByte(serverHandshake.ServerDefaultCollation)
+
+	// Write StatusFlags
+	statusFlagsBuf := make([]byte, 2)
+	binary.LittleEndian.PutUint16(statusFlagsBuf, serverHandshake.StatusFlags)
+	buf.Write(statusFlagsBuf)
+
+	// write ExServerCapabilities
+	buf.Write([]byte{
+		byte(serverHandshake.ServerCapabilities >> 16),
+		byte(serverHandshake.ServerCapabilities >> 24),
+	})
+
+	// Write AuthnPluginData length
+	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
+		buf.WriteByte(uint8(len(serverHandshake.Salt) + 1))
+	} else {
+		buf.WriteByte(0)
+	}
+
+	// Skip reserved (all 0x00)
+	buf.Write(make([]byte, 10))
+
+	// Write AuthnPluginDataPart2
+	buf.Write(serverHandshake.Salt[8:])
+	buf.WriteByte(0)
+
+	// Write AuthPluginName
+	if serverHandshake.ServerCapabilities&ClientPluginAuth != 0 {
+		if err := WriteNullTerminatedString(&buf, serverHandshake.AuthPlugin); err != nil {
+			return nil, err
+		}
+	}
+
+	result := buf.Bytes()
+
+	// Update payload length
+	binary.LittleEndian.PutUint32(result, uint32(buf.Len() - 4))
+
+	return result, nil
+}
+
 
 // UnpackHandshakeV10 decodes initial handshake request from server.
 // Basic packet structure shown below.
@@ -297,87 +381,6 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		AuthPlugin:             authPlugin,
 		Salt:                   salt,
 	}, nil
-}
-
-
-// PackHandshakeV10 takes in a HandshakeV10 object and
-// returns a handshake packet
-func PackHandshakeV10(handshake *HandshakeV10) (packet []byte, err error) {
-	if len(handshake.Header) != 4 {
-		return nil, errors.New("#PackHandshakeV10: malformed header")
-	}
-
-	var buf bytes.Buffer
-
-	// Write Header (same as the original), ensure 4 bytes
-	buf.Write(handshake.Header)
-
-	// Write ProtocolVersion
-	buf.WriteByte(handshake.ProtocolVersion)
-
-	// Write ServerVersion
-	if err := WriteNullTerminatedString(&buf, handshake.ServerVersion); err != nil {
-		return nil, err
-	}
-
-	// Write Connection ID
-	connectionIDBuf := make([]byte, 4)
-	binary.LittleEndian.PutUint32(connectionIDBuf, handshake.ConnectionID)
-	buf.Write(connectionIDBuf)
-
-	// Write AuthnPluginDataPart1
-	buf.Write(handshake.Salt[:8])
-
-	// Filler
-	buf.WriteByte(0)
-
-	// write ServerCapabilities
-	buf.Write([]byte{
-		byte(handshake.ServerCapabilities),
-		byte(handshake.ServerCapabilities >> 8),
-	})
-
-	// Write ServerDefaultCollation
-	buf.WriteByte(handshake.ServerDefaultCollation)
-
-	// Write StatusFlags
-	statusFlagsBuf := make([]byte, 2)
-	binary.LittleEndian.PutUint16(statusFlagsBuf, handshake.StatusFlags)
-	buf.Write(statusFlagsBuf)
-
-	// write ExServerCapabilities
-	buf.Write([]byte{
-		byte(handshake.ServerCapabilities >> 16),
-		byte(handshake.ServerCapabilities >> 24),
-	})
-
-	// Write AuthnPluginData length
-	if handshake.ServerCapabilities&ClientPluginAuth > 0 {
-		buf.WriteByte(uint8(len(handshake.Salt) + 1))
-	} else {
-		buf.WriteByte(0)
-	}
-
-	// Skip reserved (all 0x00)
-	buf.Write(make([]byte, 10))
-
-	// Write AuthnPluginDataPart2
-	buf.Write(handshake.Salt[8:])
-	buf.WriteByte(0)
-
-	// Write AuthPluginName
-	if handshake.ServerCapabilities&ClientPluginAuth != 0 {
-		if err := WriteNullTerminatedString(&buf, handshake.AuthPlugin); err != nil {
-			return nil, err
-		}
-	}
-
-	result := buf.Bytes()
-
-	// Update payload length
-	binary.LittleEndian.PutUint32(result, uint32(buf.Len() - 4))
-
-	return result, nil
 }
 
 // writes Uint16 starting from a given position in a byte slice

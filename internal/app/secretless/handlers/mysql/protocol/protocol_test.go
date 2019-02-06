@@ -193,7 +193,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 	}
 }
 
-func TestPackHandshakeV10(t *testing.T) {
+func TestHandshakeV10Pack(t *testing.T) {
 
 	type PackHandshakeV10Assert struct {
 		Packet   []byte
@@ -249,7 +249,7 @@ func TestPackHandshakeV10(t *testing.T) {
 	}
 
 	for _, asserted := range testData {
-		encoded, err := PackHandshakeV10(&asserted.HandshakeV10)
+		encoded, err := asserted.HandshakeV10.Pack()
 
 		if err != nil {
 			assert.Equal(t, asserted.Error, err)

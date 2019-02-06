@@ -138,6 +138,7 @@ type HandshakeV10 struct {
 	Salt               []byte
 }
 
+
 // UnpackHandshakeV10 decodes initial handshake request from server.
 // Basic packet structure shown below.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeV10
@@ -282,7 +283,12 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}, nil
 }
 
-// Removes Client SSL Capability from Server Handshake Packet
+// RemoveSSLFromHandshakeV10 removes Client SSL Capability from Server
+// Handshake Packet.  Secretless needs to do this to force the client to
+// communicate with Secretless without using SSL.  That half of the connection
+// is insecure by design.  Secretless then (usually) adds SSL for the other
+// half of the communication -- between Secretless and the MySQL server.
+//
 func RemoveSSLFromHandshakeV10(packet []byte) ([]byte, error) {
 	r := bytes.NewReader(packet)
 	initialLen := r.Len()
@@ -366,6 +372,21 @@ func writeUint16(data []byte, pos int, value uint16) {
 // HandshakeResponse41 represents handshake response packet sent by 4.1+ clients supporting clientProtocol41 capability,
 // if the server announced it in its initial handshake packet.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeResponse41
+//
+// The format of the header is also described here:
+//
+//   https://dev.mysql.com/doc/internals/en/mysql-packet.html
+//
+//  +-------------+----------------+---------------------------------------------+
+//  |    Type     |      Name      |                 Description                 |
+//	+-------------+----------------+---------------------------------------------+
+//  | int<3>      | payload_length | Length of the payload. The number of bytes  |
+//  |             |                | in the packet beyond the initial 4 bytes    |
+//  |             |                | that make up the packet header.             |
+//  | int<1>      | sequence_id    | Sequence ID                                 |
+//  | string<var> | payload        | [len=payload_length] payload of the packet  |
+//  +-------------+----------------+---------------------------------------------+
+//
 type HandshakeResponse41 struct {
 	Header          []byte
 	CapabilityFlags uint32

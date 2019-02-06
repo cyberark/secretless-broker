@@ -19,26 +19,51 @@ const (
 
 // Error is a MySQL processing error.
 type Error struct {
-	Code        uint16
-	SQLSTATE    string
-	Message     string
+	Code     uint16
+	SQLState string
+	Message  string
+}
+
+// NewGenericError returns a MySQL protocol specific error, to handle cases
+// that don't fit neatly into the MySQL code categories.  This makes sense,
+// since a Go error, eg, is not a true "protocol" error but instead something
+// resulting from Secretless's role as a proxy, which MySQL is unaware of.
+//
+// That said, we should try to use MySQL specific error codes wherever we
+// can, so that client error messages will be more meaningful.
+//
+// TODO: Replace instances of generic error with specific MySQL error codes.
+//
+func NewGenericError(goErr error) *Error {
+	return &Error{
+		Code:     CRUnknownError,
+		SQLState: ErrorCodeInternalError,
+		Message:  goErr.Error(),
+	}
+}
+
+// ErrNoTLS is a MySQL protocol error raised when SSL is required but the
+// server doesn't support it.
+var ErrNoTLS = &Error{
+	Code:     CRSSLConnectionError,
+	SQLState: ErrorCodeInternalError,
+	Message:  "SSL connection error: SSL is required but the server doesn't support it",
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("ERROR: %v (%s): %s", e.Code, e.SQLSTATE, e.Message)
+	return fmt.Sprintf("ERROR: %v (%s): %s", e.Code, e.SQLState, e.Message)
 }
 
-const ERR_HEADER = 0xff
 // GetMessage formats an Error into a protocol message.
 // https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
 func (e *Error) GetMessage() []byte {
 	data := make([]byte, 4, 4 + 1 + 2 + 1 + 5 + len(e.Message))
-	data = append(data, ERR_HEADER)
+	data = append(data, 0xff)
 	data = append(data, byte(e.Code), byte(e.Code>>8))
 
 	// TODO: for client41
 	data = append(data, '#')
-	data = append(data, e.SQLSTATE...)
+	data = append(data, e.SQLState...)
 
 	data = append(data, e.Message...)
 
@@ -53,3 +78,4 @@ func (e *Error) GetMessage() []byte {
 
 	return data
 }
+

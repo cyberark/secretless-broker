@@ -15,7 +15,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
-// BackendConfig stores the connection info to the real backend database.
+// connectionDetails stores the connection info to the real backend database.
 // These values are pulled from the handler credentials config
 type BackendConfig struct {
 	Host             string
@@ -24,7 +24,7 @@ type BackendConfig struct {
 }
 
 // Handler connects a client to a backend. It uses the handler Config and Providers to
-// establish the BackendConfig, which is used to make the Backend connection. Then the data
+// establish the connectionDetails, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 type Handler struct {
 	BackendConfig      *BackendConfig

@@ -32,16 +32,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUnpackOkResponse(t *testing.T) {
+func TestNewOkResponse(t *testing.T) {
 
-	type UnpackOkResponseAssert struct {
+	type NewOkResponseAssert struct {
 		Packet   []byte
 		HasError bool
 		Error    error
 		OkResponse
 	}
 
-	testData := []*UnpackOkResponseAssert{
+	testData := []*NewOkResponseAssert{
 		{
 			[]byte{
 				0x30, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x22, 0x00, 0x00, 0x00, 0x28, 0x52, 0x6f, 0x77, 0x73,
@@ -83,7 +83,7 @@ func TestUnpackOkResponse(t *testing.T) {
 	}
 
 	for _, asserted := range testData {
-		decoded, err := UnpackOkResponse(asserted.Packet)
+		decoded, err := NewOkResponse(asserted.Packet)
 
 		assert.Nil(t, err)
 
@@ -97,9 +97,9 @@ func TestUnpackOkResponse(t *testing.T) {
 	}
 }
 
-func TestUnpackHandshakeV10(t *testing.T) {
+func TestNewHandshakeV10(t *testing.T) {
 
-	type UnpackHandshakeV10Assert struct {
+	type NewHandshakeV10Assert struct {
 		Packet   []byte
 		HasError bool
 		Error    error
@@ -107,7 +107,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 		CapabilitiesMap map[uint32]bool
 	}
 
-	testData := []*UnpackHandshakeV10Assert{
+	testData := []*NewHandshakeV10Assert{
 		{
 			[]byte{
 				0x4a, 0x00, 0x00, 0x00, 0x0a, 0x35, 0x2e, 0x35, 0x2e, 0x35, 0x36, 0x00, 0x5e, 0x06, 0x00, 0x00,
@@ -167,7 +167,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 	}
 
 	for _, asserted := range testData {
-		decoded, err := UnpackHandshakeV10(asserted.Packet)
+		decoded, err := NewHandshakeV10(asserted.Packet)
 
 		if err != nil {
 			assert.Equal(t, asserted.Error, err)
@@ -193,15 +193,15 @@ func TestUnpackHandshakeV10(t *testing.T) {
 	}
 }
 
-func TestHandshakeV10Pack(t *testing.T) {
+func TestHandshakeV10_Pack(t *testing.T) {
 
-	type PackHandshakeV10Assert struct {
+	type HandshakeV10_PackAssert struct {
 		Packet   []byte
 		Error    error
 		HandshakeV10
 	}
 
-	testData := []*PackHandshakeV10Assert{
+	testData := []*HandshakeV10_PackAssert{
 		{
 			[]byte{
 				0x4a, 0x00, 0x00, 0x00, 0x0a, 0x35, 0x2e, 0x35, 0x2e, 0x35, 0x36, 0x00, 0x5e, 0x06, 0x00, 0x00,
@@ -259,7 +259,7 @@ func TestHandshakeV10Pack(t *testing.T) {
 	}
 }
 
-func TestUnpackHandshakeResponse41(t *testing.T) {
+func TestNewHandshakeResponse41(t *testing.T) {
 	expected := HandshakeResponse41{
 		Header:          []byte{0xaa, 0x0, 0x0, 0x1},
 		CapabilityFlags: uint32(33464965),
@@ -299,13 +299,13 @@ func TestUnpackHandshakeResponse41(t *testing.T) {
 		0x2e, 0x32, 0x30, 0x9, 0x5f, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f,
 		0x72, 0x6d, 0x6, 0x78, 0x38, 0x36, 0x5f, 0x36, 0x34}
 
-	output, err := UnpackHandshakeResponse41(input)
+	output, err := NewHandshakeResponse41(input)
 
 	assert.Equal(t, expected, *output)
 	assert.Equal(t, nil, err)
 }
 
-func TestInjectCredentials(t *testing.T) {
+func TestHandshakeResponse41_InjectCredentials(t *testing.T) {
 	username := "testuser" // 8
 	password := "testpass"
 	salt := []byte{0x2f, 0x50, 0x25, 0x34, 0x78, 0x17, 0x1, 0x44, 0x1d,
@@ -326,7 +326,7 @@ func TestInjectCredentials(t *testing.T) {
 		Header:   []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 
-	err := InjectCredentials(&handshake, salt, username, password)
+	err := handshake.InjectCredentials(salt, username, password)
 
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
@@ -345,7 +345,7 @@ func TestInjectCredentials(t *testing.T) {
 		Header:         []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 
-	err = InjectCredentials(&handshake, salt, username, password)
+	err = handshake.InjectCredentials(salt, username, password)
 
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
@@ -354,7 +354,7 @@ func TestInjectCredentials(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
-func TestPackHandshakeResponse41(t *testing.T) {
+func TestHandshakeResponse41_Pack(t *testing.T) {
 	input := HandshakeResponse41{
 		Header:          []byte{0xaa, 0x0, 0x0, 0x1},
 		CapabilityFlags: uint32(33464965),
@@ -393,7 +393,7 @@ func TestPackHandshakeResponse41(t *testing.T) {
 		0x2e, 0x32, 0x30, 0x9, 0x5f, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f,
 		0x72, 0x6d, 0x6, 0x78, 0x38, 0x36, 0x5f, 0x36, 0x34}
 
-	output, err := PackHandshakeResponse41(&input)
+	output, err := input.Pack()
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)

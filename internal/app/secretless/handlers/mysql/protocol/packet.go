@@ -55,7 +55,7 @@ func ProcessHandshake(client net.Conn, mysql net.Conn) (*HandshakeV10, *Handshak
 		return nil, nil, err
 	}
 
-	serverHandshake, err := UnpackHandshakeV10(packet)
+	serverHandshake, err := NewHandshakeV10(packet)
 	if err != nil {
 		println(err.Error())
 		return nil, nil, err
@@ -68,7 +68,7 @@ func ProcessHandshake(client net.Conn, mysql net.Conn) (*HandshakeV10, *Handshak
 		return nil, nil, err
 	}
 
-	clientHandshake, err := UnpackHandshakeResponse41(packet)
+	clientHandshake, err := NewHandshakeResponse41(packet)
 	if err != nil {
 		println(err.Error())
 		return nil, nil, err

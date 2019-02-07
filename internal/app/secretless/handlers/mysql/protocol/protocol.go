@@ -46,8 +46,8 @@ type ErrResponse struct {
 	Message string
 }
 
-// UnpackErrResponse is not yet implemented
-func UnpackErrResponse(packet []byte) (*ErrResponse, error) {
+// NewErrResponse is not yet implemented
+func NewErrResponse(packet []byte) (*ErrResponse, error) {
 	return nil, nil
 }
 
@@ -61,7 +61,7 @@ type OkResponse struct {
 	Warnings     uint16
 }
 
-// UnpackOkResponse decodes OK_Packet from server.
+// NewOkResponse decodes OK_Packet from server.
 // Part of basic packet structure shown below.
 //
 // int<3> PacketLength
@@ -70,7 +70,7 @@ type OkResponse struct {
 // int<lenenc> AffectedRows
 // int<lenenc> LastInsertID
 // ... more ...
-func UnpackOkResponse(packet []byte) (*OkResponse, error) {
+func NewOkResponse(packet []byte) (*OkResponse, error) {
 
 	// Min packet length = header(4 bytes) + PacketType(1 byte)
 	if err := CheckPacketLength(5, packet); err != nil {
@@ -144,6 +144,11 @@ type HandshakeV10 struct {
 // RemoveClientSSL removes Client SSL Capability from Server Handshake
 func (serverHandshake *HandshakeV10) RemoveClientSSL() {
 	serverHandshake.ServerCapabilities &^= ClientSSL
+}
+
+// SupportsSSL returns truthy if the serverHandshake has the ClientSSL capability
+func (serverHandshake *HandshakeV10) SupportsSSL() bool {
+	return serverHandshake.ServerCapabilities & ClientSSL != 0
 }
 
 func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
@@ -225,7 +230,7 @@ func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
 }
 
 
-// UnpackHandshakeV10 decodes initial handshake request from server.
+// NewHandshakeV10 decodes initial handshake request from server.
 // Basic packet structure shown below.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeV10
 //
@@ -257,7 +262,7 @@ func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
 // {
 //		string[NUL] AuthPluginName
 // }
-func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
+func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
 	// Read packet header
@@ -405,10 +410,10 @@ type HandshakeResponse41 struct {
 	PacketTail      []byte
 }
 
-// UnpackHandshakeResponse41 decodes handshake response packet send by client.
+// NewHandshakeResponse41 decodes handshake response packet send by client.
 // TODO: Add packet struct comment
 // TODO: Add packet length check
-func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
+func NewHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	r := bytes.NewReader(packet)
 
 	// Skip packet header (but save in struct)
@@ -509,11 +514,26 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		PacketTail:      packetTail}, nil
 }
 
-// InjectCredentials takes in a HandshakeResponse41 from the client, the
+// DisableClientPluginAuth removes ClientPluginAuth to the capability flags of the client handshake
+func (clientHandshake *HandshakeResponse41) DisableClientPluginAuth() {
+	clientHandshake.CapabilityFlags &^= ClientPluginAuth
+}
+
+// EnableClientSecureConnection adds ClientSecureConnection to the capability flags of the client handshake
+func (clientHandshake *HandshakeResponse41) EnableClientSecureConnection() {
+	clientHandshake.CapabilityFlags |= ClientSecureConnection
+}
+
+// EnableSSL adds ClientSSL to the capability flags of the client handshake
+func (clientHandshake *HandshakeResponse41) EnableSSL() {
+	clientHandshake.CapabilityFlags |= ClientSSL
+}
+
+// InjectCredentials takes in the
 // salt from the server, and a username / password, and uses the salt
 // from the server handshake to inject the username / password credentials into
-// the client handshake response
-func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, username string, password string) (err error) {
+// the client handshake response (HandshakeResponse41)
+func (clientHandshake *HandshakeResponse41) InjectCredentials(salt []byte, username string, password string) (err error) {
 
 	authResponse, err := NativePassword(password, salt)
 	if err != nil {
@@ -537,9 +557,9 @@ func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, userna
 	return
 }
 
-// PackHandshakeResponse41 takes in a HandshakeResponse41 object and
+// Pack encodes a HandshakeResponse41 object to bytes
 // returns a handshake response packet
-func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byte, err error) {
+func (clientHandshake *HandshakeResponse41) Pack() (packet []byte, err error) {
 
 	var buf bytes.Buffer
 

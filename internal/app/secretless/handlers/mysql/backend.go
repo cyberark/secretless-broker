@@ -110,8 +110,8 @@ func (h *Handler) ConnectToBackend() (err error) {
 	//////////////////////////////////////////////
 
 	// Unpack server packet
-	serverHandshake, err := protocol.UnpackHandshakeV10(serverHandshakePacket)
-	serverDoesntSupportSSL := serverHandshake.ServerCapabilities & protocol.ClientSSL == 0
+	serverHandshake, err := protocol.NewHandshakeV10(serverHandshakePacket)
+	serverDoesntSupportSSL := !serverHandshake.SupportsSSL()
 	if err != nil {
 		return
 	}
@@ -148,26 +148,26 @@ func (h *Handler) ConnectToBackend() (err error) {
 	// Parse intercepted client response
 	// TODO: client requesting SSL results ERROR 2026 (HY000): SSL connection error: protocol version mismatch
 
-	clientHandshakeResponse, err := protocol.UnpackHandshakeResponse41(clientHandshakeResponsePacket)
+	clientHandshakeResponse, err := protocol.NewHandshakeResponse41(clientHandshakeResponsePacket)
 	if err != nil {
 		return err
 	}
 
 	// TODO: add tests cases for authentication plugins support
 	// Disable CapabilityFlag for authentication plugins support
-	clientHandshakeResponse.CapabilityFlags &^= protocol.ClientPluginAuth
+	clientHandshakeResponse.DisableClientPluginAuth()
 
 	// TODO: add tests cases for client secure connection
 	// Enable CapabilityFlag for client secure connection
-	clientHandshakeResponse.CapabilityFlags |= protocol.ClientSecureConnection
+	clientHandshakeResponse.EnableClientSecureConnection()
 
 	// Ensure CapabilityFlag is set when using TLS
 	if requestedSSL {
-		clientHandshakeResponse.CapabilityFlags |= protocol.ClientSSL
+		clientHandshakeResponse.EnableSSL()
 	}
 
 	// Inject credentials into client response
-	if err = protocol.InjectCredentials(clientHandshakeResponse, serverHandshake.Salt, h.BackendConfig.Username, h.BackendConfig.Password); err != nil {
+	if err = clientHandshakeResponse.InjectCredentials(serverHandshake.Salt, h.BackendConfig.Username, h.BackendConfig.Password); err != nil {
 		return
 	}
 
@@ -184,7 +184,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	//  | int<1>      | sequence_id    | Sequence ID                                 |
 	//  | string<var> | payload        | [len=payload_length] payload of the packet  |
 	//  +-------------+----------------+---------------------------------------------+
-	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(clientHandshakeResponse)
+	packedHandshakeRespPacket, err := clientHandshakeResponse.Pack()
 
 	if err != nil {
 		return
@@ -258,7 +258,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	if _, err = protocol.UnpackOkResponse(loginResponsePacket); err != nil {
+	if _, err = protocol.NewOkResponse(loginResponsePacket); err != nil {
 		return
 	}
 

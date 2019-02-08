@@ -47,9 +47,11 @@
 }
 .btn-secondary {
 	background-color: #fff;
-	color: $sless-blue; 
+	color: $sless-blue;
 	&:hover {
 		background-color: darken($sless-light-blue, 05);
 		color: darken($sless-blue, 10);
 	}
 }
+
+.btn-lowercase { text-transform: none; }

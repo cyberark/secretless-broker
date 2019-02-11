@@ -5,12 +5,15 @@
 
 // TODO: look into setting rpath
 // http://gridengine.eu/index.php/other-stories/232-avoiding-the-ldlibrarypath-with-shared-libs-in-go-cgo-applications-2015-12-21
-
-
 // BUILD
 // go build -buildmode c-shared -o ./cmd/envoy/lib.a ./cmd/envoy/main.go
-// g++ -o ./cmd/envoy/main ./cmd/envoy/main.cpp ./cmd/envoy/lib.a
-// cd ./cmd/envoy; ./main; cd ../..;
+// g++ -o main ./cmd/envoy/main.cpp ./cmd/envoy/lib.a
+//
+// specify directory to search for dynamic libraries
+// for mac DYLD_LIBRARY_PATH
+// for linux LD_LIBRARY_PATH
+// LD_LIBRARY_PATH=$PWD/cmd/envoy DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH ./main
+
 char* to_c_string(std::string str) {
   return &str[0u];
 }

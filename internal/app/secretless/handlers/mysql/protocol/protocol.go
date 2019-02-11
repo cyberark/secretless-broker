@@ -129,108 +129,6 @@ func NewOkResponse(packet []byte) (*OkResponse, error) {
 
 // HandshakeV10 represents sever's initial handshake packet
 // See https://mariadb.com/kb/en/mariadb/1-connecting-connecting/#initial-handshake-packet
-type HandshakeV10 struct {
-	Header                 []byte
-	ProtocolVersion        byte
-	ServerVersion          string
-	ConnectionID           uint32
-	ServerDefaultCollation uint8
-	StatusFlags            uint16
-	ServerCapabilities     uint32
-	AuthPlugin             string
-	Salt                   []byte
-}
-
-// RemoveClientSSL removes Client SSL Capability from Server Handshake
-func (serverHandshake *HandshakeV10) RemoveClientSSL() {
-	serverHandshake.ServerCapabilities &^= ClientSSL
-}
-
-// SupportsSSL returns truthy if the serverHandshake has the ClientSSL capability
-func (serverHandshake *HandshakeV10) SupportsSSL() bool {
-	return serverHandshake.ServerCapabilities & ClientSSL != 0
-}
-
-func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
-	if len(serverHandshake.Header) != 4 {
-		return nil, errors.New("HandshakeV10#Pack: malformed header")
-	}
-
-	var buf bytes.Buffer
-
-	// Write Header (same as the original), ensure 4 bytes
-	buf.Write(serverHandshake.Header)
-
-	// Write ProtocolVersion
-	buf.WriteByte(serverHandshake.ProtocolVersion)
-
-	// Write ServerVersion
-	if err := WriteNullTerminatedString(&buf, serverHandshake.ServerVersion); err != nil {
-		return nil, err
-	}
-
-	// Write Connection ID
-	connectionIDBuf := make([]byte, 4)
-	binary.LittleEndian.PutUint32(connectionIDBuf, serverHandshake.ConnectionID)
-	buf.Write(connectionIDBuf)
-
-	// Write AuthnPluginDataPart1
-	buf.Write(serverHandshake.Salt[:8])
-
-	// Filler
-	buf.WriteByte(0)
-
-	// write ServerCapabilities
-	buf.Write([]byte{
-		byte(serverHandshake.ServerCapabilities),
-		byte(serverHandshake.ServerCapabilities >> 8),
-	})
-
-	// Write ServerDefaultCollation
-	buf.WriteByte(serverHandshake.ServerDefaultCollation)
-
-	// Write StatusFlags
-	statusFlagsBuf := make([]byte, 2)
-	binary.LittleEndian.PutUint16(statusFlagsBuf, serverHandshake.StatusFlags)
-	buf.Write(statusFlagsBuf)
-
-	// write ExServerCapabilities
-	buf.Write([]byte{
-		byte(serverHandshake.ServerCapabilities >> 16),
-		byte(serverHandshake.ServerCapabilities >> 24),
-	})
-
-	// Write AuthnPluginData length
-	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
-		buf.WriteByte(uint8(len(serverHandshake.Salt) + 1))
-	} else {
-		buf.WriteByte(0)
-	}
-
-	// Skip reserved (all 0x00)
-	buf.Write(make([]byte, 10))
-
-	// Write AuthnPluginDataPart2
-	buf.Write(serverHandshake.Salt[8:])
-	buf.WriteByte(0)
-
-	// Write AuthPluginName
-	if serverHandshake.ServerCapabilities&ClientPluginAuth != 0 {
-		if err := WriteNullTerminatedString(&buf, serverHandshake.AuthPlugin); err != nil {
-			return nil, err
-		}
-	}
-
-	result := buf.Bytes()
-
-	// Update payload length
-	binary.LittleEndian.PutUint32(result, uint32(buf.Len() - 4))
-
-	return result, nil
-}
-
-
-// NewHandshakeV10 decodes initial handshake request from server.
 // Basic packet structure shown below.
 // See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeV10
 //
@@ -262,6 +160,109 @@ func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
 // {
 //		string[NUL] AuthPluginName
 // }
+type HandshakeV10 struct {
+	Header                 []byte
+	ProtocolVersion        *MySQLInt // 1
+	ServerVersion          *MySQLString
+	ConnectionID           *MySQLInt // 4
+	Salt1                  *MySQLNString // 8
+	ServerCapabilities     uint32
+	ServerDefaultCollation *MySQLInt // 1
+	StatusFlags            *MySQLInt // 2
+	Salt2                  *MySQLNString // MAX 13
+	AuthPlugin             *MySQLString
+}
+
+// Concatenated Salt
+func (serverHandshake *HandshakeV10) Salt() []byte {
+	result := make([]byte, 0)
+	result = append(result, serverHandshake.Salt1.Bytes()...)
+	result = append(result, serverHandshake.Salt2.Bytes()...)
+	return result
+}
+
+// RemoveClientSSL removes Client SSL Capability from Server Handshake
+func (serverHandshake *HandshakeV10) RemoveClientSSL() {
+	serverHandshake.ServerCapabilities &^= ClientSSL
+}
+
+// SupportsSSL returns truthy if the serverHandshake has the ClientSSL capability
+func (serverHandshake *HandshakeV10) SupportsSSL() bool {
+	return serverHandshake.ServerCapabilities & ClientSSL != 0
+}
+
+func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
+	if len(serverHandshake.Header) != 4 {
+		return nil, errors.New("HandshakeV10#Pack: malformed header")
+	}
+
+	var buf bytes.Buffer
+
+	// Write Header (same as the original), ensure 4 bytes
+	buf.Write(serverHandshake.Header)
+
+	// Write ProtocolVersion
+	serverHandshake.ProtocolVersion.Pack(&buf)
+
+	// Write ServerVersion
+	serverHandshake.ServerVersion.Pack(&buf)
+
+	// Write Connection ID
+	serverHandshake.ConnectionID.Pack(&buf)
+
+	// Write AuthnPluginDataPart1
+	serverHandshake.Salt1.Pack(&buf)
+
+	// Filler
+	buf.WriteByte(0)
+
+	// write ServerCapabilities
+	buf.Write([]byte{
+		byte(serverHandshake.ServerCapabilities),
+		byte(serverHandshake.ServerCapabilities >> 8),
+	})
+
+	// Write ServerDefaultCollation
+	serverHandshake.ServerDefaultCollation.Pack(&buf)
+
+	// Write StatusFlags
+	serverHandshake.StatusFlags.Pack(&buf)
+
+	// write ExServerCapabilities
+	buf.Write([]byte{
+		byte(serverHandshake.ServerCapabilities >> 16),
+		byte(serverHandshake.ServerCapabilities >> 24),
+	})
+
+	// Write AuthnPluginData length
+	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
+		buf.WriteByte(uint8(serverHandshake.Salt1.length + serverHandshake.Salt2.length + 1))
+	} else {
+		buf.WriteByte(0)
+	}
+
+	// Skip reserved (all 0x00)
+	buf.Write(make([]byte, 10))
+
+	// Write AuthnPluginDataPart2
+	serverHandshake.Salt2.Pack(&buf)
+	buf.WriteByte(0)
+
+	// Write AuthPluginName
+	if serverHandshake.ServerCapabilities&ClientPluginAuth != 0 {
+		serverHandshake.AuthPlugin.Pack(&buf)
+	}
+
+	result := buf.Bytes()
+
+	// Update payload length
+	binary.LittleEndian.PutUint32(result, uint32(buf.Len() - 4))
+
+	return result, nil
+}
+
+
+// NewHandshakeV10 decodes initial handshake request from server.
 func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
@@ -272,25 +273,16 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	// Read ProtocolVersion
-	protoVersion, _ := r.ReadByte()
+	protoVersion, _ := NewMySQLInt(r, 1)
 
 	// Read ServerVersion
-	serverVersion := ReadNullTerminatedString(r)
+	serverVersion, _ := NewMySQLString(r)
 
 	// Read ConnectionID
-	connectionIDBuf := make([]byte, 4)
-	if _, err := r.Read(connectionIDBuf); err != nil {
-		return nil, err
-	}
-	connectionID := binary.LittleEndian.Uint32(connectionIDBuf)
+	connectionID, _ := NewMySQLInt(r, 4)
 
 	// Read AuthPluginDataPart1
-	var salt []byte
-	salt8 := make([]byte, 8)
-	if _, err := r.Read(salt8); err != nil {
-		return nil, err
-	}
-	salt = append(salt, salt8...)
+	salt1, _ := NewMySQLNString(r, 8)
 
 	// Skip filler
 	if _, err := r.ReadByte(); err != nil {
@@ -304,19 +296,11 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	// Read ServerDefaultCollation
-	serverDefaultCollationByte, err := r.ReadByte()
-	if err != nil {
-		return nil, err
-	}
-	serverDefaultCollation := uint8(serverDefaultCollationByte)
+	serverDefaultCollation, _ := NewMySQLInt(r ,1)
 
 
 	// Read StatusFlags
-	statusFlagsBuf := make([]byte, 2)
-	if _, err := r.Read(statusFlagsBuf); err != nil {
-		return nil, err
-	}
-	statusFlags := binary.LittleEndian.Uint16(statusFlagsBuf)
+	statusFlags, _ := NewMySQLInt(r ,2)
 
 	// Read ExServerCapabilities
 	serverCapabilitiesHigherBuf := make([]byte, 2)
@@ -332,10 +316,10 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 
 	// Get length of AuthnPluginDataPart2
 	// or read in empty byte if not included
-	var authPluginDataLength byte
+	var authPluginDataLength *MySQLInt
 	if serverCapabilities&ClientPluginAuth > 0 {
 		var err error
-		authPluginDataLength, err = r.ReadByte()
+		authPluginDataLength, err = NewMySQLInt(r, 1)
 		if err != nil {
 			return nil, err
 		}
@@ -352,27 +336,28 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 
 	// Get AuthnPluginDataPart2
 	var numBytes int
+	var salt2 *MySQLNString
 	if serverCapabilities&ClientSecureConnection != 0 {
-		numBytes = int(authPluginDataLength) - 8
+		numBytes = authPluginDataLength.Val() - 8
 		if numBytes < 0 || numBytes > 13 {
 			numBytes = 13
 		}
 
-		salt2 := make([]byte, numBytes)
-		if _, err := r.Read(salt2); err != nil {
-			return nil, err
-		}
+		salt2, _ = NewMySQLNString(r, numBytes -1)
 
 		// the last byte has to be 0, and is not part of the data
-		if salt2[numBytes-1] != 0 {
+		emptyByte, err := r.ReadByte()
+		if err != nil {
+			return nil, err
+		}
+		if emptyByte != 0 {
 			return nil, errors.New("Malformed packet")
 		}
-		salt = append(salt, salt2[:numBytes-1]...)
 	}
 
-	var authPlugin string
+	var authPlugin *MySQLString
 	if serverCapabilities&ClientPluginAuth != 0 {
-		authPlugin = ReadNullTerminatedString(r)
+		authPlugin, _ = NewMySQLString(r)
 	}
 
 	return &HandshakeV10{
@@ -384,7 +369,8 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		ConnectionID:           connectionID,
 		ServerCapabilities:     serverCapabilities,
 		AuthPlugin:             authPlugin,
-		Salt:                   salt,
+		Salt1:                   salt1,
+		Salt2:                   salt2,
 	}, nil
 }
 

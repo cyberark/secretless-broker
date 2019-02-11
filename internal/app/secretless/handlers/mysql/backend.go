@@ -167,7 +167,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	}
 
 	// Inject credentials into client response
-	if err = clientHandshakeResponse.InjectCredentials(serverHandshake.Salt, h.BackendConfig.Username, h.BackendConfig.Password); err != nil {
+	if err = clientHandshakeResponse.InjectCredentials(serverHandshake.Salt(), h.BackendConfig.Username, h.BackendConfig.Password); err != nil {
 		return
 	}
 

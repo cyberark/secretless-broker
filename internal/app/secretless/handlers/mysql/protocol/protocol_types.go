@@ -43,8 +43,9 @@ func (my *MySQLInt) Bytes() []byte { // Go representation
 	return data
 }
 
-func (my *MySQLInt) Pack(buff *bytes.Buffer)  { // Raw representation
-	buff.Write(my.Bytes())
+func (my *MySQLInt) Pack(buff *bytes.Buffer) error  { // Raw representation
+	_, err := buff.Write(my.Bytes())
+	return err
 }
 
 // MySQLNString
@@ -73,8 +74,9 @@ func (my *MySQLNString) Val() string { // Go representation
 	return my.value
 }
 
-func (my *MySQLNString) Pack(buff *bytes.Buffer)  { // Raw representation
-	buff.Write([]byte(my.value[:my.length]))
+func (my *MySQLNString) Pack(buff *bytes.Buffer) error  { // Raw representation
+	_, err := buff.Write([]byte(my.value[:my.length]))
+	return err
 }
 
 // MySQLString

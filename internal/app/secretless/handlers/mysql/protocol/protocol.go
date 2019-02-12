@@ -199,58 +199,102 @@ func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
 	var buf bytes.Buffer
 
 	// Write Header (same as the original), ensure 4 bytes
-	buf.Write(serverHandshake.Header)
+	_, err := buf.Write(serverHandshake.Header)
+	if err != nil {
+		return nil, err
+	}
 
 	// Write ProtocolVersion
-	serverHandshake.ProtocolVersion.Pack(&buf)
-
+	err = serverHandshake.ProtocolVersion.Pack(&buf)
+	if err != nil {
+		return nil, err
+	}
 	// Write ServerVersion
-	serverHandshake.ServerVersion.Pack(&buf)
+	err = serverHandshake.ServerVersion.Pack(&buf)
+	if err != nil {
+		return nil, err
+	}
 
 	// Write Connection ID
-	serverHandshake.ConnectionID.Pack(&buf)
+	err = serverHandshake.ConnectionID.Pack(&buf)
+	if err != nil {
+		return nil, err
+	}
 
 	// Write AuthnPluginDataPart1
-	serverHandshake.Salt1.Pack(&buf)
+	err = serverHandshake.Salt1.Pack(&buf)
+	if err != nil {
+		return nil, err
+	}
 
 	// Filler
-	buf.WriteByte(0)
+	err = buf.WriteByte(0)
+	if err != nil {
+		return nil, err
+	}
 
 	// write ServerCapabilities
-	buf.Write([]byte{
+	_, err = buf.Write([]byte{
 		byte(serverHandshake.ServerCapabilities),
 		byte(serverHandshake.ServerCapabilities >> 8),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	// Write ServerDefaultCollation
-	serverHandshake.ServerDefaultCollation.Pack(&buf)
+	err = serverHandshake.ServerDefaultCollation.Pack(&buf)
+	if err != nil {
+		return nil, err
+	}
 
 	// Write StatusFlags
-	serverHandshake.StatusFlags.Pack(&buf)
+	err = serverHandshake.StatusFlags.Pack(&buf)
+	if err != nil {
+		return nil, err
+	}
 
 	// write ExServerCapabilities
-	buf.Write([]byte{
+	_, err = buf.Write([]byte{
 		byte(serverHandshake.ServerCapabilities >> 16),
 		byte(serverHandshake.ServerCapabilities >> 24),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	// Write AuthnPluginData length
 	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
-		buf.WriteByte(uint8(serverHandshake.Salt1.length + serverHandshake.Salt2.length + 1))
+		err = buf.WriteByte(uint8(serverHandshake.Salt1.length + serverHandshake.Salt2.length + 1))
 	} else {
-		buf.WriteByte(0)
+		err = buf.WriteByte(0)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	// Skip reserved (all 0x00)
-	buf.Write(make([]byte, 10))
+	_, err = buf.Write(make([]byte, 10))
+	if err != nil {
+		return nil, err
+	}
 
 	// Write AuthnPluginDataPart2
-	serverHandshake.Salt2.Pack(&buf)
-	buf.WriteByte(0)
+	err = serverHandshake.Salt2.Pack(&buf)
+	if err != nil {
+		return nil, err
+	}
+	err = buf.WriteByte(0)
+	if err != nil {
+		return nil, err
+	}
 
 	// Write AuthPluginName
 	if serverHandshake.ServerCapabilities&ClientPluginAuth != 0 {
-		serverHandshake.AuthPlugin.Pack(&buf)
+		err = serverHandshake.AuthPlugin.Pack(&buf)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	result := buf.Bytes()
@@ -273,16 +317,28 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	// Read ProtocolVersion
-	protoVersion, _ := NewMySQLInt(r, 1)
+	protoVersion, err := NewMySQLInt(r, 1)
+	if err != nil {
+		return nil, err
+	}
 
 	// Read ServerVersion
-	serverVersion, _ := NewMySQLString(r)
+	serverVersion, err := NewMySQLString(r)
+	if err != nil {
+		return nil, err
+	}
 
 	// Read ConnectionID
-	connectionID, _ := NewMySQLInt(r, 4)
+	connectionID, err := NewMySQLInt(r, 4)
+	if err != nil {
+		return nil, err
+	}
 
 	// Read AuthPluginDataPart1
-	salt1, _ := NewMySQLNString(r, 8)
+	salt1, err := NewMySQLNString(r, 8)
+	if err != nil {
+		return nil, err
+	}
 
 	// Skip filler
 	if _, err := r.ReadByte(); err != nil {
@@ -296,11 +352,16 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	// Read ServerDefaultCollation
-	serverDefaultCollation, _ := NewMySQLInt(r ,1)
-
+	serverDefaultCollation, err := NewMySQLInt(r ,1)
+	if err != nil {
+		return nil, err
+	}
 
 	// Read StatusFlags
-	statusFlags, _ := NewMySQLInt(r ,2)
+	statusFlags, err := NewMySQLInt(r ,2)
+	if err != nil {
+		return nil, err
+	}
 
 	// Read ExServerCapabilities
 	serverCapabilitiesHigherBuf := make([]byte, 2)
@@ -343,7 +404,10 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 			numBytes = 13
 		}
 
-		salt2, _ = NewMySQLNString(r, numBytes -1)
+		salt2, err = NewMySQLNString(r, numBytes - 1)
+		if err != nil {
+			return nil, err
+		}
 
 		// the last byte has to be 0, and is not part of the data
 		emptyByte, err := r.ReadByte()
@@ -357,7 +421,10 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 
 	var authPlugin *MySQLString
 	if serverCapabilities&ClientPluginAuth != 0 {
-		authPlugin, _ = NewMySQLString(r)
+		authPlugin, err = NewMySQLString(r)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &HandshakeV10{

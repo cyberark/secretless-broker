@@ -119,13 +119,20 @@ func TestNewHandshakeV10(t *testing.T) {
 			false,
 			nil,
 			HandshakeV10{
-				ProtocolVersion:    byte(10),
-				ServerVersion:      "5.5.56",
-				ConnectionID:       uint32(1630),
-				AuthPlugin:         "mysql_native_password",
+				ProtocolVersion:    &MySQLInt{length: 1, value:  10},
+				ServerVersion:      &MySQLString{value: "5.5.56"},
+				ConnectionID:       &MySQLInt{length: 4, value:  1630},
+				AuthPlugin:         &MySQLString{value: "mysql_native_password"},
 				ServerCapabilities: binary.LittleEndian.Uint32([]byte{255, 247, 15, 128}),
-				Salt: []byte{0x48, 0x6a, 0x5b, 0x6a, 0x24, 0x71, 0x30, 0x3a, 0x6f, 0x43, 0x40, 0x56, 0x6e, 0x4b,
-					0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a},
+				Salt1: &MySQLNString{
+					value: string([]byte{0x48, 0x6a, 0x5b, 0x6a, 0x24, 0x71, 0x30, 0x3a}),
+					length: 8,
+				},
+				Salt2: &MySQLNString{
+					value: string([]byte{0x6f, 0x43, 0x40, 0x56, 0x6e, 0x4b,
+						0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a}),
+					length: 12,
+				},
 			},
 			map[uint32]bool{
 				ClientLongPassword: true, ClientFoundRows: true, ClientLongFlag: true,
@@ -147,13 +154,20 @@ func TestNewHandshakeV10(t *testing.T) {
 			false,
 			nil,
 			HandshakeV10{
-				ProtocolVersion:    byte(10),
-				ServerVersion:      "5.7.18",
-				ConnectionID:       uint32(15),
-				AuthPlugin:         "mysql_native_password",
+				ProtocolVersion:    &MySQLInt{length: 1, value:  10},
+				ServerVersion:      &MySQLString{value: "5.7.18"},
+				ConnectionID:       &MySQLInt{length: 4, value:  15},
+				AuthPlugin:         &MySQLString{value: "mysql_native_password"},
 				ServerCapabilities: binary.LittleEndian.Uint32([]byte{255, 255, 255, 193}),
-				Salt: []byte{0x15, 0x12, 0x4b, 0x1f, 0x70, 0x2b, 0x33, 0x55, 0x01, 0x30, 0x0d,
-					0x0a, 0x28, 0x06, 0x4a, 0x12, 0x5e, 0x45, 0x18, 0x05},
+				Salt1: &MySQLNString{
+					value: string([]byte{0x15, 0x12, 0x4b, 0x1f, 0x70, 0x2b, 0x33, 0x55}),
+					length: 8,
+				},
+				Salt2: &MySQLNString{
+					value: string([]byte{0x01, 0x30, 0x0d,
+						0x0a, 0x28, 0x06, 0x4a, 0x12, 0x5e, 0x45, 0x18, 0x05}),
+					length: 12,
+				},
 			},
 			map[uint32]bool{
 				ClientLongPassword: true, ClientFoundRows: true, ClientLongFlag: true,
@@ -176,7 +190,7 @@ func TestNewHandshakeV10(t *testing.T) {
 			assert.Equal(t, asserted.HandshakeV10.ServerVersion, decoded.ServerVersion)
 			assert.Equal(t, asserted.HandshakeV10.ConnectionID, decoded.ConnectionID)
 			assert.Equal(t, asserted.HandshakeV10.AuthPlugin, decoded.AuthPlugin)
-			assert.Equal(t, asserted.HandshakeV10.Salt, decoded.Salt)
+			assert.Equal(t, asserted.HandshakeV10.Salt(), decoded.Salt())
 			assert.Equal(t, asserted.HandshakeV10.ServerCapabilities, decoded.ServerCapabilities)
 
 			for flag, isSet := range asserted.CapabilitiesMap {
@@ -213,15 +227,22 @@ func TestHandshakeV10_Pack(t *testing.T) {
 			nil,
 			HandshakeV10{
 				Header:                 []byte{0x4a, 0x00, 0x00, 0x00},
-				ProtocolVersion:        byte(10),
-				ServerVersion:          "5.5.56",
-				ServerDefaultCollation: 0x08,
-				StatusFlags:            0x0002,
-				ConnectionID:           uint32(1630),
+				ProtocolVersion:    &MySQLInt{length: 1, value:  10},
+				ServerVersion:      &MySQLString{value: "5.5.56"},
+				ConnectionID:       &MySQLInt{length: 4, value:  1630},
+				AuthPlugin:         &MySQLString{value: "mysql_native_password"},
+				ServerDefaultCollation: &MySQLInt{length: 1, value:  int(0x08)},
+				StatusFlags:            &MySQLInt{length: 2, value:  int(0x0002)},
 				ServerCapabilities:     binary.LittleEndian.Uint32([]byte{255, 247, 15, 128}),
-				AuthPlugin:             "mysql_native_password",
-				Salt: []byte{0x48, 0x6a, 0x5b, 0x6a, 0x24, 0x71, 0x30, 0x3a, 0x6f, 0x43, 0x40, 0x56, 0x6e, 0x4b,
-					0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a},
+				Salt1: &MySQLNString{
+					value: string([]byte{0x48, 0x6a, 0x5b, 0x6a, 0x24, 0x71, 0x30, 0x3a}),
+					length: 8,
+				},
+				Salt2: &MySQLNString{
+					value: string([]byte{0x6f, 0x43, 0x40, 0x56, 0x6e, 0x4b,
+						0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a}),
+					length: 12,
+				},
 			},
 		},
 		{
@@ -235,15 +256,22 @@ func TestHandshakeV10_Pack(t *testing.T) {
 			nil,
 			HandshakeV10{
 				Header:          	[]byte{0x4a, 0x00, 0x00, 0x00},
-				ProtocolVersion:    byte(10),
-				ServerVersion:      "5.7.18",
-				ServerDefaultCollation: 0x08,
-				StatusFlags:            0x0002,
-				ConnectionID:       uint32(15),
-				AuthPlugin:         "mysql_native_password",
+				ProtocolVersion:    &MySQLInt{length: 1, value:  10},
+				ServerVersion:      &MySQLString{value: "5.7.18"},
+				ConnectionID:       &MySQLInt{length: 4, value:  15},
+				AuthPlugin:         &MySQLString{value: "mysql_native_password"},
+				ServerDefaultCollation: &MySQLInt{length: 1, value:  int(0x08)},
+				StatusFlags:            &MySQLInt{length: 2, value:  int(0x0002)},
 				ServerCapabilities: binary.LittleEndian.Uint32([]byte{255, 255, 255, 193}),
-				Salt: []byte{0x15, 0x12, 0x4b, 0x1f, 0x70, 0x2b, 0x33, 0x55, 0x01, 0x30, 0x0d,
-					0x0a, 0x28, 0x06, 0x4a, 0x12, 0x5e, 0x45, 0x18, 0x05},
+				Salt1: &MySQLNString{
+					value: string([]byte{0x15, 0x12, 0x4b, 0x1f, 0x70, 0x2b, 0x33, 0x55}),
+					length: 8,
+				},
+				Salt2: &MySQLNString{
+					value: string([]byte{0x01, 0x30, 0x0d,
+						0x0a, 0x28, 0x06, 0x4a, 0x12, 0x5e, 0x45, 0x18, 0x05}),
+					length: 12,
+				},
 			},
 		},
 	}

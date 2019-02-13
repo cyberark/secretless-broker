@@ -16,8 +16,8 @@ import (
 	"syscall"
 	"time"
 
-	yaml "gopkg.in/yaml.v1"
 	"github.com/pkg/profile"
+	yaml "gopkg.in/yaml.v1"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -73,7 +73,7 @@ func GetManager() *Manager {
 
 // SetFlags allows you to set the value of the debug and profile flags
 func (manager *Manager) SetFlags(profileFlag string, debugFlag bool) {
-	if (!(profileFlag == "cpu" || profileFlag == "memory" || profileFlag == "")) {
+	if !(profileFlag == "cpu" || profileFlag == "memory" || profileFlag == "") {
 		log.Fatal("ERROR: Invalid profile flag. Acceptable values are 'cpu' or 'memory'.")
 	}
 	manager.ProfileFlag = profileFlag
@@ -123,9 +123,9 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 	var ProfileCleaner interface {
 		Stop()
 	}
-	if (manager.ProfileFlag == "cpu") {
+	if manager.ProfileFlag == "cpu" {
 		ProfileCleaner = profile.Start(profile.NoShutdownHook)
-	} else if (manager.ProfileFlag == "memory") {
+	} else if manager.ProfileFlag == "memory" {
 		ProfileCleaner = profile.Start(profile.MemProfile, profile.NoShutdownHook)
 	}
 
@@ -144,9 +144,9 @@ func (manager *Manager) _RegisterShutdownSignalHandlers() {
 		log.Printf("Intercepted exit signal '%v'. Cleaning up...", exitSignal)
 		manager.Shutdown()
 
-		if (manager.ProfileFlag == "cpu") {
+		if manager.ProfileFlag == "cpu" {
 			ProfileCleaner.Stop()
-		} else if (manager.ProfileFlag == "memory") {
+		} else if manager.ProfileFlag == "memory" {
 			ProfileCleaner.Stop()
 		}
 		log.Printf("Exiting...")
@@ -397,10 +397,18 @@ func (manager *Manager) LoadInternalPlugins() error {
 }
 
 // LoadLibraryPlugins loads all shared object files in `path`
-func (manager *Manager) LoadLibraryPlugins(path string) error {
+func (manager *Manager) LoadLibraryPlugins(path string, checksumsFile string) error {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
+	}
+
+	if checksumsFile != "" {
+		if err := VerifyPluginChecksums(path, files, checksumsFile); err != nil {
+			log.Fatalln(err)
+		}
+	} else if len(files) > 0 {
+		log.Println("WARN: Plugin hashes were not provided - tampering will not be detectable!")
 	}
 
 	for _, file := range files {

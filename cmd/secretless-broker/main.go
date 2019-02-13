@@ -51,6 +51,7 @@ func main() {
 	configManagerSpecString := flag.String("config-mgr", "configfile", configManagerHelp)
 	fsWatchSwitch := flag.Bool("watch", false, "Enable automatic reloads when configuration file changes.")
 	pluginDir := flag.String("p", "/usr/local/lib/secretless", "Directory containing Secretless plugins")
+	pluginChecksumsFile := flag.String("s", "", "Path to a file of sha256sum plugin checksums")
 	flag.Parse()
 
 	configManagerID, configManagerSpec := parseConfigManagerSpec(*configManagerSpecString)
@@ -86,7 +87,7 @@ func main() {
 	}
 
 	log.Println("Loading external library plugins...")
-	err = plugin.GetManager().LoadLibraryPlugins(*pluginDir)
+	err = plugin.GetManager().LoadLibraryPlugins(*pluginDir, *pluginChecksumsFile)
 	if err != nil {
 		log.Println(err)
 	}

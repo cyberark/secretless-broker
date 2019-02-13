@@ -17,7 +17,7 @@ func NewMySQLInt(reader *bytes.Reader, len int) (*MySQLInt, error) {
 	}
 
 	if len > 4 {
-		return nil, fmt.Errorf("NewMySQLInt len must be <= to 4")
+		return nil, fmt.Errorf("NewMySQLInt len must be <= 4")
 	}
 
 	value := uint32(val[0])

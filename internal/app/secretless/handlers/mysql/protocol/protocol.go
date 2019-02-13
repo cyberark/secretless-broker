@@ -164,11 +164,11 @@ type HandshakeV10 struct {
 	Header                 []byte
 	ProtocolVersion        *MySQLInt // 1
 	ServerVersion          *MySQLString
-	ConnectionID           *MySQLInt // 4
+	ConnectionID           *MySQLInt     // 4
 	Salt1                  *MySQLNString // 8
 	ServerCapabilities     uint32
-	ServerDefaultCollation *MySQLInt // 1
-	StatusFlags            *MySQLInt // 2
+	ServerDefaultCollation *MySQLInt     // 1
+	StatusFlags            *MySQLInt     // 2
 	Salt2                  *MySQLNString // MAX 13
 	AuthPlugin             *MySQLString
 }
@@ -188,10 +188,12 @@ func (serverHandshake *HandshakeV10) RemoveClientSSL() {
 
 // SupportsSSL returns truthy if the serverHandshake has the ClientSSL capability
 func (serverHandshake *HandshakeV10) SupportsSSL() bool {
-	return serverHandshake.ServerCapabilities & ClientSSL != 0
+	return serverHandshake.ServerCapabilities&ClientSSL != 0
 }
 
 func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
+	// TODO: this shouldn't be possible, need a Header type too...
+	//
 	if len(serverHandshake.Header) != 4 {
 		return nil, errors.New("HandshakeV10#Pack: malformed header")
 	}
@@ -300,11 +302,10 @@ func (serverHandshake *HandshakeV10) Pack() ([]byte, error) {
 	result := buf.Bytes()
 
 	// Update payload length
-	binary.LittleEndian.PutUint32(result, uint32(buf.Len() - 4))
+	binary.LittleEndian.PutUint32(result, uint32(buf.Len()-4))
 
 	return result, nil
 }
-
 
 // NewHandshakeV10 decodes initial handshake request from server.
 func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
@@ -398,7 +399,7 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	// Get AuthnPluginDataPart2
 	var numBytes int
 	var salt2 *MySQLNString
-	if serverCapabilities&ClientSecureConnection != 0 {
+	if (serverCapabilities & ClientSecureConnection) != 0 {
 		numBytes = authPluginDataLength.Val() - 8
 		if numBytes < 0 || numBytes > 13 {
 			numBytes = 13
@@ -436,8 +437,8 @@ func NewHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		ConnectionID:           connectionID,
 		ServerCapabilities:     serverCapabilities,
 		AuthPlugin:             authPlugin,
-		Salt1:                   salt1,
-		Salt2:                   salt2,
+		Salt1:                  salt1,
+		Salt2:                  salt2,
 	}, nil
 }
 

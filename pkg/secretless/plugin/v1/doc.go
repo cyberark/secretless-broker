@@ -28,6 +28,25 @@ at startup by using the plugin directory flag:
 
   ./secretless-broker -p /etc/lib/secretless
 
+Optionally (and highly recommended) is also providing a checksum of plugins to the broker
+so that verification can be done of expected vs actual plugins and ensure that plugins have
+not been modified. By doing the checksum validation any new plugins that are not expected
+or plugins with modified content will prevent the broker from starting, ensuring that no
+malicious (or corrupted) libraries will be loaded.
+
+Plugin checksum verification in general should eliminate:
+  - Plugin library code injections
+  - Drive-by plugin content modifications
+  - Addition of malicious plugins
+  - Plugin corruption
+  - Modification of plugins when they are mounted from other locations
+
+You can provide the checksums in the standard "sha256sum" format that is available in most
+distributions:
+
+   sha256sum /path/to/plugins/dir/* > PLUGINS_SHA256SUM.txt
+  ./secretless-broker -p /etc/lib/secretless -s PLUGINS_SHA256SUM.txt
+
 When Secretless Broker starts, all plugins are currently loaded in the following manner:
 
 1. The plugin directory (by default set to /usr/local/lib/secretless) is checked

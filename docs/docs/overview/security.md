@@ -47,7 +47,7 @@ It is _very_ important to configure the OS properly so that unauthorized process
 
 ## Plugin checksum verification
 
-Secertless can be provided with an optional SHA256SUM text file of plugin library hashes that can
+Secretless can be provided with an optional SHA256SUM text file of plugin library hashes that can
 verify that there are no unexpected nor modified plugins that the broker will try to load.
 
 Plugin checksum verification in general eliminates:

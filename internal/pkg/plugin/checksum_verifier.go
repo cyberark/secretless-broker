@@ -26,13 +26,22 @@ func VerifyPluginChecksums(pluginDir string, checksumsFile string) ([]os.FileInf
 		return nil, fmt.Errorf("ERROR: %s", err)
 	}
 
+	if err := compareChecksums(pluginDir, pluginFiles, checksums); err != nil {
+		return nil, fmt.Errorf("ERROR: %s", err)
+	}
+
+	log.Println("Plugin verification completed.")
+	return pluginFiles, nil
+}
+
+func compareChecksums(pluginDir string, pluginFiles []os.FileInfo, checksums map[string]string) error {
 	for pluginIndex, pluginFile := range pluginFiles {
 		pluginBasename := pluginFile.Name()
 		fullPluginPath := path.Join(pluginDir, pluginBasename)
 
 		actualChecksum, err := getSha256Sum(fullPluginPath)
 		if err != nil {
-			return nil, fmt.Errorf("ERROR: %s", err)
+			return err
 		}
 
 		log.Printf("- Plugin checksum verification (%d/%d): %s %s", pluginIndex+1, len(pluginFiles),
@@ -40,17 +49,16 @@ func VerifyPluginChecksums(pluginDir string, checksumsFile string) ([]os.FileInf
 
 		expectedChecksum, ok := checksums[pluginBasename]
 		if !ok {
-			return nil, fmt.Errorf("ERROR: Plugin '%s' not found in checksums file!", pluginBasename)
+			return fmt.Errorf("Plugin '%s' not found in checksums file!", pluginBasename)
 		}
 
 		if expectedChecksum != actualChecksum {
-			return nil, fmt.Errorf("ERROR: Plugin '%s' checksum '%s' did not match the expected '%s'!",
+			return fmt.Errorf("Plugin '%s' checksum '%s' did not match the expected '%s'!",
 				fullPluginPath, actualChecksum, expectedChecksum)
 		}
 	}
 
-	log.Println("Plugin verification completed.")
-	return pluginFiles, nil
+	return nil
 }
 
 func loadChecksumsFile(checksumsPath string) (map[string]string, error) {

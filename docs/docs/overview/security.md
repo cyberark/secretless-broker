@@ -45,6 +45,19 @@ It is _very_ important to configure the OS properly so that unauthorized process
 - With Unix domain sockets, operating system file permissions should be used to protect the socket.
 - With TCP connections, Secretless should be configured to listen only on localhost.
 
+## Plugin checksum verification
+
+Secertless can be provided with an optional SHA256SUM text file of plugin library hashes that can
+verify that there are no unexpected nor modified plugins that the broker will try to load.
+
+Plugin checksum verification in general eliminates:
+
+  - Plugin library code injections
+  - Drive-by plugin content modifications
+  - Addition of malicious plugins
+  - Plugin corruption
+  - Modification of plugins when they are mounted from other locations
+
 ## Future Work
 
 We continue to investigate ways to make Secretless Broker even more secure. Please check the [changelog](https://github.com/cyberark/secretless-broker) and this page for updates on additional safeguards as we implement them.

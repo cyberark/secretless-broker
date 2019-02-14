@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -12,12 +13,17 @@ import (
 	"strings"
 )
 
-func VerifyPluginChecksums(pluginDir string, pluginFiles []os.FileInfo, checksumsFile string) error {
+func VerifyPluginChecksums(pluginDir string, checksumsFile string) ([]os.FileInfo, error) {
 	log.Println("Verifying checksums of plugins...")
+
+	pluginFiles, err := ioutil.ReadDir(pluginDir)
+	if err != nil {
+		return nil, fmt.Errorf("ERROR: %s", err)
+	}
 
 	checksums, err := loadChecksumsFile(checksumsFile)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("ERROR: %s", err)
 	}
 
 	for pluginIndex, pluginFile := range pluginFiles {
@@ -26,7 +32,7 @@ func VerifyPluginChecksums(pluginDir string, pluginFiles []os.FileInfo, checksum
 
 		actualChecksum, err := getSha256Sum(fullPluginPath)
 		if err != nil {
-			return err
+			return nil, fmt.Errorf("ERROR: %s", err)
 		}
 
 		log.Printf("- Plugin checksum verification (%d/%d): %s %s", pluginIndex+1, len(pluginFiles),
@@ -34,17 +40,17 @@ func VerifyPluginChecksums(pluginDir string, pluginFiles []os.FileInfo, checksum
 
 		expectedChecksum, ok := checksums[pluginBasename]
 		if !ok {
-			return fmt.Errorf("ERROR: Plugin '%s' not found in checksums file!", pluginBasename)
+			return nil, fmt.Errorf("ERROR: Plugin '%s' not found in checksums file!", pluginBasename)
 		}
 
 		if expectedChecksum != actualChecksum {
-			return fmt.Errorf("ERROR: Plugin '%s' checksum '%s' did not match the expected '%s'!",
+			return nil, fmt.Errorf("ERROR: Plugin '%s' checksum '%s' did not match the expected '%s'!",
 				fullPluginPath, actualChecksum, expectedChecksum)
 		}
 	}
 
 	log.Println("Plugin verification completed.")
-	return nil
+	return pluginFiles, nil
 }
 
 func loadChecksumsFile(checksumsPath string) (map[string]string, error) {
@@ -62,7 +68,7 @@ func loadChecksumsFile(checksumsPath string) (map[string]string, error) {
 
 		fields := strings.Fields(checksumsLine)
 		if len(fields) != 2 {
-			formattingError := fmt.Errorf("ERROR! Checksum file contained a misformatted line: '%s'!",
+			formattingError := fmt.Errorf("Checksum file contained a misformatted line: '%s'!",
 				checksumsLine)
 			return nil, formattingError
 		}

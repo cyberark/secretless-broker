@@ -404,7 +404,10 @@ func (manager *Manager) LoadLibraryPlugins(path string, checksumsFile string) er
 	}
 
 	if checksumsFile != "" {
-		if err := VerifyPluginChecksums(path, files, checksumsFile); err != nil {
+		// We override file listing if we did a verification to prevent additions
+		// to plugins between verification and loading the plugins.
+		var err error
+		if files, err = VerifyPluginChecksums(path, checksumsFile); err != nil {
 			log.Fatalln(err)
 		}
 	} else if len(files) > 0 {

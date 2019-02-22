@@ -17,8 +17,6 @@ import (
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
-// go build -buildmode=c-shared -o ~/workspace/playground/envoy/source/extensions/filters/network/mysql_proxy/secretless.a ./cmd/envoy/main.go
-
 func NewStoredSecret(ref C.struct_StoredSecret) config.StoredSecret {
 	return config.StoredSecret{
 		Name:     C.GoString(ref.Name),

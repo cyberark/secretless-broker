@@ -78,10 +78,21 @@ func (h *BaseHandler) GetConfig() config.Handler {
 }
 
 // Debug: Print only if Debug is enabled
-func (h *BaseHandler) PrintDebug(msg string) {
-	if h.GetConfig().Debug {
+func (h *BaseHandler) Debug(msg string) {
+	if h.DebugModeOn() {
 		log.Print(msg)
 	}
+}
+
+// Debug: Print only if Debug is enabled
+func (h *BaseHandler) Debugf(format string, v ...interface{}) {
+	if h.DebugModeOn() {
+		log.Printf(format, v...)
+	}
+}
+
+func (h *BaseHandler) DebugModeOn() bool {
+	return h.GetConfig().Debug
 }
 
 // GetClientConnection implements plugin_v1.Handler

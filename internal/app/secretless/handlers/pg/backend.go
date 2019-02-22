@@ -20,7 +20,7 @@ var sslOptions = []string{
 }
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
-// BackendConfig field.
+// connectionDetails field.
 func (h *Handler) ConfigureBackend() (err error) {
 	result := BackendConfig{
 		Options:      make(map[string]string),
@@ -93,7 +93,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 	debug := util.OptionalDebug(h.GetConfig().Debug)
 	debug("Sending startup message")
 
-	tlsConf, err := ssl.NewSecretlessTLSConfig(h.BackendConfig.QueryStrings, true)
+	tlsConf, err := ssl.NewDbSSLMode(h.BackendConfig.QueryStrings, true)
 	if err != nil {
 		return
 	}

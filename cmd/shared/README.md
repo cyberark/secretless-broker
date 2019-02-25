@@ -1,5 +1,7 @@
 # C shared library
 
+**Status**: Pre-alpha
+
 This is an experiment in exposing the internals of Secretless as a C shared library.
 Static would be best but for now this needs dynamic linking since some Secretless components use CGO.
 

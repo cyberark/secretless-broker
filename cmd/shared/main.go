@@ -11,9 +11,9 @@ import "C"
 import (
 	"fmt"
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
-	"crypto/sha1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 	"reflect"
 	"unsafe"
@@ -76,26 +76,9 @@ func NativePassword(cRef C.struct_StoredSecret, salt *C.char) (*C.char) {
 	saltBytes := C.GoBytes(unsafe.Pointer(salt), C.int(8))
 	defer ZeroizeByteSlice(saltBytes)
 
-	sha1 := sha1.New()
-	sha1.Write(passwordBytes)
-	passwordSHA1 := sha1.Sum(nil)
-
-	sha1.Reset()
-	sha1.Write(passwordSHA1)
-	hash := sha1.Sum(nil)
-
-	sha1.Reset()
-
-	sha1.Write(saltBytes)
-	sha1.Write(hash)
-	randomSHA1 := sha1.Sum(nil)
-
 	// nativePassword = passwordSHA1 ^ randomSHA1
-	nativePassword := make([]byte, len(randomSHA1))
+	nativePassword, _ := protocol.NativePasswordWithBytes(passwordBytes, saltBytes)
 	defer ZeroizeByteSlice(nativePassword)
-	for i := range randomSHA1 {
-		nativePassword[i] = passwordSHA1[i] ^ randomSHA1[i]
-	}
 
 	return C.CString(ByteBoundString(nativePassword))
 }

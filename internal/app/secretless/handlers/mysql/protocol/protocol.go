@@ -711,9 +711,11 @@ func CheckPacketLength(expected int, packet []byte) error {
 // https://dev.mysql.com/doc/internals/en/secure-password-authentication.html#packet-Authentication::Native41
 // SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
 func NativePassword(password string, salt []byte) (nativePassword []byte, err error) {
-
+	return NativePasswordWithBytes([]byte(password), salt)
+}
+func NativePasswordWithBytes(password []byte, salt []byte) (nativePassword []byte, err error) {
 	sha1 := sha1.New()
-	sha1.Write([]byte(password))
+	sha1.Write(password)
 	passwordSHA1 := sha1.Sum(nil)
 
 	sha1.Reset()

@@ -77,7 +77,7 @@ func NativePassword(cRef C.struct_StoredSecret, salt *C.char) (*C.char) {
 	defer ZeroizeByteSlice(saltBytes)
 
 	// nativePassword = passwordSHA1 ^ randomSHA1
-	nativePassword, _ := protocol.NativePasswordWithBytes(passwordBytes, saltBytes)
+	nativePassword, _ := protocol.NativePassword(passwordBytes, saltBytes)
 	defer ZeroizeByteSlice(nativePassword)
 
 	return C.CString(ByteBoundString(nativePassword))

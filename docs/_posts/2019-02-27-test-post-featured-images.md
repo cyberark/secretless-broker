@@ -5,11 +5,6 @@ date: 2019-02-27 09:00:00 -0600
 author: Geri Jennings
 categories: blog
 published: true
-image: ship_it.jpg
-thumb: ship_it.jpg
-image-alt: Test post
-excerpt: "This is a test post to see that featured images are working."
----
 
 The CyberArk development team responsible for the Secretless Broker project is excited
 to be traveling to KubeCon in Seattle next week! CyberArk is a proud sponsor of KubeCon

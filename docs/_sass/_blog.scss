@@ -17,7 +17,7 @@
 }
 
 .post {
-  background-color: #f2f3f5; //#EDF2F6;
+  background-color: #f2f3f5;
   padding: 3rem;
   border-radius: $border-radius;
   transition: all 0.4s;
@@ -32,13 +32,13 @@
     text-decoration: none;
     background-color: darken(#EDF2F6,10);
   }
-
 }
 
 .post-list-thumb {
   margin-bottom: 3rem;
   width: 100%;
 }
+
 .post-image {
   margin-bottom: 3rem;
   width: 100%;

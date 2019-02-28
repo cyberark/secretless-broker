@@ -4,7 +4,7 @@ title: "Adding featured images to blog posts"
 date: 2019-02-27 09:00:00 -0600
 author: Geri Jennings
 categories: blog
-published: false
+published: true
 image: ship_it.jpg
 thumb: ship_it.jpg
 image-alt: Test post

@@ -510,7 +510,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 // the client handshake response
 func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, username string, password string) (err error) {
 
-	authResponse, err := NativePassword(password, salt)
+	authResponse, err := NativePassword([]byte(password), salt)
 	if err != nil {
 		return
 	}
@@ -731,10 +731,9 @@ func CheckPacketLength(expected int, packet []byte) error {
 // NativePassword calculates native password expected by server in HandshakeResponse41
 // https://dev.mysql.com/doc/internals/en/secure-password-authentication.html#packet-Authentication::Native41
 // SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
-func NativePassword(password string, salt []byte) (nativePassword []byte, err error) {
-
+func NativePassword(password []byte, salt []byte) (nativePassword []byte, err error) {
 	sha1 := sha1.New()
-	sha1.Write([]byte(password))
+	sha1.Write(password)
 	passwordSHA1 := sha1.Sum(nil)
 
 	sha1.Reset()

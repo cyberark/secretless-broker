@@ -6,49 +6,68 @@ description: Secretless Broker Documentation
 permalink: /docs/get_started/kubernetes_tutorial.html
 ---
 
-To get started with the Secretless Broker, try working through this tutorial, which goes through deploying the Secretless Broker with a sample application that uses a PostgreSQL database for backend storage.
+This is a detailed, step-by-step tutorial. 
 
-We have chosen a PostgreSQL database as the target service for this tutorial, however the Secretless Broker comes built-in with support for several other target services; check out our [reference](/docs/reference.html) for more info.
+You will:
 
-If you'd rather just see **the whole thing working end to end**, check out [our tutorial on github](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo), complete with shell scripts for walking through the steps yourself and configurable to suit your needs.
+1. Deploy a PostgreSQL database
+2. Store its credentials in Kubernetes secrets
+3. Setup Secretless Broker to proxy connections to it 
+4. Deploy an application that connects to the database **without knowing its password**
 
+Already a Kubernetes expert? You may prefer our:
+
+<a href="#simple-started" class="button btn-primary gradient">Advanced Github Tutorial</a>
+
+complete with shell scripts to get **the whole thing working end to end fast**.
 
 ## Table of Contents
 
-+ [Getting Started](#getting-started)
-+ [Sample Application](#sample-application)
-+ Steps for the admin user
-  + [Provision Target Services (optional)](#provision-target-services-optional)
-  + [Setup And Configure PostgreSQL Target Service](#setup-and-configure-postgresql-target-service)
-  + [Create Application Namespace and Store Application DB-Credentials](#create-application-namespace-and-store-application-db-credentials)
++ [Overview](#overview)
++ Steps for Security Admin
+  + [Create PostgreSQL Service in Kubernetes](#create-postgresql-service-in-kubernetes)
+  + [Setup Application Database](#setup-application-database)
+  + [Create Application Namespace and Store Credentials](#create-application-namespace-and-store-credentials)
   + [Create Secretless Broker Configuration ConfigMap](#create-secretless-broker-configuration-configmap)
   + [Create Application Service Account and Grant Entitlements](#create-application-service-account-and-grant-entitlements)
-+ Steps for the non-privileged user (i.e developer)
++ Steps for Application Developer
+  + [Sample Application Overview](#sample-application-overview)
   + [Build Application Deployment Manifest](#build-application-deployment-manifest)
     + [Add & Configure Application Container](#add--configure-application-container)
     + [Add & Configure Secretless Broker Sidecar Container](#add--configure-secretless-broker-sidecar-container)
     + [Completed Application Deployment Manifest](#completed-application-deployment-manifest)
   + [Deploy Application With Secretless Broker](#deploy-application-with-secretless-broker)
     + [Expose Application Publicly](#expose-application-publicly)
-+ [Try The Running Application](#try-the-running-application)
++ [Test the Application](#test-the-application)
 + [Rotate Target Service Credentials](#rotate-target-service-credentials)
 + [Review Complete Tutorial With Scripts](#review-complete-tutorial-with-scripts)
 
-## Getting started
+## Overview
 
-In this tutorial, we will walk through creating an application that communicates with a password-protected PostgreSQL database **via the Secretless Broker**. _The application does not need to know anything about the credentials required to connect to the database;_ the admin super-user who provisions and configures the database will also configure the Secretless Broker to be able to communicate with it. The developer writing the application only needs to know the socket or address that the Secretless Broker is listening on to proxy the connection to the PostgreSQL backend.
+Applications and application developers should be **incapable of leaking secrets**.
 
-We are going to do the following:
+To achieve that goal, you'll play two roles in this tutorial:
 
-**As the admin super-user:**
+1. A **Security Admin** who handles secrets, and has sole access to those secrets
+2. An **Application Developer** with no access to secrets.
 
-1. Provision the PostgreSQL target service
-1. Configure the PostgreSQL target service for usage by the application and add its credentials to secret store
-1. Configure the Secretless Broker to broker the connection to the PostgreSQL target service using the credentials from the secret store
+The situation looks like this:
+
+![Image](/img/secretless_overview.jpg)
+
+Specifically, we will:
+
+**As the security admin:**
+
+1. Create a PostgreSQL database
+1. Create a DB user for the application
+1. Add that user's credentials to Kubernetes Secrets
+1. Configure Secretless to connect to PostgreSQL using those credentials
 
 **As the application developer:**
-1. Configure the application to connect to the PostgreSQL target service via the Secretless Broker
-1. Deploy and run the Secretless Broker adjacent to the application
+
+1. Configure the application to connect to PostgreSQL via Secretless
+1. Deploy the application and the Secretless sidecar
 
 ### Prerequisites
 
@@ -58,150 +77,143 @@ To run through this tutorial, you will need:
 + [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured to point to the cluster
 + [Docker CLI](https://docs.docker.com/install/)
 
-Our Kubernetes deployment manifests assume that you are using minikube, so we use **NodePort** to expose the services; you may prefer to use a **LoadBalancer** for a GKE cluster.
+**Note:** We assume you're using minikube, so we use **NodePort** to expose the services.  If you're using a GKE cluster instead, you may prefer to use a **LoadBalancer**.
 
-## Sample Application
+## Steps for the Security Admin
 
-The tutorial uses an existing [pet store demo application](https://github.com/conjurdemos/pet-store-demo) that exposes the following routes:
+The Security Admin sets up PostgreSQL, configures Secretless, and has sole
+access to the credentials.
 
-- `GET /pets` to list all the pets in inventory
-- `POST /pet` to add a pet
-  - Requires **Content-Type: application/json** header and body that includes **name** data
+### Create PostgreSQL Service in Kubernetes
 
-There are additional routes that are also available, but these are the two that we will focus on for this tutorial.
+If you already have PostgreSQL running and want to use your instance, please
+continue to [Setup Application Database](#setup-application-database).
 
-Pet data is stored in a PostgreSQL database, and the application may be configured to connect to the database by setting the `DB_URL` environment variable in the application's environment (following [12-factor principles](https://12factor.net/)).
-
-See [Try The Running Application](#try-the-running-application) for examples of consuming the routes using `curl`.
-
-The database is **credential-protected**. With the Secretless Broker, we will be able to set the `DB_URL` environment variable to a value of the form:  `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`. The application will not require knowledge of credentials to connect to the database.
-
-Note that although the local application-to-Secretless connection does not require SSL, by default the Secretless-to-PostgreSQL connection uses `sslmode=require`. For more information on PostgreSQL SSL modes please see the
-[PostgreSQL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html) or
-our documentation on the [PostgreSQL handler](/docs/reference/handlers/postgres.html).
-
-## Steps for the admin user
-
-The following steps would be taken by an admin-level user, who has the ability to create and configure a database and to add secret values to a secret store.
-
-### Provision Target Services (optional)
-
-If you already have a PostgreSQL server running and want to use that in this tutorial, please continue to [Setup And Configure PostgreSQL Target Service](#setup-and-configure-postgresql-target-service).
-
-In this section, you will create the PostgreSQL storage backend in your Kubernetes cluster.
-
-Our PostgreSQL storage backend is stateful. For this reason, we'll use a StatefulSet to manage the backend. Please consult [the Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) to understand what a StatefulSet is and when it's appropriate to use it.
+PostgreSQL is stateful, so we'll use a
+[StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+to manage it.
 
 #### Deploy PostgreSQL StatefulSet
 
-To deploy a PostgreSQL StatefulSet, follow these steps:
+To deploy a PostgreSQL StatefulSet:
 
-**1.** To create a dedicated **namespace** for the storage backend, run the command:
-```bash
-kubectl create namespace quick-start-backend-ns
-```
-<pre>
-namespace "quick-start-backend-ns" created
-</pre>
+1. Create a dedicated **namespace** for the storage backend:
+    ```bash
+    kubectl create namespace quick-start-backend-ns
+    ```
+    <pre>
+    namespace "quick-start-backend-ns" created
+    </pre>
 
-**2.** Create a simple self-signed certificate for the server, and upload to secret store.
-To create the certificate, you can run the following commands (as described in
-the [PostgreSQL documentation](https://www.postgresql.org/docs/9.6/ssl-tcp.html)):
-```bash
-openssl req -new -x509 -days 365 -nodes -text -out server.crt \
-  -keyout server.key -subj "/CN=pg"
-chmod og-rwx server.key
-```
-<pre>Generating a 2048 bit RSA private key
-....................................................................................+++++
-.......+++++
-writing new private key to 'server.key'
------</pre>
+1. Create a self-signed certificate (see [PostgreSQL documentation for
+   more](https://www.postgresql.org/docs/9.6/ssl-tcp.html)):
 
-Now that the certificates have been created, you will proceed to store them in Kubernetes secrets. This is better than hard-coding them - but in a real deployment you would want to store your secrets in a fully-featured vault, like Conjur.
+    ```bash
+    openssl req -new -x509 -days 365 -nodes -text -out server.crt \
+      -keyout server.key -subj "/CN=pg"
+    chmod og-rwx server.key
+    ```
+    <pre>Generating a 2048 bit RSA private key
+    ....................................................................................+++++
+    .......+++++
+    writing new private key to 'server.key'
+    -----</pre>
 
-Run this code to store the certificate files in a Kubernetes secret in the
-`quick-start-backend-ns` namespace:
-```bash
-kubectl --namespace quick-start-backend-ns \
-  create secret generic \
-  quick-start-backend-certs \
-  --from-file=server.crt \
-  --from-file=server.key
-```
-<pre>secret "quick-start-backend-certs" created</pre>
+1. Store the certificate files as Kubernetes secrets in the
+   `quick-start-backend-ns` namespace:
+    ```bash
+    kubectl --namespace quick-start-backend-ns \
+      create secret generic \
+      quick-start-backend-certs \
+      --from-file=server.crt \
+      --from-file=server.key
+    ```
+    <pre>secret "quick-start-backend-certs" created</pre>
+    **Note:** While Kubernetes secrets are more secure than hard-coded ones, in
+    a real deployment you should secure secrets in a fully-featured vault, like
+    Conjur.
 
-**3.** To create and save the **PostgreSQL StatefulSet** manifest in a file named **pg.yml** in your current working directory, run the command:
+1. Create and save the **PostgreSQL StatefulSet manifest** in a file named **pg.yml** in your current working directory:
 
-```bash
-cat << EOF > pg.yml
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: pg
-  labels:
-    app: quick-start-backend
-spec:
-  serviceName: quick-start-backend
-  selector:
-    matchLabels:
-      app: quick-start-backend
-  template:
+    ```bash
+    cat << EOF > pg.yml
+    apiVersion: apps/v1
+    kind: StatefulSet
     metadata:
+      name: pg
       labels:
         app: quick-start-backend
     spec:
-      securityContext:
-        fsGroup: 999
-      containers:
-      - name: quick-start-backend
-        image: postgres:9.6
-        imagePullPolicy: IfNotPresent
-        ports:
-          - containerPort: 5432
-        env:
-          - name: POSTGRES_DB
-            value: postgres
-          - name: POSTGRES_USER
-            value: quick_start_admin_user
-          - name: POSTGRES_PASSWORD
-            value: quick_start_admin_password
-        volumeMounts:
-        - name: backend-certs
-          mountPath: "/etc/certs/"
-          readOnly: true
-        args: ["-c", "ssl=on", "-c", "ssl_cert_file=/etc/certs/server.crt", "-c", "ssl_key_file=/etc/certs/server.key"]
-      volumes:
-      - name: backend-certs
-        secret:
-          secretName: quick-start-backend-certs
-          defaultMode: 384
-EOF
-```
-In the manifest above, the certificate files for your database server are mounted
-in a volume with permissions `0600` (as indicated by the `defaultMode: 384`) and
-the pod is deployed with `999` (which is the `postgres` group) associated with any volumes mounted into the pod (as indicated by `fsGroup: 999`).
+      serviceName: quick-start-backend
+      selector:
+        matchLabels:
+          app: quick-start-backend
+      template:
+        metadata:
+          labels:
+            app: quick-start-backend
+        spec:
+          securityContext:
+            fsGroup: 999
+          containers:
+          - name: quick-start-backend
+            image: postgres:9.6
+            imagePullPolicy: IfNotPresent
+            ports:
+              - containerPort: 5432
+            env:
+              - name: POSTGRES_DB
+                value: postgres
+              - name: POSTGRES_USER
+                value: quick_start_admin_user
+              - name: POSTGRES_PASSWORD
+                value: quick_start_admin_password
+            volumeMounts:
+            - name: backend-certs
+              mountPath: "/etc/certs/"
+              readOnly: true
+            args: ["-c", "ssl=on", "-c", "ssl_cert_file=/etc/certs/server.crt", "-c", "ssl_key_file=/etc/certs/server.key"]
+          volumes:
+          - name: backend-certs
+            secret:
+              secretName: quick-start-backend-certs
+              defaultMode: 384
+    EOF
+    ```
+    In the manifest above, the certificate files for your database server are
+    mounted in a volume with permissions `0600` (as indicated by the
+    `defaultMode: 384`) and the pod is deployed with `999` (which is the
+    `postgres` group) associated with any volumes mounted into the pod (as
+    indicated by `fsGroup: 999`).
 
-**4.** To deploy the **PostgreSQL StatefulSet**, run the command:
-```bash
-kubectl --namespace quick-start-backend-ns apply -f pg.yml
-```
-<pre>
-statefulset "pg" created
-</pre>
+1. Deploy the **PostgreSQL StatefulSet**:
+    ```bash
+    kubectl --namespace quick-start-backend-ns apply -f pg.yml
+    ```
+    <pre>
+    statefulset "pg" created
+    </pre>
 
-This StatefulSet uses the [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container image available from DockerHub. When the container is started, the environment variables `POSTGRES_USER` and `POSTGRES_PASSWORD` are used to create a user with superuser power.
+    This StatefulSet uses the
+    [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container
+    image available from DockerHub. When the container is started, the
+    environment variables `POSTGRES_USER` and `POSTGRES_PASSWORD` are used to
+    create a user with superuser power.
 
-We'll treat these credentials as **admin-credentials** moving forward (i.e. `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD` environment variables), to be used for administrative tasks - separate from **application-credentials**.
+    We'll treat these credentials as **admin-credentials** moving forward (i.e.
+    `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD` environment
+    variables), to be used for administrative tasks - separate from
+    **application-credentials**.
 
-**5.** To ensure the **PostgreSQL StatefulSet** pod has started and is healthy, run the command:
-```bash
-kubectl --namespace quick-start-backend-ns get pods
-```
-<pre>
-NAME      READY     STATUS    RESTARTS   AGE
-pg-0      1/1       Running   0          6s
-</pre>
+1. To ensure the **PostgreSQL StatefulSet** pod has started and is healthy, run
+   the command:
+    ```bash
+    kubectl --namespace quick-start-backend-ns get pods
+    ```
+    <pre>
+    NAME      READY     STATUS    RESTARTS   AGE
+    pg-0      1/1       Running   0          6s
+    </pre>
 
 #### Expose PostgreSQL Service
 
@@ -262,18 +274,21 @@ docker run \
  RLS | {}
 </pre>
 
-### Setup And Configure PostgreSQL Target Service
+### Setup Application Database
 
-In this section, we assume that you have a PostgreSQL backend set up and ready to go. This means:
+In this section, we assume the following:
 
-+ The PostgreSQL backend is publicly available via some URL. We'll refer to this public URL by the environment variable `REMOTE_DB_URL`
-+ Admin-level database credentials exist to allow you to create the application user. We'll refer to them as the environment variables `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD`
+- You already have a PostgreSQL database setup.
+- It's publicly available via a URL stored in the environment variable `REMOTE_DB_URL`
+- You have admin-level database credentials
+- The environment variables `REMOTE_DB_ADMIN_USER` and `REMOTE_DB_ADMIN_PASSWORD` hold those credentials
 
-Note that if you are using your own database server for this tutorial and it is
-not SSL-enabled, you will want to reference the [handler documentation](/docs/reference/handlers/postgres.html) to learn how to
-modify your Secretless Broker configuration to disable SSL.
+**Note:** _If you're using your own database server and it's not SSL-enabled,
+please see the [handler
+documentation](/docs/reference/handlers/postgres.html) for how to disable
+SSL in your Secretless configuration._
 
-Please ensure the environment variables are set to reflect your environment. For example, if you followed along in the last section and are using minikube for your local K8s cluster, you can run:
+If you followed along in the last section and are using minikube, you can run:
 
 ``` bash
 export REMOTE_DB_ADMIN_USER=quick_start_admin_user
@@ -281,7 +296,9 @@ export REMOTE_DB_ADMIN_PASSWORD=quick_start_admin_password
 export REMOTE_DB_URL="$(minikube ip):30001"
 ```
 
-You will setup and configure the PostgreSQL storage backend by carrying the following steps:
+You will setup and configure the PostgreSQL storage backend by carrying the
+following steps:
+
 1. Create a dedicated application database (henceforth referred to by the environment variable `APPLICATION_DB_NAME`) within the PostgreSQL DBMS, then carry out the rest of the steps within its context
 2. Create the application table (i.e. pets)
 3. Create an application user with limited privileges: `SELECT` and `INSERT` on the application table
@@ -335,9 +352,10 @@ GRANT
 GRANT
 </pre>
 
-### Create Application Namespace and Store Application DB-Credentials
+### Create Application Namespace and Store Credentials
 
-Now that the storage backend is setup and good to go, it's time to set up the namespace where the application will be deployed.
+Now that the storage backend is setup and good to go, it's time to set up the
+namespace where the application will be deployed.
 
 The application will be scoped to the **quick-start-application-ns** namespace.
 
@@ -477,7 +495,7 @@ role "quick-start-backend-credentials-reader" created
 rolebinding "read-quick-start-backend-credentials" created
 </pre>
 
-## Steps for the non-privileged user (i.e developer)
+## Steps for the Application Developer
 
 Close the terminal you've been using to run through all of the previous steps and open a new one for these next few. That terminal window had all of the database configuration stored as environment variables - but none of the steps in this section need any credentials at all. That is, the person deploying the application needs to know _nothing_ about the secret values required to connect to the PostgreSQL database!!
 
@@ -487,12 +505,42 @@ The only environment variable you will need for this next set of steps is `APPLI
 export APPLICATION_DB_NAME=quick_start_db
 ```
 
+### Sample Application Overview
+
+The tutorial uses a [pet store demo application](https://github.com/conjurdemos/pet-store-demo) with a simple API:
+
+- `GET /pets` lists all the pets
+- `POST /pet` adds a pet
+
+The PostgreSQL backend is configured with a `DB_URL` environment variable
+such as: 
+
+```
+postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
+```
+
+Again, the application has no knowledge of the database credentials it's using.
+
+For usage examples, please see [Test the Application](#test-the-application).
+
+**Note:** Although the application's localhost connection to Secretless not
+secure, the connection from Secretless to PostgreSQL is, and uses
+`sslmode=require` by default. For more information on PostgreSQL SSL modes
+see:
+
+- [PostgreSQL SSL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html)
+- [PostgreSQL Secretless Handler documentation](/docs/reference/handlers/postgres.html).
+
 ### Build Application Deployment Manifest
 
-In this section, you build the deployment manifest for the application. The manifest includes a section for specifying the pod template (`$.spec.template`), it is here that we will declare the application container and Secretless Broker sidecar container.
+In this section, you build the deployment manifest for the application. The
+manifest includes a section for specifying the pod template
+(`$.spec.template`), it is here that we will declare the application container
+and Secretless Broker sidecar container.
 
 Below is the base manifest that you will be building upon:
 _quick-start-application.yml_
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -516,21 +564,36 @@ spec:
       # to be completed in the following steps
 ```
 
-The manifest should be saved as a file named **quick-start-application.yml**. As you can see above, to start off the base manifest you declare a deployment of 3 replicas with associated metadata, and assign the *quick-start-application* ServiceAccount (that we created earlier) to the pod.
+The manifest should be saved as a file named **quick-start-application.yml**.
+As you can see above, to start off the base manifest you declare a deployment
+of 3 replicas with associated metadata, and assign the
+*quick-start-application* ServiceAccount (that we created earlier) to the pod.
 
-The additional steps to complete building the manifest are provided to be informative:
+The additional steps to complete building the manifest are provided to be
+informative:
+
 + [Add & Configure Application Container](#add--configure-application-container)
+
 + [Add & Configure Secretless Broker Sidecar Container](#add--configure-secretless-broker-sidecar-container)
 
 A [Completed Application Deployment Manifest](#completed-application-deployment-manifest) is provided in the last section, where you'll actually create the **quick-start-application.yml**.
 
 #### Add & Configure Application Container
 
-The Secretless Broker sidecar container has a shared network with the application container. This allows us to point the application to `localhost` where the Secretless Broker is listening on port `5432`, in accordance with the configuration stored in ConfigMap.
+The Secretless Broker sidecar container has a shared network with the
+application container. This allows us to point the application to `localhost`
+where the Secretless Broker is listening on port `5432`, in accordance with the
+configuration stored in ConfigMap.
 
-_Note_:
-+ An application must connect to the Secretless Broker without SSL, though the actual connection between the Secretless Broker and the target service can leverage SSL. To achieve this we append the query parameters `sslmode=disable` to the connection string, which prevents the PostgreSQL driver from using SSL mode with the Secretless Broker.
-+ The Secretless Broker respects the parameters specified in the database connections string.
+**Note:**
+
+- An application must connect to the Secretless Broker without SSL, though the
+  actual connection between the Secretless Broker and the target service can
+  leverage SSL. To achieve this we append the query parameters
+  `sslmode=disable` to the connection string, which prevents the PostgreSQL
+  driver from using SSL mode with the Secretless Broker.
+- The Secretless Broker respects the parameters specified in the database
+  connections string.
 
 You will now add the application container definition to the application deployment manifest. The application takes configuration from environment variables. Set the `DB_URL` environment variable to `postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable`, so that when the application is deployed it will open the connection to the PostgreSQL backend via the Secretless Broker.
 
@@ -577,8 +640,11 @@ volumes:
 
 #### Completed Application Deployment Manifest
 
-You should now save the application deployment manifest in a file named **quick-start-application.yml**.
-Running the command below will save a completed deployment manifest to **quick-start-application.yml** in your current working directory, using the value of the `APPLICATION_DB_NAME` environment variable in the executing terminal:
+You should now save the application deployment manifest in a file named
+**quick-start-application.yml**.  Running the command below will save a
+completed deployment manifest to **quick-start-application.yml** in your
+current working directory, using the value of the `APPLICATION_DB_NAME`
+environment variable in the executing terminal:
 
 ```bash
 cat << EOF > quick-start-application.yml
@@ -677,7 +743,7 @@ service "quick-start-application" created
 
 If you used the service definition above, the application should now be available at `$(minikube ip):30002`, (referred to as environment variable `APPLICATION_URL` from now on).
 
-## Try The Running Application
+## Test the Application
 
 That's it! You've configured your application to connect to PostgreSQL via the Secretless Broker, and we can try it out to validate that it's working as expected.
 

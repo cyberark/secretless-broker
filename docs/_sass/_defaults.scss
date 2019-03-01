@@ -82,7 +82,7 @@ h2 {
 h3 {
 	color: $sless-blue;
 	font-size: 2rem;
-	margin: 0 0 0 0;
+	margin: 2rem 0 2rem 0;
 	font-family: $sless-font-secondary;
 }
 
@@ -90,7 +90,8 @@ h4 {
 	text-transform: uppercase;
 	color: $sless-text;
 	font-family: $sless-font-secondary;
-	margin: 1rem 0;
+	font-weight: bold;
+	margin: 2rem 0 2rem 0;
 }
 
 .container {

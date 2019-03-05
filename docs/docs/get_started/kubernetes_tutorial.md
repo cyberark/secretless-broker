@@ -36,7 +36,6 @@ complete with shell scripts to get **the whole thing working end to end fast**.
   + [Deploy Application With Secretless Broker](#deploy-application-with-secretless-broker)
   + [Expose Application Publicly](#expose-application-publicly)
 + [Test the Application](#test-the-application)
-+ [Rotate Database Credentials](#rotate-database-credentials)
 + [Appendix - Secretless Deployment Manifest Explained](#appendix---secretless-deployment-manifest-explained)
   + [Networking](#networking)
   + [SSL](#ssl)
@@ -594,7 +593,7 @@ We're ready to deploy our application.
 
 A detailed explanation of the manifest below is in the [Appendix - Secretless
 Deployment Manifest
-Explained](appendix---secretless-deployment-manifest-explained), but is not
+Explained](appendix---secretless-deployment-manifest-explained), but isn't
 needed to complete the tutorial.
 
 To create the **quick-start-application.yml** manifest using the
@@ -748,170 +747,6 @@ That's it!
 
 The application is connecting to a password-protected Postgres database **without
 any knowledge of the credentials**.
-
-## Rotate Database Credentials
-
-We now show how the Security Admin can **rotate the application-credentials
-with zero application downtime**.
-
-We'll do this in 3 steps:
-
-1. Rotate application-credentials in the database
-1. Update Kubernetes Secrets with the new credentials
-1. Prune any stale database connections
-
-### Poll Application API [new terminal]
-
-Let's open a new tab **as an application user**.
-
-We'll poll the `GET /pets` endpoint to simulate continuous use.  When we later
-rotate the application-credentials in another terminal, we can verify there was
-no downtime.
-
-Set the `APPLICATION_URL` again in the new terminal:
-
-```bash
-export APPLICATION_URL=$(minikube ip):30002
-```
-
-To start polling run:
-
-```bash
-while true
-do
-  echo "Retrieving pets at $(date):"
-  curl -i ${APPLICATION_URL}/pets
-  echo ""
-  echo ""
-  sleep 3
-done
-```
-<pre>
-Retrieving pets at Thu 23 Aug 2018 19:55:33 +08:
-HTTP/1.1 200
-Content-Type: application/json;charset=UTF-8
-Transfer-Encoding: chunked
-Date: Thu, 23 Aug 2018 11:55:33 GMT
-
-[{"id":1,"name":"Secretlessly Fluffy"}]
-
-...
-</pre>
-
-### Rotate Credentials [new terminal]
-
-<div class="change-role">
-  <div class="character-icon"><img src="/img/security_admin.jpg"/></div>
-  <div class="content">
-    <div class="change-announcement">
-      You are now the Security Admin
-    </div>
-    <div class="message">
-      You once again know the <b>admin-credentials</b>.
-    </div>
-  </div>
-</div>
-
-Open a new terminal and create environment variables with the
-**admin-credentials**, as well as **the new database application password**,
-which you'll invent:
-
-```bash
-export SECURITY_ADMIN_USER=security_admin_user
-export SECURITY_ADMIN_PASSWORD=security_admin_password
-export REMOTE_DB_URL=$(minikube ip):30001
-
-export APPLICATION_DB_USER=app_user
-# you can specify a different value for the new password below
-export APPLICATION_DB_NEW_PASSWORD=new_app_user_password
-```
-
-#### Rotate Credentials In DB
-
-To rotate the application's database password, run:
-
-```bash
-docker run --rm -i \
- -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} \
- postgres:9.6 \
-  psql \
-  -U ${SECURITY_ADMIN_USER} \
-  "postgres://${REMOTE_DB_URL}/postgres" \
-  << EOSQL
-/* Rotate Application User password */
-
-ALTER ROLE ${APPLICATION_DB_USER} WITH PASSWORD '${APPLICATION_DB_NEW_PASSWORD}';
-EOSQL
-```
-<pre>
-ALTER ROLE
-</pre>
-
-#### Update Credentials In Secret Store
-
-The password is now updated in the database, but not in Kubernetes Secrets.
-
-To update the password in Kubernetes Secrets, run:
-
-```bash
-base64_new_password=$(echo -n "${APPLICATION_DB_NEW_PASSWORD}" | base64)
-new_password_json='{"data":{"password": "'${base64_new_password}'"}}'
-
-kubectl --namespace quick-start-application-ns \
- patch secret \
- quick-start-backend-credentials \
- -p="${new_password_json}"
-```
-<pre>
-secret "quick-start-backend-credentials" patched
-</pre>
-
-#### Prune Existing Connections In DB
-
-We now prune existing database connections, which were created with the old,
-now invalid, credentials.  This won't create downtime since most database
-drivers keep a pool of connections and replenish them as needed.
-
-Since we've already updated Kubernetes Secrets, new database connections will
-succeed.
-
-To prune existing connections, run this command:
-
-```bash
-docker run --rm -i \
- -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} \
- postgres:9.6 \
-  psql \
-  -U ${SECURITY_ADMIN_USER} \
-  "postgres://${REMOTE_DB_URL}/postgres" \
-  << EOSQL
-/* Prune Existing Connections */
-
-SELECT pg_terminate_backend(pid)
-FROM pg_stat_activity
-WHERE pid <> pg_backend_pid()
-AND usename='${APPLICATION_DB_USER}';
-
-EOSQL
-```
-<pre>
- pg_terminate_backend
-----------------------
- t
- t
- t
- .
- .
- .
-(30 rows)
-</pre>
-
-### Conclusion
-
-Now return to the polling terminal. Notice that requests to the application API
-were unaffected by the password rotation.
-
-The Security Admin rotated the database password with no downtime!
 
 ## Appendix - Secretless Deployment Manifest Explained
 

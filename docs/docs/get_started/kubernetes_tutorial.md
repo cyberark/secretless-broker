@@ -318,8 +318,9 @@ In this section, we assume the following:
 
 <div class="note">
   If you're using your own database server and it's not SSL-enabled, please see
-  the [handler documentation](/docs/reference/handlers/postgres.html) for how
-  to disable SSL in your Secretless configuration.
+  the <a
+  href="https://secretless.io/docs/reference/handlers/postgres.html">handler
+  documentation</a> for how to disable SSL in your Secretless configuration.
 </div>
 
 If you followed along in the last section and are using minikube, you can run:

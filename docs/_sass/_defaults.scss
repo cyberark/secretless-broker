@@ -102,3 +102,13 @@ h4 {
 .content {
 	padding-top: 3rem;
 }
+
+.note {
+  &:before {
+    content: 'Note: ';
+  }
+  background: #F3FCFD;
+  border-left: 40px solid #269D91;
+  margin-bottom: 10px;
+  padding: 10px;
+}

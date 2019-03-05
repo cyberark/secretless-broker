@@ -133,9 +133,11 @@ To deploy a PostgreSQL StatefulSet:
     ```
     <pre>secret "quick-start-backend-certs" created</pre>
 
-    **Note:** _While Kubernetes Secrets are more secure than hard-coded ones, in
-    a real deployment you should secure secrets in a fully-featured vault, like
-    Conjur._
+    <div class="note">
+      While Kubernetes Secrets are more secure than hard-coded ones, in
+      a real deployment you should secure secrets in a fully-featured vault, like
+      Conjur.
+    </div>
 
 1. Create and save the **PostgreSQL StatefulSet manifest** in a file named **pg.yml** in your current working directory:
 
@@ -184,13 +186,22 @@ To deploy a PostgreSQL StatefulSet:
               defaultMode: 384
     EOF
     ```
-    **Note 1:** _In the manifest above, the certificate files for your database server are
-    mounted in a volume with `defaultMode: 384`, giving it permissions `0600`. (Why?
-     Because `600` in base 8 = `384` in base 10)._
+    <div class="note">
+      In the manifest above, the certificate files for your database server are
+      mounted in a volume with <code class="highlighter-rouge">defaultMode:
+      384</code> giving it permissions <code
+      class="highlighter-rouge">0600</code> (Why?  Because <code
+      class="highlighter-rouge">600</code> in base 8 = <code
+      class="highlighter-rouge">384</code> in base 10).
+    </div>
     
-    **Note 2:** _The pod is deployed with `999` as the group associated with
-    any mounted volumes, as indicated by `fsGroup: 999`.  `999` is a the static postgres
-    gid, defined in the postgres Docker image._
+    <div class="note">
+      The pod is deployed with <code class="highlighter-rouge">999</code> as
+      the group associated with any mounted volumes, as indicated by <code
+      class="highlighter-rouge">fsGroup: 999</code>.  <code
+      class="highlighter-rouge">999</code> is a the static postgres gid,
+      defined in the postgres Docker image.
+    </div>
 
 1. Deploy the **PostgreSQL StatefulSet**:
     ```bash
@@ -253,12 +264,14 @@ kubectl --namespace quick-start-backend-ns  apply -f pg-service.yml
 service "quick-start-backend" created
 </pre>
 
-**Note:** _The service manifest above assumes you're using minikube, where
-**NodePort** is the correct service type; for a GKE cluser, you may prefer a
-different service type, such as a **LoadBalancer**._
+<div class="note">
+  The service manifest above assumes you're using minikube, where <b>NodePort</b>
+  is the correct service type; for a GKE cluser, you may prefer a different
+  service type, such as a <b>LoadBalancer</b>.
+</div>
 
-The database is now available at `$(minikube ip):30001`, which we'll 
-call the `REMOTE_DB_URL`.
+The database is now available at `$(minikube ip):30001`, which we'll call the
+`REMOTE_DB_URL`.
 
 The database has no data yet, but we can verify it works by logging in as the
 security admin and listing the users:
@@ -294,9 +307,11 @@ In this section, we assume the following:
 - The `SECURITY_ADMIN_USER` and `SECURITY_ADMIN_PASSWORD` environment variables
   hold those credentials
 
-**Note:** _If you're using your own database server and it's not SSL-enabled,
-please see the [handler documentation](/docs/reference/handlers/postgres.html)
-for how to disable SSL in your Secretless configuration._
+<div class="note">
+  If you're using your own database server and it's not SSL-enabled, please see
+  the [handler documentation](/docs/reference/handlers/postgres.html) for how
+  to disable SSL in your Secretless configuration.
+</div>
 
 If you followed along in the last section and are using minikube, you can run:
 
@@ -384,9 +399,10 @@ kubectl --namespace quick-start-application-ns \
 secret "quick-start-backend-credentials" created
 </pre>
 
-**Note:** _While Kubernetes Secrets are more secure than hard-coded ones, in a
-real deployment you should secure secrets in a fully-featured vault, like
-Conjur._
+<div class="note">
+  While Kubernetes Secrets are more secure than hard-coded ones, in a real
+  deployment you should secure secrets in a fully-featured vault, like Conjur.
+</div>
 
 ### Create Secretless Broker Configuration ConfigMap
 
@@ -436,11 +452,17 @@ Here's what this does:
   Kubernetes Secrets 
 - Lists the ids of those credentials within Kubernetes Secrets
 
-**Note 1:** _This configuration is shared by all Secretless Broker sidecar
-containers.  There is one Secretless sidecar in every application Pod replica._
+<div class="note">
+  This configuration is shared by all Secretless Broker sidecar containers.
+  There is one Secretless sidecar in every application Pod replica.
+</div>
 
-**Note 2:** _Since we don't specify an `sslmode` in the Secretless Broker config,
-it will use the default `require` value._
+<div class="note">
+  Since we don't specify an <code class="highlighter-rouge">sslmode</code> in
+  the Secretless Broker config, it will use the default <code
+  class="highlighter-rouge">require</code> value.
+</div>
+
 
 Next we create a Kubernetes `ConfigMap` from this **secretless.yml**:
 

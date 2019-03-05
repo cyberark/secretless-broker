@@ -99,10 +99,6 @@ To run through this tutorial, you will need:
 
 ### Create PostgreSQL Service in Kubernetes
 
-If you already have PostgreSQL running and want to use your instance, jump
-straight to the section [Create Application
-Database](#create-application-database).
-
 PostgreSQL is stateful, so we'll use a
 [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 to manage it.
@@ -120,7 +116,7 @@ To deploy a PostgreSQL StatefulSet:
     </pre>
 
 1. Create a self-signed certificate (see [PostgreSQL documentation for
-   more](https://www.postgresql.org/docs/9.6/ssl-tcp.html)):
+   more info](https://www.postgresql.org/docs/9.6/ssl-tcp.html)):
 
     ```bash
     openssl req -new -x509 -days 365 -nodes -text -out server.crt \
@@ -153,49 +149,49 @@ To deploy a PostgreSQL StatefulSet:
 1. Create and save the **PostgreSQL StatefulSet manifest** in a file named **pg.yml** in your current working directory:
 
     ```bash
-    cat << EOF > pg.yml
-    apiVersion: apps/v1
-    kind: StatefulSet
+cat << EOF > pg.yml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pg
+  labels:
+    app: quick-start-backend
+spec:
+  serviceName: quick-start-backend
+  selector:
+    matchLabels:
+      app: quick-start-backend
+  template:
     metadata:
-      name: pg
       labels:
         app: quick-start-backend
     spec:
-      serviceName: quick-start-backend
-      selector:
-        matchLabels:
-          app: quick-start-backend
-      template:
-        metadata:
-          labels:
-            app: quick-start-backend
-        spec:
-          securityContext:
-            fsGroup: 999
-          containers:
-          - name: quick-start-backend
-            image: postgres:9.6
-            imagePullPolicy: IfNotPresent
-            ports:
-              - containerPort: 5432
-            env:
-              - name: POSTGRES_DB
-                value: postgres
-              - name: POSTGRES_USER
-                value: security_admin_user
-              - name: POSTGRES_PASSWORD
-                value: security_admin_password
-            volumeMounts:
-            - name: backend-certs
-              mountPath: "/etc/certs/"
-              readOnly: true
-            args: ["-c", "ssl=on", "-c", "ssl_cert_file=/etc/certs/server.crt", "-c", "ssl_key_file=/etc/certs/server.key"]
-          volumes:
-          - name: backend-certs
-            secret:
-              secretName: quick-start-backend-certs
-              defaultMode: 384
-    EOF
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: quick-start-backend
+        image: postgres:9.6
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 5432
+        env:
+          - name: POSTGRES_DB
+            value: postgres
+          - name: POSTGRES_USER
+            value: security_admin_user
+          - name: POSTGRES_PASSWORD
+            value: security_admin_password
+        volumeMounts:
+        - name: backend-certs
+          mountPath: "/etc/certs/"
+          readOnly: true
+        args: ["-c", "ssl=on", "-c", "ssl_cert_file=/etc/certs/server.crt", "-c", "ssl_key_file=/etc/certs/server.key"]
+      volumes:
+      - name: backend-certs
+        secret:
+          secretName: quick-start-backend-certs
+          defaultMode: 384
+EOF
     ```
     <div class="note">
       In the manifest above, the certificate files for your database server are
@@ -211,12 +207,14 @@ To deploy a PostgreSQL StatefulSet:
       the group associated with any mounted volumes, as indicated by <code
       class="highlighter-rouge">fsGroup: 999</code>.  <code
       class="highlighter-rouge">999</code> is a the static postgres gid,
-      defined in the postgres Docker image.
+      defined in the <a
+      href="https://github.com/docker-library/postgres/blob/master/9.6/Dockerfile#L16">postgres
+      Docker image</a>
     </div>
 
 1. Deploy the **PostgreSQL StatefulSet**:
     ```bash
-    kubectl --namespace quick-start-backend-ns apply -f pg.yml
+kubectl --namespace quick-start-backend-ns apply -f pg.yml
     ```
     <pre>
     statefulset "pg" created
@@ -236,15 +234,17 @@ To deploy a PostgreSQL StatefulSet:
     In the scripts below, we'll refer to the admin-credentials by the
     environment variables `SECURITY_ADMIN_USER` and `SECURITY_ADMIN_PASSWORD`.
 
-1. To ensure the **PostgreSQL StatefulSet** pod has started and is healthy, run
-   the command:
+1. To ensure the **PostgreSQL StatefulSet** pod has started and is healthy
+   (this may take a minute or so), run:
     ```bash
-    kubectl --namespace quick-start-backend-ns get pods
+kubectl --namespace quick-start-backend-ns get pods
     ```
     <pre>
     NAME      READY     STATUS    RESTARTS   AGE
     pg-0      1/1       Running   0          6s
     </pre>
+
+
 
 #### Expose PostgreSQL Service
 
@@ -295,8 +295,6 @@ export REMOTE_DB_URL=$(minikube ip):30001
 docker run --rm -it -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
   psql -U ${SECURITY_ADMIN_USER} "postgres://${REMOTE_DB_URL}/postgres" -c "\du"
 ```
-
-TODO: fix this table formatting
 
 <pre>
                                           List of roles
@@ -360,7 +358,9 @@ docker run --rm -i -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
 
 CREATE DATABASE ${APPLICATION_DB_NAME};
 
-\c ${APPLICATION_DB_NAME}; -- connect to it
+/* connect to it */
+
+\c ${APPLICATION_DB_NAME};
 
 CREATE TABLE pets (
   id serial primary key,
@@ -396,6 +396,9 @@ To create the namespace run:
 ```yaml
 kubectl create namespace quick-start-application-ns
 ```
+<pre>
+namespace "quick-start-application-ns" created
+</pre>
 
 Next we'll store the application-credentials in Kubernetes Secrets:
 
@@ -576,9 +579,9 @@ application](https://github.com/conjurdemos/pet-store-demo) with a simple API:
 
 Its PostgreSQL backend is configured using a `DB_URL` environment variable: 
 
-```
+<pre>
 postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
-```
+</pre>
 
 Again, the application has no knowledge of the database credentials it's using.
 
@@ -648,7 +651,7 @@ kubectl --namespace quick-start-application-ns apply -f quick-start-application.
 deployment "quick-start-application" created
 </pre>
 
-Finally, verify that the pods are healthy:
+Before moving on, verify that the pods are healthy:
 
 ```bash
 kubectl --namespace quick-start-application-ns get pods

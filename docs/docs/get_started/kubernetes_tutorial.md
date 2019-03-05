@@ -372,8 +372,6 @@ kubectl create namespace quick-start-application-ns
 
 Next we'll store the application-credentials in Kubernetes Secrets:
 
-TODO: remove quick-start prefix from these names
-
 ```bash
 kubectl --namespace quick-start-application-ns \
   create secret generic quick-start-backend-credentials \

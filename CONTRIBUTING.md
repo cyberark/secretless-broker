@@ -13,6 +13,7 @@ to enforce its license terms. Please email a signed copy to
 - [Style Guide](#style-guide)
 - [Building](#building)
 - [Testing](#testing)
+- [Documentation](#documentation)
 - [Profiling](#profiling)
 - [Plugins](#plugins)
 - [Releasing](#releasing)
@@ -133,6 +134,47 @@ cd test/manual/k8s_crds
 ./deploy
 ```
 This test currently does not run as part of the test suite.
+
+## Documentation
+Secretless has a few sources for documentation: a website, a documentation subdomain, and godocs.
+
+### Website
+The [website](https://secretless.io) source is in the [docs](docs/) folder in this repository. It is generated using Jekyll.
+
+The source includes:
+- the website main page
+- some old pages that redirect to the documentation subdomain
+- tutorials
+- godocs for the plugin API
+- Secretless blog
+- community info page
+#### Prerequisites
+
+To get the site up and running locally on your computer, ensure you have:
+1. Ruby version 2.1.0 or higher (check by running `ruby -v`)
+2. Bundler (`gem install bundler`)
+3. Jekyll (`gem install jekyll`)
+4. Once Bundler and Jekyll gems are installed, run `bundle install`
+
+#### Run Locally
+To construct:
+1. `git clone https://github.com/cyberark/secretless-broker`
+2. `cd docs`
+3. Run the following command:
+`bundle exec jekyll serve`
+4. Preview Jekyll site locally in web browser by either running `open localhost:4000` or manually navigating to http://localhost:4000
+
+#### Run in Docker
+With `docker` and `docker-compose`:
+
+1. Run `docker-compose up -d` in the `docs` directory.
+2. Preview Jekyll site locally in web browser by either running `open localhost:4000` or manually navigating to http://localhost:4000
+
+### Documentation Website
+The [documentation website](https://docs.secretless.io) source is in the [secretless-docs repo](https://github.com/cyberark/secretless-docs); instructions for contributing are available there.
+
+### Godocs
+[Godocs](https://godoc.org/github.com/cyberark/secretless-broker) are auto-published, and our `./bin/build_website` script also generates godocs for our plugin API that are published to our website.
 
 ## Profiling
 Profiling can be used to monitor the impact of Secretless on CPU and Memory consumption. Currently, Secretless supports two types- CPU and Memory.

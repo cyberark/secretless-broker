@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -euo pipefail
+
+docker run \
+  --rm \
+  -v $PWD:/godoc/ \
+  -p 6060:6060 \
+  secretless-dev \
+  bash -c "
+    GOROOT=/godoc/ godoc -http=:6060
+  "

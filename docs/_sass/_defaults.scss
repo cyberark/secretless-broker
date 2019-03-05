@@ -112,3 +112,25 @@ h4 {
   margin-bottom: 10px;
   padding: 10px;
 }
+.change-role {
+  background: pink;
+  border: 3px solid pink;
+  display: flex;
+  margin-bottom: 10px;
+  .character-icon { flex-grow: 1; }
+  .content { 
+    display: flex;
+    flex-direction: column;
+    flex-grow: 100;
+    justify-content: space-between;
+    padding: 0;
+    .change-announcement {
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 15px;
+    }
+    .message {
+      padding: 15px;
+    }
+  }
+}

@@ -83,8 +83,19 @@ To run through this tutorial, you will need:
 
 ## Steps for Security Admin
 
-The Security Admin sets up PostgreSQL, configures Secretless, and has sole
-access to the credentials.
+<div class="change-role">
+  <div class="character-icon"><img src="/img/security_admin.jpg"/></div>
+  <div class="content">
+    <div class="change-announcement">
+      You are now the Security Admin
+    </div>
+    <div class="message">
+      The Security Admin sets up PostgreSQL, configures Secretless, and has sole
+      access to the credentials.
+    </div>
+  </div>
+</div>
+
 
 ### Create PostgreSQL Service in Kubernetes
 
@@ -536,10 +547,18 @@ rolebinding "read-quick-start-backend-credentials" created
 
 ## Steps for the Application Developer
 
-Now imagine you've magically become an application developer.  
-
-You can no longer access the secrets we stored above in environment variables.
-Open a new terminal so that all those variables are gone.
+<div class="change-role">
+  <div class="character-icon"><img src="/img/application_developer.jpg"/></div>
+  <div class="content">
+    <div class="change-announcement">
+      You are now the application developer.  
+    </div>
+    <div class="message">
+      You can no longer access the secrets we stored above in environment
+      variables.  Open a new terminal so that all those variables are gone.
+    </div>
+  </div>
+</div>
 
 You know only one thing -- the name of the database:
 
@@ -777,11 +796,21 @@ Date: Thu, 23 Aug 2018 11:55:33 GMT
 
 ### Rotate Credentials [new terminal]
 
-You are now magically the Security Admin again.  
+<div class="change-role">
+  <div class="character-icon"><img src="/img/security_admin.jpg"/></div>
+  <div class="content">
+    <div class="change-announcement">
+      You are now the Security Admin
+    </div>
+    <div class="message">
+      You once again know the <b>admin-credentials</b>.
+    </div>
+  </div>
+</div>
 
 Open a new terminal and create environment variables with the
-**admin-credentials** you once again know, as well as **the new
-database application password**, which you'll invent:
+**admin-credentials**, as well as **the new database application password**,
+which you'll invent:
 
 ```bash
 export SECURITY_ADMIN_USER=security_admin_user

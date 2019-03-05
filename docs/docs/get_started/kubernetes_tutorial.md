@@ -544,14 +544,6 @@ Again, the application has no knowledge of the database credentials it's using.
 
 For usage examples, please see [Test the Application](#test-the-application).
 
-**Note:** _Although the application's localhost connection to Secretless not
-secure, the connection from Secretless to PostgreSQL is secure, and uses
-`sslmode=require` by default. For more information on PostgreSQL SSL modes
-see_:
-
-- [PostgreSQL SSL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html)
-- [PostgreSQL Secretless Handler documentation](/docs/reference/handlers/postgres.html).
-
 ### Create Application Deployment Manifest
 
 We're ready to deploy our application.
@@ -768,7 +760,7 @@ You are now magically the Security Admin again.
 
 Open a new terminal and create environment variables with the
 **admin-credentials** you once again know, as well as **the new
-database application password**, which you'll create:
+database application password**, which you'll invent:
 
 ```bash
 export SECURITY_ADMIN_USER=security_admin_user
@@ -822,12 +814,12 @@ secret "quick-start-backend-credentials" patched
 
 #### Prune Existing Connections In DB
 
-We now prune existing connections established with the old
-credentials.  This won't create downtime since most drivers keep a pool of
-connections and replenish them as needed.
+We now prune existing database connections, which were created with the old,
+now invalid, credentials.  This won't create downtime since most database
+drivers keep a pool of connections and replenish them as needed.
 
-Since Kubernetes Secrets is updated, attempts to establish new database
-connections will succeed.
+Since we've already updated Kubernetes Secrets, new database connections will
+succeed.
 
 To prune existing connections, run this command:
 
@@ -935,6 +927,11 @@ The situation looks like this:
                  No SSL                       SSL
 Application   <---------->   Secretless   <---------->   Postgres
 ```
+
+For more information on PostgreSQL SSL modes see:
+
+- [PostgreSQL SSL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html)
+- [PostgreSQL Secretless Handler documentation](/docs/reference/handlers/postgres.html).
 
 ### Credential Access
 

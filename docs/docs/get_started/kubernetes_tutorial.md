@@ -38,9 +38,10 @@ complete with shell scripts to get **the whole thing working end to end fast**.
 + [Test the Application](#test-the-application)
 + [Rotate Database Credentials](#rotate-database-credentials)
 + [Appendix - Secretless Deployment Manifest Explained](#appendix---secretless-deployment-manifest-explained)
-  + [Add & Configure Application Container](#add--configure-application-container)
-  + [Add & Configure Secretless Broker Sidecar Container](#add--configure-secretless-broker-sidecar-container)
-  + [Completed Application Deployment Manifest](#completed-application-deployment-manifest)
+  + [Networking](#networking)
+  + [SSL](#ssl)
+  + [Credential Access](#credential-access)
+  + [Configuration Access](#configuration-access)
 
 ## Overview
 

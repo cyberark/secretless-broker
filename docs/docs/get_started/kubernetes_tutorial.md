@@ -17,7 +17,7 @@ You will:
 
 Already a Kubernetes expert? You may prefer our:
 
-<a href="#simple-started" class="button btn-primary gradient">Advanced Github Tutorial</a>
+<a href="https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo" class="button btn-primary gradient">Advanced Github Tutorial</a>
 
 complete with shell scripts to get **the whole thing working end to end fast**.
 
@@ -83,7 +83,7 @@ To run through this tutorial, you will need:
 ## Steps for Security Admin
 
 <div class="change-role">
-  <div class="character-icon"><img src="/img/security_admin.jpg"/></div>
+  <div class="character-icon"><img src="/img/security_admin.jpg" alt="Security Admin"/></div>
   <div class="content">
     <div class="change-announcement">
       You are now the Security Admin
@@ -551,7 +551,7 @@ rolebinding "read-quick-start-backend-credentials" created
 ## Steps for the Application Developer
 
 <div class="change-role">
-  <div class="character-icon"><img src="/img/application_developer.jpg"/></div>
+  <div class="character-icon"><img src="/img/application_developer.jpg" alt="Application Developer"/></div>
   <div class="content">
     <div class="change-announcement">
       You are now the application developer.  
@@ -593,7 +593,7 @@ We're ready to deploy our application.
 
 A detailed explanation of the manifest below is in the [Appendix - Secretless
 Deployment Manifest
-Explained](appendix---secretless-deployment-manifest-explained), but isn't
+Explained](#appendix---secretless-deployment-manifest-explained), but isn't
 needed to complete the tutorial.
 
 To create the **quick-start-application.yml** manifest using the
@@ -749,7 +749,7 @@ That's it!
   The application is connecting to a password-protected Postgres database
   <b>without any knowledge of the credentials</b>.
 
-  <img src="/img/its_magic.jpg"/>
+  <img src="/img/its_magic.jpg" alt="It's Magic"/>
 </div>
 
 ## Appendix - Secretless Deployment Manifest Explained

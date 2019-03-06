@@ -1,7 +1,7 @@
 ---
 title: Kubernetes Tutorial
 id: kubernetes_tutorial
-layout: docs
+layout: subpages
 description: Secretless Broker Documentation
 permalink: /docs/get_started/kubernetes_tutorial.html
 ---
@@ -225,8 +225,8 @@ spec:
       targetPort: 5432
       nodePort: 30001
   type: NodePort
-EOF
 
+EOF
 kubectl --namespace quick-start-backend-ns  apply -f pg-service.yml
 ```
 <pre>
@@ -290,6 +290,7 @@ You will setup and configure the PostgreSQL storage backend by carrying the foll
 **Note:** You must set the value of and export the environment variables `APPLICATION_DB_NAME`, `APPLICATION_DB_USER` and `APPLICATION_DB_INITIAL_PASSWORD` before proceeding, e.g.
 ``` bash
 export APPLICATION_DB_NAME=quick_start_db
+
 export APPLICATION_DB_USER=app_user
 export APPLICATION_DB_INITIAL_PASSWORD=app_user_password
 ```
@@ -317,8 +318,9 @@ CREATE TABLE pets (
 );
 
 /* Create Application User */
-CREATE USER ${APPLICATION_DB_USER} PASSWORD '${APPLICATION_DB_INITIAL_PASSWORD}';
+CREATE USER ${APPLICATION_DB_USER} PASSWORD
 
+'${APPLICATION_DB_INITIAL_PASSWORD}';
 /* Grant Permissions */
 GRANT SELECT, INSERT ON public.pets TO ${APPLICATION_DB_USER};
 GRANT USAGE, SELECT ON SEQUENCE public.pets_id_seq TO ${APPLICATION_DB_USER};
@@ -665,7 +667,6 @@ spec:
     nodePort: 30002
   type: NodePort
 EOF
-
 kubectl --namespace quick-start-application-ns \
  apply \
  -f quick-start-application-service.yml

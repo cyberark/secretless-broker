@@ -17,7 +17,9 @@ You will:
 
 Already a Kubernetes expert? You may prefer our:
 
-<a href="https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo" class="button btn-primary gradient">Advanced Github Tutorial</a>
+<div style="text-align: center">
+  <a href="https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo" class="button btn-primary gradient">Advanced Github Tutorial</a>
+</div>
 
 complete with shell scripts to get **the whole thing working end to end fast**.
 
@@ -756,7 +758,9 @@ That's it!
 
 For more info on configuring Secretless for your own use case, see the:
 
-<a href="https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm" class="button btn-primary gradient">Full Secretless Documentation</a>
+<div style="text-align: center">
+  <a href="https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm" class="button btn-primary gradient">Full Secretless Documentation</a>
+</div>
 
 ## Appendix - Secretless Deployment Manifest Explained
 

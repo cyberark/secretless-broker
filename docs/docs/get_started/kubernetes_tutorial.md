@@ -1,5 +1,5 @@
 ---
-title: Kubernetes Tutorial
+title: Using Secretless in Kubernetes
 id: kubernetes_tutorial
 layout: subpages
 description: Secretless Broker Documentation
@@ -746,11 +746,17 @@ We should get a 200 response with a JSON array of the pets.
 That's it! 
 
 <div class="the-big-finish">
+  <p>
   The application is connecting to a password-protected Postgres database
   <b>without any knowledge of the credentials</b>.
+  </p>
 
   <img src="/img/its_magic.jpg" alt="It's Magic"/>
 </div>
+
+For more info on configuring Secretless for your own use case, see the:
+
+<a href="https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm" class="button btn-primary gradient">Full Secretless Documentation</a>
 
 ## Appendix - Secretless Deployment Manifest Explained
 

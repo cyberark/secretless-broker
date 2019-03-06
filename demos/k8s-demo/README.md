@@ -1,21 +1,28 @@
-# Introduction to the Secretless Broker on Kubernetes
+# Advanced Introduction to Secretless in Kubernetes
 
-## Description: Secretless Broker
+This tutorial gets Secretless running quickly in Kubernetes.  It's intended for
+advanced Kubernetes users.
 
-Secrets are used to provide privileged access to protected resources.
-The Secretless Broker pushes the trust boundary of secrets away from application code into a privileged process that's designed with security best practices in mind. The Secretless Broker provides a local interface for application code to transparently consume protected resources.
+For a friendlier version of this tutorial, including explanations of every step, try:
+
+[Detailed Introduction to Secretless in
+Kubernetes](https://secretless.io/docs/get_started/kubernetes_tutorial.html)
 
 ## Usage: Secretless Broker as Sidecar
 
-The Secretless Broker operates as a sidecar container within a kubernetes application pod. This means there is shared storage/network between the application container and the Secretless Broker. It is this which allows the Secretless Broker to provide a local interface.
+The Secretless Broker operates as a sidecar container within a kubernetes
+application pod. This means there is shared storage/network between the
+application container and the Secretless Broker. It is this which allows the
+Secretless Broker to provide a local interface.
 
-In this tutorial, we will walk through creating an application that communicates
-with a password-protected PostgreSQL database via the Secretless Broker. _The application
-does not need to know anything about the credentials required to connect to the database;_
-the admin super-user who provisions and configures the database will also configure the Secretless Broker
-to be able to communicate with it. The developer writing the application only needs to
-know the socket or address that the Secretless Broker is listening on to proxy the connection to the
-PostgreSQL backend.
+In this tutorial, we will walk through creating an application that
+communicates with a password-protected PostgreSQL database via the Secretless
+Broker. _The application does not need to know anything about the credentials
+required to connect to the database;_ the admin super-user who provisions and
+configures the database will also configure the Secretless Broker to be able to
+communicate with it. The developer writing the application only needs to know
+the socket or address that the Secretless Broker is listening on to proxy the
+connection to the PostgreSQL backend.
 
 To accomplish this, we are going to do the following:
 

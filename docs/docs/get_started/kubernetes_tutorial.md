@@ -318,7 +318,7 @@ In this section, we assume the following:
 <div class="note">
   If you're using your own database server and it's not SSL-enabled, please see
   the <a
-  href="https://secretless.io/docs/reference/handlers/postgres.html">handler
+  href="https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm">handler
   documentation</a> for how to disable SSL in your Secretless configuration.
 </div>
 
@@ -745,8 +745,12 @@ We should get a 200 response with a JSON array of the pets.
 
 That's it! 
 
-The application is connecting to a password-protected Postgres database **without
-any knowledge of the credentials**.
+<div class="the-big-finish">
+  The application is connecting to a password-protected Postgres database
+  <b>without any knowledge of the credentials</b>.
+
+  <img src="/img/its_magic.jpg"/>
+</div>
 
 ## Appendix - Secretless Deployment Manifest Explained
 
@@ -820,7 +824,7 @@ Application   <---------->   Secretless   <---------->   Postgres
 For more information on PostgreSQL SSL modes see:
 
 - [PostgreSQL SSL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html)
-- [PostgreSQL Secretless Handler documentation](/docs/reference/handlers/postgres.html).
+- [PostgreSQL Secretless Handler documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm).
 
 ### Credential Access
 

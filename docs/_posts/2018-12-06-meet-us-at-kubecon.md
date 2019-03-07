@@ -5,6 +5,9 @@ date: 2018-12-06 09:00:00 -0600
 author: Geri Jennings
 categories: blog
 published: true
+image: secretless_at_kubecon_2018.png
+thumb: secretless_at_kubecon_2018.png
+image-alt: Meet us at Kubecon promo
 excerpt: "The Secretless Broker development team is going to be at KubeCon -
 we hope to see you there!"
 ---

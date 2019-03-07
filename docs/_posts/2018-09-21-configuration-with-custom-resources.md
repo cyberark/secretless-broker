@@ -5,6 +5,9 @@ date: 2018-09-21 09:00:00 -0600
 author: Geri Jennings
 categories: blog
 published: true
+image: secretless_logo_blog.jpg
+thumb: secretless_logo_blog.jpg
+image-alt: Secretless logo
 excerpt: "Secretless Broker by default expects its configuration via file, but users
   deploying their apps to Kubernetes can also take advantage of our Secretless config
   Custom Resource to provide their Secretless Broker with its configuration"

@@ -33,10 +33,8 @@ footer-resources:
     url: /docs/get_started/kubernetes_tutorial.html
   - title: Community
     url: /community.html
-    target: target="_blank" rel="noopener noreferrer"
   - title: Blog
     url: /blog.html
-    target: target="_blank" rel="noopener noreferrer"
   - title: FAQ
     url: https://docs.secretless.io/Latest/en/Content/FAQ/faq.htm
     target: target="_blank" rel="noopener noreferrer"

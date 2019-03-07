@@ -105,12 +105,14 @@ h4 {
 
 .note {
   &:before {
-    content: 'Note: ';
+	content: 'Note: ';
+	font-weight: 800;
   }
   background: #F3FCFD;
   border-left: 40px solid #269D91;
-  margin-bottom: 10px;
-  padding: 10px;
+  border-radius: 0.3rem;
+  margin: 3rem 0;
+  padding: 1.5rem 2rem;
 }
 .change-role {
   background: pink;

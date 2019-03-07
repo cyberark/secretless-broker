@@ -3,6 +3,8 @@ main:
     url: https://docs.secretless.io
     target: target="_blank" rel="noopener noreferrer"
     section: /docs/
+  - title: Tutorial
+    url: /docs/get_started/kubernetes_tutorial.html
   - title: Community
     url: /community.html
   - title: Blog
@@ -29,7 +31,6 @@ footer-docs:
 footer-resources:
   - title: Tutorial
     url: /docs/get_started/kubernetes_tutorial.html
-    target: target="_blank" rel="noopener noreferrer"
   - title: Community
     url: /community.html
     target: target="_blank" rel="noopener noreferrer"

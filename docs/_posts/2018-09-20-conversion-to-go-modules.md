@@ -5,6 +5,9 @@ date: 2018-09-20 09:00:00 -0600
 author: Srdjan Grubor
 categories: blog
 published: true
+image: secretless_logo_blog.jpg
+thumb: secretless_logo_blog.jpg
+image-alt: Secretless logo
 excerpt: "How we converted the Secretless Broker to use the new Golang dependency management"
 ---
 

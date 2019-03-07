@@ -5,6 +5,9 @@ date: 2018-09-03 09:00:00 -0400
 author: John Walsh
 categories: blog
 published: true
+image: secretless_logo_blog.jpg
+thumb: secretless_logo_blog.jpg
+image-alt: Secretless logo
 excerpt: "CyberArk is incredibly pleased to announce the beta release of a new open source project, Secretless Broker. Secretless Broker makes secrets management seamless for developers by removing secrets from the application space altogether, so that applications built with Secretless Broker are leak-proof."
 ---
 

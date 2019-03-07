@@ -11,15 +11,18 @@
       <div class="row">
         <div class="col-md-10 offset-md-1">
           <article class="post-single">
+              {% if page.image %}
+                <img class="post-image" src="{{ base.url }}/img/blog/{{ page.image }}" alt="{{ page.image-alt }}">
+              {% endif %}
               <header class="post-header">
                 <h1 class="post-title">{{ page.title | escape }}</h1>
                 <p class="post-meta">
-                  <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}">
-                    {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+                  Published <time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}">
+                    {%- assign date_format = site.minima.date_format | default: "%B %-d, %Y" -%}
                     {{ page.date | date: date_format }}
                   </time>
                   {%- if page.author -%}
-                    • <span>{{ page.author }}</span>
+                    by <span>{{ page.author }}</span>
                   {%- endif -%}</p>
               </header>
             

@@ -108,29 +108,39 @@ h4 {
 	content: 'Note: ';
 	font-weight: 800;
   }
+
   background: #F3FCFD;
   border-left: 40px solid #269D91;
   border-radius: 0.3rem;
   margin: 3rem 0;
   padding: 1.5rem 2rem;
 }
+
 .change-role {
-  background: pink;
-  border: 3px solid pink;
-  display: flex;
-  margin-bottom: 10px;
-  .character-icon { flex-grow: 1; }
+	background: pink;
+	border: 2px solid pink;
+	display: flex;
+	margin-bottom: 10px;
+	border-radius: 0.3rem;
+	padding: 1rem;
+  
+  .character-icon { 
+	  flex-grow: 1; 
+	  margin-right: 1rem;
+	}
+
   .content { 
     display: flex;
     flex-direction: column;
     flex-grow: 100;
-    justify-content: space-between;
-    padding: 0;
+	padding: 0;
+	
     .change-announcement {
-      font-size: 1.5rem;
+      font-size: 2rem;
       font-weight: bold;
-      padding: 15px;
-    }
+      padding: 1rem 1rem 0 1rem;
+	}
+	
     .message {
       padding: 15px;
     }
@@ -138,7 +148,5 @@ h4 {
 }
 
 .the-big-finish {
-  font-size: 18px;
-  text-align: center;
-  margin: 30px 0 30px 0;
+  margin: 3rem 0;
 }

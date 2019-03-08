@@ -550,6 +550,7 @@ role "quick-start-backend-credentials-reader" created
 rolebinding "read-quick-start-backend-credentials" created
 </pre>
 
+
 ## Steps for the Application Developer
 
 <div class="change-role">

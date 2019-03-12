@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+. ./utils.sh
+
+# application url accessible to local machine
+#
+# NOTE 1: Defined in quick-start-application.yml as nodePort
+#
+# NOTE 2: This file does not have access to the secrets stored in
+# admin_config.sh.  It knows only this application url:
+APPLICATION_URL="$(minikube ip)":30002 
+
+##################################################
+start_step "Start application"
+
+kubectl --namespace quick-start-application-ns \
+ apply --filename "etc/quick-start-application.yml"
+
+wait_for_app "quick-start-application" "quick-start-application-ns"
+
+##################################################
+start_step "Add a Sample Pet"
+
+# -include includes HTTP headers
+curl -include \
+  --data '{"name": "Mr. Snuggles"}' \
+  --header "Content-Type: application/json" \
+  "${APPLICATION_URL}/pet"
+
+##################################################
+start_step "Retrieve All Pets"
+
+curl -include "${APPLICATION_URL}/pets"
+
+printf '\n\nAll finished!  Secretless is working!\n\n'

@@ -1,11 +1,12 @@
 #!/bin/bash
 
 
-# application url accessible to local machine
-export APPLICATION_URL=192.168.99.100:30002 # CHANGE to reflect endpoint exposed by application service
+MINIKUBE_IP="$(minikube ip)"
+export MINIKUBE_IP
 
 # database url accessible to kubernetes cluster and local machine
-export DB_URL=192.168.99.100:30001/quick_start_db # CHANGE to reflect endpoint exposed by db service
+# NOTE: Defined in pg.yml as nodePort
+export DB_URL="$MINIKUBE_IP":30001/quick_start_db
 
 # admin-user credentials
 export DB_ADMIN_USER=postgres

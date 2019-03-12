@@ -1,18 +1,19 @@
-#!/bin/bash -e
+#!/bin/bash
+
 
 # application url accessible to local machine
-APPLICATION_URL=192.168.99.100:30002 # CHANGE to reflect endpoint exposed by application service
+export APPLICATION_URL=192.168.99.100:30002 # CHANGE to reflect endpoint exposed by application service
 
 # database url accessible to kubernetes cluster and local machine
-DB_URL=192.168.99.100:30001/quick_start_db # CHANGE to reflect endpoint exposed by db service
+export DB_URL=192.168.99.100:30001/quick_start_db # CHANGE to reflect endpoint exposed by db service
 
 # admin-user credentials
-DB_ADMIN_USER=postgres
-DB_ADMIN_PASSWORD=admin_password
+export DB_ADMIN_USER=postgres
+export DB_ADMIN_PASSWORD=admin_password
 
 # application-user credentials
-DB_USER=quick_start
-DB_INITIAL_PASSWORD=quick_start
+export DB_USER=quick_start
+export DB_INITIAL_PASSWORD=quick_start
 
 # Run this to access postgres as admin_user
 # docker run --rm -it -e PGPASSWORD=${DB_ADMIN_PASSWORD} postgres:9.6 psql -U ${DB_ADMIN_USER} "postgres://$DB_URL"

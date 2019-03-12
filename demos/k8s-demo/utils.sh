@@ -10,23 +10,22 @@ first_pod() {
 }
 
 wait_for_app() {
-  local is_waiting=false
+  local waiting=false
 
-  while kubectl get pods \
+  while [[ "$(kubectl get pods \
     --namespace "$2" \
-    --selector=app="$1" \
-    --output=jsonpath='{$.items[0].status.containerStatuses.*.ready}' \
-      | grep -q "false"
+    --selector app="$1" \
+    --output jsonpath='{$.items[0].status.containerStatuses.*.ready}')" != *true* ]]
   do
-    if [[ "$is_waiting" != "true" ]]; then
+    if [[ "$waiting" != "true" ]]; then
       printf "Waiting for %s to be ready" "$1"
-      is_waiting=true
+      waiting=true
     fi
     printf "."
     sleep 3
   done
 
-  if [[ "$is_waiting" = "true" ]]; then
+  if [[ "$waiting" = "true" ]]; then
     printf "Done"
   fi
 }

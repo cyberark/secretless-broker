@@ -14,7 +14,7 @@ APPLICATION_URL="$(minikube ip)":30002
 start_step "Start application"
 
 kubectl --namespace quick-start-application-ns \
- apply --filename "etc/quick-start-application.yml"
+  apply --filename "etc/quick-start-application.yml"
 
 wait_for_app "quick-start-application" "quick-start-application-ns"
 

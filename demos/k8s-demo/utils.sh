@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+start_step() { printf '\n\n>>--- %s\n\n' "$1"; }
+
 first_pod() {
   kubectl get pods \
     --namespace "$2" \
@@ -8,29 +10,48 @@ first_pod() {
 }
 
 wait_for_app() {
+  local is_waiting=false
+
   while kubectl get pods \
     --namespace "$2" \
     --selector=app="$1" \
     --output=jsonpath='{$.items[0].status.containerStatuses.*.ready}' \
       | grep -q "false"
   do
-    echo "Waiting for $1 to be ready"
-    sleep 5
+    if [[ "$is_waiting" != "true" ]]; then
+      printf "Waiting for %s to be ready" "$1"
+      is_waiting=true
+    fi
+    printf "."
+    sleep 3
   done
-  echo "$1" Ready!
+
+  if [[ "$is_waiting" = "true" ]]; then
+    printf "Done"
+  fi
 }
 
-# Usage: repeat_str 3 hi (returns hihihi)
-repeat_str() {
-  local i
-  for ((i=0; i<"$1"; i++)); do
-    printf "%s" "$2"
-  done
-}
+# Note: In future versions of k8s we'll be able to replace this function
+# with the k8s "wait" command:
+#
+# https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#wait
+#
+delete_ns_and_cleanup() {
+  # We don't care about the output of this command, only its return return code:
+  # success means there was something to delete, and that we must wait for
+  # deletion to fully process.  Failure means there was nothing to delete and
+  # we can return early.
+  if ! kubectl delete namespace "$1" > /dev/null 2>&1; then
+    return 0
+  fi
 
-# repeats a cmd
-# Usage: repeat 3 echo hi
-# hi
-# hi
-# hi
-repeat() { local i n; n=$1; shift; for ((i=1; i<=n; i++)); do "$@"; done; }
+  printf "Cleaning up old namespace"
+
+  # As long as we can still "get" the namespace, the deletion isn't done.
+  while kubectl get namespace "$1" > /dev/null 2>&1; do 
+    printf "."
+    sleep 3
+  done
+
+  printf '%s\n\n' "Done"
+}

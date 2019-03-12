@@ -2,14 +2,6 @@
 
 . ./utils.sh
 
-# store Secretless config
-echo ">>--- Create and store Secretless configuration"
-
-kubectl --namespace quick-start-application-ns \
- create configmap \
- quick-start-application-secretless-config \
- --from-file=etc/secretless.yml
-
 # start application
 echo ">>--- Start application"
 

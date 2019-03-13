@@ -4,13 +4,13 @@
 . ./admin_config.sh
 
 ##################################################
-start_step "Create a new namespace"
+step "Create a new namespace"
 
 delete_ns_and_cleanup "quick-start-backend-ns"
 kubectl create namespace "quick-start-backend-ns"
 
 ##################################################
-start_step "Add certificates to Kubernetes Secrets"
+step "Add certificates to Kubernetes Secrets"
 
 # add pg certificates to kubernetes secrets
 kubectl --namespace quick-start-backend-ns \
@@ -20,7 +20,7 @@ kubectl --namespace quick-start-backend-ns \
   --from-file "etc/pg_server.key"
 
 ##################################################
-start_step "Create StatefulSet for Database"
+step "Create StatefulSet for Database"
 
 kubectl --namespace quick-start-backend-ns apply \
   --filename "etc/pg.yml"
@@ -31,7 +31,7 @@ wait_for_app "quick-start-backend" "quick-start-backend-ns"
 #   rollout status "statefulset/quick-start-backend"
 
 ##################################################
-start_step "Create Application Database"
+step "Create Application Database"
 
 kubectl --namespace quick-start-backend-ns \
  exec --stdin "$(first_pod quick-start-backend quick-start-backend-ns)" \
@@ -40,7 +40,7 @@ kubectl --namespace quick-start-backend-ns \
   --command "CREATE DATABASE quick_start_db;"
 
 ##################################################
-start_step "Create Database Table and Permissions"
+step "Create Database Table and Permissions"
 
 docker run --rm --interactive \
  --env PGPASSWORD="${DB_ADMIN_PASSWORD}" \
@@ -64,7 +64,7 @@ GRANT USAGE, SELECT ON SEQUENCE public.pets_id_seq TO ${DB_USER};
 EOSQL
 
 ##################################################
-start_step "Store DB credentials in Kubernetes Secrets"
+step "Store DB credentials in Kubernetes Secrets"
 
 delete_ns_and_cleanup "quick-start-application-ns"
 kubectl create namespace "quick-start-application-ns"
@@ -77,7 +77,7 @@ kubectl --namespace quick-start-application-ns \
   --from-literal password="${DB_INITIAL_PASSWORD}"
 
 ##################################################
-start_step "Create Application Service Account"
+step "Create Application Service Account"
 
 # create application service account
 kubectl --namespace quick-start-application-ns \
@@ -90,7 +90,7 @@ kubectl --namespace quick-start-application-ns \
   create --filename "etc/quick-start-application-entitlements.yml"
 
 ##################################################
-start_step "Create and Store Secretless Configuration"
+step "Create and Store Secretless Configuration"
 
 kubectl --namespace quick-start-application-ns \
   create configmap "quick-start-application-secretless-config" \

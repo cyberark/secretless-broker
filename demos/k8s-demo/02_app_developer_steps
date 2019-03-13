@@ -11,7 +11,7 @@
 APPLICATION_URL="$(minikube ip)":30002 
 
 ##################################################
-start_step "Start application"
+step "Start application"
 
 kubectl --namespace quick-start-application-ns \
   apply --filename "etc/quick-start-application.yml"
@@ -19,7 +19,7 @@ kubectl --namespace quick-start-application-ns \
 wait_for_app "quick-start-application" "quick-start-application-ns"
 
 ##################################################
-start_step "Add a Sample Pet"
+step "Add a Sample Pet"
 
 # -include includes HTTP headers
 curl -include \
@@ -28,7 +28,7 @@ curl -include \
   "${APPLICATION_URL}/pet"
 
 ##################################################
-start_step "Retrieve All Pets"
+step "Retrieve All Pets"
 
 curl -include "${APPLICATION_URL}/pets"
 

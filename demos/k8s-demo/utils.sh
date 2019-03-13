@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-start_step() { printf '\n\n>>--- %s\n\n' "$1"; }
+step() { printf '\n\n>>--- %s\n\n' "$1"; }
 
 first_pod() {
   kubectl get pods \

@@ -107,32 +107,22 @@ To perform all these steps in one go, run:
   <summary>View expected output</summary>
   <pre>
 >>--- Start application
-
 deployment "quick-start-application" created
 service "quick-start-application" created
 Waiting for application to boot up
 (This may take more than 1 minute)
 ............................Done
-
-
 >>--- Add a Sample Pet
-
 HTTP/1.1 201 
 Location: http://192.168.99.100:30002/pet/1
 Content-Length: 0
 Date: Thu, 14 Mar 2019 15:35:33 GMT
-
-
-
 >>--- Retrieve All Pets
-
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
 Transfer-Encoding: chunked
 Date: Thu, 14 Mar 2019 15:35:33 GMT
-
 [{"id":1,"name":"Mr. Snuggles"}]
-
 All finished!  Secretless is working!
   </pre>
 </details>

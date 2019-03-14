@@ -14,7 +14,7 @@ main:
 
 footer-docs:
   - title: Why Secretless?
-    url: https://docs.secretless.io/Latest/en/Content/Overview/WhySecretless.htm
+    url: https://docs.secretless.io/Latest/en/Content/Overview/overview.htm#WhySecretless
     target: target="_blank" rel="noopener noreferrer"
   - title: Key Terms
     url: https://docs.secretless.io/Latest/en/Content/Overview/key_terms.htm

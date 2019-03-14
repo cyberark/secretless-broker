@@ -23,19 +23,6 @@ You'll play two roles in this tutorial:
 1. A **Security Admin** who handles secrets, and has sole access to those secrets
 2. An **Application Developer** with no access to secrets.
 
-**As the security admin:**
-
-1. Create a PostgreSQL database
-1. Create a DB user for the application
-1. Add that user's credentials to Kubernetes Secrets
-1. Configure Secretless to connect to PostgreSQL using those credentials
-
-**As the application developer:**
-
-1. Configure the application to connect to PostgreSQL via Secretless
-1. Deploy the application and the Secretless sidecar
-To accomplish this, we are going to do the following:
-
 ## Prerequisites
 
 + A running Kubernetes cluster (you can use
@@ -47,186 +34,137 @@ To accomplish this, we are going to do the following:
 
 ## Steps for Security Admin
 
-### 1. Create PostgreSQL Database
+As security admin, you will:
 
-Deploy a PostgreSQL instance using a **StatefulSet** in the
-**quick-start-backend-ns**:
+1. Create a PostgreSQL database
+1. Create a DB user for the application
+1. Add that user's credentials to Kubernetes Secrets
+1. Configure Secretless to connect to PostgreSQL using those credentials
+
+To perform all these steps in one go, run:
 
 ```bash
-./01_create_db.sh
+./01_security_admin_steps
 ```
 
 <p></p>
 <details>
   <summary>View expected output</summary>
   <pre>
->>--- Clean up quick-start-backend-ns namespace
-namespace "quick-start-backend-ns" deleted
-Waiting for quick-start-backend-ns namespace clean up
+>>--- Create a new namespace
+
+Cleaning up old namespace............Done
+
 namespace "quick-start-backend-ns" created
-Ready!
+
+
+>>--- Add certificates to Kubernetes Secrets
+
 secret "quick-start-backend-certs" created
->>--- Create database
+
+
+>>--- Create StatefulSet for Database
+
 statefulset "pg" created
 service "quick-start-backend" created
-Waiting for quick-start-backend to be ready
-Ready!
+Waiting for quick-start-backend to be ready........Done
+
+>>--- Create Application Database
+
 CREATE DATABASE
-  </pre>
-</details>
-<p></p>
 
-Note we upload test certificates to the PostgreSQL container using Kubernetes
-Secrets. In practice, you'll have your own certificates. For more info see
-[PostgreSQL documentation](https://www.postgresql.org/docs/9.6/ssl-tcp.html).
 
-### 2. Configure Database and Kubernetes Secrets
+>>--- Create Database Table and Permissions
 
-Next we'll:
-
-- Create the DB user and table
-- Create the Kubernetes Service
-- Add the application's credentials to Kubernetes Secrets
-
-```bash
-./02_configure_db.sh
-```
-
-<p></p>
-<details>
-  <summary>View expected output</summary>
-  <pre>
->>--- Set up database
 CREATE ROLE
 CREATE TABLE
 GRANT
 GRANT
->>--- Clean up quick-start-application-ns namespace
-namespace/quick-start-application-ns created
-Ready!
-secret/quick-start-backend-credentials created
-serviceaccount/quick-start-application created
-role.rbac.authorization.k8s.io/quick-start-backend-credentials-reader created
-rolebinding.rbac.authorization.k8s.io/read-quick-start-backend-credentials created
+
+
+>>--- Store DB credentials in Kubernetes Secrets
+
+Cleaning up old namespace....................Done
+
+namespace "quick-start-application-ns" created
+secret "quick-start-backend-credentials" created
+
+
+>>--- Create Application Service Account
+
+serviceaccount "quick-start-application" created
+role "quick-start-backend-credentials-reader" created
+rolebinding "read-quick-start-backend-credentials" created
+
+
+>>--- Create and Store Secretless Configuration
+
+configmap "quick-start-application-secretless-config" created
   </pre>
 </details>
 <p></p>
 
-### 3. Configure the Secretless Broker
-
-The [secretless.yml](/demos/k8s-demo/etc/secretless.yml) config file defines a
-PostgreSQL listener on port 5432 and a handler that retrieves the previous
-step's credentials from Kubernetes Secrets.
-
-This step will be performed by the script `./03_deploy_app.sh` below.
-
-<p></p>
-<details>
-  <summary>View "secretless.yml"</summary>
-  <pre>
-    <code>
-listeners:
-  - name: pg
-    protocol: pg
-    address: localhost:5432
-handlers:
-  - name: pg
-    listener: pg
-    credentials:
-      - name: address
-        provider: kubernetes
-        id: quick-start-backend-credentials#address
-      - name: username
-        provider: kubernetes
-        id: quick-start-backend-credentials#username
-      - name: password
-        provider: kubernetes
-        id: quick-start-backend-credentials#password
-    </code>
-  </pre>
-</details>
-<p></p>
 
 ## Steps for Application Developer
 
 **Important: The application developer never needs any credentials to connect
 to the database.**
 
-In particular, as the application developer you do not know
-any of the secrets in **admin_config.sh**.
+In particular, as the application developer you do not know any of the secrets
+in **admin_config.sh**.
 
-### 1. Tell application to connect to Secretless
+**As the application developer:**                                                                                                                                       
 
-In the application manifest, we set the `DB_URL` environment variable to
-`localhost:5432`, where the Secretless Broker is listening.
+1. Configure the application to connect to PostgreSQL via Secretless                                                                                                    
+1. Deploy the application and the Secretless sidecar                                                                                                                    
+1. Test the application
 
-The application connects to Secretless.  Secretless connects to the database.
-
-### 2. Deploy application
-
-To perform all remaining steps run:
+To perform all these steps in one go, run:
 
 ```bash
-./03_deploy_app.sh
+./02_app_developer_steps
 ```
 
 <p></p>
 <details>
   <summary>View expected output</summary>
   <pre>
->>--- Create and store Secretless configuration
-configmap/quick-start-application-secretless-config created
 >>--- Start application
-deployment.apps/quick-start-application created
-service/quick-start-application created
-Waiting for quick-start-application to be ready
-...
-Ready!
+
+deployment "quick-start-application" created
+service "quick-start-application" created
+Waiting for application to boot up
+(This may take more than 1 minute)
+............................Done
+
+
+>>--- Add a Sample Pet
+
+HTTP/1.1 201 
+Location: http://192.168.99.100:30002/pet/1
+Content-Length: 0
+Date: Thu, 14 Mar 2019 15:35:33 GMT
+
+
+
+>>--- Retrieve All Pets
+
+HTTP/1.1 200 
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 14 Mar 2019 15:35:33 GMT
+
+[{"id":1,"name":"Mr. Snuggles"}]
+
+All finished!  Secretless is working!
   </pre>
 </details>
 <p></p>
-
-## Try it out!
 
 That's it!
 
 The application is connecting to a password-protected Postgres database
 **without any knowledge of the credentials**.
-
-Let's test it...
-
-Our sample [pet store demo
-application](https://github.com/conjurdemos/pet-store-demo) has a simple API:
-
-- `GET /pets` lists all the pets
-- `POST /pet` adds a pet
-
-To test both adding a pet and listing all pets, run:
-
-```bash
-./04_test_deployment.sh
-```
-
-<p></p>
-<details>
-  <summary>View expected output</summary>
-  <pre>
-Adding a pet...
-HTTP/1.1 201 
-Location: http://192.168.99.100:30002/pet/1
-Content-Length: 0
-Date: Thu, 07 Mar 2019 05:03:58 GMT
-
-Checking the pets...
-HTTP/1.1 200 
-Content-Type: application/json;charset=UTF-8
-Transfer-Encoding: chunked
-Date: Thu, 07 Mar 2019 05:04:02 GMT
-
-[{"id":1,"name":"Mr. Snuggles"}]
-  </pre>
-</details>
-<p></p>
 
 ## Conclusion
 

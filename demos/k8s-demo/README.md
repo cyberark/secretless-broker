@@ -52,53 +52,30 @@ To perform all these steps in one go, run:
   <summary>View expected output</summary>
   <pre>
 >>--- Create a new namespace
-
 Cleaning up old namespace............Done
-
 namespace "quick-start-backend-ns" created
-
-
 >>--- Add certificates to Kubernetes Secrets
-
 secret "quick-start-backend-certs" created
-
-
 >>--- Create StatefulSet for Database
-
 statefulset "pg" created
 service "quick-start-backend" created
 Waiting for quick-start-backend to be ready........Done
-
 >>--- Create Application Database
-
 CREATE DATABASE
-
-
 >>--- Create Database Table and Permissions
-
 CREATE ROLE
 CREATE TABLE
 GRANT
 GRANT
-
-
 >>--- Store DB credentials in Kubernetes Secrets
-
 Cleaning up old namespace....................Done
-
 namespace "quick-start-application-ns" created
 secret "quick-start-backend-credentials" created
-
-
 >>--- Create Application Service Account
-
 serviceaccount "quick-start-application" created
 role "quick-start-backend-credentials-reader" created
 rolebinding "read-quick-start-backend-credentials" created
-
-
 >>--- Create and Store Secretless Configuration
-
 configmap "quick-start-application-secretless-config" created
   </pre>
 </details>

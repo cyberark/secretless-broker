@@ -16,7 +16,17 @@ step "Start application"
 kubectl --namespace quick-start-application-ns \
   apply --filename "etc/quick-start-application.yml"
 
-wait_for_app "quick-start-application" "quick-start-application-ns"
+# Since wait_for_app and kubectl rollout status are both not working...
+# We revert to simply pinging the endpoint
+printf 'Waiting for application to boot up\n'
+printf '(This may take more than 1 minute)\n'
+
+until curl --silent "${APPLICATION_URL}/pets" >/dev/null; do
+  printf "."
+  sleep 3
+done
+
+printf 'Done\n'
 
 ##################################################
 step "Add a Sample Pet"

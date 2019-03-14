@@ -26,7 +26,7 @@ kubectl --namespace quick-start-backend-ns apply \
   --filename "etc/pg.yml"
 
 wait_for_app "quick-start-backend" "quick-start-backend-ns"
-# experiment here
+# why doesn't this work?
 # kubectl --namespace quick-start-backend-ns \
 #   rollout status "statefulset/quick-start-backend"
 

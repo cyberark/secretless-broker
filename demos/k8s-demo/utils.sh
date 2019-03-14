@@ -12,10 +12,10 @@ first_pod() {
 wait_for_app() {
   local waiting=false
 
-  while [[ "$(kubectl get pods \
+  until [[ "$(kubectl get pods \
     --namespace "$2" \
     --selector app="$1" \
-    --output jsonpath='{$.items[0].status.containerStatuses.*.ready}')" != *true* ]]
+    --output jsonpath='{$.items[0].status.containerStatuses.*.ready}')" =~ (true ?)+ ]]
   do
     if [[ "$waiting" != "true" ]]; then
       printf "Waiting for %s to be ready" "$1"

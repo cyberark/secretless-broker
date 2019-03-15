@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+. ./utils.sh
+
+# application url accessible to local machine
+#
+# NOTE 1: Defined in quick-start-application.yml as nodePort
+#
+# NOTE 2: This file does not have access to the secrets stored in
+# security_admin_secrets.sh.  It knows only this application url:
+APPLICATION_URL="$(minikube ip)":30002 
+
+##################################################
+step "Start application"
+
+kubectl --namespace quick-start-application-ns \
+  apply --filename "etc/quick-start-application.yml"
+
+# Since wait_for_app and kubectl rollout status are both not working...
+# We revert to simply pinging the endpoint
+printf 'Waiting for application to boot up\n'
+printf '(This may take more than 1 minute)\n'
+
+until curl --silent "${APPLICATION_URL}/pets" >/dev/null; do
+  printf "."
+  sleep 3
+done
+
+printf 'Done\n'
+
+##################################################
+step "Add a Sample Pet"
+
+# -include includes HTTP headers
+curl -include \
+  --data '{"name": "Mr. Snuggles"}' \
+  --header "Content-Type: application/json" \
+  "${APPLICATION_URL}/pet"
+
+##################################################
+step "Retrieve All Pets"
+
+curl -include "${APPLICATION_URL}/pets"
+
+printf '\n\nAll finished!  Secretless is working!\n\n'

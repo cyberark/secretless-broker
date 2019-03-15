@@ -35,7 +35,7 @@ step "Create Application Database"
 
 # Note: the `psql` command requires the --stdin flag
 kubectl --namespace quick-start-backend-ns \
-exec --stdin "$(first_pod quick-start-backend quick-start-backend-ns)" \
+  exec --stdin "$(first_pod quick-start-backend quick-start-backend-ns)" \
   -- \
     psql --username "${DB_ADMIN_USER}" \
     --command "CREATE DATABASE quick_start_db;"

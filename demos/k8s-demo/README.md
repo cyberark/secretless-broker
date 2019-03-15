@@ -88,7 +88,7 @@ configmap "quick-start-application-secretless-config" created
 to the database.**
 
 In particular, as the application developer you do not know any of the secrets
-in **admin_config.sh**.
+in **security_admin_secrets.sh**.
 
 **As the application developer:**                                                                                                                                       
 

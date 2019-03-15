@@ -1,7 +1,8 @@
-#!/bin/bash -e
-set -o pipefail
+#!/bin/bash
 
-CURRENT_DIR=$($(dirname $0)/abspath)
+set -eo pipefail
+
+CURRENT_DIR=$("$(dirname "$0")/abspath")
 TOPLEVEL_DIR="$CURRENT_DIR/.."
 
 DOCS_DIR="$TOPLEVEL_DIR/docs"
@@ -22,11 +23,12 @@ rm -rf "${DEST_SITE_DIR}"
 mkdir -p "${DEST_SITE_DIR}"
 
 echo "Cleaning up generated files..."
-rm -rf $DOCS_DIR/generated/*.html
+rm -rf "$DOCS_DIR"/generated/*.html
 
 echo "Reading and generating godoc pages..."
-cat $DOCS_DIR/godoc_packages.txt | while read package; do
-  if [[ "${package}" =~ ^\#.* ]] || [[ "${package}" == "" ]]; then
+while read -r package "$DOCS_DIR/godoc_packages.txt"; do
+  # Note: "${package:?}" instead of "${package}" to avoice shellcheck 2154
+  if [[ "${package:?}" =~ ^\#.* ]] || [[ "${package:?}" == "" ]]; then
     continue
   fi
 
@@ -59,12 +61,12 @@ godoc_package: ${package}
                                    "/go/src/${REPOSITORY}/${package}" | sed 1,19d >> "${output_file}"
 
   # Sanity check that godoc actually generated something
-  if [[ "$(tail -2 ${output_file})" =~ .*Package\ import.* ]]; then
+  if [[ "$(tail -2 "${output_file}")" =~ .*Package\ import.* ]]; then
     echo "ERROR: Output file '${output_file}' was empty!"
     exit 1
   fi
 
-  echo -e "\n</div>\n" >> "${output_file}"
+  printf '\n%s\n' '</div>' >> "${output_file}"
 done
 echo "Finished generating godoc pages."
 

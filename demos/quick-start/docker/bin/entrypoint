@@ -5,18 +5,27 @@ trap "exit 0" INT
 
 # Initialize postgres secrets
 export QUICKSTART_USERNAME="secretless"
-export QUICKSTART_PASSWORD="$(openssl rand -hex 8)"
-export POSTGRES_PASSWORD="$(openssl rand -hex 8)"
+
+QUICKSTART_PASSWORD="$(openssl rand -hex 8)"
+export QUICKSTART_PASSWORD
+
+POSTGRES_PASSWORD="$(openssl rand -hex 8)"
+export POSTGRES_PASSWORD
 
 ## Initialize SSH secrets
 ssh-keygen -b 2048 -f /tmp/id_rsa -N ''
 chown secretless /tmp/id_rsa
 mv /tmp/id_rsa.pub /home/user/.ssh/authorized_keys
-export SSH_PRIVATE_KEY="$(cat /tmp/id_rsa)"
+
+SSH_PRIVATE_KEY="$(cat /tmp/id_rsa)"
+export SSH_PRIVATE_KEY
 
 ## Initialize nginx secrets (for HTTP auth)
 export BASIC_AUTH_USERNAME="user"
-export BASIC_AUTH_PASSWORD="$(openssl rand -hex 16)"
+
+BASIC_AUTH_PASSWORD="$(openssl rand -hex 16)"
+export BASIC_AUTH_PASSWORD
+
 htpasswd \
   -cbd /etc/nginx/.htpasswd \
   "${BASIC_AUTH_USERNAME}" \

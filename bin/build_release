@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
-CURRENT_DIR=$($(dirname $0)/abspath)
-TOPLEVEL_DIR="$CURRENT_DIR/.."
+CURRENT_DIR=$("$(dirname "$0")/abspath")
 
 GORELEASER_IMAGE="goreleaser/goreleaser:latest-cgo"
 
@@ -15,8 +14,8 @@ echo "Current dir: $CURRENT_DIR"
 docker pull "${GORELEASER_IMAGE}"
 
 docker run --rm -it \
-  -v "$CURRENT_DIR/..:/secretless-broker" \
-  -w /secretless-broker \
-  "${GORELEASER_IMAGE}" ${GORELEASER_ARGS}
+  --volume "$CURRENT_DIR/..:/secretless-broker" \
+  --workdir /secretless-broker \
+  "${GORELEASER_IMAGE}" "${GORELEASER_ARGS}"
 
 echo "Releases built. Archives can be found in dist/goreleaser"

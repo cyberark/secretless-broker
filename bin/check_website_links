@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
-CURRENT_DIR=$($(dirname $0)/abspath)
+CURRENT_DIR="$("$(dirname "$0")/abspath")"
 TOPLEVEL_DIR="$CURRENT_DIR/.."
 
-docker run -v ${TOPLEVEL_DIR}/docs/_site:/_site:ro \
+docker run -v "${TOPLEVEL_DIR}/docs/_site:/_site:ro" \
            --network none \
            --rm \
            18fgsa/html-proofer --check-external-hash \

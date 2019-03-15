@@ -1,6 +1,8 @@
-#!/bin/bash -ex
+#!/bin/bash 
 
-pushd $(dirname $0)/..
+set -ex
+
+pushd "$(dirname "$0")/.."
 trap popd EXIT INT TERM
 
 echo "Building for darwin/amd64"
@@ -8,6 +10,6 @@ echo "Building for darwin/amd64"
 mkdir -p dist/darwin/amd64
 env GOOS=darwin GOARCH=amd64 go build -o dist/darwin/amd64/secretless-broker ./cmd/secretless-broker
 
-if [ "$NO_SUMMON" == "" ]; then
+if [[ -z "$NO_SUMMON" ]]; then
   env GOOS=darwin GOARCH=amd64 go build -o dist/darwin/amd64/summon2 ./cmd/summon2
 fi

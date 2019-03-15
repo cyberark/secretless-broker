@@ -1,4 +1,10 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -e
+
+most_recent_version() {
+  sort --reverse --version-sort | head -1
+}
 
 if [[ $# -lt 1 ]]; then
   echo "Usage: $0 [--dry-run] <new_release_version>"
@@ -11,47 +17,49 @@ if [[ "$1" == "--dry-run" ]]; then
   shift
 fi
 
-desired_version=$(echo ${1} | sed 's/^v//')
-tags=$(git tag | grep '^v' | sed 's/^v//')
-latest_tag=$(echo "$tags" | sort -rV | head -1)
+desired_tag=${1//v/}
+latest_tag=$(git tag | sed 's/^v//' | most_recent_version)
+latest_version="v${latest_tag}"
+desired_version="v${desired_tag}"
 
-echo "Latest known tag: 'v${latest_tag}'"
-echo "New version: 'v${desired_version}'"
+echo "Latest known tag: '${latest_tag}'"
+echo "New version: 'v${desired_tag}'"
 
 # Sanity check
-newer_version=$(echo -e "${latest_tag}\n${desired_version}" | sort -rV | head -1)
-if [[ "${newer_version}" != "${desired_version}" ]]; then
-  echo "ERROR! Desired version 'v${desired_version}' is below latest version 'v${latest_tag}'!"
+newest_tag=$(printf '%s\n%s' "${latest_tag}" "${desired_tag}" | most_recent_version)
+if [[ "${newest_tag}" != "${desired_tag}" ]]; then
+  echo "ERROR! Desired version '${desired_version}' is below latest version '${latest_version}'!"
   echo "Exiting!"
   exit 1
 fi
 
 echo "Fetching git commit data..."
-git_diff=$(git log --format="- %s" "v${latest_tag}..HEAD")
+git_diff=$(git log --format="- %s" "${latest_version}..HEAD")
 change_date=$(date +%Y-%m-%d)
 
-changelog_snippet="\n"
-changelog_snippet+="## [${desired_version}] ${change_date}\n\n"
-changelog_snippet+="### TODO: Don't commit this without proofreading!!!\n\n"
-changelog_snippet+="### Added\n\n"
-changelog_snippet+="### Changed\n\n"
+changelog_snippet='\n'
+changelog_snippet+="## [${desired_tag}] ${change_date}"'\n\n'
+changelog_snippet+="### TODO: Don't commit this without proofreading!!!"'\n\n'
+changelog_snippet+='### Added\n\n'
+changelog_snippet+='### Changed\n\n'
 changelog_snippet+="${git_diff}"
 
 echo "Adding snippet to tempfile..."
 tmp_file=$(mktemp /tmp/changelog_snippet.XXXXXX)
-echo -e "${changelog_snippet}" >> ${tmp_file}
+printf "%s" "${changelog_snippet}" >> "${tmp_file}"
 echo "Tempfile: ${tmp_file}"
 
 echo "Adding snippet to CHANGELOG..."
-sed "/^## \[Unreleased\]/r ${tmp_file}" CHANGELOG.md > CHANGELOG.md.tmp
+sed "/^## \\[Unreleased\\]/r ${tmp_file}" CHANGELOG.md > CHANGELOG.md.tmp
 
 rm -f "${tmp_file}"
 
 echo "Appending link to diff..."
-echo -e "[${desired_version}]: https://github.com/cyberark/secretless-broker/compare/v${latest_tag}...v${desired_version}\n" >> CHANGELOG.md.tmp
+echo "[${desired_tag}]: https://github.com/cyberark/secretless-broker/compare/${latest_version}...${desired_version}" $'\n' >> CHANGELOG.md.tmp
 
+# shellcheck disable=SC1117
 sed -i .bak \
-    "s/^\[Unreleased\]: .*/[Unreleased]: https:\/\/github.com\/cyberark\/secretless-broker\/compare\/v${desired_version}...HEAD/" \
+    "s/^\[Unreleased\]: .*/[Unreleased]: https:\/\/github.com\/cyberark\/secretless-broker\/compare\/${desired_version}...HEAD/" \
     CHANGELOG.md.tmp
 
 if [[ "${dry_run}" == "true" ]]; then

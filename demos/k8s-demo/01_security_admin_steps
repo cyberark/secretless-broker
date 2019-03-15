@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+# generic utilities
 . ./utils.sh
-. ./admin_config.sh
+
+# secrets known only by the security admin exported as env variables
+. ./security_admin_secrets.sh
 
 ##################################################
 step "Create a new namespace"
@@ -26,18 +29,16 @@ kubectl --namespace quick-start-backend-ns apply \
   --filename "etc/pg.yml"
 
 wait_for_app "quick-start-backend" "quick-start-backend-ns"
-# why doesn't this work?
-# kubectl --namespace quick-start-backend-ns \
-#   rollout status "statefulset/quick-start-backend"
 
 ##################################################
 step "Create Application Database"
 
+# Note: the `psql` command requires the --stdin flag
 kubectl --namespace quick-start-backend-ns \
- exec --stdin "$(first_pod quick-start-backend quick-start-backend-ns)" \
- -- \
-  psql --username "${DB_ADMIN_USER}" \
-  --command "CREATE DATABASE quick_start_db;"
+exec --stdin "$(first_pod quick-start-backend quick-start-backend-ns)" \
+  -- \
+    psql --username "${DB_ADMIN_USER}" \
+    --command "CREATE DATABASE quick_start_db;"
 
 ##################################################
 step "Create Database Table and Permissions"
@@ -66,6 +67,9 @@ EOSQL
 ##################################################
 step "Store DB credentials in Kubernetes Secrets"
 
+# Note: We're creating a separate namespace for the app just to emphasize the
+# conceptual separation between the duties of the security admin and the app
+# developer
 delete_ns_and_cleanup "quick-start-application-ns"
 kubectl create namespace "quick-start-application-ns"
 

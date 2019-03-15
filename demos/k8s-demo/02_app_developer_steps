@@ -7,7 +7,7 @@
 # NOTE 1: Defined in quick-start-application.yml as nodePort
 #
 # NOTE 2: This file does not have access to the secrets stored in
-# admin_config.sh.  It knows only this application url:
+# security_admin_secrets.sh.  It knows only this application url:
 APPLICATION_URL="$(minikube ip)":30002 
 
 ##################################################

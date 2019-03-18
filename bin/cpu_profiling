@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-#Note: use _ instead of i to avoid shellcheck error
 for _ in {1..10}; do
   psql -h localhost -p 15432 sslmode=disable -c "select count(*) from test.test" postgres
 done

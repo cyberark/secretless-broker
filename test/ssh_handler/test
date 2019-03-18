@@ -12,15 +12,15 @@ function pass() {
 function print_status() {
   result="${1}"
   set +x
-  echo "=== RUN TestSSHAgentHandler"
-  echo "--- $result: TestSSHAgentHandler ($(runtime).00s)"
+  echo "=== RUN TestSSHHandler"
+  echo "--- $result: TestSSHHandler ($(runtime).00s)"
   echo "$result"
 
   if [ "$result" = "FAIL" ]; then
     echo "exit status 1"
   fi
 
-  echo "$result    github.com/cyberark/secretless-broker/test/ssh_agent_handler  $(runtime).000s"
+  echo "$result    github.com/cyberark/secretless-broker/test/ssh_handler  $(runtime).000s"
 }
 
 function runtime() {

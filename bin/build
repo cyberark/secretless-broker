@@ -22,7 +22,8 @@ fi
 
 echo "Building secretless-broker:$TAG Docker image"
 # NOTE: the latest tag is required by downstream pipeline stages
-# shellcheck disable=SC2086 # (we want the flags to be word split here)
+# (we want the flags to be word split here)
+# shellcheck disable=SC2086
 docker build -t "secretless-broker:${TAG}" \
              -t "secretless-broker:latest" \
              $DOCKER_FLAGS \
@@ -31,7 +32,8 @@ docker build -t "secretless-broker:${TAG}" \
 
 echo "Building secretless-dev:$TAG Docker image"
 # NOTE: the latest tag is required by downstream pipeline stages
-# shellcheck disable=SC2086 # (we want the flags to be word split here)
+# (we want the flags to be word split here)
+# shellcheck disable=SC2086
 docker build -t "secretless-dev:${TAG}" \
              -t "secretless-dev:latest" \
              $DOCKER_FLAGS \
@@ -40,7 +42,8 @@ docker build -t "secretless-dev:${TAG}" \
 
 echo "Building secretless-broker-quickstart:$TAG Docker image"
 # NOTE: the latest tag is required by downstream pipeline stages
-# shellcheck disable=SC2086 # (we want the flags to be word split here)
+# (we want the flags to be word split here)
+# shellcheck disable=SC2086
 docker build -t "secretless-broker-quickstart:${TAG}" \
              -t "secretless-broker-quickstart:latest" \
              $DOCKER_FLAGS \

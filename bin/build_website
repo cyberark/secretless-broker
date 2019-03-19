@@ -26,7 +26,7 @@ echo "Cleaning up generated files..."
 rm -rf "$DOCS_DIR"/generated/*.html
 
 echo "Reading and generating godoc pages..."
-while read -r package "$DOCS_DIR/godoc_packages.txt"; do
+while read -r package; do
   # Note: "${package:?}" instead of "${package}" to avoid shellcheck 2154
   #        This ? version will throw an error if package isn't defined.
   if [[ "${package:?}" =~ ^\#.* ]] || [[ -z "${package}" ]]; then
@@ -68,7 +68,8 @@ godoc_package: ${package}
   fi
 
   printf '\n%s\n' '</div>' >> "${output_file}"
-done
+done < "$DOCS_DIR/godoc_packages.txt"
+
 echo "Finished generating godoc pages."
 
 echo "Building..."

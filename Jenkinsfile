@@ -8,6 +8,10 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '30'))
   }
 
+  triggers {
+    cron(getDailyCronString())
+  }
+
   stages {
     stage('Image Build') {
       steps {

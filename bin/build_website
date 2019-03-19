@@ -29,7 +29,7 @@ echo "Reading and generating godoc pages..."
 while read -r package "$DOCS_DIR/godoc_packages.txt"; do
   # Note: "${package:?}" instead of "${package}" to avoid shellcheck 2154
   #        This ? version will throw an error if package isn't defined.
-  if [[ "${package:?}" =~ ^\#.* ]] || [[ "${package:?}" == "" ]]; then
+  if [[ "${package:?}" =~ ^\#.* ]] || [[ -z "${package}" ]]; then
     continue
   fi
 

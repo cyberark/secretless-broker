@@ -20,6 +20,6 @@ docker run --rm \
   -e AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY \
   mesosphere/aws-cli \
-    s3 sync --delete "/_site s3://${S3_BUCKET}"
+    s3 sync --delete /_site "s3://${S3_BUCKET}"
 
 echo "Publishing done!"

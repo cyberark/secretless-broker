@@ -1,4 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -e
 
 . bin/build_utils
 
@@ -18,7 +20,7 @@ readonly TAGS=(
 
 # fetching tags is required for git_description to work
 git fetch --tags
-git_description=`git describe`
+git_description=$(git describe)
 
 for image_name in "${IMAGES[@]}"; do
   # always push the tag with the commit hash
@@ -32,7 +34,7 @@ for image_name in "${IMAGES[@]}"; do
   if [ "$git_description" = "v${VERSION}" ]; then
     echo "Revision $git_description matches version $VERSION exactly. Pushing to Dockerhub..."
 
-    for tag in "${TAGS[@]}" $(gen_versions $VERSION); do
+    for tag in "${TAGS[@]}" $(gen_versions "$VERSION"); do
       echo "Tagging and pushing $REGISTRY/$image_name:$tag"
 
       docker tag "$image_name:$TAG" "$REGISTRY/$image_name:$tag"

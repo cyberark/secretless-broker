@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash 
+
+set -ex
 
 source ./_conjur.sh
 
@@ -10,6 +12,6 @@ export CONJUR_AUTHN_API_KEY="$myapp_tls_api_key"
 docker-compose up --no-deps -d myapp_tls
 
 docker-compose run --rm \
-                   -v $PWD/../src/proxy_tls/proxy_tls.pem:/proxy_tls.pem \
+                   -v "$PWD"/../src/proxy_tls/proxy_tls.pem:/proxy_tls.pem \
                    client \
                    /bin/sh -c 'curl --cacert /proxy_tls.pem https://myapp_tls | jq'

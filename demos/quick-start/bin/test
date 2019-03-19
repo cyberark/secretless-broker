@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-CURRENT_DIR=$(dirname $0)
+CURRENT_DIR="$(dirname "$0")"
 
 echo "Cleaning up old runners..."
-$CURRENT_DIR/stop || true
+"$CURRENT_DIR/stop" || true
 echo "Clean up complete"
 
 pushd test &>/dev/null

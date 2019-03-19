@@ -1,14 +1,16 @@
-#!/bin/sh -e
+#!/bin/bash
+
+set -e
 
 # Publish the site from _site to S3 bucket.
 # It needs the following environment variables:
 # - AWS_ACCESS_KEY_ID
 # - AWS_SECRET_ACCESS_KEY
 # - S3_BUCKET
-
+#
 # Note that this requires docs/_site to be present
 
-CURRENT_DIR=$($(dirname $0)/abspath)
+CURRENT_DIR=$("$(dirname "$0")/abspath")
 TOPLEVEL_DIR="$CURRENT_DIR/.."
 
 echo "Publishing to $S3_BUCKET..."
@@ -18,6 +20,6 @@ docker run --rm \
   -e AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY \
   mesosphere/aws-cli \
-    s3 sync --delete /_site s3://${S3_BUCKET}
+    s3 sync --delete "/_site s3://${S3_BUCKET}"
 
 echo "Publishing done!"

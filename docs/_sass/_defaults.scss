@@ -1,112 +1,125 @@
 // ***********************
 // Default values
 // ***********************
+
 html { 
-	font-size: 62.5%; 
-	font-family: $sless-font-primary;
-	color: $sless-text;
+  font-size: 62.5%; 
+  font-family: $sless-font-primary;
+  color: $sless-text;
 }
+
 body {
-	font-family: $sless-font-primary;
-	font-size: 1.5rem;
-	color: $sless-text;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
+  font-family: $sless-font-primary;
+  font-size: 1.5rem;
+  color: $sless-text;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
+
 p {
-	line-height: 1.8;
+  line-height: 1.8;
 }
+
 li {
-	font-size: 1.5rem;
-	line-height: 1.8;
+  font-size: 1.5rem;
+  line-height: 1.8;
 }
+
 code {
-	margin-left: 2.5rem;
-	color: #4d8fcc;
-	&.highlighter-rouge {
-		background-color: darken($sless-light-blue, 02);
-		padding: .2rem .4rem;
-		border-radius: .2rem;
-	}
+  margin-left: 2.5rem;
+  color: #4d8fcc;
+
+  &.highlighter-rouge {
+    background-color: darken($sless-light-blue, 02);
+    padding: .2rem .4rem;
+    border-radius: .2rem;
+  }
 }
+
 a {
-	text-decoration: none;
-	display: inline-block;
-	color: $sless-blue;
+  text-decoration: none;
+  display: inline-block;
+  color: $sless-blue;
 }
+
 hr {
-	position: relative;
+  position: relative;
 }
+
 button:focus {
-	outline: 0;
+  outline: 0;
 }
+
 pre {
-	background-color: white;
-	&.highlight {
-		padding: 2rem;
-	}
+  background-color: white;
+  
+  &.highlight {
+    padding: 2rem;
+  }
 }
+
 code {
-	margin: 0;
+  margin: 0;
 }
 
 .highlighter-rouge .highlight {
-	border-radius: $border-radius;
-	margin: 1rem 0;
-	background-color: $sless-dark-blue;
+  border-radius: $border-radius;
+  margin: 1rem 0;
+  background-color: $sless-dark-blue;
 }
+
 .page-title {
-	font-size: 4rem;
-	color: $sless-blue;
-	font-weight: 800;
-	margin-bottom: 3rem;
+  font-size: 4rem;
+  color: $sless-blue;
+  font-weight: 800;
+  margin-bottom: 3rem;
 }
 
 h1 {
-	color: $sless-blue;
-	margin-top: 0;
-	margin-bottom: 2rem;
-	font-weight: 800;
-	font-size: 4.5rem;
-	font-family: $sless-font-secondary;
+  color: $sless-blue;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  font-weight: 800;
+  font-size: 4.5rem;
+  font-family: $sless-font-secondary;
 }
 
 h2 {
-	color: $sless-blue;
-	font-size: 3rem;
-	margin: 2rem 0 1rem 0;
-	font-family: $sless-font-secondary;
+  color: $sless-blue;
+  font-size: 3rem;
+  margin: 2rem 0 1rem 0;
+  font-family: $sless-font-secondary;
 }
 
 h3 {
-	color: $sless-blue;
-	font-size: 2rem;
-	margin: 2rem 0 2rem 0;
-	font-family: $sless-font-secondary;
+  color: $sless-blue;
+  font-size: 2rem;
+  margin: 2rem 0 2rem 0;
+  font-family: $sless-font-secondary;
 }
 
 h4 {
-	text-transform: uppercase;
-	color: $sless-text;
-	font-family: $sless-font-secondary;
-	font-weight: bold;
-	margin: 2rem 0 2rem 0;
+  text-transform: uppercase;
+  color: $sless-text;
+  font-family: $sless-font-secondary;
+  font-weight: bold;
+  margin: 2rem 0 2rem 0;
 }
 
 .container {
-	flex: 1;
-	padding-bottom: 6rem;
+  flex: 1;
+  padding-bottom: 6rem;
 }
 
 .content {
-	padding-top: 3rem;
+  padding-top: 3rem;
 }
 
 .note {
   &:before {
-	content: 'Note: ';
-	font-weight: 800;
+  content: 'Note: ';
+  font-weight: 800;
   }
 
   background: #F3FCFD;
@@ -117,17 +130,17 @@ h4 {
 }
 
 .change-role {
-	background: pink;
-	border: 2px solid pink;
-	display: flex;
-	margin-bottom: 10px;
-	border-radius: 0.3rem;
-	padding: 1rem;
+  background: pink;
+  border: 2px solid pink;
+  display: flex;
+  margin-bottom: 10px;
+  border-radius: 0.3rem;
+  padding: 1rem;
   
   .character-icon { 
-	  flex-grow: 1; 
-	  margin-right: 1rem;
-	}
+    flex-grow: 1; 
+    margin-right: 1rem;
+  }
 
   .content { 
     display: flex;
@@ -139,7 +152,7 @@ h4 {
       font-size: 2rem;
       font-weight: bold;
       padding: 1rem 1rem 0 1rem;
-	}
+  }
 	
     .message {
       padding: 15px;

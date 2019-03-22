@@ -49,7 +49,7 @@ VAULT_ADDR=http://localhost:$vault_port
 VAULT_TOKEN=$root_token
 ENV
 
-vault_cmd mount kv
-vault_cmd write kv/db/password 'password=db-secret'
-vault_cmd write kv/frontend/admin-password 'password=frontend-secret'
-vault_cmd write kv/web/password 'value=web-secret'
+vault_cmd secrets enable kv
+vault_cmd kv put kv/db/password 'password=db-secret'
+vault_cmd kv put kv/frontend/admin-password 'password=frontend-secret'
+vault_cmd kv put kv/web/password 'value=web-secret'

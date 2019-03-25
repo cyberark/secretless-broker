@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  {% include head.html %}
+  <body>
+    <link rel="stylesheet" href="/css/tutorial.css">
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DGS7TG"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+    {% include top_nav.html %}
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h1 class="page-title" >{{ page.title }}</h1>
+          <div class="wrapper">
+            <div class="back item">
+              <p class="item-title">Overview</p>
+              <p>Applications and application developers should be **incapable of leaking secrets**.</p>
+
+              <p>To achieve that goal, you'll play two roles in this tutorial:</p>
+              <ol>
+                <li>A **Security Admin** who handles secrets, and has sole access to those secrets</li>
+                <li>An **Application Developer** with no access to secrets.</li>
+              </ol>
+              <p>The situation looks like this:</p>
+
+              ![Image](/img/secretless_overview.jpg)
+
+              <p>Specifically, we will:</p>
+
+              <p>**As the security admin:**</p>
+              <ol>
+              <li>Create a PostgreSQL database</li>
+              <li>Create a DB user for the application</li>
+              <li>Add that user's credentials to Kubernetes Secrets</li>
+              <li>Configure Secretless to connect to PostgreSQL using those credentials</li>
+              </ol>
+              <p>**As the application developer:**</p>
+              <ol>
+                <li>Configure the application to connect to PostgreSQL via Secretless</li>
+                <li>Deploy the application and the Secretless sidecar</li>
+              </ol>
+              <p class="item-title">Prerequisites</p>
+
+              <p>To run through this tutorial, you will need:</p>
+
+              <ul>
+                <li>A running Kubernetes cluster (you can use
+                [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) to run a
+                cluster locally)</li>
+                <li>[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured
+                to point to the cluster</li>
+                <li>[Docker CLI](https://docs.docker.com/install/)
+              </ul>
+            </div>
+
+            <div class="front item">
+              <p class="item-title">This is a detailed, step-by-step tutorial.</p>
+              <p>You will:</p>
+              <ol>
+                <li>Deploy a PostgreSQL database</li>
+                <li>Store its credentials in Kubernetes secrets</li>
+                <li>Setup Secretless Broker to proxy connections to it</li>
+                <li>Deploy an application that connects to the database **without knowing its password**</li>
+            </ol>
+              <p>Already a Kubernetes expert? You may prefer our:</p>
+
+              <div style="text-align: center">
+                <a href="https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo" class="button btn-primary gradient">Advanced Github Tutorial</a>
+              </div>
+
+              <p>complete with shell scripts to get **the whole thing working end to end fast**.</p>
+
+              <p class="item-title">Table of Contents</p>
+
+              <ul>
+                <li>[Overview](#overview)</li>
+                <li>Steps for Security Admin</li>
+                <ul>
+                  <li>[Create PostgreSQL Service in Kubernetes](#create-postgresql-service-in-kubernetes)</li>
+                  <li>[Create Application Database](#create-application-database)</li>
+                  <li>[Create Application Namespace and Store Credentials](#create-application-namespace-and-store-credentials)</li>
+                  <li>[Create Secretless Broker Configuration ConfigMap](#create-secretless-broker-configuration-configmap)</li>
+                  <li>[Create Application Service Account and Grant Entitlements](#create-application-service-account-and-grant-entitlements)</li>
+                </ul>
+                <li>Steps for Application Developer</li>
+                <ul>
+                  <li>[Sample Application Overview](#sample-application-overview)</li>
+                  <li>[Create Application Deployment Manifest](#create-application-deployment-manifest)</li>
+                  <li>[Deploy Application With Secretless Broker](#deploy-application-with-secretless-broker)</li>
+                  <li>[Expose Application Publicly](#expose-application-publicly)</li>
+                </ul>
+                <li>[Test the Application](#test-the-application)</li>
+                <li>[Appendix - Secretless Deployment Manifest Explained](#appendix---secretless-deployment-manifest-explained)</li>
+                <ul>
+                  <li>[Networking](#networking)</li>
+                  <li>[SSL](#ssl)</li>
+                  <li>[Credential Access](#credential-access)</li>
+                  <li>[Configuration Access](#configuration-access)</li>
+                </ul>
+              </ul>
+            </div>
+          </div>
+
+          <button id="bBtn">back</button>
+          <button id="fBtn">forward</button>
+        </div>
+      </div>
+    </div>
+    {% include cta-banner.html %}
+    {% include footer.html %}
+    <script src='/javascript/clipboard-buttons.js' type="text/javascript"></script>
+    <script src="/javascript/tutorial.js"></script>
+
+  </body>
+</html>

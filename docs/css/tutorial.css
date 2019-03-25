@@ -1,0 +1,15 @@
+.wrapper {
+  position: relative;
+  min-height: 95rem;
+}
+
+.item {
+  position: absolute;
+  height: 90rem;
+  width: 100rem;
+  top: 0px;
+  left: 0px;
+  margin: 10px;
+  visibility: hidden;
+  background: white;
+}

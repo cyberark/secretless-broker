@@ -333,7 +333,7 @@ Example:
 ...
     credentials:
       - name: accessToken
-        provider: vault
+        provider: kubernetes
         id: secret_identifier#key
 ...
 ```

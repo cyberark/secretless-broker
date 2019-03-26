@@ -6,8 +6,44 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.0] 2019-03-26
+
 ### Added
-- Added ability to verify plugin checksums
+
+- Add ability to verify plugin checksums
+- Add kubernetes secrets provider to README.md
+- Note styling in Kubernetes tutorial
+- Add link to /tutorials in the top nav
+- Add daily build trigger
+- Add redirect link capabilities
+- Add version to README.md
+- Add a README for the shared library
+- C shared library exposing secret providers (POC)
+- Add custom 404 page
+
+### Changed
+
+- Update Kubernetes Tutorial for Simplicity and Clarity
+- Simplify fast k8s tutorial
+- Update CTA links
+- Refactor mysql/NativePassword to take bytes
+- Clean up Go memory of secrets
+- Refactor MySQL handler for readability and consistency
+- Updating website build to gen godocs in go img
+
+### Fixed
+
+- Fix kubernetes secrets example in README
+- Fix kubernetes-secrets-provider hash
+- Remove target=blank from footer links
+- Fix broken website publishing
+- Fix all non-TODO CodeClimate issues
+- Fix ssh hadler test naming
+- Make ssh-handler integration test pull images before build
+- Remove references to doc layout and update links
+- Remove hashicorp root cert to fix broken build
+- Fix the vault test that broke due to vault CLI updates
+- Re-enable ssh-handler tests
 
 ## [0.6.4] 2019-02-01
 
@@ -203,3 +239,4 @@ The first tagged version.
 [0.6.2]: https://github.com/cyberark/secretless-broker/compare/v0.6.1...v0.6.2
 [0.6.3]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...v0.6.3
 [0.6.4]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...v0.6.4
+[0.7.0]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...v0.7.0 

@@ -290,6 +290,7 @@ secrets management toolset.
 We currently support the following secrets providers/vaults:
 - [Conjur (`conjur`)](#conjur-provider)
 - [HashiCorp Vault (`vault`)](#hashicorp-vault-provider)
+- [Kubernetes Secrets Provider (`kubernetes`)](#kubernetes-provider)
 - [File Provider (`file`)](#file-provider)
 - [Environment Variable (`env`)](#environment-variable-provider )
 - [Literal Value (`literal`)](#literal-value-provider)
@@ -320,6 +321,20 @@ Example:
       - name: accessToken
         provider: vault
         id: path/to/the/token
+...
+```
+
+### Kubernetes Secrets Provider
+
+Kubernetes Secrets (`kubernetes`) provider allows use of [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) for fetching secrets.
+
+Example:
+```
+...
+    credentials:
+      - name: accessToken
+        provider: vault
+        id: secret_identifier#key
 ...
 ```
 

@@ -21,7 +21,7 @@ kubectl --namespace quick-start-application-ns \
 printf 'Waiting for application to boot up\n'
 printf '(This may take more than 1 minute)\n'
 
-until curl --silent "${APPLICATION_URL}/pets" >/dev/null; do
+until curl --connect-timeout 3 --silent "${APPLICATION_URL}/pets" >/dev/null; do
   printf "."
   sleep 3
 done

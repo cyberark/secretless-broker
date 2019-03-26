@@ -290,7 +290,7 @@ secrets management toolset.
 We currently support the following secrets providers/vaults:
 - [Conjur (`conjur`)](#conjur-provider)
 - [HashiCorp Vault (`vault`)](#hashicorp-vault-provider)
-- [Kubernetes Secrets Provider (`kubernetes`)](#kubernetes-provider)
+- [Kubernetes Secrets Provider (`kubernetes`)](#kubernetes-secrets-provider)
 - [File Provider (`file`)](#file-provider)
 - [Environment Variable (`env`)](#environment-variable-provider )
 - [Literal Value (`literal`)](#literal-value-provider)

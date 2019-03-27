@@ -105,7 +105,7 @@ $ docker run \
 In a new window, if we try to connect to PostgreSQL directly via port 5432 (guessing at the `postgres` username), our attempt will fail:
 
 ```sh-session
-$ psql -h localhost -p 5432 -U postgres -d quickstart
+$ psql "host=localhost port=5432 user=postgres dbname=quickstart sslmode=disable"
 Password for user postgres:
 psql: FATAL:  password authentication failed for user "postgres"
 ```
@@ -113,11 +113,7 @@ psql: FATAL:  password authentication failed for user "postgres"
 But the Secretless Broker is listening on port 5454, and will add authentication credentials (both username and password) to our connection request and proxy our connection to the PostgreSQL server:
 
 ```sh-session
-$ psql \
-  -h localhost \
-  -p 5454 \
-  --set=sslmode=disable \
-  -d quickstart
+$ psql "host=localhost port=5454 user=postgres dbname=quickstart sslmode=disable"
 psql (10.3, server 9.6.9)
 Type "help" for help.
 

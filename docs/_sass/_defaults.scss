@@ -2,8 +2,8 @@
 // Default values
 // ***********************
 
-html { 
-  font-size: 62.5%; 
+html {
+  font-size: 62.5%;
   font-family: $sless-font-primary;
   color: $sless-text;
 }
@@ -130,19 +130,19 @@ h4 {
 }
 
 .change-role {
-  background: pink;
-  border: 2px solid pink;
+  background: white;
+  border: 1px solid #E6E6E6;
   display: flex;
   margin-bottom: 10px;
   border-radius: 0.3rem;
   padding: 1rem;
-  
-  .character-icon { 
-    flex-grow: 1; 
+
+  .character-icon {
+    flex-grow: 1;
     margin-right: 1rem;
   }
 
-  .content { 
+  .content {
     display: flex;
     flex-direction: column;
     flex-grow: 100;

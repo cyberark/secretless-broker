@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  {% include head.html %}
+
+  <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DGS7TG"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+    {% include top_nav.html %}
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h1 class="page-title" >{{ page.title }}</h1>
+          <div class="page-subtitle">
+            <p class="page-subtitle-left">Estimated time to complete: {{ page.time-complete }} min</p>
+            <p class="page-subtitle-right">Products used: {{ page.products-used }}</p>
+          </div>
+            <div class="row">
+              <!-- TODO progress bar -->
+              <div class="col-md-4">
+                <p>test</p>
+              </div>
+              <!-- right-side of tutorial with content -->
+              <div class="col-md-8">
+                <h2 class="section-title">{{ page.section-header }}</h1>
+                {{ content }}
+                <!-- Sneakpeak as to what is to follow -->
+                <!-- TODO, check that there is an upnext (goes hand in hand with forward btn. If no more tiles, forward btn disppears) -->
+                <h2 class="section-title">Up next...</h1>
+                <p class="section-title-up-next">{{ page.up-next }}</p>
+              </div>
+            </div>
+          <!-- TODO Add navigation here -->
+          <!-- TODO If statement checking previous tile is null (if first element in nav), then back button doesn't show -->
+          <!-- ... or add in liquid checking attributes, if no previous attribute URL, then do not show -->
+            <button>next</button>
+            <button>back</button>
+          </div>
+        </div>
+      </div>
+    {% include cta-banner.html %}
+    {% include footer.html %}
+    <script src='/javascript/clipboard-buttons.js' type="text/javascript"></script>
+  </body>
+</html>

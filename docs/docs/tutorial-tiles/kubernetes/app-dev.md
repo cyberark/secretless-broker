@@ -6,6 +6,8 @@ description: Secretless Broker Documentation
 section-header: Steps for Application Developer
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
+back-btn: /docs/tutorial-tiles/kubernetes/sec-admin.html
+continue-btn: /docs/tutorial-tiles/kubernetes/appendix.html
 up-next: Get an overview of what is going to be covered in this tutorial.
 permalink: /docs/tutorial-tiles/kubernetes/app-dev.html
 ---
@@ -211,11 +213,7 @@ That's it!
   <b>without any knowledge of the credentials</b>.
   </p>
 
-  <img src="/img/its_magic.jpg" alt="It's Magic"/>
+  <img src="/img/its_magic.jpg" class="k8s-img" alt="It's Magic"/>
 </div>
 
-For more info on configuring Secretless for your own use case, see the:
-
-<div style="text-align: center">
-  <a href="https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm" class="button btn-primary gradient">Full Secretless Documentation</a>
-</div>
+For more info on configuring Secretless for your own use case, see the <a href="https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm">Secretless Documentation</a>

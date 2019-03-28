@@ -6,6 +6,8 @@ description: Secretless Broker Documentation
 section-header: Steps for Security Admin
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
+back-btn: /docs/tutorial-tiles/kubernetes/overview.html
+continue-btn: /docs/tutorial-tiles/kubernetes/app-dev.html
 up-next: Get an overview of what is going to be covered in this tutorial.
 permalink: /docs/tutorial-tiles/kubernetes/sec-admin.html
 ---

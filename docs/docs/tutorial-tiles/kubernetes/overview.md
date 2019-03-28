@@ -6,6 +6,8 @@ description: Secretless Broker Documentation
 section-header: Overview
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
+back-btn: /docs/tutorial-tiles/kubernetes/base.html
+continue-btn: /docs/tutorial-tiles/kubernetes/sec-admin.html
 up-next: Get an overview of what is going to be covered in this tutorial.
 permalink: /docs/tutorial-tiles/kubernetes/overview.html
 ---

@@ -1,3 +1,6 @@
+---
+layout: tutorial_index.html
+---
 <!DOCTYPE html>
 <html lang="en-us">
 
@@ -20,25 +23,38 @@
             <p class="page-subtitle-right">Products used: {{ page.products-used }}</p>
           </div>
             <div class="row">
-              <!-- TODO progress bar -->
-              <div class="col-md-4">
-                <p>test</p>
+              <div class="col-md-3 tutorial-left">
+                <div class="progressbar-index">
+                  <ul class="progressbar">
+                    {% for item in site.data.navigation.tutorial-tiles %}
+                      <li class="bubble {% if item.url == page.url %} active {% endif %}">{{ item.title }}</li>
+                    {% endfor %}
+                  </ul>
+                  <!-- <ul class="progressbar-elements">
+                    {% for item in site.data.navigation.tutorial-tiles %}
+                      <li class="progressbar-element">{{ item.title }}</li>
+                    {% endfor %}
+
+                  </ul> -->
+                </div>
               </div>
               <!-- right-side of tutorial with content -->
-              <div class="col-md-8">
+              <div class="col-md-9 tutorial-right">
                 <h2 class="section-title">{{ page.section-header }}</h1>
                 {{ content }}
-                <!-- Sneakpeak as to what is to follow -->
-                <!-- TODO, check that there is an upnext (goes hand in hand with forward btn. If no more tiles, forward btn disppears) -->
                 <h2 class="section-title">Up next...</h1>
                 <p class="section-title-up-next">{{ page.up-next }}</p>
               </div>
             </div>
-          <!-- TODO Add navigation here -->
-          <!-- TODO If statement checking previous tile is null (if first element in nav), then back button doesn't show -->
-          <!-- ... or add in liquid checking attributes, if no previous attribute URL, then do not show -->
-            <button>next</button>
-            <button>back</button>
+
+            <div class="tutorial-btns">
+              {% if page.back-btn %}
+                <a href={{ page.back-btn }}><button class="tutorial-back-btn button">back</button></a>
+              {% endif %}
+              {% if page.continue-btn %}
+                <a href={{ page.continue-btn }}><button class="tutorial-continue-btn button">continue</button></a>
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>

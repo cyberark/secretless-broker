@@ -6,7 +6,7 @@ spec:
   listeners:
     - name: http_config_1_listener
       protocol: http
-      address: 127.0.0.1:8080
+      address: 127.0.0.1:8000
 
   handlers:
     - name: http_config_1_handler

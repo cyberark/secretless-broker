@@ -38,3 +38,13 @@ footer-resources:
   - title: FAQ
     url: https://docs.secretless.io/Latest/en/Content/FAQ/faq.htm
     target: target="_blank" rel="noopener noreferrer"
+
+tutorial-tiles:
+  - title: Overview
+    url: /docs/tutorial-tiles/kubernetes/overview.html
+  - title: Steps for Security Admin
+    url: /docs/tutorial-tiles/kubernetes/sec-admin.html
+  - title: Steps for Application Developer
+    url: /docs/tutorial-tiles/kubernetes/app-dev.html
+  - title: Appendix - Secretless Deployment Manifest Explained
+    url: /docs/tutorial-tiles/kubernetes/appendix.html

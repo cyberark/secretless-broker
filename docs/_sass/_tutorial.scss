@@ -1,0 +1,86 @@
+.page-subtitle {
+    display: flex;
+    margin: -3rem 0rem 3rem 0rem;
+    font-style: italic;
+    color: #9396A2;
+    font-size: 1.3rem;
+    > p {
+      padding-right: 3rem;
+    }
+}
+
+.tutorial-right {
+	background-color: #F7F8FA;
+	box-shadow: 0px 4px 4px rgba(141, 132, 132, 0.25);
+	padding: 1rem 4rem 1rem 4rem;
+}
+
+.tutorial-left {
+  display: flex;
+}
+
+.progressbar {
+  counter-reset: step;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.progressbar li {
+  list-style: none;
+  position: relative;
+  float: left;
+}
+.progressbar li:before {
+  content: '';
+  counter-increment: step;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: .3rem solid #ddd;
+  display: block;
+  margin: 0 2rem 0rem 0;
+  border-radius: 50%;
+}
+.progressbar li:after{
+  content: '';
+  position: absolute;
+  width: 3.25rem;
+  height: .2rem;
+  background: #ddd;
+  transform: rotate(90deg);
+  top: 4rem;
+  left: -0.4rem;
+  z-index: -1;
+}
+.progressbar li:last-child:after {
+  content: none;
+}
+.progressbar li.active:before {
+  border: .3rem solid #33699C;
+  background-color: white;
+}
+.progressbar-elements {
+  padding-left: 0;
+  .progressbar-element {
+    list-style: none;
+  }
+}
+.bubble {
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: row;
+  font-size: 1.25rem;
+}
+
+.tutorial-btns {
+	text-align: right;
+	.tutorial-continue-btn {
+		background: rgba(51, 105, 156, 0.65);
+		border-radius: 4px;
+		color: white;
+	}
+}
+
+
+.k8s-img {
+  border: 1px solid #E6E6E6;
+}

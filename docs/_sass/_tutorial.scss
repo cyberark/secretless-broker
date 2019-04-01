@@ -36,7 +36,7 @@
   position: absolute;
   width: 5.25rem;
   height: .2rem;
-  background: #ddd;
+  background: #dddd;
   transform: rotate(90deg);
   top: 7rem;
   left: -0.6rem;
@@ -46,12 +46,22 @@
   content: none;
 }
 
-.active {
-  fill: #33699C;
+.progressbar-bubble {
+  fill: #dddd;
 }
 
-li.active:after {
-  background: #33699C;
+.progressbar .completed:after {
+  background-color: #33699C;
+}
+
+.active {
+  stroke: #33699C;
+  stroke-width: .2rem;
+  fill: #ffff;
+}
+
+.completed {
+  fill: #33699C;
 }
 
 .progressbar-elements {
@@ -61,7 +71,6 @@ li.active:after {
   }
 }
 .progressbar-bubble {
-  // margin-bottom: 3rem;
   min-height: 7rem;
   display: flex;
   align-items: center;

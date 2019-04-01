@@ -7,7 +7,7 @@ section-header: Appendix - Secretless Deployment Manifest Explained
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
 back-btn: /docs/tutorial-tiles/kubernetes/app-dev.html
-continue-btn:
+continue-btn: /docs/tutorial-tiles/kubernetes/finish.html
 up-next:
 permalink: /docs/tutorial-tiles/kubernetes/appendix.html
 ---

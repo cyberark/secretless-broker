@@ -30,7 +30,7 @@ layout: tutorial_index.html
                   {% for item in site.data.navigation.tutorial-tiles %}
                     <li class="progressbar-bubble {% if item.url == page.url %} active {% endif %}">
                       <svg height="40" width="40">
-                        <circle class="cir" cx="20" cy="20" r="10" fill="dddd"/>
+                        <circle class="cir" cx="20" cy="20" r="10"/>
                       </svg>
                       <p class="progressbar-text">{{ item.title }}</p>
                     </li>
@@ -61,5 +61,6 @@ layout: tutorial_index.html
     {% include cta-banner.html %}
     {% include footer.html %}
     <script src='/javascript/clipboard-buttons.js' type="text/javascript"></script>
+    <script src='/javascript/tutorial.js' type="text/javascript"></script>
   </body>
 </html>

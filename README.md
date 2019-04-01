@@ -89,7 +89,7 @@ Successfully built cbf747e7f548
 Successfully tagged secretless-broker-quickstart:latest
 ```
 
-The quick start image runs the Secretless Broker binary and a few sample target services. The Secretless Broker is configured to retrieve the credentials required to access the services from the process environment. **All services are configured to require authorization to access**, but we don't know what those credentials are. We can try to access the services, but since we don't know the password our access attempts will fail. _But when we try to connect via the Secretless Broker_, we will be granted access.
+The quick start image runs the Secretless Broker binary and a few sample target services. The Secretless Broker is configured to retrieve the credentials required to access the services from the process environment. **All services are configured to require authentication to access**, but we don't know what those credentials are. We can try to access the services, but since we don't know the password our access attempts will fail. _But when we try to connect via the Secretless Broker_, we will be granted access.
 
 Let's try this with the PostgreSQL server running in the quick start image. We know that the server has been configured with a `quickstart` database, so let's try to access it.
 

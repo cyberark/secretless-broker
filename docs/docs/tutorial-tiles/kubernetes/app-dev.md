@@ -53,10 +53,8 @@ For usage examples, please see [Test the Application](#test-the-application).
 
 We're ready to deploy our application.
 
-A detailed explanation of the manifest below is in the [Appendix - Secretless
-Deployment Manifest
-Explained](#appendix---secretless-deployment-manifest-explained), but isn't
-needed to complete the tutorial.
+A detailed explanation of the manifest below is in the <a href="/docs/tutorial-tiles/kubernetes/appendix.html"> Appendix - Secretless
+Deployment Manifest Explained </a>, but isn't needed to complete the tutorial.
 
 To create the **quick-start-application.yml** manifest using the
 `APPLICATION_DB_NAME` above, run:

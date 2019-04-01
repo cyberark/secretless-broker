@@ -30,45 +30,49 @@
   position: relative;
   float: left;
 }
-.progressbar li:before {
-  content: '';
-  counter-increment: step;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: .3rem solid #ddd;
-  display: block;
-  margin: 0 2rem 0rem 0;
-  border-radius: 50%;
-}
+
 .progressbar li:after{
   content: '';
   position: absolute;
-  width: 3.25rem;
+  width: 5.25rem;
   height: .2rem;
   background: #ddd;
   transform: rotate(90deg);
-  top: 4rem;
-  left: -0.4rem;
+  top: 7rem;
+  left: -0.6rem;
   z-index: -1;
 }
 .progressbar li:last-child:after {
   content: none;
 }
-.progressbar li.active:before {
-  border: .3rem solid #33699C;
-  background-color: white;
+
+.active {
+  fill: #33699C;
 }
+
+li.active:after {
+  background: #33699C;
+}
+
 .progressbar-elements {
   padding-left: 0;
   .progressbar-element {
     list-style: none;
   }
 }
-.bubble {
-  margin-bottom: 3rem;
+.progressbar-bubble {
+  // margin-bottom: 3rem;
+  min-height: 7rem;
   display: flex;
+  align-items: center;
   flex-direction: row;
   font-size: 1.25rem;
+}
+
+.progressbar-text {
+  margin-left: 0rem;
+  width: 19rem;
+  margin-bottom: 0;
 }
 
 .tutorial-btns {
@@ -79,7 +83,6 @@
 		color: white;
 	}
 }
-
 
 .k8s-img {
   border: 1px solid #E6E6E6;

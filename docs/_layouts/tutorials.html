@@ -22,22 +22,22 @@ layout: tutorial_index.html
             <p class="page-subtitle-left">Estimated time to complete: {{ page.time-complete }} min</p>
             <p class="page-subtitle-right">Products used: {{ page.products-used }}</p>
           </div>
-            <div class="row">
-              <div class="col-md-3 tutorial-left">
-                <div class="progressbar-index">
-                  <ul class="progressbar">
-                    {% for item in site.data.navigation.tutorial-tiles %}
-                      <li class="bubble {% if item.url == page.url %} active {% endif %}">{{ item.title }}</li>
-                    {% endfor %}
-                  </ul>
-                  <!-- <ul class="progressbar-elements">
-                    {% for item in site.data.navigation.tutorial-tiles %}
-                      <li class="progressbar-element">{{ item.title }}</li>
-                    {% endfor %}
-
-                  </ul> -->
-                </div>
+          <div class="row">
+            <!-- left-side of tutorial with content -->
+            <div class="col-md-3 tutorial-left">
+              <div class="progressbar-index">
+                <ul class="progressbar">
+                  {% for item in site.data.navigation.tutorial-tiles %}
+                    <li class="progressbar-bubble {% if item.url == page.url %} active {% endif %}">
+                      <svg height="40" width="40">
+                        <circle class="cir" cx="20" cy="20" r="10" fill="dddd"/>
+                      </svg>
+                      <p class="progressbar-text">{{ item.title }}</p>
+                    </li>
+                  {% endfor %}
+                </ul>
               </div>
+            </div>
               <!-- right-side of tutorial with content -->
               <div class="col-md-9 tutorial-right">
                 <h2 class="section-title">{{ page.section-header }}</h1>
@@ -49,10 +49,10 @@ layout: tutorial_index.html
 
             <div class="tutorial-btns">
               {% if page.back-btn %}
-                <a href={{ page.back-btn }}><button class="tutorial-back-btn button">back</button></a>
+                <a href={{ page.back-btn }}><button class="tutorial-back-btn button" id="back">back</button></a>
               {% endif %}
               {% if page.continue-btn %}
-                <a href={{ page.continue-btn }}><button class="tutorial-continue-btn button">continue</button></a>
+                <a href={{ page.continue-btn }}><button class="tutorial-continue-btn button" id="continue">continue</button></a>
               {% endif %}
             </div>
           </div>

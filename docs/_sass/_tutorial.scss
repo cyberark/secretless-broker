@@ -1,6 +1,16 @@
 // ***********************
 // Tutorial styling
 // ***********************
+.tutorial-right {
+  background-color: #F7F8FA;
+  box-shadow: 0px 4px 4px rgba(141, 132, 132, 0.25);
+  padding: 1rem 4rem 4rem 4rem;
+}
+
+.tutorial-left {
+  display: flex;
+}
+
 .page-subtitle {
     display: flex;
     margin: -3rem 0rem 3rem 0rem;

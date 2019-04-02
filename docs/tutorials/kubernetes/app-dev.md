@@ -6,10 +6,10 @@ description: Secretless Broker Documentation
 section-header: Steps for Application Developer
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
-back-btn: /docs/tutorial-tiles/kubernetes/sec-admin.html
-continue-btn: /docs/tutorial-tiles/kubernetes/appendix.html
-up-next: Get an overview of what is going to be covered in this tutorial.
-permalink: /docs/tutorial-tiles/kubernetes/app-dev.html
+back-btn: /tutorials/kubernetes/sec-admin.html
+continue-btn: /tutorials/kubernetes/appendix.html
+up-next: Get a closer look at Secretless...
+permalink: /tutorials/kubernetes/app-dev.html
 ---
 
 <div class="change-role">
@@ -19,7 +19,7 @@ permalink: /docs/tutorial-tiles/kubernetes/app-dev.html
       You are now the application developer.  
     </div>
     <div class="message">
-      You can no longer access the secrets we stored above in environment
+      You can no longer access the secrets we stored previously in environment
       variables.  Open a new terminal so that all those variables are gone.
     </div>
   </div>
@@ -53,8 +53,8 @@ For usage examples, please see [Test the Application](#test-the-application).
 
 We're ready to deploy our application.
 
-A detailed explanation of the manifest below is in the <a href="/docs/tutorial-tiles/kubernetes/appendix.html"> Appendix - Secretless
-Deployment Manifest Explained </a>, but isn't needed to complete the tutorial.
+A detailed explanation of the manifest below is featured in the next step, <a href="/tutorials/kubernetes/appendix.html">Appendix - Secretless
+Deployment Manifest Explained</a> and isn't needed to complete the tutorial.
 
 To create the **quick-start-application.yml** manifest using the
 `APPLICATION_DB_NAME` above, run:

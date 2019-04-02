@@ -30,7 +30,7 @@ footer-docs:
 
 footer-resources:
   - title: Tutorial
-    url: /docs/get_started/kubernetes_tutorial.html
+    url: /docs/tutorial-tiles/kubernetes/kubernetes-tutorial-base.html
   - title: Community
     url: /community.html
   - title: Blog

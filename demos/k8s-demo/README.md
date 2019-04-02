@@ -6,7 +6,7 @@ It's intended for advanced users and is light on explanations.
 
 For a friendlier version of this tutorial, with breakdowns of every step, try:
 
-[Our Detailed Introduction to Secretless in Kubernetes](https://secretless.io/docs/get_started/kubernetes_tutorial.html)
+[Our Detailed Introduction to Secretless in Kubernetes](https://secretless.io/docs/tutorial-tiles/kubernetes/kubernetes-tutorial-base.html)
 
 ## Overview
 
@@ -14,7 +14,7 @@ Here's what we'll do:
 
 1. Deploy a PostgreSQL database
 2. Store its credentials in Kubernetes secrets
-3. Setup Secretless Broker to proxy connections to it 
+3. Setup Secretless Broker to proxy connections to it
 4. Deploy a sample application that connects to the database **without knowing
    its password**
 
@@ -113,12 +113,12 @@ Waiting for application to boot up
 (This may take more than 1 minute)
 ............................Done
 >>--- Add a Sample Pet
-HTTP/1.1 201 
+HTTP/1.1 201
 Location: http://192.168.99.100:30002/pet/1
 Content-Length: 0
 Date: Thu, 14 Mar 2019 15:35:33 GMT
 >>--- Retrieve All Pets
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: application/json;charset=UTF-8
 Transfer-Encoding: chunked
 Date: Thu, 14 Mar 2019 15:35:33 GMT

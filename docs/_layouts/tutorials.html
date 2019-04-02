@@ -22,28 +22,32 @@ layout: tutorial_index.html
             <p class="page-subtitle-left">Estimated time to complete: {{ page.time-complete }} min</p>
             <p class="page-subtitle-right">Products used: {{ page.products-used }}</p>
           </div>
-          <div class="row">
+
+          <div class="row page-wrapper">
             <!-- left-side of tutorial with content -->
-            <div class="col-md-3 tutorial-left">
+            <div class="col-xs-12 col-s-12 col-md-3 tutorial-left">
               <div class="progressbar-index">
                 <ul class="progressbar">
+
                   {% for item in site.data.navigation.tutorial-tiles %}
-                    <li class="progressbar-bubble {% if item.url == page.url %} active {% endif %}">
+                    <li class="progressbar-bubble {% if item.url == page.url %}active {% endif %}">
                       <svg height="40" width="40">
                         <circle class="cir" cx="20" cy="20" r="10"/>
                       </svg>
-                      <p class="progressbar-text">{{ item.title }}</p>
+                      <a href="{{ item.url }}"><p id="progressbar-text">{{ item.title }}</p></a>
                     </li>
                   {% endfor %}
                 </ul>
               </div>
             </div>
               <!-- right-side of tutorial with content -->
-              <div class="col-md-9 tutorial-right">
+              <div class="col-xs-12 col-s-12 col-md-9 tutorial-right">
                 <h2 class="section-title">{{ page.section-header }}</h1>
                 {{ content }}
-                <h2 class="section-title">Up next...</h1>
-                <p class="section-title-up-next">{{ page.up-next }}</p>
+                {% if page.up-next %}
+                  <h2 class="section-title">Up next...</h1>
+                  <p class="section-title-up-next">{{ page.up-next }}</p>
+                {% endif %}
               </div>
             </div>
 

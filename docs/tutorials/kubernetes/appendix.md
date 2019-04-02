@@ -5,11 +5,11 @@ layout: tutorials
 description: Secretless Broker Documentation
 section-header: Appendix - Secretless Deployment Manifest Explained
 time-complete: 5
-products-used: Conjur Vault, Kubernetes
-back-btn: /docs/tutorial-tiles/kubernetes/app-dev.html
-continue-btn: /docs/tutorial-tiles/kubernetes/finish.html
-up-next:
-permalink: /docs/tutorial-tiles/kubernetes/appendix.html
+products-used: Kubernetes Secrets, PostgreSQL Handler
+back-btn: /tutorials/kubernetes/app-dev.html
+continue-btn: /tutorials/kubernetes/finish.html
+up-next: A summary of what you accomplished in this tutorial!
+permalink: /tutorials/kubernetes/appendix.html
 ---
 Here we'll walk through the application deployment manifest, to better
 understand how Secretless works.

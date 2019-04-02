@@ -9,7 +9,7 @@ products-used: Conjur Vault, Kubernetes
 back-btn:
 continue-btn: /docs/tutorial-tiles/kubernetes/overview.html
 up-next: Get an overview of what is going to be covered in this tutorial.
-permalink: /docs/tutorial-tiles/kubernetes/base.html
+permalink: /docs/tutorial-tiles/kubernetes/kubernetes-tutorial-base.html
 ---
 This is a detailed, step-by-step tutorial.
 

@@ -8,7 +8,7 @@ time-complete: 5
 products-used: Conjur Vault, Kubernetes
 back-btn: /docs/tutorial-tiles/kubernetes/app-dev.html
 continue-btn: /docs/tutorial-tiles/kubernetes/finish.html
-up-next:
+up-next: A summary of what you accomplished in this tutorial!
 permalink: /docs/tutorial-tiles/kubernetes/appendix.html
 ---
 Here we'll walk through the application deployment manifest, to better

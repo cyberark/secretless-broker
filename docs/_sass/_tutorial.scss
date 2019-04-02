@@ -1,3 +1,6 @@
+// ***********************
+// Tutorial styling
+// ***********************
 .page-subtitle {
     display: flex;
     margin: -3rem 0rem 3rem 0rem;
@@ -19,6 +22,9 @@
   display: flex;
 }
 
+// ***********************
+// Progress Bar
+// ***********************
 .progressbar {
   counter-reset: step;
   padding: 0;
@@ -94,6 +100,9 @@
   margin-bottom: 0;
 }
 
+// ***********************
+// Buttons
+// ***********************
 .tutorial-btns {
   text-align: right;
   #continue {
@@ -114,11 +123,17 @@
   }
 }
 
+// ***********************
+// Images
+// ***********************
 .k8s-img {
   width: 100%;
   border: 1px solid #E6E6E6;
 }
 
+// ***********************
+// Media queries
+// ***********************
 @media only screen and (max-width: 1100px) {
   #progressbar-text {
     width: 16rem;
@@ -188,4 +203,36 @@
   .section-title {
     font-size: 2rem;
   }
+}
+
+// ***********************
+// Keyframes
+// ***********************
+@keyframes fadeInLeft {
+  0% {
+     opacity: 0;
+     transform: translateX(-20px);
+  }
+  100% {
+     opacity: 1;
+     transform: translateX(0);
+  }
+}
+@keyframes fadeInRight {
+  0% {
+     opacity: 0;
+     transform: translateX(20px);
+  }
+  100% {
+     opacity: 1;
+     transform: translateX(0);
+  }
+}
+
+.tutorial-left {
+  animation: fadeInLeft 1s;
+}
+
+.tutorial-right {
+  animation: fadeInRight 1s;
 }

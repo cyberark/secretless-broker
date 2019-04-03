@@ -1,16 +1,91 @@
 ---
 title: Using Secretless in Kubernetes
 id: kubernetes_tutorial
-layout: tutorials
+layout: subpages
 description: Secretless Broker Documentation
-section-header: Steps for Security Admin
-time-complete: 5
-products-used: Conjur Vault, Kubernetes
-back-btn: /docs/tutorial-tiles/kubernetes/overview.html
-continue-btn: /docs/tutorial-tiles/kubernetes/app-dev.html
-up-next: As an Application Developer, you no longer need to worry about all the passwords and database connections! You will deploy an application and leave it up to the Secretless Broker to make the desired connection to the database. 
-permalink: /docs/tutorial-tiles/kubernetes/sec-admin.html
+permalink: /docs/get_started/kubernetes_tutorial.html
+redirect_to: /docs/tutorials/kubernetes/kubernetes-tutorial-base.html
+
 ---
+
+This is a detailed, step-by-step tutorial.
+
+You will:
+
+1. Deploy a PostgreSQL database
+2. Store its credentials in Kubernetes secrets
+3. Setup Secretless Broker to proxy connections to it
+4. Deploy an application that connects to the database **without knowing its password**
+
+Already a Kubernetes expert? You may prefer our:
+
+<div style="text-align: center">
+  <a href="https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo" class="button btn-primary gradient">Advanced Github Tutorial</a>
+</div>
+
+complete with shell scripts to get **the whole thing working end to end fast**.
+
+## Table of Contents
+
++ [Overview](#overview)
++ Steps for Security Admin
+  + [Create PostgreSQL Service in Kubernetes](#create-postgresql-service-in-kubernetes)
+  + [Create Application Database](#create-application-database)
+  + [Create Application Namespace and Store Credentials](#create-application-namespace-and-store-credentials)
+  + [Create Secretless Broker Configuration ConfigMap](#create-secretless-broker-configuration-configmap)
+  + [Create Application Service Account and Grant Entitlements](#create-application-service-account-and-grant-entitlements)
++ Steps for Application Developer
+  + [Sample Application Overview](#sample-application-overview)
+  + [Create Application Deployment Manifest](#create-application-deployment-manifest)
+  + [Deploy Application With Secretless Broker](#deploy-application-with-secretless-broker)
+  + [Expose Application Publicly](#expose-application-publicly)
++ [Test the Application](#test-the-application)
++ [Appendix - Secretless Deployment Manifest Explained](#appendix---secretless-deployment-manifest-explained)
+  + [Networking](#networking)
+  + [SSL](#ssl)
+  + [Credential Access](#credential-access)
+  + [Configuration Access](#configuration-access)
+
+## Overview
+
+Applications and application developers should be **incapable of leaking secrets**.
+
+To achieve that goal, you'll play two roles in this tutorial:
+
+1. A **Security Admin** who handles secrets, and has sole access to those secrets
+2. An **Application Developer** with no access to secrets.
+
+The situation looks like this:
+
+![Image](/img/secretless_overview.jpg)
+
+Specifically, we will:
+
+**As the security admin:**
+
+1. Create a PostgreSQL database
+1. Create a DB user for the application
+1. Add that user's credentials to Kubernetes Secrets
+1. Configure Secretless to connect to PostgreSQL using those credentials
+
+**As the application developer:**
+
+1. Configure the application to connect to PostgreSQL via Secretless
+1. Deploy the application and the Secretless sidecar
+
+### Prerequisites
+
+To run through this tutorial, you will need:
+
++ A running Kubernetes cluster (you can use
+  [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) to run a
+  cluster locally)
++ [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured
+  to point to the cluster
++ [Docker CLI](https://docs.docker.com/install/)
+
+## Steps for Security Admin
+
 <div class="change-role">
   <div class="character-icon"><img src="/img/security_admin.jpg" alt="Security Admin"/></div>
   <div class="content">
@@ -226,7 +301,7 @@ docker run --rm -it -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
 
 <pre>
                                           List of roles
-       Role name        |                         Attributes                    
+       Role name        |                         Attributes
      | Member of
 ------------------------+-------------------------------------------------------
 -----+-----------
@@ -476,3 +551,325 @@ kubectl --namespace quick-start-application-ns \
 role "quick-start-backend-credentials-reader" created
 rolebinding "read-quick-start-backend-credentials" created
 </pre>
+
+
+## Steps for the Application Developer
+
+<div class="change-role">
+  <div class="character-icon"><img src="/img/application_developer.jpg" alt="Application Developer"/></div>
+  <div class="content">
+    <div class="change-announcement">
+      You are now the application developer.
+    </div>
+    <div class="message">
+      You can no longer access the secrets we stored above in environment
+      variables.  Open a new terminal so that all those variables are gone.
+    </div>
+  </div>
+</div>
+
+You know only one thing -- the name of the database:
+
+```bash
+export APPLICATION_DB_NAME=quick_start_db
+```
+
+### Sample Application Overview
+
+The application we'll be deploying is a [pet store demo
+application](https://github.com/conjurdemos/pet-store-demo) with a simple API:
+
+- `GET /pets` lists all the pets
+- `POST /pet` adds a pet
+
+Its PostgreSQL backend is configured using a `DB_URL` environment variable:
+
+<pre>
+postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
+</pre>
+
+Again, the application has no knowledge of the database credentials it's using.
+
+For usage examples, please see [Test the Application](#test-the-application).
+
+### Create Application Deployment Manifest
+
+We're ready to deploy our application.
+
+A detailed explanation of the manifest below is in the [Appendix - Secretless
+Deployment Manifest
+Explained](#appendix---secretless-deployment-manifest-explained), but isn't
+needed to complete the tutorial.
+
+To create the **quick-start-application.yml** manifest using the
+`APPLICATION_DB_NAME` above, run:
+
+```bash
+cat << EOF > quick-start-application.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quick-start-application
+  labels:
+    app: quick-start-application
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: quick-start-application
+  template:
+    metadata:
+      labels:
+        app: quick-start-application
+    spec:
+      serviceAccountName: quick-start-application
+      automountServiceAccountToken: true
+      containers:
+        - name: quick-start-application
+          image: cyberark/demo-app:latest
+          env:
+            - name: DB_URL
+              value: postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
+        - name: secretless-broker
+          image: cyberark/secretless-broker:latest
+          imagePullPolicy: IfNotPresent
+          args: ["-f", "/etc/secretless/secretless.yml"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/secretless
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: quick-start-application-secretless-config
+EOF
+```
+
+### Deploy Application With Secretless Broker
+
+To deploy the application, run:
+
+```bash
+kubectl --namespace quick-start-application-ns apply -f quick-start-application.yml
+```
+<pre>
+deployment "quick-start-application" created
+</pre>
+
+Before moving on, verify that the pods are healthy:
+
+```bash
+kubectl --namespace quick-start-application-ns get pods
+```
+<pre>
+NAME                                       READY     STATUS        RESTARTS   AGE
+quick-start-application-6bd8dbd57f-bshmf   2/2       Running       0          22s
+quick-start-application-6bd8dbd57f-dr962   2/2       Running       0          26s
+quick-start-application-6bd8dbd57f-fgfnh   2/2       Running       0          30s
+</pre>
+
+### Expose Application Publicly
+
+The application is running, but not yet publicly available.
+
+To expose it publicly as a Kubernetes Service, run:
+
+```bash
+cat << EOF > quick-start-application-service.yml
+kind: Service
+apiVersion: v1
+metadata:
+  name: quick-start-application
+spec:
+  selector:
+    app: quick-start-application
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30002
+  type: NodePort
+EOF
+kubectl --namespace quick-start-application-ns \
+ apply -f quick-start-application-service.yml
+```
+<pre>
+service "quick-start-application" created
+</pre>
+
+Congratulations!
+
+The application is now available at `$(minikube ip):30002`.  We'll call
+this the `APPLICATION_URL` going forward.
+
+## Test the Application
+
+Let's verify everything works as expected.
+
+First, make sure the `APPLICATION_URL` is correctly set:
+
+```bash
+export APPLICATION_URL=$(minikube ip):30002
+```
+
+Now let's create a pet (`POST /pet`):
+
+```bash
+curl -i -d @- \
+ -H "Content-Type: application/json" \
+ ${APPLICATION_URL}/pet \
+ << EOF
+{
+   "name": "Secretlessly Fluffy"
+}
+EOF
+```
+<pre>
+HTTP/1.1 201
+Location: http://192.168.99.100:30002/pet/2
+Content-Length: 0
+Date: Thu, 23 Aug 2018 11:56:27 GMT
+</pre>
+
+We should get a 201 response status.
+
+Now let's retrieve all the pets (`GET /pets`):
+
+```bash
+curl -i ${APPLICATION_URL}/pets
+```
+<pre>
+HTTP/1.1 200
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Thu, 23 Aug 2018 11:57:17 GMT
+
+[{"id":1,"name":"Secretlessly Fluffy"}]
+</pre>
+
+We should get a 200 response with a JSON array of the pets.
+
+That's it!
+
+<div class="the-big-finish">
+  <p>
+  The application is connecting to a password-protected Postgres database
+  <b>without any knowledge of the credentials</b>.
+  </p>
+
+  <img src="/img/its_magic.jpg" alt="It's Magic"/>
+</div>
+
+For more info on configuring Secretless for your own use case, see the:
+
+<div style="text-align: center">
+  <a href="https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm" class="button btn-primary gradient">Full Secretless Documentation</a>
+</div>
+
+## Appendix - Secretless Deployment Manifest Explained
+
+Here we'll walk through the application deployment manifest, to better
+understand how Secretless works.
+
+We'll focus on the Pod's template, which is where the magic happens:
+
+```yaml
+  # top part elided...
+  template:
+    metadata:
+      labels:
+        app: quick-start-application
+    spec:
+      serviceAccountName: quick-start-application
+      automountServiceAccountToken: true
+      containers:
+        - name: quick-start-application
+          image: cyberark/demo-app:latest
+          env:
+            - name: DB_URL
+              value: postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
+        - name: secretless-broker
+          image: cyberark/secretless-broker:latest
+          imagePullPolicy: IfNotPresent
+          args: ["-f", "/etc/secretless/secretless.yml"]
+          volumeMounts:
+            - name: config
+              mountPath: /etc/secretless
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: quick-start-application-secretless-config
+```
+
+### Networking
+
+Since it resides in the same pod, the application can access the Secretless
+sidecar container over localhost.
+
+As specified in the ConfigMap we created, Secretless listens on port
+`5432`, and hence this:
+
+```yaml
+          env:
+            - name: DB_URL
+              value: postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
+```
+
+is all our application needs to locate Secretless.
+
+### SSL
+
+Notice the `?sslmode=disable` at the end of our `DB_URL`.
+
+This means that **the application connects to Secretless without SSL**, which
+is safe because it is intra-Pod communication over localhost.
+
+However, the **connection between Secretless and Postgres is secure, and does
+use SSL**.
+
+The situation looks like this:
+
+```
+                 No SSL                       SSL
+Application   <---------->   Secretless   <---------->   Postgres
+```
+
+For more information on PostgreSQL SSL modes see:
+
+- [PostgreSQL SSL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html)
+- [PostgreSQL Secretless Handler documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm).
+
+### Credential Access
+
+Notice we add the **quick-start-application** ServiceAccount to the pod:
+
+```yaml
+    spec:
+      serviceAccountName: quick-start-application
+```
+
+That's the ServiceAccount we created earlier, the one with access to the
+credentials in Kubernetes Secrets.  This is what gives Secretless access
+to those credentials.
+
+### Configuration Access
+
+Finally, notice the sections defining the volumes and the volume mount in the
+Secretless container:
+
+```yaml
+          # ... elided
+          volumeMounts:
+            - name: config
+              mountPath: /etc/secretless
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: quick-start-application-secretless-config
+```
+
+Here we create a volume base on the ConfigMap we created earlier, which stores
+our **secretless.yml** configuration file.
+
+Thus Secretless gets its configuration file via a volume mount.

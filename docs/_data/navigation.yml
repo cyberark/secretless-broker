@@ -4,7 +4,7 @@ main:
     target: target="_blank" rel="noopener noreferrer"
     section: /docs/
   - title: Tutorial
-    url: /docs/tutorial-tiles/kubernetes/kubernetes-tutorial-base.html
+    url: /docs/tutorials/kubernetes/kubernetes-tutorial-base.html
   - title: Community
     url: /community.html
   - title: Blog
@@ -30,7 +30,7 @@ footer-docs:
 
 footer-resources:
   - title: Tutorial
-    url: /docs/tutorial-tiles/kubernetes/kubernetes-tutorial-base.html
+    url: /docs/tutorials/kubernetes/kubernetes-tutorial-base.html
   - title: Community
     url: /community.html
   - title: Blog
@@ -39,12 +39,12 @@ footer-resources:
     url: https://docs.secretless.io/Latest/en/Content/FAQ/faq.htm
     target: target="_blank" rel="noopener noreferrer"
 
-tutorial-tiles:
+tutorials-k8s:
   - title: Overview
-    url: /docs/tutorial-tiles/kubernetes/overview.html
+    url: /docs/tutorials/kubernetes/overview.html
   - title: Steps for Security Admin
-    url: /docs/tutorial-tiles/kubernetes/sec-admin.html
+    url: /docs/tutorials/kubernetes/sec-admin.html
   - title: Steps for Application Developer
-    url: /docs/tutorial-tiles/kubernetes/app-dev.html
+    url: /docs/tutorials/kubernetes/app-dev.html
   - title: Appendix - Secretless Deployment Manifest Explained
-    url: /docs/tutorial-tiles/kubernetes/appendix.html
+    url: /docs/tutorials/kubernetes/appendix.html

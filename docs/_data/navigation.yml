@@ -40,6 +40,8 @@ footer-resources:
     target: target="_blank" rel="noopener noreferrer"
 
 tutorials-k8s:
+  - title: Before We Begin
+    url: /docs/tutorials/kubernetes/kubernetes-tutorial-base.html
   - title: Overview
     url: /docs/tutorials/kubernetes/overview.html
   - title: Steps for Security Admin

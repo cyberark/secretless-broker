@@ -23,7 +23,7 @@
 }
 
 .section-title {
-  padding-top: 4rem;
+  padding-top: 1rem;
 }
 
 // ***********************
@@ -47,7 +47,6 @@
   position: absolute;
   width: 5.25rem;
   height: .2rem;
-  background: #C4C4C4;
   transform: rotate(90deg);
   top: 7rem;
   left: -0.6rem;
@@ -66,11 +65,28 @@
   background-color: #33699C;
 }
 
-.active {
-  stroke: #33699C;
-  stroke-width: .2rem;
-  fill: #ffff;
-  font-weight: 600;
+.progressbar {
+  .progressbar-bubble {
+    fill: #33699C;
+  }
+  .active {
+    stroke: #33699C;
+    stroke-width: .2rem;
+    fill: #ffff;
+    font-weight: 600;
+  }
+  .active:after {
+    background: #E4E4E4;
+  }
+  .active ~ .progressbar-bubble {
+    fill: #E4E4E4;
+  }
+  .active ~ .progressbar-bubble:after {
+    background: #E4E4E4;
+  }
+}
+.progressbar-bubble:after {
+  background: #33699C;
 }
 
 .progressbar-index, .progressbar, .active #progressbar-text {

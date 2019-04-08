@@ -6,10 +6,10 @@ description: Secretless Broker Documentation
 section-header: Steps for Application Developer
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
-back-btn: /docs/tutorials/kubernetes/sec-admin.html
-continue-btn: /docs/tutorials/kubernetes/appendix.html
+back-btn: /tutorials/kubernetes/sec-admin.html
+continue-btn: /tutorials/kubernetes/appendix.html
 up-next: Get a closer look at Secretless...
-permalink: /docs/tutorials/kubernetes/app-dev.html
+permalink: /tutorials/kubernetes/app-dev.html
 ---
 
 <div class="change-role">
@@ -53,7 +53,7 @@ For usage examples, please see [Test the Application](#test-the-application).
 
 We're ready to deploy our application.
 
-A detailed explanation of the manifest below is featured in the next step, <a href="/docs/tutorials/kubernetes/appendix.html">Appendix - Secretless
+A detailed explanation of the manifest below is featured in the next step, <a href="/docs/get_started/kubernetes_tutorial.html">Appendix - Secretless
 Deployment Manifest Explained</a> and isn't needed to complete the tutorial.
 
 To create the **quick-start-application.yml** manifest using the

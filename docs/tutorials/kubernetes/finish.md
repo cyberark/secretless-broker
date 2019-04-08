@@ -6,10 +6,10 @@ description: Secretless Broker Documentation
 section-header: You're done!
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
-back-btn: /docs/tutorials/kubernetes/appendix.html
+back-btn: /tutorials/kubernetes/appendix.html
 continue-btn:
 up-next:
-permalink: /docs/tutorials/kubernetes/finish.html
+permalink: /tutorials/kubernetes/finish.html
 ---
 In this tutorial you learned how to:
 

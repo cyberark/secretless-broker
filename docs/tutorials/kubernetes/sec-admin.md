@@ -6,10 +6,10 @@ description: Secretless Broker Documentation
 section-header: Steps for Security Admin
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
-back-btn: /docs/tutorials/kubernetes/overview.html
-continue-btn: /docs/tutorials/kubernetes/app-dev.html
+back-btn: /tutorials/kubernetes/overview.html
+continue-btn: /tutorials/kubernetes/app-dev.html
 up-next: As an Application Developer, you no longer need to worry about all the passwords and database connections! You will deploy an application and leave it up to the Secretless Broker to make the desired connection to the database.
-permalink: /docs/tutorials/kubernetes/sec-admin.html
+permalink: /tutorials/kubernetes/sec-admin.html
 ---
 <div class="change-role">
   <div class="character-icon"><img src="/img/security_admin.jpg" alt="Security Admin"/></div>

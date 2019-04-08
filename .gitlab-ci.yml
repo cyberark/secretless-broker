@@ -1,4 +1,18 @@
-image: docker:stable-git
+image: registry.gitlab.com/cyberark/secretless-broker/gitlab-dind:latest
+# 
+# This container image is used for running CI stages.
+# It contains all the common utilities; docker, git, docker-compose, openssl etc.
+# This image coupled with the docker:stable-dind service makes it possible to 
+# leverage the Gitlab runner's Docker daemon during CI stages.
+# 
+# This container image can be built by running the following:
+# 
+# echo "
+# FROM docker:stable-git
+# RUN apk add --no-cache bash openssl py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
+# RUN pip install docker-compose
+# " | docker build -t registry.gitlab.com/cyberark/secretless-broker/gitlab-dind:latest -
+#
 
 variables:
   IMAGE_TAGS: |
@@ -14,7 +28,7 @@ stages:
 build:
   stage: build
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
@@ -27,7 +41,7 @@ build:
 check_style:
   stage: test
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
@@ -43,7 +57,7 @@ check_style:
 test_unit:
   stage: test
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
@@ -59,7 +73,7 @@ test_unit:
 test_integration:
   stage: test
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
@@ -75,7 +89,7 @@ test_integration:
 test_demo:
   stage: test
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
@@ -88,7 +102,7 @@ test_demo:
 website:
   stage: website
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   variables:
     DOCKER_DRIVER: overlay2
   script:
@@ -125,43 +139,39 @@ website:
   function setup_docker() {
     login_ci_registry
   }
-  
+
   function save_image() {
     tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
     docker tag $1 "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
     docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
   }
-  
+
   function get_image() {
     tag=$(echo $1 | sed -e 's/\:/-/' -e 's/\//-/')
 
     docker pull "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag"
     docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG-$tag" $1
   }
-  
+
   function save_images() {
     echo "$ALL_TAGS" | while read -r line; do
-      save_image "$line"; 
+      save_image "$line";
     done
   }
-  
+
   function optional_get_images() {
     echo "$ALL_TAGS" | while read -r line; do
-      get_image "$line" 2> /dev/null || true; 
+      get_image "$line" 2> /dev/null || true;
     done
   }
-  
+
   function get_images() {
     echo "$ALL_TAGS" | while read -r line; do
-      get_image "$line"; 
+      get_image "$line";
     done
   }
 
   echo "loaded utils"
 
 before_script:
-  - apk add --no-cache bash
-  - apk add --no-cache openssl
-  - apk add --no-cache py-pip
-  - pip install docker-compose
   - *utils

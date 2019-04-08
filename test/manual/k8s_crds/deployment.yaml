@@ -75,7 +75,7 @@ spec:
         env:
         - name: DEBUG_CONTAINER
           value: "false"
-        image: cyberark/secretless-broker:latest
+        image: secretless-broker:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 8080

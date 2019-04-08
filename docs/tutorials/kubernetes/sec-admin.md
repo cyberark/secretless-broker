@@ -36,143 +36,149 @@ to manage it.
 To deploy a PostgreSQL StatefulSet:
 
 1. Create a dedicated **namespace** for the storage backend:
-    ```bash
-    kubectl create namespace quick-start-backend-ns
-    ```
-    <pre>
-    namespace "quick-start-backend-ns" created
-    </pre>
+
+   ```bash
+   kubectl create namespace quick-start-backend-ns
+   ```
+   <pre>
+   namespace "quick-start-backend-ns" created
+   </pre>
 
 1. Create a self-signed certificate (see [PostgreSQL documentation for
    more info](https://www.postgresql.org/docs/9.6/ssl-tcp.html)):
 
-    ```bash
-    openssl req -new -x509 -days 365 -nodes -text -out server.crt \
-      -keyout server.key -subj "/CN=pg"
-    chmod og-rwx server.key
-    ```
-    <pre>Generating a 2048 bit RSA private key
-    ....................................................................................+++++
-    .......+++++
-    writing new private key to 'server.key'
-    -----</pre>
+   ```bash
+   openssl req -new -x509 -days 365 -nodes -text -out server.crt \
+     -keyout server.key -subj "/CN=pg"
+   chmod og-rwx server.key
+   ```
+   <pre>Generating a 2048 bit RSA private key
+   ....................................................................................+++++
+   .......+++++
+   writing new private key to 'server.key'
+   -----</pre>
 
 1. Store the certificate files as Kubernetes secrets in the
    `quick-start-backend-ns` namespace:
-    ```bash
-    kubectl --namespace quick-start-backend-ns \
-      create secret generic \
-      quick-start-backend-certs \
-      --from-file=server.crt \
-      --from-file=server.key
-    ```
-    <pre>secret "quick-start-backend-certs" created</pre>
 
-    <div class="note">
-      While Kubernetes Secrets are more secure than hard-coded ones, in
-      a real deployment you should secure secrets in a fully-featured vault, like
-      Conjur.
-    </div>
+   ```bash
+   kubectl --namespace quick-start-backend-ns \
+     create secret generic \
+     quick-start-backend-certs \
+     --from-file=server.crt \
+     --from-file=server.key
+   ```
+   <pre>secret "quick-start-backend-certs" created</pre>
 
-1. Create and save the **PostgreSQL StatefulSet manifest** in a file named **pg.yml** in your current working directory:
+   <div class="note">
+     While Kubernetes Secrets are more secure than hard-coded ones, in
+     a real deployment you should secure secrets in a fully-featured vault, like
+     Conjur.
+   </div>
 
-    ```bash
-cat << EOF > pg.yml
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: pg
-  labels:
-    app: quick-start-backend
-spec:
-  serviceName: quick-start-backend
-  selector:
-    matchLabels:
-      app: quick-start-backend
-  template:
-    metadata:
-      labels:
-        app: quick-start-backend
-    spec:
-      securityContext:
-        fsGroup: 999
-      containers:
-      - name: quick-start-backend
-        image: postgres:9.6
-        imagePullPolicy: IfNotPresent
-        ports:
-          - containerPort: 5432
-        env:
-          - name: POSTGRES_DB
-            value: postgres
-          - name: POSTGRES_USER
-            value: security_admin_user
-          - name: POSTGRES_PASSWORD
-            value: security_admin_password
-        volumeMounts:
-        - name: backend-certs
-          mountPath: "/etc/certs/"
-          readOnly: true
-        args: ["-c", "ssl=on", "-c", "ssl_cert_file=/etc/certs/server.crt", "-c", "ssl_key_file=/etc/certs/server.key"]
-      volumes:
-      - name: backend-certs
-        secret:
-          secretName: quick-start-backend-certs
-          defaultMode: 384
-EOF
-    ```
-    <div class="note">
-      In the manifest above, the certificate files for your database server are
-      mounted in a volume with <code class="highlighter-rouge">defaultMode:
-      384</code> giving it permissions <code
-      class="highlighter-rouge">0600</code> (Why?  Because <code
-      class="highlighter-rouge">600</code> in base 8 = <code
-      class="highlighter-rouge">384</code> in base 10).
-    </div>
+1. Create and save the **PostgreSQL StatefulSet manifest** in a file named
+   **pg.yml** in your current working directory:
 
-    <div class="note">
-      The pod is deployed with <code class="highlighter-rouge">999</code> as
-      the group associated with any mounted volumes, as indicated by <code
-      class="highlighter-rouge">fsGroup: 999</code>.  <code
-      class="highlighter-rouge">999</code> is a the static postgres gid,
-      defined in the <a
-      href="https://github.com/docker-library/postgres/blob/master/9.6/Dockerfile#L16">postgres
-      Docker image</a>
-    </div>
+   ```bash
+   cat << EOF > pg.yml
+   apiVersion: apps/v1
+   kind: StatefulSet
+   metadata:
+     name: pg
+     labels:
+       app: quick-start-backend
+   spec:
+     serviceName: quick-start-backend
+     selector:
+       matchLabels:
+         app: quick-start-backend
+     template:
+       metadata:
+         labels:
+           app: quick-start-backend
+       spec:
+         securityContext:
+           fsGroup: 999
+         containers:
+         - name: quick-start-backend
+           image: postgres:9.6
+           imagePullPolicy: IfNotPresent
+           ports:
+             - containerPort: 5432
+           env:
+             - name: POSTGRES_DB
+               value: postgres
+             - name: POSTGRES_USER
+               value: security_admin_user
+             - name: POSTGRES_PASSWORD
+               value: security_admin_password
+           volumeMounts:
+           - name: backend-certs
+             mountPath: "/etc/certs/"
+             readOnly: true
+           args: ["-c", "ssl=on", "-c", "ssl_cert_file=/etc/certs/server.crt", "-c", "ssl_key_file=/etc/certs/server.key"]
+         volumes:
+         - name: backend-certs
+           secret:
+             secretName: quick-start-backend-certs
+             defaultMode: 384
+   EOF
+   ```
+
+   <div class="note">
+     In the manifest above, the certificate files for your database server are
+     mounted in a volume with <code class="highlighter-rouge">defaultMode:
+     384</code> giving it permissions <code
+     class="highlighter-rouge">0600</code> (Why?  Because <code
+     class="highlighter-rouge">600</code> in base 8 = <code
+     class="highlighter-rouge">384</code> in base 10).
+   </div>
+
+   <div class="note">
+     The pod is deployed with <code class="highlighter-rouge">999</code> as
+     the group associated with any mounted volumes, as indicated by <code
+     class="highlighter-rouge">fsGroup: 999</code>.  <code
+     class="highlighter-rouge">999</code> is a the static postgres gid,
+     defined in the <a
+     href="https://github.com/docker-library/postgres/blob/master/9.6/Dockerfile#L16">postgres
+     Docker image</a>
+   </div>
 
 1. Deploy the **PostgreSQL StatefulSet**:
-    ```bash
-kubectl --namespace quick-start-backend-ns apply -f pg.yml
-    ```
-    <pre>
-    statefulset "pg" created
-    </pre>
 
-    This StatefulSet uses the DockerHub
-    [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container.
+   ```bash
+   kubectl --namespace quick-start-backend-ns apply -f pg.yml
+   ```
 
-    On startup, the container creates a superuser from the environment
-    variables `POSTGRES_USER` and `POSTGRES_PASSWORD`, which
-    we set to the values `security_admin_user` and `security_admin_password`,
-    respectively.
+   <pre>
+   statefulset "pg" created
+   </pre>
 
-    Going forward, we'll call these values the **admin-credentials**, to distinguish
-    them from the **application-credentials** our application will use.
+   This StatefulSet uses the DockerHub
+   [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container.
 
-    In the scripts below, we'll refer to the admin-credentials by the
-    environment variables `SECURITY_ADMIN_USER` and `SECURITY_ADMIN_PASSWORD`.
+   On startup, the container creates a superuser from the environment
+   variables `POSTGRES_USER` and `POSTGRES_PASSWORD`, which
+   we set to the values `security_admin_user` and `security_admin_password`,
+   respectively.
+
+   Going forward, we'll call these values the **admin-credentials**, to distinguish
+   them from the **application-credentials** our application will use.
+
+   In the scripts below, we'll refer to the admin-credentials by the
+   environment variables `SECURITY_ADMIN_USER` and `SECURITY_ADMIN_PASSWORD`.
 
 1. To ensure the **PostgreSQL StatefulSet** pod has started and is healthy
    (this may take a minute or so), run:
-    ```bash
-kubectl --namespace quick-start-backend-ns get pods
-    ```
-    <pre>
-    NAME      READY     STATUS    RESTARTS   AGE
-    pg-0      1/1       Running   0          6s
-    </pre>
 
+   ```bash
+   kubectl --namespace quick-start-backend-ns get pods
+   ```
 
+   <pre>
+   NAME      READY     STATUS    RESTARTS   AGE
+   pg-0      1/1       Running   0          6s
+   </pre>
 
 #### Expose PostgreSQL Service
 
@@ -300,7 +306,6 @@ CREATE TABLE pets (
 
 CREATE USER ${APPLICATION_DB_USER} PASSWORD '${APPLICATION_DB_INITIAL_PASSWORD}';
 
-'${APPLICATION_DB_INITIAL_PASSWORD}';
 /* Grant Permissions */
 
 GRANT SELECT, INSERT ON public.pets TO ${APPLICATION_DB_USER};

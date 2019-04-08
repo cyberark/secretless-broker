@@ -1,12 +1,12 @@
 image: registry.gitlab.com/cyberark/secretless-broker/gitlab-dind:latest
-# 
+#
 # This container image is used for running CI stages.
 # It contains all the common utilities; docker, git, docker-compose, openssl etc.
-# This image coupled with the docker:stable-dind service makes it possible to 
+# This image coupled with the docker:stable-dind service makes it possible to
 # leverage the Gitlab runner's Docker daemon during CI stages.
-# 
+#
 # This container image can be built by running the following:
-# 
+#
 # echo "
 # FROM docker:stable-git
 # RUN apk add --no-cache bash openssl py-pip python-dev libffi-dev openssl-dev gcc libc-dev make
@@ -33,85 +33,31 @@ build:
     DOCKER_DRIVER: overlay2
   script:
     - setup_docker
+    - announce "RUNNING build"
     - ./bin/build
-    - save_images
-  only:
-    - branches
-
-check_style:
-  stage: test
-  services:
-    - docker:stable-dind
-  variables:
-    DOCKER_DRIVER: overlay2
-  script:
-    - setup_docker
-    - get_images
+    - announce "RUNNING check_style"
     - ./bin/check_style
+    - announce "RUNNING test_unit"
+    - ./bin/test_unit
+    - mv test/junit.xml test/unit-junit.xml
+    - announce "RUNNING test_integration"
+    - ./bin/test_integration
+    - mv test/junit.xml test/integration-junit.xml
+    - announce "RUNNING test_demo"
+    - ./bin/test_demo
+    - announce "RUNNING build_website"
+    - ./bin/build_website
+    - announce "RUNNING check_website_links"
+    - ./bin/check_website_links
   only:
     - branches
   artifacts:
     paths:
       - test/golint.xml
-
-test_unit:
-  stage: test
-  services:
-    - docker:stable-dind
-  variables:
-    DOCKER_DRIVER: overlay2
-  script:
-    - setup_docker
-    - get_images
-    - ./bin/test_unit
-  only:
-    - branches
-  artifacts:
     reports:
-      junit: test/junit.xml
-
-test_integration:
-  stage: test
-  services:
-    - docker:stable-dind
-  variables:
-    DOCKER_DRIVER: overlay2
-  script:
-    - setup_docker
-    - get_images
-    - ./bin/test_integration
-  only:
-    - branches
-  artifacts:
-    reports:
-      junit: test/junit.xml
-
-test_demo:
-  stage: test
-  services:
-    - docker:stable-dind
-  variables:
-    DOCKER_DRIVER: overlay2
-  script:
-    - setup_docker
-    - get_images
-    - ./bin/test_demo
-  only:
-    - branches
-
-website:
-  stage: website
-  services:
-    - docker:stable-dind
-  variables:
-    DOCKER_DRIVER: overlay2
-  script:
-    - setup_docker
-    - get_images
-    - ./bin/build_website
-    - ./bin/check_website_links
-  only:
-    - branches
+      junit:
+        - test/unit-junit.xml
+        - test/integration-junit.xml
 
 .utils: &utils |
   # variables and functions
@@ -134,6 +80,10 @@ website:
       docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
       echo ""
     fi
+  }
+
+  function announce() {
+    printf "\n\n\n"; echo "<<<<<<<<< $1"; printf "\n\n\n";
   }
 
   function setup_docker() {

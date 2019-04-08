@@ -24,11 +24,11 @@ apk add -U curl openssh expect &>/dev/null
 # Test postgres connection
 set +e
 psql \
-  --host quickstart \
-  --port 5454 \
-  --set=sslmode=disable \
-  --username secretless \
-  -d quickstart \
+  "host=quickstart
+  port=5454
+  sslmode=disable
+  user=secretless
+  dbname=quickstart" \
   -c 'select * from counties;'
 report_result "PostgreSQL"
 set -e

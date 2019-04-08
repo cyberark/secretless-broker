@@ -25,25 +25,29 @@ docker container run \
 2. Direct access to the PostgreSQL database is available over port `5432`. You
 can try querying some data, but you don't have the credentials required to
 connect:
+
+[//]: # "NOTE: The psql command below uses the universal Keyword/Value Connection Strings, see https://www.postgresql.org/docs/9.2/libpq-connect.html#LIBPQ-CONNSTRING. Do not change to flag-based connection options, they are not universal."
 ```
 psql \
-  --host localhost \
-  --port 5432 \
-  --set=sslmode=disable \
-  --username secretless \
-  -d quickstart \
+  "host=localhost
+  port=5432
+  sslmode=disable
+  user=secretless
+  dbname=quickstart" \
   -c 'select * from counties;'
 ```
 3. The good news is that you don't need any credentials! Instead, you can
 connect to the password-protected PostgreSQL database via the Secretless Broker
 on port `5454`, _without knowing the password_. Give it a try:
+
+[//]: # "NOTE: The psql command below uses the universal Keyword/Value Connection Strings, see https://www.postgresql.org/docs/9.2/libpq-connect.html#LIBPQ-CONNSTRING. Do not change to flag-based connection options, they are not universal."
 ```
 psql \
-  --host localhost \
-  --port 5454 \
-  --set=sslmode=disable \
-  --username secretless \
-  -d quickstart \
+  "host=localhost
+  port=5454
+  sslmode=disable
+  user=secretless
+  dbname=quickstart" \
   -c 'select * from counties;'
 ```
 

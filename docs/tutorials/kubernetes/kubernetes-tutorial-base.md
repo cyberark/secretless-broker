@@ -7,9 +7,9 @@ section-header: Before we begin...
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
 back-btn:
-continue-btn: /docs/tutorials/kubernetes/overview.html
+continue-btn: /tutorials/kubernetes/overview.html
 up-next: Get an overview of what is going to be covered in this tutorial.
-permalink: /docs/tutorials/kubernetes/kubernetes-tutorial-base.html
+permalink: /tutorials/kubernetes/kubernetes-tutorial-base.html
 ---
 This is a detailed, step-by-step tutorial.
 

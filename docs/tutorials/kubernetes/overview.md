@@ -6,10 +6,10 @@ description: Secretless Broker Documentation
 section-header: Overview
 time-complete: 5
 products-used: Conjur Vault, Kubernetes
-back-btn: /docs/tutorials/kubernetes/kubernetes-tutorial-base.html
-continue-btn: /docs/tutorials/kubernetes/sec-admin.html
+back-btn: /tutorials/kubernetes/kubernetes-tutorial-base.html
+continue-btn: /tutorials/kubernetes/sec-admin.html
 up-next: Play the role of a Security Admin and learn how to set up PostgreSQL and configure Secretless.
-permalink: /docs/tutorials/kubernetes/overview.html
+permalink: /tutorials/kubernetes/overview.html
 ---
 Applications and application developers should be **incapable of leaking secrets**.
 

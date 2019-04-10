@@ -53,7 +53,7 @@ For usage examples, please see [Test the Application](#test-the-application).
 
 We're ready to deploy our application.
 
-A detailed explanation of the manifest below is featured in the next step, <a href="/docs/get_started/kubernetes_tutorial.html">Appendix - Secretless
+A detailed explanation of the manifest below is featured in the next step, <a href="/tutorials/kubernetes/appendix.html">Appendix - Secretless
 Deployment Manifest Explained</a> and isn't needed to complete the tutorial.
 
 To create the **quick-start-application.yml** manifest using the

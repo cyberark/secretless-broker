@@ -6,7 +6,7 @@ It's intended for advanced users and is light on explanations.
 
 For a friendlier version of this tutorial, with breakdowns of every step, try:
 
-[Our Detailed Introduction to Secretless in Kubernetes](https://secretless.io/docs/tutorials/kubernetes/kubernetes-tutorial-base.html)
+[Our Detailed Introduction to Secretless in Kubernetes](https://secretless.io/tutorials/kubernetes/kubernetes-tutorial-base.html)
 
 ## Overview
 

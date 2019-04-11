@@ -84,7 +84,8 @@ function assert_on_http_proxy_resp() {
 function deploy_secretless() {
   echo "secretless sidecar deploying CRD"
 
-  ./deployment.yaml.sh 2> ${log} | kubectl apply -f - &> ${log} || exit_err "failed to deploy CRD"
+  ./deployment.yaml.sh > deployment.yaml 2> ${log} || exit_err "Failed to template deployment.yaml"
+  kubectl apply -f deployment.yaml 2> ${log} || exit_err "Failed to deploy CRD"
 
   echo "deployed"
   echo ""

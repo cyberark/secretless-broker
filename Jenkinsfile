@@ -51,6 +51,12 @@ pipeline {
           }
         }
 
+        stage('CRD tests') {
+          steps {
+            sh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test'
+          }
+        }
+
         stage('Benchmarks') {
           steps {
             sh './bin/test_benchmarks'

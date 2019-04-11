@@ -18,7 +18,7 @@ The tests proceed as follows:
 
 Run the tests with:
 ```bash
-./deploy
+./test
 ```
 
 Expected output:

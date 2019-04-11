@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -euo pipefail
+cd $(dirname $0)
+. ./utils.sh
+
+# Set environment variables
+export UNIQUE_TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 10)"
+export SECRETLESS_IMAGE="${DOCKER_REGISTRY_PATH}/secretless-broker:${UNIQUE_TEST_ID}"
+
+# Clean up when script completes
+function finish {
+  announce 'Wrapping up and removing test environment'
+
+  # Delete registry images that were used
+  deleteRegistryImage "${SECRETLESS_IMAGE}" > /dev/null
+}
+trap finish EXIT
+
+
+function main() {
+  announce 'Preparing test environment'
+  prepareTestEnvironment
+
+  announce 'Test CRD'
+  runDockerCommand "
+docker tag 'secretless-broker:latest' '${SECRETLESS_IMAGE}' > /dev/null;
+docker push '${SECRETLESS_IMAGE}' > /dev/null;
+export SECRETLESS_IMAGE='$SECRETLESS_IMAGE';
+cd test/manual/k8s_crds;
+./test
+"
+}
+
+main

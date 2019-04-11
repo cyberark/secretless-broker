@@ -1,14 +1,14 @@
 #!/bin/bash -e
 
-kubectl delete --wait=true --ignore-not-found=true crd configurations.secretless.io &
+kubectl delete --ignore-not-found=true crd configurations.secretless.io &
 
-kubectl delete --wait=true --ignore-not-found=true service secretless-broker secretless-broker-external &
+kubectl delete --ignore-not-found=true service secretless-broker secretless-broker-external &
 
-kubectl delete --wait=true --ignore-not-found=true clusterrole secretless-crd &
-kubectl delete --wait=true --ignore-not-found=true rolebinding secretless-crd &
-kubectl delete --wait=true --ignore-not-found=true clusterrolebinding secretless-crd &
-kubectl delete --wait=true --ignore-not-found=true serviceaccount secretless-crd &
+kubectl delete --ignore-not-found=true clusterrole secretless-crd &
+kubectl delete --ignore-not-found=true rolebinding secretless-crd &
+kubectl delete --ignore-not-found=true clusterrolebinding secretless-crd &
+kubectl delete --ignore-not-found=true serviceaccount secretless-crd &
 
-kubectl delete --wait=true --ignore-not-found=true deployment secretless-k8s-test &
+kubectl delete --ignore-not-found=true deployment secretless-k8s-test &
 
 wait

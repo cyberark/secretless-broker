@@ -4,9 +4,9 @@ The tests are used to verify the usage of the Secretless Configuration CRDs with
 
 The tests proceed as follows:
 1. Deploy Echo-Server, and Secretless Sidecar (deploys the CRDs using privileged ServiceAccount)
-2. Create v1 Configuration CRD instance expected by Secretless, which sets up an HTTP proxy using the HTTP handler on port 8000
+2. Create a v1 of the Configuration CRD instance named 'first', used by Secretless as instructions to setup an HTTP (handler) proxy on port 8000. The credentials for this handler are literal values.
 3. Make a call to the Echo-Server on port 8080 using Secretless as an HTTP proxy and assert the existence and value of credentials in the response headers
-4. Update Configuration CRD instance to v1 expected by Secretless, which updates the values of the credentials
+4. Update the Configuration CRD instance named 'first' to v2 which results in updated credentials
 5. Repeat step 3, this time asserting on the new value of the credentials in the response headers
 
 ## Prerequisites

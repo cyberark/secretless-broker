@@ -1,3 +1,21 @@
+#!/usr/bin/env bash
+
+: ${SECRETLESS_IMAGE:?"Need to set SECRETLESS_IMAGE non-empty, and available to cluster e.g. cyberark/secretless-broker:latest"}
+
+# returns current namespace if available, otherwise returns 'default'
+current_namespace() {
+  cur_ctx="$(kubectl config current-context)" || exit_err "error getting current context"
+  ns="$(kubectl config view -o=jsonpath="{.contexts[?(@.name==\"${cur_ctx}\")].context.namespace}")" \
+     || exit_err "error getting current namespace"
+
+  if [[ -z "${ns}" ]]; then
+    echo "default"
+  else
+    echo "${ns}"
+  fi
+}
+
+cat << EOL
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -39,12 +57,10 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: secretless-crd
-  # This only grants permissions within the "default" namespace.
-  # namespace: default
 subjects:
 - kind: ServiceAccount
   name: secretless-crd
-  namespace: default
+  namespace: $(current_namespace)
 roleRef:
   kind: ClusterRole
   name: secretless-crd
@@ -75,7 +91,13 @@ spec:
         env:
         - name: DEBUG_CONTAINER
           value: "false"
-        image: secretless-broker:latest
-        imagePullPolicy: Never
+        image: "${SECRETLESS_IMAGE}"
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+          - containerPort: 8080
+EOL

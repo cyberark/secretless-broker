@@ -1,16 +1,14 @@
 #!/bin/bash -e
 
-CURRENT_DIR=$(dirname $0)
+kubectl delete --wait=true --ignore-not-found=true crd configurations.secretless.io &
 
-echo "Deploying..."
-kubectl delete crd configurations.secretless.io || true
+kubectl delete --wait=true --ignore-not-found=true service secretless-broker secretless-broker-external &
 
-kubectl delete service secretless-broker || true
-kubectl delete service secretless-broker-external || true
+kubectl delete --wait=true --ignore-not-found=true clusterrole secretless-crd &
+kubectl delete --wait=true --ignore-not-found=true rolebinding secretless-crd &
+kubectl delete --wait=true --ignore-not-found=true clusterrolebinding secretless-crd &
+kubectl delete --wait=true --ignore-not-found=true serviceaccount secretless-crd &
 
-kubectl delete clusterrole secretless-crd || true
-kubectl delete rolebinding secretless-crd || true
-kubectl delete clusterrolebinding secretless-crd || true
-kubectl delete serviceaccount secretless-crd || true
+kubectl delete --wait=true --ignore-not-found=true deployment secretless-k8s-test &
 
-kubectl delete deployment secretless-k8s-test
+wait

@@ -1,79 +1,118 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+log=log.txt
+rm -rf ${log}
+
+
+exit_err() {
+   printf "\n--------------------- \n\n"
+   printf "\n- exited\n\n"
+   echo >&2 "${1}"
+   printf "\n-- last logs\n\n"
+   cat ${log};
+   rm -rf ${log};
+
+   exit 1
+}
+
+function cleanup() {
+  echo "cleaning up previous deployments"
+  ./stop_deployment &> ${log} || true
+  printf "cleaned\n\n"
+}
+
+trap cleanup EXIT INT QUIT
 
 function pod_ready() {
   kubectl describe pod ${POD_NAME} | awk '/Ready/{if ($2 != "True") exit 1}'
 }
 
 function http_proxy_resp() {
-  POD_NAME=$(kubectl get po -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
+  POD_NAME=$(kubectl get pods -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -it ${POD_NAME} -c echo-server -- \
     env http_proxy=localhost:8000 curl -s localhost:8080
 }
 function http_resp() {
-  POD_NAME=$(kubectl get po -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -it ${POD_NAME} -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> /dev/null
+  POD_NAME=$(kubectl get pods --field-selector=status.phase=Running -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
+  kubectl exec -it ${POD_NAME} -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> ${log}
+}
+
+function wait_for_CRD() {
+  echo "waiting for CRD to be ready"
+  until $(kubectl get configurations.secretless.io &> ${log}); do
+    printf ".";
+    sleep 2;
+  done
+  echo ""
+  echo "ready"
+  echo ""
+}
+
+function wait_for_pod() {
+  echo "waiting for pod to be ready"
+  until pod_ready; do
+    printf ".";
+    sleep 2;
+  done
+  until http_resp; do
+    printf ".";
+    sleep 2;
+  done
+  echo ""
+  echo "ready"
+  echo ""
+}
+
+function assert_on_http_proxy_resp() {
+# $1 username
+# $2 password
+  local resp=$(http_proxy_resp)
+  local expected_header="authorization=Basic $(printf "$1:$2" | base64)"
+
+  if printf "${resp}" | grep -q "${expected_header}"; then
+    echo "test passed ✔"
+  else
+    echo "expected to find '${expected_header}', in response:" > ${log}
+    echo "${resp}"  >> ${log}
+    exit_err "test failed ✗"
+  fi
+}
+
+function deploy_secretless() {
+  echo "secretless sidecar deploying CRD"
+
+  ./deployment.yaml.sh 2> ${log} | kubectl apply -f - &> ${log} || exit_err "failed to deploy CRD"
+
+  echo "deployed"
+  echo ""
+}
+
+function run_test_case() {
+# $1 test description
+# $2 manifest
+# $3 username
+# $4 password
+  echo "[TEST] $1"
+  echo ""
+  echo "applying manifest"
+  kubectl apply -f "${CURRENT_DIR}/${2}" &> ${log} || exit_err "failed to $1"
+  wait_for_pod
+
+  echo "testing"
+  assert_on_http_proxy_resp ${3} ${4}
+  echo ""
 }
 
 CURRENT_DIR=$(dirname $0)
 
-echo "cleaning up previous deployments"
-./stop_deployment &> /dev/null || true
-echo "cleaned"
-echo ""
+cleanup
 
-echo "deploying CRDs"
-kubectl apply -f $CURRENT_DIR/deployment.yaml &> /dev/null
-echo "deployed"
-echo ""
+deploy_secretless
+wait_for_CRD
+wait_for_pod
 
-echo "waiting for CRDs to be ready"
-until $(kubectl get configurations.secretless.io &> /dev/null); do
-  printf ".";
-  sleep 2;
-done
-echo ""
-echo "ready"
-echo ""
-
-echo "waiting for pod to be ready"
-until pod_ready; do
-  printf ".";
-  sleep 2;
-done
-until http_resp; do
-  printf ".";
-  sleep 2;
-done
-echo ""
-echo "ready"
-echo ""
-
-echo "[TEST] v1 CRD config"
-echo ""
-echo "creating v1 CRD config"
-kubectl apply -f $CURRENT_DIR/first-v1.yaml &> /dev/null
-sleep 2
-
-echo "testing"
-if http_proxy_resp | grep -q "authorization=Basic dXNlcjE6cGFzc3dvcmQx"; then
-  echo "test passed"
-else
-  echo "test failed"
-  exit 1
-fi
-echo ""
-
-echo "[TEST] v2 CRD config"
-echo ""
-echo "updating CRD config to v2"
-kubectl apply -f $CURRENT_DIR/first-v2.yaml &> /dev/null
-sleep 2
-
-echo "testing"
-if http_proxy_resp | grep -q "authorization=Basic b2hub2Vzd2VjaGFuZ2VkaXQ6c3VwZXJzZWNyZXRwYXNzd29yZA=="; then
-  echo "test passed"
-else
-  echo "test failed"
-  exit 1
-fi
-echo ""
+run_test_case "create configuration object" "first-v1.yaml" user1 password1
+run_test_case "update configuration object" "first-v2.yaml" ohnoeswechangedit supersecretpassword

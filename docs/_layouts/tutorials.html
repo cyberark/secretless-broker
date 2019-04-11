@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  {% include head.html %}
+
+  <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DGS7TG"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+    {% include top_nav.html %}
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h1 class="page-title" >{{ page.title }}</h1>
+          <div class="page-subtitle">
+            <p class="page-subtitle-left">Estimated time to complete: {{ page.time-complete }} min</p>
+            <p class="page-subtitle-right">Products used: {{ page.products-used }}</p>
+          </div>
+
+          <div class="row page-wrapper">
+            <!-- left-side of tutorial with content -->
+            <div class="col-xs-12 col-s-12 col-md-3 tutorial-left">
+              <div class="progressbar-index">
+                <ul class="progressbar">
+                  {% for item in site.data.navigation.tutorials-k8s %}
+                    <li class="progressbar-bubble {% if item.url == page.url %}active {% endif %}">
+                      <svg height="40" width="40">
+                        <circle class="cir" cx="20" cy="20" r="10"/>
+                      </svg>
+                      <a href="{{ item.url }}"><p id="progressbar-text">{{ item.title }}</p></a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+              <!-- right-side of tutorial with content -->
+              <div class="col-xs-12 col-s-12 col-md-9 tutorial-right">
+                <h2 class="section-title">{{ page.section-header }}</h1>
+                {{ content }}
+                {% if page.up-next %}
+                  <h2 class="section-title">Up next...</h1>
+                  <p class="section-title-up-next">{{ page.up-next }}</p>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="tutorial-btns">
+              {% if page.back-btn %}
+                <a href={{ page.back-btn }}><button class="tutorial-back-btn button" id="back">back</button></a>
+              {% endif %}
+              {% if page.continue-btn %}
+                <a href={{ page.continue-btn }}><button class="tutorial-continue-btn button" id="continue">continue</button></a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% include cta-banner.html %}
+    {% include footer.html %}
+    <script src='/javascript/clipboard-buttons.js' type="text/javascript"></script>
+  </body>
+</html>

@@ -1,0 +1,258 @@
+// ***********************
+// Tutorial styling
+// ***********************
+.tutorial-right {
+  background-color: #F7F8FA;
+  box-shadow: 0px 4px 4px rgba(141, 132, 132, 0.25);
+  padding: 1rem 4rem 4rem 4rem;
+}
+
+.tutorial-left {
+  display: flex;
+}
+
+.page-subtitle {
+    display: flex;
+    margin: -3rem 0rem 3rem 0rem;
+    font-style: italic;
+    color: #9396A2;
+    font-size: 1.3rem;
+    > p {
+      padding-right: 3rem;
+    }
+}
+
+.section-title {
+  padding-top: 1rem;
+}
+
+// ***********************
+// Progress Bar
+// ***********************
+.progressbar {
+  counter-reset: step;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.progressbar li {
+  list-style: none;
+  position: relative;
+  float: left;
+}
+
+.progressbar li:after{
+  content: '';
+  position: absolute;
+  width: 5.25rem;
+  height: .2rem;
+  transform: rotate(90deg);
+  top: 7rem;
+  left: -0.6rem;
+  z-index: -1;
+}
+
+.progressbar li:last-child:after {
+  content: none;
+}
+
+.progressbar-bubble {
+  fill: #C4C4C4;
+}
+
+.progressbar .completed:after {
+  background-color: #33699C;
+}
+
+.progressbar {
+  .progressbar-bubble {
+    fill: #33699C;
+  }
+  .active {
+    stroke: #33699C;
+    stroke-width: .2rem;
+    fill: #ffff;
+    font-weight: 600;
+  }
+  .active:after {
+    background: #E4E4E4;
+  }
+  .active ~ .progressbar-bubble {
+    fill: #E4E4E4;
+  }
+  .active ~ .progressbar-bubble:after {
+    background: #E4E4E4;
+  }
+}
+.progressbar-bubble:after {
+  background: #33699C;
+}
+
+.progressbar-index, .progressbar, .active #progressbar-text {
+  font-size: 1.4rem;
+  color: #4D8FCC;
+}
+
+.completed {
+  fill: #33699C;
+}
+
+.progressbar-elements {
+  padding-left: 0;
+  .progressbar-element {
+    list-style: none;
+  }
+}
+
+.progressbar-bubble {
+  min-height: 7rem;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  font-size: 1.25rem;
+}
+
+#progressbar-text {
+  margin-left: 0rem;
+  width: 19rem;
+  color: #A4A4A4;
+  margin-bottom: 0;
+}
+
+// ***********************
+// Buttons
+// ***********************
+.tutorial-btns {
+  text-align: right;
+  #continue {
+		background: rgba(51, 105, 156, 0.8);
+    transition: all 0.4s;
+		border-radius: 4px;
+		color: white;
+    &:hover {
+      background-color: #275E91;
+      box-shadow: 0 .2rem .04rem -.1rem rgba(0, 0, 0, 0.2), 0 .4rem .5rem 0 rgba(0, 0, 0, 0.14), 0 .1rem 1rem 0 rgba(0, 0, 0, 0.12);
+    }
+  }
+  #back{
+    transition: all 0.4s;
+    &:hover {
+      box-shadow: 0 .2rem .04rem -.1rem rgba(0, 0, 0, 0.2), 0 .4rem .5rem 0 rgba(0, 0, 0, 0.14), 0 .1rem 1rem 0 rgba(0, 0, 0, 0.12);
+    }
+  }
+}
+
+// ***********************
+// Images
+// ***********************
+.k8s-img {
+  width: 100%;
+  border: 1px solid #E6E6E6;
+}
+
+// ***********************
+// Media queries
+// ***********************
+@media only screen and (max-width: 1100px) {
+  #progressbar-text {
+    width: 16rem;
+    font-size: 1.2rem;
+    padding-right: 1.2rem;
+  }
+
+  .progressbar-index, .progressbar, .active #progressbar-text {
+    font-size: 1.3rem;
+    color: #4D8FCC;
+  }
+}
+
+@media only screen and (max-width: 991px) and (min-width: 767px) {
+  .tutorial-right {
+    max-width: 100%;
+  }
+  .page-wrapper {
+    flex-direction: column;
+  }
+  .progressbar-index, .progressbar, .active #progressbar-text {
+    font-size: 1.4rem;
+  }
+  #progressbar-text {
+    width: 38rem;
+    font-size: 1.4rem;
+  }
+  .progressbar li:after{
+    width: 5.25rem;
+    height: .2rem;
+    top: 6rem;
+    left: -.6rem;
+    z-index: -1;
+  }
+  .progressbar-bubble {
+    min-height: 6rem;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  #progressbar-text {
+    width: 100%;
+  }
+
+  .progressbar li:after{
+    width: 4.25rem;
+    height: .2rem;
+    top: 4rem;
+    left: -0.2rem;
+    z-index: -1;
+  }
+
+  .progressbar-bubble {
+    min-height: 2.5rem;
+  }
+
+  .page-title {
+    margin-bottom: 0;
+    font-size: 3rem;
+  }
+
+  .page-subtitle {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+}
+
+// ***********************
+// Keyframes
+// ***********************
+@keyframes fadeInLeft {
+  0% {
+     opacity: 0;
+     transform: translateX(-20px);
+  }
+  100% {
+     opacity: 1;
+     transform: translateX(0);
+  }
+}
+@keyframes fadeInRight {
+  0% {
+     opacity: 0;
+     transform: translateX(20px);
+  }
+  100% {
+     opacity: 1;
+     transform: translateX(0);
+  }
+}
+
+.tutorial-left {
+  animation: fadeInLeft 1s;
+}
+
+.tutorial-right {
+  animation: fadeInRight 1s;
+}

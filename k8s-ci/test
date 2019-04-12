@@ -17,19 +17,25 @@ function finish {
 }
 trap finish EXIT
 
+function testCRDs() {
+  runDockerCommand "
+# push the local secretless-broker image to the remote DOCKER_REGISTRY_PATH
+docker tag 'secretless-broker:latest' '${SECRETLESS_IMAGE}' > /dev/null;
+docker push '${SECRETLESS_IMAGE}' > /dev/null;
+
+# run CRD tests
+cd test/manual/k8s_crds;
+export SECRETLESS_IMAGE='${SECRETLESS_IMAGE}';
+./test
+"
+}
 
 function main() {
   announce 'Preparing test environment'
   prepareTestEnvironment
 
   announce 'Test CRD'
-  runDockerCommand "
-docker tag 'secretless-broker:latest' '${SECRETLESS_IMAGE}' > /dev/null;
-docker push '${SECRETLESS_IMAGE}' > /dev/null;
-export SECRETLESS_IMAGE='$SECRETLESS_IMAGE';
-cd test/manual/k8s_crds;
-./test
-"
+  testCRDs
 }
 
 main

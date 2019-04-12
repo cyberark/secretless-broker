@@ -3,9 +3,10 @@
 set -e
 set -o pipefail
 
+# setup environment variables
 log=log.txt
 rm -rf ${log}
-
+CURRENT_DIR=$(dirname $0)
 
 exit_err() {
    printf "\n--------------------- \n\n"
@@ -23,6 +24,7 @@ function cleanup() {
   ./stop_deployment &> ${log} || true
   printf "cleaned\n\n"
 }
+trap cleanup EXIT INT QUIT
 
 function pod_ready() {
   kubectl describe pod ${POD_NAME} | awk '/Ready/{if ($2 != "True") exit 1}'
@@ -107,13 +109,17 @@ function run_test_case() {
   echo "----------"
 }
 
-CURRENT_DIR=$(dirname $0)
+function main() {
+  cleanup
 
-trap cleanup EXIT INT QUIT
+  # deploy secretless and echo-server
+  deploy_secretless
+  wait_for_CRD
+  wait_for_pod
 
-cleanup
-deploy_secretless
-wait_for_CRD
-wait_for_pod
-run_test_case "create configuration object" "first-v1.yaml" user1 password1
-run_test_case "update configuration object" "first-v2.yaml" ohnoeswechangedit supersecretpassword
+  # run test cases
+  run_test_case "create configuration object" "first-v1.yaml" user1 password1
+  run_test_case "update configuration object" "first-v2.yaml" ohnoeswechangedit supersecretpassword
+}
+
+main

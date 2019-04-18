@@ -6,7 +6,7 @@ set -euo pipefail
 # secrets.yml file, and performs other preparatory steps
 function prepareTestEnvironment() {
   # Prepare Docker images
-  cat Dockerfile | docker build --rm --tag "gke-utils:latest" - > /dev/null
+  docker build --rm --tag "gke-utils:latest" - < Dockerfile > /dev/null
 }
 
 # Delete an image from GCR, unless it is has multiple tags pointing to it

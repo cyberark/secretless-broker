@@ -1,11 +1,11 @@
 #!/bin/bash
 
 set -euo pipefail
-cd $(dirname $0)
+cd "$(dirname "$0")"
 . ./utils.sh
 
 # Set environment variables
-export UNIQUE_TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 6)"
+export UNIQUE_TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
 export SECRETLESS_IMAGE="${DOCKER_REGISTRY_PATH}/secretless-broker:${UNIQUE_TEST_ID}"
 export TEST_NAMESPACE="test-secretless-${UNIQUE_TEST_ID}"
 

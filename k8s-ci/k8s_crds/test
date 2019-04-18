@@ -6,7 +6,7 @@ set -o pipefail
 # setup environment variables
 log=log.txt
 rm -rf ${log}
-CURRENT_DIR=$(dirname $0)
+CURRENT_DIR="$(dirname "$0")"
 export SECRETLESS_CRD_SUFFIX=${SECRETLESS_CRD_SUFFIX-}
 
 exit_err() {
@@ -28,22 +28,22 @@ function cleanup() {
 trap cleanup EXIT INT QUIT
 
 function pod_ready() {
-  kubectl describe pod ${POD_NAME} | awk '/Ready/{if ($2 != "True") exit 1}'
+  kubectl describe pod "${POD_NAME}" | awk '/Ready/{if ($2 != "True") exit 1}'
 }
 
 function http_proxy_resp() {
   POD_NAME=$(kubectl get pods -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -i ${POD_NAME} -c echo-server -- \
+  kubectl exec -i "${POD_NAME}" -c echo-server -- \
     env http_proxy=localhost:8000 curl -v localhost:8080 2> ${log}
 }
 function http_resp() {
   POD_NAME=$(kubectl get pods --field-selector=status.phase=Running -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -i ${POD_NAME} -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> ${log}
+  kubectl exec -i "${POD_NAME}" -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> ${log}
 }
 
 function wait_for_CRD() {
   echo "waiting for CRD to be ready"
-  until $(kubectl get "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" &> ${log}); do
+  until kubectl get "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" &> ${log}; do
     printf ".";
     sleep 2;
   done
@@ -71,9 +71,9 @@ function assert_on_http_proxy_resp() {
   local username=$1
   local password=$2
   local resp=$(http_proxy_resp)
-  local expected_header="authorization=Basic $(printf "${username}:${password}" | base64)"
+  local expected_header="authorization=Basic $(printf "%s" "${username}:${password}" | base64)"
 
-  if printf "${resp}" | grep -q "${expected_header}"; then
+  if printf "%s" "${resp}" | grep -q "${expected_header}"; then
     echo "test passed ✔"
   else
     echo "expected to find '${expected_header}', in response:" > ${log}
@@ -108,7 +108,7 @@ function run_test_case() {
   wait_for_pod
 
   echo "testing"
-  assert_on_http_proxy_resp ${username} ${password}
+  assert_on_http_proxy_resp "${username}" "${password}"
   echo ""
   echo "----------"
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-: ${SECRETLESS_IMAGE:?"Need to set SECRETLESS_IMAGE non-empty, and available to cluster e.g. cyberark/secretless-broker:latest"}
+: "${SECRETLESS_IMAGE:?"Need to set SECRETLESS_IMAGE non-empty, and available to cluster e.g. cyberark/secretless-broker:latest"}"
 
 # returns current namespace if available, otherwise returns 'default'
 current_namespace() {

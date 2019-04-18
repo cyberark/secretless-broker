@@ -3,8 +3,8 @@
 username=$1
 password=$2
 
-: ${username:?"Need to provide non-empty username as first argument"}
-: ${password:?"Need to provide non-empty password as second argument"}
+: "${username:?"Need to provide non-empty username as first argument"}"
+: "${password:?"Need to provide non-empty password as second argument"}"
 
 cat << EOL
 apiVersion: "secretless${SECRETLESS_CRD_SUFFIX}.io/v1"

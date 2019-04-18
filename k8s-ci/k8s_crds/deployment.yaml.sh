@@ -38,7 +38,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - secretless.io
+  - "secretless${SECRETLESS_CRD_SUFFIX}.io"
   resources:
   - configurations
   verbs:
@@ -89,8 +89,8 @@ spec:
       - name: secretless
         args: [ "-config-mgr", "k8s/crd#first" ]
         env:
-        - name: DEBUG_CONTAINER
-          value: "false"
+        - name: SECRETLESS_CRD_SUFFIX
+          value: "${SECRETLESS_CRD_SUFFIX}"
         image: "${SECRETLESS_IMAGE}"
         readinessProbe:
           tcpSocket:

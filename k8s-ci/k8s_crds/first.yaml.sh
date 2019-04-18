@@ -1,5 +1,14 @@
-apiVersion: "secretless.io/v1"
-kind: Configuration
+#!/usr/bin/env bash
+
+username=$1
+password=$2
+
+: ${username:?"Need to provide non-empty username as first argument"}
+: ${password:?"Need to provide non-empty password as second argument"}
+
+cat << EOL
+apiVersion: "secretless${SECRETLESS_CRD_SUFFIX}.io/v1"
+kind: "Configuration"
 metadata:
   name: first
 spec:
@@ -17,7 +26,8 @@ spec:
       credentials:
         - name: username
           provider: literal
-          id: user1
+          id: "${username}"
         - name: password
           provider: literal
-          id: password1
+          id: "${password}"
+EOL

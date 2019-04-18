@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+kubectl delete --wait=true --ignore-not-found=true crd "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" &
+
+kubectl delete --wait=true --ignore-not-found=true service secretless-broker secretless-broker-external &
+
+kubectl delete --wait=true --ignore-not-found=true clusterrole secretless-crd &
+kubectl delete --wait=true --ignore-not-found=true rolebinding secretless-crd &
+kubectl delete --wait=true --ignore-not-found=true clusterrolebinding secretless-crd &
+kubectl delete --wait=true --ignore-not-found=true serviceaccount secretless-crd &
+
+kubectl delete --wait=true --ignore-not-found=true deployment secretless-k8s-test &
+kubectl delete --wait=true --ignore-not-found=true pods -l app=secretless-k8s-test &
+
+wait

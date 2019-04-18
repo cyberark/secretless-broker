@@ -16,9 +16,9 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const (
-	GroupName = "secretless.io"
-	CRDName   = "configurations." + GroupName
+var (
+	GroupName = "secretless" + os.Getenv("SECRETLESS_CRD_SUFFIX") + ".io"
+	CRDName = "configurations." + GroupName
 )
 
 func getHomeDir() string {

@@ -7,6 +7,7 @@ set -o pipefail
 log=log.txt
 rm -rf ${log}
 CURRENT_DIR=$(dirname $0)
+export SECRETLESS_CRD_SUFFIX=${SECRETLESS_CRD_SUFFIX-}
 
 exit_err() {
    printf "\n--------------------- \n\n"
@@ -21,7 +22,7 @@ exit_err() {
 
 function cleanup() {
   echo "cleaning up previous deployments"
-  ./stop_deployment &> ${log} || true
+  ./stop_deployment &> ${log}
   printf "cleaned\n\n"
 }
 trap cleanup EXIT INT QUIT
@@ -33,7 +34,7 @@ function pod_ready() {
 function http_proxy_resp() {
   POD_NAME=$(kubectl get pods -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
   kubectl exec -i ${POD_NAME} -c echo-server -- \
-    env http_proxy=localhost:8000 curl -s localhost:8080
+    env http_proxy=localhost:8000 curl -v localhost:8080 2> ${log}
 }
 function http_resp() {
   POD_NAME=$(kubectl get pods --field-selector=status.phase=Running -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
@@ -42,7 +43,7 @@ function http_resp() {
 
 function wait_for_CRD() {
   echo "waiting for CRD to be ready"
-  until $(kubectl get configurations.secretless.io &> ${log}); do
+  until $(kubectl get "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" &> ${log}); do
     printf ".";
     sleep 2;
   done
@@ -93,14 +94,17 @@ function deploy_secretless() {
 
 function run_test_case() {
   local test_description=$1
-  local manifest=$2
-  local username=$3
-  local password=$4
+  local username=$2
+  local password=$3
   echo "----------"
   echo "[TEST CASE] ${test_description}"
   echo ""
   echo "applying manifest"
-  kubectl apply -f "${CURRENT_DIR}/${manifest}" &> ${log} || exit_err "failed to $1"
+
+  rm -f first.yaml
+  ./first.yaml.sh "${username}" "${password}" > first.yaml 2> ${log} || exit_err "Failed to template first.yaml"
+  kubectl apply -f first.yaml &> ${log} || exit_err "Failed to $1"
+
   wait_for_pod
 
   echo "testing"
@@ -110,6 +114,7 @@ function run_test_case() {
 }
 
 function main() {
+  echo "using SECRETLESS_CRD_SUFFIX=${SECRETLESS_CRD_SUFFIX}"
   cleanup
 
   # deploy secretless and echo-server
@@ -118,8 +123,8 @@ function main() {
   wait_for_pod
 
   # run test cases
-  run_test_case "create configuration object" "first-v1.yaml" user1 password1
-  run_test_case "update configuration object" "first-v2.yaml" ohnoeswechangedit supersecretpassword
+  run_test_case "create configuration object" user1 password1
+  run_test_case "update configuration object" ohnoeswechangedit supersecretpassword
 }
 
 main

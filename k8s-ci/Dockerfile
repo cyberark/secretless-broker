@@ -1,4 +1,4 @@
-FROM google/cloud-sdk
+FROM google/cloud-sdk:latest
 
 RUN mkdir -p /src
 WORKDIR /src
@@ -13,6 +13,11 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Install kubectl CLI
-ARG KUBECTL_CLI_URL
-RUN wget -O /usr/local/bin/kubectl ${KUBECTL_CLI_URL:-https://storage.googleapis.com/kubernetes-release/release/v1.7.6/bin/linux/amd64/kubectl} && \
-    chmod +x /usr/local/bin/kubectl
+RUN wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.11.3/bin/linux/amd64/kubectl && \
+  chmod +x /usr/local/bin/kubectl
+
+# Install kubectx and kubens
+RUN wget -O /usr/local/bin/kubectx https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx && \
+  chmod +x /usr/local/bin/kubectx
+RUN wget -O /usr/local/bin/kubens https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens && \
+  chmod +x /usr/local/bin/kubens

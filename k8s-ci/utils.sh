@@ -6,10 +6,7 @@ set -euo pipefail
 # secrets.yml file, and performs other preparatory steps
 function prepareTestEnvironment() {
   # Prepare Docker images
-  docker build --tag "gke-utils:latest" \
-    --file Dockerfile \
-    --build-arg KUBECTL_CLI_URL=${KUBECTL_CLI_URL} \
-    . > /dev/null
+  cat Dockerfile | docker build --rm --tag "gke-utils:latest" - > /dev/null
 }
 
 # Delete an image from GCR, unless it is has multiple tags pointing to it
@@ -32,7 +29,6 @@ function runDockerCommand() {
     -e GCLOUD_CLUSTER_NAME \
     -e GCLOUD_ZONE \
     -e SECRETLESS_IMAGE \
-    -e KUBECTL_CLI_URL \
     -e GCLOUD_PROJECT_NAME \
     -v "${GCLOUD_SERVICE_KEY}":"/tmp${GCLOUD_SERVICE_KEY}" \
     -v /var/run/docker.sock:/var/run/docker.sock \

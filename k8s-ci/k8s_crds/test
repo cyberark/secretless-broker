@@ -6,7 +6,6 @@ set -o pipefail
 # setup environment variables
 log=log.txt
 rm -rf ${log}
-CURRENT_DIR="$(dirname "$0")"
 export SECRETLESS_CRD_SUFFIX=${SECRETLESS_CRD_SUFFIX-}
 
 exit_err() {
@@ -76,8 +75,10 @@ function wait_for_pod() {
 function assert_on_http_proxy_resp() {
   local username=$1
   local password=$2
-  local resp=$(http_proxy_resp)
-  local expected_header="authorization=Basic $(printf "%s" "${username}:${password}" | base64)"
+  local resp
+  resp=$(http_proxy_resp)
+  local expected_header
+  expected_header="authorization=Basic $(printf "%s" "${username}:${password}" | base64)"
 
   if printf "%s" "${resp}" | grep -q "${expected_header}"; then
     echo "test passed ✔"

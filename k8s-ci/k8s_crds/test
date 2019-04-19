@@ -27,18 +27,24 @@ function cleanup() {
 }
 trap cleanup EXIT INT QUIT
 
+function POD_NAME() {
+  kubectl get pods \
+    --field-selector=status.phase=Running \
+    -l app=secretless-k8s-test \
+    -o jsonpath="{.items[0].metadata.name}" \
+    2> ${log}
+}
+
 function pod_ready() {
-  kubectl describe pod "${POD_NAME}" | awk '/Ready/{if ($2 != "True") exit 1}'
+  (kubectl describe pod "$(POD_NAME)" 2> ${log} || echo "Ready False") | awk '/Ready/{if ($2 != "True") exit 1}'
 }
 
 function http_proxy_resp() {
-  POD_NAME=$(kubectl get pods -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -i "${POD_NAME}" -c echo-server -- \
+  kubectl exec -i "$(POD_NAME)" -c echo-server -- \
     env http_proxy=localhost:8000 curl -v localhost:8080 2> ${log}
 }
 function http_resp() {
-  POD_NAME=$(kubectl get pods --field-selector=status.phase=Running -l app=secretless-k8s-test -o jsonpath="{.items[0].metadata.name}")
-  kubectl exec -i "${POD_NAME}" -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> ${log}
+  kubectl exec -i "$(POD_NAME)" -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> ${log}
 }
 
 function wait_for_CRD() {

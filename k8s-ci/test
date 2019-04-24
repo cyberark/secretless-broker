@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 . ./utils.sh
 
 # check for secretless-broker:latest
-docker inspect secretless-broker:latestx > /dev/null 2>&1 || { 
+docker inspect secretless-broker:latest > /dev/null 2>&1 || { 
   echo "ERROR: secretless-broker:latest must exist locally for test to run.";
   exit 1;
 }

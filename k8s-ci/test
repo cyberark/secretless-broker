@@ -4,6 +4,12 @@ set -euo pipefail
 cd "$(dirname "$0")"
 . ./utils.sh
 
+# check for secretless-broker:latest
+docker inspect secretless-broker:latestx > /dev/null 2>&1 || { 
+  echo "ERROR: secretless-broker:latest must exist locally for test to run.";
+  exit 1;
+}
+
 # Set environment variables
 export UNIQUE_TEST_ID
 UNIQUE_TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"

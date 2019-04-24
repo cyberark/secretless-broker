@@ -1,4 +1,4 @@
-# Manual tests for CRD
+# Tests for CRD
 
 The tests are used to verify the usage of the Secretless Configuration CRDs with Secretless.
 
@@ -12,13 +12,13 @@ The tests proceed as follows:
 ## Prerequisites
 
 + `kubectl` installed and already logged onto a Kubernetes cluster.
-+ export `SECRETLESS_IMAGE` to point to the Secretless container image under test, e.g. `cyebrark/secretless-broker:latest`. This image must be available to be pulled by the nodes in your Kubernetes cluster.
++ export `SECRETLESS_IMAGE` to point to the Secretless container image under test, e.g. `cyberark/secretless-broker:latest`. This image must be available to be pulled by the nodes in your Kubernetes cluster.
 
 ## Usage
 
 Run the tests with:
 ```bash
-./deploy
+./test
 ```
 
 Expected output:

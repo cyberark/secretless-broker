@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -18,13 +18,6 @@ import (
 
 	api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 	secretlessClientset "github.com/cyberark/secretless-broker/pkg/k8sclient/clientset/versioned"
-)
-
-const (
-	CRDGroupName = "secretless.io"
-	CRDName      = "configurations"
-	CRDFQDNName  = CRDName + "." + CRDGroupName
-	CRDVersion   = "v1"
 )
 
 func getHomeDir() string {

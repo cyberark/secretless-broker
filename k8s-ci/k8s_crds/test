@@ -1,0 +1,137 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+# setup environment variables
+log=log.txt
+rm -rf ${log}
+export SECRETLESS_CRD_SUFFIX=${SECRETLESS_CRD_SUFFIX-}
+
+exit_err() {
+   printf "\n--------------------- \n\n"
+   printf "\n- exited\n\n"
+   echo >&2 "${1}"
+   printf "\n-- last logs\n\n"
+   cat ${log};
+   rm -rf ${log};
+
+   exit 1
+}
+
+function cleanup() {
+  echo "cleaning up previous deployments"
+  ./stop_deployment &> ${log}
+  printf "cleaned\n\n"
+}
+trap cleanup EXIT INT QUIT
+
+function POD_NAME() {
+  kubectl get pods \
+    --field-selector=status.phase=Running \
+    -l app=secretless-k8s-test \
+    -o jsonpath="{.items[0].metadata.name}" \
+    2> ${log}
+}
+
+function pod_ready() {
+  (kubectl describe pod "$(POD_NAME)" 2> ${log} || echo "Ready False") | awk '/Ready/{if ($2 != "True") exit 1}'
+}
+
+function http_proxy_resp() {
+  kubectl exec -i "$(POD_NAME)" -c echo-server -- \
+    env http_proxy=localhost:8000 curl -v localhost:8080 2> ${log}
+}
+function http_resp() {
+  kubectl exec -i "$(POD_NAME)" -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> ${log}
+}
+
+function wait_for_CRD() {
+  echo "waiting for CRD to be ready"
+  until kubectl get "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" &> ${log}; do
+    printf ".";
+    sleep 2;
+  done
+  echo ""
+  echo "ready"
+  echo ""
+}
+
+function wait_for_pod() {
+  echo "waiting for pod to be ready"
+  until pod_ready; do
+    printf ".";
+    sleep 2;
+  done
+  until http_resp; do
+    printf ".";
+    sleep 2;
+  done
+  echo ""
+  echo "ready"
+  echo ""
+}
+
+function assert_on_http_proxy_resp() {
+  local username=$1
+  local password=$2
+  local resp
+  resp=$(http_proxy_resp)
+  local expected_header
+  expected_header="authorization=Basic $(printf "%s" "${username}:${password}" | base64)"
+
+  if printf "%s" "${resp}" | grep -q "${expected_header}"; then
+    echo "test passed ✔"
+  else
+    echo "expected to find '${expected_header}', in response:" > ${log}
+    echo "${resp}"  >> ${log}
+    exit_err "test failed ✗"
+  fi
+}
+
+function deploy_secretless() {
+  echo "secretless sidecar deploying CRD"
+
+  ./deployment.yaml.sh > deployment.yaml 2> ${log} || exit_err "Failed to template deployment.yaml"
+  kubectl apply -f deployment.yaml 2> ${log} || exit_err "Failed to deploy CRD"
+
+  echo "deployed"
+  echo ""
+}
+
+function run_test_case() {
+  local test_description=$1
+  local username=$2
+  local password=$3
+  echo "----------"
+  echo "[TEST CASE] ${test_description}"
+  echo ""
+  echo "applying manifest"
+
+  rm -f first.yaml
+  ./first.yaml.sh "${username}" "${password}" > first.yaml 2> ${log} || exit_err "Failed to template first.yaml"
+  kubectl apply -f first.yaml &> ${log} || exit_err "Failed to $1"
+
+  wait_for_pod
+
+  echo "testing"
+  assert_on_http_proxy_resp "${username}" "${password}"
+  echo ""
+  echo "----------"
+}
+
+function main() {
+  echo "using SECRETLESS_CRD_SUFFIX=${SECRETLESS_CRD_SUFFIX}"
+  cleanup
+
+  # deploy secretless and echo-server
+  deploy_secretless
+  wait_for_CRD
+  wait_for_pod
+
+  # run test cases
+  run_test_case "create configuration object" user1 password1
+  run_test_case "update configuration object" ohnoeswechangedit supersecretpassword
+}
+
+main

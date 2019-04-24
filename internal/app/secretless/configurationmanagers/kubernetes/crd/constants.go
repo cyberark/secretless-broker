@@ -1,10 +1,19 @@
 package crd
 
-import "time"
+import (
+	"os"
+	"time"
+)
+
+var (
+	// CRDGroupName is the main interface TLD that we tie our CRD under
+	CRDGroupName = "secretless" + os.Getenv("SECRETLESS_CRD_SUFFIX") + ".io"
+
+	// CRDFQDNName is the fully-qualified resource ID
+	CRDFQDNName = CRDName + "." + CRDGroupName
+)
 
 const (
-	// CRDGroupName is the main interface TLD that we tie our CRD under
-	CRDGroupName = "secretless.io"
 
 	// CRDLongName is a string indicating what prefix we will use on the CLI
 	CRDLongName = "configuration"
@@ -12,9 +21,6 @@ const (
 	// CRDName is the internal prefix for our resource that will be prefixed to
 	// CRDGroupName
 	CRDName = "configurations"
-
-	// CRDFQDNName is the fully-qualified resource ID
-	CRDFQDNName = CRDName + "." + CRDGroupName
 
 	// CRDVersion indicates what version of the CRD APIs we will be using
 	CRDVersion = "v1"

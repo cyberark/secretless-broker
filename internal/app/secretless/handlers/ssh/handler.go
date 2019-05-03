@@ -94,7 +94,8 @@ func (h *Handler) Run() {
 	var server ssh.Conn
 
 	if serverConfig, err = h.serverConfig(); err != nil {
-		log.Fatalf("ERROR: Could not resolve server config\n", err)
+		log.Printf("ERROR: Could not resolve server config\n", err)
+		return
 	}
 
 	// TODO: Ensure that we don't print credentials here before uncommenting

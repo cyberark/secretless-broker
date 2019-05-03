@@ -46,14 +46,12 @@ $ apt install mercurial
 
 1. Search the [open issues][issues] in GitHub to find out what has been planned
 2. Select an existing issue or open an issue to propose changes or fixes
-3. Move the issue to "in progress" in [Waffle][waffle] as you work on it
+3. Add the `implementing` label to the issue as you begin to work on it
 4. Run tests as described [here][tests], ensuring they pass
-5. Submit a pull request, linking the issue in the description
-6. Move the issue to "in review" in [Waffle][waffle], ask another contributor to review and merge your code
+5. Submit a pull request, linking the issue in the description (e.g. `Connected to #123`)
+6. Add the `implemented` label to the issue, and ask another contributor to review and merge your code
 
-Our [Waffle.io][waffle] is synchronized with GitHub and helps you navigate this workflow more easily.
-
-In addition to technical workflow descriptions available in Waffle / GitHub,
+In addition to technical workflow descriptions available in GitHub,
 some of the project's technical design documents can be found in the project [design][design] folder.
 
 ## Style guide
@@ -64,7 +62,6 @@ Use [this guide][style] to maintain consistent style across the Secretless Broke
 [issues]: https://github.com/cyberark/secretless-broker/issues
 [style]: STYLE.md
 [tests]: #testing
-[waffle]: https://waffle.io/cyberark/secretless
 
 ## Building
 

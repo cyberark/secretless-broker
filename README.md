@@ -308,6 +308,8 @@ Example:
 
 ### HashiCorp Vault Provider
 
+**Note: this provider is in an _alpha_ state due to its lack of support for [native Kubernetes auth](https://www.vaultproject.io/docs/auth/kubernetes.html).**
+
 Vault (`vault`) provider allows use of [HashiCorp Vault](https://www.vaultproject.io/) for fetching secrets.
 
 Example:

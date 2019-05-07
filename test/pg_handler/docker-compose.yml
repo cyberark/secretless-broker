@@ -25,9 +25,7 @@ services:
       timeout: 30s
 
   secretless-dev:
-    build:
-      context: ../..
-      dockerfile: Dockerfile.dev
+    image: secretless-dev
     command: ./bin/reflex
     volumes:
       - ../../:/secretless
@@ -35,8 +33,7 @@ services:
       - pg-socket:/sock
 
   secretless:
-    build:
-      context: ../..
+    image: secretless-broker
     volumes:
       - ../../test/util/ssl:/secretless/test/util/ssl
       - ./fixtures/secretless.yml:/secretless.yml

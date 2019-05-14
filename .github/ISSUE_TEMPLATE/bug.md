@@ -2,7 +2,7 @@
 name: Bug
 about: Create a bug report to help us improve
 title: ''
-labels: kind/bug, component/secretless-broker
+labels: component/secretless-broker, kind/bug
 assignees: ''
 
 ---

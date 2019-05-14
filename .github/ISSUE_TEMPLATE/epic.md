@@ -2,7 +2,7 @@
 name: Epic
 about: Create an epic to plan a major new initiative
 title: ''
-labels: kind/epic, component/secretless-broker, Epic
+labels: Epic, component/secretless-broker, kind/epic
 assignees: ''
 
 ---

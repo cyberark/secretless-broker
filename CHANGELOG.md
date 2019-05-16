@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.1] 2019-05-16
+
+### Added
+- Added several issue templates
+- Added improved tutorial flow to webpage
+
+### Changed
+- Noted alpha support for HCV provider in README
+- Improved CRD testing
+- Updated base image used for GitLab CI
+- Updated contributor info for documentation
+- Updated to use universal `psql` command throughout repo`
+
+### Fixed
+- Corrected tutorial issues with code snippets and spacing
+
 ## [0.7.0] 2019-03-26
 
 ### Added
@@ -227,7 +243,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -240,3 +256,4 @@ The first tagged version.
 [0.6.3]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...v0.6.3
 [0.6.4]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...v0.6.4
 [0.7.0]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...v0.7.0 
+[0.7.1]: https://github.com/cyberark/secretless-broker/compare/v0.7.0...v0.7.1 

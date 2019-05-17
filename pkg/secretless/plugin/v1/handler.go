@@ -1,13 +1,12 @@
 package v1
 
 import (
+	"log"
 	"net"
 	"net/http"
-	"log"
 	"sync"
 
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
@@ -27,13 +26,11 @@ type HandlerOptions struct {
 
 // Handler is an interface which takes a connection and connects it to a backend
 // TODO: Remove Authenticate as it's only used by http listener
-// TODO: Remove LoadKeys as it's only used by sshagent listener
 type Handler interface {
 	Authenticate(map[string][]byte, *http.Request) error
 	GetConfig() config.Handler
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn
-	LoadKeys(keyring agent.Agent) error
 	Shutdown()
 }
 
@@ -103,11 +100,6 @@ func (h *BaseHandler) GetClientConnection() net.Conn {
 // GetBackendConnection implements plugin_v1.Handler
 func (h *BaseHandler) GetBackendConnection() net.Conn {
 	return h.BackendConnection
-}
-
-// LoadKeys implements plugin_v1.Handler
-func (h *BaseHandler) LoadKeys(keyring agent.Agent) error {
-	panic("BaseHandler does not implement LoadKeys")
 }
 
 // Shutdown implements plugin_v1.Handler

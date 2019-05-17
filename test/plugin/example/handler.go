@@ -5,14 +5,12 @@ import (
 	"errors"
 	"log"
 	"net"
+	"net/http"
 	"strings"
 	"time"
-	"net/http"
 
-	"golang.org/x/crypto/ssh/agent"
-
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // connectionDetails stores the connection info to the real backend database.
@@ -162,11 +160,6 @@ func (h *Handler) GetClientConnection() net.Conn {
 // GetBackendConnection implements plugin_v1.Handler
 func (h *Handler) GetBackendConnection() net.Conn {
 	return h.BackendConnection
-}
-
-// LoadKeys implements plugin_v1.Handler
-func (h *Handler) LoadKeys(keyring agent.Agent) error {
-	panic("example handler does not implement LoadKeys")
 }
 
 // Shutdown implements plugin_v1.Handler

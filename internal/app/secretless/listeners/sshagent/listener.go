@@ -2,6 +2,7 @@ package sshagent
 
 import (
 	"fmt"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/sshagent"
 	"log"
 	"strconv"
 
@@ -58,7 +59,20 @@ func (l *Listener) Listen() {
 		Resolver:      l.Resolver,
 	}
 
-	handler := l.RunHandlerFunc("sshagent", handlerOptions)
+	genericHandler := l.RunHandlerFunc("sshagent", handlerOptions)
+// NOTE:
+// This type coercion is a hack to prevent an even worse hack.  Originally, we had
+// a method `LoadKeys` on the Handler interface itself, even though the method was
+// only needed for this specific handler.  We decided that keeping the public
+// interface clean was far more important, but in order to do that we must do this
+// ugly type assertion in this handler.  Eventually, a more comprehensive refactor
+// of the Secretless architecture will clean this up.
+	handler, ok := genericHandler.(*sshagent.Handler)
+	if !ok {
+		log.Printf("handler created is not for ssh-agent")
+		return
+	}
+
 	if err := handler.LoadKeys(keyring); err != nil {
 		log.Printf("Failed to load ssh-agent handler keys: ", err)
 		return

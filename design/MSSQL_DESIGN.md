@@ -65,6 +65,9 @@ Given an instance of MSSQL is running and credentials to connect to the target s
 
 ### Stories
 - `<list of story titles and links to corresponding GH issue>`
+- Define the configuration format for MSSQL
+- Identify and document the steps of the MSSQL protocol
+- 
 
 ### Future Work
 - `<list of potential future work>`

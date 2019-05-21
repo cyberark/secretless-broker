@@ -1,6 +1,8 @@
 package secretless
 
 import (
+	"fmt"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/pg"
 	"log"
 	"net"
 	"sync"
@@ -31,6 +33,13 @@ type Proxy struct {
 	RunListenerFunc func(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener
 }
 
+type ListenerHandler interface {
+	Closed() bool
+	Handle(net.Conn) error
+	PreListen(net.Listener) error
+	Shutdown() error
+}
+
 // Listen runs the listen loop for a specific Listener.
 func (p *Proxy) Listen(listenerConfig config.Listener) plugin_v1.Listener {
 	var netListener net.Listener
@@ -59,6 +68,30 @@ func (p *Proxy) Listen(listenerConfig config.Listener) plugin_v1.Listener {
 		RunHandlerFunc: p.RunHandlerFunc,
 	}
 
+	if listenerConfig.Protocol == "pg" {
+		// example of generic proxy
+		var listener ListenerHandler
+		listener = pg.ListenerFactory(options)
+
+		go func() {
+			defer listener.Shutdown()
+			listener.PreListen(netListener)
+
+
+			fmt.Print("proxy accepting connections for listener-handler")
+			for !listener.Closed() {
+				var client net.Conn
+				var err error
+				if client, err = netListener.Accept(); err != nil {
+					log.Printf("WARN: Failed to accept incoming pg connection: ", err)
+					continue
+				}
+
+				listener.Handle(client)
+			}
+		}()
+		return nil
+	}
 	listener := p.RunListenerFunc(listenerConfig.Protocol, options)
 
 	err = listener.Validate()

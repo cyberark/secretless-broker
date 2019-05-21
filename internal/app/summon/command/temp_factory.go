@@ -4,8 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
-	"github.com/mitchellh/go-homedir"
 )
 
 // DEVSHM is the location of a memory-mapped directory on Linux.
@@ -35,11 +33,13 @@ func DefaultTempPath() string {
 	if err == nil && fi.Mode().IsDir() {
 		return DEVSHM
 	}
-	home, err := homedir.Dir()
+
+	home, err := os.UserHomeDir()
 	if err == nil {
 		dir, _ := ioutil.TempDir(home, ".tmp")
 		return dir
 	}
+
 	return os.TempDir()
 }
 

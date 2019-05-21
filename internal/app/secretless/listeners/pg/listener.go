@@ -9,7 +9,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 
 	// TODO: Ideally this protocol-specific import shouldn't be needed
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/pg/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
@@ -72,7 +72,7 @@ func (l *Listener) Listen() {
 				Resolver: l.Resolver,
 			}
 
-			handler := l.RunHandlerFunc("pg", handlerOptions)
+			handler := HandlerFactory(handlerOptions)
 			l.AddHandler(handler)
 		} else {
 			pgError := protocol.Error{

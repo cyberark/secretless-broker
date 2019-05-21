@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/pg/protocol"
 )
 
 // newClientOptions builds a ClientOptions from an options map.

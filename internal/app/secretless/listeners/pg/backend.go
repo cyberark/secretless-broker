@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/pg/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 )
 

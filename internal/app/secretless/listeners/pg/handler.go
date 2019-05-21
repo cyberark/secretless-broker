@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/pg/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 

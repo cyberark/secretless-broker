@@ -5,13 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // BasicAuthHandler applies HTTP Basic authentication to the HTTP Authorization header.
 type BasicAuthHandler struct {
-	plugin_v1.BaseHandler
 }
 
 // Authenticate applies the "username" and "password" credential to the Authorization header, following the
@@ -43,11 +40,4 @@ func (h BasicAuthHandler) Authenticate(values map[string][]byte, r *http.Request
 	r.Header.Set("Authorization", fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(rawAuthString)))
 
 	return nil
-}
-
-// BasicAuthHandlerFactory instantiates a handler given HandlerOptions
-func BasicAuthHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
-	return &BasicAuthHandler{
-		BaseHandler: plugin_v1.NewBaseHandler(options),
-	}
 }

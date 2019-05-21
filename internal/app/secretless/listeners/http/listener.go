@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strconv"
 
+	secretlessHttp "github.com/cyberark/secretless-broker/internal/app/secretless/handlers/http"
 	"github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
@@ -90,7 +91,7 @@ func zeroizeSecrets(backendSecrets map[string][]byte) {
 }
 
 // LookupHandler returns the handler that matches the request URL
-func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
+func (l *Listener) LookupHandler(r *http.Request) *secretlessHttp.HttpHandler {
 	for _, handlerConfig := range l.HandlerConfigs {
 		for _, pattern := range handlerConfig.Patterns {
 			log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
@@ -104,7 +105,13 @@ func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
 					Resolver:      l.Resolver,
 				}
 
-				return l.RunHandlerFunc("http/"+handlerConfig.Type, handlerOptions)
+				handlerGeneric := l.RunHandlerFunc("http", handlerOptions)
+				handler, ok := handlerGeneric.(*secretlessHttp.HttpHandler)
+				if !ok {
+					log.Panicf("handler created is not for http")
+				}
+				handler.RegisterSubHandler(handlerConfig.Type)
+				return handler
 			}
 		}
 	}
@@ -147,7 +154,8 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, keys)
 		}
 
-		err = handler.Authenticate(backendSecrets, r)
+		fmt.Print("here we are", handler.SubHandler)
+		err = handler.SubHandler.Authenticate(backendSecrets, r)
 		zeroizeSecrets(backendSecrets)
 		if err != nil {
 			http.Error(w, err.Error(), 500)

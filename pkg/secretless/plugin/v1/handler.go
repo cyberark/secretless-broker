@@ -3,7 +3,6 @@ package v1
 import (
 	"log"
 	"net"
-	"net/http"
 	"sync"
 
 	"golang.org/x/crypto/ssh"
@@ -27,7 +26,6 @@ type HandlerOptions struct {
 // Handler is an interface which takes a connection and connects it to a backend
 // TODO: Remove Authenticate as it's only used by http listener
 type Handler interface {
-	Authenticate(map[string][]byte, *http.Request) error
 	GetConfig() config.Handler
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn
@@ -62,11 +60,6 @@ func NewBaseHandler(options HandlerOptions) BaseHandler {
 		Resolver:          options.Resolver,
 		ShutdownNotifier:  options.ShutdownNotifier,
 	}
-}
-
-// Authenticate implements plugin_v1.Handler
-func (h *BaseHandler) Authenticate(map[string][]byte, *http.Request) error {
-	panic("BaseHandler does not implement Authenticate")
 }
 
 // GetConfig implements plugin_v1.Handler

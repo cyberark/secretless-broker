@@ -11,13 +11,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
-
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // AWSHandler applies AWS signature authentication to the HTTP Authorization header.
 type AWSHandler struct {
-	plugin_v1.BaseHandler
 }
 
 // AWS4-HMAC-SHA256 Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
@@ -116,11 +113,4 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	r.Body = ioutil.NopCloser(bytes.NewReader(bodyBytes))
 
 	return nil
-}
-
-// AWSHandlerFactory instantiates a handler given HandlerOptions
-func AWSHandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
-	return &AWSHandler{
-		BaseHandler: plugin_v1.NewBaseHandler(options),
-	}
 }

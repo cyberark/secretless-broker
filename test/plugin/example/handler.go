@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net"
-	"net/http"
 	"strings"
 	"time"
 
@@ -140,11 +139,6 @@ func (h *Handler) Run() {
 	}
 
 	h.Pipe()
-}
-
-// Authenticate implements plugin_v1.Handler
-func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
-	panic("example handler does not implement Authenticate")
 }
 
 // GetConfig implements plugin_v1.Handler

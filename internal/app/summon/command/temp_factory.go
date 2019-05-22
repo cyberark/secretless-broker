@@ -6,8 +6,11 @@ import (
 	"strings"
 )
 
-// DEVSHM is the location of a memory-mapped directory on Linux.
-const DEVSHM = "/dev/shm"
+// This is the location of a memory-mapped directory on Linux. We want
+// to use this location where possible since files saved there are not
+// saved on disk but kept in transient memory which is more secure than
+// the filesystem.
+const defaultSharedMemoryDir = "/dev/shm"
 
 // TempFactory creates new temp files, using heuristics to choose as secure a location
 // as possible.
@@ -19,25 +22,41 @@ type TempFactory struct {
 // NewTempFactory creates a new temporary file factory.
 // defer Cleanup() if you want the files removed.
 func NewTempFactory(path string) TempFactory {
-	if path == "" {
-		path = DefaultTempPath()
-	}
-	return TempFactory{path: path}
+	return NewCustomTempFactory(path, "")
 }
 
-// DefaultTempPath is the path for temporary files.
-// Returns DEVSHM if it exists and is a directory. The home dir of current user
-// is the next preferred option. The final option is the OS temp dir.
-func DefaultTempPath() string {
-	fi, err := os.Stat(DEVSHM)
+// NewCustomTempFactory creates a new temporary file factory with specified
+// sharedMemoryDir. If sharedMemoryDir is empty, we use the default path for it.
+// defer Cleanup() if you want the files removed.
+func NewCustomTempFactory(path string, sharedMemoryDir string) TempFactory {
+	if path == "" {
+		path = defaultTempPath(sharedMemoryDir)
+	}
+
+	return TempFactory{
+		path: path,
+	}
+}
+
+// defaultTempPath is the path for temporary files.
+// Returns shared memory dir if it exists and is a directory. The home dir of
+// current user is the next preferred option. The final option is the OS temp dir.
+func defaultTempPath(sharedMemoryDir string) string {
+	if sharedMemoryDir == "" {
+		sharedMemoryDir = defaultSharedMemoryDir
+	}
+
+	fi, err := os.Stat(sharedMemoryDir)
 	if err == nil && fi.Mode().IsDir() {
-		return DEVSHM
+		return sharedMemoryDir
 	}
 
 	home, err := os.UserHomeDir()
 	if err == nil {
-		dir, _ := ioutil.TempDir(home, ".tmp")
-		return dir
+		dir, err := ioutil.TempDir(home, ".tmp")
+		if err == nil {
+			return dir
+		}
 	}
 
 	return os.TempDir()
@@ -59,8 +78,8 @@ func (tf *TempFactory) Cleanup() {
 	for _, file := range tf.files {
 		os.Remove(file)
 	}
-	// Also remove the tempdir if it's not DEVSHM
-	if !strings.Contains(tf.path, DEVSHM) {
+	// Also remove the tempdir if it's not the shared memory directory
+	if !strings.Contains(tf.path, defaultSharedMemoryDir) {
 		os.Remove(tf.path)
 	}
 	tf = nil

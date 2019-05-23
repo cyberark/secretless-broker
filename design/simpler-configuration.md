@@ -150,16 +150,17 @@ services:
     protocol: http
     listenOn: /var/docker/docker.sock
     credentials:
-      aws/accessKeyID:
+      accessKeyID:
         providerId: name-in-vault
         provider: conjur
-      aws/secretAccessKey:
+      secretAccessKey:
         providerId: name-in-vault
         provider: conjur
-      aws/accessToken:
+      accessToken:
         providerId: name-in-vault
         provider: conjur
     config:
+      type: aws
       pattern: ^http.*
 
   # the conjur prefix on the credentials indicates which protocol implementation to use
@@ -167,13 +168,14 @@ services:
     protocol: http
     listenOn: 127.0.0.1:8080
     credentials:
-      conjur/accessToken:
+      accessToken:
         providerId: /path/to/file
         provider: file
-      conjur/forceSSL:
+      forceSSL:
         providerId: name-in-vault
         provider: conjur
     config:
+      type: conjur
       pattern: ^http://srdjan.com*
 
   ssh-handler:
@@ -186,13 +188,8 @@ services:
         providerId: SSH_PRIVATE_KEY
         provider: env
 ```
-**Note**: We have not decided on the final syntax for http yet. We are considering dropping support in the near-term for
-multiple http sub-handlers on a single port / socket file.
-Some things we'd like to be able to support with the http definition:
-- Connections to multiple different endpoints flowing through a single port / socket file
-- Supporting connections to multiple different versions of the same connection type through the same port / socket file
-  (eg connections to different AWS accounts)
-- A clear definition for one listener / handler configured on a given port / socket (**this is the priority to support in this version**)
+**Note**: In this iteration we are **not** supporting requests for multiple http handler types flowing through a
+single service definition. We plan to add support for this in a later iteration. For now, we only support one http handler configured on a given port / socket.
 
 This proposal:
 - Integrates the port / socket that Secretless is listening on with how to process the connection (eg credentials, etc)
@@ -248,3 +245,8 @@ In addition, all integration and end-to-end tests will be updated to use the new
   internal and not visible to end-users.
 - Update the configuration CRD to follow the new model (#715) - until we make these updates, CRDs will remain in beta and
   will use the old style Secretless configuration
+- Multiple http handlers on a single port / socket
+  We have not decided on the final syntax for http with multiple configured backends yet. Some things we'd like to be able to support with the http definition:
+  - Connections to multiple different endpoints flowing through a single port / socket file
+  - Supporting connections to multiple different versions of the same connection type through the same port / socket file
+    (eg connections to different AWS accounts)

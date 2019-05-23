@@ -17,10 +17,12 @@ unnecessary concepts and present better chrome to the user.  This improvement co
 Aha Card: https://cyberark.aha.io/features/AAM-<>
 
 - [Objective](#objective)
-- [Experience (Summary)](#experience-summary)
-- [Experience (Detailed)](#experience-detailed)
+- [Team](#team)
+- [SDLC Timeline](#sdlc-timeline)
+- [Experience](#experience)
 - [Technical Details](#technical-details)
 - [Testing](#testing)
+- [Dependent Components](#dependent-components)
 - [Documentation](#documentation)
 - [Open Questions](#open-questions)
 - [Stories](#stories)
@@ -34,6 +36,23 @@ Aha Card: https://cyberark.aha.io/features/AAM-<>
   configuration beyond the next stable release
 - Ensure that CRDs using the legacy configuration may still be used with the project once the standard configuration
   syntax has been updated
+  
+### Team
+- Engineering Manager: Geri Jennings (@izgeri)
+- Engineers:
+    - Jonah Goldstein (@jonahx)
+    - Kumbirai Tanekha (@doodlesbykumbi)
+    - Srdjan Grubor (@sgnn7)
+
+### SDLC Timeline
+|Stage|Status|ETA|Artifact|
+|-|-|-|-|
+|High Level Feature Doc|n/a|n/a|n/a|
+|Functional Sign-off|n/a|n/a|n/a|
+|Detailed Feature Doc|Pending|2019-05-23|[Link](https://github.com/cyberark/secretless-broker/pull/716)|
+|Solution Sign-off|Pending|2019-05-23||
+|Epic|Pending|2019-05-23|[Link](https://github.com/cyberark/secretless-broker/issues/707)|
+|Execution|Pending|2019-06-13||
 
 ### Experience 
 #### Current Experience
@@ -212,14 +231,14 @@ In addition, all integration and end-to-end tests will be updated to use the new
 - Should we integrate versioning as part of these changes?
 
 ### Stories
-### Development
+#### Development
 - #708 - Configuration parsing in config package handles new config format
 - #714 - Secretless configuration syntax is versioned 
 
-### Testing
+#### Testing
 - #712 - All Secretless test cases use new yml config format
 
-### Documentation
+#### Documentation
 - #713 - All Secretless configuration code samples are updated to reflect new yml config format
 - cyberark/secretless-docs#135 - Listener / Handler references are updated to refer to single handler construct
 

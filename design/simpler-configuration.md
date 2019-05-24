@@ -200,6 +200,21 @@ This proposal:
 - It does not expose the concepts of listeners and handlers, but rather uses naming conventions that will do a better job
   of mapping to the user's mental model of what the broker is doing.
 
+One other difference is that we enable less verbose options for specifying credentials. For almost all credential providers (Conjur, Kubernetes Secrets, HashiCorp Vault, environment, file, keychain) the syntax is:
+```yaml
+credentials:
+  secretKey:
+    providerId: path-to-secret-in-provider
+    provider: credentialProvider
+```
+In the example snippet above, `secretKey` must match a key in the handler configuration (eg `address` for SSH) and `credentialProvider` must match the handle of the desired credential provider (eg `kubernetes` for Kubernetes Secrets). `path-to-secret-in-provider` is the fully qualified ID of the secret in the specified credential store.
+
+The one exception to this syntax is the `literal` provider, which no longer ever needs to be referenced by its `credentialProvider` handle but instead is invoked by simply providing the `secretKey` and the string value that the key should be set to:
+```yaml
+credentials:
+  secretKey: "my-secret-value"
+```
+
 ### Technical Details
 - The [configuration parser](https://github.com/cyberark/secretless-broker/tree/master/pkg/secretless/config) needs to be
   updated to parse the updated YAML, while maintaining support for the old YAML syntax.

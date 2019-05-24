@@ -145,7 +145,7 @@ services:
     config:  # this section usually blank
       optionalStuff: blah
       
-  # the aws prefix on the credentials indicates which protocol implementation to use
+  # the `aws` authStrategy specified in the config indicates which protocol implementation to use
   aws-client:
     protocol: http
     listenOn: /var/docker/docker.sock
@@ -160,10 +160,10 @@ services:
         providerId: name-in-vault
         provider: conjur
     config:
-      type: aws
+      authStrategy: aws
       pattern: ^http.*
 
-  # the conjur prefix on the credentials indicates which protocol implementation to use
+  # the `conjur` authStrategy specified in the config indicates which protocol implementation to use
   conjur-client:
     protocol: http
     listenOn: 127.0.0.1:8080
@@ -175,7 +175,7 @@ services:
         providerId: name-in-vault
         provider: conjur
     config:
-      type: conjur
+      authStrategy: conjur
       pattern: ^http://srdjan.com*
 
   ssh-handler:
@@ -207,9 +207,9 @@ credentials:
     providerId: path-to-secret-in-provider
     provider: credentialProvider
 ```
-In the example snippet above, `secretKey` must match a key in the handler configuration (eg `address` for SSH) and `credentialProvider` must match the handle of the desired credential provider (eg `kubernetes` for Kubernetes Secrets). `path-to-secret-in-provider` is the fully qualified ID of the secret in the specified credential store.
+In the example snippet above, `secretKey` must match a key in the handler configuration (eg `address` for SSH) and `credentialProvider` must match the unique identifier of the desired credential provider (eg `kubernetes` for Kubernetes Secrets). `path-to-secret-in-provider` is the fully qualified ID of the secret in the specified credential store.
 
-The one exception to this syntax is the `literal` provider, which no longer ever needs to be referenced by its `credentialProvider` handle but instead is invoked by simply providing the `secretKey` and the string value that the key should be set to:
+The one exception to this syntax is the `literal` provider, which no longer ever needs to be referenced by its `credentialProvider` identifier but instead is invoked by simply providing the `secretKey` and the string value that the key should be set to:
 ```yaml
 credentials:
   secretKey: "my-secret-value"

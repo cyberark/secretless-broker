@@ -131,6 +131,11 @@ Some of the key concerns we have with this configuration are:
 ```yaml
 version: "1"
 services:
+
+  ###
+  # database handler example
+  ###
+
   postgres-db:
     protocol: pg
     listenOn: 0.0.0.0:5432 # can be a socket as well (same name for both)
@@ -145,7 +150,14 @@ services:
     config:  # this section usually blank
       optionalStuff: blah
       
-  # the `aws` authStrategy specified in the config indicates which protocol implementation to use
+  ###
+  # http handler example
+  ###
+      
+  # the config for the http protocol has two required values:
+  #   `authenticationStrategy` which indicates which specific http protocol implementation to use (eg `type`)
+  #   `authenticateURLsMatching` which gives a regex pattern for request URIs that use Secretless for auth (eg `match`)
+  
   aws-client:
     protocol: http
     listenOn: /var/docker/docker.sock
@@ -160,10 +172,9 @@ services:
         providerId: name-in-vault
         provider: conjur
     config:
-      authStrategy: aws
-      pattern: ^http.*
+      authenticationStrategy: aws
+      authenticateURLsMatching: ^http.*
 
-  # the `conjur` authStrategy specified in the config indicates which protocol implementation to use
   conjur-client:
     protocol: http
     listenOn: 127.0.0.1:8080
@@ -175,10 +186,14 @@ services:
         providerId: name-in-vault
         provider: conjur
     config:
-      authStrategy: conjur
-      pattern: ^http://srdjan.com*
+      authenticationStrategy: conjur
+      authenticateURLsMatching: ^http://srdjan.com*
 
-  ssh-handler:
+  ###
+  # ssh handler example
+  ###
+
+  ssh-proxy:
     protocol: ssh
     listenOn: 0.0.0.0:2222
     credentials:

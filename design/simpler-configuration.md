@@ -221,7 +221,7 @@ specified credential store.
 
 The one exception to this syntax is the `literal` provider, which no longer
 ever needs to be referenced by its `credentialProvider` identifier but instead
-is invoked by simply providing the `secretKey` and the string value that the
+is invoked by simply providing the `secretName` and the string value that the
 key should be set to:
 ```yaml
 credentials:

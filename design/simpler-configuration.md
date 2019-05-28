@@ -142,11 +142,9 @@ services:
     credentials:
       address: postgres.my-service.internal:5432
       password:
-        providerId: name-in-vault
-        provider: vault
+        vault: id-of-secret-in-vault
       username:
-        providerId: username
-        provider: env
+        env: username
     config:  # this section usually blank
       optionalStuff: blah
       
@@ -163,14 +161,11 @@ services:
     listenOn: /var/docker/docker.sock
     credentials:
       accessKeyID:
-        providerId: name-in-vault
-        provider: conjur
+        conjur: id-of-secret-in-conjur
       secretAccessKey:
-        providerId: name-in-vault
-        provider: conjur
+        conjur: id-of-secret-in-conjur
       accessToken:
-        providerId: name-in-vault
-        provider: conjur
+        conjur: id-of-secret-in-conjur
     config:
       authenticationStrategy: aws
       authenticateURLsMatching: ^http.*
@@ -180,11 +175,8 @@ services:
     listenOn: 127.0.0.1:8080
     credentials:
       accessToken:
-        providerId: /path/to/file
-        provider: file
-      forceSSL:
-        providerId: name-in-vault
-        provider: conjur
+        file: /path/to/file
+      forceSSL: true
     config:
       authenticationStrategy: conjur
       authenticateURLsMatching: ^http://srdjan.com*
@@ -200,8 +192,7 @@ services:
       address: "localhost"
       user: "Jonah"
       privateKey:
-        providerId: SSH_PRIVATE_KEY
-        provider: env
+        env: SSH_PRIVATE_KEY
 ```
 **Note**: In this iteration we are **not** supporting requests for multiple http handler types flowing through a
 single service definition. We plan to add support for this in a later iteration. For now, we only support one http handler configured on a given port / socket.
@@ -218,16 +209,23 @@ This proposal:
 One other difference is that we enable less verbose options for specifying credentials. For almost all credential providers (Conjur, Kubernetes Secrets, HashiCorp Vault, environment, file, keychain) the syntax is:
 ```yaml
 credentials:
-  secretKey:
-    providerId: path-to-secret-in-provider
-    provider: credentialProvider
+  secretName:
+    credentialProvider: id-of-secret-in-provider
 ```
-In the example snippet above, `secretKey` must match a key in the handler configuration (eg `address` for SSH) and `credentialProvider` must match the unique identifier of the desired credential provider (eg `kubernetes` for Kubernetes Secrets). `path-to-secret-in-provider` is the fully qualified ID of the secret in the specified credential store.
+In the example snippet above, `secretName` is the credential's name within
+Secretless, and as such must match a key in the handler configuration (eg
+`address` for SSH). `credentialProvider` must match the unique identifier of
+the desired credential provider (eg `kubernetes` for Kubernetes Secrets).
+`id-of-secret-in-provider` is the fully qualified ID of the secret in the
+specified credential store.
 
-The one exception to this syntax is the `literal` provider, which no longer ever needs to be referenced by its `credentialProvider` identifier but instead is invoked by simply providing the `secretKey` and the string value that the key should be set to:
+The one exception to this syntax is the `literal` provider, which no longer
+ever needs to be referenced by its `credentialProvider` identifier but instead
+is invoked by simply providing the `secretName` and the string value that the
+key should be set to:
 ```yaml
 credentials:
-  secretKey: "my-secret-value"
+  secretName: "my-secret-value"
 ```
 
 ### Technical Details

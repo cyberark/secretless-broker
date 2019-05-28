@@ -2,22 +2,22 @@ package example
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"strconv"
-	"log"
 
 	"github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Listener listens for and handles new connections.
 type Listener struct {
-	Config         config.Listener
+	Config         config_v1.Listener
 	EventNotifier  plugin_v1.EventNotifier
-	HandlerConfigs []config.Handler
+	HandlerConfigs []config_v1.Handler
 	NetListener    net.Listener
 	Resolver       plugin_v1.Resolver
 	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions)  plugin_v1.Handler
@@ -29,7 +29,7 @@ type handlerHasCredentials struct {
 
 // Validate checks that a handler has all necessary credentials.
 func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config.Handler)
+	hs := value.([]config_v1.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
 		if !h.HasCredential("host") {
@@ -82,7 +82,7 @@ func (l *Listener) GetName() string {
 }
 
 // GetConfig implements plugin_v1.Listener
-func (l *Listener) GetConfig() config.Listener {
+func (l *Listener) GetConfig() config_v1.Listener {
 	return l.Config
 }
 

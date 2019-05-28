@@ -5,14 +5,14 @@ import (
 	"net"
 	"sync"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // ListenerOptions contains thetype Proxy struct { configuration for the listener
 type ListenerOptions struct {
 	EventNotifier  EventNotifier
-	HandlerConfigs []config.Handler
-	ListenerConfig config.Listener
+	HandlerConfigs []config_v1.Handler
+	ListenerConfig config_v1.Listener
 	NetListener    net.Listener
 	Resolver       Resolver
 	RunHandlerFunc func(string, HandlerOptions) Handler
@@ -21,7 +21,7 @@ type ListenerOptions struct {
 // Listener is the interface which accepts client connections and passes them
 // to a handler
 type Listener interface {
-	GetConfig() config.Listener
+	GetConfig() config_v1.Listener
 	GetConnections() []net.Conn
 	GetHandlers() []Handler
 	GetListener() net.Listener
@@ -45,9 +45,9 @@ type Listener interface {
 type BaseListener struct {
 	closingMutex   *sync.Mutex
 	handlers       []Handler // store of active handlers for this listener,
-	Config         config.Listener
+	Config         config_v1.Listener
 	EventNotifier  EventNotifier
-	HandlerConfigs []config.Handler
+	HandlerConfigs []config_v1.Handler
 	IsClosed       bool
 	NetListener    net.Listener
 	Resolver       Resolver
@@ -68,7 +68,7 @@ func NewBaseListener(options ListenerOptions) BaseListener {
 }
 
 // GetConfig implements plugin_v1.Listener
-func (l *BaseListener) GetConfig() config.Listener {
+func (l *BaseListener) GetConfig() config_v1.Listener {
 	return l.Config
 }
 

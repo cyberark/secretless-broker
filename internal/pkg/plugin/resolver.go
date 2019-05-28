@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
@@ -70,7 +70,7 @@ func (resolver *Resolver) Provider(name string) (provider plugin_v1.Provider, er
 
 // Resolve accepts an list of Providers and a list of StoredSecrets and
 // attempts to obtain the value of each StoredSecret from the appropriate Provider.
-func (resolver *Resolver) Resolve(secrets []config.StoredSecret) (map[string][]byte, error) {
+func (resolver *Resolver) Resolve(secrets []config_v1.StoredSecret) (map[string][]byte, error) {
 	if secrets == nil {
 		resolver.LogFatalf("ERROR! StoredSecrets not defined in Resolve call!")
 	}

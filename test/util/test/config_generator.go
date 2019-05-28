@@ -2,12 +2,13 @@ package test
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // TODO: standardise on DB_PORT, DB_USER, DB_PASSWORD for flexibility
-func sharedCredentials() []config.StoredSecret {
-	return []config.StoredSecret{
+func sharedCredentials() []config_v1.StoredSecret {
+	return []config_v1.StoredSecret{
 		{
 			Name:     "username",
 			Provider: "literal",
@@ -23,10 +24,10 @@ func sharedCredentials() []config.StoredSecret {
 
 
 // TODO: consider parametrising ConnectPort generator
-func GenerateConfigurations() (config.Config, LiveConfigurations) {
+func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 	// initialised with health-check listener and handler
-	secretlessConfig := config.Config{
-		Listeners: []config.Listener{
+	secretlessConfig := config_v1.Config{
+		Listeners: []config_v1.Listener{
 			{
 				Debug:       true,
 				Name:        "health-check",
@@ -40,12 +41,12 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 				Address:     "0.0.0.0:5432",
 			},
 		},
-		Handlers:  []config.Handler{
+		Handlers:  []config_v1.Handler{
 			{
 				Name:         "health-check",
 				ListenerName: "health-check",
 				Debug:        true,
-				Credentials:  []config.StoredSecret{
+				Credentials:  []config_v1.StoredSecret{
 					{
 						Name:     "host",
 						Provider: "literal",
@@ -72,7 +73,7 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 				Name:         "pg-bench",
 				ListenerName: "pg-bench",
 				Debug:        true,
-				Credentials:  []config.StoredSecret{
+				Credentials:  []config_v1.StoredSecret{
 					{
 						Name:     "address",
 						Provider: "literal",
@@ -115,13 +116,13 @@ func GenerateConfigurations() (config.Config, LiveConfigurations) {
 								Port:       portNumber,
 							}
 
-							listener := config.Listener{
+							listener := config_v1.Listener{
 								Name: "listener_" + connectionPort.ToPortString(),
 								// TODO: grab value from envvar for flexibility
 								Protocol: TestDbConfig.Protocol,
 								Debug:    true,
 							}
-							handler := config.Handler{
+							handler := config_v1.Handler{
 								Name:         "handler_" + connectionPort.ToPortString(),
 								Debug:        true,
 								ListenerName: "listener_" + connectionPort.ToPortString(),

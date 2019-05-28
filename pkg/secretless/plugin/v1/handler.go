@@ -1,15 +1,15 @@
 package v1
 
 import (
+	"log"
 	"net"
 	"net/http"
-	"log"
 	"sync"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // HandlerShutdownNotifier is a function signature for notifying of a Handler's Shutdown
@@ -17,12 +17,12 @@ type HandlerShutdownNotifier func(Handler)
 
 // HandlerOptions contains the configuration for the handler
 type HandlerOptions struct {
-	HandlerConfig           config.Handler
-	Channels                <-chan ssh.NewChannel
-	ClientConnection        net.Conn
-	EventNotifier           EventNotifier
-	ShutdownNotifier        HandlerShutdownNotifier
-	Resolver                Resolver
+	HandlerConfig    config_v1.Handler
+	Channels         <-chan ssh.NewChannel
+	ClientConnection net.Conn
+	EventNotifier    EventNotifier
+	ShutdownNotifier HandlerShutdownNotifier
+	Resolver         Resolver
 }
 
 // Handler is an interface which takes a connection and connects it to a backend
@@ -30,7 +30,7 @@ type HandlerOptions struct {
 // TODO: Remove LoadKeys as it's only used by sshagent listener
 type Handler interface {
 	Authenticate(map[string][]byte, *http.Request) error
-	GetConfig() config.Handler
+	GetConfig() config_v1.Handler
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn
 	LoadKeys(keyring agent.Agent) error
@@ -48,12 +48,12 @@ type Handler interface {
 //
 // There is no requirement to use BaseHandler.
 type BaseHandler struct {
-	BackendConnection  net.Conn
-	ClientConnection   net.Conn
-	EventNotifier      EventNotifier
-	HandlerConfig      config.Handler
-	Resolver           Resolver
-	ShutdownNotifier   HandlerShutdownNotifier
+	BackendConnection net.Conn
+	ClientConnection  net.Conn
+	EventNotifier     EventNotifier
+	HandlerConfig     config_v1.Handler
+	Resolver          Resolver
+	ShutdownNotifier  HandlerShutdownNotifier
 }
 
 // NewBaseHandler creates a BaseHandler from HandlerOptions
@@ -73,7 +73,7 @@ func (h *BaseHandler) Authenticate(map[string][]byte, *http.Request) error {
 }
 
 // GetConfig implements plugin_v1.Handler
-func (h *BaseHandler) GetConfig() config.Handler {
+func (h *BaseHandler) GetConfig() config_v1.Handler {
 	return h.HandlerConfig
 }
 

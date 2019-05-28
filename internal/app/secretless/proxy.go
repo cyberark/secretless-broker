@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
@@ -24,7 +24,7 @@ type Proxy struct {
 	cleanupMutex    sync.Mutex
 	runEventChan    chan int
 	EventNotifier   plugin_v1.EventNotifier
-	Config          config.Config
+	Config          config_v1.Config
 	Listeners       []plugin_v1.Listener
 	Resolver        plugin_v1.Resolver
 	RunHandlerFunc  func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
@@ -32,7 +32,7 @@ type Proxy struct {
 }
 
 // Listen runs the listen loop for a specific Listener.
-func (p *Proxy) Listen(listenerConfig config.Listener) plugin_v1.Listener {
+func (p *Proxy) Listen(listenerConfig config_v1.Listener) plugin_v1.Listener {
 	var netListener net.Listener
 	var err error
 
@@ -53,7 +53,7 @@ func (p *Proxy) Listen(listenerConfig config.Listener) plugin_v1.Listener {
 	options := plugin_v1.ListenerOptions{
 		EventNotifier:  p.EventNotifier,
 		ListenerConfig: listenerConfig,
-		HandlerConfigs: listenerConfig.SelectHandlers(p.Config.Handlers),
+		HandlerConfigs: listenerConfig.LinkedHandlers(p.Config.Handlers),
 		NetListener:    netListener,
 		Resolver:       p.Resolver,
 		RunHandlerFunc: p.RunHandlerFunc,

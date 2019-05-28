@@ -11,7 +11,7 @@ import (
 	// TODO: Ideally this protocol-specific import shouldn't be needed
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
@@ -26,7 +26,7 @@ type handlerHasCredentials struct {
 
 // Validate checks that a handler has all necessary credentials.
 func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config.Handler)
+	hs := value.([]config_v1.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
 		if !h.HasCredential("address") {

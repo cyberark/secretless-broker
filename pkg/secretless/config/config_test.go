@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
-
 	. "github.com/smartystreets/goconvey/convey"
+
+	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 )
 
 func Test_Config(t *testing.T) {
@@ -84,21 +84,13 @@ handlers:
 		So(config.Listeners, ShouldHaveLength, 1)
 	})
 
-	Convey("Reports an invalid top-level map key", t, func() {
-		yaml := `
-foobar: []
-`
-		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "field foobar not found in type config.Config")
-	})
-
 	Convey("Reports an unnamed Listener definition", t, func() {
 		yaml := `
 listeners:
   - protocol: pg
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Listeners: (0: (Name: cannot be blank.).)")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank")
 	})
 
 	Convey("Reports an unknown protocol", t, func() {
@@ -134,7 +126,7 @@ handlers:
   - name: mylistener
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Listeners: (0: must have an Address or Socket.)")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "address or socket is required")
 	})
 
 	Convey("Reports an unnamed Handler definition", t, func() {
@@ -147,7 +139,7 @@ handlers:
   - listener: http_default
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Handlers: (0: (Name: cannot be blank.).)")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank")
 	})
 
 	Convey("Can serialize match fields", t, func() {

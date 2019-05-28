@@ -21,6 +21,7 @@ services:
       HTTP_PORT: 8080
     volumes:
       - ./secretless.yml:/secretless.yml
+      - ../..:/secretless
     depends_on:
       - nginx
 

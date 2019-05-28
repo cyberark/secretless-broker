@@ -7,11 +7,12 @@ import (
 
 	api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 type configurationManager struct {
-	ConfigChangedFunc func(string, config.Config) error
+	ConfigChangedFunc func(string, config_v1.Config) error
 	FilterSpec        string
 	Name              string
 }
@@ -49,7 +50,7 @@ func (configManager *configurationManager) CRDDeleted(crdConfiguration *api_v1.C
 	log.Printf("%s: WARN: CRDDeleted - setting empty config!", PluginName)
 
 	// TODO: Do something of value here
-	newConfig := config.Config{}
+	newConfig := config_v1.Config{}
 	configManager.ConfigChangedFunc(configManager.Name, newConfig)
 }
 

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-
 	. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 var fatalErrors []string
@@ -28,8 +28,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Can resolve secrets", func() {
 			resolver := newInstance()
 
-			secrets := make([]config.StoredSecret, 1, 1)
-			secrets[0] = config.StoredSecret{
+			secrets := make([]config_v1.StoredSecret, 1, 1)
+			secrets[0] = config_v1.StoredSecret{
 				Name:     "foo",
 				Provider: "literal",
 				ID:       "bar",
@@ -43,7 +43,7 @@ func Test_Resolver(t *testing.T) {
 		Convey("Exits if secret resolution array is empty", func() {
 			resolver := newInstance()
 
-			secrets := make([]config.StoredSecret, 1, 1)
+			secrets := make([]config_v1.StoredSecret, 1, 1)
 
 			resolveVarFunc := func() {
 				resolver.Resolve(secrets)
@@ -56,8 +56,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Exits if provider cannot be found", func() {
 			resolver := newInstance()
 
-			secrets := make([]config.StoredSecret, 1, 1)
-			secrets[0] = config.StoredSecret{
+			secrets := make([]config_v1.StoredSecret, 1, 1)
+			secrets[0] = config_v1.StoredSecret{
 				Name:     "foo",
 				Provider: "nope-not-found",
 				ID:       "bar",
@@ -73,8 +73,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Exits if secret can't be resolved", func() {
 			resolver := newInstance()
 
-			secrets := make([]config.StoredSecret, 1, 1)
-			secrets[0] = config.StoredSecret{
+			secrets := make([]config_v1.StoredSecret, 1, 1)
+			secrets[0] = config_v1.StoredSecret{
 				Name:     "foo",
 				Provider: "env",
 				ID:       "something-not-in-env",
@@ -91,8 +91,8 @@ func Test_Resolver(t *testing.T) {
 		Convey("Can resolve secret2", func() {
 			resolver := newInstance()
 
-			secrets := make([]config.StoredSecret, 1, 1)
-			secrets[0] = config.StoredSecret{
+			secrets := make([]config_v1.StoredSecret, 1, 1)
+			secrets[0] = config_v1.StoredSecret{
 				Name:     "foo",
 				Provider: "literal",
 				ID:       "bar",

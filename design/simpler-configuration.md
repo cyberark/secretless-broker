@@ -138,13 +138,15 @@ services:
 
   postgres-db:
     protocol: pg
-    listenOn: 0.0.0.0:5432 # can be a socket as well (same name for both)
+    listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
     credentials:
       address: postgres.my-service.internal:5432
       password:
-        vault: id-of-secret-in-vault
+        from: vault
+        get: id-of-secret-in-vault
       username:
-        env: username
+        from: env
+        get: username
     config:  # this section usually blank
       optionalStuff: blah
       
@@ -158,24 +160,28 @@ services:
   
   aws-client:
     protocol: http
-    listenOn: /var/docker/docker.sock
+    listenOn: unix:///var/docker/docker.sock
     credentials:
       accessKeyID:
-        conjur: id-of-secret-in-conjur
+        from: conjur
+        get: id-of-secret-in-conjur
       secretAccessKey:
-        conjur: id-of-secret-in-conjur
+        from: conjur
+        get: id-of-secret-in-conjur
       accessToken:
-        conjur: id-of-secret-in-conjur
+        from: conjur
+        get: id-of-secret-in-conjur
     config:
       authenticationStrategy: aws
       authenticateURLsMatching: ^http.*
 
   conjur-client:
     protocol: http
-    listenOn: 127.0.0.1:8080
+    listenOn: http://127.0.0.1:8080
     credentials:
       accessToken:
-        file: /path/to/file
+        from: file
+        get: /path/to/file
       forceSSL: true
     config:
       authenticationStrategy: conjur
@@ -187,15 +193,18 @@ services:
 
   ssh-proxy:
     protocol: ssh
-    listenOn: 0.0.0.0:2222
+    listenOn: tcp://0.0.0.0:2222
     credentials:
       address: "localhost"
       user: "Jonah"
       privateKey:
-        env: SSH_PRIVATE_KEY
+        from: env
+        get: SSH_PRIVATE_KEY
 ```
-**Note**: In this iteration we are **not** supporting requests for multiple http handler types flowing through a
-single service definition. We plan to add support for this in a later iteration. For now, we only support one http handler configured on a given port / socket.
+**Note**: In this iteration we are **not** supporting requests for multiple
+http handler types flowing through a single service definition. We plan to add
+support for this in a later iteration. For now, we only support one http
+handler configured on a given port / socket.
 
 This proposal:
 - Integrates the port / socket that Secretless is listening on with how to process the connection (eg credentials, etc)
@@ -206,11 +215,14 @@ This proposal:
 - It does not expose the concepts of listeners and handlers, but rather uses naming conventions that will do a better job
   of mapping to the user's mental model of what the broker is doing.
 
-One other difference is that we enable less verbose options for specifying credentials. For almost all credential providers (Conjur, Kubernetes Secrets, HashiCorp Vault, environment, file, keychain) the syntax is:
+One other difference is that we enable less verbose options for specifying
+credentials. For almost all credential providers (Conjur, Kubernetes Secrets,
+HashiCorp Vault, environment, file, keychain) the syntax is:
 ```yaml
 credentials:
   secretName:
-    credentialProvider: id-of-secret-in-provider
+    from: credentialProvider
+    get: id-of-secret-in-provider
 ```
 In the example snippet above, `secretName` is the credential's name within
 Secretless, and as such must match a key in the handler configuration (eg
@@ -227,6 +239,11 @@ key should be set to:
 credentials:
   secretName: "my-secret-value"
 ```
+
+A final difference is that we don't need to specify sockets and local addresses
+using separate keys.  Both are valid values for a single `listenOn` key.  You
+use the `unix://` prefix to specify a socket, and a `tcp://` or `http://` (both
+are equivalent) prefix to specify a local TCP address.
 
 ### Technical Details
 - The [configuration parser](https://github.com/cyberark/secretless-broker/tree/master/pkg/secretless/config) needs to be

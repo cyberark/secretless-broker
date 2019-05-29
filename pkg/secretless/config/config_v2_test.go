@@ -51,11 +51,13 @@ func TestNewConfig(t *testing.T) {
 
 func TestConvertToV1(t *testing.T) {
 	// standard case
-	t.Run("valid file contents", func(t *testing.T) {
-		configFileContents := []byte(sampleConfig)
-		_, err := NewConfigV2(configFileContents)
-		assert.Nil(t, err)
-		// TODO: add sanity check that hydration occurred?
+	t.Run("listenOn is TCP address", func(t *testing.T) {
+	})
+
+	t.Run("listenOn is socket", func(t *testing.T) {
+	})
+
+	t.Run("database handler over socket", func(t *testing.T) {
 	})
 
 	// liston on socket and tcp

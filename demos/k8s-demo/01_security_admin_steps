@@ -1,22 +1,27 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
-# generic utilities
+./stop
+
+# Generic utilities
 . ./utils.sh
 
-# secrets known only by the security admin exported as env variables
+# Generic variables about the environment
+. ./app_constants.sh
+
+# Secrets known only by the security admin exported as env variables
 . ./security_admin_secrets.sh
+
 
 ##################################################
 step "Create a new namespace"
 
-delete_ns_and_cleanup "quick-start-backend-ns"
-kubectl create namespace "quick-start-backend-ns"
+kubectl create namespace "${BACKEND_NAMESPACE}"
 
 ##################################################
 step "Add certificates to Kubernetes Secrets"
 
 # add pg certificates to kubernetes secrets
-kubectl --namespace quick-start-backend-ns \
+kubectl --namespace "${BACKEND_NAMESPACE}" \
   create secret generic \
   quick-start-backend-certs \
   --from-file "etc/pg_server.crt" \
@@ -25,17 +30,17 @@ kubectl --namespace quick-start-backend-ns \
 ##################################################
 step "Create StatefulSet for Database"
 
-kubectl --namespace quick-start-backend-ns apply \
+kubectl --namespace "${BACKEND_NAMESPACE}" apply \
   --filename "etc/pg.yml"
 
-wait_for_app "quick-start-backend" "quick-start-backend-ns"
+wait_for_app "quick-start-backend" "${BACKEND_NAMESPACE}"
 
 ##################################################
 step "Create Application Database"
 
 # Note: the `psql` command requires the --stdin flag
-kubectl --namespace quick-start-backend-ns \
-  exec --stdin "$(first_pod quick-start-backend quick-start-backend-ns)" \
+kubectl --namespace "${BACKEND_NAMESPACE}" \
+  exec --stdin "$(first_pod quick-start-backend "${BACKEND_NAMESPACE}")" \
   -- \
     psql --username "${DB_ADMIN_USER}" \
     --command "CREATE DATABASE quick_start_db;"
@@ -43,12 +48,16 @@ kubectl --namespace quick-start-backend-ns \
 ##################################################
 step "Create Database Table and Permissions"
 
+db_url="$(minikube service quick-start-backend --namespace "${BACKEND_NAMESPACE}" --wait 15 --url | sed 's#http://##')/quick_start_db"
+
+echo "Using DB endpoint: $db_url"
+
 docker run --rm --interactive \
  --env PGPASSWORD="${DB_ADMIN_PASSWORD}" \
  "postgres:9.6" \
     psql \
     --username "${DB_ADMIN_USER}" \
-    "postgres://$DB_URL" \
+    "postgres://$db_url" \
     <<EOSQL
 /* Create Application User */
 CREATE USER ${DB_USER} PASSWORD '${DB_INITIAL_PASSWORD}';
@@ -70,13 +79,12 @@ step "Store DB credentials in Kubernetes Secrets"
 # Note: We're creating a separate namespace for the app just to emphasize the
 # conceptual separation between the duties of the security admin and the app
 # developer
-delete_ns_and_cleanup "quick-start-application-ns"
-kubectl create namespace "quick-start-application-ns"
+kubectl create namespace "${APP_NAMESPACE}"
 
 # Store the credentials
-kubectl --namespace quick-start-application-ns \
+kubectl --namespace "${APP_NAMESPACE}" \
   create secret generic "quick-start-backend-credentials" \
-  --from-literal address="${DB_URL}" \
+  --from-literal address="${db_url}" \
   --from-literal username="${DB_USER}" \
   --from-literal password="${DB_INITIAL_PASSWORD}"
 
@@ -84,18 +92,18 @@ kubectl --namespace quick-start-application-ns \
 step "Create Application Service Account"
 
 # create application service account
-kubectl --namespace quick-start-application-ns \
+kubectl --namespace "${APP_NAMESPACE}" \
   create serviceaccount "quick-start-application"
 
 # grant "quick-start-application" service account in
 # "quick-start-application-ns" namespace access to
 # "quick-start-backend-credentials"
-kubectl --namespace quick-start-application-ns \
+kubectl --namespace "${APP_NAMESPACE}" \
   create --filename "etc/quick-start-application-entitlements.yml"
 
 ##################################################
 step "Create and Store Secretless Configuration"
 
-kubectl --namespace quick-start-application-ns \
+kubectl --namespace "${APP_NAMESPACE}" \
   create configmap "quick-start-application-secretless-config" \
   --from-file "etc/secretless.yml"

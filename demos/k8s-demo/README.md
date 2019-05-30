@@ -25,9 +25,7 @@ You'll play two roles in this tutorial:
 
 ## Prerequisites
 
-+ A running Kubernetes cluster (you can use
-  [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) to run a
-  cluster locally)
++ A running [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) cluster
 + [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured
   to point to the cluster
 + [Docker CLI](https://docs.docker.com/install/)
@@ -51,33 +49,51 @@ To perform all these steps in one go, run:
 <details>
   <summary>View expected output</summary>
   <pre>
+Deleting namespace 'quick-start-backend-ns'...
+Deleting namespace 'quick-start-application-ns'...
+Namespaces cleared
+
 >>--- Create a new namespace
-Cleaning up old namespace............Done
-namespace "quick-start-backend-ns" created
+
+namespace/quick-start-backend-ns created
+
 >>--- Add certificates to Kubernetes Secrets
-secret "quick-start-backend-certs" created
+
+secret/quick-start-backend-certs created
+
 >>--- Create StatefulSet for Database
-statefulset "pg" created
-service "quick-start-backend" created
-Waiting for quick-start-backend to be ready........Done
+
+statefulset.apps/pg created
+service/quick-start-backend created
+Waiting for quick-start-backend to be ready
+........OK
+
 >>--- Create Application Database
+
 CREATE DATABASE
+
 >>--- Create Database Table and Permissions
+
+Using DB endpoint: 192.168.99.100:30001/quick_start_db
 CREATE ROLE
 CREATE TABLE
 GRANT
 GRANT
+
 >>--- Store DB credentials in Kubernetes Secrets
-Cleaning up old namespace....................Done
-namespace "quick-start-application-ns" created
-secret "quick-start-backend-credentials" created
+
+namespace/quick-start-application-ns created
+secret/quick-start-backend-credentials created
+
 >>--- Create Application Service Account
-serviceaccount "quick-start-application" created
-role "quick-start-backend-credentials-reader" created
-rolebinding "read-quick-start-backend-credentials" created
+
+serviceaccount/quick-start-application created
+role.rbac.authorization.k8s.io/quick-start-backend-credentials-reader created
+rolebinding.rbac.authorization.k8s.io/read-quick-start-backend-credentials created
+
 >>--- Create and Store Secretless Configuration
-configmap "quick-start-application-secretless-config" created
-  </pre>
+
+configmap/quick-start-application-secretless-config created</pre>
 </details>
 <p></p>
 
@@ -90,10 +106,10 @@ to the database.**
 In particular, as the application developer you do not know any of the secrets
 in **security_admin_secrets.sh**.
 
-**As the application developer:**                                                                                                                                       
+**As the application developer:**
 
-1. Configure the application to connect to PostgreSQL via Secretless                                                                                                    
-1. Deploy the application and the Secretless sidecar                                                                                                                    
+1. Configure the application to connect to PostgreSQL via Secretless
+1. Deploy the application and the Secretless sidecar
 1. Test the application
 
 To perform all these steps in one go, run:
@@ -107,23 +123,41 @@ To perform all these steps in one go, run:
   <summary>View expected output</summary>
   <pre>
 >>--- Start application
-deployment "quick-start-application" created
-service "quick-start-application" created
+
+deployment.apps/quick-start-application created
+service/quick-start-application created
+Detecting app url...
+Using app URL: http://192.168.99.100:30002
 Waiting for application to boot up
 (This may take more than 1 minute)
-............................Done
+..............OK
+
 >>--- Add a Sample Pet
-HTTP/1.1 201
+
+HTTP/1.1 201 
 Location: http://192.168.99.100:30002/pet/1
 Content-Length: 0
-Date: Thu, 14 Mar 2019 15:35:33 GMT
+Date: Tue, 28 May 2019 16:47:43 GMT
+
+
 >>--- Retrieve All Pets
-HTTP/1.1 200
+
+HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
 Transfer-Encoding: chunked
-Date: Thu, 14 Mar 2019 15:35:33 GMT
+Date: Tue, 28 May 2019 16:47:43 GMT
+
 [{"id":1,"name":"Mr. Snuggles"}]
-All finished!  Secretless is working!
+
+*** All finished! Secretless is working! ***
+
+
+>>--- Cleaning up
+
+Deleting namespace 'quick-start-backend-ns'...
+Deleting namespace 'quick-start-application-ns'...
+
+Namespaces cleared
   </pre>
 </details>
 <p></p>

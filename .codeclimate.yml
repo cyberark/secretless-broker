@@ -1,0 +1,9 @@
+engines:
+  shellcheck:
+    enabled: true
+    checks:
+      # Disable 'Not following' check - it doesn't handle ". ./script.sh" properly
+      SC1091:
+        enabled: false
+      SC2148:
+        enabled: false

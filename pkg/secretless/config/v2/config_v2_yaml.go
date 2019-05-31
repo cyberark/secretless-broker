@@ -1,4 +1,4 @@
-package config
+package v2
 
 import (
 	"fmt"
@@ -10,23 +10,23 @@ type ServiceYAML struct {
 	Protocol         string                 `yaml:"protocol" json:"protocol"`
 	ListenOn         string                 `yaml:"listenOn" json:"listenOn"`
 	ProxyCredentials map[string]interface{} `yaml:"credentials" json:"credentials"`
-	ProxyConfig      interface{} `yaml:"config" json:"config"`
+	ProxyConfig      interface{}            `yaml:"config" json:"config"`
 }
 
-type ConfigV2YAML struct {
+type ConfigYAML struct {
 	Services map[string]*ServiceYAML
 }
 
 type CredentialsYAML struct {
-	From   string `yaml:"from"`
-	Get     string `yaml:"get"`
+	From string `yaml:"from"`
+	Get  string `yaml:"get"`
 }
 
-func NewConfigV2YAML(fileContents []byte) (*ConfigV2YAML, error) {
+func NewConfigYAML(fileContents []byte) (*ConfigYAML, error) {
 	if len(fileContents) == 0 {
 		return nil, fmt.Errorf("empty file contents given to NewConfig")
 	}
-	cfgYAML := &ConfigV2YAML{}
+	cfgYAML := &ConfigYAML{}
 	err := yaml.Unmarshal(fileContents, cfgYAML)
 	if err != nil {
 		return nil, err
@@ -35,8 +35,8 @@ func NewConfigV2YAML(fileContents []byte) (*ConfigV2YAML, error) {
 	return cfgYAML, nil
 }
 
-func (cfgYAML *ConfigV2YAML) ConvertToConfigV2() (*ConfigV2, error)  {
-	cfg := &ConfigV2{
+func (cfgYAML *ConfigYAML) ConvertToConfig() (*Config, error) {
+	cfg := &Config{
 		Services: make([]*Service, 0),
 	}
 

@@ -1,4 +1,5 @@
-package config
+package v2
+
 //TODO: should we throw custom errors?
 import (
 	"fmt"
@@ -6,8 +7,8 @@ import (
 	"testing"
 )
 
-func v2DbExample() ConfigV2 {
-	return ConfigV2{
+func v2DbExample() Config {
+	return Config{
 		Services: []*Service{
 			{
 				Name:     "test-db",
@@ -26,8 +27,8 @@ func v2DbExample() ConfigV2 {
 	}
 }
 
-func v2HttpExample() ConfigV2 {
-	return ConfigV2{
+func v2HttpExample() Config {
+	return Config{
 		Services: []*Service{
 			{
 				Name:     "test-http",

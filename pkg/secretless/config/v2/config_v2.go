@@ -1,52 +1,52 @@
-package config
+package v2
 
 import (
 	"fmt"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	"sort"
 	"strings"
 )
 
-
 type Service struct {
-	Name             string
-	Credentials      []*Credential
-	Protocol         string
-	ListenOn         string
-	Config           []byte
+	Name        string
+	Credentials []*Credential
+	Protocol    string
+	ListenOn    string
+	Config      []byte
 }
 
 type Credential struct {
-	Name   string
-	From   string
-	Get    string
+	Name string
+	From string
+	Get  string
 }
 
-type ConfigV2 struct {
+type Config struct {
 	Services []*Service
 }
 
-func NewConfigV2(fileContents []byte) (*ConfigV2, error) {
-	cfgYAML, err := NewConfigV2YAML(fileContents)
+func NewConfig(fileContents []byte) (*Config, error) {
+	cfgYAML, err := NewConfigYAML(fileContents)
 	if err != nil {
 		return nil, err
 	}
 
-	return cfgYAML.ConvertToConfigV2()
+	return cfgYAML.ConvertToConfig()
 }
 
-func (cfg *ConfigV2) ConvertToV1() (*Config, error) {
-	v1Config := &Config{
-		Listeners: make([]Listener, 0),
-		Handlers:  make([]Handler, 0),
+func (cfg *Config) ConvertToV1() (*config.Config, error) {
+	v1Config := &config.Config{
+		Listeners: make([]config.Listener, 0),
+		Handlers:  make([]config.Handler, 0),
 	}
 
-	for _, svc := range cfg.Services  {
+	for _, svc := range cfg.Services {
 		// create listener
-		listener := Listener{
+		listener := config.Listener{
 			// TODO: find out why this is never used in the Secretless codebase or in example
 			// CACertFiles: nil,
-			Name:        svc.Name,
-			Protocol:    svc.Protocol,
+			Name:     svc.Name,
+			Protocol: svc.Protocol,
 		}
 
 		if strings.HasPrefix(svc.ListenOn, "tcp://") {
@@ -58,9 +58,9 @@ func (cfg *ConfigV2) ConvertToV1() (*Config, error) {
 		}
 
 		// create handler
-		credentials := make([]StoredSecret, 0)
-		for _, cred := range svc.Credentials  {
-			credentials = append(credentials, StoredSecret{
+		credentials := make([]config.StoredSecret, 0)
+		for _, cred := range svc.Credentials {
+			credentials = append(credentials, config.StoredSecret{
 				Name:     cred.Name,
 				Provider: cred.From,
 				ID:       cred.Get,
@@ -70,7 +70,7 @@ func (cfg *ConfigV2) ConvertToV1() (*Config, error) {
 		sort.Slice(credentials, func(i, j int) bool {
 			return credentials[i].Name < credentials[j].Name
 		})
-		handler := Handler{
+		handler := config.Handler{
 			Name:         svc.Name,
 			ListenerName: svc.Name,
 			Credentials:  credentials,
@@ -98,4 +98,3 @@ func (cfg *ConfigV2) ConvertToV1() (*Config, error) {
 	})
 	return v1Config, nil
 }
-

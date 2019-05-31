@@ -1,11 +1,11 @@
-package config
+package v2
 
 import (
 	"fmt"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
-type listenerHandlerTransform func(bytes []byte, listener *Listener, handler *Handler) ( error)
-
+type listenerHandlerTransform func(bytes []byte, listener *config.Listener, handler *config.Handler) ( error)
 
 func IsValidStrategy(strategy string) bool {
 	switch strategy {
@@ -18,8 +18,8 @@ func IsValidStrategy(strategy string) bool {
 	return false
 }
 
-var listenerHandlerTransforms = map[string]listenerHandlerTransform {
-	"http": func(cfgBytes []byte, listener *Listener, handler *Handler) error {
+var listenerHandlerTransforms = map[string]listenerHandlerTransform{
+	"http": func(cfgBytes []byte, listener *config.Listener, handler *config.Handler) error {
 		if len(cfgBytes) == 0 {
 			return fmt.Errorf("http config: nil")
 		}
@@ -48,7 +48,7 @@ var listenerHandlerTransforms = map[string]listenerHandlerTransform {
 	},
 }
 
-func transformListenerHandler(protocol string, configBytes []byte, listener *Listener, handler *Handler) error {
+func transformListenerHandler(protocol string, configBytes []byte, listener *config.Listener, handler *config.Handler) error {
 	if lhTransform, ok := listenerHandlerTransforms[protocol]; ok {
 		return lhTransform(configBytes, listener, handler)
 	}

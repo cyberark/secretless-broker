@@ -1,4 +1,4 @@
-package config
+package v2
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -23,21 +23,21 @@ services:
       optionalStuff: blah
 `
 
-func sampleConfig() (*ConfigV2, error) {
+func sampleConfig() (*Config, error) {
 	configFileContents := []byte(sampleConfigStr)
-	return NewConfigV2(configFileContents)
+	return NewConfig(configFileContents)
 }
 
 func TestNewConfig(t *testing.T) {
 	t.Run("invalid file contents", func(t *testing.T) {
 		configFileContents := []byte("12323232")
-		_, err := NewConfigV2(configFileContents)
+		_, err := NewConfig(configFileContents)
 		assert.Error(t, err)
 	})
 
 	t.Run("blank file contents", func(t *testing.T) {
 		configFileContents := []byte("")
-		_, err := NewConfigV2(configFileContents)
+		_, err := NewConfig(configFileContents)
 		assert.Error(t, err)
 	})
 
@@ -67,17 +67,17 @@ func TestNewConfig(t *testing.T) {
 			{
 				Name: "address",
 				From: "literal",
-				Get: "postgres.my-service.internal:5432",
+				Get:  "postgres.my-service.internal:5432",
 			},
 			{
 				Name: "password",
 				From: "vault",
-				Get: "name-in-vault",
+				Get:  "name-in-vault",
 			},
 			{
 				Name: "username",
 				From: "env",
-				Get: "USERNAME",
+				Get:  "USERNAME",
 			},
 		}
 		assert.ElementsMatch(t, expectedCreds, actualCreds)

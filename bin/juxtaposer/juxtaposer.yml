@@ -1,0 +1,22 @@
+---
+driver: mysql-5.7
+
+#comparison:
+#  type: sql
+#  style: select
+
+backends:
+  secretless:
+    description: Secretless DB connection
+#   address: localhost:3308
+    socket: /sock/mysql
+    username: myuser
+    password: mypassword
+    debug: false
+
+  direct:
+    description: Direct DB connection
+    address: localhost:3307
+    username: myuser
+    password: mypassword
+    debug: false

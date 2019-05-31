@@ -1,9 +1,15 @@
 /*
 
-These are protocol specific transforms of the configuration.  In the future,
-these will be the responsibility of individual service handlers.  We're pulling
-them out into their own functions both to clarify what's happening conceptually,
-and to prepare for this future refactoring.
+v1Service exists for conceptual clarity.  The concept of a service exists
+implicitly in v1 config.Config, but not in the code.  The combination of a
+Listener and Handler implicitly represents a service in the v1 code. We're
+making it explicit here.
+
+v1Service also hourses protocol specific configuration logic.  In the future,
+this logic will be the responsibility of individual v2 services.  We're pulling
+them out now into their own functions both to clarify that this is a separate
+step of the configuration process -- one specific to each protocol -- and to
+prepare for this future refactoring.
 
 */
 package v2
@@ -13,9 +19,6 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
-// v1Service exists purely for clarity, since the concept of a service exists
-// implicitly in v1 config, but not anywhere in code.  The combination of a
-// Listener and Handler _is_ a v1 service.
 type v1Service struct {
 	Listener *config.Listener
 	Handler *config.Handler

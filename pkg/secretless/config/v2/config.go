@@ -83,9 +83,11 @@ func (cfg *Config) ConvertToV1() (*config.Config, error) {
 			Credentials:  credentials,
 		}
 
-		// transform listener and handler in a protocol specific way using config
-		// TODO: Perhaps this should be injected
-		err := applyProtocolTransform(svc.Protocol, svc.Config, &listener, &handler)
+		// Some services, such as http, have specialized configuration that
+		// needs to be applied, and is specific only to them.  We use the
+		// v1Service abstraction as an explicit way of capturing this logic.
+		v1Service := &v1Service{&listener, &handler}
+		err := v1Service.applyProtocolConfig(svc.Config)
 		if err != nil {
 			return nil, err
 		}

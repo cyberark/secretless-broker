@@ -7,24 +7,28 @@ import (
 
 // reflex -r '\.go$' -s -- bash -c "go test"
 
-const sampleConfig = `
+const sampleConfigStr = `
 version: "1"
 services:
   postgres-db:
     protocol: pg
-    listenOn: 0.0.0.0:5432 # can be a socket as well (same name for both)
+    listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
     credentials:
       address: postgres.my-service.internal:5432
       password:
-        providerId: name-in-vault
-        provider: vault
+        from: vault
+        get: name-in-vault
       username:
-        providerId: username
-        provider: env
+        from: env
+        get: USERNAME
     config:  # this section usually blank
       optionalStuff: blah
 `
 
+func sampleConfig() (*ConfigV2, error) {
+	configFileContents := []byte(sampleConfigStr)
+	return NewConfigV2(configFileContents)
+}
 
 func TestNewConfig(t *testing.T) {
 
@@ -40,28 +44,46 @@ func TestNewConfig(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("valid file contents", func(t *testing.T) {
-		configFileContents := []byte(sampleConfig)
-		_, err := NewConfigV2(configFileContents)
-		assert.Nil(t, err)
-		// TODO: add sanity check that hydration occurred?
+	t.Run("basic hydration", func(t *testing.T) {
+		cfg, err := sampleConfig()
+		assert.NoError(t, err)
+
+		assert.Equal(t, "1", cfg.Version)
+		assert.Equal(t, "postgres-db", cfg.Services[0].Name)
+		assert.Equal(t, "pg", cfg.Services[0].Name)
+		assert.Equal(t, "tcp://0.0.0.0:5432", cfg.Services[0].ListenOn)
 	})
 
-}
+	t.Run("config hydration", func(t *testing.T) {
+		cfg, err := sampleConfig()
+		assert.NoError(t, err)
 
-func TestConvertToV1(t *testing.T) {
-	// standard case
-	t.Run("listenOn is TCP address", func(t *testing.T) {
+		expectedBytes := []byte("optionalStuff: blah")
+		assert.Equal(t, expectedBytes, cfg.Services[0].Config)
 	})
 
-	t.Run("listenOn is socket", func(t *testing.T) {
+	t.Run("credential hydration", func(t *testing.T) {
+		cfg, err := sampleConfig()
+		assert.NoError(t, err)
+
+		actualCreds := cfg.Services[0].Credentials
+		expectedCreds := []Credential{
+			{
+				Name: "address",
+				From: "literal",
+				Get: "postgres.my-service.internal:5432",
+			},
+			{
+				Name: "password",
+				From: "vault",
+				Get: "name-in-vault",
+			},
+			{
+				Name: "username",
+				From: "env",
+				Get: "USERNAME",
+			},
+		}
+		assert.ElementsMatch(t, expectedCreds, actualCreds)
 	})
-
-	t.Run("database handler over socket", func(t *testing.T) {
-	})
-
-	// liston on socket and tcp
-
-	// provider literals
-
 }

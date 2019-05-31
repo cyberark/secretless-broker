@@ -6,22 +6,28 @@ import (
 )
 
 type Service struct {
-	Name         string `yaml:"name" json:"name"`
-	Protocol     string `yaml:"protocol" json:"protocol"`
-	ListenOn string `yaml:"listenOn" json:"listenOn"`
-	Credentials  map[string]Credential `yaml:"credentials" json:"credentials"`
-	Config       map[string]interface{} `yaml:"config" json:"config"`
+	Name             string
+	Protocol         string
+	ListenOn         string
+	Credentials      []Credential
+	Config           []byte
 }
 
 type Credential struct {
-	ProviderId   string `yaml:"providerId" json:"providerId"`
-	Provider     string `yaml:"provider" json:"provider"`
+	Name   string `yaml:"-"`
+	From   string `yaml:"from" json:"from"`
+	Get    string `yaml:"get" json:"get"`
+}
+
+type HttpConfig struct {
+	authenticationStrategy string
+	authenticateURLsMatching []string
 }
 
 
 type ConfigV2 struct {
 	Version  string `yaml:"version"`
-	Services map[string]Service
+	Services []Service
 }
 
 // TODO: Perhaps rename existing "Config" to "ConfigV1"?

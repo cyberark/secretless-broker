@@ -5,10 +5,8 @@ import (
 	"testing"
 )
 
-// reflex -r '\.go$' -s -- bash -c "go test"
-
 const sampleConfigStr = `
-version: "1"
+version: 2
 services:
   postgres-db:
     protocol: pg
@@ -31,7 +29,6 @@ func sampleConfig() (*ConfigV2, error) {
 }
 
 func TestNewConfig(t *testing.T) {
-
 	t.Run("invalid file contents", func(t *testing.T) {
 		configFileContents := []byte("12323232")
 		_, err := NewConfigV2(configFileContents)
@@ -48,9 +45,8 @@ func TestNewConfig(t *testing.T) {
 		cfg, err := sampleConfig()
 		assert.NoError(t, err)
 
-		assert.Equal(t, "1", cfg.Version)
 		assert.Equal(t, "postgres-db", cfg.Services[0].Name)
-		assert.Equal(t, "pg", cfg.Services[0].Name)
+		assert.Equal(t, "pg", cfg.Services[0].Protocol)
 		assert.Equal(t, "tcp://0.0.0.0:5432", cfg.Services[0].ListenOn)
 	})
 
@@ -58,7 +54,7 @@ func TestNewConfig(t *testing.T) {
 		cfg, err := sampleConfig()
 		assert.NoError(t, err)
 
-		expectedBytes := []byte("optionalStuff: blah")
+		expectedBytes := []byte("optionalStuff: blah\n")
 		assert.Equal(t, expectedBytes, cfg.Services[0].Config)
 	})
 
@@ -67,7 +63,7 @@ func TestNewConfig(t *testing.T) {
 		assert.NoError(t, err)
 
 		actualCreds := cfg.Services[0].Credentials
-		expectedCreds := []Credential{
+		expectedCreds := []*Credential{
 			{
 				Name: "address",
 				From: "literal",

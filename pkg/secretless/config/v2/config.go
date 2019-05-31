@@ -41,13 +41,17 @@ func (cfg *Config) ConvertToV1() (*config.Config, error) {
 	}
 
 	for _, svc := range cfg.Services {
-		// create listener
+
+		// Create listener
+
 		listener := config.Listener{
 			// TODO: find out why this is never used in the Secretless codebase or in example
 			// CACertFiles: nil,
 			Name:     svc.Name,
 			Protocol: svc.Protocol,
 		}
+
+		// Convert listenOn to Address or Socket, depending on protocol
 
 		if strings.HasPrefix(svc.ListenOn, "tcp://") {
 			listener.Address = strings.TrimPrefix(svc.ListenOn, "tcp://")
@@ -57,7 +61,8 @@ func (cfg *Config) ConvertToV1() (*config.Config, error) {
 			return nil, fmt.Errorf("convertToV1: listenOn='%s' missing prefix from one of tcp:// or unix//", svc.ListenOn)
 		}
 
-		// create handler
+		// Create handler
+
 		credentials := make([]config.StoredSecret, 0)
 		for _, cred := range svc.Credentials {
 			credentials = append(credentials, config.StoredSecret{
@@ -66,7 +71,9 @@ func (cfg *Config) ConvertToV1() (*config.Config, error) {
 				ID:       cred.Get,
 			})
 		}
-		/// sort Credentials
+
+		// Sort Credentials
+
 		sort.Slice(credentials, func(i, j int) bool {
 			return credentials[i].Name < credentials[j].Name
 		})
@@ -78,7 +85,7 @@ func (cfg *Config) ConvertToV1() (*config.Config, error) {
 
 		// transform listener and handler in a protocol specific way using config
 		// TODO: Perhaps this should be injected
-		err := transformListenerHandler(svc.Protocol, svc.Config, &listener, &handler)
+		err := applyProtocolTransform(svc.Protocol, svc.Config, &listener, &handler)
 		if err != nil {
 			return nil, err
 		}

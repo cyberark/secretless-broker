@@ -6,24 +6,23 @@ import (
 	"sort"
 )
 
-type ConfigYAML struct {
-	Services ServicesYAML
+type configYAML struct {
+	Services servicesYAML
 }
 
-type ServiceYAML struct {
-	Protocol    string                 `yaml:"protocol" json:"protocol"`
-	ListenOn    string                 `yaml:"listenOn" json:"listenOn"`
-	Credentials CredentialsYAML `yaml:"credentials" json:"credentials"`
-	Config      interface{}            `yaml:"config" json:"config"`
+type serviceYAML struct {
+	Protocol    string          `yaml:"protocol" json:"protocol"`
+	ListenOn    string          `yaml:"listenOn" json:"listenOn"`
+	Credentials credentialsYAML `yaml:"credentials" json:"credentials"`
+	Config      interface{}     `yaml:"config" json:"config"`
 }
 
 // CredentialYAML needs to be an interface because it contains arbitrary YAML
 // dictionaries, since end user credential names can be anything.
 
-type CredentialsYAML map[string]interface{}
+type credentialsYAML map[string]interface{}
 
-type ServicesYAML map[string]*ServiceYAML
-
+type servicesYAML map[string]*serviceYAML
 
 func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
 
@@ -62,7 +61,7 @@ func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
 	return cred, nil
 }
 
-func (credentialsYAML *CredentialsYAML) ConvertToCredentials() ([]*Credential, error) {
+func (credentialsYAML *credentialsYAML) ConvertToCredentials() ([]*Credential, error) {
 	credentials := make([]*Credential, 0)
 
 	for credName, credYAML := range *credentialsYAML {
@@ -80,8 +79,7 @@ func (credentialsYAML *CredentialsYAML) ConvertToCredentials() ([]*Credential, e
 	return credentials, nil
 }
 
-
-func NewService(svcName string, svcYAML *ServiceYAML) (*Service, error) {
+func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	credentials, err := svcYAML.Credentials.ConvertToCredentials()
 	if err != nil {
@@ -105,7 +103,7 @@ func NewService(svcName string, svcYAML *ServiceYAML) (*Service, error) {
 	return svc, nil
 }
 
-func (servicesYAML *ServicesYAML) ToServices() ([]*Service, error) {
+func (servicesYAML *servicesYAML) ToServices() ([]*Service, error) {
 
 	services := make([]*Service, 0)
 	for svcName, svcYAML := range *servicesYAML {
@@ -123,12 +121,11 @@ func (servicesYAML *ServicesYAML) ToServices() ([]*Service, error) {
 	return services, nil
 }
 
-
-func NewConfigYAML(fileContents []byte) (*ConfigYAML, error) {
+func NewConfigYAML(fileContents []byte) (*configYAML, error) {
 	if len(fileContents) == 0 {
 		return nil, fmt.Errorf("empty file contents given to NewConfig")
 	}
-	cfgYAML := &ConfigYAML{}
+	cfgYAML := &configYAML{}
 	err := yaml.Unmarshal(fileContents, cfgYAML)
 	if err != nil {
 		return nil, err
@@ -137,7 +134,7 @@ func NewConfigYAML(fileContents []byte) (*ConfigYAML, error) {
 	return cfgYAML, nil
 }
 
-func (cfgYAML *ConfigYAML) ConvertToConfig() (*Config, error) {
+func (cfgYAML *configYAML) ConvertToConfig() (*Config, error) {
 	services, err := cfgYAML.Services.ToServices()
 	if err != nil {
 		return nil, err

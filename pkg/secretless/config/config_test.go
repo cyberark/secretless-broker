@@ -84,14 +84,6 @@ handlers:
 		So(config.Listeners, ShouldHaveLength, 1)
 	})
 
-	Convey("Reports an invalid top-level map key", t, func() {
-		yaml := `
-foobar: []
-`
-		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "field foobar not found in type v1.Config")
-	})
-
 	Convey("Reports an unnamed Listener definition", t, func() {
 		yaml := `
 listeners:

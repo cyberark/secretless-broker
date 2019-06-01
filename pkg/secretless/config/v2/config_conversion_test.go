@@ -3,6 +3,7 @@ package v2
 //TODO: should we throw custom errors?
 import (
 	"fmt"
+	v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -16,9 +17,14 @@ func v2DbExample() Config {
 				ListenOn: "tcp://0.0.0.0:2345",
 				Credentials: []*Credential{
 					{
-						Name: "TestSecret",
+						Name: "TestSecret1",
 						From: "conjur",
-						Get:  "some-id",
+						Get:  "some-id-1",
+					},
+					{
+						Name: "TestSecret2",
+						From: "literal",
+						Get:  "some-id-2",
 					},
 				},
 				Config: nil,
@@ -36,9 +42,14 @@ func v2HttpExample() Config {
 				ListenOn: "tcp://0.0.0.0:2345",
 				Credentials: []*Credential{
 					{
-						Name: "TestSecret",
+						Name: "TestSecret1",
 						From: "conjur",
-						Get:  "some-id",
+						Get:  "some-id-1",
+					},
+					{
+						Name: "TestSecret2",
+						From: "literal",
+						Get:  "some-id-2",
 					},
 				},
 				Config: []byte(`
@@ -148,5 +159,25 @@ func TestListenOnConversion(t *testing.T) {
 		v2.Services[0].ListenOn = "0.0.0.0:2345"
 		_, err = v2.ConvertToV1()
 		assert.Error(t, err)
+	})
+}
+
+func TestCredentialsConversion(t *testing.T) {
+	t.Run("Service Credentials map to Handler Credentials", func(t *testing.T) {
+		v2cfg := v2DbExample()
+		v1cfg, err := v2cfg.ConvertToV1()
+		assert.NoError(t, err)
+		assert.Equal(t, []v1.StoredSecret{
+			{
+				Name:     "TestSecret1",
+				Provider: "conjur",
+				ID:       "some-id-1",
+			},
+			{
+				Name:     "TestSecret2",
+				Provider: "literal",
+				ID:       "some-id-2",
+			},
+		}, v1cfg.Handlers[0].Credentials)
 	})
 }

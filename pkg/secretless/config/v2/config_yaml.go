@@ -10,19 +10,10 @@ type configYAML struct {
 	Services servicesYAML
 }
 
-type serviceYAML struct {
-	Protocol    string          `yaml:"protocol" json:"protocol"`
-	ListenOn    string          `yaml:"listenOn" json:"listenOn"`
-	Credentials credentialsYAML `yaml:"credentials" json:"credentials"`
-	Config      interface{}     `yaml:"config" json:"config"`
-}
-
 // CredentialYAML needs to be an interface because it contains arbitrary YAML
 // dictionaries, since end user credential names can be anything.
 
 type credentialsYAML map[string]interface{}
-
-type servicesYAML map[string]*serviceYAML
 
 func (credentialsYAML *credentialsYAML) ConvertToCredentials() ([]*Credential, error) {
 	credentials := make([]*Credential, 0)
@@ -64,24 +55,6 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 	svc.Config = configBytes
 
 	return svc, nil
-}
-
-func (servicesYAML *servicesYAML) ToServices() ([]*Service, error) {
-
-	services := make([]*Service, 0)
-	for svcName, svcYAML := range *servicesYAML {
-		svc, err := NewService(svcName, svcYAML)
-		if err != nil {
-			return nil, err
-		}
-		services = append(services, svc)
-	}
-	// sort services
-	sort.Slice(services, func(i, j int) bool {
-		return services[i].Name < services[j].Name
-	})
-
-	return services, nil
 }
 
 func NewConfigYAML(fileContents []byte) (*configYAML, error) {

@@ -13,8 +13,36 @@ if $local_test; then
   docker_args="-v $(cd ../..; pwd):/secretless"
 fi
 
-docker-compose run \
+assert_contains() {
+  # assert_contains <string> <substring>
+  local string="${1}"
+  local substring="${2}"
+
+  if [[ "${string}" =~ "${substring}" ]]; then
+      echo .
+      return
+  fi
+
+  echo "expected string"
+  echo "${string}"
+  echo "to contain substring"
+  echo "${substring}"
+
+  exit 1
+}
+
+echo "test: http_good_basic_auth"
+test_1=$(docker-compose run \
   --rm \
   --no-deps \
   $docker_args \
-  test
+  test env http_proxy=http://secretless:8080 wget -q -O- nginx:8080/ || true)
+assert_contains "${test_1}" "secured resource"
+
+echo "test: http_bad_basic_auth"
+test_2=$(docker-compose run \
+  --rm \
+  --no-deps \
+  $docker_args \
+  test env http_proxy=http://secretless:8081 wget -q -O- nginx:8080/ || true)
+assert_contains "${test_2}" "wget: server returned error: HTTP/1.1 401 Unauthorized"

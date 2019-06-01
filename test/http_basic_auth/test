@@ -31,6 +31,26 @@ assert_contains() {
   exit 1
 }
 
+echo "Waiting for Secretless to start"
+docker-compose run --rm --no-deps test sh -c '
+counter=0
+while ! wget -q -O- http://secretless:5335/ready > /dev/null 2>&1;
+  do
+    if [[ ${counter} == 5 ]]; then
+      echo ""
+      echo "Timed out waiting for Secretless"
+      exit 1
+    fi
+    counter=$(( $counter + 1 ))
+    >&2 printf ". "
+    sleep 1
+done
+'
+
+>&2 echo "Secretless is up - continuing "
+echo ""
+
+echo "Running tests"
 echo "test: http_good_basic_auth"
 test_1=$(docker-compose run \
   --rm \

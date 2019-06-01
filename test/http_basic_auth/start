@@ -5,5 +5,3 @@
 docker-compose build
 
 docker-compose up -d secretless
-
-sleep 2

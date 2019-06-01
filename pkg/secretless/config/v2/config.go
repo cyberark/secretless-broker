@@ -20,12 +20,6 @@ type Service struct {
 	Config      []byte
 }
 
-type Credential struct {
-	Name string
-	From string
-	Get  string
-}
-
 func NewV1Config(fileContents []byte) (*v1.Config, error) {
 	v2cfg, err := NewConfig(fileContents)
 	if err != nil {

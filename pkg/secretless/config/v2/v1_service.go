@@ -52,7 +52,7 @@ func NewV1Service(v2Svc Service) (ret *v1Service, err error) {
 		return nil, fmt.Errorf(errMsg, v2Svc.ListenOn)
 	}
 
-	// Map v2.Credentials to v1.Crendentials
+	// Map v2.Credentials to v1.StoredSecret
 
 	credentials := make([]v1.StoredSecret, 0)
 	for _, cred := range v2Svc.Credentials {
@@ -68,6 +68,10 @@ func NewV1Service(v2Svc Service) (ret *v1Service, err error) {
 	sort.Slice(credentials, func(i, j int) bool {
 		return credentials[i].Name < credentials[j].Name
 	})
+
+	// Add Credentials to Handler
+
+	ret.Handler.Credentials = credentials
 
 	// Apply protocol specific config
 

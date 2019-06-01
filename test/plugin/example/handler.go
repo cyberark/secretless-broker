@@ -3,16 +3,16 @@ package example
 import (
 	"bytes"
 	"errors"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	"log"
 	"net"
+	"net/http"
 	"strings"
 	"time"
-	"net/http"
 
 	"golang.org/x/crypto/ssh/agent"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 )
 
 // connectionDetails stores the connection info to the real backend database.
@@ -27,13 +27,13 @@ type BackendConfig struct {
 // establish the connectionDetails, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 type Handler struct {
-	BackendConfig      *BackendConfig
-	BackendConnection  net.Conn
-	ClientConnection   net.Conn
-	EventNotifier      plugin_v1.EventNotifier
-	HandlerConfig      config.Handler
-	Resolver           plugin_v1.Resolver
-	ShutdownNotifier   plugin_v1.HandlerShutdownNotifier
+	BackendConfig     *BackendConfig
+	BackendConnection net.Conn
+	ClientConnection  net.Conn
+	EventNotifier     plugin_v1.EventNotifier
+	HandlerConfig     v1.Handler
+	Resolver          plugin_v1.Resolver
+	ShutdownNotifier  plugin_v1.HandlerShutdownNotifier
 }
 
 func stream(source, dest net.Conn, callback func([]byte)) {
@@ -150,7 +150,7 @@ func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
 }
 
 // GetConfig implements plugin_v1.Handler
-func (h *Handler) GetConfig() config.Handler {
+func (h *Handler) GetConfig() v1.Handler {
 	return h.HandlerConfig
 }
 

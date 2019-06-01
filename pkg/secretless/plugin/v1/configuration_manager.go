@@ -1,13 +1,15 @@
 package v1
 
-import "github.com/cyberark/secretless-broker/pkg/secretless/config"
+import (
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+)
 
 // ConfigurationChangedHandler interface specifies what method is required to support
 // being a target of a ConfigurationManger object.
 type ConfigurationChangedHandler interface {
 	// ConfigurationChanged is a method that gets triggered when a ConfigurationManager
 	// has a new configuration that should be loaded.
-	ConfigurationChanged(string, config.Config) error
+	ConfigurationChanged(string, v1.Config) error
 }
 
 // ConfigurationManagerOptions contains the configuration for the configuration

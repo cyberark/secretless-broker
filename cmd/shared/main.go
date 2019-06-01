@@ -13,7 +13,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 	"reflect"
 	"unsafe"
@@ -34,15 +34,15 @@ func ByteBoundString(b []byte) string {
 	return *(*string)(unsafe.Pointer(bytesHeader))
 }
 
-func NewStoredSecret(ref C.struct_StoredSecret) config.StoredSecret {
-	return config.StoredSecret{
+func NewStoredSecret(ref C.struct_StoredSecret) v1.StoredSecret {
+	return v1.StoredSecret{
 		Name:     C.GoString(ref.Name),
 		ID:       C.GoString(ref.ID),
 		Provider: C.GoString(ref.Provider),
 	}
 }
 
-func GetSecrets(secrets []config.StoredSecret) (map[string][]byte, error)  {
+func GetSecrets(secrets []v1.StoredSecret) (map[string][]byte, error)  {
 	// Load all internal Providers
 	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error))
 	for providerID, providerFactory := range secretless.InternalProviders {
@@ -61,7 +61,7 @@ func GetSecret(cRef C.struct_StoredSecret) (*C.char) {
 
 func GetSecretByteString(cRef C.struct_StoredSecret) (string) {
 	ref := NewStoredSecret(cRef)
-	secrets, err := GetSecrets([]config.StoredSecret{ref})
+	secrets, err := GetSecrets([]v1.StoredSecret{ref})
 	if err != nil {
 		fmt.Println("Error fetching secret")
 		return ByteBoundString(nil)

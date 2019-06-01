@@ -2,7 +2,7 @@ package v2
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	"sort"
 	"strings"
 )
@@ -23,7 +23,7 @@ func (svc *Service) ToV1Service() (*v1Service, error) {
 
 	// Create listener
 
-	listener := config.Listener{
+	listener := v1.Listener{
 		// TODO: find out why this is never used in the Secretless codebase or in example
 		//  CACertFiles: nil
 		Name:     svc.Name,
@@ -43,9 +43,9 @@ func (svc *Service) ToV1Service() (*v1Service, error) {
 
 	// Create handler
 
-	credentials := make([]config.StoredSecret, 0)
+	credentials := make([]v1.StoredSecret, 0)
 	for _, cred := range svc.Credentials {
-		credentials = append(credentials, config.StoredSecret{
+		credentials = append(credentials, v1.StoredSecret{
 			Name:     cred.Name,
 			Provider: cred.From,
 			ID:       cred.Get,
@@ -57,7 +57,7 @@ func (svc *Service) ToV1Service() (*v1Service, error) {
 	sort.Slice(credentials, func(i, j int) bool {
 		return credentials[i].Name < credentials[j].Name
 	})
-	handler := config.Handler{
+	handler := v1.Handler{
 		Name:         svc.Name,
 		ListenerName: svc.Name,
 		Credentials:  credentials,
@@ -80,6 +80,20 @@ type Credential struct {
 	Get  string
 }
 
+func NewV1Config(fileContents []byte) (*v1.Config, error) {
+	v2cfg, err := NewConfig(fileContents)
+	if err != nil {
+		return nil, err
+	}
+
+	v1cfg, err := v2cfg.ConvertToV1()
+	if err != nil {
+		return nil, err
+	}
+
+	return v1cfg, nil
+}
+
 func NewConfig(fileContents []byte) (*Config, error) {
 	cfgYAML, err := NewConfigYAML(fileContents)
 	if err != nil {
@@ -89,10 +103,10 @@ func NewConfig(fileContents []byte) (*Config, error) {
 	return cfgYAML.ConvertToConfig()
 }
 
-func (cfg *Config) ConvertToV1() (*config.Config, error) {
-	v1Config := &config.Config{
-		Listeners: make([]config.Listener, 0),
-		Handlers:  make([]config.Handler, 0),
+func (cfg *Config) ConvertToV1() (*v1.Config, error) {
+	v1Config := &v1.Config{
+		Listeners: make([]v1.Listener, 0),
+		Handlers:  make([]v1.Handler, 0),
 	}
 
 	for _, svc := range cfg.Services {

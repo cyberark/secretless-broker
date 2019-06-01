@@ -7,7 +7,9 @@
 //
 package test
 
-import "github.com/cyberark/secretless-broker/pkg/secretless/config"
+import (
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+)
 
 // NOTE: "Socket Type" is indeed the correct name here:
 //       https://en.wikipedia.org/wiki/Network_socket#Other
@@ -32,8 +34,8 @@ func AllTLSSettings()[]TLSSetting {
 
 //TODO: Something is still quite wrong with the design here:
 //      Should pg/mysql logic live here?  It feels wrong...
-func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []config.StoredSecret {
-	var secrets []config.StoredSecret
+func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []v1.StoredSecret {
+	var secrets []v1.StoredSecret
 	var host string
 
 	switch tlsSetting {
@@ -47,18 +49,18 @@ func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []config.StoredSecret 
 
 	switch dbConfig.Protocol {
 	case "pg":
-		secrets = append(secrets, config.StoredSecret{
+		secrets = append(secrets, v1.StoredSecret{
 			Name:     "address",
 			Provider: "literal",
 			ID:		  host + ":" + dbConfig.Port,
 		})
 	case "mysql":
-		secrets = append(secrets, config.StoredSecret{
+		secrets = append(secrets, v1.StoredSecret{
 			Name:     "host",
 			Provider: "literal",
 			ID:		  host,
 		})
-		secrets = append(secrets, config.StoredSecret{
+		secrets = append(secrets, v1.StoredSecret{
 			Name:     "port",
 			Provider: "literal",
 			ID:		  dbConfig.Port,
@@ -85,8 +87,8 @@ func AllSSLModes()[]SSLMode {
 
 // For Secretless, sslmode="" is equivalent to not setting sslmode at all.
 // Therefore, this will work for the "Default" case too.
-func (sslMode SSLMode) toSecret() config.StoredSecret {
-	return config.StoredSecret{
+func (sslMode SSLMode) toSecret() v1.StoredSecret {
+	return v1.StoredSecret{
 		Name:     "sslmode",
 		Provider: "literal",
 		ID:		   string(sslMode),
@@ -106,7 +108,7 @@ func AllRootCertStatuses()[]RootCertStatus {
 	return []RootCertStatus{Undefined, Valid, Invalid, Malformed}
 }
 
-func (sslRootCertType RootCertStatus) toSecret() config.StoredSecret {
+func (sslRootCertType RootCertStatus) toSecret() v1.StoredSecret {
 	provider := "literal"
 
 	switch sslRootCertType {
@@ -114,7 +116,7 @@ func (sslRootCertType RootCertStatus) toSecret() config.StoredSecret {
 		provider = "file"
 	}
 
-	return config.StoredSecret{
+	return v1.StoredSecret{
 		Name:     "sslrootcert",
 		Provider: provider,
 		ID:		  string(sslRootCertType),
@@ -135,14 +137,14 @@ func AllPrivateKeyStatuses() []PrivateKeyStatus {
 	}
 }
 
-func (status PrivateKeyStatus) toSecret() config.StoredSecret {
+func (status PrivateKeyStatus) toSecret() v1.StoredSecret {
 
 	provider := "literal"
 	if status == PrivateKeyValid || status == PrivateKeyNotSignedByCA {
 		provider = "file"
 	}
 
-	return config.StoredSecret{
+	return v1.StoredSecret{
 		Name:     "sslkey",
 		Provider: provider,
 		ID:       string(status),
@@ -164,14 +166,14 @@ func AllPublicCertStatuses() []PublicCertStatus {
 	}
 }
 
-func (status PublicCertStatus) toSecret() config.StoredSecret {
+func (status PublicCertStatus) toSecret() v1.StoredSecret {
 
 	provider := "literal"
 	if status == PublicCertValid || status == PublicCertNotSignedByCA {
 		provider = "file"
 	}
 
-	return config.StoredSecret{
+	return v1.StoredSecret{
 		Name:     "sslcert",
 		Provider: provider,
 		ID:       string(status),

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
+	crdAPIv1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -89,7 +89,7 @@ handlers:
 foobar: []
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "field foobar not found in type config.Config")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "field foobar not found in type v1.Config")
 	})
 
 	Convey("Reports an unnamed Listener definition", t, func() {
@@ -187,10 +187,10 @@ handlers:
 		So(err, ShouldBeNil)
 
 		// Create an API object that would be similar to one used to trigger a config reload
-		crdConfig := crd_api_v1.Configuration{
-			Spec: crd_api_v1.ConfigurationSpec{
-				Handlers: []crd_api_v1.Handler{
-					crd_api_v1.Handler{
+		crdConfig := crdAPIv1.Configuration{
+			Spec: crdAPIv1.ConfigurationSpec{
+				Handlers: []crdAPIv1.Handler{
+					crdAPIv1.Handler{
 						Name:         "http_default_handler",
 						ListenerName: "http_default",
 						Match: []string{
@@ -198,8 +198,8 @@ handlers:
 						},
 					},
 				},
-				Listeners: []crd_api_v1.Listener{
-					crd_api_v1.Listener{
+				Listeners: []crdAPIv1.Listener{
+					crdAPIv1.Listener{
 						Name:     "http_default",
 						Protocol: "tcp",
 						Address:  "0.0.0.0:1080",

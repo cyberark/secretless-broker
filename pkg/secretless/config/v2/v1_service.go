@@ -16,12 +16,12 @@ package v2
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 type v1Service struct {
-	Listener *config.Listener
-	Handler *config.Handler
+	Listener *v1.Listener
+	Handler *v1.Handler
 }
 
 func (v1Svc *v1Service) applyProtocolConfig(cfgBytes []byte) error {

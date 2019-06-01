@@ -17,6 +17,8 @@ package v2
 import (
 	"fmt"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"sort"
+	"strings"
 )
 
 type v1Service struct {
@@ -24,18 +26,70 @@ type v1Service struct {
 	Handler *v1.Handler
 }
 
+func NewV1Service(v2Svc Service) (ret *v1Service, err error) {
+
+	// Create basic Service
+
+	ret = &v1Service{
+		Listener: &v1.Listener{
+			Name:     v2Svc.Name,
+			Protocol: v2Svc.Protocol,
+		},
+		Handler: &v1.Handler{
+			Name:         v2Svc.Name,
+			ListenerName: v2Svc.Name,
+		},
+	}
+
+	// Map ListenOn To Address or Socket
+
+	if strings.HasPrefix(v2Svc.ListenOn, "tcp://") {
+		ret.Listener.Address = strings.TrimPrefix(v2Svc.ListenOn, "tcp://")
+	} else if strings.HasPrefix(v2Svc.ListenOn, "unix://") {
+		ret.Listener.Socket = strings.TrimPrefix(v2Svc.ListenOn, "unix://")
+	} else {
+		errMsg := "listenOn=%q missing prefix from one of tcp:// or unix//"
+		return nil, fmt.Errorf(errMsg, v2Svc.ListenOn)
+	}
+
+	// Map v2.Credentials to v1.Crendentials
+
+	credentials := make([]v1.StoredSecret, 0)
+	for _, cred := range v2Svc.Credentials {
+		credentials = append(credentials, v1.StoredSecret{
+			Name:     cred.Name,
+			Provider: cred.From,
+			ID:       cred.Get,
+		})
+	}
+
+	// Sort Credentials
+
+	sort.Slice(credentials, func(i, j int) bool {
+		return credentials[i].Name < credentials[j].Name
+	})
+
+	// Apply protocol specific config
+
+	if err = ret.applyProtocolConfig(v2Svc.Config); err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
 func (v1Svc *v1Service) applyProtocolConfig(cfgBytes []byte) error {
 
 	switch v1Svc.Listener.Protocol {
 	case "http":
-		if err := v1Svc.transformHTTP(cfgBytes); err != nil {
+		if err := v1Svc.configureHTTP(cfgBytes); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (v1Svc *v1Service) transformHTTP(cfgBytes []byte) error {
+func (v1Svc *v1Service) configureHTTP(cfgBytes []byte) error {
 	if len(cfgBytes) == 0 {
 		return fmt.Errorf("empty http config")
 	}
@@ -46,9 +100,6 @@ func (v1Svc *v1Service) transformHTTP(cfgBytes []byte) error {
 	}
 
 	v1Svc.Handler.Match = httpCfg.AuthenticateURLsMatching
-
-	// TODO: it's funny that this field was only for http, as well as the other
-	//  fields we've found this to be true for as well
 	v1Svc.Handler.Type = httpCfg.AuthenticationStrategy
 
 	return nil

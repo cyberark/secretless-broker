@@ -1,10 +1,11 @@
+// TODO: find out why this is never used in the Secretless codebase or in example
+//  CACertFiles: nil
+
 package v2
 
 import (
-	"fmt"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	"sort"
-	"strings"
 )
 
 type Config struct {
@@ -17,61 +18,6 @@ type Service struct {
 	Protocol    string
 	ListenOn    string
 	Config      []byte
-}
-
-func (svc *Service) ToV1Service() (*v1Service, error) {
-
-	// Create listener
-
-	listener := v1.Listener{
-		// TODO: find out why this is never used in the Secretless codebase or in example
-		//  CACertFiles: nil
-		Name:     svc.Name,
-		Protocol: svc.Protocol,
-	}
-
-	// Convert listenOn to Address or Socket, depending on protocol
-
-	if strings.HasPrefix(svc.ListenOn, "tcp://") {
-		listener.Address = strings.TrimPrefix(svc.ListenOn, "tcp://")
-	} else if strings.HasPrefix(svc.ListenOn, "unix://") {
-		listener.Socket = strings.TrimPrefix(svc.ListenOn, "unix://")
-	} else {
-		errMsg := "listenOn=%q missing prefix from one of tcp:// or unix//"
-		return nil, fmt.Errorf(errMsg, svc.ListenOn)
-	}
-
-	// Create handler
-
-	credentials := make([]v1.StoredSecret, 0)
-	for _, cred := range svc.Credentials {
-		credentials = append(credentials, v1.StoredSecret{
-			Name:     cred.Name,
-			Provider: cred.From,
-			ID:       cred.Get,
-		})
-	}
-
-	// Sort Credentials
-
-	sort.Slice(credentials, func(i, j int) bool {
-		return credentials[i].Name < credentials[j].Name
-	})
-	handler := v1.Handler{
-		Name:         svc.Name,
-		ListenerName: svc.Name,
-		Credentials:  credentials,
-	}
-
-	// Apply protocol specific config
-
-	v1Service := &v1Service{&listener, &handler}
-	err := v1Service.applyProtocolConfig(svc.Config)
-	if err != nil {
-		return nil, err
-	}
-
-	return v1Service, nil
 }
 
 type Credential struct {
@@ -110,7 +56,7 @@ func (cfg *Config) ConvertToV1() (*v1.Config, error) {
 	}
 
 	for _, svc := range cfg.Services {
-		v1Svc, err := svc.ToV1Service()
+		v1Svc, err := NewV1Service(*svc)
 		if err != nil {
 			return nil, err
 		}

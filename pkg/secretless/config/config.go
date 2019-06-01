@@ -48,7 +48,6 @@ func Load(data []byte) (config v1.Config, err error) {
 
 	var configPointer *v1.Config
 	if versionStruct.Version == "" {
-		fmt.Println("missing configuration version, defaulting to version 1")
 		versionStruct.Version = "1"
 	}
 

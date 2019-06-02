@@ -23,6 +23,7 @@ type Service struct {
 
 // NewV1Config is converts the bytes of a v2 YAML file to a v1.Config.  As such,
 // it's the primary public interface of the v2 package.
+// TODO: Possible move to v1.config?
 func NewV1Config(v2YAML []byte) (*v1.Config, error) {
 	v2cfg, err := NewConfig(v2YAML)
 	if err != nil {
@@ -65,16 +66,12 @@ func NewV1ConfigFromV2Config(v2cfg *Config) (*v1.Config, error) {
 	return v1Config, nil
 }
 
-func NewConfig(fileContents []byte) (*Config, error) {
-	cfgYAML, err := NewConfigYAML(fileContents)
+func NewConfig(v2YAML []byte) (*Config, error) {
+	cfgYAML, err := NewConfigYAML(v2YAML)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewConfigFromConfigYAML(cfgYAML)
-}
-
-func NewConfigFromConfigYAML(cfgYAML *configYAML) (*Config, error) {
 	services := make([]*Service, 0)
 	for svcName, svcYAML := range cfgYAML.Services {
 		svc, err := NewService(svcName, svcYAML)

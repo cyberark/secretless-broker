@@ -14,11 +14,11 @@ type Config struct {
 }
 
 type Service struct {
-	Name        string
-	Credentials []*Credential
-	Protocol    string
-	ListenOn    string
-	Config      []byte
+	Name           string
+	Credentials    []*Credential
+	Protocol       string
+	ListenOn       string
+	ProtocolConfig []byte
 }
 
 // NewV1Config is converts the bytes of a v2 YAML file to a v1.Config.  As such,
@@ -94,18 +94,18 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 	}
 
 	svc := &Service{
-		Name:        svcName,
-		Credentials: credentials,
-		Protocol:    svcYAML.Protocol,
-		ListenOn:    svcYAML.ListenOn,
-		Config:      nil,
+		Name:           svcName,
+		Credentials:    credentials,
+		Protocol:       svcYAML.Protocol,
+		ListenOn:       svcYAML.ListenOn,
+		ProtocolConfig: nil,
 	}
 
 	configBytes, err := yaml.Marshal(svcYAML.Config)
 	if err != nil {
 		return nil, err
 	}
-	svc.Config = configBytes
+	svc.ProtocolConfig = configBytes
 
 	return svc, nil
 }

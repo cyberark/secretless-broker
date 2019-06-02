@@ -55,7 +55,7 @@ func TestNewConfig(t *testing.T) {
 		assert.NoError(t, err)
 
 		expectedBytes := []byte("optionalStuff: blah\n")
-		assert.Equal(t, expectedBytes, cfg.Services[0].Config)
+		assert.Equal(t, expectedBytes, cfg.Services[0].ProtocolConfig)
 	})
 
 	t.Run("credential hydration", func(t *testing.T) {

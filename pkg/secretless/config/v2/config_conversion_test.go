@@ -27,7 +27,7 @@ func v2DbExample() *Config {
 						Get:  "some-id-2",
 					},
 				},
-				Config: nil,
+				ProtocolConfig: nil,
 			},
 		},
 	}
@@ -52,7 +52,7 @@ func v2HttpExample() *Config {
 						Get:  "some-id-2",
 					},
 				},
-				Config: []byte(`
+				ProtocolConfig: []byte(`
 {
 	"authenticationStrategy": "aws",
 	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]
@@ -77,14 +77,14 @@ func TestHttpServiceConversion(t *testing.T) {
 
 	t.Run("nil config errors", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v2.Services[0].Config = nil
+		v2.Services[0].ProtocolConfig = nil
 		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 	})
 
 	t.Run("missing authenticationStrategy errors", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v2.Services[0].Config = []byte(`
+		v2.Services[0].ProtocolConfig = []byte(`
 {
 	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]
 }
@@ -95,7 +95,7 @@ func TestHttpServiceConversion(t *testing.T) {
 
 	t.Run("missing authenticateURLsMatching errors", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v2.Services[0].Config = []byte(`
+		v2.Services[0].ProtocolConfig = []byte(`
 {
 	"authenticationStrategy": "aws"
 }`)
@@ -114,7 +114,7 @@ func TestHttpServiceConversion(t *testing.T) {
 	"authenticationStrategy": "%s",
 	"authenticateURLsMatching": ["^http://blah*"]
 }`, strategy)
-			v2.Services[0].Config = []byte(config)
+			v2.Services[0].ProtocolConfig = []byte(config)
 			_, err := NewV1ConfigFromV2Config(v2)
 			assert.NoError(t, err)
 		}
@@ -122,7 +122,7 @@ func TestHttpServiceConversion(t *testing.T) {
 
 	t.Run("invalid auth strategies rejected", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v2.Services[0].Config = []byte(`
+		v2.Services[0].ProtocolConfig = []byte(`
 {
 	"authenticationStrategy": "SHOULD FAIL",
 	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]

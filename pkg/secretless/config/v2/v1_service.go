@@ -75,7 +75,7 @@ func NewV1Service(v2Svc Service) (ret *v1Service, err error) {
 
 	// Apply protocol specific config
 
-	if err = ret.applyProtocolConfig(v2Svc.Config); err != nil {
+	if err = ret.applyProtocolConfig(v2Svc.ProtocolConfig); err != nil {
 		return nil, err
 	}
 

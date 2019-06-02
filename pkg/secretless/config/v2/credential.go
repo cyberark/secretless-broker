@@ -2,12 +2,36 @@ package v2
 
 import (
 	"gopkg.in/yaml.v2"
+	"sort"
 )
 
+// Credential the v2.Config representation of a named secret stored in a
+// provider. It's the analog of the StoredSecret in v1.Config.
 type Credential struct {
 	Name string
 	From string
 	Get  string
+}
+
+// NewCredentials converts the raw YAML representation of credentials
+// (credentialsYAML) into it's logical representation ([]*Credential).
+func NewCredentials(credsYAML credentialsYAML) ([]*Credential, error) {
+	credentials := make([]*Credential, 0)
+
+	for credName, credYAML := range credsYAML {
+		cred, err := NewCredential(credName, credYAML)
+		if err != nil {
+			return nil, err
+		}
+		credentials = append(credentials, cred)
+	}
+
+	// sort credentials
+	sort.Slice(credentials, func(i, j int) bool {
+		return credentials[i].Name < credentials[j].Name
+	})
+
+	return credentials, nil
 }
 
 func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
@@ -46,4 +70,3 @@ func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
 
 	return cred, nil
 }
-

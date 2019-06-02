@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func v2DbExample() Config {
-	return Config{
+func v2DbExample() *Config {
+	return &Config{
 		Services: []*Service{
 			{
 				Name:     "test-db",
@@ -33,8 +33,8 @@ func v2DbExample() Config {
 	}
 }
 
-func v2HttpExample() Config {
-	return Config{
+func v2HttpExample() *Config {
+	return &Config{
 		Services: []*Service{
 			{
 				Name:     "test-http",
@@ -67,7 +67,7 @@ func TestHttpServiceConversion(t *testing.T) {
 
 	t.Run("valid config maps correctly", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v1, err := v2.ConvertToV1()
+		v1, err := NewV1ConfigFromV2Config(v2)
 		assert.NoError(t, err)
 
 		expectedURLs := []string{"^http://aws*", "amzn.com"}
@@ -78,7 +78,7 @@ func TestHttpServiceConversion(t *testing.T) {
 	t.Run("nil config errors", func(t *testing.T) {
 		v2 := v2HttpExample()
 		v2.Services[0].Config = nil
-		_, err := v2.ConvertToV1()
+		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 	})
 
@@ -89,7 +89,7 @@ func TestHttpServiceConversion(t *testing.T) {
 	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]
 }
 `)
-		_, err := v2.ConvertToV1()
+		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 	})
 
@@ -99,7 +99,7 @@ func TestHttpServiceConversion(t *testing.T) {
 {
 	"authenticationStrategy": "aws"
 }`)
-		_, err := v2.ConvertToV1()
+		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 	})
 
@@ -115,7 +115,7 @@ func TestHttpServiceConversion(t *testing.T) {
 	"authenticateURLsMatching": ["^http://blah*"]
 }`, strategy)
 			v2.Services[0].Config = []byte(config)
-			_, err := v2.ConvertToV1()
+			_, err := NewV1ConfigFromV2Config(v2)
 			assert.NoError(t, err)
 		}
 	})
@@ -127,7 +127,7 @@ func TestHttpServiceConversion(t *testing.T) {
 	"authenticationStrategy": "SHOULD FAIL",
 	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]
 }`)
-		_, err := v2.ConvertToV1()
+		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 	})
 }
@@ -136,7 +136,7 @@ func TestListenOnConversion(t *testing.T) {
 
 	t.Run("tcp listenOn maps to Address", func(t *testing.T) {
 		v2 := v2DbExample()
-		v1, err := v2.ConvertToV1()
+		v1, err := NewV1ConfigFromV2Config(v2)
 		assert.NoError(t, err)
 		assert.Equal(t, "0.0.0.0:2345", v1.Listeners[0].Address)
 	})
@@ -144,7 +144,7 @@ func TestListenOnConversion(t *testing.T) {
 	t.Run("unix listenOn maps to Socket", func(t *testing.T) {
 		v2 := v2DbExample()
 		v2.Services[0].ListenOn = "unix:///some/socket/path"
-		v1, err := v2.ConvertToV1()
+		v1, err := NewV1ConfigFromV2Config(v2)
 		assert.NoError(t, err)
 		assert.NotNil(t, v1.Listeners[0].Socket)
 		assert.Equal(t, "/some/socket/path", v1.Listeners[0].Socket)
@@ -153,11 +153,11 @@ func TestListenOnConversion(t *testing.T) {
 	t.Run("unknown listenOn returns error", func(t *testing.T) {
 		v2 := v2DbExample()
 		v2.Services[0].ListenOn = "/some/socket/path"
-		_, err := v2.ConvertToV1()
+		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 
 		v2.Services[0].ListenOn = "0.0.0.0:2345"
-		_, err = v2.ConvertToV1()
+		_, err = NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 	})
 }
@@ -165,7 +165,7 @@ func TestListenOnConversion(t *testing.T) {
 func TestCredentialsConversion(t *testing.T) {
 	t.Run("Service Credentials map to Handler Credentials", func(t *testing.T) {
 		v2cfg := v2DbExample()
-		v1cfg, err := v2cfg.ConvertToV1()
+		v1cfg, err := NewV1ConfigFromV2Config(v2cfg)
 		assert.NoError(t, err)
 		assert.Equal(t, []v1.StoredSecret{
 			{

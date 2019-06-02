@@ -5,19 +5,19 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 )
 
-type HTTPConfig struct {
+type httpConfig struct {
 	AuthenticationStrategy   string   `yaml:"authenticationStrategy"`
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
 }
 
-func NewHTTPConfig(cfgBytes []byte) (*HTTPConfig, error) {
-	cfg := &HTTPConfig{}
+func newHTTPConfig(cfgBytes []byte) (*httpConfig, error) {
+	cfg := &httpConfig{}
 	err := yaml.Unmarshal(cfgBytes, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	err = cfg.Validate()
+	err = cfg.validate()
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func NewHTTPConfig(cfgBytes []byte) (*HTTPConfig, error) {
 	return cfg, nil
 }
 
-func (cfg *HTTPConfig) Validate() error {
+func (cfg *httpConfig) validate() error {
 	return validation.ValidateStruct(cfg,
 		// AuthenticationStrategy cannot be empty, and must be a recognized strategy
 		validation.Field(&cfg.AuthenticationStrategy, validation.Required, validation.In(

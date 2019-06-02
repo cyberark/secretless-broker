@@ -98,7 +98,7 @@ func (v1Svc *v1Service) configureHTTP(cfgBytes []byte) error {
 		return fmt.Errorf("empty http config")
 	}
 
-	httpCfg, err := NewHTTPConfig(cfgBytes)
+	httpCfg, err := newHTTPConfig(cfgBytes)
 	if err != nil {
 		return err
 	}

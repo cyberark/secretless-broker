@@ -67,7 +67,7 @@ func NewV1ConfigFromV2Config(v2cfg *Config) (*v1.Config, error) {
 }
 
 func NewConfig(v2YAML []byte) (*Config, error) {
-	cfgYAML, err := NewConfigYAML(v2YAML)
+	cfgYAML, err := newConfigYAML(v2YAML)
 	if err != nil {
 		return nil, err
 	}

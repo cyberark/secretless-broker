@@ -21,7 +21,7 @@ type serviceYAML struct {
 
 type credentialsYAML map[string]interface{}
 
-func NewConfigYAML(rawYAML []byte) (*configYAML, error) {
+func newConfigYAML(rawYAML []byte) (*configYAML, error) {
 	if len(rawYAML) == 0 {
 		return nil, fmt.Errorf("empty file contents given to NewConfig")
 	}

@@ -10,13 +10,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// This represents not the value of a "secret," but the abstract concept of
-// "a secret stored somewhere".
+// StoredSecret represents not the value of a "secret," but the abstract concept
+// of "a secret stored somewhere".
 //
-// Note that "Name" will by the key that maps to this secret's actual value
-// in the map[string][]byte when the "StoredSecret" itself is looked up by a
+// Note that "Name" will be the key that maps to this secret's actual value in
+// the map[string][]byte when the "StoredSecret" itself is looked up by a
 // Resolver.
-//
 type StoredSecret struct {
 	// How client code will refer to the secret's actual value at runtime.
 	// Specifically, the key to the secret's value in the map[string][]byte

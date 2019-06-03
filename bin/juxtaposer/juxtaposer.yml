@@ -1,9 +1,10 @@
 ---
 driver: mysql-5.7
 
-#comparison:
+comparison:
 #  type: sql
 #  style: select
+#  rounds: infinity
 
 backends:
   secretless:

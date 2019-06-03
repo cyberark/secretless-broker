@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -33,8 +34,9 @@ type BackendTiming struct {
 }
 
 type Comparison struct {
-	Style string `yaml:"style"`
-	Type  string `yaml:"type"`
+	Rounds string `yaml:"rounds"`
+	Style  string `yaml:"style"`
+	Type   string `yaml:"type"`
 }
 
 type Config struct {
@@ -72,8 +74,9 @@ func readConfiguration(configFile string) (*Config, error) {
 
 	config := Config{
 		Comparison: Comparison{
-			Type:  "sql",
-			Style: "select",
+			Rounds: "1000",
+			Style:  "select",
+			Type:   "sql",
 		},
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
@@ -102,7 +105,7 @@ func registerShutdownSignalHandlers(shutdownChannel chan<- bool) {
 	}()
 }
 
-func printResults(aggregatedTimings map[string]BackendTiming) {
+func printResults(backendNames []string, aggregatedTimings map[string]BackendTiming) {
 	fmt.Println()
 	fmt.Println("Calculating averages...")
 	fmt.Println()
@@ -117,7 +120,9 @@ func printResults(aggregatedTimings map[string]BackendTiming) {
 	dividerString := strings.Repeat("-", 85)
 	fmt.Printf("%s\n", dividerString)
 
-	for backendName, timingInfo := range aggregatedTimings {
+	for _, backendName := range backendNames {
+		timingInfo := aggregatedTimings[backendName]
+
 		successfulRuns := timingInfo.Count - len(timingInfo.Errors)
 
 		averageDuration := ZeroDuration
@@ -246,9 +251,19 @@ func main() {
 	shutdownChannel := make(chan bool, 1)
 	registerShutdownSignalHandlers(shutdownChannel)
 
+	rounds := -1
+	if config.Comparison.Rounds != "infinity" {
+		rounds, err = strconv.Atoi(config.Comparison.Rounds)
+		if err != nil {
+			log.Printf("%v", err)
+			os.Exit(1)
+		}
+	}
+
 	shuttingDown := false
+	round := 0
 	//	for {
-	for i := 0; i < 100; i++ {
+	for {
 		select {
 		case _ = <-shutdownChannel:
 			shuttingDown = true
@@ -259,6 +274,11 @@ func main() {
 			break
 		}
 
+		round = round + 1
+		if rounds != -1 && round > rounds {
+			break
+		}
+
 		for _, backendName := range backendNames {
 			singleTestRunDuration, err := performInvocation(backendName, backendInstances[backendName],
 				config.Backends[backendName])
@@ -266,18 +286,19 @@ func main() {
 			timingInfo := aggregatedTimings[backendName]
 			timingInfo.Count = timingInfo.Count + 1
 			if err != nil {
-				log.Printf("%-20s=> %v", backendName, err)
+				log.Printf("[%.3d/%s] %-20s=> %v", round, config.Comparison.Rounds, backendName, err)
 				timingInfo.Errors = append(timingInfo.Errors, err)
 				aggregatedTimings[backendName] = timingInfo
 				continue
 			}
 
-			log.Printf("%-20s=>%15v", backendName, singleTestRunDuration)
+			log.Printf("[%.3d/%s], %-20s=>%15v", round, config.Comparison.Rounds,
+				backendName, singleTestRunDuration)
 			timingInfo.Duration = timingInfo.Duration + singleTestRunDuration
 
 			aggregatedTimings[backendName] = timingInfo
 		}
 	}
 
-	printResults(aggregatedTimings)
+	printResults(backendNames, aggregatedTimings)
 }

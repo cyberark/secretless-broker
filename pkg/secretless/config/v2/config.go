@@ -1,6 +1,6 @@
-// TODO: find out why this is never used in the Secretless codebase or in example
-//  CACertFiles: nil
-
+// v2 is package for parsing version 2 "secretless.yml" files and converting
+// them into "v1.Config" objects.  Users of this package will typically only be
+// concerned with calling "NewV1Config" to parse
 package v2
 
 import (
@@ -9,10 +9,16 @@ import (
 	"sort"
 )
 
+// Config represents a full configuration of Secretless, which is just a list of
+// Service configurations.
 type Config struct {
 	Services []*Service
 }
 
+// Service represents a the configuration of a Secretless proxy service. It
+// includes the services protocol, where it's listening, where to find its
+// required credentials, and (optionally) any additional protocol specific
+// configuration.
 type Service struct {
 	Name           string
 	Credentials    []*Credential
@@ -38,6 +44,7 @@ func NewV1Config(v2YAML []byte) (*v1.Config, error) {
 	return v1cfg, nil
 }
 
+// NewV1ConfigFromV2Config converts a v2.Config to a v1.Config
 func NewV1ConfigFromV2Config(v2cfg *Config) (*v1.Config, error) {
 	v1Config := &v1.Config{
 		Listeners: make([]v1.Listener, 0),
@@ -45,7 +52,7 @@ func NewV1ConfigFromV2Config(v2cfg *Config) (*v1.Config, error) {
 	}
 
 	for _, svc := range v2cfg.Services {
-		v1Svc, err := NewV1Service(*svc)
+		v1Svc, err := newV1Service(*svc)
 		if err != nil {
 			return nil, err
 		}
@@ -66,6 +73,7 @@ func NewV1ConfigFromV2Config(v2cfg *Config) (*v1.Config, error) {
 	return v1Config, nil
 }
 
+// NewConfig creates a v2.Config from yaml bytes
 func NewConfig(v2YAML []byte) (*Config, error) {
 	cfgYAML, err := newConfigYAML(v2YAML)
 	if err != nil {
@@ -86,6 +94,7 @@ func NewConfig(v2YAML []byte) (*Config, error) {
 	}, nil
 }
 
+// NewService creates a named v2.Service from yaml bytes
 func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	credentials, err := NewCredentials(svcYAML.Credentials)

@@ -26,7 +26,7 @@ type v1Service struct {
 	Handler *v1.Handler
 }
 
-func NewV1Service(v2Svc Service) (ret *v1Service, err error) {
+func newV1Service(v2Svc Service) (ret *v1Service, err error) {
 
 	// Create basic Service
 

@@ -44,6 +44,9 @@ func TestNewConfig(t *testing.T) {
 	t.Run("basic hydration", func(t *testing.T) {
 		cfg, err := sampleConfig()
 		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
 
 		assert.Equal(t, "postgres-db", cfg.Services[0].Name)
 		assert.Equal(t, "pg", cfg.Services[0].Protocol)
@@ -53,6 +56,9 @@ func TestNewConfig(t *testing.T) {
 	t.Run("config hydration", func(t *testing.T) {
 		cfg, err := sampleConfig()
 		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
 
 		expectedBytes := []byte("optionalStuff: blah\n")
 		assert.Equal(t, expectedBytes, cfg.Services[0].ProtocolConfig)
@@ -61,6 +67,9 @@ func TestNewConfig(t *testing.T) {
 	t.Run("credential hydration", func(t *testing.T) {
 		cfg, err := sampleConfig()
 		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
 
 		actualCreds := cfg.Services[0].Credentials
 		expectedCreds := []*Credential{

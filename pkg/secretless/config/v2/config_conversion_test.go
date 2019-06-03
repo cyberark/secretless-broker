@@ -69,6 +69,9 @@ func TestHttpServiceConversion(t *testing.T) {
 		v2 := v2HttpExample()
 		v1, err := NewV1ConfigFromV2Config(v2)
 		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
 
 		expectedURLs := []string{"^http://aws*", "amzn.com"}
 		assert.Equal(t, "aws", v1.Handlers[0].Type)
@@ -138,6 +141,10 @@ func TestListenOnConversion(t *testing.T) {
 		v2 := v2DbExample()
 		v1, err := NewV1ConfigFromV2Config(v2)
 		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
 		assert.Equal(t, "0.0.0.0:2345", v1.Listeners[0].Address)
 	})
 
@@ -146,6 +153,10 @@ func TestListenOnConversion(t *testing.T) {
 		v2.Services[0].ListenOn = "unix:///some/socket/path"
 		v1, err := NewV1ConfigFromV2Config(v2)
 		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
 		assert.NotNil(t, v1.Listeners[0].Socket)
 		assert.Equal(t, "/some/socket/path", v1.Listeners[0].Socket)
 	})
@@ -167,6 +178,10 @@ func TestCredentialsConversion(t *testing.T) {
 		v2cfg := v2DbExample()
 		v1cfg, err := NewV1ConfigFromV2Config(v2cfg)
 		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
 		assert.Equal(t, []v1.StoredSecret{
 			{
 				Name:     "TestSecret1",

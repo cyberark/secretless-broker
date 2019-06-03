@@ -6,5 +6,6 @@ import (
 
 type DriverManager interface {
 	RunSingleTest() (time.Duration, error)
+	RotatePassword(string) error
 	Shutdown() error
 }

@@ -146,6 +146,10 @@ func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
 	return testDuration, nil
 }
 
+func (manager *DriverManager) RotatePassword(newPassword string) error {
+	return fmt.Errorf("ERROR: Rotating passwords is not yet implemented!")
+}
+
 func (manager *DriverManager) Shutdown() error {
 	return manager.Tester.Shutdown()
 }

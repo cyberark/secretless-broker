@@ -2,24 +2,37 @@
 #driver: mysql-5.7
 driver: postgres
 
-
 comparison:
 #  type: sql
 #  style: select
+#  rounds: 1000
 #  rounds: infinity
 
 backends:
-  secretless:
-    description: Secretless DB connection
+  pg_secretless:
+    description: Secretless Postgres connection
     host: /sock
-    port: 5433
-    debug: false
 
-  direct:
-    description: Direct DB connection
+  pg_direct:
+    description: Direct Postgres connection
     host: localhost
     port: 5433
     username: myuser
     password: mypassword
     sslmode: disable
     debug: false
+
+  mysql_secretless:
+    description: Secretless Mysql connection
+    host: /sock/mysql
+    ignore: true
+
+  mysql_direct:
+    description: Direct MySql connection
+    host: localhost
+    port: 3307
+    username: myuser
+    password: mypassword
+    sslmode: disable
+    debug: false
+    ignore: true

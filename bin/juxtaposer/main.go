@@ -23,6 +23,7 @@ type Backend struct {
 	Debug       bool   `yaml:"debug"`
 	Description string `yaml:"description"`
 	Host        string `yaml:"host"`
+	Ignore      bool   `yaml:"ignore"`
 	Password    string `yaml:"password"`
 	Port        string `yaml:"port"`
 	SslMode     string `yaml:"sslmode"`
@@ -81,6 +82,16 @@ func readConfiguration(configFile string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Slice out any backends which are ignored
+	filteredBackends := map[string]Backend{}
+	for backendName, backendConfig := range config.Backends {
+		if backendConfig.Ignore == false {
+			filteredBackends[backendName] = backendConfig
+		}
+	}
+
+	config.Backends = filteredBackends
 
 	return &config, nil
 }

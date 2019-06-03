@@ -9,7 +9,6 @@ comparison:
 backends:
   secretless:
     description: Secretless DB connection
-#   address: localhost:3308
     socket: /sock/mysql
     username: myuser
     password: mypassword
@@ -18,6 +17,13 @@ backends:
   direct:
     description: Direct DB connection
     address: localhost:3307
+    username: myuser
+    password: mypassword
+    debug: false
+
+  direct2:
+    description: Direct DB connection2
+    address: localhost:3306
     username: myuser
     password: mypassword
     debug: false

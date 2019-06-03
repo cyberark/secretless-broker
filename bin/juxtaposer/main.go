@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -234,6 +235,9 @@ func main() {
 
 		backendInstances[backendName] = backendTestManager
 	}
+
+	// Sort backendNames for consistent output
+	sort.Strings(backendNames)
 
 	aggregatedTimings := map[string]BackendTiming{}
 	for _, backendName := range backendNames {

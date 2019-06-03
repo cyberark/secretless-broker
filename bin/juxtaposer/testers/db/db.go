@@ -7,31 +7,19 @@ import (
 	"time"
 
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/testers/api"
+	mysql "github.com/cyberark/secretless-broker/bin/juxtaposer/testers/db/mysql"
+	postgres "github.com/cyberark/secretless-broker/bin/juxtaposer/testers/db/postgres"
 )
 
-type DbTesterOptions struct {
-	Address      string
-	DatabaseName string
-	Debug        bool
-	Password     string
-	Socket       string
-	Username     string
-}
-
-type DbTester interface {
-	Connect(DbTesterOptions) error
-	Query(string, ...interface{}) ([]byte, error)
-	Shutdown() error
-}
-
 type DriverManager struct {
-	Options  *DbTesterOptions
-	Tester   DbTester
+	Options  *api.DbTesterOptions
+	Tester   api.DbTester
 	TestType string
 }
 
-var DbTesterImplementatons = map[string]func() (DbTester, error){
-	"mysql-5.7": NewMysqlTester,
+var DbTesterImplementatons = map[string]func() (api.DbTester, error){
+	"mysql-5.7": mysql.NewTester,
+	"postgres":  postgres.NewTester,
 }
 
 const ZeroDuration = 0 * time.Second
@@ -46,12 +34,12 @@ const CreateTableStatement = `
 `
 
 var QueryTypes = map[string]string{
-	"dropTable": fmt.Sprintf("DROP TABLE %s;", DefaultTableName),
+	"dropTable": fmt.Sprintf("DROP TABLE IF EXISTS %s;", DefaultTableName),
 	"createTable": fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);",
 		DefaultTableName,
 		CreateTableStatement),
 	"insertItem": fmt.Sprintf(`INSERT INTO %s (name, id, birth_date, result, passed)
-		VALUES (?, ?, ?, ?, ?);`, DefaultTableName),
+		VALUES `, DefaultTableName),
 	"select": fmt.Sprintf("SELECT * FROM %s;", DefaultTableName),
 }
 
@@ -78,7 +66,10 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 	}
 
 	for itemIndex := 0; itemIndex < 10; itemIndex++ {
-		_, err = manager.Tester.Query(QueryTypes["insertItem"],
+		insertItemStatement := QueryTypes["insertItem"] +
+			fmt.Sprintf("(%s)", manager.Tester.GetQueryMarkers(5))
+
+		_, err = manager.Tester.Query(insertItemStatement,
 			fmt.Sprintf("person #%d", itemIndex),
 			itemIndex,
 			time.Now().AddDate(0, 0, itemIndex),
@@ -98,7 +89,7 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 func (manager *DriverManager) instantiateNewDbDriverTester(driverName string) error {
 	testerConstructor, ok := DbTesterImplementatons[driverName]
 	if !ok {
-		return fmt.Errorf("ERROR: DB tester type not supported: %s!", driverName)
+		return fmt.Errorf("ERROR: DB driver type not supported: %s!", driverName)
 	}
 
 	tester, err := testerConstructor()
@@ -115,9 +106,9 @@ func (manager *DriverManager) instantiateNewDbDriverTester(driverName string) er
 	return nil
 }
 
-func validateOptions(options DbTesterOptions) error {
-	if options.Address == "" && options.Socket == "" {
-		return fmt.Errorf("ERROR: Neither Address nor Socket specified!")
+func validateOptions(options api.DbTesterOptions) error {
+	if options.Host == "" && options.Socket == "" {
+		return fmt.Errorf("ERROR: Neither Host nor Socket specified!")
 	}
 
 	if options.DatabaseName == "" {
@@ -154,7 +145,7 @@ func (manager *DriverManager) Shutdown() error {
 	return manager.Tester.Shutdown()
 }
 
-func NewTestDriver(driver string, testType string, options DbTesterOptions) (api.DriverManager, error) {
+func NewTestDriver(driver string, testType string, options api.DbTesterOptions) (api.DriverManager, error) {
 	if options.DatabaseName == "" {
 		options.DatabaseName = DefaultDatabaseName
 	}

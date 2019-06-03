@@ -20,10 +20,12 @@ import (
 )
 
 type Backend struct {
-	Address     string `yaml:"address"`
 	Debug       bool   `yaml:"debug"`
 	Description string `yaml:"description"`
+	Host        string `yaml:"host"`
 	Password    string `yaml:"password"`
+	Port        string `yaml:"port"`
+	SslMode     string `yaml:"sslmode"`
 	Socket      string `yaml:"socket"`
 	Username    string `yaml:"username`
 }
@@ -49,11 +51,6 @@ type Config struct {
 const ZeroDuration = 0 * time.Second
 
 func verifyConfiguration(config *Config) error {
-	if config.Driver != "mysql-5.7" {
-		err := fmt.Errorf("ERROR: Driver not supported: %s", config.Driver)
-		return err
-	}
-
 	if config.Comparison.Type != "sql" {
 		err := fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
 		return err
@@ -207,10 +204,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		options := db.DbTesterOptions{
-			Address:  backendConfig.Address,
+		options := api.DbTesterOptions{
 			Debug:    backendConfig.Debug,
+			Host:     backendConfig.Host,
 			Password: backendConfig.Password,
+			Port:     backendConfig.Port,
+			SslMode:  backendConfig.SslMode,
 			Socket:   backendConfig.Socket,
 			Username: backendConfig.Username,
 		}

@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/testers/api"
 )
 
 type MySqlTester struct {
@@ -16,16 +19,25 @@ type MySqlTester struct {
 
 //[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 
-func NewMysqlTester() (DbTester, error) {
+func NewTester() (api.DbTester, error) {
 	tester := &MySqlTester{}
 
 	return tester, nil
 }
 
-func (tester *MySqlTester) Connect(options DbTesterOptions) error {
-	host := fmt.Sprintf("tcp(%s)", options.Address)
-	if options.Socket != "" {
-		host = fmt.Sprintf("unix(%s)", options.Socket)
+func (tester *MySqlTester) GetQueryMarkers(length int) string {
+	queryMarkers := strings.Split(strings.Repeat("?", length), "")
+	return strings.Join(queryMarkers, ", ")
+}
+
+func (tester *MySqlTester) Connect(options api.DbTesterOptions) error {
+	if options.Port == "" {
+		options.Port = "3306"
+	}
+
+	host := fmt.Sprintf("tcp(%s:%s)", options.Host, options.Port)
+	if strings.HasPrefix(options.Host, "/") {
+		host = fmt.Sprintf("unix(%s)", options.Host)
 	}
 
 	authString := ""

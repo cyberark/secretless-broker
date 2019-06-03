@@ -1,5 +1,7 @@
 ---
-driver: mysql-5.7
+#driver: mysql-5.7
+driver: postgres
+
 
 comparison:
 #  type: sql
@@ -9,21 +11,15 @@ comparison:
 backends:
   secretless:
     description: Secretless DB connection
-    socket: /sock/mysql
-    username: myuser
-    password: mypassword
+    host: /sock
+    port: 5433
     debug: false
 
   direct:
     description: Direct DB connection
-    address: localhost:3307
+    host: localhost
+    port: 5433
     username: myuser
     password: mypassword
-    debug: false
-
-  direct2:
-    description: Direct DB connection2
-    address: localhost:3306
-    username: myuser
-    password: mypassword
+    sslmode: disable
     debug: false

@@ -3,13 +3,17 @@ package json
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"strings"
 	"time"
 
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 )
 
-type JsonFormatter struct{}
+type JsonFormatter struct {
+	Options formatter_api.FormatterOptions
+}
 
 type BackendTimingDataJson struct {
 	AverageDurationNs int64                        `json:"averageDurationNs"`
@@ -26,7 +30,9 @@ type JsonOutput struct {
 }
 
 func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputFormatter, error) {
-	return &JsonFormatter{}, nil
+	return &JsonFormatter{
+		Options: options,
+	}, nil
 }
 
 func (formatter *JsonFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]formatter_api.BackendTiming) error {
@@ -65,7 +71,16 @@ func (formatter *JsonFormatter) ProcessResults(backendNames []string, aggregated
 		return err
 	}
 
-	fmt.Printf("%s\n", timingInfoBytes)
+	outputFilename := formatter.Options["output_file"]
+	if outputFilename == "" {
+		fmt.Printf("%s\n", timingInfoBytes)
+		return nil
+	}
 
-	return nil
+	err = ioutil.WriteFile(outputFilename, timingInfoBytes, 0644)
+	if err == nil {
+		log.Printf("Successfully wrote JSON results to file '%s'.", outputFilename)
+	}
+
+	return err
 }

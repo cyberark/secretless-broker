@@ -15,9 +15,9 @@ func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputF
 }
 
 func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]formatter_api.BackendTiming) error {
-	fmt.Println()
-	fmt.Println("Calculating averages...")
-	fmt.Println()
+	dividerString := strings.Repeat("-", 85)
+	fmt.Printf("%s\n", dividerString)
+
 	fmt.Printf("%-20s|%15s|%8s|%8s|%13s|%15s|\n",
 		"Name",
 		"Avg Duration",
@@ -26,7 +26,6 @@ func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregat
 		"Success(%)",
 		"Total Duration")
 
-	dividerString := strings.Repeat("-", 85)
 	fmt.Printf("%s\n", dividerString)
 
 	for _, backendName := range backendNames {

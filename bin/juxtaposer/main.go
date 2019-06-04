@@ -40,9 +40,10 @@ type Comparison struct {
 }
 
 type Config struct {
-	Backends   map[string]Backend `yaml:"backends"`
-	Comparison Comparison         `yaml:"comparison"`
-	Driver     string             `yaml:"driver"`
+	Backends   map[string]Backend                        `yaml:"backends"`
+	Comparison Comparison                                `yaml:"comparison"`
+	Driver     string                                    `yaml:"driver"`
+	Formatters map[string]formatter_api.FormatterOptions `yaml:"formatters"`
 }
 
 const ZeroDuration = 0 * time.Second
@@ -58,6 +59,11 @@ func verifyConfiguration(config *Config) error {
 		return err
 	}
 
+	if len(config.Formatters) == 0 {
+		err := fmt.Errorf("ERROR: No formatters defined!")
+		return err
+	}
+
 	return nil
 }
 
@@ -67,11 +73,15 @@ func readConfiguration(configFile string) (*Config, error) {
 		return nil, err
 	}
 
+	// Default options
 	config := Config{
 		Comparison: Comparison{
 			Rounds: "1000",
 			Style:  "select",
 			Type:   "sql",
+		},
+		Formatters: map[string]formatter_api.FormatterOptions{
+			"stdout": formatter_api.FormatterOptions{},
 		},
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
@@ -278,15 +288,15 @@ func main() {
 		}
 	}
 
-	// TODO: Make this readable from config
-	enabledFormatters := []string{"stdout", "json"}
+	for formatterName, formatterOptions := range config.Formatters {
+		log.Printf("Processing output formatter '%s'...", formatterName)
 
-	for _, formatterName := range enabledFormatters {
-		dividerString := strings.Repeat("-", 85)
-		fmt.Printf("%s\n", dividerString)
+		formatterType := formatterOptions["type"]
+		if formatterType == "" {
+			formatterType = formatterName
+		}
 
-		formatterOptions := formatter_api.FormatterOptions{}
-		formatter, err := formatter.GetFormatter(formatterName, formatterOptions)
+		formatter, err := formatter.GetFormatter(formatterType, formatterOptions)
 		if err != nil {
 			log.Println(err)
 			os.Exit(1)

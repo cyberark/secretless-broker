@@ -8,6 +8,11 @@ comparison:
 #  rounds: 1000
 #  rounds: infinity
 
+formatters:
+  json:
+    output_file: ./results.json
+  stdout:
+
 backends:
   pg_secretless:
     description: Secretless Postgres connection

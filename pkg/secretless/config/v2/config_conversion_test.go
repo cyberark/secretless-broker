@@ -109,9 +109,7 @@ func TestHttpServiceConversion(t *testing.T) {
 	t.Run("all valid auth strategies accepted", func(t *testing.T) {
 		v2 := v2HttpExample()
 
-		//TODO: This should be available as a public constant somewhere
-		valid := []string{"aws", "basic_auth", "conjur"}
-		for _, strategy := range valid {
+		for _, strategy := range ValidHttpAuthenticationStrategies {
 			config := fmt.Sprintf(`
 {
 	"authenticationStrategy": "%s",
@@ -132,6 +130,24 @@ func TestHttpServiceConversion(t *testing.T) {
 }`)
 		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
+	})
+
+	t.Run("authenticateURLsMatching accepts strings", func(t *testing.T) {
+		v2 := v2HttpExample()
+		v2.Services[0].ProtocolConfig = []byte(`
+{
+	"authenticationStrategy": "aws",
+	"authenticateURLsMatching": "^http://aws*"
+}`)
+		v1, err := NewV1ConfigFromV2Config(v2)
+
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		expectedURLs := []string{"^http://aws*"}
+		assert.ElementsMatch(t, expectedURLs, v1.Handlers[0].Match)
 	})
 }
 

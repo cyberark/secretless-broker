@@ -62,7 +62,7 @@ func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
 		cred.Get = credYamlStruct.Get
 		cred.From = credYamlStruct.From
 
-	// Special Case: scalar id specified
+	// Special Case: scalar literal value specified
 	} else {
 		var credentialValue string
 		err = yaml.Unmarshal(credentialBytes, &credentialValue)

@@ -14,6 +14,7 @@ type DbTesterOptions struct {
 type DbTester interface {
 	Connect(DbTesterOptions) error
 	GetQueryMarkers(length int) string
-	Query(string, ...interface{}) ([]byte, error)
+	Query(string, ...interface{}) error
+	QueryRows(string, string, ...interface{}) ([]string, error)
 	Shutdown() error
 }

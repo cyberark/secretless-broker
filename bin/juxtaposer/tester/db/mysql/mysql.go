@@ -71,7 +71,14 @@ func (tester *MySqlTester) Connect(options api.DbTesterOptions) error {
 	return nil
 }
 
-func (tester *MySqlTester) Query(query string, args ...interface{}) ([]byte, error) {
+func (tester *MySqlTester) Query(query string, args ...interface{}) error {
+	_, err := tester.QueryRows("", query, args...)
+	return err
+}
+
+func (tester *MySqlTester) QueryRows(fieldName string,
+	query string, args ...interface{}) ([]string, error) {
+
 	if tester.Debug {
 		log.Printf("Query: %s", query)
 		log.Print(args...)
@@ -87,7 +94,21 @@ func (tester *MySqlTester) Query(query string, args ...interface{}) ([]byte, err
 		return nil, err
 	}
 	defer rows.Close()
-	return nil, nil
+
+	fieldValues := make([]string, 0)
+	for rows.Next() {
+		var fieldValue string
+		if err := rows.Scan(&fieldValue); err != nil {
+			return nil, err
+		}
+		fieldValues = append(fieldValues, fieldValue)
+	}
+	// Check for errors from iterating over rows.
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return fieldValues, nil
 }
 
 func (tester *MySqlTester) Shutdown() error {

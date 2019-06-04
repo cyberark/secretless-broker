@@ -23,8 +23,13 @@ var DbTesterImplementatons = map[string]func() (api.DbTester, error){
 }
 
 const ZeroDuration = 0 * time.Second
+
 const DefaultDatabaseName = "mydb"
 const DefaultTableName = "mytable"
+
+const SampleDataRowCount = 100
+const NameFieldPrefix = "person #"
+
 const CreateTableStatement = `
     name         TEXT,
     id           INTEGER,
@@ -40,7 +45,7 @@ var QueryTypes = map[string]string{
 		CreateTableStatement),
 	"insertItem": fmt.Sprintf(`INSERT INTO %s (name, id, birth_date, result, passed)
 		VALUES `, DefaultTableName),
-	"select": fmt.Sprintf("SELECT * FROM %s;", DefaultTableName),
+	"select": fmt.Sprintf("SELECT name FROM %s;", DefaultTableName),
 }
 
 func (manager *DriverManager) ensureWantedDbDataState() error {
@@ -51,12 +56,12 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 	}
 	defer manager.Tester.Shutdown()
 
-	_, err = manager.Tester.Query(QueryTypes["dropTable"])
+	err = manager.Tester.Query(QueryTypes["dropTable"])
 	if err != nil {
 		return err
 	}
 
-	_, err = manager.Tester.Query(QueryTypes["createTable"])
+	err = manager.Tester.Query(QueryTypes["createTable"])
 	if err != nil {
 		return err
 	}
@@ -65,12 +70,12 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 		log.Printf("Table created")
 	}
 
-	for itemIndex := 0; itemIndex < 10; itemIndex++ {
+	for itemIndex := 0; itemIndex < SampleDataRowCount; itemIndex++ {
 		insertItemStatement := QueryTypes["insertItem"] +
 			fmt.Sprintf("(%s)", manager.Tester.GetQueryMarkers(5))
 
-		_, err = manager.Tester.Query(insertItemStatement,
-			fmt.Sprintf("person #%d", itemIndex),
+		err = manager.Tester.Query(insertItemStatement,
+			fmt.Sprintf("%s%d", NameFieldPrefix, itemIndex),
 			itemIndex,
 			time.Now().AddDate(0, 0, itemIndex),
 			float32(itemIndex)*10,
@@ -118,12 +123,35 @@ func validateOptions(options api.DbTesterOptions) error {
 	return nil
 }
 
+func ensureCorrectReturnedData(rows []string) error {
+	if len(rows) != SampleDataRowCount {
+		return fmt.Errorf("ERROR: Expected %d returned rows but got %d",
+			SampleDataRowCount,
+			len(rows))
+	}
+
+	for _, row := range rows {
+		if row[:len(NameFieldPrefix)] != NameFieldPrefix {
+			return fmt.Errorf("ERROR: Row '%s' did not have expected prefix '%s'",
+				row,
+				NameFieldPrefix)
+		}
+	}
+
+	return nil
+}
+
 func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
 	startTime := time.Now()
 
-	_, err := manager.Tester.Query(QueryTypes[manager.TestType])
+	rows, err := manager.Tester.QueryRows("name", QueryTypes[manager.TestType])
 	if err != nil {
 		log.Printf("ERROR! Query failed!")
+		return ZeroDuration, err
+	}
+
+	err = ensureCorrectReturnedData(rows)
+	if err != nil {
 		return ZeroDuration, err
 	}
 

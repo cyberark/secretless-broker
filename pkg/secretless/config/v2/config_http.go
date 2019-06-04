@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/go-ozzo/ozzo-validation"
-	"gopkg.in/yaml.v1"
+	"gopkg.in/yaml.v2"
 )
 
 type httpConfig struct {

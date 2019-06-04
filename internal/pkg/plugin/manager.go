@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/pkg/profile"
-	"gopkg.in/yaml.v1"
+	"gopkg.in/yaml.v2"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"

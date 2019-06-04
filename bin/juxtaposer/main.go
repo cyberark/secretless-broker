@@ -34,9 +34,11 @@ type Backend struct {
 }
 
 type Comparison struct {
-	Rounds string `yaml:"rounds"`
-	Style  string `yaml:"style"`
-	Type   string `yaml:"type"`
+	BaselineBackend             string `yaml:"baselineBackend"`
+	BaselineMaxThresholdPercent int    `yaml:"baselineMaxThresholdPercent"`
+	Rounds                      string `yaml:"rounds"`
+	Style                       string `yaml:"style"`
+	Type                        string `yaml:"type"`
 }
 
 type Config struct {
@@ -50,18 +52,25 @@ const ZeroDuration = 0 * time.Second
 
 func verifyConfiguration(config *Config) error {
 	if config.Comparison.Type != "sql" {
-		err := fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
-		return err
+		return fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
 	}
 
 	if config.Comparison.Style != "select" {
-		err := fmt.Errorf("ERROR: Comparison style supported: %s", config.Comparison.Style)
-		return err
+		return fmt.Errorf("ERROR: Comparison style supported: %s", config.Comparison.Style)
 	}
 
 	if len(config.Formatters) == 0 {
-		err := fmt.Errorf("ERROR: No formatters defined!")
-		return err
+		return fmt.Errorf("ERROR: No formatters defined!")
+	}
+
+	baselineBackend := config.Comparison.BaselineBackend
+	if baselineBackend == "" {
+		return fmt.Errorf("ERROR: Comparison baselineBackend must be specified!")
+	}
+
+	if _, ok := config.Backends[baselineBackend]; !ok {
+		return fmt.Errorf("ERROR: Comparison baseline backend '%s' not found!",
+			baselineBackend)
 	}
 
 	return nil
@@ -76,9 +85,10 @@ func readConfiguration(configFile string) (*Config, error) {
 	// Default options
 	config := Config{
 		Comparison: Comparison{
-			Rounds: "1000",
-			Style:  "select",
-			Type:   "sql",
+			BaselineMaxThresholdPercent: 120,
+			Rounds:                      "1000",
+			Style:                       "select",
+			Type:                        "sql",
 		},
 		Formatters: map[string]formatter_api.FormatterOptions{
 			"stdout": formatter_api.FormatterOptions{},
@@ -153,14 +163,12 @@ func main() {
 
 	config, err := readConfiguration(*configFile)
 	if err != nil {
-		log.Printf("ERROR: Could not read config file: %v", err)
-		os.Exit(1)
+		log.Fatalf("ERROR: Could not read config file '%s': %v", *configFile, err)
 	}
 
 	err = verifyConfiguration(config)
 	if err != nil {
-		log.Printf("%v", err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	log.Println("Config loaded!")
@@ -172,6 +180,7 @@ func main() {
 	// each time so we have a separate array that guarantees it
 	backendNames := []string{}
 	backendInstances := map[string]tester_api.DriverManager{}
+	baselineBackendName := config.Comparison.BaselineBackend
 
 	log.Println("Backends:", len(config.Backends))
 	for backendName, backendConfig := range config.Backends {
@@ -180,9 +189,7 @@ func main() {
 		log.Printf("Setting up backend: %s", backendName)
 
 		if config.Comparison.Type != "sql" {
-			err := fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
-			log.Printf("%v", err)
-			os.Exit(1)
+			log.Fatalf("ERROR: Comparison type supported: %s", config.Comparison.Type)
 		}
 
 		options := tester_api.DbTesterOptions{
@@ -209,8 +216,7 @@ func main() {
 		}
 
 		if err != nil {
-			log.Printf("%v", err)
-			os.Exit(1)
+			log.Fatalln(err)
 		}
 
 		backendInstances[backendName] = backendTestManager
@@ -218,6 +224,11 @@ func main() {
 
 	// Sort backendNames for consistent output
 	sort.Strings(backendNames)
+
+	// Place baseline backend first
+	backendBaselineNameIndex := sort.SearchStrings(backendNames, baselineBackendName)
+	backendNames = append(backendNames[:backendBaselineNameIndex], backendNames[backendBaselineNameIndex+1:]...)
+	backendNames = append([]string{baselineBackendName}, backendNames...)
 
 	aggregatedTimings := map[string]formatter_api.BackendTiming{}
 	for _, backendName := range backendNames {
@@ -241,14 +252,13 @@ func main() {
 	if config.Comparison.Rounds != "infinity" {
 		rounds, err = strconv.Atoi(config.Comparison.Rounds)
 		if err != nil {
-			log.Printf("%v", err)
-			os.Exit(1)
+			log.Fatalln(err)
 		}
 	}
 
-	shuttingDown := false
 	round := 0
-	//	for {
+	shuttingDown := false
+
 	for {
 		select {
 		case _ = <-shutdownChannel:
@@ -313,8 +323,7 @@ func main() {
 
 		formatter, err := formatter.GetFormatter(formatterType, formatterOptions)
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			log.Fatalln(err)
 		}
 
 		formatter.ProcessResults(backendNames, aggregatedTimings)

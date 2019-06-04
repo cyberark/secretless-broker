@@ -3,10 +3,12 @@
 driver: postgres
 
 comparison:
+  baselineBackend: pg_direct
 #  type: sql
 #  style: select
 #  rounds: 1000
 #  rounds: infinity
+#  baselineMaxThresholdPercent: 120
 
 formatters:
   json:
@@ -15,11 +17,9 @@ formatters:
 
 backends:
   pg_secretless:
-    description: Secretless Postgres connection
     host: /sock
 
   pg_direct:
-    description: Direct Postgres connection
     host: localhost
     port: 5433
     username: myuser
@@ -28,12 +28,10 @@ backends:
     debug: false
 
   mysql_secretless:
-    description: Secretless Mysql connection
     host: /sock/mysql
     ignore: true
 
   mysql_direct:
-    description: Direct MySql connection
     host: localhost
     port: 3307
     username: myuser

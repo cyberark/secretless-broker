@@ -5,9 +5,11 @@ import (
 )
 
 type BackendTiming struct {
-	Count    int
-	Duration time.Duration
-	Errors   []TestRunError `json:"errors"`
+	Count           int
+	Duration        time.Duration
+	Errors          []TestRunError `json:"errors"`
+	MaximumDuration time.Duration
+	MinimumDuration time.Duration
 }
 
 type OutputFormatter interface {

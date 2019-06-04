@@ -19,6 +19,8 @@ type BackendTimingDataJson struct {
 	AverageDurationNs int64                        `json:"averageDurationNs"`
 	Errors            []formatter_api.TestRunError `json:"errors"`
 	FailedRounds      int                          `json:"failedRounds"`
+	MaximumDurationNs int64                        `json:"maximumDurationNs"`
+	MinimumDurationNs int64                        `json:"minimumDurationNs"`
 	SuccessfulRounds  int                          `json:"successfulRounds"`
 	SuccessPercentage float32                      `json:"successPercentage"`
 	TotalDurationNs   int64                        `json:"totalDurationNs"`
@@ -57,6 +59,8 @@ func (formatter *JsonFormatter) ProcessResults(backendNames []string, aggregated
 			AverageDurationNs: averageDuration.Nanoseconds(),
 			Errors:            timingInfo.Errors,
 			FailedRounds:      failedRounds,
+			MaximumDurationNs: timingInfo.MaximumDuration.Nanoseconds(),
+			MinimumDurationNs: timingInfo.MinimumDuration.Nanoseconds(),
 			SuccessfulRounds:  successfulRounds,
 			SuccessPercentage: successPercentage,
 			TotalDurationNs:   timingInfo.Duration.Nanoseconds(),

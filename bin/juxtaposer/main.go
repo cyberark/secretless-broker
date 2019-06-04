@@ -222,9 +222,11 @@ func main() {
 	aggregatedTimings := map[string]formatter_api.BackendTiming{}
 	for _, backendName := range backendNames {
 		aggregatedTimings[backendName] = formatter_api.BackendTiming{
-			Count:    0,
-			Duration: 0 * time.Second,
-			Errors:   []formatter_api.TestRunError{},
+			Count:           0,
+			Duration:        ZeroDuration,
+			MinimumDuration: ZeroDuration,
+			MaximumDuration: ZeroDuration,
+			Errors:          []formatter_api.TestRunError{},
 		}
 	}
 
@@ -282,7 +284,20 @@ func main() {
 
 			log.Printf("[%.3d/%s], %-20s=>%15v", round, config.Comparison.Rounds,
 				backendName, singleTestRunDuration)
+
 			timingInfo.Duration = timingInfo.Duration + singleTestRunDuration
+
+			if timingInfo.MinimumDuration == ZeroDuration {
+				timingInfo.MinimumDuration = timingInfo.Duration
+			}
+
+			if singleTestRunDuration > timingInfo.MaximumDuration {
+				timingInfo.MaximumDuration = singleTestRunDuration
+			}
+
+			if singleTestRunDuration < timingInfo.MinimumDuration {
+				timingInfo.MinimumDuration = singleTestRunDuration
+			}
 
 			aggregatedTimings[backendName] = timingInfo
 		}

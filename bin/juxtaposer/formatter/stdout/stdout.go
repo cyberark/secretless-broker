@@ -18,8 +18,10 @@ func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregat
 	dividerString := strings.Repeat("-", 85)
 	fmt.Printf("%s\n", dividerString)
 
-	fmt.Printf("%-20s|%15s|%8s|%8s|%13s|%15s|\n",
+	fmt.Printf("%-20s|%15s|%15s|%15s|%8s|%8s|%13s|%15s|\n",
 		"Name",
+		"Min Duration",
+		"Max Duration",
 		"Avg Duration",
 		"Runs",
 		"Errors",
@@ -39,8 +41,10 @@ func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregat
 				int64(successfulRuns))
 		}
 
-		fmt.Printf("%-20s %15v %8d %8d %13.0f %15v \n",
+		fmt.Printf("%-20s %15v %15v %15v %8d %8d %13.0f %15v \n",
 			backendName,
+			timingInfo.MinimumDuration,
+			timingInfo.MaximumDuration,
 			averageDuration,
 			timingInfo.Count,
 			len(timingInfo.Errors),

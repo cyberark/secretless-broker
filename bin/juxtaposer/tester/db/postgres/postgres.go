@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/cyberark/secretless-broker/bin/juxtaposer/testers/api"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
 )
 
 type PostgresTester struct {

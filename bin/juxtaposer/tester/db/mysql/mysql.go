@@ -9,7 +9,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/cyberark/secretless-broker/bin/juxtaposer/testers/api"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
 )
 
 type MySqlTester struct {

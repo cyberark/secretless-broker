@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/cyberark/secretless-broker/bin/juxtaposer/testers/api"
-	mysql "github.com/cyberark/secretless-broker/bin/juxtaposer/testers/db/mysql"
-	postgres "github.com/cyberark/secretless-broker/bin/juxtaposer/testers/db/postgres"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
+	mysql "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/mysql"
+	postgres "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/postgres"
 )
 
 type DriverManager struct {

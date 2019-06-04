@@ -15,8 +15,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/cyberark/secretless-broker/bin/juxtaposer/testers/api"
-	"github.com/cyberark/secretless-broker/bin/juxtaposer/testers/db"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter"
+	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
+	tester_api "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db"
 )
 
 type Backend struct {
@@ -29,12 +31,6 @@ type Backend struct {
 	SslMode     string `yaml:"sslmode"`
 	Socket      string `yaml:"socket"`
 	Username    string `yaml:"username`
-}
-
-type BackendTiming struct {
-	Count    int
-	Duration time.Duration
-	Errors   []error
 }
 
 type Comparison struct {
@@ -114,43 +110,7 @@ func registerShutdownSignalHandlers(shutdownChannel chan<- bool) {
 	}()
 }
 
-func printResults(backendNames []string, aggregatedTimings map[string]BackendTiming) {
-	fmt.Println()
-	fmt.Println("Calculating averages...")
-	fmt.Println()
-	fmt.Printf("%-20s|%15s|%8s|%8s|%13s|%15s|\n",
-		"Name",
-		"Avg Duration",
-		"Runs",
-		"Errors",
-		"Success(%)",
-		"Total Duration")
-
-	dividerString := strings.Repeat("-", 85)
-	fmt.Printf("%s\n", dividerString)
-
-	for _, backendName := range backendNames {
-		timingInfo := aggregatedTimings[backendName]
-
-		successfulRuns := timingInfo.Count - len(timingInfo.Errors)
-
-		averageDuration := ZeroDuration
-		if successfulRuns > 0 {
-			averageDuration = time.Duration(int64(timingInfo.Duration) /
-				int64(successfulRuns))
-		}
-
-		fmt.Printf("%-20s %15v %8d %8d %13.0f %15v \n",
-			backendName,
-			averageDuration,
-			timingInfo.Count,
-			len(timingInfo.Errors),
-			(float32(successfulRuns)/float32(timingInfo.Count))*100,
-			timingInfo.Duration)
-	}
-}
-
-func performInvocation(backendName string, backendTestManager api.DriverManager,
+func performInvocation(backendName string, backendTestManager tester_api.DriverManager,
 	backendConfig Backend) (time.Duration, error) {
 
 	if backendConfig.Debug {
@@ -201,7 +161,7 @@ func main() {
 	// Keys in a map are not guaranteed to be retrieved in the same order
 	// each time so we have a separate array that guarantees it
 	backendNames := []string{}
-	backendInstances := map[string]api.DriverManager{}
+	backendInstances := map[string]tester_api.DriverManager{}
 
 	log.Println("Backends:", len(config.Backends))
 	for backendName, backendConfig := range config.Backends {
@@ -215,7 +175,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		options := api.DbTesterOptions{
+		options := tester_api.DbTesterOptions{
 			Debug:    backendConfig.Debug,
 			Host:     backendConfig.Host,
 			Password: backendConfig.Password,
@@ -249,12 +209,12 @@ func main() {
 	// Sort backendNames for consistent output
 	sort.Strings(backendNames)
 
-	aggregatedTimings := map[string]BackendTiming{}
+	aggregatedTimings := map[string]formatter_api.BackendTiming{}
 	for _, backendName := range backendNames {
-		aggregatedTimings[backendName] = BackendTiming{
+		aggregatedTimings[backendName] = formatter_api.BackendTiming{
 			Count:    0,
 			Duration: 0 * time.Second,
-			Errors:   []error{},
+			Errors:   []formatter_api.TestRunError{},
 		}
 	}
 
@@ -301,7 +261,11 @@ func main() {
 			timingInfo.Count = timingInfo.Count + 1
 			if err != nil {
 				log.Printf("[%.3d/%s] %-20s=> %v", round, config.Comparison.Rounds, backendName, err)
-				timingInfo.Errors = append(timingInfo.Errors, err)
+				timingInfo.Errors = append(timingInfo.Errors,
+					formatter_api.TestRunError{
+						Error: err,
+						Round: round,
+					})
 				aggregatedTimings[backendName] = timingInfo
 				continue
 			}
@@ -314,5 +278,20 @@ func main() {
 		}
 	}
 
-	printResults(backendNames, aggregatedTimings)
+	// TODO: Make this readable from config
+	enabledFormatters := []string{"stdout", "json"}
+
+	for _, formatterName := range enabledFormatters {
+		dividerString := strings.Repeat("-", 85)
+		fmt.Printf("%s\n", dividerString)
+
+		formatterOptions := formatter_api.FormatterOptions{}
+		formatter, err := formatter.GetFormatter(formatterName, formatterOptions)
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+
+		formatter.ProcessResults(backendNames, aggregatedTimings)
+	}
 }

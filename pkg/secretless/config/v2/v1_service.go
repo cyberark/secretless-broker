@@ -12,13 +12,14 @@ step of the configuration process -- one specific to each protocol -- and to
 prepare for this future refactoring.
 
 */
-package config_v2
+package v2
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"sort"
 	"strings"
+
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 type v1Service struct {

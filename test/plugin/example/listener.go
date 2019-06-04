@@ -2,7 +2,6 @@ package example
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"log"
 	"net"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 

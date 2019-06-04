@@ -1,7 +1,8 @@
-package config_v2
+package v2
 
 import (
 	"errors"
+
 	"github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v1"
 )

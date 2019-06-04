@@ -5,10 +5,11 @@ import (
 	"io/ioutil"
 	"regexp"
 
-	crdAPIv1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v2"
 	yaml "gopkg.in/yaml.v2"
+
+	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // LoadFromFile loads a configuration file into a Config object.
@@ -22,7 +23,7 @@ func LoadFromFile(fileName string) (config config_v1.Config, err error) {
 }
 
 // LoadFromCRD loads a configuration from a CRD API Configuration object
-func LoadFromCRD(crdConfig crdAPIv1.Configuration) (config config_v1.Config, err error) {
+func LoadFromCRD(crdConfig crd_api_v1.Configuration) (config config_v1.Config, err error) {
 	var specData []byte
 	if specData, err = yaml.Marshal(crdConfig.Spec); err != nil {
 		return

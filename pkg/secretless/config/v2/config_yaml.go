@@ -1,7 +1,8 @@
-package config_v2
+package v2
 
 import (
 	"fmt"
+
 	"gopkg.in/yaml.v2"
 )
 

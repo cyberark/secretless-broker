@@ -1,11 +1,13 @@
-package config_v2
+package v2
 
 //TODO: should we throw custom errors?
 import (
 	"fmt"
-	v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 func v2DbExample() *Config {
@@ -198,7 +200,7 @@ func TestCredentialsConversion(t *testing.T) {
 			return
 		}
 
-		assert.Equal(t, []v1.StoredSecret{
+		assert.Equal(t, []config_v1.StoredSecret{
 			{
 				Name:     "TestSecret1",
 				Provider: "conjur",

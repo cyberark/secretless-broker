@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // ConfigurationChangedHandler interface specifies what method is required to support

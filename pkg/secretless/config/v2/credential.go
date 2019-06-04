@@ -1,8 +1,9 @@
-package config_v2
+package v2
 
 import (
-	"gopkg.in/yaml.v2"
 	"sort"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Credential the v2.Config representation of a named secret stored in a

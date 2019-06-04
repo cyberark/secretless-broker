@@ -10,13 +10,14 @@ struct StoredSecret{
 import "C"
 import (
 	"fmt"
+	"reflect"
+	"unsafe"
+
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
-	"reflect"
-	"unsafe"
 )
 
 func ZeroizeByteSlice(bs []byte) {

@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	crdAPIv1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
-
 	. "github.com/smartystreets/goconvey/convey"
+
+	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 )
 
 func Test_Config(t *testing.T) {
@@ -179,10 +179,10 @@ handlers:
 		So(err, ShouldBeNil)
 
 		// Create an API object that would be similar to one used to trigger a config reload
-		crdConfig := crdAPIv1.Configuration{
-			Spec: crdAPIv1.ConfigurationSpec{
-				Handlers: []crdAPIv1.Handler{
-					crdAPIv1.Handler{
+		crdConfig := crd_api_v1.Configuration{
+			Spec: crd_api_v1.ConfigurationSpec{
+				Handlers: []crd_api_v1.Handler{
+					crd_api_v1.Handler{
 						Name:         "http_default_handler",
 						ListenerName: "http_default",
 						Match: []string{
@@ -190,8 +190,8 @@ handlers:
 						},
 					},
 				},
-				Listeners: []crdAPIv1.Listener{
-					crdAPIv1.Listener{
+				Listeners: []crd_api_v1.Listener{
+					crd_api_v1.Listener{
 						Name:     "http_default",
 						Protocol: "tcp",
 						Address:  "0.0.0.0:1080",

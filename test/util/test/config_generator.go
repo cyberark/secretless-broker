@@ -2,7 +2,8 @@ package test
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
+
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // TODO: standardise on DB_PORT, DB_USER, DB_PASSWORD for flexibility

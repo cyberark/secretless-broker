@@ -8,7 +8,7 @@
 package test
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // NOTE: "Socket Type" is indeed the correct name here:

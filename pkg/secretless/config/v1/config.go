@@ -1,4 +1,4 @@
-package config_v1
+package v1
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -59,8 +58,8 @@ type Config struct {
 
 // HasCredential indicates whether a Handler has the specified credential.
 func (h Handler) HasCredential(credentialName string) bool {
-	for _, c := range h.Credentials {
-		if c.Name == credentialName {
+	for _, credential := range h.Credentials {
+		if credential.Name == credentialName {
 			return true
 		}
 	}

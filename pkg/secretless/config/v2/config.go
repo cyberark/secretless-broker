@@ -1,12 +1,14 @@
 // v2 is package for parsing version 2 "secretless.yml" files and converting
 // them into "v1.Config" objects.  Users of this package will typically only be
 // concerned with calling "NewV1Config" to parse
-package config_v2
+package v2
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
-	"gopkg.in/yaml.v2"
 	"sort"
+
+	"gopkg.in/yaml.v2"
+
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // Config represents a full configuration of Secretless, which is just a list of

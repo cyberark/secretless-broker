@@ -1,8 +1,9 @@
-package config_v2
+package v2
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const sampleConfigStr = `

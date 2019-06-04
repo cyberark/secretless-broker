@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"log"
 	"net"
 	"net/http"
@@ -9,6 +8,8 @@ import (
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
+
+	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
 // HandlerShutdownNotifier is a function signature for notifying of a Handler's Shutdown

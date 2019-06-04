@@ -53,7 +53,7 @@ func (p *Proxy) Listen(listenerConfig config_v1.Listener) plugin_v1.Listener {
 	options := plugin_v1.ListenerOptions{
 		EventNotifier:  p.EventNotifier,
 		ListenerConfig: listenerConfig,
-		HandlerConfigs: listenerConfig.SelectHandlers(p.Config.Handlers),
+		HandlerConfigs: listenerConfig.LinkedHandlers(p.Config.Handlers),
 		NetListener:    netListener,
 		Resolver:       p.Resolver,
 		RunHandlerFunc: p.RunHandlerFunc,

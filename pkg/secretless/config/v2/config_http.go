@@ -38,32 +38,25 @@ func newHTTPConfig(cfgBytes []byte) (*httpConfig, error) {
 func (cfg *httpConfig) UnmarshalYAML(bytes []byte) error {
 	err := yaml.Unmarshal(bytes, cfg)
 
-	// string is converted into [] by default, so we must verify length
-	ok := err == nil && len(cfg.AuthenticateURLsMatching) > 0
-
-	// it worked, just return
-	if ok {
+	// A string type is converted into [] by default, so we must verify length.
+	// If this passes, all is good and we can return.
+	if ok := err == nil && len(cfg.AuthenticateURLsMatching) > 0; ok {
 		return nil
 	}
 
-	// it failed, let's check if authenticateURLsMatching is a string
-
-	// unmarshall into a temp struct that expects a string
+	// Unmarshall into a temp struct that expects a string
 	tempCfg := &struct {
 		AuthenticationStrategy   string `yaml:"authenticationStrategy"`
 		AuthenticateURLsMatching string `yaml:"authenticateURLsMatching"`
 	}{}
 	err = yaml.Unmarshal(bytes, tempCfg)
 
-	// it must succeed with a non-empty string
-	ok = err == nil && len(tempCfg.AuthenticateURLsMatching) > 0
-
-	// still failed, this is a real error and not a valid string pattern
-	if !ok {
+	// It must succeed with a non-empty string
+	if ok := err == nil && len(tempCfg.AuthenticateURLsMatching) > 0; !ok {
 		return errors.New("http ProtocolConfig could not be parsed")
 	}
 
-	// it's a string, let's convert it to a []string
+	// It's a string, let's convert it to a []string
 	cfg.AuthenticationStrategy = tempCfg.AuthenticationStrategy
 	cfg.AuthenticateURLsMatching = []string{ tempCfg.AuthenticateURLsMatching }
 

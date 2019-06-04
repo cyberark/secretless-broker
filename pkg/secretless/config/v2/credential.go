@@ -27,7 +27,7 @@ func NewCredentials(credsYAML credentialsYAML) ([]*Credential, error) {
 		credentials = append(credentials, cred)
 	}
 
-	// sort credentials
+	// Sort credentials
 	sort.Slice(credentials, func(i, j int) bool {
 		return credentials[i].Name < credentials[j].Name
 	})
@@ -35,8 +35,9 @@ func NewCredentials(credsYAML credentialsYAML) ([]*Credential, error) {
 	return credentials, nil
 }
 
+// NewCredential creates a Credential from a credential name and raw yaml
+// that's been unmarshalled into an interface{}.
 func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
-
 	cred := &Credential{
 		Name: credName,
 	}

@@ -8,9 +8,11 @@ while getopts :l opt; do
     esac
 done
 
-docker_args=""
+docker_volume_flag=""
+docker_volume_val=""
 if $local_test; then
-  docker_args="-v $(cd ../..; pwd):/secretless"
+  docker_volume_flag="--volume"
+  docker_volume_val="$(cd ../..; pwd):/secretless"
 fi
 
 assert_contains() {
@@ -18,8 +20,8 @@ assert_contains() {
   local string="${1}"
   local substring="${2}"
 
-  if [[ "${string}" =~ "${substring}" ]]; then
-      echo .
+  if [[ "${string}" =~ ${substring} ]]; then
+      echo "."
       return
   fi
 
@@ -32,16 +34,17 @@ assert_contains() {
 }
 
 echo "Waiting for Secretless to start"
-docker-compose run --rm --no-deps test sh -c '
+# single quotes are intentional
+# shellcheck disable=SC2016
+docker-compose run --rm --no-deps test sh -ec '
 counter=0
-while ! wget -q -O- http://secretless:5335/ready > /dev/null 2>&1;
-  do
-    if [[ ${counter} == 5 ]]; then
+while ! wget -q -O- http://secretless:5335/ready > /dev/null 2>&1; do
+    if (( counter == 5 )); then
       echo ""
       echo "Timed out waiting for Secretless"
       exit 1
     fi
-    counter=$(( $counter + 1 ))
+    counter=$(( counter + 1 ))
     >&2 printf ". "
     sleep 1
 done
@@ -55,7 +58,7 @@ echo "test: http_good_basic_auth"
 test_1=$(docker-compose run \
   --rm \
   --no-deps \
-  $docker_args \
+  "$docker_volume_flag"  "$docker_volume_val" \
   test env http_proxy=http://secretless:8080 wget -q -O- nginx:8080/ 2>&1 || true)
 assert_contains "${test_1}" "secured resource"
 
@@ -63,6 +66,6 @@ echo "test: http_bad_basic_auth"
 test_2=$(docker-compose run \
   --rm \
   --no-deps \
-  $docker_args \
+  "$docker_volume_flag"  "$docker_volume_val" \
   test env http_proxy=http://secretless:8081 wget -q -O- nginx:8080/ 2>&1 || true)
 assert_contains "${test_2}" "wget: server returned error: HTTP/1.1 401 Unauthorized"

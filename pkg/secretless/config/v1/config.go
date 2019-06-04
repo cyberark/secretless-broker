@@ -83,9 +83,8 @@ func (h Handler) Validate() (err error) {
 	return
 }
 
-// SelectHandlers selects the Handlers that are configured
-// to use this Listener.
-func (l Listener) SelectHandlers(handlers []Handler) []Handler {
+// LinkedHandlers returns all Handlers using this Listener.
+func (l Listener) LinkedHandlers(handlers []Handler) []Handler {
 	var result []Handler
 	for _, h := range handlers {
 		if h.ListenerName == l.Name {

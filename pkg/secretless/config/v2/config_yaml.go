@@ -34,4 +34,3 @@ func newConfigYAML(rawYAML []byte) (*configYAML, error) {
 
 	return cfgYAML, nil
 }
-

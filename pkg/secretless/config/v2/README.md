@@ -1,4 +1,4 @@
-##Overview
+## Overview
 
 These are notes on implementation details relevant only to developers.
 
@@ -6,7 +6,7 @@ These are notes on implementation details relevant only to developers.
 converting them into `v1.Config` objects.   This approach let us overhaul the
 user config experience, without updating the guts of Secretless.
 
-##Design Details
+## Design Details
 
 The conversion occurs in 3 distinct steps, starting with the `yml` file input:
 
@@ -35,7 +35,7 @@ of `Credential` which includes a field for the credential's name.
 and the protocol specific transformations defined in
 `v2.Service.ProtocolConfig`.
 
-##Motivation for Design
+## Motivation for Design
 
 `v1` used a messier approach for parsing, where fields whose only purpose was to
 act as temporary receptacles for unmarshalled yaml leaked into the objects used
@@ -50,7 +50,7 @@ the parsing stage, but it has leaked into application code.
 The approach we take in the `v2` parsing avoids the problem.  It also adds
 clarity, since each stage has a specific, well-defined responsiblity.
 
-##Additional Notes
+## Additional Notes
 
 In both the `v1` and `v2` cases, a Secretless configuration is, fundamentally,
 just a list of proxy service definitions.  In `v2`, this is explicit, as you

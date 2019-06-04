@@ -10,7 +10,7 @@ comparison:
 
 formatters:
   json:
-    output_file: ./results.json
+    outputFile: ./results.json
   stdout:
 
 backends:

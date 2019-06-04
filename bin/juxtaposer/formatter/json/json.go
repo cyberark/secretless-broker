@@ -75,7 +75,7 @@ func (formatter *JsonFormatter) ProcessResults(backendNames []string, aggregated
 		return err
 	}
 
-	outputFilename := formatter.Options["output_file"]
+	outputFilename := formatter.Options["outputFile"]
 	if outputFilename == "" {
 		fmt.Printf("%s\n", timingInfoBytes)
 		return nil

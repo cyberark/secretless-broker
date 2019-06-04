@@ -1,10 +1,10 @@
 // v2 is package for parsing version 2 "secretless.yml" files and converting
 // them into "v1.Config" objects.  Users of this package will typically only be
 // concerned with calling "NewV1Config" to parse
-package v2
+package config_v2
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"gopkg.in/yaml.v2"
 	"sort"
 )
@@ -30,7 +30,7 @@ type Service struct {
 // NewV1Config is converts the bytes of a v2 YAML file to a v1.Config.  As such,
 // it's the primary public interface of the v2 package.
 // TODO: Possible move to v1.config?
-func NewV1Config(v2YAML []byte) (*v1.Config, error) {
+func NewV1Config(v2YAML []byte) (*config_v1.Config, error) {
 	v2cfg, err := NewConfig(v2YAML)
 	if err != nil {
 		return nil, err
@@ -45,10 +45,10 @@ func NewV1Config(v2YAML []byte) (*v1.Config, error) {
 }
 
 // NewV1ConfigFromV2Config converts a v2.Config to a v1.Config
-func NewV1ConfigFromV2Config(v2cfg *Config) (*v1.Config, error) {
-	v1Config := &v1.Config{
-		Listeners: make([]v1.Listener, 0),
-		Handlers:  make([]v1.Handler, 0),
+func NewV1ConfigFromV2Config(v2cfg *Config) (*config_v1.Config, error) {
+	v1Config := &config_v1.Config{
+		Listeners: make([]config_v1.Listener, 0),
+		Handlers:  make([]config_v1.Handler, 0),
 	}
 
 	for _, svc := range v2cfg.Services {

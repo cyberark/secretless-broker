@@ -2,12 +2,12 @@ package test
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 )
 
 // TODO: standardise on DB_PORT, DB_USER, DB_PASSWORD for flexibility
-func sharedCredentials() []v1.StoredSecret {
-	return []v1.StoredSecret{
+func sharedCredentials() []config_v1.StoredSecret {
+	return []config_v1.StoredSecret{
 		{
 			Name:     "username",
 			Provider: "literal",
@@ -23,10 +23,10 @@ func sharedCredentials() []v1.StoredSecret {
 
 
 // TODO: consider parametrising ConnectPort generator
-func GenerateConfigurations() (v1.Config, LiveConfigurations) {
+func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 	// initialised with health-check listener and handler
-	secretlessConfig := v1.Config{
-		Listeners: []v1.Listener{
+	secretlessConfig := config_v1.Config{
+		Listeners: []config_v1.Listener{
 			{
 				Debug:       true,
 				Name:        "health-check",
@@ -40,12 +40,12 @@ func GenerateConfigurations() (v1.Config, LiveConfigurations) {
 				Address:     "0.0.0.0:5432",
 			},
 		},
-		Handlers:  []v1.Handler{
+		Handlers:  []config_v1.Handler{
 			{
 				Name:         "health-check",
 				ListenerName: "health-check",
 				Debug:        true,
-				Credentials:  []v1.StoredSecret{
+				Credentials:  []config_v1.StoredSecret{
 					{
 						Name:     "host",
 						Provider: "literal",
@@ -72,7 +72,7 @@ func GenerateConfigurations() (v1.Config, LiveConfigurations) {
 				Name:         "pg-bench",
 				ListenerName: "pg-bench",
 				Debug:        true,
-				Credentials:  []v1.StoredSecret{
+				Credentials:  []config_v1.StoredSecret{
 					{
 						Name:     "address",
 						Provider: "literal",
@@ -115,13 +115,13 @@ func GenerateConfigurations() (v1.Config, LiveConfigurations) {
 								Port:       portNumber,
 							}
 
-							listener := v1.Listener{
+							listener := config_v1.Listener{
 								Name: "listener_" + connectionPort.ToPortString(),
 								// TODO: grab value from envvar for flexibility
 								Protocol: TestDbConfig.Protocol,
 								Debug:    true,
 							}
-							handler := v1.Handler{
+							handler := config_v1.Handler{
 								Name:         "handler_" + connectionPort.ToPortString(),
 								Debug:        true,
 								ListenerName: "listener_" + connectionPort.ToPortString(),

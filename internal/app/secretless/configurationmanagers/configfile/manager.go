@@ -3,7 +3,7 @@ package configfile
 import (
 	"fmt"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"log"
 	"net/url"
 	"os"
@@ -25,7 +25,7 @@ const (
 )
 
 type configurationManager struct {
-	ConfigChangedFunc func(string, v1.Config) error
+	ConfigChangedFunc func(string, config_v1.Config) error
 	Name              string
 }
 
@@ -82,7 +82,7 @@ func (configManager *configurationManager) registerConfigFileWatcher(configFile 
 	AttachWatcher(configFile, onChangeRunner)
 }
 
-func (configManager *configurationManager) onGoodConfigLoad(configuration v1.Config,
+func (configManager *configurationManager) onGoodConfigLoad(configuration config_v1.Config,
 	changeHandler plugin_v1.ConfigurationChangedHandler, configFilePath string, watchFile bool) error {
 
 	go func() {

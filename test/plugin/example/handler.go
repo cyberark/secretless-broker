@@ -3,7 +3,7 @@ package example
 import (
 	"bytes"
 	"errors"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"log"
 	"net"
 	"net/http"
@@ -31,7 +31,7 @@ type Handler struct {
 	BackendConnection net.Conn
 	ClientConnection  net.Conn
 	EventNotifier     plugin_v1.EventNotifier
-	HandlerConfig     v1.Handler
+	HandlerConfig     config_v1.Handler
 	Resolver          plugin_v1.Resolver
 	ShutdownNotifier  plugin_v1.HandlerShutdownNotifier
 }
@@ -150,7 +150,7 @@ func (h *Handler) Authenticate(map[string][]byte, *http.Request) error {
 }
 
 // GetConfig implements plugin_v1.Handler
-func (h *Handler) GetConfig() v1.Handler {
+func (h *Handler) GetConfig() config_v1.Handler {
 	return h.HandlerConfig
 }
 

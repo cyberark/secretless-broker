@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"io/ioutil"
 	"log"
 	"net"
@@ -82,12 +82,12 @@ func (manager *Manager) SetFlags(profileFlag string, debugFlag bool) {
 }
 
 // ConfigurationChanged is an interface adapter for plugin_v1.ConfigurationChangedHandler
-func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig v1.Config) error {
+func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig config_v1.Config) error {
 	log.Printf("Configuration manager '%s' provided new configuration...",
 		configManagerName)
 	return manager._ReloadConfig(newConfig)
 }
-func (manager *Manager) _ReloadConfig(newConfig v1.Config) error {
+func (manager *Manager) _ReloadConfig(newConfig config_v1.Config) error {
 	log.Println("Reloading...")
 	manager.configReloadMutex.Lock()
 
@@ -161,7 +161,7 @@ func (manager *Manager) RegisterSignalHandlers() {
 }
 
 // LoadConfigurationFile creates a configuration instance from a filesystem path
-func (manager *Manager) LoadConfigurationFile(configFile string) v1.Config {
+func (manager *Manager) LoadConfigurationFile(configFile string) config_v1.Config {
 	configuration, err := config.LoadFromFile(configFile)
 
 	if err != nil {
@@ -332,7 +332,7 @@ func (manager *Manager) Run(configManagerID string, configManagerSpec string) er
 		manager.InitializeConfigurationManager(configManagerID, configManagerSpec)
 	}
 
-	configuration := v1.Config{}
+	configuration := config_v1.Config{}
 	manager.InitializeConnectionManagers(configuration)
 
 	log.Println("Initialization of plugins done.")
@@ -515,7 +515,7 @@ func (manager *Manager) InitializeConfigurationManager(id string, configSpec str
 }
 
 // InitializeConnectionManagers loops through the connection managers and initializes them
-func (manager *Manager) InitializeConnectionManagers(c v1.Config) error {
+func (manager *Manager) InitializeConnectionManagers(c config_v1.Config) error {
 	log.Println("Initializing connection managers...")
 	for managerID, connManagerPlugin := range manager.ConnectionManagers {
 		err := connManagerPlugin.Initialize(c, manager._ReloadConfig)

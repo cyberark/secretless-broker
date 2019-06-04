@@ -6,13 +6,13 @@ import (
 	"regexp"
 
 	crdAPIv1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
-	v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
-	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v2"
 	yaml "gopkg.in/yaml.v2"
 )
 
 // LoadFromFile loads a configuration file into a Config object.
-func LoadFromFile(fileName string) (config v1.Config, err error) {
+func LoadFromFile(fileName string) (config config_v1.Config, err error) {
 	var buffer []byte
 	if buffer, err = ioutil.ReadFile(fileName); err != nil {
 		err = fmt.Errorf("error reading config file '%s': '%s'", fileName, err)
@@ -22,7 +22,7 @@ func LoadFromFile(fileName string) (config v1.Config, err error) {
 }
 
 // LoadFromCRD loads a configuration from a CRD API Configuration object
-func LoadFromCRD(crdConfig crdAPIv1.Configuration) (config v1.Config, err error) {
+func LoadFromCRD(crdConfig crdAPIv1.Configuration) (config config_v1.Config, err error) {
 	var specData []byte
 	if specData, err = yaml.Marshal(crdConfig.Spec); err != nil {
 		return
@@ -36,7 +36,7 @@ func LoadFromCRD(crdConfig crdAPIv1.Configuration) (config v1.Config, err error)
 }
 
 // Load parses a YAML string into a Config object.
-func Load(data []byte) (config v1.Config, err error) {
+func Load(data []byte) (config config_v1.Config, err error) {
 	versionStruct := &struct {
 		Version string `yaml:"version"`
 	}{}
@@ -46,18 +46,18 @@ func Load(data []byte) (config v1.Config, err error) {
 		return
 	}
 
-	var configPointer *v1.Config
+	var configPointer *config_v1.Config
 	if versionStruct.Version == "" {
 		versionStruct.Version = "1"
 	}
 
 	switch versionStruct.Version {
 	case "1":
-		if configPointer, err = v1.NewConfig(data); err != nil {
+		if configPointer, err = config_v1.NewConfig(data); err != nil {
 			err = fmt.Errorf("unable to load configuration when parsing version 1: '%s'", err)
 		}
 	case "2":
-		if configPointer, err = v2.NewV1Config(data); err != nil {
+		if configPointer, err = config_v2.NewV1Config(data); err != nil {
 			err = fmt.Errorf("unable to load configuration when parsing version 2: '%s'", err)
 		}
 	default:

@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"io"
 	"io/ioutil"
 	"log"
@@ -29,7 +29,7 @@ type handlerHasCredentials struct {
 
 // Validate checks that a handler has all necessary credentials.
 func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]v1.Handler)
+	hs := value.([]config_v1.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
 		if h.Type == "aws" {

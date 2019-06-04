@@ -1,4 +1,4 @@
-package v2
+package config_v2
 
 import (
 	"github.com/stretchr/testify/assert"

@@ -1,7 +1,7 @@
 package example
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"log"
 	"net"
 	"strconv"
@@ -14,7 +14,7 @@ type connectionManager struct {
 }
 
 // Initialize is called before proxy initialization
-func (manager *connectionManager) Initialize(c v1.Config, configChangedFunc func(v1.Config) error) error {
+func (manager *connectionManager) Initialize(c config_v1.Config, configChangedFunc func(config_v1.Config) error) error {
 	log.Println("Initialized manager event...")
 	return nil
 }

@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"log"
 	"net"
 	"net/http"
@@ -16,7 +16,7 @@ type HandlerShutdownNotifier func(Handler)
 
 // HandlerOptions contains the configuration for the handler
 type HandlerOptions struct {
-	HandlerConfig    v1.Handler
+	HandlerConfig    config_v1.Handler
 	Channels         <-chan ssh.NewChannel
 	ClientConnection net.Conn
 	EventNotifier    EventNotifier
@@ -29,7 +29,7 @@ type HandlerOptions struct {
 // TODO: Remove LoadKeys as it's only used by sshagent listener
 type Handler interface {
 	Authenticate(map[string][]byte, *http.Request) error
-	GetConfig() v1.Handler
+	GetConfig() config_v1.Handler
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn
 	LoadKeys(keyring agent.Agent) error
@@ -50,7 +50,7 @@ type BaseHandler struct {
 	BackendConnection net.Conn
 	ClientConnection  net.Conn
 	EventNotifier     EventNotifier
-	HandlerConfig     v1.Handler
+	HandlerConfig     config_v1.Handler
 	Resolver          Resolver
 	ShutdownNotifier  HandlerShutdownNotifier
 }
@@ -72,7 +72,7 @@ func (h *BaseHandler) Authenticate(map[string][]byte, *http.Request) error {
 }
 
 // GetConfig implements plugin_v1.Handler
-func (h *BaseHandler) GetConfig() v1.Handler {
+func (h *BaseHandler) GetConfig() config_v1.Handler {
 	return h.HandlerConfig
 }
 

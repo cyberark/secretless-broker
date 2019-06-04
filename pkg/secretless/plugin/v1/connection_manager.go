@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"net"
 )
 
@@ -9,7 +9,7 @@ import (
 // manage connections for handlers and listeners.
 type ConnectionManager interface {
 	// Initialize is called before proxy initialization
-	Initialize(v1.Config, func(v1.Config) error) error
+	Initialize(config_v1.Config, func(config_v1.Config) error) error
 
 	// CreateListener is called for every listener created by Proxy
 	CreateListener(Listener)

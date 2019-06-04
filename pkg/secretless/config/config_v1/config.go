@@ -1,4 +1,4 @@
-package v1
+package config_v1
 
 import (
 	"fmt"

@@ -1,9 +1,9 @@
-package v2
+package config_v2
 
 //TODO: should we throw custom errors?
 import (
 	"fmt"
-	v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

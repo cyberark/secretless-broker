@@ -2,7 +2,7 @@ package example
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"log"
 	"net"
 	"strconv"
@@ -15,9 +15,9 @@ import (
 
 // Listener listens for and handles new connections.
 type Listener struct {
-	Config         v1.Listener
+	Config         config_v1.Listener
 	EventNotifier  plugin_v1.EventNotifier
-	HandlerConfigs []v1.Handler
+	HandlerConfigs []config_v1.Handler
 	NetListener    net.Listener
 	Resolver       plugin_v1.Resolver
 	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions)  plugin_v1.Handler
@@ -29,7 +29,7 @@ type handlerHasCredentials struct {
 
 // Validate checks that a handler has all necessary credentials.
 func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]v1.Handler)
+	hs := value.([]config_v1.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
 		if !h.HasCredential("host") {
@@ -82,7 +82,7 @@ func (l *Listener) GetName() string {
 }
 
 // GetConfig implements plugin_v1.Listener
-func (l *Listener) GetConfig() v1.Listener {
+func (l *Listener) GetConfig() config_v1.Listener {
 	return l.Config
 }
 

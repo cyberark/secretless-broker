@@ -12,18 +12,18 @@ step of the configuration process -- one specific to each protocol -- and to
 prepare for this future refactoring.
 
 */
-package v2
+package config_v2
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/config_v1"
 	"sort"
 	"strings"
 )
 
 type v1Service struct {
-	Listener *v1.Listener
-	Handler *v1.Handler
+	Listener *config_v1.Listener
+	Handler *config_v1.Handler
 }
 
 func newV1Service(v2Svc Service) (ret *v1Service, err error) {
@@ -31,11 +31,11 @@ func newV1Service(v2Svc Service) (ret *v1Service, err error) {
 	// Create basic Service
 
 	ret = &v1Service{
-		Listener: &v1.Listener{
+		Listener: &config_v1.Listener{
 			Name:     v2Svc.Name,
 			Protocol: v2Svc.Protocol,
 		},
-		Handler: &v1.Handler{
+		Handler: &config_v1.Handler{
 			Name:         v2Svc.Name,
 			ListenerName: v2Svc.Name,
 		},
@@ -54,9 +54,9 @@ func newV1Service(v2Svc Service) (ret *v1Service, err error) {
 
 	// Map v2.Credentials to v1.StoredSecret
 
-	credentials := make([]v1.StoredSecret, 0)
+	credentials := make([]config_v1.StoredSecret, 0)
 	for _, cred := range v2Svc.Credentials {
-		credentials = append(credentials, v1.StoredSecret{
+		credentials = append(credentials, config_v1.StoredSecret{
 			Name:     cred.Name,
 			Provider: cred.From,
 			ID:       cred.Get,

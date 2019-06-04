@@ -40,9 +40,7 @@ func LoadFromCRD(crdConfig crd_api_v1.Configuration) (config config_v1.Config, e
 func Load(data []byte) (config config_v1.Config, err error) {
 	versionStruct := &struct {
 		Version string `yaml:"version"`
-	}{
-		Version: "1",
-	}
+	}{}
 
 	if err = yaml.Unmarshal(data, versionStruct); err != nil {
 		err = fmt.Errorf("unable to load configuration: '%s'", err)
@@ -50,6 +48,9 @@ func Load(data []byte) (config config_v1.Config, err error) {
 	}
 
 	var configPointer *config_v1.Config
+	if versionStruct.Version == "" {
+		versionStruct.Version = "1"
+	}
 
 	switch versionStruct.Version {
 	case "1":

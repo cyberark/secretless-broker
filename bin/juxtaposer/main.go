@@ -233,11 +233,12 @@ func main() {
 	aggregatedTimings := map[string]formatter_api.BackendTiming{}
 	for _, backendName := range backendNames {
 		aggregatedTimings[backendName] = formatter_api.BackendTiming{
-			Count:           0,
-			Duration:        ZeroDuration,
-			MinimumDuration: ZeroDuration,
-			MaximumDuration: ZeroDuration,
-			Errors:          []formatter_api.TestRunError{},
+			BaselineDivergencePercent: map[int]int{},
+			Count:                     0,
+			Duration:                  ZeroDuration,
+			MinimumDuration:           ZeroDuration,
+			MaximumDuration:           ZeroDuration,
+			Errors:                    []formatter_api.TestRunError{},
 		}
 	}
 
@@ -258,6 +259,8 @@ func main() {
 
 	round := 0
 	shuttingDown := false
+
+	var baselineTestDuration time.Duration
 
 	for {
 		select {
@@ -292,10 +295,11 @@ func main() {
 				continue
 			}
 
-			log.Printf("[%.3d/%s], %-20s=>%15v", round, config.Comparison.Rounds,
-				backendName, singleTestRunDuration)
-
 			timingInfo.Duration = timingInfo.Duration + singleTestRunDuration
+
+			if backendName == baselineBackendName {
+				baselineTestDuration = singleTestRunDuration
+			}
 
 			if timingInfo.MinimumDuration == ZeroDuration {
 				timingInfo.MinimumDuration = timingInfo.Duration
@@ -308,6 +312,17 @@ func main() {
 			if singleTestRunDuration < timingInfo.MinimumDuration {
 				timingInfo.MinimumDuration = singleTestRunDuration
 			}
+
+			baselineDivergencePercent := 100
+			if backendName != baselineBackendName {
+				baselineDivergencePercent = int(float32(singleTestRunDuration) /
+					float32(baselineTestDuration) * 100.0)
+			}
+
+			log.Printf("[%d/%s], %-20s=>%15v, %3d%%", round, config.Comparison.Rounds,
+				backendName, singleTestRunDuration, baselineDivergencePercent)
+
+			timingInfo.BaselineDivergencePercent[baselineDivergencePercent] += 1
 
 			aggregatedTimings[backendName] = timingInfo
 		}
@@ -326,6 +341,7 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		formatter.ProcessResults(backendNames, aggregatedTimings)
+		formatter.ProcessResults(backendNames, aggregatedTimings,
+			config.Comparison.BaselineMaxThresholdPercent)
 	}
 }

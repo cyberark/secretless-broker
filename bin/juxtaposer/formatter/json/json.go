@@ -6,25 +6,33 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
-	"time"
 
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/util"
 )
 
 type JsonFormatter struct {
 	Options formatter_api.FormatterOptions
 }
 
+type ConfidenceIntervalJson struct {
+	IntervalPercent   int     `json:"intervalPercent"`
+	LowerBoundPercent float64 `json:"lowerBoundPercent"`
+	UpperBoundPercent float64 `json:"upperBoundPercent"`
+}
+
 type BackendTimingDataJson struct {
-	AverageDurationNs int64                        `json:"averageDurationNs"`
-	Errors            []formatter_api.TestRunError `json:"errors"`
-	FailedRounds      int                          `json:"failedRounds"`
-	MaximumDurationNs int64                        `json:"maximumDurationNs"`
-	MinimumDurationNs int64                        `json:"minimumDurationNs"`
-	SuccessfulRounds  int                          `json:"successfulRounds"`
-	SuccessPercentage float32                      `json:"successPercentage"`
-	TotalDurationNs   int64                        `json:"totalDurationNs"`
-	TotalRounds       int                          `json:"totalRounds"`
+	AverageDurationNs        int64                        `json:"averageDurationNs"`
+	ConfidenceInterval       ConfidenceIntervalJson       `json:"confidenceInterval"`
+	Errors                   []formatter_api.TestRunError `json:"errors"`
+	FailedRounds             int                          `json:"failedRounds"`
+	MaximumDurationNs        int64                        `json:"maximumDurationNs"`
+	MinimumDurationNs        int64                        `json:"minimumDurationNs"`
+	SuccessfulRounds         int                          `json:"successfulRounds"`
+	SuccessPercentage        float64                      `json:"successPercentage"`
+	ThresholdBreachedPercent float64                      `json:"thresholdBreachedPercent"`
+	TotalDurationNs          int64                        `json:"totalDurationNs"`
+	TotalRounds              int                          `json:"totalRounds"`
 }
 
 type JsonOutput struct {
@@ -37,7 +45,9 @@ func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputF
 	}, nil
 }
 
-func (formatter *JsonFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]formatter_api.BackendTiming) error {
+func (formatter *JsonFormatter) ProcessResults(backendNames []string,
+	aggregatedTimings map[string]formatter_api.BackendTiming, baselineThresholdMaxPercent int) error {
+
 	jsonOutput := JsonOutput{
 		Backends: map[string]BackendTimingDataJson{},
 	}
@@ -48,23 +58,29 @@ func (formatter *JsonFormatter) ProcessResults(backendNames []string, aggregated
 		failedRounds := len(timingInfo.Errors)
 		successfulRounds := timingInfo.Count - failedRounds
 
-		averageDuration := 0 * time.Second
-		if successfulRounds > 0 {
-			averageDuration = time.Duration(int64(timingInfo.Duration) /
-				int64(successfulRounds))
-		}
+		averageDuration := util.GetAverageDuration(&timingInfo)
+		successPercentage := util.GetSuccessPercentage(&timingInfo)
 
-		successPercentage := (float32(successfulRounds) / float32(timingInfo.Count)) * 100
+		lowerBoundCI, upperBoundCI := util.GetConfidenceInterval90(&timingInfo.BaselineDivergencePercent)
+		thresholdBreachedPercent := util.GetThresholdBreachedPercent(&timingInfo.BaselineDivergencePercent,
+			baselineThresholdMaxPercent)
+
 		timingDataJson := BackendTimingDataJson{
 			AverageDurationNs: averageDuration.Nanoseconds(),
 			Errors:            timingInfo.Errors,
 			FailedRounds:      failedRounds,
-			MaximumDurationNs: timingInfo.MaximumDuration.Nanoseconds(),
-			MinimumDurationNs: timingInfo.MinimumDuration.Nanoseconds(),
-			SuccessfulRounds:  successfulRounds,
-			SuccessPercentage: successPercentage,
-			TotalDurationNs:   timingInfo.Duration.Nanoseconds(),
-			TotalRounds:       timingInfo.Count,
+			ConfidenceInterval: ConfidenceIntervalJson{
+				IntervalPercent:   90,
+				LowerBoundPercent: lowerBoundCI,
+				UpperBoundPercent: upperBoundCI,
+			},
+			MaximumDurationNs:        timingInfo.MaximumDuration.Nanoseconds(),
+			MinimumDurationNs:        timingInfo.MinimumDuration.Nanoseconds(),
+			SuccessfulRounds:         successfulRounds,
+			SuccessPercentage:        successPercentage,
+			ThresholdBreachedPercent: thresholdBreachedPercent,
+			TotalDurationNs:          timingInfo.Duration.Nanoseconds(),
+			TotalRounds:              timingInfo.Count,
 		}
 
 		jsonOutput.Backends[backendName] = timingDataJson

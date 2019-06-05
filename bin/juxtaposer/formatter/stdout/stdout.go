@@ -3,9 +3,9 @@ package stdout
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/util"
 )
 
 type StdoutFormatter struct{}
@@ -14,43 +14,56 @@ func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputF
 	return &StdoutFormatter{}, nil
 }
 
-func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]formatter_api.BackendTiming) error {
-	dividerString := strings.Repeat("-", 85)
-	fmt.Printf("%s\n", dividerString)
+func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]formatter_api.BackendTiming, baselineThresholdMaxPercent int) error {
+	fields := []map[string]string{
+		map[string]string{"name": "Name", "nameFormat": "%-20s", "valueFormat": "%-20s"},
+		map[string]string{"name": "Min", "nameFormat": "%12s", "valueFormat": "%12v"},
+		map[string]string{"name": "Max", "nameFormat": "%12s", "valueFormat": "%12v"},
+		map[string]string{"name": "Avg", "nameFormat": "%12s", "valueFormat": "%12v"},
+		map[string]string{"name": "90% Lower %", "nameFormat": "%12s", "valueFormat": "%12.2f"},
+		map[string]string{"name": "90% Upper %", "nameFormat": "%12s", "valueFormat": "%12.2f"},
+		map[string]string{"name": "Total", "nameFormat": "%13s", "valueFormat": "%13v"},
+		map[string]string{"name": "Rounds", "nameFormat": "%7s", "valueFormat": "%7d"},
+		map[string]string{"name": "Errors", "nameFormat": "%7s", "valueFormat": "%7d"},
+		map[string]string{"name": "Succ %", "nameFormat": "%9s", "valueFormat": "%9.2f"},
+		map[string]string{"name": "Thresh %", "nameFormat": "%9s", "valueFormat": "%9.2f"},
+	}
 
-	fmt.Printf("%-20s|%15s|%15s|%15s|%8s|%8s|%13s|%15s|\n",
-		"Name",
-		"Min Duration",
-		"Max Duration",
-		"Avg Duration",
-		"Runs",
-		"Errors",
-		"Success(%)",
-		"Total Duration")
+	dividerString := strings.Repeat("-", 136)
 
 	fmt.Printf("%s\n", dividerString)
+	formatValueString := ""
+	for _, field := range fields {
+		fmt.Printf(field["nameFormat"]+"|", field["name"])
+		formatValueString += field["valueFormat"] + "|"
+	}
+	fmt.Printf("\n%s\n", dividerString)
 
 	for _, backendName := range backendNames {
 		timingInfo := aggregatedTimings[backendName]
 
-		successfulRuns := timingInfo.Count - len(timingInfo.Errors)
+		averageDuration := util.GetAverageDuration(&timingInfo)
+		successPercentage := util.GetSuccessPercentage(&timingInfo)
 
-		averageDuration := 0 * time.Second
-		if successfulRuns > 0 {
-			averageDuration = time.Duration(int64(timingInfo.Duration) /
-				int64(successfulRuns))
-		}
+		lowerBoundCI, upperBoundCI := util.GetConfidenceInterval90(&timingInfo.BaselineDivergencePercent)
+		thresholdBreachedPercent := util.GetThresholdBreachedPercent(&timingInfo.BaselineDivergencePercent,
+			baselineThresholdMaxPercent)
 
-		fmt.Printf("%-20s %15v %15v %15v %8d %8d %13.0f %15v \n",
+		fmt.Printf(formatValueString+"\n",
 			backendName,
 			timingInfo.MinimumDuration,
 			timingInfo.MaximumDuration,
 			averageDuration,
+			lowerBoundCI,
+			upperBoundCI,
+			timingInfo.Duration,
 			timingInfo.Count,
 			len(timingInfo.Errors),
-			(float32(successfulRuns)/float32(timingInfo.Count))*100,
-			timingInfo.Duration)
+			successPercentage,
+			thresholdBreachedPercent)
 	}
+
+	fmt.Printf("%s\n", dividerString)
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 	"regexp"
+	"strconv"
 )
 
 // StoredSecret represents not the value of a "secret," but the abstract concept
@@ -93,17 +94,17 @@ func (l Listener) LinkedHandlers(handlers []Handler) []Handler {
 	return result
 }
 
-// Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(
 		&l,
-		validation.Field(&l.Name, validation.Required),
+		validation.Field(
+			&l.Name,
+			validation.Required,
+			validation.By(hasAddressOrSocket),
+		),
 	)
 }
 
-// addressOrSocketRequiredRule is validation.RuleFunc that ensures a Listener
-// has either an Address or Socket configured.  This is a helper func for
-// Listener.Validate().
 func hasAddressOrSocket(v interface{}) error {
 	l := v.(Listener)
 	if l.Address == "" && l.Socket == "" {
@@ -123,17 +124,44 @@ func (c Config) String() string {
 // Validate verifies the completeness and correctness of the Config.
 func (c Config) Validate() error {
 
-	// Create a rule than ensures every Handler has a Listener
-	var listenerNames []interface{}
-	for _, l := range c.Listeners {
-		listenerNames = append(listenerNames, l.Name)
-	}
-	listenerRequired := validation.In(listenerNames...)
-
 	return validation.ValidateStruct(&c,
-		validation.Field(&c.Handlers, validation.Required, listenerRequired),
-		validation.Field(&c.Listeners, validation.Required, validation.By(hasAddressOrSocket)),
+		validation.Field(&c.Handlers, validation.Required, c.listenerRequired()),
+		validation.Field(&c.Listeners, validation.Required),
 		validation.Field(&c.Handlers),
 		validation.Field(&c.Listeners),
 	)
+}
+
+// listenerRequired returns a validation.Rule that will ensure every Handler has
+// an associated listener.  We cannot define this rule on Handler itself,
+// because it needs access to the list of available listeners, which we provide
+// here by using a closure.
+func (c Config) listenerRequired() validation.Rule {
+	availListeners := c.listenersByName()
+
+	// Create a custom validation.RuleFunc
+	ruleFunc := func(handlers interface{}) error {
+		hs := handlers.([]Handler)
+		errors := validation.Errors{}
+
+		for i, h := range hs {
+			if _, ok := availListeners[h.ListenerName]; !ok {
+				errors[strconv.Itoa(i)] = fmt.Errorf(
+					"has no associated listener",
+				)
+			}
+		}
+
+		return errors.Filter()
+	}
+
+	return validation.By(ruleFunc)
+}
+
+func (c Config) listenersByName() map[string]Listener {
+	ret := make(map[string]Listener)
+	for _, l := range c.Listeners {
+		ret[l.Name] = l
+	}
+	return ret
 }

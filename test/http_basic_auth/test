@@ -36,7 +36,7 @@ assert_contains() {
 echo "Waiting for Secretless to start"
 # single quotes are intentional
 # shellcheck disable=SC2016
-docker-compose run --rm --no-deps test sh -ec '
+docker-compose run --rm --no-deps test bash -ec '
 counter=0
 while ! wget -q -O- http://secretless:5335/ready > /dev/null 2>&1; do
     if (( counter == 5 )); then

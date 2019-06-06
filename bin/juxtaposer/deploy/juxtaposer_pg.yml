@@ -1,0 +1,28 @@
+---
+driver: postgres
+
+comparison:
+  baselineBackend: pg_direct
+#  type: sql
+#  style: select
+#  rounds: 1000
+#  rounds: infinity
+#  baselineMaxThresholdPercent: 120
+  rounds: 300
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  pg_secretless:
+    host: /sock
+
+  pg_direct:
+    host: test-secretless-app-postgresql-backend
+    port: 5432
+    username: REPLACEME
+    password: REPLACEME
+    database: test_app
+    sslmode: disable

@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+
+CURRENT_DIR=$(dirname ${BASH_SOURCE[0]})
+
+kubectl create configmap ${APP_NAME}-secretless-config --from-file=secretless.yml=$CURRENT_DIR/secretless.yml
+
+kubectl create configmap ${APP_NAME}-config \
+  --from-file=${APP_NAME}_pg.yml=$CURRENT_DIR/${APP_NAME}_pg.yml \
+  --from-file=${APP_NAME}_mysql.yml=$CURRENT_DIR/${APP_NAME}_mysql.yml
+
+kubectl apply -f $CURRENT_DIR/tmp/juxtaposer_deployment.yml
+

@@ -1,0 +1,28 @@
+---
+driver: mysql-5.7
+
+comparison:
+  baselineBackend: mysql_direct
+#  type: sql
+#  style: select
+#  rounds: 1000
+#  rounds: infinity
+#  baselineMaxThresholdPercent: 120
+  rounds: 300
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  mysql_secretless:
+    host: /sock/mysql
+
+  mysql_direct:
+    host: test-secretless-app-mysql-backend
+    port: 3306
+    database: test_app
+    username: REPLACEME
+    password: REPLACEME
+    sslmode: disable

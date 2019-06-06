@@ -26,7 +26,7 @@ services:
       - nginx
 
   test:
-    image: alpine:latest
+    image: ubuntu:16.04
     environment:
       http_proxy: http://secretless:8080
     command: wget -q -O- nginx:8080/

@@ -90,7 +90,7 @@ listeners:
   - protocol: pg
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Listeners: (0: (Name: cannot be blank.).)")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank")
 	})
 
 	Convey("Reports an unknown protocol", t, func() {
@@ -126,7 +126,7 @@ handlers:
   - name: mylistener
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Listeners: (0: must have an Address or Socket.)")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "address or Socket is required")
 	})
 
 	Convey("Reports an unnamed Handler definition", t, func() {
@@ -139,7 +139,7 @@ handlers:
   - listener: http_default
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Handlers: (0: (Name: cannot be blank.).)")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank")
 	})
 
 	Convey("Can serialize match fields", t, func() {

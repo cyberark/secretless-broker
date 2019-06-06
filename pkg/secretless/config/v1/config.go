@@ -95,22 +95,24 @@ func (l Listener) LinkedHandlers(handlers []Handler) []Handler {
 }
 
 func (l Listener) Validate() error {
-	return validation.ValidateStruct(
+	// Validations on individual fields of the struct
+	fieldErrs := validation.ValidateStruct(
 		&l,
-		validation.Field(
-			&l.Name,
-			validation.Required,
-			validation.By(hasAddressOrSocket),
-		),
+		validation.Field(&l.Name, validation.Required),
 	)
-}
 
-func hasAddressOrSocket(v interface{}) error {
-	l := v.(Listener)
-	if l.Address == "" && l.Socket == "" {
-		return fmt.Errorf("either Address or Socket is required")
+	// Cast back to validation.Errors so we add to it
+	allErrs := validation.Errors{}
+	if fieldErrs != nil {
+		allErrs = fieldErrs.(validation.Errors)
 	}
-	return nil
+
+	// Either Address or Socket must be non-empty
+	if l.Address == "" && l.Socket == "" {
+		allErrs["AddressOrSocket"] = fmt.Errorf("address or Socket is required")
+	}
+
+	return allErrs.Filter()
 }
 
 func (c Config) String() string {

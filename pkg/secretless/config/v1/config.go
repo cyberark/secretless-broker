@@ -2,11 +2,9 @@ package v1
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
-
 	"github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
+	"regexp"
 )
 
 // StoredSecret represents not the value of a "secret," but the abstract concept
@@ -19,7 +17,7 @@ type StoredSecret struct {
 	// How client code will refer to the secret's actual value at runtime.
 	// Specifically, the key to the secret's value in the map[string][]byte
 	// returned by a Resolver.
-	Name string
+	Name     string
 	Provider string
 	// The identifier within the context of a Provider.  Ie, how a provider
 	// refers to this secret.  Eg, a database primary key.
@@ -83,7 +81,8 @@ func (h Handler) Validate() (err error) {
 	return
 }
 
-// LinkedHandlers returns all Handlers using this Listener.
+// LinkedHandlers filters the handlers passed to it, returning only those
+// attached to this Listener
 func (l Listener) LinkedHandlers(handlers []Handler) []Handler {
 	var result []Handler
 	for _, h := range handlers {
@@ -95,42 +94,22 @@ func (l Listener) LinkedHandlers(handlers []Handler) []Handler {
 }
 
 // Validate verifies the completeness and correctness of the Listener.
-func (l Listener) Validate() (err error) {
-	err = validation.ValidateStruct(&l,
+func (l Listener) Validate() error {
+	return validation.ValidateStruct(
+		&l,
 		validation.Field(&l.Name, validation.Required),
 	)
-
-	return
 }
 
-type handlerHasListener struct {
-	listenerNames map[string]Listener
-}
-
-func (hhl handlerHasListener) Validate(value interface{}) error {
-	hs := value.([]Handler)
-	errors := validation.Errors{}
-	for i, h := range hs {
-		_, ok := hhl.listenerNames[h.ListenerName]
-		if !ok {
-			errors[strconv.Itoa(i)] = fmt.Errorf("has no associated listener")
-		}
+// addressOrSocketRequiredRule is validation.RuleFunc that ensures a Listener
+// has either an Address or Socket configured.  This is a helper func for
+// Listener.Validate().
+func hasAddressOrSocket(v interface{}) error {
+	l := v.(Listener)
+	if l.Address == "" && l.Socket == "" {
+		return fmt.Errorf("either Address or Socket is required")
 	}
-	return errors.Filter()
-}
-
-type addressOrSocket struct {
-}
-
-func (hhl addressOrSocket) Validate(value interface{}) error {
-	ls := value.([]Listener)
-	errors := validation.Errors{}
-	for i, l := range ls {
-		if l.Address == "" && l.Socket == "" {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have an Address or Socket")
-		}
-	}
-	return errors.Filter()
+	return nil
 }
 
 func (c Config) String() string {
@@ -141,21 +120,25 @@ func (c Config) String() string {
 	return string(out)
 }
 
-// Validate verifies the completeness and correctness of the Config.
-func (c Config) Validate() (err error) {
-	listenerNames := make(map[string]Listener)
+// listenerRequiredRule returns a validation.Rule that will ensure every Handler has
+// an associated listener.  We cannot define this rule on Handler itself,
+// because it needs access to the list of available listeners.
+func (c Config) listenerRequiredRule() validation.Rule {
+	var listenerNames []interface{}
+
 	for _, l := range c.Listeners {
-		listenerNames[l.Name] = l
+		listenerNames = append(listenerNames, l.Name)
 	}
 
-	hasListener := handlerHasListener{listenerNames: listenerNames}
+	return validation.In(listenerNames...)
+}
 
-	err = validation.ValidateStruct(&c,
-		validation.Field(&c.Handlers, validation.Required, hasListener),
-		validation.Field(&c.Listeners, validation.Required, addressOrSocket{}),
+// Validate verifies the completeness and correctness of the Config.
+func (c Config) Validate() error {
+	return validation.ValidateStruct(&c,
+		validation.Field(&c.Handlers, validation.Required, c.listenerRequiredRule()),
+		validation.Field(&c.Listeners, validation.Required, validation.By(hasAddressOrSocket)),
 		validation.Field(&c.Handlers),
 		validation.Field(&c.Listeners),
 	)
-
-	return
 }

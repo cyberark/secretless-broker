@@ -120,23 +120,18 @@ func (c Config) String() string {
 	return string(out)
 }
 
-// listenerRequiredRule returns a validation.Rule that will ensure every Handler has
-// an associated listener.  We cannot define this rule on Handler itself,
-// because it needs access to the list of available listeners.
-func (c Config) listenerRequiredRule() validation.Rule {
-	var listenerNames []interface{}
+// Validate verifies the completeness and correctness of the Config.
+func (c Config) Validate() error {
 
+	// Create a rule than ensures every Handler has a Listener
+	var listenerNames []interface{}
 	for _, l := range c.Listeners {
 		listenerNames = append(listenerNames, l.Name)
 	}
+	listenerRequired := validation.In(listenerNames...)
 
-	return validation.In(listenerNames...)
-}
-
-// Validate verifies the completeness and correctness of the Config.
-func (c Config) Validate() error {
 	return validation.ValidateStruct(&c,
-		validation.Field(&c.Handlers, validation.Required, c.listenerRequiredRule()),
+		validation.Field(&c.Handlers, validation.Required, listenerRequired),
 		validation.Field(&c.Listeners, validation.Required, validation.By(hasAddressOrSocket)),
 		validation.Field(&c.Handlers),
 		validation.Field(&c.Listeners),

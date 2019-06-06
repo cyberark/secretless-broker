@@ -26,10 +26,10 @@ services:
       - nginx
 
   test:
-    image: ubuntu:16.04
+    image: alpine:latest
     environment:
       http_proxy: http://secretless:8080
-    command: wget -q -O- nginx:8080/
+    command: 'apk update && apk add bash && wget -q -O- nginx:8080/'
     depends_on:
       - secretless
 

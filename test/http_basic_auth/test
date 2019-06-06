@@ -54,18 +54,29 @@ done
 echo ""
 
 echo "Running tests"
+
 echo "test: http_good_basic_auth"
+
+# NOTE: The inner quotes in the parameter expanasions below are needed
+#       even though shellcheck doesn't flag it if you remove them. See:
+# https://tio.run/##S0oszvj/P9FWyVDBSIkrydaYq6AoM68kTUFJtVi1WFdXSUGlOtFKW0klUalWQSWJKzU5Ix@7EpVEkIL//wE
 test_1=$(docker-compose run \
   --rm \
   --no-deps \
-  ${docker_volume_flag:+$docker_volume_flag} ${docker_volume_val:+ $docker_volume_val} \
-  test env http_proxy=http://secretless:8080 wget -q -O- nginx:8080/ 2>&1 || true)
-assert_contains "${test_1}" "secured resource"
+  ${docker_volume_flag:+"$docker_volume_flag"} \
+  ${docker_volume_val:+"$docker_volume_val"} \
+  test env http_proxy=http://secretless:8080 \
+  wget --quiet --output-document - nginx:8080/ 2>&1 || true)
+
+assert_contains "$test_1" "secured resource"
 
 echo "test: http_bad_basic_auth"
 test_2=$(docker-compose run \
   --rm \
   --no-deps \
-  ${docker_volume_flag:+$docker_volume_flag} ${docker_volume_val:+ $docker_volume_val} \
-  test env http_proxy=http://secretless:8081 wget -q -O- nginx:8080/ 2>&1 || true)
+  ${docker_volume_flag:+"$docker_volume_flag"} \
+  ${docker_volume_val:+"$docker_volume_val"} \
+  test env http_proxy=http://secretless:8081 \
+  wget --quiet --output-document - nginx:8080/ 2>&1 || true)
+
 assert_contains "${test_2}" "wget: server returned error: HTTP/1.1 401 Unauthorized"

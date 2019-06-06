@@ -22,6 +22,7 @@ import (
 )
 
 type Backend struct {
+	Database    string `yaml:"database"`
 	Debug       bool   `yaml:"debug"`
 	Description string `yaml:"description"`
 	Host        string `yaml:"host"`
@@ -193,13 +194,14 @@ func main() {
 		}
 
 		options := tester_api.DbTesterOptions{
-			Debug:    backendConfig.Debug,
-			Host:     backendConfig.Host,
-			Password: backendConfig.Password,
-			Port:     backendConfig.Port,
-			SslMode:  backendConfig.SslMode,
-			Socket:   backendConfig.Socket,
-			Username: backendConfig.Username,
+			DatabaseName: backendConfig.Database,
+			Debug:        backendConfig.Debug,
+			Host:         backendConfig.Host,
+			Password:     backendConfig.Password,
+			Port:         backendConfig.Port,
+			SslMode:      backendConfig.SslMode,
+			Socket:       backendConfig.Socket,
+			Username:     backendConfig.Username,
 		}
 
 		if backendConfig.Debug {

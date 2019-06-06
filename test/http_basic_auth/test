@@ -36,15 +36,15 @@ assert_contains() {
 echo "Waiting for Secretless to start"
 # single quotes are intentional
 # shellcheck disable=SC2016
-docker-compose run --rm --no-deps test bash -ec '
+docker-compose run --rm --no-deps test sh -ec '
 counter=0
 while ! wget -q -O- http://secretless:5335/ready > /dev/null 2>&1; do
-    if (( counter == 5 )); then
+    if [ $counter -eq 5 ]; then
       echo ""
       echo "Timed out waiting for Secretless"
       exit 1
     fi
-    counter=$(( counter + 1 ))
+    let "counter = $counter + 1"
     >&2 printf ". "
     sleep 1
 done

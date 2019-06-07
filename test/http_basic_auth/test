@@ -8,9 +8,12 @@ while getopts :l opt; do
     esac
 done
 
-docker_volume=""
+# NOTE: We need an array here so that the elements will be interpreted
+# as separate args, even when double quoted.
+# Relevant: https://github.com/koalaman/shellcheck/wiki/SC2089
+docker_volume_args=()
 if $local_test; then
-  docker_volume="$(cd ../..; pwd):/secretless"
+  docker_volume_args=(--volume "$(cd ../..; pwd):/secretless")
 fi
 
 assert_contains() {
@@ -44,11 +47,7 @@ ping_target_service_thru_secretless() {
   # NOTE: We need to 2>&1 because we need to assert on wget's error messages
   # and we need to "|| true" because we don't want the script to exit when this
   # happens
-  if [[ -n $docker_volume ]]; then
-    $docker_cmd --volume "$docker_volume" test "${wget_cmd[@]}" 2>&1 || true
-  else
-    $docker_cmd test "${wget_cmd[@]}" 2>&1 || true
-  fi
+  $docker_cmd "${docker_volume_args[@]}" test "${wget_cmd[@]}" 2>&1 || true
 }
 
 echo "Waiting for Secretless to start"

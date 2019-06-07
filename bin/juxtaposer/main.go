@@ -287,7 +287,7 @@ func main() {
 			timingInfo := aggregatedTimings[backendName]
 			timingInfo.Count = timingInfo.Count + 1
 			if err != nil {
-				log.Printf("[%.3d/%s] %-20s=> %v", round, config.Comparison.Rounds, backendName, err)
+				log.Printf("[%.3d/%s] %-35s=> %v", round, config.Comparison.Rounds, backendName, err)
 				timingInfo.Errors = append(timingInfo.Errors,
 					formatter_api.TestRunError{
 						Error: err,
@@ -321,7 +321,7 @@ func main() {
 					float32(baselineTestDuration) * 100.0)
 			}
 
-			log.Printf("[%d/%s], %-20s=>%15v, %3d%%", round, config.Comparison.Rounds,
+			log.Printf("[%d/%s], %-35s=>%15v, %3d%%", round, config.Comparison.Rounds,
 				backendName, singleTestRunDuration, baselineDivergencePercent)
 
 			timingInfo.BaselineDivergencePercent[baselineDivergencePercent] += 1

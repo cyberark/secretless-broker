@@ -16,7 +16,7 @@ func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputF
 
 func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]formatter_api.BackendTiming, baselineThresholdMaxPercent int) error {
 	fields := []map[string]string{
-		map[string]string{"name": "Name", "nameFormat": "%-20s", "valueFormat": "%-20s"},
+		map[string]string{"name": "Name", "nameFormat": "%-30s", "valueFormat": "%-30s"},
 		map[string]string{"name": "Min", "nameFormat": "%12s", "valueFormat": "%12v"},
 		map[string]string{"name": "Max", "nameFormat": "%12s", "valueFormat": "%12v"},
 		map[string]string{"name": "Avg", "nameFormat": "%12s", "valueFormat": "%12v"},
@@ -29,7 +29,7 @@ func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregat
 		map[string]string{"name": "Thresh %", "nameFormat": "%9s", "valueFormat": "%9.2f"},
 	}
 
-	dividerString := strings.Repeat("-", 136)
+	dividerString := strings.Repeat("-", 146)
 
 	fmt.Printf("%s\n", dividerString)
 	formatValueString := ""

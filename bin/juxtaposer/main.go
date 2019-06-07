@@ -38,6 +38,7 @@ type Comparison struct {
 	BaselineBackend             string `yaml:"baselineBackend"`
 	BaselineMaxThresholdPercent int    `yaml:"baselineMaxThresholdPercent"`
 	Rounds                      string `yaml:"rounds"`
+	Silent                      bool   `yaml:"silent"`
 	Style                       string `yaml:"style"`
 	Type                        string `yaml:"type"`
 }
@@ -120,6 +121,7 @@ func registerShutdownSignalHandlers(shutdownChannel chan<- bool) {
 		syscall.SIGABRT,
 		syscall.SIGHUP,
 		syscall.SIGINT,
+		syscall.SIGUSR1,
 		syscall.SIGQUIT,
 		syscall.SIGTERM,
 	)
@@ -128,6 +130,7 @@ func registerShutdownSignalHandlers(shutdownChannel chan<- bool) {
 		exitSignal := <-signalChannel
 		log.Printf("Intercepted exit signal '%v'. Waiting for loop to finish...", exitSignal)
 		shutdownChannel <- true
+		signal.Reset()
 	}()
 }
 
@@ -158,10 +161,14 @@ func main() {
 	log.Println("Juxtaposer starting up...")
 
 	configFile := flag.String("f", "juxtaposer.yml", "Location of the configuration file.")
+	continueRunningAfterExit := flag.Bool("c", false, "Continue running after exit")
+	requestedDurationString := flag.String("t", "",
+		"Duration of test (ignores 'rounds' field in the configuration.")
 	flag.Parse()
 
 	log.Printf("Using configuration: %s", *configFile)
 
+	var err error
 	config, err := readConfiguration(*configFile)
 	if err != nil {
 		log.Fatalf("ERROR: Could not read config file '%s': %v", *configFile, err)
@@ -176,6 +183,19 @@ func main() {
 
 	log.Println("Driver:", config.Driver)
 	log.Println("Comparison type:", config.Comparison.Type)
+
+	requestedDuration := ZeroDuration
+	if *requestedDurationString != "" {
+		requestedDuration, err = time.ParseDuration(*requestedDurationString)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		log.Printf("Using test duration of %v (overriding any 'rounds' from configfile)",
+			requestedDuration)
+
+		config.Comparison.Rounds = "infinity"
+	}
 
 	// Keys in a map are not guaranteed to be retrieved in the same order
 	// each time so we have a separate array that guarantees it
@@ -262,6 +282,17 @@ func main() {
 	round := 0
 	shuttingDown := false
 
+	if requestedDuration != ZeroDuration {
+		go func() {
+			time.Sleep(requestedDuration)
+			log.Println("Timeout reached!")
+			log.Println("Sending shutdown signal!")
+			shutdownChannel <- true
+		}()
+	}
+
+	log.Println("Running tests...")
+
 	var baselineTestDuration time.Duration
 
 	for {
@@ -321,8 +352,14 @@ func main() {
 					float32(baselineTestDuration) * 100.0)
 			}
 
-			log.Printf("[%d/%s], %-35s=>%15v, %3d%%", round, config.Comparison.Rounds,
-				backendName, singleTestRunDuration, baselineDivergencePercent)
+			if !config.Comparison.Silent {
+				log.Printf("[%d/%s], %-35s=>%15v, %3d%%", round, config.Comparison.Rounds,
+					backendName, singleTestRunDuration, baselineDivergencePercent)
+			} else {
+				if round%1000 == 0 {
+					fmt.Printf(".")
+				}
+			}
 
 			timingInfo.BaselineDivergencePercent[baselineDivergencePercent] += 1
 
@@ -345,5 +382,13 @@ func main() {
 
 		formatter.ProcessResults(backendNames, aggregatedTimings,
 			config.Comparison.BaselineMaxThresholdPercent)
+
+	}
+
+	if *continueRunningAfterExit == true {
+		log.Println("Continuing to run after tests requested. Sleeping forever...")
+		log.Println("You can exit this process by sending it SIGTERM/SIGKILL/SIGINT")
+		signal.Reset()
+		select {}
 	}
 }

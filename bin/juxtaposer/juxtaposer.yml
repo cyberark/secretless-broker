@@ -9,6 +9,7 @@ comparison:
 #  rounds: 1000
 #  rounds: infinity
 #  baselineMaxThresholdPercent: 120
+  silent: true
 
 formatters:
   json:

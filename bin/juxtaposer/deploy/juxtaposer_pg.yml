@@ -7,6 +7,7 @@ comparison:
 #  style: select
   rounds: 10000
 #  baselineMaxThresholdPercent: 120
+  silent: true
 
 formatters:
   json:

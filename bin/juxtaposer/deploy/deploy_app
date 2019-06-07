@@ -13,6 +13,7 @@ sed -e "s#\${APP_NAME}#$APP_NAME#g" \
     -e "s#\${APP_NAMESPACE}#$TEST_APP_NAMESPACE_NAME#g" \
     -e "s#\${AUTHENTICATOR_ID}#$AUTHENTICATOR_ID#g" \
     -e "s#\${AUTHENTICATOR_ID_ENCODED}#$AUTHENTICATOR_ID_ENCODED#g" \
+    -e "s#\${CONFIG_TEMPLATE}#$CONFIG_TEMPLATE#g" \
     -e "s#\${DAP_ACCOUNT}#$DAP_ACCOUNT#g" \
     -e "s#\${DAP_FOLLOWER_URL}#https:\/\/conjur-follower.$DAP_NAMESPACE_NAME.svc.cluster.local#g" \
     -e "s#\${DAP_SSL_CERT_CONFIG_MAP}#$DAP_SSL_CERT_CONFIG_MAP#g" \

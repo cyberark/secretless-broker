@@ -6,8 +6,8 @@ comparison:
 #  type: sql
 #  style: select
   rounds: 10000
-#  rounds: infinity
 #  baselineMaxThresholdPercent: 120
+  silent: true
 
 formatters:
   json:

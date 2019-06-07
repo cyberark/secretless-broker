@@ -41,7 +41,8 @@ spec:
         image: ${PERFTOOL_IMAGE}
         imagePullPolicy: Always
         # command: [ "/bin/sleep", "999d" ]
-        args: ["-f", "/etc/${APP_NAME}/${APP_NAME}_pg.yml"]
+        args: ["-c", "-t", "10s", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
+
         volumeMounts:
           - mountPath: /etc/${APP_NAME}
             name: ${APP_NAME}-config
@@ -59,7 +60,7 @@ spec:
           httpGet:
             path: /live
             port: 5335
-          initialDelaySeconds: 1
+          initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 2
           failureThreshold: 60
@@ -67,7 +68,7 @@ spec:
           httpGet:
             path: /ready
             port: 5335
-          initialDelaySeconds: 1
+          initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 2
           failureThreshold: 60

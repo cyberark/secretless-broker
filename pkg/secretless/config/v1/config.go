@@ -110,7 +110,7 @@ func (l Listener) Validate() error {
 
 	// Either Address or Socket must be non-empty
 	if l.Address == "" && l.Socket == "" {
-		allErrs["AddressOrSocket"] = fmt.Errorf("address or Socket is required")
+		allErrs["AddressOrSocket"] = fmt.Errorf("address or socket is required")
 	}
 
 	return allErrs.Filter()

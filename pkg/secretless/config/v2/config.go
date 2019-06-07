@@ -98,7 +98,6 @@ func NewConfig(v2YAML []byte) (*Config, error) {
 
 // NewService creates a named v2.Service from yaml bytes
 func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
-
 	credentials, err := NewCredentials(svcYAML.Credentials)
 	if err != nil {
 		return nil, err

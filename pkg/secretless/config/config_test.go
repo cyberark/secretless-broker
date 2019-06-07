@@ -126,7 +126,7 @@ handlers:
   - name: mylistener
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "address or Socket is required")
+		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "address or socket is required")
 	})
 
 	Convey("Reports an unnamed Handler definition", t, func() {

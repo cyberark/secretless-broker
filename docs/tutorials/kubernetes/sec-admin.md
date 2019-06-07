@@ -5,7 +5,7 @@ layout: tutorials
 description: Secretless Broker Documentation
 section-header: Steps for Security Admin
 time-complete: 5
-products-used: Kubernetes Secrets, PostgreSQL Handler
+products-used: Kubernetes Secrets, PostgreSQL Service Authenticator
 back-btn: /tutorials/kubernetes/overview.html
 continue-btn: /tutorials/kubernetes/app-dev.html
 up-next: As an Application Developer, you no longer need to worry about all the passwords and database connections! You will deploy an application and leave it up to the Secretless Broker to make the desired connection to the database.
@@ -253,7 +253,7 @@ In this section, we assume the following:
 <div class="note">
   If you're using your own database server and it's not SSL-enabled, please see
   the <a
-  href="https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm">handler
+  href="https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm">service authenticator
   documentation</a> for how to disable SSL in your Secretless configuration.
 </div>
 
@@ -361,41 +361,34 @@ to proxy them.
 After that, the developer's application can access the database **without ever
 knowing the application-credentials**.
 
-A Secretless Broker configuration file has 2 sections:
-  - **Listeners:** Define how and where to listen for connections
-  - **Handlers:** Define where to get credentials and how to connect to the
-    target service (a Postgres database, in our example)
+A Secretless Broker configuration file defines the services that Secretless with authenticate to on behalf of your application.
 
 To create **secretless.yml** in your current directory, run:
 
 ```bash
 cat << EOF > secretless.yml
-listeners:
-  - name: pets-pg-listener
+version: "2"
+services:
+  pets-pg:
     protocol: pg
-    address: localhost:5432
-
-handlers:
-  - name: pets-pg-handler
-    listener: pets-pg-listener
+    listenOn: tcp://localhost:5432
     credentials:
-      - name: address
-        provider: kubernetes
-        id: quick-start-backend-credentials#address
-      - name: username
-        provider: kubernetes
-        id: quick-start-backend-credentials#username
-      - name: password
-        provider: kubernetes
-        id: quick-start-backend-credentials#password
+      address:
+        from: kubernetes
+        get: quick-start-backend-credentials#address
+      username:
+        from: kubernetes
+        get: quick-start-backend-credentials#username
+      password:
+        from: kubernetes
+        get: quick-start-backend-credentials#password
 EOF
 ```
 
 Here's what this does:
 
-- Defines a listener named `pets-pg-listener` that listens for Postgres
-  connections on `localhost:5432`
-- Defines a handler `pets-pg-handler` connected to that listener
+- Defines a service called `pets-pg` that listens for PostgreSQL connections
+  on `localhost:5432`
 - Says that the database `address`, `username` and `password` are stored in
   Kubernetes Secrets
 - Lists the ids of those credentials within Kubernetes Secrets

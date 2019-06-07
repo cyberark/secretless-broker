@@ -5,7 +5,7 @@ layout: tutorials
 description: Secretless Broker Documentation
 section-header: Before we begin...
 time-complete: 5
-products-used: Kubernetes Secrets, PostgreSQL Handler
+products-used: Kubernetes Secrets, PostgreSQL Service Authenticator
 back-btn:
 continue-btn: /tutorials/kubernetes/overview.html
 up-next: Get an overview of what is going to be covered in this tutorial.

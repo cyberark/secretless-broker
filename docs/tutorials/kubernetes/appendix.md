@@ -5,7 +5,7 @@ layout: tutorials
 description: Secretless Broker Documentation
 section-header: Appendix - Secretless Deployment Manifest Explained
 time-complete: 5
-products-used: Kubernetes Secrets, PostgreSQL Handler
+products-used: Kubernetes Secrets, PostgreSQL Service Authenticator
 back-btn: /tutorials/kubernetes/app-dev.html
 continue-btn: /tutorials/kubernetes/finish.html
 up-next: A summary of what you accomplished in this tutorial!
@@ -81,7 +81,7 @@ Application   <---------->   Secretless   <---------->   Postgres
 For more information on PostgreSQL SSL modes see:
 
 - [PostgreSQL SSL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html)
-- [PostgreSQL Secretless Handler documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm).
+- [PostgreSQL Secretless Service Authenticator documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm).
 
 ### Credential Access
 

@@ -2,10 +2,11 @@ package v1
 
 import (
 	"fmt"
-	"github.com/go-ozzo/ozzo-validation"
-	"gopkg.in/yaml.v2"
 	"regexp"
 	"strconv"
+
+	"github.com/go-ozzo/ozzo-validation"
+	"gopkg.in/yaml.v2"
 )
 
 // StoredSecret represents not the value of a "secret," but the abstract concept

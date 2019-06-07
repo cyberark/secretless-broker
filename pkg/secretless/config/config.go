@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"regexp"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
 	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"

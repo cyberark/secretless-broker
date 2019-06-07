@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: ${APPLICATION_SERVICE_ACCOUNT}
+  name: ${APP_SERVICE_ACCOUNT}
 ---
 apiVersion: apps/v1beta2
 kind: Deployment
@@ -10,7 +10,7 @@ metadata:
   labels:
     app: ${APP_NAME}
   name: ${APP_NAME}
-  namespace: ${APPLICATION_NAMESPACE}
+  namespace: ${APP_NAMESPACE}
 spec:
   replicas: 1
   selector:
@@ -21,7 +21,7 @@ spec:
       labels:
         app: ${APP_NAME}
     spec:
-      serviceAccountName: ${APPLICATION_SERVICE_ACCOUNT}
+      serviceAccountName: ${APP_SERVICE_ACCOUNT}
 
       volumes:
         - name: ${APP_NAME}-secretless-config
@@ -49,21 +49,38 @@ spec:
           - mountPath: /sock
             name: ${APP_NAME}-sockets
             readOnly: false
-      - name: secretless-broker
+      - name: secretless
         image: cyberark/secretless-broker:latest
         imagePullPolicy: Always
         args: ["-f", "/etc/secretless/secretless.yml"]
         ports:
         - containerPort: 5432
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 5335
+          initialDelaySeconds: 1
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5335
+          initialDelaySeconds: 1
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 60
+
         env:
           - name: CONJUR_APPLIANCE_URL
             value: ${DAP_FOLLOWER_URL}
           - name: CONJUR_ACCOUNT
             value: ${DAP_ACCOUNT}
           - name: CONJUR_AUTHN_URL
-            value: "${DAP_FOLLOWER_URL}/authn-k8s/${AUTHENTICATOR_ID}"
+            value: "${DAP_FOLLOWER_URL}/authn-k8s/${AUTHENTICATOR_ID_ENCODED}"
           - name: CONJUR_AUTHN_LOGIN
-            value: "${APPLICATION_NAMESPACE}/service_account/${APPLICATION_SERVICE_ACCOUNT}"
+            value: "host/conjur/authn-k8s/${AUTHENTICATOR_ID}/apps/${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT}"
           - name: MY_POD_NAME
             valueFrom:
               fieldRef:
@@ -81,6 +98,9 @@ spec:
               configMapKeyRef:
                 key: ssl-certificate
                 name: ${DAP_SSL_CERT_CONFIG_MAP}
+        ports:
+        - containerPort: 15432
+        - containerPort: 13306
         volumeMounts:
           - mountPath: /etc/secretless
             name: ${APP_NAME}-secretless-config

@@ -5,10 +5,8 @@ comparison:
   baselineBackend: pg_direct
 #  type: sql
 #  style: select
-#  rounds: 1000
-#  rounds: infinity
+  rounds: 10000
 #  baselineMaxThresholdPercent: 120
-  rounds: 300
 
 formatters:
   json:
@@ -16,13 +14,24 @@ formatters:
   stdout:
 
 backends:
-  pg_secretless:
-    host: /sock
-
   pg_direct:
-    host: test-secretless-app-postgresql-backend
+    host: REPLACEME
     port: 5432
     username: REPLACEME
     password: REPLACEME
-    database: test_app
+    database: secretless_xa
+
+  pg_secretless_tcp:
+    host: localhost
+    port: 15432
+    database: secretless_xa
+    username: foo
+    password: foo
+    sslmode: disable
+
+  pg_secretless_socket:
+    host: /sock
+    database: secretless_xa
+    username: foo
+    password: foo
     sslmode: disable

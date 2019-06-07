@@ -1,7 +1,12 @@
-export AUTHENTICATOR_ID=madeup-id
-export APPLICATION_SERVICE_ACCOUNT=test-app-secretless
-export DAP_ACCOUNT=example
-export DAP_NAMESPACE_NAME=conjur-geri-test
-export DAP_SSL_CERT_CONFIG_MAP=geri-test
-export DOCKER_REGISTRY_PATH=docker-registry-default.openshift-39.itci.conjur.net
-export TEST_APP_NAMESPACE_NAME=geri-test
+export APP_NAME=juxtaposer
+export APP_SERVICE_ACCOUNT=secretless-xa
+export AUTHENTICATOR_ID=openshift/secretless-xa
+export DAP_ACCOUNT=xa
+export DAP_NAMESPACE_NAME=xa-secretless
+export DAP_SSL_CERT_CONFIG_MAP=dap-ssl-cert
+export DOCKER_REGISTRY_PATH=REPLACEME
+export TEST_APP_NAMESPACE_NAME=srdjan-secretless-xa
+
+OC_REPOSITORY="docker-registry.default.svc:5000/$TEST_APP_NAMESPACE_NAME"
+TAG_NAME="$TEST_APP_NAMESPACE_NAME"
+export PERFTOOL_IMAGE="$OC_REPOSITORY/$APP_NAME:$TAG_NAME"

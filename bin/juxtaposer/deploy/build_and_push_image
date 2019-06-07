@@ -3,28 +3,11 @@ set -euo pipefail
 
 CURRENT_DIR=$(dirname ${BASH_SOURCE[0]})
 
-export APP_NAME=juxtaposer
-
 docker login -u _ -p $(oc whoami -t) $DOCKER_REGISTRY_PATH
 
 test_app_image="$DOCKER_REGISTRY_PATH/$TEST_APP_NAMESPACE_NAME/$APP_NAME:$TEST_APP_NAMESPACE_NAME"
 
 echo "Building and pushing image..."
-
-OC_REPOSITORY="docker-registry.default.svc:5000/$TEST_APP_NAMESPACE_NAME"
-TAG_NAME="$TEST_APP_NAMESPACE_NAME"
-PERFTOOL_IMAGE="$OC_REPOSITORY/$APP_NAME:$TAG_NAME"
-
-set -x
-sed -e "s#\${APP_NAME}#$APP_NAME#g" \
-    -e "s#\${APPLICATION_SERVICE_ACCOUNT}#$APPLICATION_SERVICE_ACCOUNT#g" \
-    -e "s#\${APPLICATION_NAMESPACE}#$TEST_APP_NAMESPACE_NAME#g" \
-    -e "s#\${AUTHENTICATOR_ID}#$AUTHENTICATOR_ID#g" \
-    -e "s#\${DAP_ACCOUNT}#$DAP_ACCOUNT#g" \
-    -e "s#\${DAP_FOLLOWER_URL}#https:\/\/conjur-follower.$DAP_NAMESPACE_NAME.svc.cluster.local#g" \
-    -e "s#\${DAP_SSL_CERT_CONFIG_MAP}#$DAP_SSL_CERT_CONFIG_MAP#g" \
-    -e "s#\${PERFTOOL_IMAGE}#$PERFTOOL_IMAGE#g" \
-    $CURRENT_DIR/juxtaposer_deployment_template.yml > "$CURRENT_DIR/tmp/juxtaposer_deployment.yml"
 
 echo "Building $APP_NAME image"
 pushd $CURRENT_DIR/..

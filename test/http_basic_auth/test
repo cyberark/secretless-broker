@@ -8,17 +8,15 @@ while getopts :l opt; do
     esac
 done
 
-docker_volume_flag=""
-docker_volume_val=""
+docker_volume=""
 if $local_test; then
-  docker_volume_flag="--volume"
-  docker_volume_val="$(cd ../..; pwd):/secretless"
+  docker_volume="$(cd ../..; pwd):/secretless"
 fi
 
 assert_contains() {
   # assert_contains <string> <substring>
-  local string="${1}"
-  local substring="${2}"
+  local string=$1
+  local substring=$2
 
   if [[ "${string}" =~ ${substring} ]]; then
       echo "."
@@ -33,13 +31,37 @@ assert_contains() {
   exit 1
 }
 
+ping_target_service_thru_secretless() {
+  port=$1
+  docker_cmd="docker-compose run --rm --no-deps"
+
+  # NOTE: We must use an array here so that we can double quote it when we use
+  # it but still have it passed as individual args.  This keeps shellcheck
+  # happy and makes our intention clear.
+  wget_cmd=(env "http_proxy=http://secretless:$port" \
+    wget --quiet --output-document - nginx:8080/)
+
+  # NOTE: We need to 2>&1 because we need to assert on wget's error messages
+  # and we need to "|| true" because we don't want the script to exit when this
+  # happens
+  if [[ -n $docker_volume ]]; then
+    $docker_cmd --volume "$docker_volume" test "${wget_cmd[@]}" 2>&1 || true
+  else
+    $docker_cmd test "${wget_cmd[@]}" 2>&1 || true
+  fi
+}
+
 echo "Waiting for Secretless to start"
-# single quotes are intentional
+
+# NOTE: We're using sh compatible script below because alpine doesn't support
+# bash.  We're looking for a better solution.
+
+# single quotes are intentional:
 # shellcheck disable=SC2016
 docker-compose run --rm --no-deps test sh -c '
 counter=0
 while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/null 2>&1; do
-    if expr $counter = 10; then
+    if expr $counter = 5; then
       echo ""
       echo "Timed out waiting for Secretless"
       exit 1
@@ -50,33 +72,21 @@ while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/nul
 done
 '
 
->&2 echo "Secretless is up - continuing "
+echo "Secretless is up - continuing "
+echo ""
+echo "Running tests"
 echo ""
 
-echo "Running tests"
+echo "Test: Secretless configured with correct password succeeds"
 
-echo "test: http_good_basic_auth"
+# port 8080 is configured with the correct pw
+good_resp=$(ping_target_service_thru_secretless 8080)
+assert_contains "$good_resp" "secured resource"
 
-# NOTE: The inner quotes in the parameter expanasions below are needed
-#       even though shellcheck doesn't flag it if you remove them. See:
-# https://tio.run/##S0oszvj/P9FWyVDBSIkrydaYq6AoM68kTUFJtVi1WFdXSUGlOtFKW0klUalWQSWJKzU5Ix@7EpVEkIL//wE
-test_1=$(docker-compose run \
-  --rm \
-  --no-deps \
-  ${docker_volume_flag:+"$docker_volume_flag"} \
-  ${docker_volume_val:+"$docker_volume_val"} \
-  test env http_proxy=http://secretless:8080 \
-  wget --quiet --output-document - nginx:8080/ 2>&1 || true)
+echo "Test: Secretless configured with incorrect password fails"
 
-assert_contains "$test_1" "secured resource"
+# port 8081 is configured with the incorrect pw
+bad_resp=$(ping_target_service_thru_secretless 8081)
+assert_contains "$bad_resp" "401 Unauthorized"
 
-echo "test: http_bad_basic_auth"
-test_2=$(docker-compose run \
-  --rm \
-  --no-deps \
-  ${docker_volume_flag:+"$docker_volume_flag"} \
-  ${docker_volume_val:+"$docker_volume_val"} \
-  test env http_proxy=http://secretless:8081 \
-  wget --quiet --output-document - nginx:8080/ 2>&1 || true)
-
-assert_contains "${test_2}" "wget: server returned error: HTTP/1.1 401 Unauthorized"
+echo "PASS"

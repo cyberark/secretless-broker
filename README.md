@@ -424,80 +424,73 @@ Using the Secretless Broker reduces the transaction throughput by about 25% on P
     go stream(self.Backend, self.Client)
 ```
 
-Here is some performance data created by running [pgbench](https://www.postgresql.org/docs/9.5/static/pgbench.html) in a Dockerized environment with the client, the Secretless Broker and database running on a single machine (2017 MacBook Pro with 4-core Intel Core i7 @ 2.9GHz).
+Here is some performance data created by running [pgbench](https://www.postgresql.org/docs/9.5/static/pgbench.html) with the client, the Secretless Broker and database running on a single machine (2017 MacBook Pro with 2.3 GHz Intel Core i5) where the database is running in Docker.
 
 Directly to the database:
 
 ```
-root@566b7c06abcf:/go/src/github.com/cyberark/secretless-broker# PGPASSWORD=test PGSSLMODE=disable pgbench -h pg -U test -T 10 -c 12 -j 12 postgres
+$ PGPASSWORD=mysecretpassword PGSSLMODE=disable pgbench -h localhost -U postgres -p 5432 -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
-transaction type: TPC-B (sort of)
+transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
 query mode: simple
 number of clients: 12
 number of threads: 12
 duration: 10 s
-number of transactions actually processed: 14434
-latency average: 8.327 ms
-tps = 1441.077559 (including connections establishing)
-tps = 1443.230144 (excluding connections establishing)
+number of transactions actually processed: 2733
+latency average = 44.167 ms
+tps = 271.696057 (including connections establishing)
+tps = 272.924176 (excluding connections establishing)
 ```
 
 Through the `secretless-broker` proxy:
 
 ```
-root@566b7c06abcf:/go/src/github.com/cyberark/secretless-broker# PGSSLMODE=disable pgbench -h 172.18.0.9 -T 10 -c 12 -j 12 postgres
+$ PGSSLMODE=disable pgbench -h localhost -U postgres -p 4321 -T 10 -c 12 -j 12 postgres
 starting vacuum...end.
-transaction type: TPC-B (sort of)
+transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
 query mode: simple
 number of clients: 12
 number of threads: 12
 duration: 10 s
-number of transactions actually processed: 10695
-latency average: 11.237 ms
-tps = 1067.933129 (including connections establishing)
-tps = 1075.661082 (excluding connections establishing)
+number of transactions actually processed: 2459
+latency average = 49.034 ms
+tps = 244.727719 (including connections establishing)
+tps = 248.327635 (excluding connections establishing)
 ```
 
-Here is a set of test results running directly against an RDS Postgresql:
+From the results above, you can see 9% fewer tps (even including establishing connections) via the Secretless Broker.
 
+To run this test yourself, you can start PostgreSQL by running
 ```
-root@2a33637a9cb5:/work# pgbench -h demo1.cb5uzm0ycqol.us-east-1.rds.amazonaws.com -p 5432 -U alice -T 10 -c 12 -j 12 postgres
-Password:
-starting vacuum...end.
-transaction type: TPC-B (sort of)
-scaling factor: 1
-query mode: simple
-number of clients: 12
-number of threads: 12
-duration: 10 s
-number of transactions actually processed: 197
-latency average: 657.775 ms
-tps = 18.243307 (including connections establishing)
-tps = 18.542609 (excluding connections establishing)
+docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d -p 5432:5432 postgres:9.3
 ```
 
-And to RDS through the Secretless Broker:
-
+Write a `secretless.yml` file that includes:
+```yaml
+version: "2"
+services:
+  pg-db:
+    protocol: pg
+    listenOn: tcp://0.0.0.0:4321
+    credentials:
+      username: postgres
+      password: mysecretpassword
+      sslmode: disable
+      address: localhost:5432
 ```
-root@2a33637a9cb5:/work# pgbench -U alice -T 10 -c 12 -j 12 postgres
-starting vacuum...end.
-transaction type: TPC-B (sort of)
-scaling factor: 1
-query mode: simple
-number of clients: 12
-number of threads: 12
-duration: 10 s
-number of transactions actually processed: 153
-latency average: 824.491 ms
-tps = 14.554441 (including connections establishing)
-tps = 15.822442 (excluding connections establishing)
+and run Secretless:
+```
+$ ./bin/build_darwin # to build the OSX binary
+$ ./dist/darwin/amd64/secretless-broker -f secretless.yml
 ```
 
-14% fewer tps (excluding establishing connections) via the Secretless Broker.
-
-Changing the `-c` (number of clients) and `-j` (number of threads) didn't have much effect on the relative throughput, though increasing these from 1 to 12 does approximately double the tps in both direct and proxied scenarios.
+Initialize `pgbench` by running
+```
+PGPASSWORD=mysecretpassword pgbench -i -h localhost -U postgres -p 5432
+```
+and run the tests as above.
 
 # Development
 

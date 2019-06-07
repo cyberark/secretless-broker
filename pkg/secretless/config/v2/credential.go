@@ -47,26 +47,12 @@ func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
 		return nil, err
 	}
 
-	// General Case: provider and id specified
-	if _, ok := credYAML.(map[interface{}]interface{}); ok {
-		credYamlStruct := &struct {
-			From string `yaml:"from"`
-			Get  string `yaml:"get"`
-		}{}
-
-		err = yaml.Unmarshal(credentialBytes, credYamlStruct)
-		// TODO: the line number in this error is dishonest
-		if err != nil {
-			return nil, err
-		}
-
-		cred.Get = credYamlStruct.Get
-		cred.From = credYamlStruct.From
-
 	// Special Case: scalar literal value specified
-	} else {
+	if _, ok := credYAML.(map[interface{}]interface{}); !ok {
+		// Try to unmarshall it into a string
 		var credentialValue string
 		err = yaml.Unmarshal(credentialBytes, &credentialValue)
+
 		// TODO: the line number in this error is dishonest
 		if err != nil {
 			return nil, err
@@ -74,7 +60,24 @@ func NewCredential(credName string, credYAML interface{}) (*Credential, error) {
 
 		cred.From = "literal"
 		cred.Get = credentialValue
+		return cred, nil
 	}
+
+	// General Case: provider and id specified
+	credYamlStruct := &struct {
+		From string `yaml:"from"`
+		Get  string `yaml:"get"`
+	}{}
+
+	err = yaml.Unmarshal(credentialBytes, credYamlStruct)
+
+	// TODO: the line number in this error is dishonest
+	if err != nil {
+		return nil, err
+	}
+
+	cred.Get = credYamlStruct.Get
+	cred.From = credYamlStruct.From
 
 	return cred, nil
 }

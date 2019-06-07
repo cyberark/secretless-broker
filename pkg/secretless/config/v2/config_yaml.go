@@ -26,6 +26,7 @@ func newConfigYAML(rawYAML []byte) (*configYAML, error) {
 	if len(rawYAML) == 0 {
 		return nil, fmt.Errorf("empty file contents given to NewConfig")
 	}
+
 	cfgYAML := &configYAML{}
 	err := yaml.Unmarshal(rawYAML, cfgYAML)
 	if err != nil {

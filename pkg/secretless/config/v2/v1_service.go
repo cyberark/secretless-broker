@@ -28,7 +28,6 @@ type v1Service struct {
 }
 
 func newV1Service(v2Svc Service) (ret *v1Service, err error) {
-
 	// Create basic Service
 
 	ret = &v1Service{
@@ -84,7 +83,6 @@ func newV1Service(v2Svc Service) (ret *v1Service, err error) {
 }
 
 func (v1Svc *v1Service) applyProtocolConfig(cfgBytes []byte) error {
-
 	switch v1Svc.Listener.Protocol {
 	case "http":
 		if err := v1Svc.configureHTTP(cfgBytes); err != nil {

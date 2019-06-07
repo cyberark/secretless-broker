@@ -22,10 +22,10 @@ type Config struct {
 // required credentials, and (optionally) any additional protocol specific
 // configuration.
 type Service struct {
-	Name           string
 	Credentials    []*Credential
-	Protocol       string
 	ListenOn       string
+	Name           string
+	Protocol       string
 	ProtocolConfig []byte
 }
 
@@ -105,10 +105,10 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 	}
 
 	svc := &Service{
-		Name:           svcName,
 		Credentials:    credentials,
-		Protocol:       svcYAML.Protocol,
 		ListenOn:       svcYAML.ListenOn,
+		Name:           svcName,
+		Protocol:       svcYAML.Protocol,
 		ProtocolConfig: nil,
 	}
 

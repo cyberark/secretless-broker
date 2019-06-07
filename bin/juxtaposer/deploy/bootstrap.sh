@@ -1,7 +1,10 @@
-export APP_NAME=juxtaposer
+export CONFIG_TEMPLATE=pg
+export TEST_DURATION=96h
+
+export APP_NAME=juxtaposer-${CONFIG_TEMPLATE}
+
 export APP_SERVICE_ACCOUNT=secretless-xa
 export AUTHENTICATOR_ID=openshift/secretless-xa
-export CONFIG_TEMPLATE=pg
 export DAP_ACCOUNT=xa
 export DAP_NAMESPACE_NAME=xa-secretless
 export DAP_SSL_CERT_CONFIG_MAP=dap-ssl-cert

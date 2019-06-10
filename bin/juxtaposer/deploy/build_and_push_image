@@ -1,20 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 
-CURRENT_DIR=$(dirname ${BASH_SOURCE[0]})
+CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
-docker login -u _ -p $(oc whoami -t) $DOCKER_REGISTRY_PATH
+docker login -u _ -p "$(oc whoami -t)" "$DOCKER_REGISTRY_PATH"
 
 test_app_image="$DOCKER_REGISTRY_PATH/$TEST_APP_NAMESPACE_NAME/$APP_NAME:$TEST_APP_NAMESPACE_NAME"
 
 echo "Building and pushing image..."
 
 echo "Building $APP_NAME image"
-pushd $CURRENT_DIR/..
-  docker build -t $APP_NAME:$TEST_APP_NAMESPACE_NAME .
+pushd "$CURRENT_DIR/.."
+  docker build -t "$APP_NAME:$TEST_APP_NAMESPACE_NAME" .
 popd
 
-docker tag $APP_NAME:$TEST_APP_NAMESPACE_NAME $test_app_image
+docker tag "$APP_NAME:$TEST_APP_NAMESPACE_NAME" "$test_app_image"
 
 echo "Pushing $test_app_image to OpenShift..."
-docker push $test_app_image
+docker push "$test_app_image"

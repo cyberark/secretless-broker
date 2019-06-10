@@ -7,7 +7,7 @@ PERF_TEST_IMAGE_TAG="$PERF_TEST_IMAGE:latest"
 
 echo "Current dir: $CURRENT_DIR"
 
-pushd $CURRENT_DIR/juxtaposer
+pushd "$CURRENT_DIR/juxtaposer"
   docker build -t "$PERF_TEST_IMAGE_TAG" .
 popd
 

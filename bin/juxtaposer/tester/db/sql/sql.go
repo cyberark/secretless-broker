@@ -43,6 +43,7 @@ func (tester *SqlDatabaseTester) QueryRows(fieldName string,
 		}
 		fieldValues = append(fieldValues, fieldValue)
 	}
+
 	// Check for errors from iterating over rows.
 	if err := rows.Err(); err != nil {
 		return nil, err

@@ -158,7 +158,6 @@ func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
 	testDuration := time.Now().Sub(startTime)
 
 	if manager.Options.Debug {
-		log.Printf("WARN: TODO: Compare returned data!")
 		log.Printf("DB query: OK")
 	}
 

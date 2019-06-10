@@ -24,3 +24,14 @@ type TestRunError struct {
 
 type FormatterOptions map[string]string
 type FormatterConstructor func(FormatterOptions) (OutputFormatter, error)
+
+func NewBackendTiming() BackendTiming {
+	return BackendTiming{
+		BaselineDivergencePercent: map[int]int{},
+		Count:                     0,
+		Duration:                  0 * time.Second,
+		MinimumDuration:           0 * time.Second,
+		MaximumDuration:           0 * time.Second,
+		Errors:                    []TestRunError{},
+	}
+}

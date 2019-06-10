@@ -10,11 +10,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
+	sql_db_tester "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/sql"
 )
 
 type MySqlTester struct {
-	Database *sql.DB
-	Debug    bool
+	sql_db_tester.SqlDatabaseTester
 }
 
 //[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
@@ -68,54 +68,5 @@ func (tester *MySqlTester) Connect(options api.DbTesterOptions) error {
 	tester.Database = db
 	tester.Debug = options.Debug
 
-	return nil
-}
-
-func (tester *MySqlTester) Query(query string, args ...interface{}) error {
-	_, err := tester.QueryRows("", query, args...)
-	return err
-}
-
-func (tester *MySqlTester) QueryRows(fieldName string,
-	query string, args ...interface{}) ([]string, error) {
-
-	if tester.Debug {
-		log.Printf("Query: %s", query)
-		log.Print(args...)
-	}
-
-	if tester.Database == nil {
-		return nil, fmt.Errorf("ERROR: Cannot query an unopened DB!")
-	}
-
-	rows, err := tester.Database.Query(query, args...)
-	if err != nil {
-		log.Printf("ERROR mysql: Could not execute query!")
-		return nil, err
-	}
-	defer rows.Close()
-
-	fieldValues := make([]string, 0)
-	for rows.Next() {
-		var fieldValue string
-		if err := rows.Scan(&fieldValue); err != nil {
-			return nil, err
-		}
-		fieldValues = append(fieldValues, fieldValue)
-	}
-	// Check for errors from iterating over rows.
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return fieldValues, nil
-}
-
-func (tester *MySqlTester) Shutdown() error {
-	if tester.Debug {
-		log.Println("Shutting down database connection...")
-	}
-
-	tester.Database.Close()
 	return nil
 }

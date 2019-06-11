@@ -9,6 +9,7 @@ export DAP_ACCOUNT=xa
 export DAP_NAMESPACE_NAME=xa-secretless
 export DAP_SSL_CERT_CONFIG_MAP=dap-ssl-cert
 export DOCKER_REGISTRY_PATH=REPLACEME
+export SECRETELESS_IMAGE="cyberark/secretless-broker:0.7.1-becf48d"
 export TEST_APP_NAMESPACE_NAME=srdjan-secretless-xa
 
 OC_REPOSITORY="docker-registry.default.svc:5000/$TEST_APP_NAMESPACE_NAME"

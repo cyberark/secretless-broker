@@ -51,7 +51,7 @@ spec:
             name: ${APP_NAME}-sockets
             readOnly: false
       - name: secretless
-        image: cyberark/secretless-broker:latest
+        image: ${SECRETELESS_IMAGE}
         imagePullPolicy: Always
         args: ["-f", "/etc/secretless/secretless.yml"]
         ports:

@@ -3,6 +3,9 @@ set -euo pipefail
 
 CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
+if ! oc whoami &> /dev/null; then
+  oc login
+fi
 docker login -u _ -p "$(oc whoami -t)" "$DOCKER_REGISTRY_PATH"
 
 test_app_image="$DOCKER_REGISTRY_PATH/$TEST_APP_NAMESPACE_NAME/$APP_NAME:$TEST_APP_NAMESPACE_NAME"

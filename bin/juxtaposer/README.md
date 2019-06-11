@@ -2,9 +2,40 @@
 
 ## Description
 
-This tool is used to compare timing data between arbitrary number of similar
+This tool can be used to compare timing data between arbitrary number of similar
 services to evaluate differences in speed between a specified baseline backend
 and the other backends.
+
+Specifically, this tool is used here as a performance test agent that can be
+deployed alongside Secretless to run through the following test scenarios:
+- Comparing performance differences between direct connection to MySQL database
+vs one over Secretless Unix socket with a persistent connection.
+- Comparing performance differences between direct connection to MySQL database
+vs one over Secretless TCP port with a persistent connection.
+- Comparing performance differences between direct connection to Postgres database
+vs one over Secretless Unix socket with a persistent connection.
+- Comparing performance differences between direct connection to Postgres database
+vs one over Secretless TCP port with a persistent connection.
+
+Comparisons results that we output and/or compare are:
+- Data returned comparison to expected values from backend
+- Number of rounds (single-shot tests runs) completed
+- Average/Min/Max single-shot test duration
+- Error count, error messages, and percentage of errors
+- Differences in timing (percentage-based) between runs temporaly close
+- Percentage of single-shot runs that are above the specified baseline threshold
+- 90% confidence interval (percentage-based) of test runs as compared to the
+baseline backend.
+
+Note: More comparison types may be added in the future.
+
+---
+
+### **Status**: Alpha
+
+#### **Warning: Naming and APIs are still subject to breaking changes!**
+
+---
 
 ## CLI flags
 

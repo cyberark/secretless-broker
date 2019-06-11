@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+CURRENT_DIR=$("$(dirname "$0")/abspath")
+
+PERF_TEST_IMAGE="juxtaposer"
+PERF_TEST_IMAGE_TAG="$PERF_TEST_IMAGE:latest"
+
+pushd "$CURRENT_DIR/juxtaposer"
+  docker build -t "$PERF_TEST_IMAGE_TAG" .
+popd
+
+echo "Perf tool built. Image tag: $PERF_TEST_IMAGE_TAG"

@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+
+CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")
+
+"$CURRENT_DIR/build_and_push_image"
+"$CURRENT_DIR/deploy_app"

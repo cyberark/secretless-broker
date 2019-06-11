@@ -34,3 +34,6 @@ Gopkg.*
 
 # Ignore auto-generated temporary files
 github.com/cyberark/
+
+# Ignore any JSON results files
+results.json

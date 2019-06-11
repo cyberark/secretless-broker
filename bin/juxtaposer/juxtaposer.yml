@@ -1,0 +1,42 @@
+---
+#driver: mysql-5.7
+driver: postgres
+
+comparison:
+  baselineBackend: pg_direct
+#  type: sql
+#  style: select
+#  rounds: 1000
+#  rounds: infinity
+#  baselineMaxThresholdPercent: 120
+  silent: true
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  pg_secretless:
+    host: /sock
+
+  pg_direct:
+    host: localhost
+    port: 5433
+    username: myuser
+    password: mypassword
+    sslmode: disable
+    debug: false
+
+  mysql_secretless:
+    host: /sock/mysql
+    ignore: true
+
+  mysql_direct:
+    host: localhost
+    port: 3307
+    username: myuser
+    password: mypassword
+    sslmode: disable
+    debug: false
+    ignore: true

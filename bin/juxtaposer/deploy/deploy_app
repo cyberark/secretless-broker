@@ -1,0 +1,32 @@
+#!/bin/bash
+set -euo pipefail
+
+CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")
+
+"$CURRENT_DIR/stop"
+
+AUTHENTICATOR_ID_ENCODED="$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(),safe=''))" <<< "$AUTHENTICATOR_ID")"
+echo "${AUTHENTICATOR_ID_ENCODED}"
+
+sed -e "s#\${APP_NAME}#$APP_NAME#g" \
+    -e "s#\${APP_SERVICE_ACCOUNT}#$APP_SERVICE_ACCOUNT#g" \
+    -e "s#\${APP_NAMESPACE}#$TEST_APP_NAMESPACE_NAME#g" \
+    -e "s#\${AUTHENTICATOR_ID}#$AUTHENTICATOR_ID#g" \
+    -e "s#\${AUTHENTICATOR_ID_ENCODED}#$AUTHENTICATOR_ID_ENCODED#g" \
+    -e "s#\${CONFIG_TEMPLATE}#$CONFIG_TEMPLATE#g" \
+    -e "s#\${DAP_ACCOUNT}#$DAP_ACCOUNT#g" \
+    -e "s#\${DAP_FOLLOWER_URL}#https:\/\/conjur-follower.$DAP_NAMESPACE_NAME.svc.cluster.local#g" \
+    -e "s#\${DAP_SSL_CERT_CONFIG_MAP}#$DAP_SSL_CERT_CONFIG_MAP#g" \
+    -e "s#\${PERFTOOL_IMAGE}#$PERFTOOL_IMAGE#g" \
+    -e "s#\${SECRETELESS_IMAGE}#$SECRETELESS_IMAGE#g" \
+    -e "s#\${TEST_DURATION}#$TEST_DURATION#g" \
+    "$CURRENT_DIR/juxtaposer_deployment_template.yml" > "$CURRENT_DIR/tmp/juxtaposer_deployment.yml"
+
+
+kubectl create configmap "${APP_NAME}-secretless-config" \
+  "--from-file=secretless.yml=$CURRENT_DIR/secretless.yml"
+
+kubectl create configmap "${APP_NAME}-config" \
+  "--from-file=${APP_NAME}_${CONFIG_TEMPLATE}.yml=$CURRENT_DIR/juxtaposer_${CONFIG_TEMPLATE}.yml"
+
+kubectl apply -f "$CURRENT_DIR/tmp/juxtaposer_deployment.yml"

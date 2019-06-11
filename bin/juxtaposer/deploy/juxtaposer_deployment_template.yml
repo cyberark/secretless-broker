@@ -1,0 +1,111 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${APP_SERVICE_ACCOUNT}
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    app: ${APP_NAME}
+  name: ${APP_NAME}
+  namespace: ${APP_NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}
+    spec:
+      serviceAccountName: ${APP_SERVICE_ACCOUNT}
+
+      volumes:
+        - name: ${APP_NAME}-secretless-config
+          configMap:
+            name: ${APP_NAME}-secretless-config
+            defaultMode: 420
+        - name: ${APP_NAME}-config
+          configMap:
+            name: ${APP_NAME}-config
+            defaultMode: 420
+        - name: ${APP_NAME}-sockets
+          emptyDir:
+            medium: Memory
+
+      containers:
+      - name: ${APP_NAME}
+        image: ${PERFTOOL_IMAGE}
+        imagePullPolicy: Always
+        # command: [ "/bin/sleep", "999d" ]
+        args: ["-c", "-t", "${TEST_DURATION}", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
+
+        volumeMounts:
+          - mountPath: /etc/${APP_NAME}
+            name: ${APP_NAME}-config
+            readOnly: true
+          - mountPath: /sock
+            name: ${APP_NAME}-sockets
+            readOnly: false
+      - name: secretless
+        image: ${SECRETELESS_IMAGE}
+        imagePullPolicy: Always
+        args: ["-f", "/etc/secretless/secretless.yml"]
+        ports:
+        - containerPort: 5432
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 5335
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5335
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 60
+
+        env:
+          - name: CONJUR_APPLIANCE_URL
+            value: ${DAP_FOLLOWER_URL}
+          - name: CONJUR_ACCOUNT
+            value: ${DAP_ACCOUNT}
+          - name: CONJUR_AUTHN_URL
+            value: "${DAP_FOLLOWER_URL}/authn-k8s/${AUTHENTICATOR_ID_ENCODED}"
+          - name: CONJUR_AUTHN_LOGIN
+            value: "host/conjur/authn-k8s/${AUTHENTICATOR_ID}/apps/${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT}"
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: CONJUR_SSL_CERTIFICATE
+            valueFrom:
+              configMapKeyRef:
+                key: ssl-certificate
+                name: ${DAP_SSL_CERT_CONFIG_MAP}
+        ports:
+        - containerPort: 15432
+        - containerPort: 13306
+        volumeMounts:
+          - mountPath: /etc/secretless
+            name: ${APP_NAME}-secretless-config
+            readOnly: true
+          - mountPath: /sock
+            name: ${APP_NAME}-sockets
+            readOnly: false

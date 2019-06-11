@@ -1,0 +1,38 @@
+---
+driver: postgres
+
+comparison:
+  baselineBackend: pg_direct
+#  type: sql
+#  style: select
+  rounds: 10000
+#  baselineMaxThresholdPercent: 120
+  silent: true
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  pg_direct:
+    host: REPLACEME
+    port: 5432
+    username: REPLACEME
+    password: REPLACEME
+    database: secretless_xa
+
+  pg_secretless_tcp:
+    host: localhost
+    port: 15432
+    database: secretless_xa
+    username: foo
+    password: foo
+    sslmode: disable
+
+  pg_secretless_socket:
+    host: /sock
+    database: secretless_xa
+    username: foo
+    password: foo
+    sslmode: disable

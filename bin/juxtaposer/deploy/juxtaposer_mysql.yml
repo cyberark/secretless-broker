@@ -1,0 +1,32 @@
+---
+driver: mysql-5.7
+
+comparison:
+  baselineBackend: mysql_direct
+#  type: sql
+#  style: select
+  rounds: 10000
+#  baselineMaxThresholdPercent: 120
+  silent: true
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  mysql_direct:
+    host: REPLACEME
+    port: 3306
+    username: REPLACEME
+    password: REPLACEME
+    database: secretless_xa
+
+  mysql_secretless_tcp:
+    host: localhost
+    port: 13306
+    database: secretless_xa
+
+  mysql_secretless_socket:
+    host: /sock/mysql
+    database: secretless_xa

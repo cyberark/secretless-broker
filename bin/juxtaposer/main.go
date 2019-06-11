@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os/signal"
 	"sort"
@@ -11,8 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
-
+	conf "github.com/cyberark/secretless-broker/bin/juxtaposer/config"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter"
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 	tester_api "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
@@ -20,109 +18,10 @@ import (
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/util"
 )
 
-type backend struct {
-	Database    string `yaml:"database"`
-	Debug       bool   `yaml:"debug"`
-	Description string `yaml:"description"`
-	Host        string `yaml:"host"`
-	Ignore      bool   `yaml:"ignore"`
-	Password    string `yaml:"password"`
-	Port        string `yaml:"port"`
-	SslMode     string `yaml:"sslmode"`
-	Socket      string `yaml:"socket"`
-	Username    string `yaml:"username"`
-}
-
-type comparison struct {
-	BaselineBackend             string `yaml:"baselineBackend"`
-	BaselineMaxThresholdPercent int    `yaml:"baselineMaxThresholdPercent"`
-	Rounds                      string `yaml:"rounds"`
-	Silent                      bool   `yaml:"silent"`
-	Style                       string `yaml:"style"`
-	Type                        string `yaml:"type"`
-}
-
-// Config is the main structure used to define the perfagent parameters
-type Config struct {
-	Backends   map[string]backend                        `yaml:"backends"`
-	Comparison comparison                                `yaml:"comparison"`
-	Driver     string                                    `yaml:"driver"`
-	Formatters map[string]formatter_api.FormatterOptions `yaml:"formatters"`
-}
-
 const zeroDuration = 0 * time.Second
 
-func verifyConfiguration(config *Config) error {
-	if !strings.HasPrefix(config.Comparison.Type, "sql/") {
-		return fmt.Errorf("ERROR: Comparison type not supported: %s", config.Comparison.Type)
-	}
-
-	connectionType := config.Comparison.Type[4:]
-	if connectionType != "persistent" &&
-		connectionType != "recreate" {
-		return fmt.Errorf("ERROR: Comparison connection type not supported: %s",
-			connectionType)
-	}
-
-	if config.Comparison.Style != "select" {
-		return fmt.Errorf("ERROR: Comparison style supported: %s", config.Comparison.Style)
-	}
-
-	if len(config.Formatters) == 0 {
-		return fmt.Errorf("ERROR: No formatters defined")
-	}
-
-	baselineBackend := config.Comparison.BaselineBackend
-	if baselineBackend == "" {
-		return fmt.Errorf("ERROR: Comparison baselineBackend must be specified")
-	}
-
-	if _, ok := config.Backends[baselineBackend]; !ok {
-		return fmt.Errorf("ERROR: Comparison baseline backend '%s' not found",
-			baselineBackend)
-	}
-
-	return nil
-}
-
-func readConfiguration(configFile string) (*Config, error) {
-	yamlFile, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return nil, err
-	}
-
-	// Default options
-	config := Config{
-		Comparison: comparison{
-			BaselineMaxThresholdPercent: 120,
-			Rounds:                      "1000",
-			Style:                       "select",
-			Type:                        "sql/persistent",
-		},
-		Formatters: map[string]formatter_api.FormatterOptions{
-			"stdout": formatter_api.FormatterOptions{},
-		},
-	}
-	err = yaml.Unmarshal(yamlFile, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	// Slice out any backends which are ignored
-	filteredBackends := map[string]backend{}
-	for backendName, backendConfig := range config.Backends {
-		if backendConfig.Ignore == false {
-			filteredBackends[backendName] = backendConfig
-		}
-	}
-
-	config.Backends = filteredBackends
-
-	return &config, nil
-}
-
 func performInvocation(backendName string, backendTestManager tester_api.DriverManager,
-	backendConfig backend) (time.Duration, error) {
+	backendConfig conf.Backend) (time.Duration, error) {
 
 	if backendConfig.Debug {
 		fmt.Printf("%s %s %s\n",
@@ -144,7 +43,7 @@ func performInvocation(backendName string, backendTestManager tester_api.DriverM
 	return testDuration, nil
 }
 
-func createBackendTesters(config *Config,
+func createBackendTesters(config *conf.Config,
 	baselineBackendName string) ([]string, map[string]tester_api.DriverManager, error) {
 
 	// Keys in a map are not guaranteed to be retrieved in the same order
@@ -209,7 +108,7 @@ func createBackendTesters(config *Config,
 	return backendNames, backendInstances, nil
 }
 
-func applyExitConditions(config *Config, requestedDurationString string,
+func applyExitConditions(config *conf.Config, requestedDurationString string,
 	shutdownChannel chan<- bool) (int, error) {
 
 	var err error
@@ -247,7 +146,7 @@ func applyExitConditions(config *Config, requestedDurationString string,
 	return rounds, nil
 }
 
-func processAllResults(backendNames []string, config *Config,
+func processAllResults(backendNames []string, config *conf.Config,
 	aggregatedTimings map[string]formatter_api.BackendTiming) error {
 
 	for formatterName, formatterOptions := range config.Formatters {
@@ -270,7 +169,7 @@ func processAllResults(backendNames []string, config *Config,
 	return nil
 }
 
-func updateTimingData(round int, config *Config, aggregatedTimings map[string]formatter_api.BackendTiming,
+func updateTimingData(round int, config *conf.Config, aggregatedTimings map[string]formatter_api.BackendTiming,
 	backendName string, singleTestRunDuration time.Duration, testError error, baselineTestDuration time.Duration) {
 
 	timingInfo := aggregatedTimings[backendName]
@@ -321,7 +220,7 @@ func updateTimingData(round int, config *Config, aggregatedTimings map[string]fo
 	aggregatedTimings[backendName] = timingInfo
 }
 
-func runMainTestingLoop(config *Config, backendNames *[]string,
+func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 	backendInstances map[string]tester_api.DriverManager,
 	baselineBackendName string,
 	rounds int,
@@ -379,15 +278,9 @@ func main() {
 
 	log.Printf("Using configuration: %s", *configFile)
 
-	var err error
-	config, err := readConfiguration(*configFile)
+	config, err := conf.NewConfiguration(*configFile)
 	if err != nil {
-		log.Fatalf("ERROR: Could not read config file '%s': %v", *configFile, err)
-	}
-
-	err = verifyConfiguration(config)
-	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("ERROR: Could not load config file '%s': %v", *configFile, err)
 	}
 
 	log.Println("Config loaded!")

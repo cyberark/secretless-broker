@@ -53,8 +53,15 @@ type Config struct {
 const zeroDuration = 0 * time.Second
 
 func verifyConfiguration(config *Config) error {
-	if config.Comparison.Type != "sql" {
-		return fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
+	if !strings.HasPrefix(config.Comparison.Type, "sql/") {
+		return fmt.Errorf("ERROR: Comparison type not supported: %s", config.Comparison.Type)
+	}
+
+	connectionType := config.Comparison.Type[4:]
+	if connectionType != "persistent" &&
+		connectionType != "recreate" {
+		return fmt.Errorf("ERROR: Comparison connection type not supported: %s",
+			connectionType)
 	}
 
 	if config.Comparison.Style != "select" {
@@ -90,7 +97,7 @@ func readConfiguration(configFile string) (*Config, error) {
 			BaselineMaxThresholdPercent: 120,
 			Rounds:                      "1000",
 			Style:                       "select",
-			Type:                        "sql",
+			Type:                        "sql/persistent",
 		},
 		Formatters: map[string]formatter_api.FormatterOptions{
 			"stdout": formatter_api.FormatterOptions{},
@@ -151,19 +158,24 @@ func createBackendTesters(config *Config,
 
 		log.Printf("Setting up backend: %s", backendName)
 
-		if config.Comparison.Type != "sql" {
-			return nil, nil, fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
+		// Sanity check
+		if !strings.HasPrefix(config.Comparison.Type, "sql/") {
+			return nil, nil, fmt.Errorf("ERROR: Comparison type not supported: %s", config.Comparison.Type)
 		}
 
+		// TODO: Make this more robust
+		connectionType := config.Comparison.Type[4:]
+
 		options := tester_api.DbTesterOptions{
-			DatabaseName: backendConfig.Database,
-			Debug:        backendConfig.Debug,
-			Host:         backendConfig.Host,
-			Password:     backendConfig.Password,
-			Port:         backendConfig.Port,
-			SslMode:      backendConfig.SslMode,
-			Socket:       backendConfig.Socket,
-			Username:     backendConfig.Username,
+			ConnectionType: connectionType,
+			DatabaseName:   backendConfig.Database,
+			Debug:          backendConfig.Debug,
+			Host:           backendConfig.Host,
+			Password:       backendConfig.Password,
+			Port:           backendConfig.Port,
+			SslMode:        backendConfig.SslMode,
+			Socket:         backendConfig.Socket,
+			Username:       backendConfig.Username,
 		}
 
 		if backendConfig.Debug {

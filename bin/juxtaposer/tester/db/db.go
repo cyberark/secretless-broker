@@ -83,7 +83,6 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 
 		if err != nil {
 			log.Printf("ERROR! Could not insert canned values into DB!")
-			manager.Tester.Shutdown()
 			return err
 		}
 	}
@@ -144,6 +143,14 @@ func ensureCorrectReturnedData(rows []string) error {
 func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
 	startTime := time.Now()
 
+	if manager.Options.ConnectionType == "recreate" {
+		err := manager.Tester.Connect(*manager.Options)
+		if err != nil {
+			return ZeroDuration, err
+		}
+		defer manager.Tester.Shutdown()
+	}
+
 	rows, err := manager.Tester.QueryRows("name", QueryTypes[manager.TestType])
 	if err != nil {
 		log.Printf("ERROR! Query failed!")
@@ -196,9 +203,12 @@ func NewTestDriver(driver string, testType string, options api.DbTesterOptions) 
 		log.Printf("Tester creation: OK")
 	}
 
-	manager.Tester.Connect(*manager.Options)
-	if options.Debug {
-		log.Printf("Tester connection: OK")
+	if options.ConnectionType == "persistent" {
+		log.Println("Persistent connection requested. Opening a long-lived one...")
+		manager.Tester.Connect(*manager.Options)
+		if options.Debug {
+			log.Printf("Tester connection: OK")
+		}
 	}
 
 	return &manager, nil

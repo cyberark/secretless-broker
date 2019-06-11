@@ -4,7 +4,7 @@ driver: postgres
 
 comparison:
   baselineBackend: pg_direct
-#  type: sql
+#  type: sql/persistent
 #  style: select
 #  rounds: 1000
 #  rounds: infinity

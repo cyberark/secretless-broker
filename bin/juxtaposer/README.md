@@ -96,9 +96,9 @@ backends:
 This setting is linked to a named backend to indicate the baseline backend
 against which all calculation will be compared.
 
-1. (optional) `type`, `string`, default: `sql`
-This setting decides what type of comparison will be run. Only `sql` is
-currently supported.
+1. (optional) `type`, `string`, default: `sql/persistent`
+This setting decides what type of comparison will be run. Only the following
+are currently supported: `sql/persistent` and `sql/recreate`.
 
 1. (optional) `style`, `string`, default: `select`
 This setting decides what style (subtype) of comparison will be run. Currently

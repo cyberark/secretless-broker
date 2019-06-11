@@ -1,14 +1,15 @@
 package api
 
 type DbTesterOptions struct {
-	DatabaseName string
-	Debug        bool
-	Host         string
-	Password     string
-	Port         string
-	SslMode      string
-	Socket       string
-	Username     string
+	ConnectionType string
+	DatabaseName   string
+	Debug          bool
+	Host           string
+	Password       string
+	Port           string
+	SslMode        string
+	Socket         string
+	Username       string
 }
 
 type DbTester interface {

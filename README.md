@@ -1,15 +1,5 @@
 [![pipeline status](https://gitlab.com/cyberark/secretless-broker/badges/master/pipeline.svg)](https://gitlab.com/cyberark/secretless-broker/commits/master)
 
-***
-
-**Status**: Beta
-
-The Secretless Broker is currently in beta.
-
-Naming and API's are still subject to *breaking* changes.
-
-***
-
 # Table of Contents
 
 - [Secretless Broker](#secretless-broker)
@@ -62,9 +52,8 @@ The Secretless Broker is currently licensed under [ASL 2.0](#license)
 
 - MySQL (Socket and TCP)
 - PostgreSQL (Socket and TCP)
-- SSH
-- SSH-Agent
-- HTTP (Basic auth, Conjur, and AWS authorization strategies)
+- SSH / SSH-Agent (Beta)
+- HTTP with Basic auth, Conjur, and AWS authorization strategies (Beta)
 
 With many others in the planning stages!
 
@@ -289,7 +278,7 @@ Example:
 ...
 ```
 
-### Kubernetes Secrets Provider
+### Kubernetes Secrets Provider (beta)
 
 Kubernetes Secrets (`kubernetes`) provider allows use of [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) for fetching secrets.
 
@@ -349,7 +338,7 @@ Example:
 ...
 ```
 
-### Keychain Provider
+### Keychain Provider (beta)
 
 Keychain (`keychain`) provider allows use of your OS-level keychain as the credentials provider.
 

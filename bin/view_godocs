@@ -2,10 +2,9 @@
 
 # This is a convenience script to start go doc for the secretless-repo
 
-if [[ ! -d ./bin ]]; then
-  echo "This script needs to be run from the root of the secretless-broker repo"
-  exit
-fi
+# Makes script work whether it's called from the project root or bin dir.
+# In either case, the working dir will be set to the project root.
+cd "$(dirname "$0")/.." || return 1
 
 echo "godoc is starting up..."
 echo ""

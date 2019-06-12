@@ -6,19 +6,19 @@ This tool can be used to compare timing data between arbitrary number of similar
 services to evaluate differences in speed between a specified baseline backend
 and the other backends.
 
-Specifically, this tool is used here as a performance test agent that can be
-deployed alongside Secretless to run through the following test scenarios:
-- Comparing performance differences between direct connection to MySQL database
-vs one over Secretless Unix socket with a persistent connection.
-- Comparing performance differences between direct connection to MySQL database
-vs one over Secretless TCP port with a persistent connection.
-- Comparing performance differences between direct connection to Postgres database
-vs one over Secretless Unix socket with a persistent connection.
-- Comparing performance differences between direct connection to Postgres database
-vs one over Secretless TCP port with a persistent connection.
+Specifically, this tool is used here as a performance test agent deployed
+alongside Secretless to compare the following scenarios:
 
-Comparisons results that we output and/or compare are:
-- Data returned comparison to expected values from backend
+| Backend       | Baseline          | Compare With                       | Connection Type |
+| ---           |---                | ---                                |---              |
+| MySQL         | Direct connection | Secretless (persistent connection) | Unix socket     |
+| MySQL         | Direct connection | Secretless (persistent connection) | TCP port        |
+| Postgres      | Direct connection | Secretless (persistent connection) | Unix socket     |
+| Postgres      | Direct connection | Secretless (persistent connection) | TCP port        |
+
+We compare the following results:
+
+- Returned values versus expected values
 - Number of rounds (single-shot tests runs) completed
 - Average/Min/Max single-shot test duration
 - Error count, error messages, and percentage of errors
@@ -41,21 +41,18 @@ Note: More comparison types may be added in the future.
 
 ### `-c`: Continue running after end of tests
 
-This setting leaves the process running after all the tests have been run and
-the aggregated data printed out to preserve the data from being lost due to
-container log reaping.
+Leaves the process running after the tests are complete and the results are
+printed. This protects the data from container log reaping.
 
 ### `-f`: Path to configuration file
 
-This will override the default configuration file path with one specified from
-the user
+Overrides the default configuration file path, which is `./juxtaposer.yml`.
 
 ### `-t`: Run tests for this duration
 
-If a specific duration of tests is needed that is not based on number of loop
-iterations, this flag is used to specify it. The format used is from Golang's
-[ParseDuration](https://golang.org/pkg/time/#ParseDuration) method so any strings
-that work with that should work here (e.g. `10h5m3s`).
+Run tests for a specified time rather than a number of loops.  Uses Golang's
+[ParseDuration](https://golang.org/pkg/time/#ParseDuration) format to specify
+time (e.g. `10h5m3s`).
 
 ## Configuration
 
@@ -64,7 +61,7 @@ directory or overridden by `-f` CLI flag.
 
 ## Format
 
-Minimum configuration looks something like this:
+A configuration file looks like this:
 
 ```yaml
 driver: <DRIVER_NAME>
@@ -87,6 +84,7 @@ backends:
   backend2:
     host: <PATH_TO_SOCKET>
 ```
+
 ## Supported Drivers:
 
 - `mysql-5.7`

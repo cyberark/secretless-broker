@@ -78,7 +78,6 @@ func (cfg *httpConfig) validate() error {
 			&cfg.AuthenticationStrategy,
 			validation.Required,
 			validation.In(availStrategies...),
-			//validation.In("aws", "basic_auth", "conjur"),
 		),
 		// AuthenticateURLsMatching cannot be empty
 		validation.Field(&cfg.AuthenticateURLsMatching, validation.Required),

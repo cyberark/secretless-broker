@@ -18,19 +18,19 @@ func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputF
 func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]timing.BackendTiming, baselineThresholdMaxPercent int) error {
 	fields := []map[string]string{
 		map[string]string{"name": "Name", "nameFormat": "%-30s", "valueFormat": "%-30s"},
-		map[string]string{"name": "Min", "nameFormat": "%12s", "valueFormat": "%12v"},
-		map[string]string{"name": "Max", "nameFormat": "%12s", "valueFormat": "%12v"},
-		map[string]string{"name": "Avg", "nameFormat": "%12s", "valueFormat": "%12v"},
+		map[string]string{"name": "Min", "nameFormat": "%13s", "valueFormat": "%13v"},
+		map[string]string{"name": "Max", "nameFormat": "%13s", "valueFormat": "%13v"},
+		map[string]string{"name": "Avg", "nameFormat": "%13s", "valueFormat": "%13v"},
 		map[string]string{"name": "90% Lower %", "nameFormat": "%12s", "valueFormat": "%12.2f"},
 		map[string]string{"name": "90% Upper %", "nameFormat": "%12s", "valueFormat": "%12.2f"},
-		map[string]string{"name": "Total", "nameFormat": "%13s", "valueFormat": "%13v"},
-		map[string]string{"name": "Rounds", "nameFormat": "%7s", "valueFormat": "%7d"},
-		map[string]string{"name": "Errors", "nameFormat": "%7s", "valueFormat": "%7d"},
+		map[string]string{"name": "Total", "nameFormat": "%18s", "valueFormat": "%18v"},
+		map[string]string{"name": "Rounds", "nameFormat": "%9s", "valueFormat": "%9d"},
+		map[string]string{"name": "Errors", "nameFormat": "%9s", "valueFormat": "%9d"},
 		map[string]string{"name": "Succ %", "nameFormat": "%9s", "valueFormat": "%9.2f"},
 		map[string]string{"name": "Thresh %", "nameFormat": "%9s", "valueFormat": "%9.2f"},
 	}
 
-	dividerString := strings.Repeat("-", 146)
+	dividerString := strings.Repeat("-", 158)
 
 	fmt.Printf("%s\n", dividerString)
 	formatValueString := ""

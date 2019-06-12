@@ -1,6 +1,3 @@
-// v2 is package for parsing version 2 "secretless.yml" files and converting
-// them into "v1.Config" objects.  Users of this package will typically only be
-// concerned with calling "NewV1Config" to parse
 package v2
 
 import (
@@ -12,15 +9,15 @@ import (
 )
 
 // Config represents a full configuration of Secretless, which is just a list of
-// Service configurations.
+// individual Service configurations.
 type Config struct {
 	Services []*Service
 }
 
 // Service represents a the configuration of a Secretless proxy service. It
-// includes the services protocol, where it's listening, where to find its
-// required credentials, and (optionally) any additional protocol specific
-// configuration.
+// includes the service's protocol, the socket or address it listens on, the
+// location of its required credentials, and (optionally) any additional
+// protocol specific configuration.
 type Service struct {
 	Credentials    []*Credential
 	ListenOn       string
@@ -29,9 +26,9 @@ type Service struct {
 	ProtocolConfig []byte
 }
 
-// NewV1Config is converts the bytes of a v2 YAML file to a v1.Config.  As such,
-// it's the primary public interface of the v2 package.
-// TODO: Possible move to v1.config?
+// NewV1Config converts the bytes of a v2 YAML file to a v1.Config.  As such,
+// it's the primary public interface of the v2 package, and probably only
+// func most users will need.
 func NewV1Config(v2YAML []byte) (*config_v1.Config, error) {
 	v2cfg, err := NewConfig(v2YAML)
 	if err != nil {
@@ -46,7 +43,7 @@ func NewV1Config(v2YAML []byte) (*config_v1.Config, error) {
 	return v1cfg, nil
 }
 
-// NewV1ConfigFromV2Config converts a v2.Config to a v1.Config
+// NewV1ConfigFromV2Config converts a v2.Config to a v1.Config.
 func NewV1ConfigFromV2Config(v2cfg *Config) (*config_v1.Config, error) {
 	v1Config := &config_v1.Config{
 		Listeners: make([]config_v1.Listener, 0),

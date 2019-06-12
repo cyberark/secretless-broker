@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# This is a convenience script to start 
+
+full_path=$(pwd)
+full_parent_path=${full_path%/*}
+parent_dir=${full_path##*/}
+
+if [[ $parent_dir != src ]]; then 
+  echo "Using godoc locally requires your repo's parent dir to be named 'src'"
+  exit 1
+fi
+
+if [[ ! -d ./bin ]]; then 
+  echo "This script needs to be run from the root of the secretless-broker repo"
+  exit
+fi
+
+echo "godoc is starting up..."
+echo ""
+echo "The public Secretless docs will be viewable at:"
+echo ""
+echo "    http://localhost:6060/pkg/pkg/secretless/"
+echo ""
+
+godoc -goroot="$full_parent_path" -http=:6060

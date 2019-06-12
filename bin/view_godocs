@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# This is a convenience script to start go doc for the secretless-repo
+
+# Makes script work whether it's called from the project root or bin dir.
+# In either case, the working dir will be set to the project root.
+cd "$(dirname "$0")/.." || return 1
+
+echo "godoc is starting up..."
+echo ""
+echo "The public Secretless docs will be viewable at:"
+echo ""
+echo "    http://localhost:6060/pkg/secretless-broker/"
+echo ""
+
+docker run \
+  --rm --interactive --tty \
+  --publish 6060:6060 \
+  --volume "$PWD":/go/src/secretless-broker \
+  --workdir /go/src/secretless-broker \
+  golang:1.12.5-stretch \
+    godoc -http=:6060

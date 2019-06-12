@@ -1,17 +1,3 @@
-/*
-
-v1Service exists for conceptual clarity.  The concept of a service exists
-implicitly in v1.Config, but not in the code.  The combination of a Listener and
-Handler implicitly represents a service in the v1 code. We're making it explicit
-here.
-
-v1Service also houses protocol specific configuration logic.  In the future,
-this logic will be the responsibility of individual v2 services.  We're pulling
-them out now into their own functions both to clarify that this is a separate
-step of the configuration process -- one specific to each protocol -- and to
-prepare for this future refactoring.
-
-*/
 package v2
 
 import (
@@ -22,6 +8,16 @@ import (
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
+// v1Service exists for conceptual clarity.  The concept of a service exists
+// implicitly in v1.Config, but not in the code.  The combination of a Listener
+// and Handler implicitly represents a service in the v1 code. We're making it
+// explicit here.
+//
+// v1Service also houses protocol specific configuration logic.  In the future,
+// this logic will be the responsibility of individual v2 services.  We're
+// pulling them out now into their own functions both to clarify that this is a
+// separate step of the configuration process -- one specific to each protocol
+// -- and to prepare for this future refactoring.
 type v1Service struct {
 	Listener *config_v1.Listener
 	Handler *config_v1.Handler

@@ -6,8 +6,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Credential the v2.Config representation of a named secret stored in a
-// provider. It's the analog of the StoredSecret in v1.Config.
+// Credential is the v2 representation of a named secret stored in a provider.
+// It's the analog of the v1.StoredSecret.
 type Credential struct {
 	Name string
 	From string

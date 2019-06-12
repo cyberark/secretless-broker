@@ -12,9 +12,9 @@ type httpConfig struct {
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
 }
 
-// ValidHttpAuthenticationStrategies is a []interface rather than a []string
-// because the validation method expects that
-var ValidHttpAuthenticationStrategies = []interface{}{
+// HttpAuthenticationStrategies are the different ways an http service
+// can authenticate.
+var HttpAuthenticationStrategies = []string{
 	"aws",
 	"basic_auth",
 	"conjur",
@@ -66,13 +66,18 @@ func (cfg *httpConfig) UnmarshalYAML(bytes []byte) error {
 // validate ensures AuthenticationStrategy neither field is empty, and that
 // AuthentcationStrategy is a valid value
 func (cfg *httpConfig) validate() error {
+	// convert strategies from []string to []interface{} for validation.In
+	var availStrategies []interface{}
+	for _, s := range HttpAuthenticationStrategies {
+		availStrategies = append(availStrategies, s)
+	}
+
 	return validation.ValidateStruct(
 		cfg,
 		validation.Field(
 			&cfg.AuthenticationStrategy,
 			validation.Required,
-			validation.In(ValidHttpAuthenticationStrategies...),
-			//validation.In("aws", "basic_auth", "conjur"),
+			validation.In(availStrategies...),
 		),
 		// AuthenticateURLsMatching cannot be empty
 		validation.Field(&cfg.AuthenticateURLsMatching, validation.Required),

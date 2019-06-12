@@ -3,6 +3,7 @@ package timing
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -24,36 +25,51 @@ type SingleRunTiming struct {
 	BaselineTestDuration time.Duration
 	BackendName          string
 	Duration             time.Duration
-	MaxRounds            int
 	Round                int
 	TestError            error
 }
 
 type AggregateTimings struct {
-	BaselineBackendName string
-	Silent              bool
-	Timings             map[string]BackendTiming
-	processingDoneChan  chan bool
-	timingReceiverChan  chan *SingleRunTiming
+	BaselineBackendName         string
+	BaselineMaxThresholdPercent int
+	MaxRoundsString             string
+	Silent                      bool
+	Timings                     map[string]BackendTiming
+	processingDoneChan          chan bool
+	timingReceiverChan          chan *SingleRunTiming
+}
+
+type AggregateTimingOptions struct {
+	BackendNames                []string
+	BaselineBackendName         string
+	BaselineMaxThresholdPercent int
+	MaxRounds                   int
+	Threads                     int
+	Silent                      bool
 }
 
 const TimingBufferScalingFactor = 100
 const ZeroDuration = 0 * time.Second
 
-func NewAggregateTimings(backendNames *[]string, baselineBackendName string,
-	threads int, silent bool) AggregateTimings {
+func NewAggregateTimings(options *AggregateTimingOptions) AggregateTimings {
+	timingChannelbufferSize := options.Threads * len(options.BackendNames) * TimingBufferScalingFactor
 
-	timingChannelbufferSize := threads * len(*backendNames) * TimingBufferScalingFactor
-
-	aggregateTimings := AggregateTimings{
-		BaselineBackendName: baselineBackendName,
-		Timings:             map[string]BackendTiming{},
-		Silent:              silent,
-		processingDoneChan:  make(chan bool),
-		timingReceiverChan:  make(chan *SingleRunTiming, timingChannelbufferSize),
+	maxRounds := "infinity"
+	if options.MaxRounds >= 0 {
+		maxRounds = strconv.Itoa(options.MaxRounds)
 	}
 
-	for _, backendName := range *backendNames {
+	aggregateTimings := AggregateTimings{
+		BaselineBackendName:         options.BaselineBackendName,
+		BaselineMaxThresholdPercent: options.BaselineMaxThresholdPercent,
+		MaxRoundsString:             maxRounds,
+		Timings:                     map[string]BackendTiming{},
+		Silent:                      options.Silent,
+		processingDoneChan:          make(chan bool),
+		timingReceiverChan:          make(chan *SingleRunTiming, timingChannelbufferSize),
+	}
+
+	for _, backendName := range options.BackendNames {
 		aggregateTimings.Timings[backendName] = BackendTiming{
 			BaselineDivergencePercent: map[int]int{},
 			Count:                     0,
@@ -99,7 +115,7 @@ func (aggregateTimings *AggregateTimings) updateBackendTiming(runTiming *SingleR
 	backendTiming.Count++
 
 	if runTiming.TestError != nil {
-		log.Printf("[%.3d/%s] %-35s=> %v", runTiming.Round, runTiming.MaxRounds,
+		log.Printf("[%.3d/%s] %-35s=> %v", runTiming.Round, aggregateTimings.MaxRoundsString,
 			runTiming.BackendName, runTiming.TestError)
 		backendTiming.Errors = append(backendTiming.Errors,
 			TestRunError{
@@ -131,8 +147,9 @@ func (aggregateTimings *AggregateTimings) updateBackendTiming(runTiming *SingleR
 	}
 
 	if !aggregateTimings.Silent {
-		log.Printf("[%d/%s], %-35s=>%15v, %3d%%", runTiming.Round, runTiming.MaxRounds,
-			runTiming.BackendName, runTiming.Duration, baselineDivergencePercent)
+		log.Printf("[%d/%s], %-35s=>%15v, %3d%%", runTiming.Round,
+			aggregateTimings.MaxRoundsString, runTiming.BackendName, runTiming.Duration,
+			baselineDivergencePercent)
 	} else {
 		if runTiming.BackendName == aggregateTimings.BaselineBackendName && runTiming.Round%1000 == 0 {
 			fmt.Printf(".")

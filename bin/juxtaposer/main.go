@@ -12,33 +12,25 @@ import (
 
 	conf "github.com/cyberark/secretless-broker/bin/juxtaposer/config"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter"
+	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 	tester_api "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/util"
 )
 
-func performInvocation(backendName string, backendTestManager tester_api.DriverManager,
-	backendConfig conf.Backend) (time.Duration, error) {
+type TestManager struct {
+	BackendNames               []string
+	BackendInstances           map[string]tester_api.DriverManager
+	BaselineBackendName        string
+	LatestBaselineTestDuration time.Duration
+	MaxRounds                  int
+	ShutdownChannel            chan bool
+}
 
-	if backendConfig.Debug {
-		fmt.Printf("%s %s %s\n",
-			strings.Repeat("v", 35),
-			backendName,
-			strings.Repeat("v", 35))
-	}
-
-	testDuration, err := backendTestManager.RunSingleTest()
-	if err != nil {
-		return timing.ZeroDuration, err
-	}
-
-	if backendConfig.Debug {
-		log.Println("Run completed")
-		fmt.Printf("%s\n", strings.Repeat("^", 85))
-	}
-
-	return testDuration, nil
+type TestRunOptions struct {
+	BackendName string
+	Round       int
 }
 
 func createBackendTesters(config *conf.Config,
@@ -48,9 +40,6 @@ func createBackendTesters(config *conf.Config,
 	// each time so we have a separate array that guarantees it
 	backendNames := []string{}
 	backendInstances := map[string]tester_api.DriverManager{}
-
-	log.Println("Backends:", len(config.Backends))
-	log.Println("Threads:", config.Comparison.Threads)
 
 	for backendName, backendConfig := range config.Backends {
 		backendNames = append(backendNames, backendName)
@@ -84,7 +73,8 @@ func createBackendTesters(config *conf.Config,
 				strings.Repeat("v", 35))
 		}
 
-		backendTestManager, err := db.NewTestDriver(config.Driver, config.Comparison.Style, options)
+		backendTestManager, err := db.NewTestDriver(backendName, config.Driver,
+			config.Comparison.Style, options)
 
 		if backendConfig.Debug {
 			fmt.Printf("%s\n", strings.Repeat("^", 85))
@@ -146,10 +136,10 @@ func applyExitConditions(config *conf.Config, requestedDurationString string,
 	return rounds, nil
 }
 
-func processAllResults(backendNames []string, config *conf.Config,
-	aggregatedTimings map[string]timing.BackendTiming) error {
+func processAllResults(backendNames []string, formatters map[string]formatter_api.FormatterOptions,
+	aggregateTimings *timing.AggregateTimings) error {
 
-	for formatterName, formatterOptions := range config.Formatters {
+	for formatterName, formatterOptions := range formatters {
 		log.Printf("Processing output formatter '%s'...", formatterName)
 
 		formatterType := formatterOptions["type"]
@@ -162,30 +152,88 @@ func processAllResults(backendNames []string, config *conf.Config,
 			return err
 		}
 
-		formatter.ProcessResults(backendNames, aggregatedTimings,
-			config.Comparison.BaselineMaxThresholdPercent)
+		formatter.ProcessResults(backendNames, aggregateTimings.Timings,
+			aggregateTimings.BaselineMaxThresholdPercent)
 	}
 
 	return nil
 }
 
-func runMainTestingLoop(config *conf.Config, backendNames *[]string,
-	backendInstances map[string]tester_api.DriverManager,
-	baselineBackendName string,
-	maxRounds int,
-	shutdownChannel <-chan bool) (map[string]timing.BackendTiming, error) {
+func runTest(backendName string, aggregateTimings *timing.AggregateTimings,
+	testManager *TestManager, round int) time.Duration {
 
-	aggregateTimings := timing.NewAggregateTimings(backendNames, baselineBackendName,
-		config.Comparison.Threads, config.Comparison.Silent)
+	backendInstance := testManager.BackendInstances[backendName]
+	singleTestRunDuration, testErr := backendInstance.RunSingleTest()
 
-	round := 0
-	shuttingDown := false
+	if backendInstance.GetName() == testManager.BaselineBackendName {
+		testManager.LatestBaselineTestDuration = singleTestRunDuration
+	}
+
+	aggregateTimings.AddTimingData(&timing.SingleRunTiming{
+		BaselineTestDuration: testManager.LatestBaselineTestDuration,
+		BackendName:          backendInstance.GetName(),
+		Duration:             singleTestRunDuration,
+		Round:                round,
+		TestError:            testErr,
+	})
+
+	return singleTestRunDuration
+}
+
+func runMainTestingLoop(config *conf.Config, testManager *TestManager) (*timing.AggregateTimings, error) {
+	aggregateTimings := timing.NewAggregateTimings(&timing.AggregateTimingOptions{
+		BackendNames:                testManager.BackendNames,
+		BaselineBackendName:         testManager.BaselineBackendName,
+		BaselineMaxThresholdPercent: config.Comparison.BaselineMaxThresholdPercent,
+		MaxRounds:                   testManager.MaxRounds,
+		Threads:                     config.Comparison.Threads,
+		Silent:                      config.Comparison.Silent,
+	})
 
 	var baselineTestDuration time.Duration
+
+	testRunChan := make(chan *TestRunOptions, config.Comparison.Threads*len(testManager.BackendNames))
+	testRunsCompletedChannel := make(chan bool)
+	stopPendingTestsChannel := make(chan bool)
+
+	go func() {
+		for testRunOptions := range testRunChan {
+			select {
+			case _ = <-stopPendingTestsChannel:
+				log.Println("Inner test loop is terminating...")
+				testRunsCompletedChannel <- true
+				return
+			default:
+			}
+
+			testDuration := runTest(testRunOptions.BackendName, &aggregateTimings, testManager,
+				testRunOptions.Round)
+
+			if testRunOptions.BackendName == testManager.BaselineBackendName {
+				baselineTestDuration = testDuration
+			}
+		}
+
+		log.Println("Test run queue drained")
+		testRunsCompletedChannel <- true
+	}()
+
+	shuttingDown := false
+	round := 0
+
+	// Initialize a backendBaseline duration to avoid race condition on first run
+	baselineTestDuration, testErr := testManager.
+		BackendInstances[testManager.BaselineBackendName].RunSingleTest()
+	if testErr != nil {
+		return nil, testErr
+	}
+
 	for {
 		select {
-		case _ = <-shutdownChannel:
+		case _ = <-testManager.ShutdownChannel:
+			log.Println("Outer testing loop is shutting down...")
 			shuttingDown = true
+			stopPendingTestsChannel <- true
 		default:
 		}
 
@@ -194,33 +242,27 @@ func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 		}
 
 		round++
-		if maxRounds != -1 && round > maxRounds {
+		if testManager.MaxRounds != -1 && round > testManager.MaxRounds {
 			break
 		}
 
-		for _, backendName := range *backendNames {
-			singleTestRunDuration, testErr := performInvocation(backendName, backendInstances[backendName],
-				config.Backends[backendName])
-
-			if backendName == baselineBackendName {
-				baselineTestDuration = singleTestRunDuration
+		for _, backendName := range testManager.BackendNames {
+			testRunChan <- &TestRunOptions{
+				BackendName: backendName,
+				Round:       round,
 			}
-
-			aggregateTimings.AddTimingData(&timing.SingleRunTiming{
-				BaselineTestDuration: baselineTestDuration,
-				BackendName:          backendName,
-				Duration:             singleTestRunDuration,
-				MaxRounds:            maxRounds,
-				Round:                round,
-				TestError:            testErr,
-			})
 		}
-
 	}
+
+	log.Println("Closing test run chan")
+	close(testRunChan)
+
+	log.Println("Waiting for all tests to complete...")
+	<-testRunsCompletedChannel
 
 	aggregateTimings.Process()
 
-	return aggregateTimings.Timings, nil
+	return &aggregateTimings, nil
 }
 
 func main() {
@@ -238,11 +280,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("ERROR: Could not load config file '%s': %v", *configFile, err)
 	}
-
 	log.Println("Config loaded!")
 
 	log.Println("Driver:", config.Driver)
 	log.Println("Comparison type:", config.Comparison.Type)
+	log.Println("Backends:", len(config.Backends))
+	log.Println("Threads:", config.Comparison.Threads)
 
 	baselineBackendName := config.Comparison.BaselineBackend
 	backendNames, backendInstances, err := createBackendTesters(config, baselineBackendName)
@@ -253,23 +296,28 @@ func main() {
 	shutdownChannel := make(chan bool, 1)
 	util.RegisterShutdownSignalCallback(shutdownChannel)
 
-	rounds, err := applyExitConditions(config, *requestedDurationString, shutdownChannel)
+	maxRounds, err := applyExitConditions(config, *requestedDurationString, shutdownChannel)
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	testManager := TestManager{
+		BackendNames:               backendNames,
+		BackendInstances:           backendInstances,
+		BaselineBackendName:        baselineBackendName,
+		LatestBaselineTestDuration: timing.ZeroDuration,
+		MaxRounds:                  maxRounds,
+		ShutdownChannel:            shutdownChannel,
 	}
 
 	log.Println("Running tests...")
-	aggregatedTimings, err := runMainTestingLoop(config,
-		&backendNames,
-		backendInstances,
-		baselineBackendName,
-		rounds,
-		shutdownChannel)
+
+	aggregatedTimings, err := runMainTestingLoop(config, &testManager)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = processAllResults(backendNames, config, aggregatedTimings)
+	err = processAllResults(backendNames, config.Formatters, aggregatedTimings)
 	if err != nil {
 		log.Fatalln(err)
 	}

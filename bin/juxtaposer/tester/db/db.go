@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
@@ -13,6 +14,7 @@ import (
 )
 
 type DriverManager struct {
+	Name     string
 	Options  *api.DbTesterOptions
 	Tester   api.DbTester
 	TestType string
@@ -140,6 +142,13 @@ func ensureCorrectReturnedData(rows []string) error {
 }
 
 func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
+	if manager.Options.Debug {
+		fmt.Printf("%s %s %s\n",
+			strings.Repeat("v", 35),
+			manager.Name,
+			strings.Repeat("v", 35))
+	}
+
 	startTime := time.Now()
 
 	if manager.Options.ConnectionType == "recreate" {
@@ -165,9 +174,18 @@ func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
 
 	if manager.Options.Debug {
 		log.Printf("DB query: OK")
+		fmt.Printf("%s\n", strings.Repeat("^", 85))
 	}
 
 	return testDuration, nil
+}
+
+func (manager *DriverManager) GetName() string {
+	return manager.Name
+}
+
+func (manager *DriverManager) DebugEnabled() bool {
+	return manager.Options.Debug
 }
 
 func (manager *DriverManager) RotatePassword(newPassword string) error {
@@ -178,7 +196,9 @@ func (manager *DriverManager) Shutdown() error {
 	return manager.Tester.Shutdown()
 }
 
-func NewTestDriver(driver string, testType string, options api.DbTesterOptions) (api.DriverManager, error) {
+func NewTestDriver(name string, driver string, testType string,
+	options api.DbTesterOptions) (api.DriverManager, error) {
+
 	if options.DatabaseName == "" {
 		options.DatabaseName = DefaultDatabaseName
 	}
@@ -189,6 +209,7 @@ func NewTestDriver(driver string, testType string, options api.DbTesterOptions) 
 	}
 
 	manager := DriverManager{
+		Name:     name,
 		Options:  &options,
 		TestType: testType,
 	}

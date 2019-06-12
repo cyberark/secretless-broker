@@ -204,7 +204,7 @@ func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 				baselineTestDuration = singleTestRunDuration
 			}
 
-			aggregateTimings.UpdateTimingData(&timing.SingleRunTiming{
+			aggregateTimings.AddTimingData(&timing.SingleRunTiming{
 				BaselineTestDuration: baselineTestDuration,
 				BackendName:          backendName,
 				Duration:             singleTestRunDuration,
@@ -213,7 +213,10 @@ func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 				TestError:            testErr,
 			})
 		}
+
 	}
+
+	aggregateTimings.Process()
 
 	return aggregateTimings.Timings, nil
 }

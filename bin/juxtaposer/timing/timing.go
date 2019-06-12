@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-type AggregateTimings struct {
-	BaselineBackendName string
-	Silent              bool
-	Timings             map[string]BackendTiming
-}
-
 type BackendTiming struct {
 	BaselineDivergencePercent map[int]int
 	Count                     int
@@ -35,6 +29,14 @@ type SingleRunTiming struct {
 	TestError            error
 }
 
+type AggregateTimings struct {
+	BaselineBackendName string
+	Silent              bool
+	Timings             map[string]BackendTiming
+	processingDoneChan  chan bool
+	timingReceiverChan  chan *SingleRunTiming
+}
+
 const ZeroDuration = 0 * time.Second
 
 func NewAggregateTimings(backendNames *[]string, baselineBackendName string,
@@ -44,7 +46,10 @@ func NewAggregateTimings(backendNames *[]string, baselineBackendName string,
 		BaselineBackendName: baselineBackendName,
 		Timings:             map[string]BackendTiming{},
 		Silent:              silent,
+		processingDoneChan:  make(chan bool),
+		timingReceiverChan:  make(chan *SingleRunTiming),
 	}
+
 	for _, backendName := range *backendNames {
 		aggregateTimings.Timings[backendName] = BackendTiming{
 			BaselineDivergencePercent: map[int]int{},
@@ -56,10 +61,42 @@ func NewAggregateTimings(backendNames *[]string, baselineBackendName string,
 		}
 	}
 
+	aggregateTimings.setupTimingReceiver()
+
 	return aggregateTimings
 }
 
-func (aggregateTimings *AggregateTimings) UpdateTimingData(runTiming *SingleRunTiming) {
+func (aggregateTimings *AggregateTimings) AddTimingData(runTiming *SingleRunTiming) {
+	aggregateTimings.timingReceiverChan <- runTiming
+}
+
+// We just wait until the timings channel is empty
+func (aggregateTimings *AggregateTimings) Process() {
+	close(aggregateTimings.timingReceiverChan)
+
+	log.Println("Waiting until all the data is processed...")
+
+	<-aggregateTimings.processingDoneChan
+
+	log.Println("Data aggregation done!")
+}
+
+func (aggregateTimings *AggregateTimings) setupTimingReceiver() {
+	go func() {
+		for {
+			runTiming, more := <-aggregateTimings.timingReceiverChan
+			if !more {
+				log.Println("Timing channel closed. Exiting...")
+				aggregateTimings.processingDoneChan <- true
+				return
+			}
+
+			aggregateTimings.updateBackendTiming(runTiming)
+		}
+	}()
+}
+
+func (aggregateTimings *AggregateTimings) updateBackendTiming(runTiming *SingleRunTiming) {
 	backendTiming := aggregateTimings.Timings[runTiming.BackendName]
 	backendTiming.Count++
 

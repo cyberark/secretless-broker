@@ -86,16 +86,11 @@ func (aggregateTimings *AggregateTimings) Process() {
 
 func (aggregateTimings *AggregateTimings) setupTimingReceiver() {
 	go func() {
-		for {
-			runTiming, more := <-aggregateTimings.timingReceiverChan
-			if !more {
-				log.Println("Timing channel closed. Exiting...")
-				aggregateTimings.processingDoneChan <- true
-				return
-			}
-
+		for runTiming := range aggregateTimings.timingReceiverChan {
 			aggregateTimings.updateBackendTiming(runTiming)
 		}
+
+		aggregateTimings.processingDoneChan <- true
 	}()
 }
 

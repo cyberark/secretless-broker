@@ -6,6 +6,7 @@ import (
 
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/util"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 )
 
 type StdoutFormatter struct{}
@@ -14,7 +15,7 @@ func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputF
 	return &StdoutFormatter{}, nil
 }
 
-func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]formatter_api.BackendTiming, baselineThresholdMaxPercent int) error {
+func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregatedTimings map[string]timing.BackendTiming, baselineThresholdMaxPercent int) error {
 	fields := []map[string]string{
 		map[string]string{"name": "Name", "nameFormat": "%-30s", "valueFormat": "%-30s"},
 		map[string]string{"name": "Min", "nameFormat": "%12s", "valueFormat": "%12v"},

@@ -9,6 +9,7 @@ import (
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
 	mysql "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/mysql"
 	postgres "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/postgres"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 )
 
 type DriverManager struct {
@@ -21,8 +22,6 @@ var DbTesterImplementatons = map[string]func() (api.DbTester, error){
 	"mysql-5.7": mysql.NewTester,
 	"postgres":  postgres.NewTester,
 }
-
-const ZeroDuration = 0 * time.Second
 
 const DefaultDatabaseName = "mydb"
 const DefaultTableName = "mytable"
@@ -146,7 +145,7 @@ func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
 	if manager.Options.ConnectionType == "recreate" {
 		err := manager.Tester.Connect(*manager.Options)
 		if err != nil {
-			return ZeroDuration, err
+			return timing.ZeroDuration, err
 		}
 		defer manager.Tester.Shutdown()
 	}
@@ -154,12 +153,12 @@ func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
 	rows, err := manager.Tester.QueryRows("name", QueryTypes[manager.TestType])
 	if err != nil {
 		log.Printf("ERROR! Query failed!")
-		return ZeroDuration, err
+		return timing.ZeroDuration, err
 	}
 
 	err = ensureCorrectReturnedData(rows)
 	if err != nil {
-		return ZeroDuration, err
+		return timing.ZeroDuration, err
 	}
 
 	testDuration := time.Now().Sub(startTime)

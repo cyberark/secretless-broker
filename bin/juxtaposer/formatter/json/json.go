@@ -9,6 +9,7 @@ import (
 
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/util"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 )
 
 type JsonFormatter struct {
@@ -22,17 +23,17 @@ type ConfidenceIntervalJson struct {
 }
 
 type BackendTimingDataJson struct {
-	AverageDurationNs        int64                        `json:"averageDurationNs"`
-	ConfidenceInterval       ConfidenceIntervalJson       `json:"confidenceInterval"`
-	Errors                   []formatter_api.TestRunError `json:"errors"`
-	FailedRounds             int                          `json:"failedRounds"`
-	MaximumDurationNs        int64                        `json:"maximumDurationNs"`
-	MinimumDurationNs        int64                        `json:"minimumDurationNs"`
-	SuccessfulRounds         int                          `json:"successfulRounds"`
-	SuccessPercentage        float64                      `json:"successPercentage"`
-	ThresholdBreachedPercent float64                      `json:"thresholdBreachedPercent"`
-	TotalDurationNs          int64                        `json:"totalDurationNs"`
-	TotalRounds              int                          `json:"totalRounds"`
+	AverageDurationNs        int64                  `json:"averageDurationNs"`
+	ConfidenceInterval       ConfidenceIntervalJson `json:"confidenceInterval"`
+	Errors                   []timing.TestRunError  `json:"errors"`
+	FailedRounds             int                    `json:"failedRounds"`
+	MaximumDurationNs        int64                  `json:"maximumDurationNs"`
+	MinimumDurationNs        int64                  `json:"minimumDurationNs"`
+	SuccessfulRounds         int                    `json:"successfulRounds"`
+	SuccessPercentage        float64                `json:"successPercentage"`
+	ThresholdBreachedPercent float64                `json:"thresholdBreachedPercent"`
+	TotalDurationNs          int64                  `json:"totalDurationNs"`
+	TotalRounds              int                    `json:"totalRounds"`
 }
 
 type JsonOutput struct {
@@ -46,7 +47,7 @@ func NewFormatter(options formatter_api.FormatterOptions) (formatter_api.OutputF
 }
 
 func (formatter *JsonFormatter) ProcessResults(backendNames []string,
-	aggregatedTimings map[string]formatter_api.BackendTiming, baselineThresholdMaxPercent int) error {
+	aggregatedTimings map[string]timing.BackendTiming, baselineThresholdMaxPercent int) error {
 
 	jsonOutput := JsonOutput{
 		Backends: map[string]BackendTimingDataJson{},

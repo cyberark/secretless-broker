@@ -12,13 +12,11 @@ import (
 
 	conf "github.com/cyberark/secretless-broker/bin/juxtaposer/config"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter"
-	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 	tester_api "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/util"
 )
-
-const zeroDuration = 0 * time.Second
 
 func performInvocation(backendName string, backendTestManager tester_api.DriverManager,
 	backendConfig conf.Backend) (time.Duration, error) {
@@ -32,7 +30,7 @@ func performInvocation(backendName string, backendTestManager tester_api.DriverM
 
 	testDuration, err := backendTestManager.RunSingleTest()
 	if err != nil {
-		return zeroDuration, err
+		return timing.ZeroDuration, err
 	}
 
 	if backendConfig.Debug {
@@ -113,7 +111,7 @@ func applyExitConditions(config *conf.Config, requestedDurationString string,
 
 	var err error
 
-	requestedDuration := zeroDuration
+	requestedDuration := timing.ZeroDuration
 	if requestedDurationString != "" {
 		requestedDuration, err = time.ParseDuration(requestedDurationString)
 		if err != nil {
@@ -134,7 +132,7 @@ func applyExitConditions(config *conf.Config, requestedDurationString string,
 		}
 	}
 
-	if requestedDuration != zeroDuration {
+	if requestedDuration != timing.ZeroDuration {
 		go func() {
 			time.Sleep(requestedDuration)
 			log.Println("Timeout reached!")
@@ -147,7 +145,7 @@ func applyExitConditions(config *conf.Config, requestedDurationString string,
 }
 
 func processAllResults(backendNames []string, config *conf.Config,
-	aggregatedTimings map[string]formatter_api.BackendTiming) error {
+	aggregatedTimings map[string]timing.BackendTiming) error {
 
 	for formatterName, formatterOptions := range config.Formatters {
 		log.Printf("Processing output formatter '%s'...", formatterName)
@@ -169,67 +167,14 @@ func processAllResults(backendNames []string, config *conf.Config,
 	return nil
 }
 
-func updateTimingData(round int, config *conf.Config, aggregatedTimings map[string]formatter_api.BackendTiming,
-	backendName string, singleTestRunDuration time.Duration, testError error, baselineTestDuration time.Duration) {
-
-	timingInfo := aggregatedTimings[backendName]
-	timingInfo.Count++
-
-	if testError != nil {
-		log.Printf("[%.3d/%s] %-35s=> %v", round, config.Comparison.Rounds, backendName, testError)
-		timingInfo.Errors = append(timingInfo.Errors,
-			formatter_api.TestRunError{
-				Error: testError,
-				Round: round,
-			})
-		aggregatedTimings[backendName] = timingInfo
-		return
-	}
-
-	timingInfo.Duration = timingInfo.Duration + singleTestRunDuration
-
-	if timingInfo.MinimumDuration == zeroDuration {
-		timingInfo.MinimumDuration = timingInfo.Duration
-	}
-
-	if singleTestRunDuration > timingInfo.MaximumDuration {
-		timingInfo.MaximumDuration = singleTestRunDuration
-	}
-
-	if singleTestRunDuration < timingInfo.MinimumDuration {
-		timingInfo.MinimumDuration = singleTestRunDuration
-	}
-
-	baselineDivergencePercent := 100
-	if baselineTestDuration != zeroDuration {
-		baselineDivergencePercent = int(float32(singleTestRunDuration) /
-			float32(baselineTestDuration) * 100.0)
-	}
-
-	if !config.Comparison.Silent {
-		log.Printf("[%d/%s], %-35s=>%15v, %3d%%", round, config.Comparison.Rounds,
-			backendName, singleTestRunDuration, baselineDivergencePercent)
-	} else {
-		if round%1000 == 0 {
-			fmt.Printf(".")
-		}
-	}
-
-	timingInfo.BaselineDivergencePercent[baselineDivergencePercent]++
-
-	aggregatedTimings[backendName] = timingInfo
-}
-
 func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 	backendInstances map[string]tester_api.DriverManager,
 	baselineBackendName string,
 	rounds int,
-	shutdownChannel <-chan bool) (map[string]formatter_api.BackendTiming, error) {
+	shutdownChannel <-chan bool) (map[string]timing.BackendTiming, error) {
 
-	aggregatedTimings := map[string]formatter_api.BackendTiming{}
-	for _, backendName := range *backendNames {
-		aggregatedTimings[backendName] = formatter_api.NewBackendTiming()
-	}
+	aggregateTimings := timing.NewAggregateTimings(backendNames, baselineBackendName,
+		config.Comparison.Silent)
 
 	round := 0
 	shuttingDown := false
@@ -259,12 +204,18 @@ func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 				baselineTestDuration = singleTestRunDuration
 			}
 
-			updateTimingData(round, config, aggregatedTimings, backendName, singleTestRunDuration,
-				testErr, baselineTestDuration)
+			aggregateTimings.UpdateTimingData(&timing.SingleRunTiming{
+				BaselineTestDuration: baselineTestDuration,
+				BackendName:          backendName,
+				Duration:             singleTestRunDuration,
+				MaxRounds:            rounds,
+				Round:                round,
+				TestError:            testErr,
+			})
 		}
 	}
 
-	return aggregatedTimings, nil
+	return aggregateTimings.Timings, nil
 }
 
 func main() {

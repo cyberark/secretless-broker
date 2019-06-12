@@ -50,6 +50,8 @@ func createBackendTesters(config *conf.Config,
 	backendInstances := map[string]tester_api.DriverManager{}
 
 	log.Println("Backends:", len(config.Backends))
+	log.Println("Threads:", config.Comparison.Threads)
+
 	for backendName, backendConfig := range config.Backends {
 		backendNames = append(backendNames, backendName)
 
@@ -170,11 +172,11 @@ func processAllResults(backendNames []string, config *conf.Config,
 func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 	backendInstances map[string]tester_api.DriverManager,
 	baselineBackendName string,
-	rounds int,
+	maxRounds int,
 	shutdownChannel <-chan bool) (map[string]timing.BackendTiming, error) {
 
 	aggregateTimings := timing.NewAggregateTimings(backendNames, baselineBackendName,
-		config.Comparison.Silent)
+		config.Comparison.Threads, config.Comparison.Silent)
 
 	round := 0
 	shuttingDown := false
@@ -192,7 +194,7 @@ func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 		}
 
 		round++
-		if rounds != -1 && round > rounds {
+		if maxRounds != -1 && round > maxRounds {
 			break
 		}
 
@@ -208,7 +210,7 @@ func runMainTestingLoop(config *conf.Config, backendNames *[]string,
 				BaselineTestDuration: baselineTestDuration,
 				BackendName:          backendName,
 				Duration:             singleTestRunDuration,
-				MaxRounds:            rounds,
+				MaxRounds:            maxRounds,
 				Round:                round,
 				TestError:            testErr,
 			})

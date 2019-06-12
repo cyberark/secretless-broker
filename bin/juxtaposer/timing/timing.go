@@ -37,17 +37,20 @@ type AggregateTimings struct {
 	timingReceiverChan  chan *SingleRunTiming
 }
 
+const TimingBufferScalingFactor = 100
 const ZeroDuration = 0 * time.Second
 
 func NewAggregateTimings(backendNames *[]string, baselineBackendName string,
-	silent bool) AggregateTimings {
+	threads int, silent bool) AggregateTimings {
+
+	timingChannelbufferSize := threads * len(*backendNames) * TimingBufferScalingFactor
 
 	aggregateTimings := AggregateTimings{
 		BaselineBackendName: baselineBackendName,
 		Timings:             map[string]BackendTiming{},
 		Silent:              silent,
 		processingDoneChan:  make(chan bool),
-		timingReceiverChan:  make(chan *SingleRunTiming),
+		timingReceiverChan:  make(chan *SingleRunTiming, timingChannelbufferSize),
 	}
 
 	for _, backendName := range *backendNames {

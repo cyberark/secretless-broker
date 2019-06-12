@@ -37,6 +37,7 @@ type Comparison struct {
 	Rounds                      string `yaml:"rounds"`
 	Silent                      bool   `yaml:"silent"`
 	Style                       string `yaml:"style"`
+	Threads                     int    `yaml:"threads"`
 	Type                        string `yaml:"type"`
 }
 
@@ -54,6 +55,11 @@ func (configuration *Config) verify() error {
 
 	if configuration.Comparison.Style != "select" {
 		return fmt.Errorf("comparison style supported: %s", configuration.Comparison.Style)
+	}
+
+	if configuration.Comparison.Threads < 1 {
+		return fmt.Errorf("comparison.Threads must be >= 1. Current value: %d",
+			configuration.Comparison.Threads)
 	}
 
 	if len(configuration.Formatters) == 0 {
@@ -86,6 +92,7 @@ func NewConfiguration(configFile string) (*Config, error) {
 			Rounds:                      "1000",
 			Style:                       "select",
 			Type:                        "sql/persistent",
+			Threads:                     1,
 		},
 		Formatters: map[string]formatter_api.FormatterOptions{
 			"stdout": formatter_api.FormatterOptions{},

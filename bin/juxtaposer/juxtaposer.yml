@@ -9,6 +9,7 @@ comparison:
 #  rounds: 1000
 #  rounds: infinity
 #  baselineMaxThresholdPercent: 120
+#  threads: 1
   silent: true
 
 formatters:

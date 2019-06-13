@@ -3,7 +3,6 @@ package conjur
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -246,30 +245,24 @@ func (p *Provider) refreshAccessToken() error {
 			// Lock the authenticatorMutex
 			p.AuthenticationMutex.Lock()
 
+			if p.Authenticator.IsLoggedIn() {
+				log.Printf("Info: Conjur provider is logged in")
+			}
+
 			log.Printf("Info: Conjur provider is authenticating as %s ...", p.Authenticator.Config.Username)
 			resp, err := p.Authenticator.Authenticate()
-
-			if err == nil {
-				log.Printf("Info: Conjur provider received a valid authentication response")
-				err = p.Authenticator.ParseAuthenticationResponse(resp)
-			}
-
 			if err != nil {
-				log.Printf("Info: Conjur provider received an error on authenticate: %s", err.Error())
-
-				if p.Authenticator.IsCertExpired() {
-					log.Printf("Info: Conjur certificate expired; Conjur provider is re-logging in.")
-
-					if err = p.Authenticator.Login(); err != nil {
-						return err
-					}
-
-					// if the cert expired and login worked then continue
-					continue
-				} else {
-					return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", err.Error())
-				}
+				return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", err.Error())
 			}
+
+			log.Printf("Info: Conjur provider finished authenticating")
+
+			err = p.Authenticator.ParseAuthenticationResponse(resp)
+			if err != nil {
+				return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", err.Error())
+			}
+
+			log.Printf("Info: Conjur provider parsed authentication response")
 
 			// Unlock the authenticatorMutex
 			p.AuthenticationMutex.Unlock()
@@ -277,7 +270,7 @@ func (p *Provider) refreshAccessToken() error {
 			// Reset exponential backoff
 			expBackoff.Reset()
 
-			log.Printf("Info: Conjur provider is waiting for %v minutes to re-authenticate.", authenticateCycleDuration)
+			log.Printf("Info: Conjur provider received a valid authentication response and will wait %v minutes to re-authenticate.", authenticateCycleDuration)
 			time.Sleep(authenticateCycleDuration)
 		}
 	}, expBackoff)
@@ -287,19 +280,4 @@ func (p *Provider) refreshAccessToken() error {
 	}
 
 	return nil
-}
-
-func readSSLCert() ([]byte, error) {
-	SSLCert := os.Getenv("CONJUR_SSL_CERTIFICATE")
-	SSLCertPath := os.Getenv("CONJUR_CERT_FILE")
-	if SSLCert == "" && SSLCertPath == "" {
-		err := errors.New("At least one of CONJUR_SSL_CERTIFICATE and CONJUR_CERT_FILE must be provided")
-		return nil, err
-	}
-
-	if SSLCert != "" {
-		return []byte(SSLCert), nil
-	}
-
-	return ioutil.ReadFile(SSLCertPath)
 }

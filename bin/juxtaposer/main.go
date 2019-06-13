@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	conf "github.com/cyberark/secretless-broker/bin/juxtaposer/config"
@@ -23,9 +24,12 @@ type TestManager struct {
 	BackendNames               []string
 	BackendInstances           map[string]tester_api.DriverManager
 	BaselineBackendName        string
+	IsShuttingDown             bool
 	LatestBaselineTestDuration time.Duration
 	MaxRounds                  int
 	ShutdownChannel            chan bool
+	ThreadRunnersWaitGroup     sync.WaitGroup
+	Threads                    int
 }
 
 type TestRunOptions struct {
@@ -159,7 +163,7 @@ func processAllResults(backendNames []string, formatters map[string]formatter_ap
 	return nil
 }
 
-func runTest(backendName string, aggregateTimings *timing.AggregateTimings,
+func runTest(backendName string, threadIndex int, aggregateTimings *timing.AggregateTimings,
 	testManager *TestManager, round int) time.Duration {
 
 	backendInstance := testManager.BackendInstances[backendName]
@@ -175,9 +179,38 @@ func runTest(backendName string, aggregateTimings *timing.AggregateTimings,
 		Duration:             singleTestRunDuration,
 		Round:                round,
 		TestError:            testErr,
+		Thread:               threadIndex,
 	})
 
 	return singleTestRunDuration
+}
+
+func createThreadedRunner(backendName string, threadIndex int, testManager *TestManager,
+	aggregateTimings *timing.AggregateTimings) {
+
+	round := 0
+	go func() {
+		for {
+			if testManager.IsShuttingDown {
+				testManager.ThreadRunnersWaitGroup.Done()
+				return
+			}
+
+			round++
+			if testManager.MaxRounds != -1 && round > testManager.MaxRounds {
+				testManager.ThreadRunnersWaitGroup.Done()
+				return
+			}
+
+			testDuration := runTest(backendName, threadIndex, aggregateTimings, testManager,
+				round)
+
+			if backendName == testManager.BaselineBackendName {
+				testManager.LatestBaselineTestDuration = testDuration
+			}
+		}
+		log.Println("WARN: Should never reach here!")
+	}()
 }
 
 func runMainTestingLoop(config *conf.Config, testManager *TestManager) (*timing.AggregateTimings, error) {
@@ -190,75 +223,32 @@ func runMainTestingLoop(config *conf.Config, testManager *TestManager) (*timing.
 		Silent:                      config.Comparison.Silent,
 	})
 
-	var baselineTestDuration time.Duration
-
-	testRunChan := make(chan *TestRunOptions, config.Comparison.Threads*len(testManager.BackendNames))
-	testRunsCompletedChannel := make(chan bool)
-	stopPendingTestsChannel := make(chan bool)
-
 	go func() {
-		for testRunOptions := range testRunChan {
-			select {
-			case _ = <-stopPendingTestsChannel:
-				log.Println("Inner test loop is terminating...")
-				testRunsCompletedChannel <- true
-				return
-			default:
-			}
-
-			testDuration := runTest(testRunOptions.BackendName, &aggregateTimings, testManager,
-				testRunOptions.Round)
-
-			if testRunOptions.BackendName == testManager.BaselineBackendName {
-				baselineTestDuration = testDuration
-			}
-		}
-
-		log.Println("Test run queue drained")
-		testRunsCompletedChannel <- true
+		<-testManager.ShutdownChannel
+		log.Println("async: Setting thread exit flag...")
+		testManager.IsShuttingDown = true
 	}()
 
-	shuttingDown := false
-	round := 0
-
 	// Initialize a backendBaseline duration to avoid race condition on first run
-	baselineTestDuration, testErr := testManager.
+	initialBaselineTestDuration, testErr := testManager.
 		BackendInstances[testManager.BaselineBackendName].RunSingleTest()
 	if testErr != nil {
 		return nil, testErr
 	}
+	testManager.LatestBaselineTestDuration = initialBaselineTestDuration
 
-	for {
-		select {
-		case _ = <-testManager.ShutdownChannel:
-			log.Println("Outer testing loop is shutting down...")
-			shuttingDown = true
-			stopPendingTestsChannel <- true
-		default:
-		}
+	for _, backendName := range testManager.BackendNames {
+		for threadIndex := 0; threadIndex < testManager.Threads; threadIndex++ {
+			log.Printf("Creating thread %s[%d]", backendName, threadIndex)
+			createThreadedRunner(backendName, threadIndex, testManager,
+				&aggregateTimings)
 
-		if shuttingDown {
-			break
-		}
-
-		round++
-		if testManager.MaxRounds != -1 && round > testManager.MaxRounds {
-			break
-		}
-
-		for _, backendName := range testManager.BackendNames {
-			testRunChan <- &TestRunOptions{
-				BackendName: backendName,
-				Round:       round,
-			}
+			testManager.ThreadRunnersWaitGroup.Add(1)
 		}
 	}
 
-	log.Println("Closing test run chan")
-	close(testRunChan)
-
-	log.Println("Waiting for all tests to complete...")
-	<-testRunsCompletedChannel
+	log.Println("async: Waiting for all tests to complete...")
+	testManager.ThreadRunnersWaitGroup.Wait()
 
 	aggregateTimings.Process()
 
@@ -282,21 +272,24 @@ func main() {
 	}
 	log.Println("Config loaded!")
 
-	log.Println("Driver:", config.Driver)
-	log.Println("Comparison type:", config.Comparison.Type)
-	log.Println("Backends:", len(config.Backends))
-	log.Println("Threads:", config.Comparison.Threads)
+	shutdownChannel := make(chan bool, 1)
+	util.RegisterShutdownSignalCallback(shutdownChannel)
 
-	baselineBackendName := config.Comparison.BaselineBackend
-	backendNames, backendInstances, err := createBackendTesters(config, baselineBackendName)
+	maxRounds, err := applyExitConditions(config, *requestedDurationString,
+		shutdownChannel)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	shutdownChannel := make(chan bool, 1)
-	util.RegisterShutdownSignalCallback(shutdownChannel)
+	log.Println("Driver:", config.Driver)
+	log.Println("Comparison type:", config.Comparison.Type)
+	log.Println("Backends:", len(config.Backends))
+	log.Println("Threads:", config.Comparison.Threads)
+	log.Println("Rounds:", config.Comparison.Rounds)
+	log.Println("Duration:", *requestedDurationString)
 
-	maxRounds, err := applyExitConditions(config, *requestedDurationString, shutdownChannel)
+	baselineBackendName := config.Comparison.BaselineBackend
+	backendNames, backendInstances, err := createBackendTesters(config, baselineBackendName)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -305,9 +298,12 @@ func main() {
 		BackendNames:               backendNames,
 		BackendInstances:           backendInstances,
 		BaselineBackendName:        baselineBackendName,
+		IsShuttingDown:             false,
 		LatestBaselineTestDuration: timing.ZeroDuration,
 		MaxRounds:                  maxRounds,
+		ThreadRunnersWaitGroup:     sync.WaitGroup{},
 		ShutdownChannel:            shutdownChannel,
+		Threads:                    config.Comparison.Threads,
 	}
 
 	log.Println("Running tests...")

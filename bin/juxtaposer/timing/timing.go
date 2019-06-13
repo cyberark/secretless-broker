@@ -27,6 +27,7 @@ type SingleRunTiming struct {
 	Duration             time.Duration
 	Round                int
 	TestError            error
+	Thread               int
 }
 
 type AggregateTimings struct {
@@ -93,7 +94,7 @@ func (aggregateTimings *AggregateTimings) AddTimingData(runTiming *SingleRunTimi
 func (aggregateTimings *AggregateTimings) Process() {
 	close(aggregateTimings.timingReceiverChan)
 
-	log.Println("Waiting until all the data is processed...")
+	log.Println("async: Waiting until all the data is processed...")
 
 	<-aggregateTimings.processingDoneChan
 
@@ -114,9 +115,10 @@ func (aggregateTimings *AggregateTimings) updateBackendTiming(runTiming *SingleR
 	backendTiming := aggregateTimings.Timings[runTiming.BackendName]
 	backendTiming.Count++
 
+	backendPrintableName := fmt.Sprintf("%s/%d", runTiming.BackendName, runTiming.Thread)
 	if runTiming.TestError != nil {
 		log.Printf("[%.3d/%s] %-35s=> %v", runTiming.Round, aggregateTimings.MaxRoundsString,
-			runTiming.BackendName, runTiming.TestError)
+			backendPrintableName, runTiming.TestError)
 		backendTiming.Errors = append(backendTiming.Errors,
 			TestRunError{
 				Error: runTiming.TestError,
@@ -147,9 +149,9 @@ func (aggregateTimings *AggregateTimings) updateBackendTiming(runTiming *SingleR
 	}
 
 	if !aggregateTimings.Silent {
-		log.Printf("[%d/%s], %-35s=>%15v, %3d%%", runTiming.Round,
-			aggregateTimings.MaxRoundsString, runTiming.BackendName, runTiming.Duration,
-			baselineDivergencePercent)
+		log.Printf("[%d/%s], %-35s=>%15v, %4d%%", runTiming.Round,
+			aggregateTimings.MaxRoundsString, backendPrintableName,
+			runTiming.Duration, baselineDivergencePercent)
 	} else {
 		if runTiming.BackendName == aggregateTimings.BaselineBackendName && runTiming.Round%1000 == 0 {
 			fmt.Printf(".")

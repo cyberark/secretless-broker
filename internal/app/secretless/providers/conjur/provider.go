@@ -203,6 +203,7 @@ func loadAuthenticator(authnURL string, version string, tokenFile string, config
 	// Try login with exponential backoff on failure
 	err = backoff.Retry(
 		func() error {
+			log.Printf("Logging in...")
 			if err = authenticator.Login(); err != nil {
 				return err
 			}
@@ -239,8 +240,8 @@ func (p *Provider) refreshAccessToken() error {
 	expBackoff.MaxElapsedTime = 2 * time.Minute
 
 	// Authenticate in a loop with retries on failure with exponential backoff
-	err = backoff.Retry(func() error {
-		for {
+	for {
+		err = backoff.Retry(func() (tryError error) {
 
 			// Lock the authenticatorMutex
 			p.AuthenticationMutex.Lock()
@@ -249,17 +250,24 @@ func (p *Provider) refreshAccessToken() error {
 				log.Printf("Info: Conjur provider is logged in")
 			}
 
+			if p.Authenticator.IsCertExpired() {
+				log.Printf("Info: Certificate is expired. Logging in...")
+				if tryError = p.Authenticator.Login(); tryError != nil {
+					return fmt.Errorf("Error: Conjur provider unable to log in: %s", tryError.Error())
+				}
+			}
+
 			log.Printf("Info: Conjur provider is authenticating as %s ...", p.Authenticator.Config.Username)
-			resp, err := p.Authenticator.Authenticate()
-			if err != nil {
-				return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", err.Error())
+			resp, tryError := p.Authenticator.Authenticate()
+			if tryError != nil {
+				return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", tryError.Error())
 			}
 
 			log.Printf("Info: Conjur provider finished authenticating")
 
-			err = p.Authenticator.ParseAuthenticationResponse(resp)
-			if err != nil {
-				return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", err.Error())
+			tryError = p.Authenticator.ParseAuthenticationResponse(resp)
+			if tryError != nil {
+				return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", tryError.Error())
 			}
 
 			log.Printf("Info: Conjur provider parsed authentication response")
@@ -267,17 +275,17 @@ func (p *Provider) refreshAccessToken() error {
 			// Unlock the authenticatorMutex
 			p.AuthenticationMutex.Unlock()
 
-			// Reset exponential backoff
-			expBackoff.Reset()
+			return nil
+		}, expBackoff)
 
-			log.Printf("Info: Conjur provider received a valid authentication response and will wait %v minutes to re-authenticate.", authenticateCycleDuration)
-			time.Sleep(authenticateCycleDuration)
+		if err != nil {
+			log.Printf("Error: Conjur provider unable to authenticate; backoff exhausted: %s", err.Error())
 		}
-	}, expBackoff)
 
-	if err != nil {
-		return fmt.Errorf("Error: Conjur provider unable to authenticate; backoff exhausted: %s", err.Error())
+		// Reset exponential backoff
+		expBackoff.Reset()
+
+		log.Printf("Info: Conjur provider received a valid authentication response and will wait %v minutes to re-authenticate.", authenticateCycleDuration)
+		time.Sleep(authenticateCycleDuration)
 	}
-
-	return nil
 }

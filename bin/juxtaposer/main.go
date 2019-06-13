@@ -27,6 +27,9 @@ type TestManager struct {
 	IsShuttingDown             bool
 	LatestBaselineTestDuration time.Duration
 	MaxRounds                  int
+	RoundsCompleted            map[string]int
+	RoundsCompletedLock        sync.RWMutex
+	RoundsMaxReachedWaitGroup  sync.WaitGroup
 	ShutdownChannel            chan bool
 	ThreadRunnersWaitGroup     sync.WaitGroup
 	Threads                    int
@@ -188,7 +191,8 @@ func runTest(backendName string, threadIndex int, aggregateTimings *timing.Aggre
 func createThreadedRunner(backendName string, threadIndex int, testManager *TestManager,
 	aggregateTimings *timing.AggregateTimings) {
 
-	round := 0
+	var once sync.Once
+
 	go func() {
 		for {
 			if testManager.IsShuttingDown {
@@ -196,10 +200,17 @@ func createThreadedRunner(backendName string, threadIndex int, testManager *Test
 				return
 			}
 
-			round++
+			testManager.RoundsCompletedLock.Lock()
+
+			testManager.RoundsCompleted[backendName]++
+			round := testManager.RoundsCompleted[backendName]
+
+			testManager.RoundsCompletedLock.Unlock()
+
 			if testManager.MaxRounds != -1 && round > testManager.MaxRounds {
-				testManager.ThreadRunnersWaitGroup.Done()
-				return
+				once.Do(func() {
+					testManager.RoundsMaxReachedWaitGroup.Done()
+				})
 			}
 
 			testDuration := runTest(backendName, threadIndex, aggregateTimings, testManager,
@@ -209,7 +220,6 @@ func createThreadedRunner(backendName string, threadIndex int, testManager *Test
 				testManager.LatestBaselineTestDuration = testDuration
 			}
 		}
-		log.Println("WARN: Should never reach here!")
 	}()
 }
 
@@ -244,8 +254,17 @@ func runMainTestingLoop(config *conf.Config, testManager *TestManager) (*timing.
 				&aggregateTimings)
 
 			testManager.ThreadRunnersWaitGroup.Add(1)
+			testManager.RoundsMaxReachedWaitGroup.Add(1)
 		}
 	}
+
+	go func() {
+		if testManager.MaxRounds != -1 {
+			testManager.RoundsMaxReachedWaitGroup.Wait()
+			log.Println("async: Max rounds reached on all backends. Sending shutdown signal...")
+			testManager.ShutdownChannel <- true
+		}
+	}()
 
 	log.Println("async: Waiting for all tests to complete...")
 	testManager.ThreadRunnersWaitGroup.Wait()
@@ -301,6 +320,9 @@ func main() {
 		IsShuttingDown:             false,
 		LatestBaselineTestDuration: timing.ZeroDuration,
 		MaxRounds:                  maxRounds,
+		RoundsCompleted:            map[string]int{},
+		RoundsCompletedLock:        sync.RWMutex{},
+		RoundsMaxReachedWaitGroup:  sync.WaitGroup{},
 		ThreadRunnersWaitGroup:     sync.WaitGroup{},
 		ShutdownChannel:            shutdownChannel,
 		Threads:                    config.Comparison.Threads,

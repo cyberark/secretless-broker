@@ -3,7 +3,8 @@ driver: postgres
 
 comparison:
   baselineBackend: pg_direct
-#  type: sql
+  #  type: sql/persistent
+  type: sql/recreate
 #  style: select
   rounds: 10000
 #  baselineMaxThresholdPercent: 120

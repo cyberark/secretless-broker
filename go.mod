@@ -20,7 +20,7 @@ require (
 	github.com/codegangsta/cli v1.20.0
 	github.com/containerd/continuity v0.0.0-20180712174259-0377f7d76720 // indirect
 	github.com/cyberark/conjur-api-go v0.5.1-0.20190103154352-bb43c2b86d76
-	github.com/cyberark/conjur-authn-k8s-client v0.12.0
+	github.com/cyberark/conjur-authn-k8s-client v0.13.0
 	github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20180707235734-242fa5aa1b45 // indirect
@@ -29,7 +29,6 @@ require (
 	github.com/duosecurity/duo_api_golang v0.0.0-20180315112207-d0530c80e49a // indirect
 	github.com/fatih/structs v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
-	github.com/fullsailor/pkcs7 v0.0.0-20180613152042-8306686428a5 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
 	github.com/go-sql-driver/mysql v1.4.0 // indirect

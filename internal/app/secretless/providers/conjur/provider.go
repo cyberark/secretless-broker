@@ -14,6 +14,7 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 	"github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator"
+	authenticatorConfig "github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator/config"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
@@ -174,49 +175,19 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 // issue logged in the authenticator for doing this via the Kubernetes API
 func loadAuthenticator(authnURL string, version string, tokenFile string, config conjurapi.Config) (*authenticator.Authenticator, error) {
 	var err error
-	var conjurCACert []byte
+	var conjurConfig *authenticatorConfig.Config
 
 	// Set the client cert / token paths
 	clientCertPath := "/etc/conjur/ssl/client.pem"
 
 	// Check that required environment variables are set
-	for _, envvar := range []string{
-		"CONJUR_ACCOUNT",
-		"CONJUR_AUTHN_LOGIN",
-		"MY_POD_NAMESPACE",
-		"MY_POD_NAME",
-	} {
-		if os.Getenv(envvar) == "" {
-			return nil, fmt.Errorf("Error: Conjur provider requires the %s environment variable", envvar)
-		}
-	}
-
-	// Load configuration from the environment
-	// TODO get pod namespace / name using Kubernetes API
-	// instead of specifying in deployment manifest
-	podNamespace := os.Getenv("MY_POD_NAMESPACE")
-	podName := os.Getenv("MY_POD_NAME")
-	account := os.Getenv("CONJUR_ACCOUNT")
-	authnLogin := os.Getenv("CONJUR_AUTHN_LOGIN")
-
-	// Load CA cert
-	if conjurCACert, err = readSSLCert(); err != nil {
+	conjurConfig, err = authenticatorConfig.NewFromEnv(&clientCertPath, &tokenFile)
+	if err != nil {
 		return nil, err
 	}
 
 	// Create new Authenticator
-	authenticator, err := authenticator.New(
-		authenticator.Config{
-			Account:        account,
-			ClientCertPath: clientCertPath,
-			ConjurVersion:  version,
-			PodName:        podName,
-			PodNamespace:   podNamespace,
-			SSLCertificate: conjurCACert,
-			TokenFilePath:  tokenFile,
-			URL:            authnURL,
-			Username:       authnLogin,
-		})
+	authenticator, err := authenticator.New(*conjurConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -286,17 +257,15 @@ func (p *Provider) refreshAccessToken() error {
 			if err != nil {
 				log.Printf("Info: Conjur provider received an error on authenticate: %s", err.Error())
 
-				if autherr, ok := err.(*authenticator.Error); ok {
-					if autherr.CertExpired() {
-						log.Printf("Info: Conjur certificate expired; Conjur provider is re-logging in.")
+				if p.Authenticator.IsCertExpired() {
+					log.Printf("Info: Conjur certificate expired; Conjur provider is re-logging in.")
 
-						if err = p.Authenticator.Login(); err != nil {
-							return err
-						}
-
-						// if the cert expired and login worked then continue
-						continue
+					if err = p.Authenticator.Login(); err != nil {
+						return err
 					}
+
+					// if the cert expired and login worked then continue
+					continue
 				} else {
 					return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", err.Error())
 				}

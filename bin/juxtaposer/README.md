@@ -15,6 +15,13 @@ alongside Secretless to compare the following scenarios:
 | MySQL         | Direct connection | Secretless (persistent connection) | TCP port        |
 | Postgres      | Direct connection | Secretless (persistent connection) | Unix socket     |
 | Postgres      | Direct connection | Secretless (persistent connection) | TCP port        |
+| MySQL         | Direct connection | Secretless (recreated connection)  | Unix socket     |
+| MySQL         | Direct connection | Secretless (recreated connection)  | TCP port        |
+| Postgres      | Direct connection | Secretless (recreated connection)  | Unix socket     |
+| Postgres      | Direct connection | Secretless (recreated connection)  | TCP port        |
+
+All scenarios can be run with limits as either minimum number of rounds completed or a
+time-limited duration.
 
 We compare the following results:
 
@@ -108,7 +115,13 @@ only `select` is supported.
 This setting decides how many loops the main test run will iterate over all
 the defined backends. This setting is ignored if time-based CLI flag is used.
 This field also supports a special keyword `infinity` that lets the tests run
-forever or until the user sends an interrupt signal.
+forever or until the user sends an interrupt signal. Note that this indicates
+only the _minimum_ amount of runs that all backends will be iterated over.
+
+1. (optional) `threads`, `int`, default: `1`
+This setting selects how many parallel routines (threads) will be used for each
+backend testing. Increasing this setting will mean that there will be a proportional
+load testing increase on the service per unit of time.
 
 1. (optional) `baselineMaxThresholdPercent`, `int`, default: `120`
 This setting decides how slow (percentage-wise) can a non-baseline backend be

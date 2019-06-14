@@ -3,7 +3,6 @@ package conjur
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -14,13 +13,11 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 	"github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator"
+	authnConfig "github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator/config"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
-// authenticateCycleDuration is the default time the system waits to
-// reauthenticate on error when using the authenticator client
-const authenticateCycleDuration = 6 * time.Minute
 const authenticatorTokenFile = "/run/conjur/access-token"
 
 // Provider provides data values from the Conjur vault.
@@ -105,8 +102,15 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		}
 		provider.Authenticator = authenticator
 
-		// Kick off the goroutine that will maintain the Conjur access token
-		go provider.refreshAccessToken()
+		refreshErr := provider.refreshAccessToken(true)
+		if refreshErr != nil {
+			return nil, refreshErr
+		}
+
+		go func() {
+			time.Sleep(provider.Authenticator.Config.TokenRefreshTimeout)
+			provider.refreshAccessToken(false)
+		}()
 
 		// Once the token file has been loaded, create a new instance of the Conjur client
 		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, authenticatorTokenFile); err != nil {
@@ -172,9 +176,10 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 // Currently the deployment manifest for Secretless must also specify
 // MY_POD_NAMESPACE and MY_POD_NAME from the pod metadata, but there is a GH
 // issue logged in the authenticator for doing this via the Kubernetes API
-func loadAuthenticator(authnURL string, version string, tokenFile string, config conjurapi.Config) (*authenticator.Authenticator, error) {
+func loadAuthenticator(authnURL string, version string, tokenFilePath string,
+	providerConfig conjurapi.Config) (*authenticator.Authenticator, error) {
+
 	var err error
-	var conjurCACert []byte
 
 	// Set the client cert / token paths
 	clientCertPath := "/etc/conjur/ssl/client.pem"
@@ -191,59 +196,15 @@ func loadAuthenticator(authnURL string, version string, tokenFile string, config
 		}
 	}
 
-	// Load configuration from the environment
-	// TODO get pod namespace / name using Kubernetes API
-	// instead of specifying in deployment manifest
-	podNamespace := os.Getenv("MY_POD_NAMESPACE")
-	podName := os.Getenv("MY_POD_NAME")
-	account := os.Getenv("CONJUR_ACCOUNT")
-	authnLogin := os.Getenv("CONJUR_AUTHN_LOGIN")
-
-	// Load CA cert
-	if conjurCACert, err = readSSLCert(); err != nil {
+	config, err := authnConfig.NewFromEnv(&clientCertPath, &tokenFilePath)
+	if err != nil {
 		return nil, err
 	}
 
 	// Create new Authenticator
-	authenticator, err := authenticator.New(
-		authenticator.Config{
-			Account:        account,
-			ClientCertPath: clientCertPath,
-			ConjurVersion:  version,
-			PodName:        podName,
-			PodNamespace:   podNamespace,
-			SSLCertificate: conjurCACert,
-			TokenFilePath:  tokenFile,
-			URL:            authnURL,
-			Username:       authnLogin,
-		})
+	authenticator, err := authenticator.New(*config)
 	if err != nil {
 		return nil, err
-	}
-
-	// Send the login request to Conjur to retrieve the signed certificate
-	// Configure exponential backoff
-	expBackoff := backoff.NewExponentialBackOff()
-	expBackoff.InitialInterval = 2 * time.Second
-	expBackoff.RandomizationFactor = 0.5
-	expBackoff.Multiplier = 2
-	expBackoff.MaxInterval = 15 * time.Second
-	expBackoff.MaxElapsedTime = 2 * time.Minute
-
-	// Try login with exponential backoff on failure
-	err = backoff.Retry(
-		func() error {
-			if err = authenticator.Login(); err != nil {
-				return err
-			}
-
-			return nil
-		},
-		expBackoff)
-
-	// If unable to login, return error
-	if err != nil {
-		return nil, fmt.Errorf("Error: Conjur provider unable to log in to Conjur: %s", err.Error())
 	}
 
 	return authenticator, nil
@@ -252,8 +213,7 @@ func loadAuthenticator(authnURL string, version string, tokenFile string, config
 // refreshAccessToken uses the Conjur Kubernetes authenticator
 // to authenticate with Conjur and retrieve a new time-limited
 // access token in a loop
-func (p *Provider) refreshAccessToken() error {
-
+func (p *Provider) refreshAccessToken(oneShot bool) error {
 	var err error
 
 	if p.Authenticator == nil {
@@ -271,45 +231,40 @@ func (p *Provider) refreshAccessToken() error {
 	// Authenticate in a loop with retries on failure with exponential backoff
 	err = backoff.Retry(func() error {
 		for {
-
 			// Lock the authenticatorMutex
 			p.AuthenticationMutex.Lock()
 
 			log.Printf("Info: Conjur provider is authenticating as %s ...", p.Authenticator.Config.Username)
 			resp, err := p.Authenticator.Authenticate()
-
-			if err == nil {
-				log.Printf("Info: Conjur provider received a valid authentication response")
-				err = p.Authenticator.ParseAuthenticationResponse(resp)
-			}
-
 			if err != nil {
+				p.AuthenticationMutex.Unlock()
 				log.Printf("Info: Conjur provider received an error on authenticate: %s", err.Error())
-
-				if autherr, ok := err.(*authenticator.Error); ok {
-					if autherr.CertExpired() {
-						log.Printf("Info: Conjur certificate expired; Conjur provider is re-logging in.")
-
-						if err = p.Authenticator.Login(); err != nil {
-							return err
-						}
-
-						// if the cert expired and login worked then continue
-						continue
-					}
-				} else {
-					return fmt.Errorf("Error: Conjur provider unable to authenticate: %s", err.Error())
-				}
+				return err
 			}
 
-			// Unlock the authenticatorMutex
+			log.Printf("Info: Conjur provider received a valid authentication response")
+
+			err = p.Authenticator.ParseAuthenticationResponse(resp)
+			if err != nil {
+				p.AuthenticationMutex.Unlock()
+				log.Printf("Failure parsing response: %s", err.Error())
+				return err
+			}
+
 			p.AuthenticationMutex.Unlock()
+
+			if oneShot {
+				return nil
+			}
 
 			// Reset exponential backoff
 			expBackoff.Reset()
 
-			log.Printf("Info: Conjur provider is waiting for %v minutes to re-authenticate.", authenticateCycleDuration)
-			time.Sleep(authenticateCycleDuration)
+			log.Printf("Info: Conjur provider is waiting for %s to re-authenticate.",
+				p.Authenticator.Config.TokenRefreshTimeout)
+
+			fmt.Println()
+			time.Sleep(p.Authenticator.Config.TokenRefreshTimeout)
 		}
 	}, expBackoff)
 
@@ -318,19 +273,4 @@ func (p *Provider) refreshAccessToken() error {
 	}
 
 	return nil
-}
-
-func readSSLCert() ([]byte, error) {
-	SSLCert := os.Getenv("CONJUR_SSL_CERTIFICATE")
-	SSLCertPath := os.Getenv("CONJUR_CERT_FILE")
-	if SSLCert == "" && SSLCertPath == "" {
-		err := errors.New("At least one of CONJUR_SSL_CERTIFICATE and CONJUR_CERT_FILE must be provided")
-		return nil, err
-	}
-
-	if SSLCert != "" {
-		return []byte(SSLCert), nil
-	}
-
-	return ioutil.ReadFile(SSLCertPath)
 }

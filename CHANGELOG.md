@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Updated codebase to use Golang v1.12.5
+- Updated `conjur-authn-k8s-client` dependency to v0.13.0
+- Updated `conjur-api-go` dependency to v0.5.2
 - Removed third-party module for evaluating home directory path
+
+### Fixed
+- Fixed issue with renewing certs on authn-k8s onjur provider
 
 ## [0.7.1] 2019-05-16
 

@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: ${APP_SERVICE_ACCOUNT}
+  namespace: ${APP_NAMESPACE}
 ---
 apiVersion: apps/v1beta2
 kind: Deployment

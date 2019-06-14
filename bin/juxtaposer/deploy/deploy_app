@@ -23,10 +23,10 @@ sed -e "s#\${APP_NAME}#$APP_NAME#g" \
     "$CURRENT_DIR/juxtaposer_deployment_template.yml" > "$CURRENT_DIR/tmp/juxtaposer_deployment.yml"
 
 
-kubectl create configmap "${APP_NAME}-secretless-config" \
+kubectl --namespace "$TEST_APP_NAMESPACE_NAME" create configmap "${APP_NAME}-secretless-config" \
   "--from-file=secretless.yml=$CURRENT_DIR/secretless.yml"
 
-kubectl create configmap "${APP_NAME}-config" \
+kubectl --namespace "$TEST_APP_NAMESPACE_NAME" create configmap "${APP_NAME}-config" \
   "--from-file=${APP_NAME}_${CONFIG_TEMPLATE}.yml=$CURRENT_DIR/juxtaposer_${CONFIG_TEMPLATE}.yml"
 
 kubectl apply -f "$CURRENT_DIR/tmp/juxtaposer_deployment.yml"

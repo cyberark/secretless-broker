@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-kubectl delete deployment "${APP_NAME}" || true
-kubectl delete serviceaccount "${APP_SERVICE_ACCOUNT}" || true
-kubectl delete configmap "${APP_NAME}-secretless-config" || true
-kubectl delete configmap "${APP_NAME}-config" || true
+kubectl delete --namespace "${TEST_APP_NAMESPACE_NAME}" deployment "${APP_NAME}" || true
+kubectl delete --namespace "${TEST_APP_NAMESPACE_NAME}" serviceaccount "${APP_SERVICE_ACCOUNT}" || true
+kubectl delete --namespace "${TEST_APP_NAMESPACE_NAME}" configmap "${APP_NAME}-secretless-config" || true
+kubectl delete --namespace "${TEST_APP_NAMESPACE_NAME}" configmap "${APP_NAME}-config" || true

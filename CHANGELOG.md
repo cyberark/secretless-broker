@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed third-party module for evaluating home directory path
 
 ### Fixed
-- Fixed issue with renewing certs on authn-k8s onjur provider
+- Fixed issue with renewing certs on authn-k8s conjur provider
 
 ## [0.7.1] 2019-05-16
 

@@ -102,14 +102,14 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		}
 		provider.Authenticator = authenticator
 
-		refreshErr := provider.refreshAccessToken(true)
+		refreshErr := provider.authenticate()
 		if refreshErr != nil {
 			return nil, refreshErr
 		}
 
 		go func() {
 			time.Sleep(provider.Authenticator.Config.TokenRefreshTimeout)
-			provider.refreshAccessToken(false)
+			provider.authenticateLoop()
 		}()
 
 		// Once the token file has been loaded, create a new instance of the Conjur client
@@ -185,17 +185,6 @@ func loadAuthenticator(authnURL string, version string, tokenFilePath string,
 	clientCertPath := "/etc/conjur/ssl/client.pem"
 
 	// Check that required environment variables are set
-	for _, envvar := range []string{
-		"CONJUR_ACCOUNT",
-		"CONJUR_AUTHN_LOGIN",
-		"MY_POD_NAMESPACE",
-		"MY_POD_NAME",
-	} {
-		if os.Getenv(envvar) == "" {
-			return nil, fmt.Errorf("Error: Conjur provider requires the %s environment variable", envvar)
-		}
-	}
-
 	config, err := authnConfig.NewFromEnv(&clientCertPath, &tokenFilePath)
 	if err != nil {
 		return nil, err
@@ -210,16 +199,11 @@ func loadAuthenticator(authnURL string, version string, tokenFilePath string,
 	return authenticator, nil
 }
 
-// refreshAccessToken uses the Conjur Kubernetes authenticator
+// authenticate uses the Conjur Kubernetes authenticator
 // to authenticate with Conjur and retrieve a new time-limited
-// access token in a loop
-func (p *Provider) refreshAccessToken(oneShot bool) error {
-	var err error
-
-	if p.Authenticator == nil {
-		return errors.New("Error: Conjur Kubernetes authenticator must be instantiated before access token may be refreshed")
-	}
-
+// access token
+// authenticate carries out retry with exponential backoff
+func (p *Provider) authenticate() error {
 	// Configure exponential backoff
 	expBackoff := backoff.NewExponentialBackOff()
 	expBackoff.InitialInterval = 2 * time.Second
@@ -228,44 +212,28 @@ func (p *Provider) refreshAccessToken(oneShot bool) error {
 	expBackoff.MaxInterval = 15 * time.Second
 	expBackoff.MaxElapsedTime = 2 * time.Minute
 
-	// Authenticate in a loop with retries on failure with exponential backoff
-	err = backoff.Retry(func() error {
-		for {
-			// Lock the authenticatorMutex
-			p.AuthenticationMutex.Lock()
+	// Authenticate with retries on failure with exponential backoff
+	err := backoff.Retry(func() error {
+		// Lock the authenticatorMutex
+		p.AuthenticationMutex.Lock()
+		defer p.AuthenticationMutex.Unlock()
 
-			log.Printf("Info: Conjur provider is authenticating as %s ...", p.Authenticator.Config.Username)
-			resp, err := p.Authenticator.Authenticate()
-			if err != nil {
-				p.AuthenticationMutex.Unlock()
-				log.Printf("Info: Conjur provider received an error on authenticate: %s", err.Error())
-				return err
-			}
-
-			log.Printf("Info: Conjur provider received a valid authentication response")
-
-			err = p.Authenticator.ParseAuthenticationResponse(resp)
-			if err != nil {
-				p.AuthenticationMutex.Unlock()
-				log.Printf("Failure parsing response: %s", err.Error())
-				return err
-			}
-
-			p.AuthenticationMutex.Unlock()
-
-			if oneShot {
-				return nil
-			}
-
-			// Reset exponential backoff
-			expBackoff.Reset()
-
-			log.Printf("Info: Conjur provider is waiting for %s to re-authenticate.",
-				p.Authenticator.Config.TokenRefreshTimeout)
-
-			fmt.Println()
-			time.Sleep(p.Authenticator.Config.TokenRefreshTimeout)
+		log.Printf("Info: Conjur provider is authenticating as %s ...", p.Authenticator.Config.Username)
+		resp, err := p.Authenticator.Authenticate()
+		if err != nil {
+			log.Printf("Info: Conjur provider received an error on authenticate: %s", err.Error())
+			return err
 		}
+
+		log.Printf("Info: Conjur provider received a valid authentication response")
+
+		err = p.Authenticator.ParseAuthenticationResponse(resp)
+		if err != nil {
+			log.Printf("Failure parsing response: %s", err.Error())
+			return err
+		}
+
+		return nil
 	}, expBackoff)
 
 	if err != nil {
@@ -273,4 +241,19 @@ func (p *Provider) refreshAccessToken(oneShot bool) error {
 	}
 
 	return nil
+}
+
+// authenticateLoop runs authenticate in an infinite loop
+func (p *Provider) authenticateLoop() error {
+	if p.Authenticator == nil {
+		return errors.New("Error: Conjur Kubernetes authenticator must be instantiated before access token may be refreshed")
+	}
+
+	// Authenticate in a loop
+	for {
+		err := p.authenticate()
+		if err != nil {
+			return err
+		}
+	}
 }

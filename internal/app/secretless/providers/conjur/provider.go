@@ -102,7 +102,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		}
 		provider.Authenticator = authenticator
 
-		refreshErr := provider.authenticate()
+		refreshErr := provider.fetchAccessToken()
 		if refreshErr != nil {
 			return nil, refreshErr
 		}
@@ -111,7 +111,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 			// sleep until token needs refresh
 			time.Sleep(provider.Authenticator.Config.TokenRefreshTimeout)
 			// authenticate in a loop
-			provider.authenticateLoop()
+			provider.fetchAccessTokenLoop()
 		}()
 
 		// Once the token file has been loaded, create a new instance of the Conjur client
@@ -201,11 +201,11 @@ func loadAuthenticator(authnURL string, version string, tokenFilePath string,
 	return authenticator, nil
 }
 
-// authenticate uses the Conjur Kubernetes authenticator
+// fetchAccessToken uses the Conjur Kubernetes authenticator
 // to authenticate with Conjur and retrieve a new time-limited
-// access token
-// authenticate carries out retry with exponential backoff
-func (p *Provider) authenticate() error {
+// access token.
+// fetchAccessToken carries out retry with exponential backoff
+func (p *Provider) fetchAccessToken() error {
 	// Configure exponential backoff
 	expBackoff := backoff.NewExponentialBackOff()
 	expBackoff.InitialInterval = 2 * time.Second
@@ -243,16 +243,16 @@ func (p *Provider) authenticate() error {
 	return nil
 }
 
-// authenticateLoop runs authenticate in an infinite loop
+// fetchAccessTokenLoop runs authenticate in an infinite loop
 // punctuated by by sleeps of duration TokenRefreshTimeout
-func (p *Provider) authenticateLoop() error {
+func (p *Provider) fetchAccessTokenLoop() error {
 	if p.Authenticator == nil {
 		return errors.New("Error: Conjur Kubernetes authenticator must be instantiated before access token may be refreshed")
 	}
 
-	// Authenticate in a loop
+	// Fetch the access token in a loop
 	for {
-		err := p.authenticate()
+		err := p.fetchAccessToken()
 		if err != nil {
 			return err
 		}

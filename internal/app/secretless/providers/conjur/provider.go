@@ -227,11 +227,9 @@ func (p *Provider) authenticate() error {
 			return err
 		}
 
-		log.Printf("Info: Conjur provider received a valid authentication response")
-
 		err = p.Authenticator.ParseAuthenticationResponse(resp)
 		if err != nil {
-			log.Printf("Failure parsing response: %s", err.Error())
+			log.Printf("Error: Conjur provider failure parsing response: %s", err.Error())
 			return err
 		}
 

@@ -25,6 +25,11 @@ func GetAverageDuration(timingInfo *formatter_api.BackendTiming) time.Duration {
 
 func getMappedDataPointCount(mappedCounts *map[int]int) int {
 	countOfDataPoints := 0
+
+	if mappedCounts == nil {
+		return 0
+	}
+
 	for _, mappedCount := range *mappedCounts {
 		countOfDataPoints += mappedCount
 	}
@@ -53,10 +58,10 @@ func GetStandardDeviation(mappedCounts *map[int]int) float64 {
 	mean := GetMean(mappedCounts)
 	totalDeviation := 0.0
 	for valueAmount, occurrences := range *mappedCounts {
-		deviation := (float64(valueAmount) - mean) * (float64(valueAmount) - mean)
+		deviation := math.Pow(float64(valueAmount) - mean, 2)
 		totalDeviation += deviation * float64(occurrences)
 	}
-	standardDeviation := math.Pow(totalDeviation/float64(getMappedDataPointCount(mappedCounts)), 0.5)
+	standardDeviation := math.Pow(totalDeviation/float64(getMappedDataPointCount(mappedCounts) - 1), 0.5)
 
 	return standardDeviation
 }

@@ -28,7 +28,9 @@ type BackendTimingDataJson struct {
 	Errors                   []timing.TestRunError  `json:"errors"`
 	FailedRounds             int                    `json:"failedRounds"`
 	MaximumDurationNs        int64                  `json:"maximumDurationNs"`
+	MedianDurationNs         int64                  `json:"medianDuration"`
 	MinimumDurationNs        int64                  `json:"minimumDurationNs"`
+	StandardDeviation        float64                `json:"standardDeviation"`
 	SuccessfulRounds         int                    `json:"successfulRounds"`
 	SuccessPercentage        float64                `json:"successPercentage"`
 	ThresholdBreachedPercent float64                `json:"thresholdBreachedPercent"`
@@ -76,7 +78,9 @@ func (formatter *JsonFormatter) ProcessResults(backendNames []string,
 				UpperBoundPercent: upperBoundCI,
 			},
 			MaximumDurationNs:        timingInfo.MaximumDuration.Nanoseconds(),
+			MedianDurationNs:         1245667890,
 			MinimumDurationNs:        timingInfo.MinimumDuration.Nanoseconds(),
+			StandardDeviation:        1.245667890,
 			SuccessfulRounds:         successfulRounds,
 			SuccessPercentage:        successPercentage,
 			ThresholdBreachedPercent: thresholdBreachedPercent,

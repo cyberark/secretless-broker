@@ -21,6 +21,8 @@ func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregat
 		map[string]string{"name": "Min", "nameFormat": "%13s", "valueFormat": "%13v"},
 		map[string]string{"name": "Max", "nameFormat": "%13s", "valueFormat": "%13v"},
 		map[string]string{"name": "Avg", "nameFormat": "%13s", "valueFormat": "%13v"},
+		map[string]string{"name": "Median", "nameFormat": "%13s", "valueFormat": "%13v"},
+		map[string]string{"name": "StdDev", "nameFormat": "%13s", "valueFormat": "%13v"},
 		map[string]string{"name": "90% Lower %", "nameFormat": "%12s", "valueFormat": "%12.2f"},
 		map[string]string{"name": "90% Upper %", "nameFormat": "%12s", "valueFormat": "%12.2f"},
 		map[string]string{"name": "Total", "nameFormat": "%18s", "valueFormat": "%18v"},
@@ -30,7 +32,7 @@ func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregat
 		map[string]string{"name": "Thresh %", "nameFormat": "%9s", "valueFormat": "%9.2f"},
 	}
 
-	dividerString := strings.Repeat("-", 158)
+	dividerString := strings.Repeat("-", 186)
 
 	fmt.Printf("%s\n", dividerString)
 	formatValueString := ""
@@ -55,6 +57,8 @@ func (formatter *StdoutFormatter) ProcessResults(backendNames []string, aggregat
 			timingInfo.MinimumDuration,
 			timingInfo.MaximumDuration,
 			averageDuration,
+			"-1.234567890",
+			"-1.234567890",
 			lowerBoundCI,
 			upperBoundCI,
 			timingInfo.Duration,

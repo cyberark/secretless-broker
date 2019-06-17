@@ -1,10 +1,12 @@
 package util
 
 import (
-	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 )
 
 func TestGetStandardDeviation(t *testing.T) {
@@ -81,9 +83,9 @@ func TestGetAverageDuration(t *testing.T) {
 
 	t.Run("valid input result is rounded down", func(t *testing.T) {
 		input := &api.BackendTiming{
-			Count:                     20,
-			Duration:                  time.Duration(50),
-			Errors:                    make([]api.TestRunError, 4),
+			Count:    20,
+			Duration: time.Duration(50),
+			Errors:   make([]api.TestRunError, 4),
 		}
 		res := GetAverageDuration(input)
 

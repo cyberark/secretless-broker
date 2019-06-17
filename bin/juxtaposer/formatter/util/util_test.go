@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 )
 
 func TestGetStandardDeviation(t *testing.T) {
@@ -68,24 +68,24 @@ func TestGetMean(t *testing.T) {
 func TestGetAverageDuration(t *testing.T) {
 
 	t.Run("empty input", func(t *testing.T) {
-		input := &api.BackendTiming{}
+		input := &timing.BackendTiming{}
 		res := GetAverageDuration(input)
 
 		assert.Equal(t, res, time.Duration(0))
 	})
 
 	t.Run("nil input", func(t *testing.T) {
-		input := &api.BackendTiming{}
+		input := &timing.BackendTiming{}
 		res := GetAverageDuration(input)
 
 		assert.Equal(t, res, time.Duration(0))
 	})
 
 	t.Run("valid input result is rounded down", func(t *testing.T) {
-		input := &api.BackendTiming{
+		input := &timing.BackendTiming{
 			Count:    20,
 			Duration: time.Duration(50),
-			Errors:   make([]api.TestRunError, 4),
+			Errors:   make([]timing.TestRunError, 4),
 		}
 		res := GetAverageDuration(input)
 

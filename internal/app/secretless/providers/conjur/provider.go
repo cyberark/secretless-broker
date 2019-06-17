@@ -108,7 +108,9 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		}
 
 		go func() {
+			// sleep until token needs refresh
 			time.Sleep(provider.Authenticator.Config.TokenRefreshTimeout)
+			// authenticate in a loop
 			provider.authenticateLoop()
 		}()
 
@@ -244,6 +246,7 @@ func (p *Provider) authenticate() error {
 }
 
 // authenticateLoop runs authenticate in an infinite loop
+// punctuated by by sleeps of duration TokenRefreshTimeout
 func (p *Provider) authenticateLoop() error {
 	if p.Authenticator == nil {
 		return errors.New("Error: Conjur Kubernetes authenticator must be instantiated before access token may be refreshed")
@@ -255,5 +258,8 @@ func (p *Provider) authenticateLoop() error {
 		if err != nil {
 			return err
 		}
+
+		// sleep until token needs refresh
+		time.Sleep(p.Authenticator.Config.TokenRefreshTimeout)
 	}
 }

@@ -50,7 +50,8 @@ You can run and test this code on your machine easily with a few things:
 - [Docker](https://docker.com)
 - [Golang](https://golang.org/dl/) 1.12 or higher
 - [Secretless-broker](https://github.com/cyberark/secretless-broker) (optional)
-- A writable folder for shared socket files (e.g. `/sock` in these configurations)
+- A writable folder for shared socket files (e.g. `/sock` in these configurations) if you're using
+socket files (optional)
 
 ### Start the test databases
 
@@ -85,61 +86,34 @@ _Note: This step is optional but it is required for this specific example since 
 performance._
 
 - Clone the [secretless-broker repository](https://github.com/cyberark/secretless-broker) (`git clone https://github.com/cyberark/secretless-broker`).
-- Create the shared socket folder if it's missing (`sudo mkdir /sock`).
+- Create the shared socket folder if it's missing and if you are using
+socket files for testing (`sudo mkdir /sock`).
 - Create the following `secretless.yml` file in that folder:
 <details>
   <summary><code>secretless.yml</code></summary>
   <p>
 
 ```yaml
-listeners:
-- socket:  /sock/mysql
-  debug: true
-  name: mysql_listener
-  protocol: mysql
+version: 2
+services:
+  mysql-socket:
+    protocol: mysql
+    listenOn: unix:///sock/mysql
+    credentials:
+      username: myuser
+      password: mypassword
+      host: 127.0.0.1
+      port: 3307
+      sslmode: disable
 
-- socket: /sock/.s.PGSQL.5432
-  debug: true
-  name: pgsql_listener
-  protocol: pg
-
-handlers:
-- name: mysql_handler
-  listener: mysql_listener
-  debug: true
-  credentials:
-  - name: username
-    provider: literal
-    id: myuser
-  - name: password
-    provider: literal
-    id: mypassword
-  - name: sslmode
-    provider: literal
-    id: disable
-  - name: host
-    provider: literal
-    id: 127.0.0.1
-  - name: port
-    provider: literal
-    id: 3307
-
-- name: pgsql_handler
-  listener: pgsql_listener
-  debug: true
-  credentials:
-  - name: username
-    provider: literal
-    id: myuser
-  - name: password
-    provider: literal
-    id: mypassword
-  - name: sslmode
-    provider: literal
-    id: disable
-  - name: address
-    provider: literal
-    id: 127.0.0.1:5433
+  pg-socket:
+    protocol: pg
+    listenOn: unix:///sock/.s.PGSQL.5432
+    credentials:
+      username: myuser
+      password: mypassword
+      address: 127.0.0.1:5433
+      sslmode: disable
 ```
 
   </p>
@@ -170,8 +144,8 @@ driver: postgres
 comparison:
   baselineBackend: pg_direct
 #  baselineBackend: mysql_direct
-#  type: sql/persistent
-#  style: select
+#  recreateConnections: true
+#  sqlStatementType: select
 #  rounds: 1000
 #  rounds: infinity
 #  baselineMaxThresholdPercent: 120

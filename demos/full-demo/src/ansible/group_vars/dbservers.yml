@@ -1,1 +1,0 @@
-dbpassword: "{{ lookup('env','DB_PASSWORD') }}"

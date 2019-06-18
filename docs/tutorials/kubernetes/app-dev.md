@@ -5,7 +5,7 @@ layout: tutorials
 description: Secretless Broker Documentation
 section-header: Steps for Application Developer
 time-complete: 5
-products-used: Kubernetes Secrets, PostgreSQL Handler
+products-used: Kubernetes Secrets, PostgreSQL Service Authenticator
 back-btn: /tutorials/kubernetes/sec-admin.html
 continue-btn: /tutorials/kubernetes/appendix.html
 up-next: Get a closer look at Secretless...

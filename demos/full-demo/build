@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -ex
-
-modules=( "plaintext" "conjur" )
-
-for directory in "${modules[@]}"; do
-  docker-compose --project-directory "./$directory" build
-done

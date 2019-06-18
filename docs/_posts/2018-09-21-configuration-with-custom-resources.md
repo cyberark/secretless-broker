@@ -16,28 +16,26 @@ excerpt: "Secretless Broker by default expects its configuration via file, but u
 # The Default Method - Configuration By File
 
 The default method for configuring your Secretless Broker is to provide it with
-a `secretless.yml` file that specifies the Listeners and Handlers that Secretless
+a `secretless.yml` file that specifies the Service Authenticators that Secretless
 Broker should be running. Your `secretless.yml` might look something like:
 
 ```
-listeners:
-  - name: my_webapp_listener
+version: "2"
+services:
+  my_webapp_authenticator:
     protocol: http
-    address: 0.0.0.0:8080
-
-handlers:
-  - name: my_webapp_handler
-    type: basic_auth
-    listener: my_webapp_listener
-    match:
-      - ^http.*
+    listenOn: tcp://0.0.0.0:8080
     credentials:
-      - name: username
-        provider: environment
-        id: WEBAPP_USERNAME
-      - name: password
-        provider: environment
-        id: WEBAPP_PASSWORD
+      username:
+        from: env
+        get: WEBAPP_USERNAME
+      password:
+        from: env
+        get: WEBAPP_PASSWORD
+    config:
+      authenticationStrategy: basic_auth
+      authenticateURLsMatching:
+        - ^http.*
 ```
 This example `secretless.yml` is for a webservice my app needs to connect to that
 uses basic auth as its authentication scheme.
@@ -145,7 +143,7 @@ that points to the specific CRD configuration we've uploaded.
 
 And that's it! Once we deploy our app with its Secretless Broker sidecar, it will
 have access to the configuration we specified in `secretless-config.yaml`. If we
-add new Listeners and Handlers to the Secretless configuration (for example, if
+add new Service Authenticators to the Secretless configuration (for example, if
 our app needs to also connect to a database), we just update the file and apply
 the changes:
 

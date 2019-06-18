@@ -1,3 +1,0 @@
-#!/bin/bash -e
-
-su postgres -c "/usr/lib/postgresql/9.5/bin/postgres -D /etc/postgresql/9.5/main/"

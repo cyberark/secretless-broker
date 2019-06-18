@@ -50,7 +50,7 @@ You can run and test this code on your machine easily with a few things:
 - [Docker](https://docker.com)
 - [Golang](https://golang.org/dl/) 1.12 or higher
 - [Secretless-broker](https://github.com/cyberark/secretless-broker) (optional)
-- A writable folder for shared socket files (e.g. `/sock` in these configurations) if you're using
+- A writable folder for shared socket files (e.g. `/tmp` in these configurations) if you're using
 socket files (optional)
 
 ### Start the test databases
@@ -86,8 +86,6 @@ _Note: This step is optional but it is required for this specific example since 
 performance._
 
 - Clone the [secretless-broker repository](https://github.com/cyberark/secretless-broker) (`git clone https://github.com/cyberark/secretless-broker`).
-- Create the shared socket folder if it's missing and if you are using
-socket files for testing (`sudo mkdir /sock`).
 - Create the following `secretless.yml` file in that folder:
 <details>
   <summary><code>secretless.yml</code></summary>
@@ -98,7 +96,7 @@ version: 2
 services:
   mysql-socket:
     protocol: mysql
-    listenOn: unix:///sock/mysql
+    listenOn: unix:///tmp/mysql
     credentials:
       username: myuser
       password: mypassword
@@ -108,7 +106,7 @@ services:
 
   pg-socket:
     protocol: pg
-    listenOn: unix:///sock/.s.PGSQL.5432
+    listenOn: unix:///tmp/.s.PGSQL.5432
     credentials:
       username: myuser
       password: mypassword
@@ -159,7 +157,7 @@ formatters:
 
 backends:
   pg_secretless:
-    host: /sock
+    host: /tmp
 
   pg_direct:
     host: localhost
@@ -170,7 +168,7 @@ backends:
     debug: false
 
   mysql_secretless:
-    host: /sock/mysql
+    host: /tmp/mysql
     ignore: true
 
   mysql_direct:

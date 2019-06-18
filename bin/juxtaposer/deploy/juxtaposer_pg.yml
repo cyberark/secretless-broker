@@ -3,12 +3,10 @@ driver: postgres
 
 comparison:
   baselineBackend: pg_direct
-  #  type: sql/persistent
-  type: sql/recreate
-#  style: select
+#  recreateConnections: true
   rounds: 10000
-#  baselineMaxThresholdPercent: 120
-  silent: true
+  silent: false
+  threads: 10
 
 formatters:
   json:

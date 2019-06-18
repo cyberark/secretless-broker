@@ -53,13 +53,10 @@ func createBackendTesters(config *conf.Config,
 
 		log.Printf("Setting up backend: %s", backendName)
 
-		// Sanity check
-		if !strings.HasPrefix(config.Comparison.Type, "sql/") {
-			return nil, nil, fmt.Errorf("ERROR: Comparison type not supported: %s", config.Comparison.Type)
+		connectionType := "persistent"
+		if config.Comparison.RecreateConnections {
+			connectionType = "recreate"
 		}
-
-		// TODO: Make this more robust
-		connectionType := config.Comparison.Type[4:]
 
 		options := tester_api.DbTesterOptions{
 			ConnectionType: connectionType,
@@ -81,7 +78,7 @@ func createBackendTesters(config *conf.Config,
 		}
 
 		backendTestManager, err := db.NewTestDriver(backendName, config.Driver,
-			config.Comparison.Style, options)
+			config.Comparison.SqlStatementType, options)
 
 		if backendConfig.Debug {
 			fmt.Printf("%s\n", strings.Repeat("^", 85))
@@ -301,7 +298,7 @@ func main() {
 	}
 
 	log.Println("Driver:", config.Driver)
-	log.Println("Comparison type:", config.Comparison.Type)
+	log.Println("Recreate connections:", config.Comparison.RecreateConnections)
 	log.Println("Backends:", len(config.Backends))
 	log.Println("Threads:", config.Comparison.Threads)
 	log.Println("Rounds:", config.Comparison.Rounds)

@@ -4,8 +4,9 @@ driver: postgres
 
 comparison:
   baselineBackend: pg_direct
-#  type: sql/persistent
-#  style: select
+#  baselineBackend: mysql_direct
+#  recreateConnections: true
+#  sqlStatementType: select
 #  rounds: 1000
 #  rounds: infinity
 #  baselineMaxThresholdPercent: 120

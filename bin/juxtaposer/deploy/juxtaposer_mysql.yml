@@ -3,12 +3,10 @@ driver: mysql-5.7
 
 comparison:
   baselineBackend: mysql_direct
-  #  type: sql/persistent
-  type: sql/recreate
-#  style: select
+#  recreateConnections: true
   rounds: 10000
-#  baselineMaxThresholdPercent: 120
-  silent: true
+  threads: 10
+  silent: false
 
 formatters:
   json:

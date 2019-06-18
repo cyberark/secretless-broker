@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -34,27 +33,16 @@ type Backend struct {
 type Comparison struct {
 	BaselineBackend             string `yaml:"baselineBackend"`
 	BaselineMaxThresholdPercent int    `yaml:"baselineMaxThresholdPercent"`
+	RecreateConnections         bool   `yaml:"recreateConnections"`
 	Rounds                      string `yaml:"rounds"`
 	Silent                      bool   `yaml:"silent"`
-	Style                       string `yaml:"style"`
+	SqlStatementType            string `yaml:"sqlStatementType"`
 	Threads                     int    `yaml:"threads"`
-	Type                        string `yaml:"type"`
 }
 
 func (configuration *Config) verify() error {
-	if !strings.HasPrefix(configuration.Comparison.Type, "sql/") {
-		return fmt.Errorf("comparison type not supported: %s", configuration.Comparison.Type)
-	}
-
-	connectionType := configuration.Comparison.Type[4:]
-	if connectionType != "persistent" &&
-		connectionType != "recreate" {
-		return fmt.Errorf("comparison connection type not supported: %s",
-			connectionType)
-	}
-
-	if configuration.Comparison.Style != "select" {
-		return fmt.Errorf("comparison style supported: %s", configuration.Comparison.Style)
+	if configuration.Comparison.SqlStatementType != "select" {
+		return fmt.Errorf("comparison style supported: %s", configuration.Comparison.SqlStatementType)
 	}
 
 	if configuration.Comparison.Threads < 1 {
@@ -89,9 +77,9 @@ func NewConfiguration(configFile string) (*Config, error) {
 	configuration := Config{
 		Comparison: Comparison{
 			BaselineMaxThresholdPercent: 120,
+			RecreateConnections:         false,
 			Rounds:                      "1000",
-			Style:                       "select",
-			Type:                        "sql/persistent",
+			SqlStatementType:            "select",
 			Threads:                     1,
 		},
 		Formatters: map[string]formatter_api.FormatterOptions{

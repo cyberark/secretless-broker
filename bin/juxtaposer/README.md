@@ -44,6 +44,180 @@ Note: More comparison types may be added in the future.
 
 ---
 
+## Running the code
+
+You can run and test this code on your machine easily with a few things:
+- [Docker](https://docker.com)
+- [Golang](https://golang.org/dl/) 1.12 or higher
+- [Secretless-broker](https://github.com/cyberark/secretless-broker) (optional)
+- A writable folder for shared socket files (e.g. `/sock` in these configurations)
+
+### Start the test databases
+
+#### PG
+
+```
+docker run --name pg-test-db \
+           -p 5433:5432 \
+           -e POSTGRES_USER=myuser \
+           -e POSTGRES_PASSWORD=mypassword \
+           -e POSTGRES_DB=mydb \
+           -d \
+           postgres
+```
+
+#### MySQL
+
+```
+docker run --name mysql-test-db \
+           -p 3307:3306 \
+           -e MYSQL_ROOT_PASSWORD=myrootpassword \
+           -e MYSQL_USER=myuser \
+           -e MYSQL_PASSWORD=mypassword \
+           -e MYSQL_DATABASE=mydb \
+           -d \
+           mysql:5
+```
+
+### Run Secretless Broker
+
+_Note: This step is optional but it is required for this specific example since it tests the broker's
+performance._
+
+- Clone the [secretless-broker repository](https://github.com/cyberark/secretless-broker) (`git clone https://github.com/cyberark/secretless-broker`).
+- Create the shared socket folder if it's missing (`sudo mkdir /sock`).
+- Create the following `secretless.yml` file in that folder:
+<details>
+  <summary><code>secretless.yml</code></summary>
+  <p>
+
+```yaml
+listeners:
+- socket:  /sock/mysql
+  debug: true
+  name: mysql_listener
+  protocol: mysql
+
+- socket: /sock/.s.PGSQL.5432
+  debug: true
+  name: pgsql_listener
+  protocol: pg
+
+handlers:
+- name: mysql_handler
+  listener: mysql_listener
+  debug: true
+  credentials:
+  - name: username
+    provider: literal
+    id: myuser
+  - name: password
+    provider: literal
+    id: mypassword
+  - name: sslmode
+    provider: literal
+    id: disable
+  - name: host
+    provider: literal
+    id: 127.0.0.1
+  - name: port
+    provider: literal
+    id: 3307
+
+- name: pgsql_handler
+  listener: pgsql_listener
+  debug: true
+  credentials:
+  - name: username
+    provider: literal
+    id: myuser
+  - name: password
+    provider: literal
+    id: mypassword
+  - name: sslmode
+    provider: literal
+    id: disable
+  - name: address
+    provider: literal
+    id: 127.0.0.1:5433
+```
+
+  </p>
+</details>
+
+Finally, start Secretless Broker with:
+
+```
+go run cmd/secretless-broker/main.go -f secretless.yml
+```
+
+### Run Juxtaposer
+
+- Open a new terminal while leaving the Secretless Broker to run in the background.
+- Go into the secretless-broker's `bin/juxtaposer` folder (`cd bin/juxtaposer`).
+- Create the following `juxtaposer.yml` file in that folder and make any relevant changes to it depening on what
+database backend you want to test:
+
+<details>
+  <summary><code>juxtaposer.yml</code></summary>
+  <p>
+    
+```yaml
+---
+#driver: mysql-5.7
+driver: postgres
+
+comparison:
+  baselineBackend: pg_direct
+#  baselineBackend: mysql_direct
+#  type: sql/persistent
+#  style: select
+#  rounds: 1000
+#  rounds: infinity
+#  baselineMaxThresholdPercent: 120
+  threads: 5
+  silent: false
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  pg_secretless:
+    host: /sock
+
+  pg_direct:
+    host: localhost
+    port: 5433
+    username: myuser
+    password: mypassword
+    sslmode: disable
+    debug: false
+
+  mysql_secretless:
+    host: /sock/mysql
+    ignore: true
+
+  mysql_direct:
+    host: localhost
+    port: 3307
+    username: myuser
+    password: mypassword
+    sslmode: disable
+    debug: false
+    ignore: true
+```
+
+</p>
+</details>
+
+Finally, start Juxtaposer with:
+
+```
+go run main.go -f juxtaposer.yml
+```
+
 ## CLI flags
 
 ### `-c`: Continue running after end of tests

@@ -3,141 +3,44 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os/signal"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	"gopkg.in/yaml.v3"
-
+	conf "github.com/cyberark/secretless-broker/bin/juxtaposer/config"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/formatter"
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
 	tester_api "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/util"
 )
 
-type backend struct {
-	Database    string `yaml:"database"`
-	Debug       bool   `yaml:"debug"`
-	Description string `yaml:"description"`
-	Host        string `yaml:"host"`
-	Ignore      bool   `yaml:"ignore"`
-	Password    string `yaml:"password"`
-	Port        string `yaml:"port"`
-	SslMode     string `yaml:"sslmode"`
-	Socket      string `yaml:"socket"`
-	Username    string `yaml:"username"`
+type TestManager struct {
+	BackendNames               []string
+	BackendInstances           map[string]tester_api.DriverManager
+	BaselineBackendName        string
+	IsShuttingDown             bool
+	LatestBaselineTestDuration time.Duration
+	MaxRounds                  int
+	RoundsCompleted            map[string]int
+	RoundsCompletedLock        sync.RWMutex
+	RoundsMaxReachedWaitGroup  sync.WaitGroup
+	ShutdownChannel            chan bool
+	ThreadRunnersWaitGroup     sync.WaitGroup
+	Threads                    int
 }
 
-type comparison struct {
-	BaselineBackend             string `yaml:"baselineBackend"`
-	BaselineMaxThresholdPercent int    `yaml:"baselineMaxThresholdPercent"`
-	Rounds                      string `yaml:"rounds"`
-	Silent                      bool   `yaml:"silent"`
-	Style                       string `yaml:"style"`
-	Type                        string `yaml:"type"`
+type TestRunOptions struct {
+	BackendName string
+	Round       int
 }
 
-// Config is the main structure used to define the perfagent parameters
-type Config struct {
-	Backends   map[string]backend                        `yaml:"backends"`
-	Comparison comparison                                `yaml:"comparison"`
-	Driver     string                                    `yaml:"driver"`
-	Formatters map[string]formatter_api.FormatterOptions `yaml:"formatters"`
-}
-
-const zeroDuration = 0 * time.Second
-
-func verifyConfiguration(config *Config) error {
-	if config.Comparison.Type != "sql" {
-		return fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
-	}
-
-	if config.Comparison.Style != "select" {
-		return fmt.Errorf("ERROR: Comparison style supported: %s", config.Comparison.Style)
-	}
-
-	if len(config.Formatters) == 0 {
-		return fmt.Errorf("ERROR: No formatters defined")
-	}
-
-	baselineBackend := config.Comparison.BaselineBackend
-	if baselineBackend == "" {
-		return fmt.Errorf("ERROR: Comparison baselineBackend must be specified")
-	}
-
-	if _, ok := config.Backends[baselineBackend]; !ok {
-		return fmt.Errorf("ERROR: Comparison baseline backend '%s' not found",
-			baselineBackend)
-	}
-
-	return nil
-}
-
-func readConfiguration(configFile string) (*Config, error) {
-	yamlFile, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return nil, err
-	}
-
-	// Default options
-	config := Config{
-		Comparison: comparison{
-			BaselineMaxThresholdPercent: 120,
-			Rounds:                      "1000",
-			Style:                       "select",
-			Type:                        "sql",
-		},
-		Formatters: map[string]formatter_api.FormatterOptions{
-			"stdout": formatter_api.FormatterOptions{},
-		},
-	}
-	err = yaml.Unmarshal(yamlFile, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	// Slice out any backends which are ignored
-	filteredBackends := map[string]backend{}
-	for backendName, backendConfig := range config.Backends {
-		if backendConfig.Ignore == false {
-			filteredBackends[backendName] = backendConfig
-		}
-	}
-
-	config.Backends = filteredBackends
-
-	return &config, nil
-}
-
-func performInvocation(backendName string, backendTestManager tester_api.DriverManager,
-	backendConfig backend) (time.Duration, error) {
-
-	if backendConfig.Debug {
-		fmt.Printf("%s %s %s\n",
-			strings.Repeat("v", 35),
-			backendName,
-			strings.Repeat("v", 35))
-	}
-
-	testDuration, err := backendTestManager.RunSingleTest()
-	if err != nil {
-		return zeroDuration, err
-	}
-
-	if backendConfig.Debug {
-		log.Println("Run completed")
-		fmt.Printf("%s\n", strings.Repeat("^", 85))
-	}
-
-	return testDuration, nil
-}
-
-func createBackendTesters(config *Config,
+func createBackendTesters(config *conf.Config,
 	baselineBackendName string) ([]string, map[string]tester_api.DriverManager, error) {
 
 	// Keys in a map are not guaranteed to be retrieved in the same order
@@ -145,25 +48,26 @@ func createBackendTesters(config *Config,
 	backendNames := []string{}
 	backendInstances := map[string]tester_api.DriverManager{}
 
-	log.Println("Backends:", len(config.Backends))
 	for backendName, backendConfig := range config.Backends {
 		backendNames = append(backendNames, backendName)
 
 		log.Printf("Setting up backend: %s", backendName)
 
-		if config.Comparison.Type != "sql" {
-			return nil, nil, fmt.Errorf("ERROR: Comparison type supported: %s", config.Comparison.Type)
+		connectionType := "persistent"
+		if config.Comparison.RecreateConnections {
+			connectionType = "recreate"
 		}
 
 		options := tester_api.DbTesterOptions{
-			DatabaseName: backendConfig.Database,
-			Debug:        backendConfig.Debug,
-			Host:         backendConfig.Host,
-			Password:     backendConfig.Password,
-			Port:         backendConfig.Port,
-			SslMode:      backendConfig.SslMode,
-			Socket:       backendConfig.Socket,
-			Username:     backendConfig.Username,
+			ConnectionType: connectionType,
+			DatabaseName:   backendConfig.Database,
+			Debug:          backendConfig.Debug,
+			Host:           backendConfig.Host,
+			Password:       backendConfig.Password,
+			Port:           backendConfig.Port,
+			SslMode:        backendConfig.SslMode,
+			Socket:         backendConfig.Socket,
+			Username:       backendConfig.Username,
 		}
 
 		if backendConfig.Debug {
@@ -173,7 +77,8 @@ func createBackendTesters(config *Config,
 				strings.Repeat("v", 35))
 		}
 
-		backendTestManager, err := db.NewTestDriver(config.Driver, config.Comparison.Style, options)
+		backendTestManager, err := db.NewTestDriver(backendName, config.Driver,
+			config.Comparison.SqlStatementType, options)
 
 		if backendConfig.Debug {
 			fmt.Printf("%s\n", strings.Repeat("^", 85))
@@ -197,12 +102,12 @@ func createBackendTesters(config *Config,
 	return backendNames, backendInstances, nil
 }
 
-func applyExitConditions(config *Config, requestedDurationString string,
+func applyExitConditions(config *conf.Config, requestedDurationString string,
 	shutdownChannel chan<- bool) (int, error) {
 
 	var err error
 
-	requestedDuration := zeroDuration
+	requestedDuration := timing.ZeroDuration
 	if requestedDurationString != "" {
 		requestedDuration, err = time.ParseDuration(requestedDurationString)
 		if err != nil {
@@ -223,7 +128,7 @@ func applyExitConditions(config *Config, requestedDurationString string,
 		}
 	}
 
-	if requestedDuration != zeroDuration {
+	if requestedDuration != timing.ZeroDuration {
 		go func() {
 			time.Sleep(requestedDuration)
 			log.Println("Timeout reached!")
@@ -235,10 +140,10 @@ func applyExitConditions(config *Config, requestedDurationString string,
 	return rounds, nil
 }
 
-func processAllResults(backendNames []string, config *Config,
-	aggregatedTimings map[string]formatter_api.BackendTiming) error {
+func processAllResults(backendNames []string, formatters map[string]formatter_api.FormatterOptions,
+	aggregateTimings *timing.AggregateTimings) error {
 
-	for formatterName, formatterOptions := range config.Formatters {
+	for formatterName, formatterOptions := range formatters {
 		log.Printf("Processing output formatter '%s'...", formatterName)
 
 		formatterType := formatterOptions["type"]
@@ -251,109 +156,119 @@ func processAllResults(backendNames []string, config *Config,
 			return err
 		}
 
-		formatter.ProcessResults(backendNames, aggregatedTimings,
-			config.Comparison.BaselineMaxThresholdPercent)
+		formatter.ProcessResults(backendNames, aggregateTimings.Timings,
+			aggregateTimings.BaselineMaxThresholdPercent)
 	}
 
 	return nil
 }
 
-func updateTimingData(round int, config *Config, aggregatedTimings map[string]formatter_api.BackendTiming,
-	backendName string, singleTestRunDuration time.Duration, testError error, baselineTestDuration time.Duration) {
+func runTest(backendName string, threadIndex int, aggregateTimings *timing.AggregateTimings,
+	testManager *TestManager, round int) time.Duration {
 
-	timingInfo := aggregatedTimings[backendName]
-	timingInfo.Count++
+	backendInstance := testManager.BackendInstances[backendName]
+	singleTestRunDuration, testErr := backendInstance.RunSingleTest()
 
-	if testError != nil {
-		log.Printf("[%.3d/%s] %-35s=> %v", round, config.Comparison.Rounds, backendName, testError)
-		timingInfo.Errors = append(timingInfo.Errors,
-			formatter_api.TestRunError{
-				Error: testError,
-				Round: round,
-			})
-		aggregatedTimings[backendName] = timingInfo
-		return
+	if backendInstance.GetName() == testManager.BaselineBackendName {
+		testManager.LatestBaselineTestDuration = singleTestRunDuration
 	}
 
-	timingInfo.Duration = timingInfo.Duration + singleTestRunDuration
+	aggregateTimings.AddTimingData(&timing.SingleRunTiming{
+		BaselineTestDuration: testManager.LatestBaselineTestDuration,
+		BackendName:          backendInstance.GetName(),
+		Duration:             singleTestRunDuration,
+		Round:                round,
+		TestError:            testErr,
+		Thread:               threadIndex,
+	})
 
-	if timingInfo.MinimumDuration == zeroDuration {
-		timingInfo.MinimumDuration = timingInfo.Duration
-	}
-
-	if singleTestRunDuration > timingInfo.MaximumDuration {
-		timingInfo.MaximumDuration = singleTestRunDuration
-	}
-
-	if singleTestRunDuration < timingInfo.MinimumDuration {
-		timingInfo.MinimumDuration = singleTestRunDuration
-	}
-
-	baselineDivergencePercent := 100
-	if baselineTestDuration != zeroDuration {
-		baselineDivergencePercent = int(float32(singleTestRunDuration) /
-			float32(baselineTestDuration) * 100.0)
-	}
-
-	if !config.Comparison.Silent {
-		log.Printf("[%d/%s], %-35s=>%15v, %3d%%", round, config.Comparison.Rounds,
-			backendName, singleTestRunDuration, baselineDivergencePercent)
-	} else {
-		if round%1000 == 0 {
-			fmt.Printf(".")
-		}
-	}
-
-	timingInfo.BaselineDivergencePercent[baselineDivergencePercent]++
-
-	aggregatedTimings[backendName] = timingInfo
+	return singleTestRunDuration
 }
 
-func runMainTestingLoop(config *Config, backendNames *[]string,
-	backendInstances map[string]tester_api.DriverManager,
-	baselineBackendName string,
-	rounds int,
-	shutdownChannel <-chan bool) (map[string]formatter_api.BackendTiming, error) {
+func createThreadedRunner(backendName string, threadIndex int, testManager *TestManager,
+	aggregateTimings *timing.AggregateTimings) {
 
-	aggregatedTimings := map[string]formatter_api.BackendTiming{}
-	for _, backendName := range *backendNames {
-		aggregatedTimings[backendName] = formatter_api.NewBackendTiming()
-	}
+	var once sync.Once
 
-	round := 0
-	shuttingDown := false
-
-	var baselineTestDuration time.Duration
-	for {
-		select {
-		case _ = <-shutdownChannel:
-			shuttingDown = true
-		default:
-		}
-
-		if shuttingDown {
-			break
-		}
-
-		round++
-		if rounds != -1 && round > rounds {
-			break
-		}
-
-		for _, backendName := range *backendNames {
-			singleTestRunDuration, testErr := performInvocation(backendName, backendInstances[backendName],
-				config.Backends[backendName])
-
-			if backendName == baselineBackendName {
-				baselineTestDuration = singleTestRunDuration
+	go func() {
+		for {
+			if testManager.IsShuttingDown {
+				testManager.ThreadRunnersWaitGroup.Done()
+				return
 			}
 
-			updateTimingData(round, config, aggregatedTimings, backendName, singleTestRunDuration,
-				testErr, baselineTestDuration)
+			testManager.RoundsCompletedLock.Lock()
+
+			testManager.RoundsCompleted[backendName]++
+			round := testManager.RoundsCompleted[backendName]
+
+			testManager.RoundsCompletedLock.Unlock()
+
+			if testManager.MaxRounds != -1 && round > testManager.MaxRounds {
+				once.Do(func() {
+					testManager.RoundsMaxReachedWaitGroup.Done()
+				})
+			}
+
+			testDuration := runTest(backendName, threadIndex, aggregateTimings, testManager,
+				round)
+
+			if backendName == testManager.BaselineBackendName {
+				testManager.LatestBaselineTestDuration = testDuration
+			}
+		}
+	}()
+}
+
+func runMainTestingLoop(config *conf.Config, testManager *TestManager) (*timing.AggregateTimings, error) {
+	aggregateTimings := timing.NewAggregateTimings(&timing.AggregateTimingOptions{
+		BackendNames:                testManager.BackendNames,
+		BaselineBackendName:         testManager.BaselineBackendName,
+		BaselineMaxThresholdPercent: config.Comparison.BaselineMaxThresholdPercent,
+		MaxRounds:                   testManager.MaxRounds,
+		Threads:                     config.Comparison.Threads,
+		Silent:                      config.Comparison.Silent,
+	})
+
+	go func() {
+		<-testManager.ShutdownChannel
+		log.Println("async: Setting thread exit flag...")
+		testManager.IsShuttingDown = true
+	}()
+
+	// Initialize a backendBaseline duration to avoid race condition on first run
+	initialBaselineTestDuration, testErr := testManager.
+		BackendInstances[testManager.BaselineBackendName].RunSingleTest()
+	if testErr != nil {
+		return nil, testErr
+	}
+	testManager.LatestBaselineTestDuration = initialBaselineTestDuration
+
+	for _, backendName := range testManager.BackendNames {
+		for threadIndex := 0; threadIndex < testManager.Threads; threadIndex++ {
+			log.Printf("Creating thread %s[%d]", backendName, threadIndex)
+			createThreadedRunner(backendName, threadIndex, testManager,
+				&aggregateTimings)
+
+			testManager.ThreadRunnersWaitGroup.Add(1)
+			testManager.RoundsMaxReachedWaitGroup.Add(1)
 		}
 	}
 
-	return aggregatedTimings, nil
+	go func() {
+		if testManager.MaxRounds != -1 {
+			testManager.RoundsMaxReachedWaitGroup.Wait()
+			log.Println("async: Max rounds reached on all backends. Sending shutdown signal...")
+			testManager.ShutdownChannel <- true
+		}
+	}()
+
+	log.Println("async: Waiting for all tests to complete...")
+	testManager.ThreadRunnersWaitGroup.Wait()
+
+	aggregateTimings.Process()
+
+	return &aggregateTimings, nil
 }
 
 func main() {
@@ -367,21 +282,27 @@ func main() {
 
 	log.Printf("Using configuration: %s", *configFile)
 
-	var err error
-	config, err := readConfiguration(*configFile)
+	config, err := conf.NewConfiguration(*configFile)
 	if err != nil {
-		log.Fatalf("ERROR: Could not read config file '%s': %v", *configFile, err)
+		log.Fatalf("ERROR: Could not load config file '%s': %v", *configFile, err)
 	}
+	log.Println("Config loaded!")
 
-	err = verifyConfiguration(config)
+	shutdownChannel := make(chan bool, 1)
+	util.RegisterShutdownSignalCallback(shutdownChannel)
+
+	maxRounds, err := applyExitConditions(config, *requestedDurationString,
+		shutdownChannel)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	log.Println("Config loaded!")
-
 	log.Println("Driver:", config.Driver)
-	log.Println("Comparison type:", config.Comparison.Type)
+	log.Println("Recreate connections:", config.Comparison.RecreateConnections)
+	log.Println("Backends:", len(config.Backends))
+	log.Println("Threads:", config.Comparison.Threads)
+	log.Println("Rounds:", config.Comparison.Rounds)
+	log.Println("Duration:", *requestedDurationString)
 
 	baselineBackendName := config.Comparison.BaselineBackend
 	backendNames, backendInstances, err := createBackendTesters(config, baselineBackendName)
@@ -389,26 +310,29 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	shutdownChannel := make(chan bool, 1)
-	util.RegisterShutdownSignalCallback(shutdownChannel)
-
-	rounds, err := applyExitConditions(config, *requestedDurationString, shutdownChannel)
-	if err != nil {
-		log.Fatalln(err)
+	testManager := TestManager{
+		BackendNames:               backendNames,
+		BackendInstances:           backendInstances,
+		BaselineBackendName:        baselineBackendName,
+		IsShuttingDown:             false,
+		LatestBaselineTestDuration: timing.ZeroDuration,
+		MaxRounds:                  maxRounds,
+		RoundsCompleted:            map[string]int{},
+		RoundsCompletedLock:        sync.RWMutex{},
+		RoundsMaxReachedWaitGroup:  sync.WaitGroup{},
+		ThreadRunnersWaitGroup:     sync.WaitGroup{},
+		ShutdownChannel:            shutdownChannel,
+		Threads:                    config.Comparison.Threads,
 	}
 
 	log.Println("Running tests...")
-	aggregatedTimings, err := runMainTestingLoop(config,
-		&backendNames,
-		backendInstances,
-		baselineBackendName,
-		rounds,
-		shutdownChannel)
+
+	aggregatedTimings, err := runMainTestingLoop(config, &testManager)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = processAllResults(backendNames, config, aggregatedTimings)
+	err = processAllResults(backendNames, config.Formatters, aggregatedTimings)
 	if err != nil {
 		log.Fatalln(err)
 	}

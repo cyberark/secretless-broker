@@ -43,6 +43,8 @@ spec:
         imagePullPolicy: Always
         # command: [ "/bin/sleep", "999d" ]
         args: ["-c", "-t", "${TEST_DURATION}", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
+        # command: ["sh", "-c", "juxtaposer -t ${TEST_DURATION} -f /etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml &> /tmp/output.txt && echo 'done' && ls -la /tmp/output.txt && sleep 999d"]
+        # args: ["-c", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
 
         volumeMounts:
           - mountPath: /etc/${APP_NAME}

@@ -57,6 +57,13 @@ func (tester *SqlDatabaseTester) Shutdown() error {
 		log.Println("Shutting down database connection...")
 	}
 
-	tester.Database.Close()
-	return nil
+	if tester.Database == nil {
+		log.Println("WARN: Closing an already-closed connection!")
+		return nil
+	}
+
+	err := tester.Database.Close()
+	tester.Database = nil
+
+	return err
 }

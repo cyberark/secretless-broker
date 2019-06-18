@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
 	mysql "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/mysql"
 	postgres "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/postgres"
+	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
 )
 
 type DriverManager struct {
+	Name     string
 	Options  *api.DbTesterOptions
 	Tester   api.DbTester
 	TestType string
@@ -21,8 +24,6 @@ var DbTesterImplementatons = map[string]func() (api.DbTester, error){
 	"mysql-5.7": mysql.NewTester,
 	"postgres":  postgres.NewTester,
 }
-
-const ZeroDuration = 0 * time.Second
 
 const DefaultDatabaseName = "mydb"
 const DefaultTableName = "mytable"
@@ -83,7 +84,6 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 
 		if err != nil {
 			log.Printf("ERROR! Could not insert canned values into DB!")
-			manager.Tester.Shutdown()
 			return err
 		}
 	}
@@ -142,26 +142,50 @@ func ensureCorrectReturnedData(rows []string) error {
 }
 
 func (manager *DriverManager) RunSingleTest() (time.Duration, error) {
+	if manager.Options.Debug {
+		fmt.Printf("%s %s %s\n",
+			strings.Repeat("v", 35),
+			manager.Name,
+			strings.Repeat("v", 35))
+	}
+
 	startTime := time.Now()
+
+	if manager.Options.ConnectionType == "recreate" {
+		err := manager.Tester.Connect(*manager.Options)
+		if err != nil {
+			return timing.ZeroDuration, err
+		}
+		defer manager.Tester.Shutdown()
+	}
 
 	rows, err := manager.Tester.QueryRows("name", QueryTypes[manager.TestType])
 	if err != nil {
 		log.Printf("ERROR! Query failed!")
-		return ZeroDuration, err
+		return timing.ZeroDuration, err
 	}
 
 	err = ensureCorrectReturnedData(rows)
 	if err != nil {
-		return ZeroDuration, err
+		return timing.ZeroDuration, err
 	}
 
 	testDuration := time.Now().Sub(startTime)
 
 	if manager.Options.Debug {
 		log.Printf("DB query: OK")
+		fmt.Printf("%s\n", strings.Repeat("^", 85))
 	}
 
 	return testDuration, nil
+}
+
+func (manager *DriverManager) GetName() string {
+	return manager.Name
+}
+
+func (manager *DriverManager) DebugEnabled() bool {
+	return manager.Options.Debug
 }
 
 func (manager *DriverManager) RotatePassword(newPassword string) error {
@@ -172,7 +196,9 @@ func (manager *DriverManager) Shutdown() error {
 	return manager.Tester.Shutdown()
 }
 
-func NewTestDriver(driver string, testType string, options api.DbTesterOptions) (api.DriverManager, error) {
+func NewTestDriver(name string, driver string, testType string,
+	options api.DbTesterOptions) (api.DriverManager, error) {
+
 	if options.DatabaseName == "" {
 		options.DatabaseName = DefaultDatabaseName
 	}
@@ -183,6 +209,7 @@ func NewTestDriver(driver string, testType string, options api.DbTesterOptions) 
 	}
 
 	manager := DriverManager{
+		Name:     name,
 		Options:  &options,
 		TestType: testType,
 	}
@@ -196,9 +223,12 @@ func NewTestDriver(driver string, testType string, options api.DbTesterOptions) 
 		log.Printf("Tester creation: OK")
 	}
 
-	manager.Tester.Connect(*manager.Options)
-	if options.Debug {
-		log.Printf("Tester connection: OK")
+	if options.ConnectionType == "persistent" {
+		log.Println("Persistent connection requested. Opening a long-lived one...")
+		manager.Tester.Connect(*manager.Options)
+		if options.Debug {
+			log.Printf("Tester connection: OK")
+		}
 	}
 
 	return &manager, nil

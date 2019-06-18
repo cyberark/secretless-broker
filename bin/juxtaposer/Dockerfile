@@ -17,6 +17,6 @@ RUN go build -a -ldflags '-extldflags "-static"' -o juxtaposer ./main.go
 # =================== MAIN CONTAINER ===================
 FROM alpine:3.9
 
-ENTRYPOINT [ "/juxtaposer" ]
+ENTRYPOINT [ "/bin/juxtaposer" ]
 
-COPY --from=perftool-builder /perftool/juxtaposer /juxtaposer
+COPY --from=perftool-builder /perftool/juxtaposer /bin/juxtaposer

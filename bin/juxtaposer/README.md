@@ -15,6 +15,13 @@ alongside Secretless to compare the following scenarios:
 | MySQL         | Direct connection | Secretless (persistent connection) | TCP port        |
 | Postgres      | Direct connection | Secretless (persistent connection) | Unix socket     |
 | Postgres      | Direct connection | Secretless (persistent connection) | TCP port        |
+| MySQL         | Direct connection | Secretless (recreated connection)  | Unix socket     |
+| MySQL         | Direct connection | Secretless (recreated connection)  | TCP port        |
+| Postgres      | Direct connection | Secretless (recreated connection)  | Unix socket     |
+| Postgres      | Direct connection | Secretless (recreated connection)  | TCP port        |
+
+All scenarios can be run with limits as either minimum number of rounds completed or a
+time-limited duration.
 
 We compare the following results:
 
@@ -36,6 +43,234 @@ Note: More comparison types may be added in the future.
 #### **Warning: Naming and APIs are still subject to breaking changes!**
 
 ---
+
+## Running the code locally
+
+You can run and test this code on your machine easily with a few things:
+- [Docker](https://docker.com)
+- [Golang](https://golang.org/dl/) 1.12 or higher
+- [Secretless-broker](https://github.com/cyberark/secretless-broker) (optional)
+- A writable folder for shared socket files (e.g. `/sock` in these configurations) if you're using
+socket files (optional)
+
+### Start the test databases
+
+#### PG
+
+```
+docker run --name pg-test-db \
+           -p 5433:5432 \
+           -e POSTGRES_USER=myuser \
+           -e POSTGRES_PASSWORD=mypassword \
+           -e POSTGRES_DB=mydb \
+           -d \
+           postgres
+```
+
+#### MySQL
+
+```
+docker run --name mysql-test-db \
+           -p 3307:3306 \
+           -e MYSQL_ROOT_PASSWORD=myrootpassword \
+           -e MYSQL_USER=myuser \
+           -e MYSQL_PASSWORD=mypassword \
+           -e MYSQL_DATABASE=mydb \
+           -d \
+           mysql:5
+```
+
+### Run Secretless Broker
+
+_Note: This step is optional but it is required for this specific example since it tests the broker's
+performance._
+
+- Clone the [secretless-broker repository](https://github.com/cyberark/secretless-broker) (`git clone https://github.com/cyberark/secretless-broker`).
+- Create the shared socket folder if it's missing and if you are using
+socket files for testing (`sudo mkdir /sock`).
+- Create the following `secretless.yml` file in that folder:
+<details>
+  <summary><code>secretless.yml</code></summary>
+  <p>
+
+```yaml
+version: 2
+services:
+  mysql-socket:
+    protocol: mysql
+    listenOn: unix:///sock/mysql
+    credentials:
+      username: myuser
+      password: mypassword
+      host: 127.0.0.1
+      port: 3307
+      sslmode: disable
+
+  pg-socket:
+    protocol: pg
+    listenOn: unix:///sock/.s.PGSQL.5432
+    credentials:
+      username: myuser
+      password: mypassword
+      address: 127.0.0.1:5433
+      sslmode: disable
+```
+
+  </p>
+</details>
+
+Finally, start Secretless Broker with:
+
+```
+go run cmd/secretless-broker/main.go -f secretless.yml
+```
+
+### Run Juxtaposer
+
+- Open a new terminal while leaving the Secretless Broker to run in the background.
+- Go into the secretless-broker's `bin/juxtaposer` folder (`cd bin/juxtaposer`).
+- Create the following `juxtaposer.yml` file in that folder and make any relevant changes to it depening on what
+database backend you want to test:
+
+<details>
+  <summary><code>juxtaposer.yml</code></summary>
+  <p>
+    
+```yaml
+---
+#driver: mysql-5.7
+driver: postgres
+
+comparison:
+  baselineBackend: pg_direct
+#  baselineBackend: mysql_direct
+#  recreateConnections: true
+#  sqlStatementType: select
+#  rounds: 1000
+#  rounds: infinity
+#  baselineMaxThresholdPercent: 120
+  threads: 5
+  silent: false
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  pg_secretless:
+    host: /sock
+
+  pg_direct:
+    host: localhost
+    port: 5433
+    username: myuser
+    password: mypassword
+    sslmode: disable
+    debug: false
+
+  mysql_secretless:
+    host: /sock/mysql
+    ignore: true
+
+  mysql_direct:
+    host: localhost
+    port: 3307
+    username: myuser
+    password: mypassword
+    sslmode: disable
+    debug: false
+    ignore: true
+```
+
+</p>
+</details>
+
+Finally, start Juxtaposer with:
+
+```
+go run main.go -f juxtaposer.yml
+```
+
+## Running the code on OpenShift
+
+Running the code on an OpenShift cluster is done through scripts in the `deploy/` folder.
+Ensure that you have:
+- Databases that you are using for your tests already deployed
+- Credentials for those databases
+- [Docker](https://docker.com)
+- [`oc` CLI tool](https://docs.openshift.com/container-platform/3.11/cli_reference/get_started_cli.html)
+- Configured `oc`/`kubectl` context
+- A configured namespace (`project` in OpenShift terminology)
+
+### Configure and source the deployment scripts
+
+Main configuration of the deployment scripts is done through the [./deploy/bootstrap.sh](deploy/bootstrap.sh)
+environment variables. Make sure to change these according to your deployment and
+source the file with:
+```
+source ./deploy/bootstrap.sh
+```
+
+### Configure the backend details
+
+Depending on the backend driver and database details, configure the appropriate 
+`./deploy/juxtaposer_${CONFIG_TEMPLATE}.yml` file and add/replace any backend
+details that are specific to your deployment. This usually includes changes to
+majority of the `backends` section of the file but depending on what you might
+be testing, it could include other fields too.
+
+### Configure the deployment template
+
+With the configuration files ready, the last part is configuring the deployment
+command for Juxtaposer in [`./deploy/juxtaposer_deployment_template.yml`](deploy/juxtaposer_deployment_template.yml)
+file. This will be influenced heavily by what type of testing you are doing on
+the codebase and may be changed depending on your needs.
+
+- If you are running round-based tests, uncomment the following line of Juxtaposer container:
+```
+...
+args: ["-c", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
+...
+```
+- If you are running time-based tests, uncomment the following line of Juxtaposer container:
+```
+...
+args: ["-c", "-t", "${TEST_DURATION}", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"
+...
+```
+- If you will be performing output parsing manually, uncomment the following line of Juxtaposer container:
+```
+...
+command: ["sh", "-c", "juxtaposer -t ${TEST_DURATION} -f /etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml &> /tmp/output.txt && echo 'done' && ls -la /tmp/output.txt && sleep 999d"]
+...
+```
+- If you are developing Juxtaposer code, uncomment the following line of Juxtaposer container:
+```
+...
+command: [ "/bin/sleep", "999d" ]
+...
+```
+
+### Deploy the code to OpenShift
+
+With all of the files fixed up and `bootstrap.sh` sourced, you can then deploy
+things to Openshift with:
+```
+./deploy/start
+```
+
+Results will be present either in Docker logs or on the filesystem depending on the
+start command and formatter configuration. Containers will remain running until
+they are manually torn down unless you remove the [`-c`](#-c-continue-running-after-end-of-tests)
+flag from the startup command.
+
+### Cleaning up
+
+To remove all deployments and clean up resources run:
+```
+./deploy/stop
+```
 
 ## CLI flags
 
@@ -96,19 +331,26 @@ backends:
 This setting is linked to a named backend to indicate the baseline backend
 against which all calculation will be compared.
 
-1. (optional) `type`, `string`, default: `sql`
-This setting decides what type of comparison will be run. Only `sql` is
-currently supported.
+1. (optional) `recreateConnections`, `bool`, default: `false`
+This setting decides if the connections during testing will be recreated
+on each test (`true`) or will the initial connection be opened only once
+and then subsequent tests run on that opened connection (`false`).
 
-1. (optional) `style`, `string`, default: `select`
-This setting decides what style (subtype) of comparison will be run. Currently
+1. (optional) `sqlStatementType`, `string`, default: `select`
+This setting decides what SQL style of comparison will be run. Currently
 only `select` is supported.
 
 1. (optional) `rounds`, `int`, default: `1000`
 This setting decides how many loops the main test run will iterate over all
 the defined backends. This setting is ignored if time-based CLI flag is used.
 This field also supports a special keyword `infinity` that lets the tests run
-forever or until the user sends an interrupt signal.
+forever or until the user sends an interrupt signal. Note that this indicates
+only the _minimum_ amount of runs that all backends will be iterated over.
+
+1. (optional) `threads`, `int`, default: `1`
+This setting selects how many parallel routines (threads) will be used for each
+backend testing. Increasing this setting will mean that there will be a proportional
+load testing increase on the service per unit of time.
 
 1. (optional) `baselineMaxThresholdPercent`, `int`, default: `120`
 This setting decides how slow (percentage-wise) can a non-baseline backend be

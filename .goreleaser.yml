@@ -21,16 +21,17 @@ builds:
   ldflags: -s -w -linkmode external -extldflags "-static"
   main: ./cmd/secretless-broker/main.go
 
-archive:
-  files:
-    - CHANGELOG.md
-    - LICENSE.md
-    - README.md
-  format_overrides:
-    - goos: windows
-      format: zip
-  name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
-  wrap_in_directory: true
+archives:
+  - id: secretless-release-archive
+    files:
+      - CHANGELOG.md
+      - LICENSE.md
+      - README.md
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
+    wrap_in_directory: true
 
 checksum:
   name_template: 'SHA256SUMS.txt'

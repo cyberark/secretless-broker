@@ -44,7 +44,7 @@ Note: More comparison types may be added in the future.
 
 ---
 
-## Running the code
+## Running the code locally
 
 You can run and test this code on your machine easily with a few things:
 - [Docker](https://docker.com)
@@ -216,6 +216,86 @@ Finally, start Juxtaposer with:
 
 ```
 go run main.go -f juxtaposer.yml
+```
+
+## Running the code on OpenShift
+
+Running the code on an OpenShift cluster is done through scripts in the `deploy/` folder.
+Ensure that you have:
+- Databases that you are using for your tests already deployed
+- Credentials for those databases
+- [Docker](https://docker.com)
+- [`oc` CLI tool](https://docs.openshift.com/container-platform/3.11/cli_reference/get_started_cli.html)
+- Configured `oc`/`kubectl` context
+- A configured namespace (`project` in OpenShift terminology)
+
+### Configure and source the deployment scripts
+
+Main configuration of the deployment scripts is done through the [./deploy/bootstrap.sh](deploy/bootstrap.sh)
+environment variables. Make sure to change these according to your deployment and
+source the file with:
+```
+source ./deploy/bootstrap.sh
+```
+
+### Configure the backend details
+
+Depending on the backend driver and database details, configure the appropriate 
+`./deploy/juxtaposer_${CONFIG_TEMPLATE}.yml` file and add/replace any backend
+details that are specific to your deployment. This usually includes changes to
+majority of the `backends` section of the file but depending on what you might
+be testing, it could include other fields too.
+
+### Configure the deployment template
+
+With the configuration files ready, the last part is configuring the deployment
+command for Juxtaposer in [`./deploy/juxtaposer_deployment_template.yml`](deploy/juxtaposer_deployment_template.yml)
+file. This will be influenced heavily by what type of testing you are doing on
+the codebase and may be changed depending on your needs.
+
+- If you are running round-based tests, uncomment the following line of Juxtaposer container:
+```
+...
+args: ["-c", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
+...
+```
+- If you are running time-based tests, uncomment the following line of Juxtaposer container:
+```
+...
+args: ["-c", "-t", "${TEST_DURATION}", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"
+...
+```
+- If you will be performing output parsing manually, uncomment the following line of Juxtaposer container:
+```
+...
+command: ["sh", "-c", "juxtaposer -t ${TEST_DURATION} -f /etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml &> /tmp/output.txt && echo 'done' && ls -la /tmp/output.txt && sleep 999d"]
+...
+```
+- If you are developing Juxtaposer code, uncomment the following line of Juxtaposer container:
+```
+...
+command: [ "/bin/sleep", "999d" ]
+...
+```
+
+### Deploy the code to OpenShift
+
+With all of the files fixed up and `bootstrap.sh` sourced, you can then deploy
+things to Openshift with:
+```
+./deploy/start
+```
+
+Results will be present either in Docker logs or on the filesystem depending on the
+start command and formatter configuration. Containers will remain running until
+they are manually torn down unless you remove the [`-c`](#-c-continue-running-after-end-of-tests)
+flag from the startup command.
+
+### Cleaning up
+
+To remove all deployments and clean up resources run:
+```
+./deploy/stop
 ```
 
 ## CLI flags

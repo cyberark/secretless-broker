@@ -50,7 +50,8 @@ You can run and test this code on your machine easily with a few things:
 - [Docker](https://docker.com)
 - [Golang](https://golang.org/dl/) 1.12 or higher
 - [Secretless-broker](https://github.com/cyberark/secretless-broker) (optional)
-- A writable folder for shared socket files (e.g. `/sock` in these configurations)
+- A writable folder for shared socket files (e.g. `/sock` in these configurations) if you're using
+socket files (optional)
 
 ### Start the test databases
 
@@ -85,61 +86,34 @@ _Note: This step is optional but it is required for this specific example since 
 performance._
 
 - Clone the [secretless-broker repository](https://github.com/cyberark/secretless-broker) (`git clone https://github.com/cyberark/secretless-broker`).
-- Create the shared socket folder if it's missing (`sudo mkdir /sock`).
+- Create the shared socket folder if it's missing and if you are using
+socket files for testing (`sudo mkdir /sock`).
 - Create the following `secretless.yml` file in that folder:
 <details>
   <summary><code>secretless.yml</code></summary>
   <p>
 
 ```yaml
-listeners:
-- socket:  /sock/mysql
-  debug: true
-  name: mysql_listener
-  protocol: mysql
+version: 2
+services:
+  mysql-socket:
+    protocol: mysql
+    listenOn: unix:///sock/mysql
+    credentials:
+      username: myuser
+      password: mypassword
+      host: 127.0.0.1
+      port: 3307
+      sslmode: disable
 
-- socket: /sock/.s.PGSQL.5432
-  debug: true
-  name: pgsql_listener
-  protocol: pg
-
-handlers:
-- name: mysql_handler
-  listener: mysql_listener
-  debug: true
-  credentials:
-  - name: username
-    provider: literal
-    id: myuser
-  - name: password
-    provider: literal
-    id: mypassword
-  - name: sslmode
-    provider: literal
-    id: disable
-  - name: host
-    provider: literal
-    id: 127.0.0.1
-  - name: port
-    provider: literal
-    id: 3307
-
-- name: pgsql_handler
-  listener: pgsql_listener
-  debug: true
-  credentials:
-  - name: username
-    provider: literal
-    id: myuser
-  - name: password
-    provider: literal
-    id: mypassword
-  - name: sslmode
-    provider: literal
-    id: disable
-  - name: address
-    provider: literal
-    id: 127.0.0.1:5433
+  pg-socket:
+    protocol: pg
+    listenOn: unix:///sock/.s.PGSQL.5432
+    credentials:
+      username: myuser
+      password: mypassword
+      address: 127.0.0.1:5433
+      sslmode: disable
 ```
 
   </p>
@@ -170,8 +144,8 @@ driver: postgres
 comparison:
   baselineBackend: pg_direct
 #  baselineBackend: mysql_direct
-#  type: sql/persistent
-#  style: select
+#  recreateConnections: true
+#  sqlStatementType: select
 #  rounds: 1000
 #  rounds: infinity
 #  baselineMaxThresholdPercent: 120
@@ -357,12 +331,13 @@ backends:
 This setting is linked to a named backend to indicate the baseline backend
 against which all calculation will be compared.
 
-1. (optional) `type`, `string`, default: `sql/persistent`
-This setting decides what type of comparison will be run. Only the following
-are currently supported: `sql/persistent` and `sql/recreate`.
+1. (optional) `recreateConnections`, `bool`, default: `false`
+This setting decides if the connections during testing will be recreated
+on each test (`true`) or will the initial connection be opened only once
+and then subsequent tests run on that opened connection (`false`).
 
-1. (optional) `style`, `string`, default: `select`
-This setting decides what style (subtype) of comparison will be run. Currently
+1. (optional) `sqlStatementType`, `string`, default: `select`
+This setting decides what SQL style of comparison will be run. Currently
 only `select` is supported.
 
 1. (optional) `rounds`, `int`, default: `1000`

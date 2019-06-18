@@ -6,14 +6,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.0] 2019-06-18
+
+### Added
+- Added a performance testing tool to bin/juxtaposer
+- Added a v2 configuration syntax that is simpler and easier to use
+
+### Fixed
+- Updated the Conjur Kubernetes authenticator client to 0.13.0 to fix a bug
+  that caused the token refresh to fail after the cert expired
+
 ### Changed
-- Updated codebase to use Golang v1.12.5
+- Revised "k8s-demo"
+- Upgraded to Golang v1.12.5 from v1.11.4
 - Updated `conjur-authn-k8s-client` dependency to v0.13.0
 - Updated `conjur-api-go` dependency to v0.5.2
 - Removed third-party module for evaluating home directory path
-
-### Fixed
-- Fixed issue with renewing certs on authn-k8s conjur provider
+- Updated goreleaser config to address deprecated `archive` tag
+- Revised PR template to remove unneeded manual tests
 
 ## [0.7.1] 2019-05-16
 
@@ -252,7 +262,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -266,3 +276,4 @@ The first tagged version.
 [0.6.4]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...v0.6.4
 [0.7.0]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...v0.7.0 
 [0.7.1]: https://github.com/cyberark/secretless-broker/compare/v0.7.0...v0.7.1 
+[0.8.0]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...v0.8.0 

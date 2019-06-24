@@ -7,21 +7,40 @@ assignees: ''
 
 ---
 
+# _Name of the Epic_
+
+_Short Description of the Epic_
+
 ETA for completion of this epic: `<Insert expected release date>`
 
 Confidence level of ETA accuracy: `<Insert confidence percentage>`%
 
-## Link to Aha
-https://cyberark.aha.io/features/AAM-<card-number>
+## Aha Card
+- [Link to Aha Card](https://cyberark.aha.io/features/)
+
+## Team
+- **Product Manager**: _Persons Name_ (@username)
+- **Product Owner**: _Persons Name_ (@username)
+- **Engineering Manager**: _Persons Name_ (@username)
+- **Feature Lead**: _Persons Name_ (@username)
+- **Engineers**:
+    - _Persons Name_ (@username)
+
+## SDLC Timeline
+|Stage|Status|Date (or ETA)|Artifact|GH Issue|
+|-|-|-|-|-|
+|High Level Feature Doc| _started_ | _yyyy-mm-dd_ |[Feature Doc]() |[Link to Feature Doc GH issue]()|
+|Functional Sign-off|Not Scheduled|_yyyy-mm-dd_|See above||
+|Detailed Feature Doc|Not Done| - |[Feature Spec]()|[Link to Feature spec GH issue]()|
+|Solution Sign-off|Not Scheduled| - ||
+|Epic|Not Started| - |[Epic]()|
+|Execution|Not Started| - ||
 
 ## Feature Overview
 `<Define the problem - give a high level description of the objective / overview of the feature and its expected benefits>`
 
 ### Key requirements
 1. `<List of requirements>`
-
-## Functional proposal
-`<Link to functional spec and description of the solution that will be implemented in the epic>`
 
 ## Supported versions
 - `<Versions of dependencies supported as part of update>`

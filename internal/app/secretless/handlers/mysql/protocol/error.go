@@ -17,6 +17,32 @@ const (
 	ErrorCodeInternalError = "HY000"
 )
 
+// ErrorPacket is a MySQL error packet
+// as a Go error
+type ErrorPacket []byte
+func (e ErrorPacket) GetPacket() []byte {
+	return e
+}
+func (e ErrorPacket) Error() string {
+	var message string
+	errRes, err := UnpackErrResponse(e)
+
+	if  err == nil && errRes != nil {
+		message = errRes.Message
+	} else {
+		message = "invalid error packet"
+	}
+
+	return fmt.Sprintf("ERROR: %v", message)
+}
+
+// ErrorContainer interface makes it possible
+// to have Go errors that can contain rich protocol specific information
+// and have the smarts to encode themselves into a MYSQL error packet
+type ErrorContainer interface {
+	GetPacket() []byte
+}
+
 // Error is a MySQL processing error.
 type Error struct {
 	Code     uint16
@@ -54,9 +80,9 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("ERROR: %v (%s): %s", e.Code, e.SQLState, e.Message)
 }
 
-// GetMessage formats an Error into a protocol message.
+// GetPacket formats an Error into a protocol message.
 // https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
-func (e *Error) GetMessage() []byte {
+func (e *Error) GetPacket() []byte {
 	data := make([]byte, 4, 4 + 1 + 2 + 1 + 5 + len(e.Message))
 	data = append(data, 0xff)
 	data = append(data, byte(e.Code), byte(e.Code>>8))

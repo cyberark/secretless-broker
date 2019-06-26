@@ -289,18 +289,33 @@ func (h *AuthenticationHandshake) verifyAndProxyOkResponse() {
 		return
 	}
 
-	rawOkPkt := h.readBackendPacket()
+	rawPkt := h.readBackendPacket()
 	if h.err != nil {
 		return
 	}
 
-	// Verify packet is valid; don't do anything with unpacked
-	if _, err := protocol.UnpackOkResponse(rawOkPkt); err != nil {
-		h.err = err
+	switch protocol.GetPacketType(rawPkt) {
+	case protocol.ResponseErr:
+		// Return after adding the error response to AuthenticationHandshake
+		// as a protocol error type which is both
+		// a Go error
+		// and conforms to the protocol.ErrorContainer interface
+		//
+		// the protocol.ErrorContainer interface makes it possible
+		// to have Go errors that can contain rich protocol specific information
+		// and have the smarts to encode themselves into a MYSQL error packet
+		errPacket := protocol.ErrorPacket(rawPkt)
+		h.err = &errPacket
 		return
+	default:
+		// Verify packet is valid; don't do anything with unpacked
+		if _, err := protocol.UnpackOkResponse(rawPkt); err != nil {
+			h.err = err
+			return
+		}
 	}
 
-	h.writeClientPacket(rawOkPkt)
+	h.writeClientPacket(rawPkt)
 }
 
 func (h *AuthenticationHandshake) dbSSLMode() *ssl.DbSSLMode {

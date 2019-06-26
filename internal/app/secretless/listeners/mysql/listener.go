@@ -83,7 +83,7 @@ func (l *Listener) Listen() {
 				SQLState: protocol.ErrorCodeInternalError,
 				Message:  fmt.Sprintf("No handler found for listener %s", l.Config.Name),
 			}
-			client.Write(mysqlError.GetMessage())
+			client.Write(mysqlError.GetPacket())
 		}
 	}
 }

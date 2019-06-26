@@ -46,9 +46,37 @@ type ErrResponse struct {
 	Message string
 }
 
-// UnpackErrResponse is not yet implemented
+// UnpackErrResponse decodes ERR_Packet from server.
+// Part of basic packet structure shown below.
+//
+// int<3> PacketLength
+// int<1> PacketNumber
+// int<1> PacketType (0xFF)
+// if clientCapabilities & clientProtocol41
+// {
+//		string<1> SqlStateMarker (#)
+//		string<5> SqlState
+// }
+// string<EOF> ErrorContainer
 func UnpackErrResponse(packet []byte) (*ErrResponse, error) {
-	return nil, nil
+	if err := CheckPacketLength(8, packet); err != nil {
+		return nil, err
+	}
+
+	return &ErrResponse{
+		Message: string(packet[7:]),
+	}, nil
+}
+
+// Extracts the PacketType byte
+// Part of basic packet structure shown below.
+//
+// int<3> PacketLength
+// int<1> PacketNumber
+// int<1> PacketType (0xFF)
+// ... more ...
+func GetPacketType(packet []byte) byte {
+	return packet[4]
 }
 
 // OkResponse represents packet sent from the server to the client to signal successful completion of a command

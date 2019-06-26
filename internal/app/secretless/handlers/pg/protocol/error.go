@@ -56,8 +56,8 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("pg: %s: %s", e.Severity, e.Message)
 }
 
-// GetMessage formats an Error into a protocol message.
-func (e *Error) GetMessage() []byte {
+// GetPacket formats an Error into a protocol message.
+func (e *Error) GetPacket() []byte {
 	msg := NewMessageBuffer([]byte{})
 
 	msg.WriteByte(ErrorMessageType)

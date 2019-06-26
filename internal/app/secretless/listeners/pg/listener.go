@@ -80,7 +80,7 @@ func (l *Listener) Listen() {
 				Code:     protocol.ErrorCodeInternalError,
 				Message:  fmt.Sprintf("No handler found for listener %s", l.Config.Name),
 			}
-			client.Write(pgError.GetMessage())
+			client.Write(pgError.GetPacket())
 		}
 	}
 }

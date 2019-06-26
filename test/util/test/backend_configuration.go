@@ -15,6 +15,7 @@ type AbstractConfiguration struct {
 	RootCertStatus
 	PrivateKeyStatus
 	PublicCertStatus
+	AuthCredentialInvalidity
 }
 
 // Represents a "live," running configuration of Secretless and

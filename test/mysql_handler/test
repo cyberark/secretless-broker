@@ -39,7 +39,7 @@ if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
 
   # use exec because the container is already running
   #TODO uncomment below when i figure out why reflex is failing...
-  # docker_compose_cmd="docker-compose exec"
+   docker_compose_cmd="docker-compose exec"
 fi
 
 ${docker_compose_cmd} \

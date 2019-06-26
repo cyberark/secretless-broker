@@ -96,6 +96,25 @@ func TestEssentials(t *testing.T) {
 				CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 			},
 		})
+
+		RunTestCase(TestCase{
+			AbstractConfiguration: AbstractConfiguration{
+				SocketType:     TCP,
+				TLSSetting:     TLS,
+				SSLMode:        Default,
+				RootCertStatus: Undefined,
+				AuthCredentialInvalidity: true,
+			},
+			TestDefinition: TestDefinition{
+				Description: "secretless using invalid credentials",
+				ShouldPass: false,
+				ClientConfiguration: ClientConfiguration{
+					Username: "testuser",
+					Password: "wrongpassword",
+				},
+				CmdOutput: StringPointer("ERROR 1045 (28000): Access denied for user 'testuser'@"),
+			},
+		})
 	})
 
 }

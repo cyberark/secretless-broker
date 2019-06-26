@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/crypto/ssh/agent"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 )
 
 // Handler implements an ssh-agent which holds a single key.

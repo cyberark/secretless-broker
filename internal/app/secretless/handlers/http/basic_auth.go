@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 )
 
 // BasicAuthHandler applies HTTP Basic authentication to the HTTP Authorization header.

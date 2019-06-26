@@ -6,7 +6,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssh"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/sshagent"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 )
 
 // HandlerFactories contains the list of built-in handler factories

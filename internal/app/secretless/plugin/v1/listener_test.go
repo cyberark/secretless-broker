@@ -1,9 +1,10 @@
 package v1
 
 import (
-	"os"
 	"net"
+	"os"
 	"testing"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -23,7 +24,7 @@ func TestListener(t *testing.T) {
 		_, err := os.Stat(socketFile)
 		So(err, ShouldBeNil)
 
-		err = listener.Shutdown()
+		err = Shutdown()
 		So(err, ShouldBeNil)
 
 		Convey("and its socket file is removed", func() {

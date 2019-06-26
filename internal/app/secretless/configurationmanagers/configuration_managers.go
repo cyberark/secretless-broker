@@ -3,7 +3,7 @@ package configurationmanagers
 import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/configurationmanagers/configfile"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/configurationmanagers/kubernetes/crd"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 )
 
 // ConfigurationManagerFactories contains the list of built-in factories

@@ -10,9 +10,9 @@ import (
 
 	// TODO: Ideally this protocol-specific import shouldn't be needed
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Listener listens for and handles new connections.

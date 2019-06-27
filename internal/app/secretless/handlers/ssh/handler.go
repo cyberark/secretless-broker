@@ -94,7 +94,7 @@ func (h *Handler) Run() {
 	var server ssh.Conn
 
 	if serverConfig, err = h.serverConfig(); err != nil {
-		log.Fatalf("ERROR: Could not resolve server config\n", err)
+		log.Fatalf("ERROR: Could not resolve server config: %s\n", err)
 	}
 
 	// TODO: Ensure that we don't print credentials here before uncommenting
@@ -171,7 +171,7 @@ func (h *Handler) Run() {
 				}
 				_, err = serverChannel.Write(data[0:len])
 				if err != nil {
-					log.Printf("Error writing %s bytes to server channel : %s", len, err)
+					log.Printf("Error writing %d bytes to server channel : %s", len, err)
 				}
 			}
 		}()
@@ -188,7 +188,7 @@ func (h *Handler) Run() {
 				}
 				_, err = clientChannel.Write(data[0:len])
 				if err != nil {
-					log.Printf("Error writing %s bytes to client channel : %s", len, err)
+					log.Printf("Error writing %d bytes to client channel : %s", len, err)
 				}
 			}
 		}()

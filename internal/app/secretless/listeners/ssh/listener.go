@@ -133,7 +133,7 @@ func (l *Listener) Listen() {
 	for l.IsClosed != true {
 		nConn, err := util.Accept(l)
 		if err != nil {
-			log.Printf("WARN: Failed to accept incoming ssh connection: ", err)
+			log.Printf("WARN: Failed to accept incoming ssh connection: %s", err)
 			continue
 		}
 
@@ -148,7 +148,7 @@ func (l *Listener) Listen() {
 		// The incoming Request channel must be serviced.
 		go func() {
 			for req := range reqs {
-				log.Printf("Global SSH request : %s", req)
+				log.Printf("Global SSH request : %v", req)
 			}
 		}()
 

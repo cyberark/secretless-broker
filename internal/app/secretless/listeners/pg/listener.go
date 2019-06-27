@@ -56,7 +56,7 @@ func (l *Listener) Listen() {
 		var client net.Conn
 		var err error
 		if client, err = util.Accept(l); err != nil {
-			log.Printf("WARN: Failed to accept incoming pg connection: ", err)
+			log.Printf("WARN: Failed to accept incoming pg connection: %s", err)
 			continue
 		}
 

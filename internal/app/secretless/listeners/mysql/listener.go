@@ -59,7 +59,7 @@ func (l *Listener) Listen() {
 		var client net.Conn
 		var err error
 		if client, err = util.Accept(l); err != nil {
-			log.Printf("WARN: Failed to accept incoming mysql connection: ", err)
+			log.Printf("WARN: Failed to accept incoming mysql connection: %s", err)
 			continue
 		}
 

@@ -60,14 +60,14 @@ func (l *Listener) Listen() {
 
 	handler := l.RunHandlerFunc("sshagent", handlerOptions)
 	if err := handler.LoadKeys(keyring); err != nil {
-		log.Printf("Failed to load ssh-agent handler keys: ", err)
+		log.Printf("Failed to load ssh-agent handler keys: %s", err)
 		return
 	}
 
 	for l.IsClosed != true {
 		nConn, err := util.Accept(l)
 		if err != nil {
-			log.Printf("WARN: Failed to accept incoming sshagent connection: ", err)
+			log.Printf("WARN: Failed to accept incoming sshagent connection: %s", err)
 			return
 		}
 

@@ -181,7 +181,7 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Note: resp is likely nil if err is non-nil, so don't access it until you get here.
 
 	if listenerDebug || handlerDebug {
-		log.Printf("Received response status: %d", resp.Status)
+		log.Printf("Received response status: %s", resp.Status)
 	}
 
 	copyHeaders(w.Header(), resp.Header)

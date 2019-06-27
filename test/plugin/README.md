@@ -1,3 +1,10 @@
+# DANGER: API OVERHAUL IN PROGRESS
+
+**The plugin API is changing, and is now private.  These tests will be turned
+back on, after appropriate modifications, once the new API is stable.**
+
+# OLD README
+
 This folder includes smoke tests for the external plugin interface. It
 implements an example plugin and verifies that it works as expected.
 

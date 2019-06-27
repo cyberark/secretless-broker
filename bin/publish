@@ -4,9 +4,11 @@ set -e
 
 . bin/build_utils
 
-readonly TAG="${1:-$(version_tag)}"
+readonly REGISTRY="cyberark"
+readonly TAG="$(version_tag)"
+readonly INTERNAL_REGISTRY="registry.tld"
+
 readonly VERSION="$(cat VERSION)"
-readonly REGISTRY="${1:-cyberark}"
 
 readonly IMAGES=(
   "secretless-broker"
@@ -23,11 +25,11 @@ git fetch --tags
 git_description=$(git describe)
 
 for image_name in "${IMAGES[@]}"; do
-  # always push the tag with the commit hash
-  echo "Tagging $REGISTRY/$image_name:${TAG}"
-  docker tag "$image_name:$TAG" "$REGISTRY/$image_name:$TAG"
-  echo "Pushing $REGISTRY/$image_name:${TAG}"
-  docker push "$REGISTRY/$image_name:$TAG"
+  # always push the tag with the commit hash to internal registry
+  echo "Tagging $INTERNAL_REGISTRY/$image_name:${TAG}"
+  docker tag "$image_name:$TAG" "$INTERNAL_REGISTRY/$image_name:$TAG"
+  echo "Pushing $INTERNAL_REGISTRY/$image_name:${TAG}"
+  docker push "$INTERNAL_REGISTRY/$image_name:$TAG"
 
   # if the tag matches the VERSION, push VERSION and latest releases
   # and x and x.y releases

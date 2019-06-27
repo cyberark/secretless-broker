@@ -133,7 +133,7 @@ func (l *BaseListener) Shutdown() error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			Shutdown()
+			_handler.Shutdown()
 		}()
 	}
 

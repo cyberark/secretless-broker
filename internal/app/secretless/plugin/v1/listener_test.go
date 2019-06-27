@@ -24,7 +24,7 @@ func TestListener(t *testing.T) {
 		_, err := os.Stat(socketFile)
 		So(err, ShouldBeNil)
 
-		err = Shutdown()
+		err = listener.Shutdown()
 		So(err, ShouldBeNil)
 
 		Convey("and its socket file is removed", func() {

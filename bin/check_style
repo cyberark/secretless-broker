@@ -28,6 +28,10 @@ output_xml() {
       # get the error
       error=${err_line:${#file_and_line}+2}
 
+      # Because the error will appear in an XML _attribute_, we need to escape
+      # double quotes.  Time for a nice, juicy bash pattern substitution.
+      error=${error//\"/&quot;}
+
       # output the file (if haven't already) and error
       if [ "$current_file" != "$file" ]; then
         if [[ ! -z "$current_file" ]]; then

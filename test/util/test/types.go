@@ -95,6 +95,35 @@ func (sslMode SSLMode) toSecret() config_v1.StoredSecret {
 	}
 }
 
+// NOTE:
+// This is AuthCredentialInvalidity as opposed CredentialValidity because
+// bool defaults to false
+type AuthCredentialInvalidity bool
+
+func AllAuthCredentialsInvalidity()[]AuthCredentialInvalidity {
+	return []AuthCredentialInvalidity{true, false}
+}
+
+func (authCredentialInvalidity AuthCredentialInvalidity) toSecrets() []config_v1.StoredSecret {
+	password := TestDbConfig.Password
+	if authCredentialInvalidity {
+		password = "wrong-password"
+	}
+
+	return []config_v1.StoredSecret{
+		{
+			Name:     "username",
+			Provider: "literal",
+			ID:       TestDbConfig.User,
+		},
+		{
+			Name:     "password",
+			Provider: "literal",
+			ID:       password,
+		},
+	}
+}
+
 type RootCertStatus string
 
 const (

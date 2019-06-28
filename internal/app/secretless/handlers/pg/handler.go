@@ -48,7 +48,7 @@ func (h *Handler) abort(err error) {
 			Code:     protocol.ErrorCodeInternalError,
 			Message:  err.Error(),
 		}
-		h.GetClientConnection().Write(pgError.GetMessage())
+		h.GetClientConnection().Write(pgError.GetPacket())
 	}
 }
 

@@ -41,14 +41,67 @@ var ErrInvalidPacketType = errors.New("Protocol: Invalid packet type")
 // ErrFieldTypeNotImplementedYet is for field types that are not yet implemented
 var ErrFieldTypeNotImplementedYet = errors.New("Protocol: Required field type not implemented yet")
 
-// ErrResponse provides an object to store error messages
-type ErrResponse struct {
-	Message string
+// UnpackErrResponse decodes ERR_Packet from server.
+// Part of basic packet structure shown below.
+//
+// int<3> PacketLength
+// int<1> PacketNumber
+// int<1> PacketType (0xFF)
+// int<2> ErrorCode
+// if clientCapabilities & clientProtocol41
+// {
+//		string<1> SqlStateMarker (#)
+//		string<5> SqlState
+// }
+// string<EOF> Error
+func UnpackErrResponse(data []byte) error {
+	// Min packet length =
+	// header(4 bytes)
+	// + PacketType(1 byte)
+	// + ErrorCode(2 bytes)
+	// + string<EOF>(at least 1 byte)
+	if err := CheckPacketLength(8, data); err != nil {
+		return err
+	}
+	pos := 0
+
+	// skip header
+	pos = pos + 4
+
+	// skip PacketType
+	// 0xff [1 byte]
+	pos++
+
+	// Error Number [16 bit uint]
+	errno := binary.LittleEndian.Uint16(data[pos:pos + 2])
+	pos = pos + 2
+
+	sqlstate := ""
+	// SQL State [optional: # + 5bytes string]
+	if data[pos] == '#' {
+		pos++
+
+		sqlstate = string(data[pos : pos + 5])
+		pos = pos + 5
+	}
+
+	// Error Message [string]
+	return Error{
+		Code:     errno,
+		SQLState: sqlstate,
+		Message:  string(data[pos:]),
+	}
 }
 
-// UnpackErrResponse is not yet implemented
-func UnpackErrResponse(packet []byte) (*ErrResponse, error) {
-	return nil, nil
+// Extracts the PacketType byte
+// Part of basic packet structure shown below.
+//
+// int<3> PacketLength
+// int<1> PacketNumber
+// int<1> PacketType (0xFF)
+// ... more ...
+func GetPacketType(packet []byte) byte {
+	return packet[4]
 }
 
 // OkResponse represents packet sent from the server to the client to signal successful completion of a command

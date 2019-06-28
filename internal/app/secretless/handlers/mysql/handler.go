@@ -85,13 +85,12 @@ func (h *Handler) fetchConnectionDetails() (result *ConnectionDetails, err error
 // "Unknown" MySQL protocol error, because the client understands only those.
 //
 func (h *Handler) sendErrorToClient(err error) {
-	mysqlError, isProtocolErr := err.(*protocol.Error)
-
+	mysqlErrorContainer, isProtocolErr := err.(protocol.ErrorContainer)
 	if !isProtocolErr {
-		mysqlError = protocol.NewGenericError(err)
+		mysqlErrorContainer = protocol.NewGenericError(err)
 	}
 
-	if e := h.mySQLClientConn.write(mysqlError.GetMessage()); e != nil {
+	if e := h.mySQLClientConn.write(mysqlErrorContainer.GetPacket()); e != nil {
 		log.Printf("Attempted to write error %s to MySQL client but failed", e)
 	}
 }

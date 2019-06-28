@@ -17,6 +17,13 @@ const (
 	ErrorCodeInternalError = "HY000"
 )
 
+// ErrorContainer interface makes it possible
+// to have Go errors that can contain rich protocol specific information
+// and have the smarts to encode themselves into a MYSQL error packet
+type ErrorContainer interface {
+	GetPacket() []byte
+}
+
 // Error is a MySQL processing error.
 type Error struct {
 	Code     uint16
@@ -34,8 +41,8 @@ type Error struct {
 //
 // TODO: Replace instances of generic error with specific MySQL error codes.
 //
-func NewGenericError(goErr error) *Error {
-	return &Error{
+func NewGenericError(goErr error) Error {
+	return Error{
 		Code:     CRUnknownError,
 		SQLState: ErrorCodeInternalError,
 		Message:  goErr.Error(),
@@ -44,19 +51,19 @@ func NewGenericError(goErr error) *Error {
 
 // ErrNoTLS is a MySQL protocol error raised when SSL is required but the
 // server doesn't support it.
-var ErrNoTLS = &Error{
+var ErrNoTLS = Error{
 	Code:     CRSSLConnectionError,
 	SQLState: ErrorCodeInternalError,
 	Message:  "SSL connection error: SSL is required but the server doesn't support it",
 }
 
-func (e *Error) Error() string {
+func (e Error) Error() string {
 	return fmt.Sprintf("ERROR: %v (%s): %s", e.Code, e.SQLState, e.Message)
 }
 
-// GetMessage formats an Error into a protocol message.
+// GetPacket formats an Error into a protocol message.
 // https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
-func (e *Error) GetMessage() []byte {
+func (e Error) GetPacket() []byte {
 	data := make([]byte, 4, 4 + 1 + 2 + 1 + 5 + len(e.Message))
 	data = append(data, 0xff)
 	data = append(data, byte(e.Code), byte(e.Code>>8))
@@ -64,7 +71,6 @@ func (e *Error) GetMessage() []byte {
 	// TODO: for client41
 	data = append(data, '#')
 	data = append(data, e.SQLState...)
-
 	data = append(data, e.Message...)
 
 	// prepare message

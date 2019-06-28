@@ -14,9 +14,9 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/ssh"
 
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Listener accepts SSH connections and MITMs them using a Handler.
@@ -133,7 +133,7 @@ func (l *Listener) Listen() {
 	for l.IsClosed != true {
 		nConn, err := util.Accept(l)
 		if err != nil {
-			log.Printf("WARN: Failed to accept incoming ssh connection: ", err)
+			log.Printf("WARN: Failed to accept incoming ssh connection: %s", err)
 			continue
 		}
 
@@ -148,7 +148,7 @@ func (l *Listener) Listen() {
 		// The incoming Request channel must be serviced.
 		go func() {
 			for req := range reqs {
-				log.Printf("Global SSH request : %s", req)
+				log.Printf("Global SSH request : %v", req)
 			}
 		}()
 

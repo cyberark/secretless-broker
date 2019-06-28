@@ -10,9 +10,9 @@ import (
 
 	// TODO: These errors should be abstracted out ideally
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Listener listens for and handles new connections.
@@ -59,7 +59,7 @@ func (l *Listener) Listen() {
 		var client net.Conn
 		var err error
 		if client, err = util.Accept(l); err != nil {
-			log.Printf("WARN: Failed to accept incoming mysql connection: ", err)
+			log.Printf("WARN: Failed to accept incoming mysql connection: %s", err)
 			continue
 		}
 

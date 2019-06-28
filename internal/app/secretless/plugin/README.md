@@ -1,3 +1,11 @@
+# DANGER: API OVERHAUL IN PROGRESS
+
+**The plugin API is changing, and is now private.  When the new public API is
+ready it will be moved back into pkg and documented.  The old documentation is
+below.  However, no new plugins should be built on this framework.**
+
+# OLD README CONTENT
+
 # Plugin v1 API
 
 **_WARNING: Given the speed of development, there will likely be cases of outdated documentation so please use this document

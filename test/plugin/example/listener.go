@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-ozzo/ozzo-validation"
 
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Listener listens for and handles new connections.
@@ -20,7 +20,7 @@ type Listener struct {
 	HandlerConfigs []config_v1.Handler
 	NetListener    net.Listener
 	Resolver       plugin_v1.Resolver
-	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions)  plugin_v1.Handler
+	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.

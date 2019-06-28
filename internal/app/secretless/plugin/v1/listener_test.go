@@ -1,9 +1,10 @@
 package v1
 
 import (
-	"os"
 	"net"
+	"os"
 	"testing"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 

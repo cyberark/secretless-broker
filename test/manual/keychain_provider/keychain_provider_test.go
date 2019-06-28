@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

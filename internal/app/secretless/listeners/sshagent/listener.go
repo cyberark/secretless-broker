@@ -8,9 +8,9 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/ssh/agent"
 
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Listener accepts ssh-agent connections and delegates them to the Handler.
@@ -60,14 +60,14 @@ func (l *Listener) Listen() {
 
 	handler := l.RunHandlerFunc("sshagent", handlerOptions)
 	if err := handler.LoadKeys(keyring); err != nil {
-		log.Printf("Failed to load ssh-agent handler keys: ", err)
+		log.Printf("Failed to load ssh-agent handler keys: %s", err)
 		return
 	}
 
 	for l.IsClosed != true {
 		nConn, err := util.Accept(l)
 		if err != nil {
-			log.Printf("WARN: Failed to accept incoming sshagent connection: ", err)
+			log.Printf("WARN: Failed to accept incoming sshagent connection: %s", err)
 			return
 		}
 

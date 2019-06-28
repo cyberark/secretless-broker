@@ -13,8 +13,8 @@ import (
 
 	"github.com/go-ozzo/ozzo-validation"
 
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Listener listens for and handles new connections
@@ -181,7 +181,7 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Note: resp is likely nil if err is non-nil, so don't access it until you get here.
 
 	if listenerDebug || handlerDebug {
-		log.Printf("Received response status: %d", resp.Status)
+		log.Printf("Received response status: %s", resp.Status)
 	}
 
 	copyHeaders(w.Header(), resp.Header)

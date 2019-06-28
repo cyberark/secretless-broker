@@ -6,8 +6,8 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
+	pluginV1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
-	pluginV1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 
 	_ "github.com/joho/godotenv/autoload"
 )

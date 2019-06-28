@@ -6,7 +6,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/pg"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/ssh"
 	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/sshagent"
-	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 )
 
 // ListenerFactories contains the list of built-in listener factories

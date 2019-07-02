@@ -1,8 +1,8 @@
-package test
+package testutil
 
-// TestDefinition allows us to treat similar tests with variations as data.
+// Definition allows us to treat similar tests with variations as data.
 //
-// By default, a TestDefinition is assumed not to error.  When we expect
+// By default, a Definition is assumed not to error.  When we expect
 // an error, however, we can set ShouldPass = true.
 //
 // For CmdOutput, there are two cases we need:
@@ -12,15 +12,15 @@ package test
 //
 // A string pointer, with its possible nil value, lets us distinguish
 // those cases. A string would not.
-//
-type TestDefinition struct {
+type Definition struct {
 	Description string
 	ClientConfiguration
 	ShouldPass  bool
 	CmdOutput   *string
 }
 
+// TestCase represents a full test case, for use in table driven tests.
 type TestCase struct {
-	TestDefinition
+	Definition
 	AbstractConfiguration
 }

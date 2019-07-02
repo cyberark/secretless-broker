@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	. "github.com/cyberark/secretless-broker/test/util/test"
+	. "github.com/cyberark/secretless-broker/test/util/testutil"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -11,7 +11,7 @@ func TestSSL(t *testing.T) {
 
 	testCases := []TestCase{
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=default",
 				ShouldPass: true,
 			},
@@ -22,7 +22,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=disable",
 				ShouldPass: true,
 			},
@@ -33,7 +33,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=require, sslrootcert=none",
 				ShouldPass: true,
 			},
@@ -44,7 +44,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=require, sslrootcert=invalid",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer(`x509: certificate signed by unknown authority`),
@@ -57,7 +57,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=require, sslrootcert=malformed",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer("couldn't parse pem in sslrootcert"),
@@ -70,7 +70,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=none",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer("x509: certificate signed by unknown authority"),
@@ -83,7 +83,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=verify-ca, sslrootcert=valid",
 				ShouldPass:    true,
 			},
@@ -95,7 +95,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=invalid",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer(`certificate signed by unknown authority`),
@@ -108,7 +108,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=malformed",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer("couldn't parse pem in sslrootcert"),
@@ -121,7 +121,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_no_tls, sslmode=default",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer("the backend does not allow SSL connections"),
@@ -134,7 +134,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_no_tls, sslmode=disable",
 				ShouldPass:    true,
 			},
@@ -146,7 +146,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=malformed, sslcert=malformed",
 				ShouldPass:          false,
 				CmdOutput:           StringPointer("psql: FATAL:  tls: failed to find any PEM data in certificate input"),
@@ -161,7 +161,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=valid, sslcert=valid",
 				ShouldPass:          true,
 			},
@@ -175,7 +175,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=notsignedbyca, sslcert=notsignedbyca",
 				ShouldPass:          true,
 			},

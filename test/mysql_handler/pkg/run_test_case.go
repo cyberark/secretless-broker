@@ -2,15 +2,21 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/test/util/test"
 	"os/exec"
 	"strings"
+
+	"github.com/cyberark/secretless-broker/test/util/testutil"
 
 	"github.com/smartystreets/goconvey/convey"
 )
 
-
-func RunQuery(clientConfig test.ClientConfiguration, connectPort test.ConnectionPort) (string, error) {
+// RunQuery constructs a mysql cmdline command (which includes a sample query)
+// for the options and credentials specified by the arguments.  It then executes
+// the command, and returns its output.
+func RunQuery(
+	clientConfig testutil.ClientConfiguration,
+	connectPort testutil.ConnectionPort,
+) (string, error) {
 	args := []string{"-e", "select count(*) from testdb.test"}
 
 	if clientConfig.SSL {
@@ -23,10 +29,10 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 		args = append(args, fmt.Sprintf("--password=%s", clientConfig.Password))
 	}
 	switch connectPort.SocketType {
-	case test.TCP:
+	case testutil.TCP:
 		args = append(args, fmt.Sprintf("--host=%s", connectPort.Host()))
 		args = append(args, fmt.Sprintf("--port=%s", connectPort.ToPortString()))
-	case test.Socket:
+	case testutil.Socket:
 		args = append(args, fmt.Sprintf("--socket=%s", connectPort.ToSocketPath()))
 	default:
 		panic("Listener Type can only be TCP or Socket")
@@ -44,7 +50,7 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 
 	// Post command logs
 	//TODO: deal with verbose
-	if test.Verbose {
+	if testutil.Verbose {
 		if err != nil {
 			convey.Println("--->> RESULTS")
 			convey.Println("----- ERROR: ")
@@ -58,4 +64,3 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 
 	return string(cmdOut), err
 }
-

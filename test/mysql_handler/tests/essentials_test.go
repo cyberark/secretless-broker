@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/cyberark/secretless-broker/test/util/test"
+	. "github.com/cyberark/secretless-broker/test/util/testutil"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestEssentials(t *testing.T) {
-	testCases := []TestDefinition{
+	testCases := []Definition{
 		{
 			Description: "with username, wrong password",
 			ShouldPass: true,
@@ -48,7 +48,7 @@ func TestEssentials(t *testing.T) {
 							SSLMode:        Default,
 							RootCertStatus: Undefined,
 						},
-						TestDefinition: testCaseData,
+						Definition: testCaseData,
 					}
 					RunTestCase(tc)
 				}
@@ -66,7 +66,7 @@ func TestEssentials(t *testing.T) {
 				SSLMode:        Default,
 				RootCertStatus: Undefined,
 			},
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "Socket, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
@@ -85,7 +85,7 @@ func TestEssentials(t *testing.T) {
 				SSLMode:        Default,
 				RootCertStatus: Undefined,
 			},
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "TCP, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
@@ -105,7 +105,7 @@ func TestEssentials(t *testing.T) {
 				RootCertStatus: Undefined,
 				AuthCredentialInvalidity: true,
 			},
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "secretless using invalid credentials",
 				ShouldPass: false,
 				ClientConfiguration: ClientConfiguration{

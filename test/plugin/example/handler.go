@@ -15,7 +15,7 @@ import (
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
-// connectionDetails stores the connection info to the real backend database.
+// BackendConfig stores the connection info to the real backend database.
 // These values are pulled from the handler credentials config
 type BackendConfig struct {
 	Host             string

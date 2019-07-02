@@ -1,4 +1,4 @@
-package test
+package testutil
 
 import (
 	"fmt"
@@ -6,8 +6,9 @@ import (
 )
 
 
+// NewRunTestCase returns a function that, given a TestCase, will run the unit
+// tests specified by that TestCase, using the query type given by RunQueryType.
 // TODO: make ConnectionParams an interface and pass it to RunTestCase
-// all flag generation and combination can happen here
 func NewRunTestCase(runQuery RunQueryType) RunTestCaseType {
 	_, testSuiteConfigurations := GenerateConfigurations()
 
@@ -37,10 +38,11 @@ func NewRunTestCase(runQuery RunQueryType) RunTestCaseType {
 	}
 }
 
-// Flags is an array of strings passed directly to the database CLI. Eg:
-//
-//     []string{"-u test", "--password=wrongpassword"}
-//
-// allows us to treat queries in mysql and postgres via a common abstraction
+// RunQueryType represents a function that takes in database credentials
+// and options, uses them to execute a test query, and returns the output
+// of that query.
 type RunQueryType func(ClientConfiguration, ConnectionPort) (string, error)
+
+// RunTestCaseType represents a function for executing the unit tests
+// specified by a TestCase.
 type RunTestCaseType func(testCase TestCase)

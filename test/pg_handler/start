@@ -33,7 +33,7 @@ mkdir fixtures
 ## secretless.yml
 
 docker-compose run --rm test \
-  bash -c "go run ./test/util/test/cmd/generate_secretless_yml.go"
+  bash -c "go run ./test/util/testutil/cmd/generate_secretless_yml.go"
 
 # start secretless once pg is running
 docker-compose up -d ${SECRETLESS_HOST}

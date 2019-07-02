@@ -12,45 +12,45 @@ import (
 	"github.com/heptiolabs/healthcheck"
 )
 
-const DEFAULT_HEALTH_CHECK_PORT = 5335
+const defaultHealthCheckPort = 5335
 
-type HealthWatcher struct {
+type healthWatcher struct {
 	handler        healthcheck.Handler
 	isAppReady     bool
 	isAppLive      bool
 	serverInstance *http.Server
 }
 
-var _healthWatcher *HealthWatcher
+var _healthWatcher *healthWatcher
 var _healthWatcherSyncOnce = sync.Once{}
 
-func (healthWatcher *HealthWatcher) registerLivelinessCheck() {
+func (healthWatcher *healthWatcher) registerLivelinessCheck() {
 	checkFunc := func() error {
 		if healthWatcher.isAppLive {
 			return nil
 		}
 
 		// If we are not ready, we return a failed liveliness check
-		return fmt.Errorf("Secretless is not listening")
+		return fmt.Errorf("secretless is not listening")
 	}
 
 	healthWatcher.handler.AddLivenessCheck("listening", checkFunc)
 }
 
-func (healthWatcher *HealthWatcher) registerReadinessCheck() {
+func (healthWatcher *healthWatcher) registerReadinessCheck() {
 	checkFunc := func() error {
 		if healthWatcher.isAppReady {
 			return nil
 		}
 
 		// If we are not ready, we return a failed readiness check
-		return fmt.Errorf("Secretless is not ready")
+		return fmt.Errorf("secretless is not ready")
 	}
 
 	healthWatcher.handler.AddReadinessCheck("ready", checkFunc)
 }
 
-func (healthWatcher *HealthWatcher) enable(port int) {
+func (healthWatcher *healthWatcher) enable(port int) {
 	log.Printf("Initializing health check on :%d...", port)
 
 	healthWatcher.handler = healthcheck.NewHandler()
@@ -72,14 +72,14 @@ func (healthWatcher *HealthWatcher) enable(port int) {
 		"You can access the endpoint at `/live` and `/ready`.")
 }
 
-func EnableHealthCheck() {
+func enableHealthCheck() {
 	_healthWatcherSyncOnce.Do(func() {
-		_healthWatcher = &HealthWatcher{}
-		_healthWatcher.enable(DEFAULT_HEALTH_CHECK_PORT)
+		_healthWatcher = &healthWatcher{}
+		_healthWatcher.enable(defaultHealthCheckPort)
 	})
 }
 
-func DisableHealthCheck() {
+func disableHealthCheck() {
 	if _healthWatcher == nil || _healthWatcher.serverInstance == nil {
 		return
 	}
@@ -95,12 +95,14 @@ func DisableHealthCheck() {
 	_healthWatcherSyncOnce = sync.Once{}
 }
 
+// SetAppInitializedFlag enables health check and sets the ready flag.
 func SetAppInitializedFlag() {
-	EnableHealthCheck()
+	enableHealthCheck()
 	_healthWatcher.isAppReady = true
 }
 
+// SetAppIsLive enables health check and marks the app as live.
 func SetAppIsLive(isLive bool) {
-	EnableHealthCheck()
+	enableHealthCheck()
 	_healthWatcher.isAppLive = isLive
 }

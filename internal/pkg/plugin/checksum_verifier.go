@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+// VerifyPluginChecksums verifies all plugin files, and returns the FileInfo
+// for the verified files.
 func VerifyPluginChecksums(pluginDir string, checksumsFile string) ([]os.FileInfo, error) {
 	log.Println("Verifying checksums of plugins...")
 
@@ -49,11 +51,11 @@ func compareChecksums(pluginDir string, pluginFiles []os.FileInfo, checksums map
 
 		expectedChecksum, ok := checksums[pluginBasename]
 		if !ok {
-			return fmt.Errorf("Plugin '%s' not found in checksums file!", pluginBasename)
+			return fmt.Errorf("plugin '%s' not found in checksums file", pluginBasename)
 		}
 
 		if expectedChecksum != actualChecksum {
-			return fmt.Errorf("Plugin '%s' checksum '%s' did not match the expected '%s'!",
+			return fmt.Errorf("plugin '%s' checksum '%s' did not match the expected '%s'",
 				fullPluginPath, actualChecksum, expectedChecksum)
 		}
 	}
@@ -76,7 +78,7 @@ func loadChecksumsFile(checksumsPath string) (map[string]string, error) {
 
 		fields := strings.Fields(checksumsLine)
 		if len(fields) != 2 {
-			formattingError := fmt.Errorf("Checksum file contained a misformatted line: '%s'!",
+			formattingError := fmt.Errorf("checksum file contained a misformatted line: '%s'",
 				checksumsLine)
 			return nil, formattingError
 		}

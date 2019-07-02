@@ -20,12 +20,14 @@ import (
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
+// ZeroizeByteSlice sets every byte to zero.
 func ZeroizeByteSlice(bs []byte) {
 	for byteIndex := range bs {
 		bs[byteIndex] = 0
 	}
 }
 
+// ByteBoundString returns a string backed by the given []byte.
 func ByteBoundString(b []byte) string {
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&b))
 	bytesHeader := &reflect.StringHeader{
@@ -35,6 +37,7 @@ func ByteBoundString(b []byte) string {
 	return *(*string)(unsafe.Pointer(bytesHeader))
 }
 
+// NewStoredSecret create a StoredSecret from the given C struct.
 func NewStoredSecret(ref C.struct_StoredSecret) config_v1.StoredSecret {
 	return config_v1.StoredSecret{
 		Name:     C.GoString(ref.Name),
@@ -43,6 +46,8 @@ func NewStoredSecret(ref C.struct_StoredSecret) config_v1.StoredSecret {
 	}
 }
 
+// GetSecrets returns secret values.  Specifically, a map whose keys are the
+// secret names requested, and whose values are the values of those secrets.
 func GetSecrets(secrets []config_v1.StoredSecret) (map[string][]byte, error)  {
 	// Load all internal Providers
 	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error))
@@ -55,11 +60,13 @@ func GetSecrets(secrets []config_v1.StoredSecret) (map[string][]byte, error)  {
 	return resolver.Resolve(secrets)
 }
 
-//export GetSecret
+// GetSecret returns a C *char with the given secret's value
+// export GetSecret
 func GetSecret(cRef C.struct_StoredSecret) (*C.char) {
 	return C.CString(GetSecretByteString(cRef))
 }
 
+// GetSecretByteString return the secret value for the given StoredSecret ref.
 func GetSecretByteString(cRef C.struct_StoredSecret) (string) {
 	ref := NewStoredSecret(cRef)
 	secrets, err := GetSecrets([]config_v1.StoredSecret{ref})
@@ -70,7 +77,8 @@ func GetSecretByteString(cRef C.struct_StoredSecret) (string) {
 	return ByteBoundString(secrets[ref.Name])
 }
 
-//export NativePassword
+// NativePassword returns the given StoredSecret value as C *char.
+// export NativePassword
 func NativePassword(cRef C.struct_StoredSecret, salt *C.char) (*C.char) {
 	passwordBytes := []byte(GetSecretByteString(cRef))
 	defer ZeroizeByteSlice(passwordBytes)

@@ -66,6 +66,7 @@ func (h Handler) HasCredential(credentialName string) bool {
 	return false
 }
 
+// NewConfig takes the bytes of a file and returns a new Config.
 func NewConfig(buffer []byte) (*Config, error) {
 	config := &Config{}
 	if err := yaml.Unmarshal(buffer, config); err != nil {
@@ -95,6 +96,7 @@ func (l Listener) LinkedHandlers(handlers []Handler) []Handler {
 	return result
 }
 
+// Validate validates the Listener
 func (l Listener) Validate() error {
 	// Validations on individual fields of the struct
 	fieldErrs := validation.ValidateStruct(

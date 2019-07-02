@@ -111,7 +111,7 @@ func TestHttpServiceConversion(t *testing.T) {
 	t.Run("all valid auth strategies accepted", func(t *testing.T) {
 		v2 := v2HttpExample()
 
-		for _, strategy := range HttpAuthenticationStrategies {
+		for _, strategy := range HTTPAuthenticationStrategies {
 			config := fmt.Sprintf(`
 {
 	"authenticationStrategy": "%s",

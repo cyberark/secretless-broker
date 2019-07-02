@@ -1,4 +1,4 @@
-package test
+package testutil
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 )
 
 
+// GenerateConfigurations returns a Secretless Config along with a comprehensive
+// list of LiveConfigurations for use in tests.
 // TODO: consider parametrising ConnectPort generator
 func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 	// initialised with health-check listener and handler
@@ -61,17 +63,17 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 					{
 						Name:     "address",
 						Provider: "literal",
-						ID:       fmt.Sprintf("%s:5432", TestDbConfig.HostWithTLS),
+						ID:       fmt.Sprintf("%s:5432", sampleDbConfig.HostWithTLS),
 					},
 					{
 						Name:     "username",
 						Provider: "literal",
-						ID:       TestDbConfig.User,
+						ID:       sampleDbConfig.User,
 					},
 					{
 						Name:     "password",
 						Provider: "literal",
-						ID:       TestDbConfig.Password,
+						ID:       sampleDbConfig.Password,
 					},
 				},
 			},
@@ -104,7 +106,7 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 								listener := config_v1.Listener{
 									Name: "listener_" + connectionPort.ToPortString(),
 									// TODO: grab value from envvar for flexibility
-									Protocol: TestDbConfig.Protocol,
+									Protocol: sampleDbConfig.Protocol,
 									Debug:    true,
 								}
 								handler := config_v1.Handler{
@@ -141,7 +143,7 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 								// serverTLSSetting
 								handler.Credentials = append(
 									handler.Credentials,
-									serverTLSSetting.toSecrets(TestDbConfig)...
+									serverTLSSetting.toSecrets(sampleDbConfig)...
 								)
 
 								// socketType

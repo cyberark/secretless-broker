@@ -9,6 +9,7 @@ import (
 
 type options map[string]string
 
+// DbSSLMode holds information about the DB's SSL options.
 type DbSSLMode struct {
 	tls.Config
 	UseTLS bool
@@ -16,6 +17,7 @@ type DbSSLMode struct {
 	Options options
 }
 
+// NewDbSSLMode configures and creates a DbSSLMode
 func NewDbSSLMode(o options, requireCanVerifyCAOnly bool) (DbSSLMode, error) {
 	// NOTE for the "require" case:
 	//

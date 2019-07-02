@@ -7,7 +7,7 @@
 - [Quick Start](#quick-start)
 - [Additional demos](#run-more-secretless-demos)
 - [Using Secretless](#using-secretless)
-  - [Service Authenticators](#service-authenticators)
+  - [Service Connectors](#service-connectors)
   - [Credential Providers](#credential-providers)
   - [Health Checks](#health-checks)
 - [Community](#community)
@@ -44,7 +44,7 @@ When the client connects to a target service through the Secretless Broker:
 
   The Secretless Broker is responsible for establishing connections to the backend, and can handle secrets rotation in a way that’s transparent to the client.
 
-To provide the Secretless Broker access to a target service, a [Service Authenticator](#service-authenticators) implements the protocol of the service, replacing the authentication handshake. The client does not need to know or use a real password to the service. Instead, it proxies its connection to the service through a local connection to the Secretless Broker. Secretless Broker obtains credentials to the target service from a secrets vault (such as Conjur, a keychain service, text files, or other sources) via a [Credential Provider](#credential-providers). The credentials are used to establish a connection to the actual service, and the Secretless Broker then rapidly shuttles data back and forth between the client and the service.
+To provide the Secretless Broker access to a target service, a [Service Connector](#service-connectors) implements the protocol of the service, replacing the authentication handshake. The client does not need to know or use a real password to the service. Instead, it proxies its connection to the service through a local connection to the Secretless Broker. Secretless Broker obtains credentials to the target service from a secrets vault (such as Conjur, a keychain service, text files, or other sources) via a [Credential Provider](#credential-providers). The credentials are used to establish a connection to the actual service, and the Secretless Broker then rapidly shuttles data back and forth between the client and the service.
 
 The Secretless Broker is currently licensed under [ASL 2.0](#license)
 
@@ -153,7 +153,7 @@ Each individual service definition provides Secretless Broker with the informati
 * Where to get credentials for incoming connections
 * The location of the target service (eg where to send requests)
 
-Secretless Broker uses the protocol given in the service configuration to determine which [Service Authenticator](#service-authenticators) should process the connection request. Secretless retrieves any required credentials, revises the connection request to inject the valid authentication credentials, negotiates the authentication handshake with the target service, and then transparently streams data between the client and service.
+Secretless Broker uses the protocol given in the service configuration to determine which [Service Connectors](#service-connectors) should process the connection request. Secretless retrieves any required credentials, revises the connection request to inject the valid authentication credentials, negotiates the authentication handshake with the target service, and then transparently streams data between the client and service.
 
 A sample service configuration for PostgreSQL is below:
 
@@ -175,15 +175,15 @@ services:
       optionalStuff: foo
 ```
 
-In this sample, Secretless Broker is configured to connect to a service named `postgres-db`. Clients send connection requests to this service via localhost using port 5432. This service uses the `pg` protocol, which indicates that the PostgreSQL service authenticator should process requests that come in via this port. Credentials from this connection will be retrieved from multiple sources; the `address` is given as a string value, the `password` will be retrieved from the Conjur variable with ID `id-of-secret-in-conjur`, and the `username` is retrieved from the environment variable named `username`.
+In this sample, Secretless Broker is configured to connect to a service named `postgres-db`. Clients send connection requests to this service via localhost using port 5432. This service uses the `pg` protocol, which indicates that the PostgreSQL service connector should process requests that come in via this port. Credentials from this connection will be retrieved from multiple sources; the `address` is given as a string value, the `password` will be retrieved from the Conjur variable with ID `id-of-secret-in-conjur`, and the `username` is retrieved from the environment variable named `username`.
 
-## Service Authenticators
+## Service Connectors
 
-Service authenticators implement the protocol of the target service and are responsible for proxying connections and managing the authentication
-handshake. When a Service Authenticator receives a new connection request, it retrieves the required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there,
-the Service Authenticator simply transparently shuttles data between the client and service.
+Service connectors implement the protocol of the target service and are responsible for proxying connections and managing the authentication
+handshake. When a Service Connector receives a new connection request, it retrieves the required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there,
+the Service Connector simply transparently shuttles data between the client and service.
 
-Secretless Broker comes with several built-in service authenticators and each accepts a different set of credentials for configuration. In this section we provide some information on the credentials used by each service authenticator - for more complete information please see our [service authenticator documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/overview.htm).
+Secretless Broker comes with several built-in service connectors and each accepts a different set of credentials for configuration. In this section we provide some information on the credentials used by each service connector - for more complete information please see our [service connector documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/overview.htm).
 
 - MySQL (accepts connections over Unix socket or TCP)
   - Credentials:
@@ -233,7 +233,7 @@ Secretless Broker comes with several built-in service authenticators and each ac
 ## Credential Providers
 
 Credential providers interact with a credential source to deliver secrets needed for authentication
-to the Secretless Service Authenticators. The Secretless Broker comes built-in with several different
+to the Secretless Service Connectors. The Secretless Broker comes built-in with several different
 Credential Providers, making it easy to use with your existing workflows regardless of your current
 secrets management toolset.
 
@@ -361,7 +361,7 @@ Example:
 Secretless broker exposes two endpoints that can be used for readiness and liveliness checks:
 
 - `http://<host>:5335/ready` which will indicate if the broker has loaded a valid configuration.
-- `http://<host>:5335/live` which will indicate if the broker has service authenticators activated.
+- `http://<host>:5335/live` which will indicate if the broker has service connectors activated.
 
 If there are failures, the service will return a `503` status or a `200` if the service indicates that
 the broker is ready/live.

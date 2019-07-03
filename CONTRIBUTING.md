@@ -161,6 +161,8 @@ stage('Integration: PG Handler') {
 
 ### OSX Keychain provider Test
 
+**OSX Keychain provider**
+
 If you are on a Mac, you may also test the OSX Keychain provider:
 ```sh-session
 cd test/manual/keychain_provider/
@@ -179,6 +181,18 @@ cd test/manual/k8s_crds
 ./deploy
 ```
 This test currently does not run as part of the test suite.
+
+**Code Climate**
+
+We use Code Climate in our CI pipeline to perform linting and other style
+checks.  The specific engines we use and their configuration is in
+`.codeclimate.yml`.
+
+To run linting checks via the Code Climate golint engine, simply run:
+
+```sh-session
+./bin/check_style
+```
 
 ## Documentation
 Secretless has a few sources for documentation: a website, a documentation subdomain, and godocs.

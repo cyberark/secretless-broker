@@ -2,14 +2,14 @@
 
 set -e
 
+if [[ $# -ge 1 ]] && [[ "$1" != "--dry-run" ]]; then
+  echo "Usage: $0 [--dry-run]"
+  exit 1
+fi
+
 most_recent_version() {
   sort --reverse --version-sort | head -1
 }
-
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 [--dry-run] <new_release_version>"
-  exit 1
-fi
 
 dry_run="false"
 if [[ "$1" == "--dry-run" ]]; then
@@ -17,10 +17,14 @@ if [[ "$1" == "--dry-run" ]]; then
   shift
 fi
 
-desired_tag=${1//v/}
-latest_tag=$(git tag | sed 's/^v//' | most_recent_version)
-latest_version="v${latest_tag}"
-desired_version="v${desired_tag}"
+readonly secretless_version=$(short_version_tag)
+echo "Secretless-broker code version: $secretless_version"
+
+readonly latest_tag=$(git tag | sed 's/^v//' | most_recent_version)
+readonly latest_version="v${latest_tag}"
+
+readonly desired_tag="${secretless_version}"
+readonly desired_version="v${desired_tag}"
 
 echo "Latest known tag: '${latest_tag}'"
 echo "New version: 'v${desired_tag}'"

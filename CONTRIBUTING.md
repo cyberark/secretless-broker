@@ -297,7 +297,7 @@ _Please note: Plugin API interface signatures and supported plugin API version(s
 1. Create a new branch for the version bump.
 1. Based on the unreleased content, determine the new version number and update
    the [version.go](pkg/secretless/version.go) file.
-1. Run `./bin/prefill_changelog $(cat VERSION)` to populate the [changelog](CHANGELOG.md) with
+1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
    the changes included in the release.
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
    for review.

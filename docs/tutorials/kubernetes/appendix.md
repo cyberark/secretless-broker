@@ -81,7 +81,7 @@ Application   <---------->   Secretless   <---------->   Postgres
 For more information on PostgreSQL SSL modes see:
 
 - [PostgreSQL SSL documentation](https://www.postgresql.org/docs/9.6/libpq-ssl.html)
-- [PostgreSQL Secretless Service Connector documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm).
+- [PostgreSQL Secretless Service Connector documentation](https://docs.secretless.io/Latest/en/Content/References/connectors/postgres.htm).
 
 ### Credential Access
 

@@ -253,7 +253,7 @@ In this section, we assume the following:
 <div class="note">
   If you're using your own database server and it's not SSL-enabled, please see
   the <a
-  href="https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm">service connector
+  href="https://docs.secretless.io/Latest/en/Content/References/connectors/postgres.htm">service connector
   documentation</a> for how to disable SSL in your Secretless configuration.
 </div>
 

@@ -183,7 +183,7 @@ Service connectors implement the protocol of the target service and are responsi
 handshake. When a Service Connector receives a new connection request, it retrieves the required credentials using the specified Provider(s), injects the correct authentication credentials into the connection request, and opens up a connection to the target service. From there,
 the Service Connector simply transparently shuttles data between the client and service.
 
-Secretless Broker comes with several built-in service connectors and each accepts a different set of credentials for configuration. In this section we provide some information on the credentials used by each service connector - for more complete information please see our [service connector documentation](https://docs.secretless.io/Latest/en/Content/References/handlers/overview.htm).
+Secretless Broker comes with several built-in service connectors and each accepts a different set of credentials for configuration. In this section we provide some information on the credentials used by each service connector - for more complete information please see our [service connector documentation](https://docs.secretless.io/Latest/en/Content/References/connectors/overview.htm).
 
 - MySQL (accepts connections over Unix socket or TCP)
   - Credentials:

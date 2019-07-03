@@ -4,10 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/pkg/secretless"
 )
+
+const programName = "secretless-broker"
 
 const configFileManagerPluginID = "configfile"
 
@@ -33,8 +37,6 @@ func parseConfigManagerSpec(configManagerSpecString string) (configManagerID str
 }
 
 func main() {
-	log.Println("Secretless starting up...")
-
 	configManagerHelp := "(Optional) Specify a config manager ID and an optional manager-specific spec string "
 	configManagerHelp += "(eg '<name>[#<filterSpec>]'). "
 	configManagerHelp += "Default will try to use 'secretless.yml' configuration."
@@ -52,7 +54,19 @@ func main() {
 	fsWatchSwitch := flag.Bool("watch", false, "Enable automatic reloads when configuration file changes.")
 	pluginDir := flag.String("p", "/usr/local/lib/secretless", "Directory containing Secretless plugins")
 	pluginChecksumsFile := flag.String("s", "", "Path to a file of sha256sum plugin checksums")
+
+	versionFlag := flag.Bool("version", false, "Show current version")
+
 	flag.Parse()
+
+	// Flag.parse only covers `-version` flag but for `version`, we need to explicitly
+	// check the args
+	if *versionFlag || flag.Arg(0) == "version" {
+		fmt.Printf("%s v%s\n", programName, secretless.FullVersionName)
+		os.Exit(0)
+	}
+
+	log.Printf("Secretless v%s starting up...", secretless.FullVersionName)
 
 	configManagerID, configManagerSpec := parseConfigManagerSpec(*configManagerSpecString)
 

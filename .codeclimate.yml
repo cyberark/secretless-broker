@@ -1,4 +1,12 @@
 engines:
+  golint:
+    enabled: true
+    exclude_patterns:
+    - "**/"                # exclude all
+    - "!./cmd/"            # unexclude just the ones we want to lint
+    - "!./internal/"
+    - "!./pkg/"
+    - "!./test/"
   shellcheck:
     enabled: true
     checks:

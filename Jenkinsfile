@@ -19,14 +19,6 @@ pipeline {
       }
     }
 
-    stage('Linting') {
-      steps {
-        sh './bin/check_style'
-
-        checkstyle pattern: 'test/golint.xml', canComputeNew: true, usePreviousBuildAsReference: false, failedNewAll: "0", failedTotalAll: "0",  unHealthy: "0", healthy: "1", thresholdLimit: "low", useDeltaValues: false
-      }
-    }
-
     stage('Run Tests') {
       parallel {
         stage('Unit tests') {

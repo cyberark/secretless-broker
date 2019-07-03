@@ -8,6 +8,7 @@ builds:
   - linux
   goarch:
   - amd64
+  id: summon2
   main: ./cmd/summon2/main.go
 
 - binary: secretless-broker
@@ -18,6 +19,7 @@ builds:
   - linux
   goarch:
   - amd64
+  id: secretless-broker
   ldflags: -s -w -linkmode external -extldflags "-static"
   main: ./cmd/secretless-broker/main.go
 

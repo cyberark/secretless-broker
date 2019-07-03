@@ -93,13 +93,13 @@ func UnpackErrResponse(data []byte) error {
 	}
 }
 
-// Extracts the PacketType byte
+// GetPacketType extracts the PacketType byte
 // Part of basic packet structure shown below.
 //
-// int<3> PacketLength
-// int<1> PacketNumber
-// int<1> PacketType (0xFF)
-// ... more ...
+//     int<3> PacketLength
+//     int<1> PacketNumber
+//     int<1> PacketType (0xFF)
+//     ... more ...
 func GetPacketType(packet []byte) byte {
 	return packet[4]
 }

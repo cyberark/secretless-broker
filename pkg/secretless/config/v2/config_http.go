@@ -12,9 +12,9 @@ type httpConfig struct {
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
 }
 
-// HttpAuthenticationStrategies are the different ways an http service
+// HTTPAuthenticationStrategies are the different ways an http service
 // can authenticate.
-var HttpAuthenticationStrategies = []string{
+var HTTPAuthenticationStrategies = []string{
 	"aws",
 	"basic_auth",
 	"conjur",
@@ -68,7 +68,7 @@ func (cfg *httpConfig) UnmarshalYAML(bytes []byte) error {
 func (cfg *httpConfig) validate() error {
 	// convert strategies from []string to []interface{} for validation.In
 	var availStrategies []interface{}
-	for _, s := range HttpAuthenticationStrategies {
+	for _, s := range HTTPAuthenticationStrategies {
 		availStrategies = append(availStrategies, s)
 	}
 

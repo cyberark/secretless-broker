@@ -2,15 +2,19 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/test/util/test"
 	"os/exec"
 	"strings"
+
+	"github.com/cyberark/secretless-broker/test/util/testutil"
 
 	"github.com/smartystreets/goconvey/convey"
 )
 
-
-func RunQuery(clientConfig test.ClientConfiguration, connectPort test.ConnectionPort) (string, error) {
+// RunQuery runs a simply test query for the given client configuration and port.
+func RunQuery(
+	clientConfig testutil.ClientConfiguration,
+	connectPort testutil.ConnectionPort,
+) (string, error) {
 	args := []string{"-c", "select count(*) from test.test"}
 	connectionParams := []string{"dbname=postgres"}
 
@@ -27,9 +31,9 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 
 	var host string
 	switch connectPort.SocketType {
-	case test.TCP:
+	case testutil.TCP:
 		host = connectPort.Host()
-	case test.Socket:
+	case testutil.Socket:
 		host = connectPort.ToSocketDir()
 	default:
 		panic("Listener Type can only be TCP or Socket")
@@ -38,7 +42,6 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 
 	// join connection params
 	args = append(args, strings.Join(connectionParams, " "))
-
 
 	// Pre command logs
 	convey.Println("")
@@ -49,7 +52,7 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 
 	// Post command logs
 	//TODO: deal with verbose
-	if test.Verbose {
+	if testutil.Verbose {
 		if err != nil {
 			convey.Println("--->> RESULTS")
 			convey.Println("----- ERROR: ")
@@ -62,10 +65,4 @@ func RunQuery(clientConfig test.ClientConfiguration, connectPort test.Connection
 	convey.Println("")
 
 	return string(cmdOut), err
-}
-
-type ConnectionParams struct {
-	Username string
-	Password string
-	SSLMode string
 }

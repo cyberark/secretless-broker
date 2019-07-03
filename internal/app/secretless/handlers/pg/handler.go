@@ -20,7 +20,7 @@ type ClientOptions struct {
 	Options  map[string]string
 }
 
-// connectionDetails stores the connection info to the real backend database.
+// BackendConfig stores the connection info to the real backend database.
 type BackendConfig struct {
 	Address  string
 	Username string

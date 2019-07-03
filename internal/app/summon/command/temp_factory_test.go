@@ -21,7 +21,7 @@ type envSnapshot struct {
 	env []string
 }
 
-func ClearEnv() *envSnapshot {
+func clearEnv() *envSnapshot {
 	e := os.Environ()
 
 	for _, s := range e {
@@ -31,8 +31,8 @@ func ClearEnv() *envSnapshot {
 	return &envSnapshot{env: e}
 }
 
-func (e *envSnapshot) RestoreEnv() {
-	ClearEnv()
+func (e *envSnapshot) restoreEnv() {
+	clearEnv()
 	for _, s := range e.env {
 		k, v := splitEq(s)
 		os.Setenv(k, v)
@@ -50,8 +50,8 @@ func TestTempFactory_NewTempFactory(t *testing.T) {
 	})
 
 	Convey("When constructor path is not provided", t, func() {
-		env := ClearEnv()
-		defer env.RestoreEnv()
+		env := clearEnv()
+		defer env.restoreEnv()
 
 		Convey("tries using shared memory path first", func() {
 			tempFactory := NewTempFactory("")

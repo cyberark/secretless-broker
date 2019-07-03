@@ -1,7 +1,7 @@
 package tests
 
 import (
-	. "github.com/cyberark/secretless-broker/test/util/test"
+	. "github.com/cyberark/secretless-broker/test/util/testutil"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
@@ -10,7 +10,7 @@ func TestSSL(t *testing.T) {
 
 	testCases := []TestCase{
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=default",
 				ShouldPass: true,
 			},
@@ -21,7 +21,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=disable",
 				ShouldPass: true,
 			},
@@ -32,7 +32,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=require, sslrootcert=none",
 				ShouldPass: true,
 			},
@@ -43,7 +43,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=require, sslrootcert=invalid (ignored)",
 				ShouldPass:  true,
 			},
@@ -54,7 +54,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=require, sslrootcert=malformed (ignored)",
 				ShouldPass:  true,
 			},
@@ -65,7 +65,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=none",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer("ERROR 2000 (HY000): x509: certificate signed by unknown authority"),
@@ -78,7 +78,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_tls, sslmode=verify-ca, sslrootcert=valid",
 				ShouldPass:    true,
 			},
@@ -90,7 +90,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=invalid",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer(`ERROR 2000 (HY000): x509: certificate signed by unknown authority`),
@@ -103,7 +103,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=malformed",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer("ERROR 2000 (HY000): couldn't parse pem in sslrootcert"),
@@ -116,7 +116,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description: "server_no_tls, sslmode=default",
 				ShouldPass:  false,
 				CmdOutput:   StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it"),
@@ -129,7 +129,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:   "server_no_tls, sslmode=disable",
 				ShouldPass:    true,
 			},
@@ -141,7 +141,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=malformed, sslcert=malformed",
 				ShouldPass:          false,
 				CmdOutput:           StringPointer("ERROR 2000 (HY000): tls: failed to find any PEM data in certificate input"),
@@ -156,7 +156,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=valid, sslcert=valid",
 				ShouldPass:          true,
 			},
@@ -170,7 +170,7 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
-			TestDefinition: TestDefinition{
+			Definition: Definition{
 				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=notsignedbyca, sslcert=notsignedbyca",
 				ShouldPass:          false,
 				CmdOutput:           StringPointer("ERROR 2000 (HY000): remote error: tls: unknown certificate authority"),

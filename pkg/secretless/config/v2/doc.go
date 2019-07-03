@@ -1,7 +1,7 @@
 /*
 
-v2 is package for parsing version 2 secretless.yml files and converting them
-into v1.Config objects.  Most users of this package will only be concerned
+Package v2 is package for parsing version 2 secretless.yml files and converting
+them into v1.Config objects.  Most users of this package will only be concerned
 with the single func NewV1Config, which parses yaml file content.
 
 File Format

@@ -77,20 +77,21 @@ func (h *BaseHandler) GetConfig() config_v1.Handler {
 	return h.HandlerConfig
 }
 
-// Debug: Print only if Debug is enabled
+// Debug prints the given msg, but only if Debug is enabled.
 func (h *BaseHandler) Debug(msg string) {
 	if h.DebugModeOn() {
 		log.Print(msg)
 	}
 }
 
-// Debug: Print only if Debug is enabled
+// Debugf prints the given msg, but only if Debug is enabled.
 func (h *BaseHandler) Debugf(format string, v ...interface{}) {
 	if h.DebugModeOn() {
 		log.Printf(format, v...)
 	}
 }
 
+// DebugModeOn tells you if debug mode is enabled.
 func (h *BaseHandler) DebugModeOn() bool {
 	return h.GetConfig().Debug
 }

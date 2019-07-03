@@ -59,7 +59,7 @@ func TestChecksumVerifier(t *testing.T) {
 
 			_, err := VerifyPluginChecksums(pluginDir, checksumsFile)
 
-			errorMsg := "ERROR: Checksum file contained a misformatted line: 'fooo bar baz'!"
+			errorMsg := "ERROR: checksum file contained a misformatted line: 'fooo bar baz'"
 			So(err.Error(), ShouldEqual, errorMsg)
 		})
 
@@ -69,7 +69,7 @@ func TestChecksumVerifier(t *testing.T) {
 
 			_, err := VerifyPluginChecksums(pluginDir, checksumsFile)
 
-			errorMsg := "ERROR: Plugin 'unknown.txt' not found in checksums file!"
+			errorMsg := "ERROR: plugin 'unknown.txt' not found in checksums file"
 			So(err.Error(), ShouldEqual, errorMsg)
 		})
 
@@ -79,9 +79,9 @@ func TestChecksumVerifier(t *testing.T) {
 
 			_, err := VerifyPluginChecksums(pluginDir, checksumsFile)
 
-			errorMsg := "ERROR: Plugin 'testdata/checksum/checksum_mismatch/foo.txt' checksum " +
+			errorMsg := "ERROR: plugin 'testdata/checksum/checksum_mismatch/foo.txt' checksum " +
 				"'b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c' did not match " +
-				"the expected 'DEADBEEFd4a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c'!"
+				"the expected 'DEADBEEFd4a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c'"
 			So(err.Error(), ShouldEqual, errorMsg)
 		})
 	})

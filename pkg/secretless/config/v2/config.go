@@ -8,8 +8,6 @@ import (
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
-// Config represents a full configuration of Secretless, which is just a list of
-// individual Service configurations.
 type Config struct {
 	Services []*Service
 }

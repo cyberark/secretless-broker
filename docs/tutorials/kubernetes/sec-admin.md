@@ -5,7 +5,7 @@ layout: tutorials
 description: Secretless Broker Documentation
 section-header: Steps for Security Admin
 time-complete: 5
-products-used: Kubernetes Secrets, PostgreSQL Service Authenticator
+products-used: Kubernetes Secrets, PostgreSQL Service Connector
 back-btn: /tutorials/kubernetes/overview.html
 continue-btn: /tutorials/kubernetes/app-dev.html
 up-next: As an Application Developer, you no longer need to worry about all the passwords and database connections! You will deploy an application and leave it up to the Secretless Broker to make the desired connection to the database.
@@ -253,7 +253,7 @@ In this section, we assume the following:
 <div class="note">
   If you're using your own database server and it's not SSL-enabled, please see
   the <a
-  href="https://docs.secretless.io/Latest/en/Content/References/handlers/postgres.htm">service authenticator
+  href="https://docs.secretless.io/Latest/en/Content/References/connectors/postgres.htm">service connector
   documentation</a> for how to disable SSL in your Secretless configuration.
 </div>
 

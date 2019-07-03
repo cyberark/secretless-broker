@@ -20,16 +20,16 @@ contribute support for a new Target Service.
 
 In our [reference](/docs/overview/how_it_works.html), we break down how the
 Secretless Broker internal architecture handles incoming requests. Every target
-service that Secretless Broker natively supports has its own Service Authenticator
+service that Secretless Broker natively supports has its own Service Connector
 implemented in the Secretless internals.
 
-  - The Service Authenticator listens on a TCP port or Unix socket for incoming connections
-  - The Service Authenticator uses standard functionality to retrieve the credentials it needs
+  - The Service Connector listens on a TCP port or Unix socket for incoming connections
+  - The Service Connector uses standard functionality to retrieve the credentials it needs
     and opens a connection to the Target Service with those credentials injected
-  - The Service Authenticator streams the connection
+  - The Service Connector streams the connection
 
 In what follows, we'll walk through the steps you would take to add a new
-Service Authenticator to the Secretless project. We'll focus on adding it to the
+Service Connector to the Secretless project. We'll focus on adding it to the
 project internals, but at the end we'll briefly give some guidance for how to build an
 external plugin into the broker binary.
 

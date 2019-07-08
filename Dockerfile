@@ -19,7 +19,10 @@ COPY ./internal /secretless/internal
 COPY ./pkg /secretless/pkg
 COPY ./resource-definitions /secretless/resource-definitions
 
-RUN go build -o dist/$GOOS/$GOARCH/secretless-broker ./cmd/secretless-broker && \
+ARG TAG="dev"
+
+RUN go build -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.Tag=$TAG" \
+             -o dist/$GOOS/$GOARCH/secretless-broker ./cmd/secretless-broker && \
     go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2
 
 

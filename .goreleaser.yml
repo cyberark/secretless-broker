@@ -4,23 +4,35 @@ builds:
 - binary: summon2
   env:
   - CGO_ENABLED=0
+  # Tag 'netgo' is a Go build tag that ensures a pure Go networking stack
+  # in the resulting binary instead of using the default host's stack to
+  # ensure a fully statically-linked artifact that has no lib dependencies.
+  flags:
+  - -tags=netgo
   goos:
   - linux
   goarch:
   - amd64
   id: summon2
+  # These flags generate a statically-linked artifact that allows the binary
+  # to run on any linux-based OS.
+  ldflags: -s -w -linkmode external -extldflags "-static"
   main: ./cmd/summon2/main.go
 
 - binary: secretless-broker
   env:
   - CGO_ENABLED=1
-  flags: --tags netgo
+  # Tag 'netgo' is a Go build tag that ensures a pure Go networking stack
+  # in the resulting binary instead of using the default host's stack to
+  # ensure a fully static artifact that has no dependencies.
+  flags:
+  - -tags=netgo
   goos:
   - linux
   goarch:
   - amd64
   id: secretless-broker
-  ldflags: -s -w -linkmode external -extldflags "-static"
+  ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}" -extldflags "-static"
   main: ./cmd/secretless-broker/main.go
 
 archives:

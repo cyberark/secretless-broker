@@ -13,7 +13,7 @@ KEEP_ALIVE=${KEEP_ALIVE:-}
 FULL_VERSION_TAG="$(full_version_tag)"
 QUICK_START_DIR="$TOPLEVEL_DIR/demos/quick-start/docker"
 
-DOCKER_FLAGS=""
+DOCKER_FLAGS="--build-arg TAG=$(git_tag)"
 if [ "${KEEP_ALIVE}" != "" ]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} --rm=false"
 else

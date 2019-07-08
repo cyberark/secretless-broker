@@ -12,8 +12,12 @@ function short_version_tag() {
   echo "$(cat ${VERSION_GO_FILE} | grep -v '^//' | grep ' Version ' | awk -F'= ' '{print $2}' | tr -d '"')"
 }
 
+function git_tag() {
+  echo "$(git rev-parse --short HEAD)"
+}
+
 function full_version_tag() {
-  echo "$(short_version_tag)-$(git rev-parse --short HEAD)"
+  echo "$(short_version_tag)-$(git_tag)"
 }
 
 # generate less specific versions, eg. given 1.2.3 will print 1.2 and 1

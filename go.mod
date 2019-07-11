@@ -7,7 +7,7 @@ require (
 	github.com/codegangsta/cli v1.20.0
 	github.com/cyberark/conjur-api-go v0.5.2
 	github.com/cyberark/conjur-authn-k8s-client v0.13.0
-	github.com/cyberark/summon v0.0.0-20171226164112-07326408eaed
+	github.com/cyberark/summon v0.7.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
@@ -22,7 +22,6 @@ require (
 	github.com/imdario/mergo v0.3.6 // indirect
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b // indirect
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180718012357-94122c33edd3 // indirect
@@ -38,12 +37,10 @@ require (
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
-	gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/api v0.0.0-20180712090710-2d6f90ab1293
 	k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408

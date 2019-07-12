@@ -1,0 +1,8 @@
+[ req ]
+distinguished_name = dn
+x509_extensions = v3_ca
+[ dn ]
+[ v3_ca ]
+basicConstraints = critical,CA:TRUE
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer:always

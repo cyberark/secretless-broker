@@ -313,5 +313,12 @@ _Please note: Plugin API interface signatures and supported plugin API version(s
 ### Build a release
 1. From a **clean checkout of master** run `./bin/build_release` to generate
    the release artifacts.
-1. Create a GitHub release from the tag and upload the release artifacts from `dist/goreleaser`
-   to the GitHub release.
+1. Create a GitHub release from the tag, add a description by copying the CHANGELOG entries
+   from the version, and upload the release artifacts from `dist/goreleaser`
+   to the GitHub release. The following artifacts should be uploaded to the release:
+   - CHANGELOG.md
+   - NOTICES.txt
+   - secretless-broker_{VERSION}_amd64.deb
+   - secretless-broker_{VERSION}_amd64.rpm
+   - secretless-broker_{VERSION}_linux_amd64.tar.gz
+   - SHA256SUMS.txt

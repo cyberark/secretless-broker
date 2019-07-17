@@ -5,18 +5,21 @@
 cat << EOL
 version: "2"
 services:
-  http_basic_auth:
-    protocol: http
+  app_db:
+    protocol: mysql
     listenOn: tcp://0.0.0.0:3000
     credentials:
+      host:
+        from: conjur
+        get: ${APP_SECRETS_POLICY_BRANCH}/host
+      port:
+        from: conjur
+        get: ${APP_SECRETS_POLICY_BRANCH}/port
       username:
         from: conjur
-        get: ${APP_NAME}-db/username
+        get: ${APP_SECRETS_POLICY_BRANCH}/username
       password:
         from: conjur
-        get: ${APP_NAME}-db/password
-    config:
-      authenticationStrategy: basic_auth
-      authenticateURLsMatching:
-        - .*
+        get: ${APP_SECRETS_POLICY_BRANCH}/password
+      sslmode: disable
 EOL

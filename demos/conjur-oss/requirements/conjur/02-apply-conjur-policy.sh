@@ -2,7 +2,9 @@
 
 . ./env.sh
 
-cat << EOL | docker exec -i conjur-cli bash -
+cat << EOL | docker exec -i "conjur-cli-${OSS_CONJUR_NAMESPACE}" bash -
+mkdir -p tmp
+
 # Apply Conjur policy
 ./conjur-policy.sh > tmp/conjur-policy.yml
 conjur policy load root tmp/conjur-policy.yml

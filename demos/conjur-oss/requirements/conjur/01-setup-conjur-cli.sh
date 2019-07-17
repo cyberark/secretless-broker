@@ -3,7 +3,7 @@
 . ./env.sh
 
 docker run \
-  --name conjur-cli \
+  --name "conjur-cli-${OSS_CONJUR_NAMESPACE}" \
   --rm \
   -d \
   -w /work \
@@ -51,7 +51,7 @@ kubectl get svc \
 done
 echo "End point ready: ${OSS_CONJUR_SERVICE_IP}"
 
-cat << EOL | docker exec -i conjur-cli bash -
+cat << EOL | docker exec -i "conjur-cli-${OSS_CONJUR_NAMESPACE}" bash -
 echo '${OSS_CONJUR_SERVICE_IP} conjur.myorg.com' >> /etc/hosts
 
 # Here you connect to the endpoint of your Conjur service.

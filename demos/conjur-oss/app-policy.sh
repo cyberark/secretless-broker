@@ -4,33 +4,24 @@
 
 cat << EOL
 ---
+# Policy enabling the Kubernetes authenticator for your application
 - !policy
-  id: "${APP_NAME}"
-  owner: !group devops
-  annotations:
-    description: This policy connects authn identities to an application identity. It defines a layer named for an application that contains the whitelisted identities that can authenticate to the authn-k8s endpoint. Any permissions granted to the application layer will be inherited by the whitelisted authn identities, thereby granting access to the authenticated identity.
+  id: conjur/authn-k8s/${AUTHENTICATOR_ID}/apps
   body:
-  - !layer
+    - &hosts
+      - !host
+        id: ${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT_NAME}
+        annotations:
+          kubernetes/authentication-container-name: ${APP_AUTHENTICATION_CONTAINER_NAME}
+          kubernetes: "true"
+    - !grant
+      role: !layer
+      members: *hosts
 
- # add authn identities to application layer so authn roles inherit app's permissions
-  - !grant
-    role: !layer
-    members:
-    - !layer /conjur/authn-k8s/${AUTHENTICATOR_ID}/apps
-- !policy
-  id: "${APP_NAME}-db"
-  owner: !group devops
-  annotations:
-    description: This policy contains the creds to access the summon init app DB
+# Grant application's authn identity membership to the application secrets reader layer so authn identity inherits read privileges on application secrets
+- !grant
+  role: !layer ${APP_SECRETS_READER_LAYER}
+  members:
+  - !host /conjur/authn-k8s/${AUTHENTICATOR_ID}/apps/${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT_NAME}
 
-  body:
-    - &init-variables
-      - !variable password
-      - !variable url
-      - !variable username
-
-    - !permit
-      role: !layer "/${APP_NAME}"
-      privileges: [ read, execute ]
-      resources: *init-variables
 EOL

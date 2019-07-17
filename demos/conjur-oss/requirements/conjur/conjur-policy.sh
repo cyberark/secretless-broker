@@ -62,13 +62,5 @@ cat << EOL
     - !layer
       annotations:
         description: Layer of authenticator identities permitted to call authn svc
-    - &hosts
-      - !host
-        id: ${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT_NAME}
-        annotations:
-          kubernetes/authentication-container-name: ${APP_AUTHENTICATION_CONTAINER_NAME}
-          openshift: "true"
-    - !grant
-      role: !layer
-      members: *hosts
+
 EOL

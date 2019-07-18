@@ -35,6 +35,5 @@ docker run --rm \
   --volume "$junit_output_dir"/:/secretless/test/output/ \
   secretless-dev \
   bash -exc "
-    go get -u github.com/jstemmer/go-junit-report
     cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml
   "

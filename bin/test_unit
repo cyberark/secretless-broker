@@ -20,9 +20,13 @@ docker build "$toplevel_dir" \
 echo "Running unit tests..."
 set +e
   # TODO: Use `go vet` too
+  # NOTE: We're leaving out cmd/shared because it was causing
+  #       a "g++": executable file not found in $PATH error, and
+  #       the code is not being used anyway (was part of an Envoy POC)
   docker run --rm -t secretless-unit-test-runner:latest \
              -vet=off \
-             ./cmd/... \
+             ./cmd/secretless-broker... \
+             ./cmd/summon2... \
              ./internal/... \
              ./pkg/... \
              | tee -a "$junit_output_file"

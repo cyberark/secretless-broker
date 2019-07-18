@@ -49,11 +49,15 @@ pipeline {
           }
         }
 
-        stage('Benchmarks') {
+        stage('Demo tests') {
           steps {
-            sh './bin/test_benchmarks'
+            sh './bin/test_demo'
+          }
+        }
 
-            junit 'test/bench.xml'
+        stage('CRD tests') {
+          steps {
+            sh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test'
           }
         }
       }

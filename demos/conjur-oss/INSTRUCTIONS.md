@@ -85,7 +85,7 @@ cat << EOL
       - !host
         id: ${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT_NAME}
         annotations:
-          kubernetes/authentication-container-name: ${APP_AUTHENTICATION_CONTAINER_NAME}
+          kubernetes/authentication-container-name: secretless
           kubernetes: "true"
     - !grant
       role: !layer
@@ -264,7 +264,7 @@ spec:
         image: mysql/mysql-server:5.7
         command: [ "sleep", "infinity" ]
         imagePullPolicy: Always
-      - name: "${APP_AUTHENTICATION_CONTAINER_NAME}"
+      - name: secretless
         image: cyberark/secretless-broker:latest
         imagePullPolicy: Always
         args: ["-f", "/etc/secretless/secretless.yml"]

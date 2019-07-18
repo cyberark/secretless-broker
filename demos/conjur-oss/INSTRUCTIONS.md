@@ -2,8 +2,6 @@
 
 This document describes how to connect to a database using Secretless with credentials stored in CyberArk Conjur. This method avoids handlings the credentials directly and therefore mitigates an important vector for secret leakage. Your app connects to Secretless, and Secretless connects to the database. To make this possible, Secretless runs as a sidecar container next to your app, and your app connects to it over a local TCP or Unix socket.
 
-NOTE: Code snippets provided in this document can be executed in a BASH shell or equivalent. Environment variables are used to represent required values that you'll need to provide. These required values will be used to generate other values via environment variable substitution e.g. `CONJUR_APPLIANCE_URL=https://${OSS_CONJUR_SERVICE_NAME}.${OSS_CONJUR_NAMESPACE}.svc.cluster.local`.  There'll also be code snippets that can be used to generate Conjur policy, Kubernetes resource manifests and carry out actions.
-
 ## Prerequisites
 
 ### Assumptions
@@ -32,8 +30,11 @@ To deploy Secretless, you need the following information about your Conjur confi
 |App Namespace|The Kubernetes namespace where the application pods reside.|`${APP_NAMESPACE}`|
 |App Service Account Name|The Kubernetes service account assigned to the application pods.|`${APP_SERVICE_ACCOUNT_NAME}`|
 
+NOTE: Code snippets provided in this document can be executed in a BASH shell or equivalent. Environment variables are used to represent required values that you'll need to provide. These required values will be used to generate other values via environment variable substitution e.g. `CONJUR_APPLIANCE_URL=https://${OSS_CONJUR_SERVICE_NAME}.${OSS_CONJUR_NAMESPACE}.svc.cluster.local`.  There'll also be code snippets that can be used to generate Conjur policy, Kubernetes resource manifests and carry out actions.
 
-Let's capture all these values in a file called `./env.sh`. It'll be sourced by other code snippets in this document. Below we show an example. Set these variables to reflect your environment.
+### env.sh
+
+Let's capture all these values in a file called `env.sh`. It'll be sourced by other code snippets in this document. Below we show an example. Set these variables to reflect your environment.
 
 ```bash
 #!/usr/bin/env bash
@@ -69,13 +70,14 @@ We'll add the host identity to the  `conjur/authn-k8s/${AUTHENTICATOR_NAME}/apps
 
 Finally, to give the host access to the database credentials, we'll add it to the  `${APP_SECRETS_READER_LAYER}`  layer.
 
+### app-policy.yml
 The bash script snippet below generates the Conjur policy that does all the above.
 
 ```bash
 #!/usr/bin/env bash
 . ./env.sh
 
-cat << EOL
+cat << EOL > app-policy.yml
 ---
 # Policy enabling the Kubernetes authenticator for your application
 - !policy

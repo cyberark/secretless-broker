@@ -3,8 +3,9 @@
 # entrypoint runs smoke tests for postgres, ssh, http authentication.
 set -e
 
+# create tmp file, then truncate it / ensure it's readable
 readonly RESULT_FILE="/tmp/.results_$$"
-> "${RESULT_FILE}"
+true > "${RESULT_FILE}"
 
 RETURN_CODE=0
 report_result () {
@@ -53,6 +54,6 @@ http_proxy=quickstart:8081 curl -sI quickstart | head -n1 | grep '200 OK'
 report_result "HTTP"
 set -e
 
-echo -e "\n\nResults\n======================================="
+echo -e '\n\nResults\n======================================='
 cat "${RESULT_FILE}"
 exit $RETURN_CODE

@@ -4,7 +4,10 @@ set -eo pipefail
 
 current_dir=$("$(dirname "$0")"/abspath)
 toplevel_dir=$current_dir/..
-junit_output_file=$toplevel_dir/test/junit.output
+
+junit_output_dir=$toplevel_dir/test/unit-test-output
+mkdir --parents "$junit_output_dir"
+junit_output_file=$junit_output_dir/junit.output
 
 rm -f "$junit_output_file"
 touch "$junit_output_file"
@@ -26,10 +29,10 @@ set +e
   echo "Unit test exit status: $?"
 set -e
 
-rm -f "$toplevel_dir"/test/junit.xml
+rm -f "$junit_output_dir"/junit.xml
 
 docker run --rm \
-  -v "$toplevel_dir"/test/:/secretless/test/output/ \
+  --volume "$junit_output_dir"/:/secretless/test/output/ \
   secretless-dev \
   bash -exc "
     go get -u github.com/jstemmer/go-junit-report

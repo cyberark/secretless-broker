@@ -20,32 +20,84 @@ pipeline {
     }
 
     stage('Run Tests') {
+
       parallel {
+
         stage('Unit tests') {
           steps {
             sh './bin/test_unit'
 
-            junit 'test/junit.xml'
+            junit 'test/unit-test-output/junit.xml'
           }
         }
 
-        stage('Integration tests') {
+        stage('Integration: AWS Secrets Provider') {
           steps {
-            sh './bin/test_integration'
-
-            junit 'test/junit.xml'
+            sh './bin/run_integration aws_secrets_provider'
+            junit 'test/aws_secrets_provider/junit.xml'
           }
         }
 
-        stage('Demo tests') {
+        stage('Integration: Conjur') {
           steps {
-            sh './bin/test_demo'
+            sh './bin/run_integration conjur'
+            junit 'test/conjur/junit.xml'
           }
         }
 
-        stage('CRD tests') {
+        stage('Integration: HTTP Basic Auth') {
           steps {
-            sh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test'
+            sh './bin/run_integration http_basic_auth'
+            // junit 'test/http_basic_auth/junit.xml'
+          }
+        }
+
+        stage('Integration: Kubernetes Provider') {
+          steps {
+            sh './bin/run_integration kubernetes_provider'
+            junit 'test/kubernetes_provider/junit.xml'
+          }
+        }
+
+        stage('Integration: MySQL Handler') {
+          steps {
+            sh './bin/run_integration mysql_handler'
+            junit 'test/mysql_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: PG Handler') {
+          steps {
+            sh './bin/run_integration pg_handler'
+            junit 'test/pg_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: SSH Agent Handler') {
+          steps {
+            sh './bin/run_integration ssh_agent_handler'
+            junit 'test/ssh_agent_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: SSH Handler') {
+          steps {
+            sh './bin/run_integration ssh_handler'
+            junit 'test/ssh_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: Summon 2') {
+          steps {
+            sh './bin/run_integration summon2'
+            junit 'test/summon2/junit.xml'
+          }
+        }
+
+        stage('Integration: Vault Provider') {
+          steps {
+            sh './bin/run_integration vault_provider'
+            junit 'test/vault_provider/junit.xml'
           }
         }
 

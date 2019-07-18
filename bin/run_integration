@@ -1,0 +1,93 @@
+#!/bin/bash
+
+set -eo pipefail
+
+help_and_exit() {
+  local retval=$1
+  local cmd_name=${0##*/}
+
+  cat <<EOF
+$cmd_name TEST_SUBDIR
+
+Runs integration tests in the directory "test/TEST_SUBDIR" by calling the
+following scripts:
+
+./start 
+./test
+./stop
+
+The TEST_SUBDIR is required to have ./start and ./test scripts, but the ./stop
+script is optional.
+EOF
+  exit "$retval"
+}
+
+non_flag_args=( )
+while (( $# )); do
+  case $1 in
+    -h|--help)   help_and_exit 0 ;;
+    -*)          echo "Unknown option: $1";
+                 echo "";
+                 help_and_exit 1 ;;
+    *)           non_flag_args+=( "$1" ) ;;
+  esac
+  shift
+done
+
+# Validate the number of arguments
+
+if [[ ${#non_flag_args[@]} != 1 ]]; then
+  echo "Expects exactly 1 test subdirectory as an argument"
+  exit 1
+fi
+
+# Validate the required scripts exists in the TEST_SUBDIR
+
+project_dir=$PWD
+test_dir="${project_dir}/test/${non_flag_args[0]}"
+
+if [[ ! -x "$test_dir/start" ]] || [[ ! -x "$test_dir/test" ]]; then
+  echo "The TEST_SUBDIR must contain executable ./start and ./test scripts"
+  exit 1
+fi
+
+# Reset output file just in case it exists
+true > "${test_dir}/junit.output" 
+
+exit_status=0
+
+# Change into the test dir
+pushd "$test_dir"
+
+# Start the test's prerequisites. Assumes ./start cleans the env
+"./start"
+
+# Run the tests
+set +e
+  "./test" | tee -a "${test_dir}/junit.output"
+  test_status=$?
+
+  if [[ $test_status -ne 0 ]]; then
+    echo "ERROR: Integration test '${test_dir}' failed!"
+    exit_status=$test_status
+  fi
+set -e
+
+# Clean up
+if [[ -x "./stop" ]]; then
+  "./stop"
+fi
+
+# Translate and copy results unit junit.xml for Jenkins
+rm --force "${test_dir}/junit.xml"
+
+docker run --rm \
+  --volume "${test_dir}/:/secretless/test/output/" \
+  secretless-dev \
+  bash -exc "
+    cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml
+  "
+
+popd || true
+
+exit $exit_status

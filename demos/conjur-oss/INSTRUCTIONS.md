@@ -33,7 +33,7 @@ To deploy Secretless, you need the following information about your Conjur confi
 |App Service Account Name|The Kubernetes service account assigned to the application pods.|`${APP_SERVICE_ACCOUNT_NAME}`|
 
 
-Let's capture all these values in a file called `./env.sh`. It'll be sourced by other code snippets in this document.
+Let's capture all these values in a file called `./env.sh`. It'll be sourced by other code snippets in this document. Below we show an example. Set these variables to reflect your environment.
 
 ```bash
 #!/usr/bin/env bash
@@ -188,7 +188,7 @@ kubectl \
 
 ## Store the Secretless configuration in a ConfigMap
 
-The bash script snippet below generates Secretless configuration. This configuration tells Secretless how to setup the service connector. Modify to suit your needs.
+The bash script snippet below generates Secretless configuration. This configuration tells Secretless how to setup the service connector. This is an example of using the MySQL service connector. If you are using another supported database you should modify this file to reflect your needs. This normally involved changing the protocol and credentials section.
 
 ```bash
 #!/usr/bin/env bash
@@ -232,7 +232,7 @@ kubectl \
 
 ## Deploy your application with Secretless
 
-The bash script snippet below generates a Kubernetes Deployment manifest with an application + Secretless. Modify to suit your needs.
+The bash script snippet below generates a Kubernetes Deployment manifest with an application + Secretless. Here we provide an example container representing the application and we call it `app`. Replace this container with your application's container definition.
 
 ```bash
 #!/usr/bin/env bash

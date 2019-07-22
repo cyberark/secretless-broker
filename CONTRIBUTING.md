@@ -271,16 +271,54 @@ _Please note: Plugin API interface signatures and supported plugin API version(s
 
 ## Releasing
 
+### Verify and update dependencies
+1. Check whether any dependencies have been changed since the last release by running
+   `./bin/check_dependencies`. The script will tell you what has changed.
+1. If any dependencies have changed, you'll need to update NOTICES.txt - which involves
+   updating the dependency files in `assets/` using the [LicenseFinder](https://github.com/Pivotal/LicenseFinder)
+   and updating the [spreadsheet](https://cyberark365.sharepoint.com/:x:/s/Conjur/Edko_eT7CfpEuPxnnbIEfmAB4j2ybNozY9B8QAIDOxKynQ?e=CfP6ym) before preparing the revised
+   NOTICES.txt.
+
+   Note: to update the dependency file you run the following command:
+   ```
+   docker run --rm \
+     -v $PWD:/scan \
+     licensefinder/license_finder \
+     /bin/bash -lc "
+       cd /scan && \
+       license_finder approvals add \
+         --decisions-file=assets/dependency_decisions.yml \
+         [DEPENDENCY] --version=[VERSION]"
+   ```
+
+   If no dependencies have changed, you can move on to the next step.
+
+### Update the version and changelog
+1. Create a new branch for the version bump.
 1. Based on the unreleased content, determine the new version number and update
    the [VERSION](VERSION) file.
 1. Run `./bin/prefill_changelog $(cat VERSION)` to populate the [changelog](CHANGELOG.md) with
    the changes included in the release.
-1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message.
+1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
+   for review.
+
+### Add a git tag
 1. Once your changes have been reviewed and merged into master, tag the version
    using `git tag -s v0.1.1`. Note this requires you to be  able to sign releases.
    Consult the [github documentation on signing commits](https://help.github.com/articles/signing-commits-with-gpg/)
    on how to set this up. `vx.y.z` is an acceptable tag message.
 1. Push the tag: `git push vx.y.z` (or `git push origin vx.y.z` if you are working
    from your local machine).
+
+### Build a release
 1. From a **clean checkout of master** run `./bin/build_release` to generate
-   the release artifacts. Upload these to the GitHub release.
+   the release artifacts.
+1. Create a GitHub release from the tag, add a description by copying the CHANGELOG entries
+   from the version, and upload the release artifacts from `dist/goreleaser`
+   to the GitHub release. The following artifacts should be uploaded to the release:
+   - CHANGELOG.md
+   - NOTICES.txt
+   - secretless-broker_{VERSION}_amd64.deb
+   - secretless-broker_{VERSION}_amd64.rpm
+   - secretless-broker_{VERSION}_linux_amd64.tar.gz
+   - SHA256SUMS.txt

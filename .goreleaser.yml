@@ -27,6 +27,7 @@ archives:
   - id: secretless-release-archive
     files:
       - CHANGELOG.md
+      - NOTICES.txt
       - LICENSE.md
       - README.md
     format_overrides:

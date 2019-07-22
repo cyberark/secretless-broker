@@ -13,7 +13,11 @@ KEEP_ALIVE=${KEEP_ALIVE:-}
 FULL_VERSION_TAG="$(full_version_tag)"
 QUICK_START_DIR="$TOPLEVEL_DIR/demos/quick-start/docker"
 
+# The `Tag` override is there to provide the git commit information in the
+# final binary. See `Static long version tags` in the `Building` section
+# of `CONTRIBUTING.md` for more information.
 DOCKER_FLAGS="--build-arg TAG=$(git_tag)"
+
 if [ "${KEEP_ALIVE}" != "" ]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} --rm=false"
 else

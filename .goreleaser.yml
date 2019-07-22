@@ -32,6 +32,9 @@ builds:
   goarch:
   - amd64
   id: secretless-broker
+  # The `Tag` override is there to provide the git commit information in the
+  # final binary. See `Static long version tags` in the `Building` section
+  # of `CONTRIBUTING.md` for more information.
   ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}" -extldflags "-static"
   main: ./cmd/secretless-broker/main.go
 

@@ -21,6 +21,9 @@ COPY ./resource-definitions /secretless/resource-definitions
 
 ARG TAG="dev"
 
+# The `Tag` override is there to provide the git commit information in the
+# final binary. See `Static long version tags` in the `Building` section
+# of `CONTRIBUTING.md` for more information.
 RUN go build -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.Tag=$TAG" \
              -o dist/$GOOS/$GOARCH/secretless-broker ./cmd/secretless-broker && \
     go build -o dist/$GOOS/$GOARCH/summon2 ./cmd/summon2

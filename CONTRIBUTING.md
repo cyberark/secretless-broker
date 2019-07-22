@@ -73,6 +73,22 @@ require either that you clone this repository outside of your `GOPATH` or you se
 
 Once you've cloned the repository, you can build the Secretless Broker.
 
+### Static long version tags
+
+In most of our build scripts we provide a static (compile-time) version augmentation so that
+the final artifacts include the Git short-hash of the code used to build it so that it looks
+similar to: `<sem_ver>-<git_short_hash>`. We do this in most cases by over-riding the `Tag`
+variable value in `pkg/secretless` package with ldflags in this manner:
+```
+...
+-ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.Tag=<git_short_hash>"
+...
+```
+
+If you would like the same behavior and something other than the default `dev` tag, you will
+need to add the same ldflags to your build commands or rely on the current build scripts to
+create your final deliverable.
+
 ### Docker containers
 
 ```sh-session

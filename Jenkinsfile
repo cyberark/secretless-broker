@@ -48,7 +48,6 @@ pipeline {
         stage('Integration: HTTP Basic Auth') {
           steps {
             sh './bin/run_integration http_basic_auth'
-            // junit 'test/http_basic_auth/junit.xml'
           }
         }
 

@@ -17,6 +17,7 @@ demo/**/proxy_tls
 demo/**/myapp
 !demo/**/src/myapp
 test/junit.*
+test/**/junit.*
 test/*.xml
 test/plugin/out/
 

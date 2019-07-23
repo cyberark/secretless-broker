@@ -98,7 +98,7 @@ $ ./bin/build_darwin
 
 ## Testing
 
-**Prerequisites**
+### Prerequisites
 
 * **Docker** You need Docker to run the tests.
 
@@ -113,6 +113,37 @@ Then run the test cases:
 ```sh-session
 $ ./bin/test
 ```
+### Adding New Integration tests
+
+Each integration test exists in its own subdirectory within the "test"
+directory.  The test runner assumes it has the following executable scripts,
+which will be run in order:
+
+- `./start` (required) - Performs setup work -- eg, spinning up test
+   containers, populating a database with test data, etc.
+- `./test` (required) - Runs the actual tests.  It is assumed to produce go
+   test output on stdout.
+- `./stop` (optional) - Performs cleanup work.
+
+Hence, adding a new integration test requires two steps:
+
+1. Creating a folder with test scripts as described above. 
+1. Adding a new entry to the `Jenkinsfile` to exercise those test scripts using
+   the `run_integration` script. In most cases, you will also call `junit` on
+   the xml file that `run_integration` outputs in your test's subdirectory. 
+
+Here's an example `Jenkinsfile` entry:
+
+```
+stage('Integration: PG Handler') {
+  steps {
+    sh './bin/run_integration pg_handler'
+    junit 'test/pg_handler/junit.xml'
+  }
+}
+```
+
+### OSX Keychain provider Test
 
 If you are on a Mac, you may also test the OSX Keychain provider:
 ```sh-session
@@ -125,7 +156,8 @@ to the Mac OSX Keychain. You will be prompted for your password when running
 this test, as it temporarily adds a generic password to your account, and
 verifies that it can retrieve the value.
 
-Kubernetes CRD loading test
+### Kubernetes CRD loading test
+
 ```sh-session
 cd test/manual/k8s_crds
 ./deploy

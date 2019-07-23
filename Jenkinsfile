@@ -19,29 +19,84 @@ pipeline {
       }
     }
 
-    stage('Linting') {
-      steps {
-        sh './bin/check_style'
-
-        checkstyle pattern: 'test/golint.xml', canComputeNew: true, usePreviousBuildAsReference: false, failedNewAll: "0", failedTotalAll: "0",  unHealthy: "0", healthy: "1", thresholdLimit: "low", useDeltaValues: false
-      }
-    }
-
     stage('Run Tests') {
+
       parallel {
+
         stage('Unit tests') {
           steps {
             sh './bin/test_unit'
 
-            junit 'test/junit.xml'
+            junit 'test/unit-test-output/junit.xml'
           }
         }
 
-        stage('Integration tests') {
+        stage('Integration: AWS Secrets Provider') {
           steps {
-            sh './bin/test_integration'
+            sh './bin/run_integration aws_secrets_provider'
+            junit 'test/aws_secrets_provider/junit.xml'
+          }
+        }
 
-            junit 'test/junit.xml'
+        stage('Integration: Conjur') {
+          steps {
+            sh './bin/run_integration conjur'
+            junit 'test/conjur/junit.xml'
+          }
+        }
+
+        stage('Integration: HTTP Basic Auth') {
+          steps {
+            sh './bin/run_integration http_basic_auth'
+          }
+        }
+
+        stage('Integration: Kubernetes Provider') {
+          steps {
+            sh './bin/run_integration kubernetes_provider'
+            junit 'test/kubernetes_provider/junit.xml'
+          }
+        }
+
+        stage('Integration: MySQL Handler') {
+          steps {
+            sh './bin/run_integration mysql_handler'
+            junit 'test/mysql_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: PG Handler') {
+          steps {
+            sh './bin/run_integration pg_handler'
+            junit 'test/pg_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: SSH Agent Handler') {
+          steps {
+            sh './bin/run_integration ssh_agent_handler'
+            junit 'test/ssh_agent_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: SSH Handler') {
+          steps {
+            sh './bin/run_integration ssh_handler'
+            junit 'test/ssh_handler/junit.xml'
+          }
+        }
+
+        stage('Integration: Summon 2') {
+          steps {
+            sh './bin/run_integration summon2'
+            junit 'test/summon2/junit.xml'
+          }
+        }
+
+        stage('Integration: Vault Provider') {
+          steps {
+            sh './bin/run_integration vault_provider'
+            junit 'test/vault_provider/junit.xml'
           }
         }
 
@@ -54,14 +109,6 @@ pipeline {
         stage('CRD tests') {
           steps {
             sh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test'
-          }
-        }
-
-        stage('Benchmarks') {
-          steps {
-            sh './bin/test_benchmarks'
-
-            junit 'test/bench.xml'
           }
         }
       }

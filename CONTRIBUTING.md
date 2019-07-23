@@ -125,13 +125,12 @@ which will be run in order:
    test output on stdout.
 - `./stop` (optional) - Performs cleanup work.
 
-Hence, adding a new integration requires two steps:
+Hence, adding a new integration test requires two steps:
 
 1. Creating a folder with test scripts as described above. 
-1. Adding a new entry to the `Jenkinsfile` to exercise it using the
-   `run_integration` script, and then (optionally) calling `junit` on its xml
-   output file, which will be created automatically by `run_integration` and
-   placed in the tests subdirectory. 
+1. Adding a new entry to the `Jenkinsfile` to exercise those test scripts using
+   the `run_integration` script. In most cases, you will also call `junit` on
+   the xml file that `run_integration` outputs in your test's subdirectory. 
 
 Here's an example `Jenkinsfile` entry:
 

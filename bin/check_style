@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # This runs golint using the same settings that will be used by hosted Code
 # Climate in our CI pipeline
 #

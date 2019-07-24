@@ -73,6 +73,22 @@ require either that you clone this repository outside of your `GOPATH` or you se
 
 Once you've cloned the repository, you can build the Secretless Broker.
 
+### Static long version tags
+
+In most of our build scripts we provide a static (compile-time) version augmentation so that
+the final artifacts include the Git short-hash of the code used to build it so that it looks
+similar to: `<sem_ver>-<git_short_hash>`. We do this in most cases by over-riding the `Tag`
+variable value in `pkg/secretless` package with ldflags in this manner:
+```
+...
+-ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.Tag=<git_short_hash>"
+...
+```
+
+If you would like the same behavior and something other than the default `dev` tag, you will
+need to add the same ldflags to your build commands or rely on the current build scripts to
+create your final deliverable.
+
 ### Docker containers
 
 ```sh-session
@@ -328,8 +344,8 @@ _Please note: Plugin API interface signatures and supported plugin API version(s
 ### Update the version and changelog
 1. Create a new branch for the version bump.
 1. Based on the unreleased content, determine the new version number and update
-   the [VERSION](VERSION) file.
-1. Run `./bin/prefill_changelog $(cat VERSION)` to populate the [changelog](CHANGELOG.md) with
+   the [version.go](pkg/secretless/version.go) file.
+1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
    the changes included in the release.
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
    for review.

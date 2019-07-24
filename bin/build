@@ -10,42 +10,46 @@ CURRENT_DIR=$("$(dirname "$0")/abspath")
 TOPLEVEL_DIR="$CURRENT_DIR/.."
 KEEP_ALIVE=${KEEP_ALIVE:-}
 
-TAG="$(version_tag)"
+FULL_VERSION_TAG="$(full_version_tag)"
 QUICK_START_DIR="$TOPLEVEL_DIR/demos/quick-start/docker"
 
-DOCKER_FLAGS=""
+# The `Tag` override is there to provide the git commit information in the
+# final binary. See `Static long version tags` in the `Building` section
+# of `CONTRIBUTING.md` for more information.
+DOCKER_FLAGS="--build-arg TAG=$(git_tag)"
+
 if [ "${KEEP_ALIVE}" != "" ]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} --rm=false"
 else
   DOCKER_FLAGS="${DOCKER_FLAGS} --force-rm"
 fi
 
-echo "Building secretless-broker:$TAG Docker image"
+echo "Building secretless-broker:$FULL_VERSION_TAG Docker image"
 # NOTE: the latest tag is required by downstream pipeline stages
 # (we want the flags to be word split here)
 # shellcheck disable=SC2086
-docker build -t "secretless-broker:${TAG}" \
-             -t "secretless-broker:latest" \
+docker build --tag "secretless-broker:${FULL_VERSION_TAG}" \
+             --tag "secretless-broker:latest" \
              $DOCKER_FLAGS \
-             -f "$TOPLEVEL_DIR/Dockerfile" \
+             --file "$TOPLEVEL_DIR/Dockerfile" \
              "$TOPLEVEL_DIR"
 
-echo "Building secretless-dev:$TAG Docker image"
+echo "Building secretless-dev:$FULL_VERSION_TAG Docker image"
 # NOTE: the latest tag is required by downstream pipeline stages
 # (we want the flags to be word split here)
 # shellcheck disable=SC2086
-docker build -t "secretless-dev:${TAG}" \
-             -t "secretless-dev:latest" \
+docker build --tag "secretless-dev:${FULL_VERSION_TAG}" \
+             --tag "secretless-dev:latest" \
              $DOCKER_FLAGS \
-             -f "$TOPLEVEL_DIR/Dockerfile.dev" \
+             --file "$TOPLEVEL_DIR/Dockerfile.dev" \
              "$TOPLEVEL_DIR"
 
-echo "Building secretless-broker-quickstart:$TAG Docker image"
+echo "Building secretless-broker-quickstart:$FULL_VERSION_TAG Docker image"
 # NOTE: the latest tag is required by downstream pipeline stages
 # (we want the flags to be word split here)
 # shellcheck disable=SC2086
-docker build -t "secretless-broker-quickstart:${TAG}" \
-             -t "secretless-broker-quickstart:latest" \
+docker build --tag "secretless-broker-quickstart:${FULL_VERSION_TAG}" \
+             --tag "secretless-broker-quickstart:latest" \
              $DOCKER_FLAGS \
-             -f "$QUICK_START_DIR/Dockerfile" \
+             --file "$QUICK_START_DIR/Dockerfile" \
              "$QUICK_START_DIR"

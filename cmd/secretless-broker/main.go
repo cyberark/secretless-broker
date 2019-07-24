@@ -2,99 +2,44 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
-	"strings"
 
 	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/pkg/secretless"
 )
 
-const configFileManagerPluginID = "configfile"
-
-func parseConfigManagerSpec(configManagerSpecString string) (configManagerID string, configManagerSpec string) {
-	if len(configManagerSpecString) == 0 {
-		return "", ""
-	}
-
-	configManagerSpecItems := strings.SplitN(configManagerSpecString, "#", 2)
-
-	if len(configManagerSpecItems) < 1 {
-		log.Fatalf("ERROR: Manager config spec must be supplied in '<manager_id>[#<spec>]' form")
-	}
-
-	configManagerID = configManagerSpecItems[0]
-
-	if len(configManagerSpecItems) > 1 {
-		configManagerSpec = configManagerSpecItems[1]
-
-	}
-
-	return
-}
-
 func main() {
-	log.Println("Secretless starting up...")
-
 	configManagerHelp := "(Optional) Specify a config manager ID and an optional manager-specific spec string "
 	configManagerHelp += "(eg '<name>[#<filterSpec>]'). "
 	configManagerHelp += "Default will try to use 'secretless.yml' configuration."
 
-	configFile := flag.String("f", "", "Location of the configuration file.")
+	params := secretless.CLIParams{}
+
+	flag.StringVar(&params.ConfigFile, "f", "", "Location of the configuration file.")
 
 	// for CPU and Memory profiling
 	// Acceptable values to input: cpu or memory
-	profileSwitch := flag.String("profile", "", "Enable and set the profiling mode to the value provided. Acceptable values are 'cpu' or 'memory'.")
+	flag.StringVar(&params.ProfilingMode, "profile", "",
+		"Enable and set the profiling mode to the value provided. Acceptable values are 'cpu' or 'memory'.")
 
 	// For development use only; enable more verbose debug logging
-	debugSwitch := flag.Bool("debug", false, "Enable debug logging.")
+	flag.BoolVar(&params.DebugEnabled, "debug", false, "Enable debug logging.")
 
-	configManagerSpecString := flag.String("config-mgr", "configfile", configManagerHelp)
-	fsWatchSwitch := flag.Bool("watch", false, "Enable automatic reloads when configuration file changes.")
-	pluginDir := flag.String("p", "/usr/local/lib/secretless", "Directory containing Secretless plugins")
-	pluginChecksumsFile := flag.String("s", "", "Path to a file of sha256sum plugin checksums")
+	flag.StringVar(&params.ConfigManagerSpec, "config-mgr", "configfile", configManagerHelp)
+	flag.BoolVar(&params.FsWatchEnabled, "watch", false,
+		"Enable automatic reloads when configuration file changes.")
+	flag.StringVar(&params.PluginDir, "p", "/usr/local/lib/secretless",
+		"Directory containing Secretless plugins")
+	flag.StringVar(&params.PluginChecksumsFile, "s", "",
+		"Path to a file of sha256sum plugin checksums")
+
+	// Flag.parse only covers `-version` flag but for `version`, we need to explicitly
+	// check the args
+	showVersion := flag.Bool("version", false, "Show current version")
+
 	flag.Parse()
 
-	configManagerID, configManagerSpec := parseConfigManagerSpec(*configManagerSpecString)
+	// Either the flag or the arg should be enough to show the version
+	params.ShowVersion = *showVersion || flag.Arg(0) == "version"
 
-	// If a configuration file is specified, we don't care what config-mgr the user selected
-	// as we know that we should use the configfile one.
-	if len(*configFile) > 0 {
-		if len(*configManagerSpecString) > 0 {
-			log.Printf("WARN: Config file and config manager specified" +
-				" - forcing 'configfile' configuration manager!")
-			configManagerID = configFileManagerPluginID
-		}
-
-		configManagerSpec = *configFile
-	}
-
-	if *fsWatchSwitch {
-		// If fsWatchSwitch is flipped but our configuration manager plugin is not 'configfile',
-		// the user is requesting an impossible situation
-		if configManagerID != configFileManagerPluginID {
-			log.Fatalf("FATAL: Watch flag enabled on a non-filesystem based configuration" +
-				"manager!")
-		}
-
-		// Attach 'watch' param as a URL query param
-		configManagerSpec = configManagerSpec + fmt.Sprintf("?watch=%v", *fsWatchSwitch)
-	}
-
-	log.Println("Loading internal plugins...")
-	err := plugin.GetManager().LoadInternalPlugins()
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Println("Loading external library plugins...")
-	err = plugin.GetManager().LoadLibraryPlugins(*pluginDir, *pluginChecksumsFile)
-	if err != nil {
-		log.Println(err)
-	}
-
-	// for CPU and Memory profiling
-	plugin.GetManager().SetFlags(*profileSwitch, *debugSwitch)
-
-	plugin.GetManager().RegisterSignalHandlers()
-	plugin.GetManager().Run(configManagerID, configManagerSpec)
+	secretless.Start(&params, plugin.GetManager())
 }

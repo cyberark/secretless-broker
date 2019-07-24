@@ -64,7 +64,7 @@ pushd "$test_dir"
 
 # Run the tests
 set +e
-  "./test" | tee -a "${test_dir}/junit.output"
+  "./test" | tee -a "junit.output"
   test_status=$?
 
   if [[ $test_status -ne 0 ]]; then
@@ -79,10 +79,10 @@ if [[ -x "./stop" ]]; then
 fi
 
 # Translate and copy results unit junit.xml for Jenkins
-rm --force "${test_dir}/junit.xml"
+rm --force "junit.xml"
 
 docker run --rm \
-  --volume "${test_dir}/:/secretless/test/output/" \
+  --volume "./:/secretless/test/output/" \
   secretless-dev \
   bash -exc "
     cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml

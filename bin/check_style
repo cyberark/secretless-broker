@@ -1,65 +1,16 @@
-#!/bin/bash -e
+#!/bin/bash
 
-PROJECT_ROOT="/secretless/"
-ROOT_DIR_LENGTH=${#PROJECT_ROOT}
+set -e
 
-# accepts an input string of style errs and outputs XML
-# the style err string is a newline-delimited list of
-# style errors of the form "file:line:[0-9]*: error"
-# the output is checkstyle-format XML, with a list of
-# errors for each file
-output_xml() {
-  style_errs="${1}"
-
-  echo "<checkstyle>"
-  if [[ ! -z "$style_errs" ]]; then
-    current_file=""
-
-    # loop through each file with errors
-    while IFS= read -r err_line; do
-      # get the filename and line # of the error
-      file_and_line_length=$(echo "$err_line" | awk '{ print $1 }')
-      file_and_line=${err_line:0:${#file_and_line_length}-1}
-
-      IFS=":" read -r -a file_data <<< "$file_and_line"
-      file=${file_data[0]:$ROOT_DIR_LENGTH}
-      line=${file_data[1]}
-
-      # get the error
-      error=${err_line:${#file_and_line}+2}
-
-      # Because the error will appear in an XML _attribute_, we need to escape
-      # double quotes.  Time for a nice, juicy bash pattern substitution.
-      error=${error//\"/&quot;}
-
-      # output the file (if haven't already) and error
-      if [ "$current_file" != "$file" ]; then
-        if [[ ! -z "$current_file" ]]; then
-          echo "  </file>"
-        fi
-        echo "  <file name=\"$file\">"
-        current_file=$file
-      fi
-
-      echo "    <error line=\"$line\" severity=\"error\" message=\"$error\"></error>"
-    done <<< "$style_errs"
-
-    echo "  </file>"
-  fi
-  echo "</checkstyle>"
-}
-
-style_errs=$(docker run \
-  --rm \
-  secretless-dev \
-  bash -ec "
-    # https://github.com/golang/lint/issues/397
-    go get golang.org/x/lint@v0.0.0-20180702182130-06c8688daad
-    go get golang.org/x/lint/golint
-    golint ${PROJECT_ROOT}cmd/...
-    golint ${PROJECT_ROOT}internal/...
-    golint ${PROJECT_ROOT}pkg/...
-    golint ${PROJECT_ROOT}test/...
-  ")
-
-output_xml "$style_errs" 2>&1 | tee ./test/golint.xml
+# This runs golint using the same settings that will be used by hosted Code
+# Climate in our CI pipeline
+#
+# See:
+#     https://github.com/codeclimate/codeclimate#usage
+docker run \
+  --interactive --tty --rm \
+  --env CODECLIMATE_CODE="$PWD" \
+  --volume "$PWD":/code \
+  --volume /var/run/docker.sock:/var/run/docker.sock \
+  --volume /tmp/cc:/tmp/cc \
+  codeclimate/codeclimate analyze -e golint .codeclimate.yml

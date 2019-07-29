@@ -13,7 +13,7 @@ services:
     protocol: pg
     listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
     credentials:
-      address: postgres.my-service.internal:5432
+      host: postgres.my-service.internal
       password:
         from: vault
         get: name-in-vault
@@ -75,9 +75,9 @@ func TestNewConfig(t *testing.T) {
 		actualCreds := cfg.Services[0].Credentials
 		expectedCreds := []*Credential{
 			{
-				Name: "address",
+				Name: "host",
 				From: "literal",
-				Get:  "postgres.my-service.internal:5432",
+				Get:  "postgres.my-service.internal",
 			},
 			{
 				Name: "password",

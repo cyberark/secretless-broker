@@ -22,19 +22,19 @@ type ClientOptions struct {
 
 // BackendConfig stores the connection info to the real backend database.
 type BackendConfig struct {
-	Address  string
-	Username string
-	Password string
-	Database string
-	Options  map[string]string
-	QueryStrings  map[string]string
+	Host         string
+	Port         string
+	Username     string
+	Password     string
+	Options      map[string]string
+	QueryStrings map[string]string
 }
 
 // Handler connects a client to a backend. It uses the handler Config and Providers to
 // establish the connectionDetails, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.
 //
-// Handler requires "address", "username" and "password" credentials.
+// Handler requires "host", "port", "username" and "password" credentials.
 type Handler struct {
 	plugin_v1.BaseHandler
 	BackendConfig *BackendConfig

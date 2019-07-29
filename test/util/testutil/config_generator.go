@@ -1,11 +1,8 @@
 package testutil
 
 import (
-	"fmt"
-
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
-
 
 // GenerateConfigurations returns a Secretless Config along with a comprehensive
 // list of LiveConfigurations for use in tests.
@@ -61,9 +58,9 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 				Debug:        true,
 				Credentials:  []config_v1.StoredSecret{
 					{
-						Name:     "address",
+						Name:     "host",
 						Provider: "literal",
-						ID:       fmt.Sprintf("%s:5432", sampleDbConfig.HostWithTLS),
+						ID:       sampleDbConfig.HostWithTLS,
 					},
 					{
 						Name:     "username",

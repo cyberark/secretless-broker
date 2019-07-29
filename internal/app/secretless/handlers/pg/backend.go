@@ -5,7 +5,6 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
 	"log"
 	"net"
-	"net/url"
 	"reflect"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
@@ -18,6 +17,8 @@ var sslOptions = []string{
 	"sslkey",
 	"sslcert",
 }
+
+const defaultPostgresPort = "5432"
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
 // connectionDetails field.
@@ -37,19 +38,13 @@ func (h *Handler) ConfigureBackend() (err error) {
 		log.Printf("%s backend connection parameters: %s", h.GetConfig().Name, keys)
 	}
 
-	if address := values["address"]; address != nil {
-		u, err := url.Parse(fmt.Sprintf("postgres://%s", address))
-		if err != nil {
-			return err
-		}
+	if values["host"] != nil {
+		result.Host = string(values["host"])
+	}
 
-		result.Address = u.Host
-		result.Database = u.Path
-		for k, v := range u.Query() {
-			if len(v) > 0 {
-				result.QueryStrings[k] = string(v[0])
-			}
-		}
+	result.Port = defaultPostgresPort
+	if values["port"] != nil {
+		result.Port = string(values["port"])
 	}
 
 	if values["username"] != nil {
@@ -69,7 +64,8 @@ func (h *Handler) ConfigureBackend() (err error) {
 		delete(values, sslOption)
 	}
 
-	delete(values, "address")
+	delete(values, "host")
+	delete(values, "port")
 	delete(values, "username")
 	delete(values, "password")
 
@@ -86,7 +82,8 @@ func (h *Handler) ConfigureBackend() (err error) {
 func (h *Handler) ConnectToBackend() (err error) {
 	var connection net.Conn
 
-	if connection, err = net.Dial("tcp", h.BackendConfig.Address); err != nil {
+	address := net.JoinHostPort(h.BackendConfig.Host, h.BackendConfig.Port)
+	if connection, err = net.Dial("tcp", address); err != nil {
 		return
 	}
 
@@ -161,7 +158,7 @@ func (h *Handler) ConnectToBackend() (err error) {
 		return
 	}
 
-	debug("Successfully connected to '%s'", h.BackendConfig.Address)
+	debug("Successfully connected to '%s:%s'", h.BackendConfig.Host, h.BackendConfig.Port)
 
 	if _, err = h.GetClientConnection().Write(protocol.CreateAuthenticationOKMessage()); err != nil {
 		return

@@ -65,9 +65,14 @@ func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []config_v1.StoredSecr
 	switch dbConfig.Protocol {
 	case "pg":
 		secrets = append(secrets, config_v1.StoredSecret{
-			Name:     "address",
+			Name:     "host",
 			Provider: "literal",
-			ID:		  host + ":" + dbConfig.Port,
+			ID:       host,
+		})
+		secrets = append(secrets, config_v1.StoredSecret{
+			Name:     "port",
+			Provider: "literal",
+			ID:       dbConfig.Port,
 		})
 	case "mysql":
 		secrets = append(secrets, config_v1.StoredSecret{

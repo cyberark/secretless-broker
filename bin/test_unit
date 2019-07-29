@@ -6,7 +6,7 @@ current_dir=$("$(dirname "$0")"/abspath)
 toplevel_dir=$current_dir/..
 
 junit_output_dir=$toplevel_dir/test/unit-test-output
-mkdir --parents "$junit_output_dir"
+mkdir -p "$junit_output_dir"
 junit_output_file=$junit_output_dir/junit.output
 
 rm -f "$junit_output_file"

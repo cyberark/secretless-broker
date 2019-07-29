@@ -23,7 +23,7 @@ docker-compose up -d pg pg_no_tls
 ./wait-for-pg pg
 
 # generate fixtures, parents option prevents error if existing
-mkdir --parents fixtures
+mkdir -p fixtures
 
 # NOTE: the tests depend on
 # + secretless.yml auto-generation (also depended on by the secretless container)

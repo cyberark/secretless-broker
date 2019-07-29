@@ -59,11 +59,11 @@ type BaseHandler struct {
 // NewBaseHandler creates a BaseHandler from HandlerOptions
 func NewBaseHandler(options HandlerOptions) BaseHandler {
 	return BaseHandler{
-		ClientConnection:  options.ClientConnection,
-		EventNotifier:     options.EventNotifier,
-		HandlerConfig:     options.HandlerConfig,
-		Resolver:          options.Resolver,
-		ShutdownNotifier:  options.ShutdownNotifier,
+		ClientConnection: options.ClientConnection,
+		EventNotifier:    options.EventNotifier,
+		HandlerConfig:    options.HandlerConfig,
+		Resolver:         options.Resolver,
+		ShutdownNotifier: options.ShutdownNotifier,
 	}
 }
 
@@ -117,17 +117,58 @@ func (h *BaseHandler) Shutdown() {
 	h.ShutdownNotifier(h)
 }
 
-// PipeHandlerWithStream performs continuous bidirectional transfer of data between handler client and backend
-// takes arguments ->
-// [handler]: Handler-compliant struct. Handler#GetClientConnection and Handler#GetBackendConnection provide client and backend connections (net.Conn)
-// [stream]: function performing continuous bidirectional transfer
-// [eventNotifier]: EventNotifier-compliant struct. EventNotifier#ClientData is passed transfer bytes
-// [done]: function called once when transfer ceases
-func PipeHandlerWithStream(handler Handler, stream func(net.Conn, net.Conn, func(b []byte)), eventNotifier EventNotifier, done func()) {
+// PipeHandlerWithStream performs continuous bidirectional transfer of data
+// between handler client and backend takes arguments:
+//
+// [handler]:
+//   Handler-compliant struct. Handler#GetClientConnection and
+//   Handler#GetBackendConnection provide client and backend connections
+//   (net.Conn)
+// [stream]:
+//   function performing continuous bidirectional transfer
+// [eventNotifier]:
+//   EventNotifier-compliant struct. EventNotifier#ClientData is passed transfer
+//   bytes
+// [done]:
+//   function called once when transfer ceases
+//
+// NOTE:
+//
+// This function is a confusing and probably the wrong abstraction.  This
+// function exists only to trigger its done() callback, and seems to have been
+// created only DRY up some code repeated across pg and mysql handlers.
+//
+// It accepts a general "stream" function.  That does the actual work of
+// streaming.  And stream accepts a callback for the sole purpose of triggering
+// events on the eventNotifier.
+//
+// Some other funny stuff:
+//   - Even though eventNotifier is a property of the handlers we use this for
+//     (pg, mysql) we have to pass it in separately because it's not a method
+//     on the Handler _interface_.
+//   - Ditto the above for the passed in "done" func, which in both cases is
+//     just the ShutdownNotifier, also available from the handler.
+//   - This is an unnatural partitioning, and it's _screaming_ at us that we've
+//     done something wrong.
+//   - "stream" is _exactly_ the same in both handlers
+//
+//
+func PipeHandlerWithStream(
+	handler Handler,
+	stream func(net.Conn, net.Conn, func(b []byte)),
+	eventNotifier EventNotifier,
+	done func(),
+) {
 	if handler.GetConfig().Debug {
-		log.Printf("Connecting client %s to backend %s", handler.GetClientConnection().RemoteAddr(), handler.GetBackendConnection().RemoteAddr())
+		log.Printf(
+			"Connecting client %s to backend %s",
+			handler.GetClientConnection().RemoteAddr(),
+			handler.GetBackendConnection().RemoteAddr(),
+		)
 	}
 
+	// Q: Why isn't this just:
+	//     _once.Do(done)
 	var _once sync.Once
 	doneOnce := func() {
 		_once.Do(func() {

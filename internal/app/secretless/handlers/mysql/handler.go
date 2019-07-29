@@ -95,6 +95,8 @@ func (h *Handler) sendErrorToClient(err error) {
 	}
 }
 
+// TODO: This feels like shared code applicable to all handlers
+//
 func stream(source, dest net.Conn, callback func([]byte)) {
 	defer func() {
 		source.Close()
@@ -111,6 +113,7 @@ func stream(source, dest net.Conn, callback func([]byte)) {
 		length, readErr = source.Read(buffer)
 
 		// Ensure the source packet is sent to the destination prior to inspecting errors
+		// Q: Does this make sense?
 		_, writeErr = dest.Write(buffer[:length])
 
 		if readErr != nil {
@@ -199,6 +202,8 @@ func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
 		BaseHandler: plugin_v1.NewBaseHandler(options),
 	}
 
+	// TODO: This was a mistake.  The constructor should NOT be calling Run() on
+	//   itself.
 	handler.Run()
 
 	return handler

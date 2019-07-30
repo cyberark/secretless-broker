@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./env.sh
 
 cat << EOL
@@ -27,7 +29,7 @@ spec:
         image: mysql/mysql-server:5.7
         command: [ "sleep", "infinity" ]
         imagePullPolicy: Always
-      - name: "${APP_AUTHENTICATION_CONTAINER_NAME}"
+      - name: secretless
         image: cyberark/secretless-broker:latest
         imagePullPolicy: Always
         args: ["-f", "/etc/secretless/secretless.yml"]
@@ -57,7 +59,7 @@ spec:
           - name: CONJUR_SSL_CERTIFICATE
             valueFrom:
               configMapKeyRef:
-                name: conjur-cert # configurable ?
+                name: conjur-cert
                 key: ssl-certificate
         readinessProbe:
           httpGet:

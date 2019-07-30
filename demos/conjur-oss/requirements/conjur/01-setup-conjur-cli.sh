@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./env.sh
 
 docker run \
@@ -46,7 +48,7 @@ kubectl get svc \
  -o jsonpath='{.status.loadBalancer.ingress[].ip}'
 ` || OSS_CONJUR_SERVICE_IP=''
 
-  # sleep if condition still not met
+  # Sleep if condition still not met
   [[ -z "${OSS_CONJUR_SERVICE_IP}" ]] && sleep 5
 done
 echo "End point ready: ${OSS_CONJUR_SERVICE_IP}"

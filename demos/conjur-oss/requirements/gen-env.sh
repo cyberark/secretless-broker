@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./mysql/env.sh
 . ./conjur/env.sh
 
@@ -19,7 +21,7 @@ CONJUR_APPLIANCE_URL="https://${OSS_CONJUR_HELM_FULLNAME}.${OSS_CONJUR_NAMESPACE
 
 
 cat << EOL > ../pre-env.sh
-# prerequisites generated from requirements/gen-env
+# Prerequisites generated from requirements/gen-env
 AUTHENTICATOR_ID="${AUTHENTICATOR_ID}"
 
 APP_SECRETS_POLICY_BRANCH="${APP_SECRETS_POLICY_BRANCH}"

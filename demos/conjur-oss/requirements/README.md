@@ -1,4 +1,4 @@
-## conjur-oss secretless demo requirementss
+## Conjur OSS Secretless Demo Requirementss
 
 Ensure you have:
 
@@ -14,7 +14,7 @@ MySQL:
   1. Configure your own environment variables in `./env.sh`
   1. Run through the numbered steps from `00`
 
-NOTE: Both Conjur and MySQL have `-00-clean.sh` which carries out cleanup
+NOTE: Both Conjur and MySQL have `./stop.sh` which carries out cleanup
 
 Generate prerequisites environment variables for demo:
   1. Run `./gen-env.sh` from this directory.

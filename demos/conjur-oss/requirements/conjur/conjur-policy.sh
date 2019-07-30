@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./env.sh
 
 cat << EOL
 ---
-# initializes users
+# Initializes users
 ## bob - devops admin
 
 - !group devops
@@ -33,7 +35,7 @@ cat << EOL
     annotations:
       description: authn service for cluster
 
-  ## permit a layer of whitelisted authn ids to call authn service
+  ## Permit a layer of whitelisted authn ids to call authn service
   - !permit
     resource: !webservice
     privilege: [ read, authenticate ]

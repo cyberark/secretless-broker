@@ -1,4 +1,4 @@
-## conjur-oss secretless demo
+## Conjur OSS Secretless demo
 
 Ensure you have:
 
@@ -10,4 +10,4 @@ Ensure you have:
 1. Configure your own environment variables in `./env.sh`
 1. Run through the numbered steps from `00` to `01`
 1. Notice that in the last step the mysql service connector makes it possible for the application to connect to the database without handling the credentials`
-1. When you're done, clean up by running `./-00-clean.sh`
+1. When you're done, clean up by running `./stop.sh`

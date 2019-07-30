@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./env.sh
 
 cat << EOL
@@ -12,7 +14,7 @@ cat << EOL
       - !host
         id: ${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT_NAME}
         annotations:
-          kubernetes/authentication-container-name: ${APP_AUTHENTICATION_CONTAINER_NAME}
+          kubernetes/authentication-container-name: secretless
           kubernetes: "true"
     - !grant
       role: !layer

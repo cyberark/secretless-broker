@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./env.sh
 
 cat << EOL
@@ -16,7 +18,7 @@ rules:
 - apiGroups: ["extensions"]
   resources: [ "deployments", "replicasets"]
   verbs: ["get", "list"]
-- apiGroups: ["apps"]  # needed on OpenShift 3.7+
+- apiGroups: ["apps"]  # Needed on OpenShift 3.7+
   resources: [ "deployments", "statefulsets", "replicasets"]
   verbs: ["get", "list"]
 - apiGroups: [""]

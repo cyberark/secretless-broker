@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./env.sh
 
 helm delete --purge "${OSS_CONJUR_RELEASE_NAME}"

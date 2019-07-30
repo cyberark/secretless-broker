@@ -6,20 +6,20 @@ This document describes how to connect to a database using Secretless with crede
 
 ### Assumptions
 
--   You have deployed your CyberArk Conjur instance on your Kubernetes cluster and it is configured to use the Kubernetes authenticator
--   You have an application that requires a  [supported database](https://docs.secretless.io/Latest/en/Content/SystemReq.htm)
--   Your database is running and accessible to apps in your Kubernetes environment, it supports SSL, and the credentials for it are stored in Conjur
+- You have deployed your CyberArk Conjur instance on your Kubernetes cluster and it is configured to use the Kubernetes authenticator
+- You have an application that requires a [supported database](https://docs.secretless.io/Latest/en/Content/SystemReq.htm)
+- Your database is running and accessible to apps in your Kubernetes environment, it supports SSL, and the credentials for it are stored in Conjur
 
 ### Required Information
 
 To deploy Secretless, you need the following information about your Conjur configuration:
 
 
-| Required Info|Description|How we refer to it|
+|Name|Description|How we refer to it|
 |--|--|--|
-|Policy branch with database credentials|The fully qualified ID of the policy branch in Conjur that contains your database secrets. You will need `read`  access to the secrets in this branch so that you can see the IDs of the secrets you will need.|`${APP_SECRETS_POLICY_BRANCH}`|
-|Layer/group with access to secrets|The fully qualified Conjur ID of a layer or group whose members have access to the database secrets. We will add the application host identity to this layer/group and the Secretless sidecar will authenticate to Conjur using this host identity to retrieve secrets. Note that our examples refer to a layer; if you are provided with a group, replace all references to  `!layer "/${APP_SECRETS_READER_LAYER}"`  with  `!group "/${APP_SECRETS_READER_LAYER}"`  instead.|`${APP_SECRETS_READER_LAYER}`|
-|Kubernetes  [authenticator name](https://docs.conjur.org/Latest/en/Content/Integrations/ConjurDeployFollowers.htm#ConfigureConjurforautoenrollmentoffollowers)| The name of the Kubernetes authenticator configured in your Conjur instance.|`${AUTHENTICATOR_ID}`|
+|Policy branch with database credentials|The fully qualified ID of the policy branch in Conjur that contains your database secrets. You will need `read` access to the secrets in this branch so that you can see the IDs of the secrets you will need.|`${APP_SECRETS_POLICY_BRANCH}`|
+|Layer/group with access to secrets|The fully qualified Conjur ID of a layer or group whose members have access to the database secrets. We will add the application host identity to this layer/group and the Secretless sidecar will authenticate to Conjur using this host identity to retrieve secrets. Note that our examples refer to a layer; if you are provided with a group, replace all references to `!layer "/${APP_SECRETS_READER_LAYER}"` with `!group "/${APP_SECRETS_READER_LAYER}"` instead.|`${APP_SECRETS_READER_LAYER}`|
+|Kubernetes [authenticator name](https://docs.conjur.org/Latest/en/Content/Integrations/ConjurDeployFollowers.htm#ConfigureConjurforautoenrollmentoffollowers)| The name of the Kubernetes authenticator configured in your Conjur instance.|`${AUTHENTICATOR_ID}`|
 |Conjur instance Kubernetes namespace|The Kubernetes namespace where the Conjur instance is deployed.|`${OSS_CONJUR_NAMESPACE}`|
 |Conjur instance Kubernetes service account|The Kubernetes service account associated with the Conjur instance.|`${CONJUR_SERVICE_ACCOUNT_NAME}`|
 |Conjur URL|The URL of the Conjur instance, for example: `https://${OSS_CONJUR_SERVICE_NAME}.${OSS_CONJUR_NAMESPACE}.svc.cluster.local`| `${CONJUR_APPLIANCE_URL}` |
@@ -39,6 +39,8 @@ Let's capture all these values in a file called `env.sh`. It'll be sourced by ot
 ```bash
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 APP_NAME=my-app
 APP_NAMESPACE=kumbi-app-example
 APP_SERVICE_ACCOUNT_NAME=my-app-sa
@@ -49,32 +51,35 @@ APP_SECRETS_POLICY_BRANCH="apps/secrets/test"
 APP_SECRETS_READER_LAYER="apps/layers/myapp"
 
 CONJUR_ACCOUNT="example_acc"
-CONJUR_APPLIANCE_URL="https://sealing-whale-conjur-oss.kumbi-conjur.svc.cluster.local"
+CONJUR_APPLIANCE_URL="https://sealing-whale-conjur-oss.conjur.svc.cluster.local"
 CONJUR_ADMIN_AUTHN_LOGIN="admin"
 CONJUR_ADMIN_API_KEY="33dk09k3bcgda6x9edvb22k9n861k5kv1cc5sndp9mge4sbq2ek"
 
 OSS_CONJUR_SERVICE_ACCOUNT_NAME="conjur-sa"
-OSS_CONJUR_NAMESPACE="kumbi-conjur"
+OSS_CONJUR_NAMESPACE="conjur"
 ```
 ## Add your application to Conjur policy
 
-You can define your host using a variety of Kubernetes resources; see the  [Conjur documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Kubernetes_MachineIdentity.htm)  for the available options.
+You can define your host using a variety of Kubernetes resources; see the [Conjur documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Kubernetes_MachineIdentity.htm) for the available options.
 
 Here we will use the service account-based host identity. Our host ID will look like this:
 
 `${APP_NAMESPACE}/service_account/${APP_SERVICE_ACCOUNT_NAME}`
 
-where  `${APP_NAMESPACE}`  is your app's Kubernetes namespace and  `${APP_SERVICE_ACCOUNT_NAME}`  is the service account assigned to the application pod.
+where `${APP_NAMESPACE}` is your app's Kubernetes namespace and `${APP_SERVICE_ACCOUNT_NAME}` is the service account assigned to the application pod.
 
-We'll add the host identity to the  `conjur/authn-k8s/${AUTHENTICATOR_NAME}/apps`  policy branch. The host will belong to a layer with the same name as the branch. This allows the host to authenticate to Conjur with the Kubernetes authenticator.
+We'll add the host identity to the `conjur/authn-k8s/${AUTHENTICATOR_ID}/apps` policy branch. The host will belong to a layer with the same name as the branch. This allows the host to authenticate to Conjur with the Kubernetes authenticator.
 
-Finally, to give the host access to the database credentials, we'll add it to the  `${APP_SECRETS_READER_LAYER}`  layer.
+Finally, to give the host access to the database credentials, we'll add it to the `${APP_SECRETS_READER_LAYER}` layer.
 
 ### app-policy.yml
 The bash script snippet below generates the Conjur policy that does all the above.
 
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
+
 . ./env.sh
 
 cat << EOL > app-policy.yml
@@ -107,6 +112,8 @@ Apply the policy:
 ``` bash
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 conjur policy load root app-policy.yml
 ```
 
@@ -116,6 +123,8 @@ The bash script snippet below generates Kubernetes manifest for a Role with the 
 
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
 
 . ./env.sh
 
@@ -133,7 +142,7 @@ rules:
 - apiGroups: ["extensions"]
   resources: [ "deployments", "replicasets"]
   verbs: ["get", "list"]
-- apiGroups: ["apps"]  # needed on OpenShift 3.7+
+- apiGroups: ["apps"]  # Needed on OpenShift 3.7+
   resources: [ "deployments", "statefulsets", "replicasets"]
   verbs: ["get", "list"]
 - apiGroups: [""]
@@ -161,6 +170,8 @@ After generating the manifest containing the Role and RoleBinding, create them b
 ```bash
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 kubectl create -f conjur-authenticator-role.yml
 ```
 
@@ -169,6 +180,9 @@ kubectl create -f conjur-authenticator-role.yml
 Fetch Conjur SSL Certificate
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
+
 . ./env.sh
 
 openssl s_client -showcerts \
@@ -179,6 +193,9 @@ openssl s_client -showcerts \
 Store Conjur SSL Certificate
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
+
 . ./env.sh
 
 kubectl \
@@ -194,6 +211,9 @@ The bash script snippet below generates Secretless configuration. This configura
 
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
+
 . ./env.sh
 
 cat << EOL > secretless.yml
@@ -223,6 +243,9 @@ After generating the Secretless configuration, store it in a ConfigMap manifest 
  
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
+
 . ./env.sh
 
 kubectl \
@@ -238,6 +261,8 @@ The bash script snippet below generates a Kubernetes Deployment manifest with an
 
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
 
 . ./env.sh
 
@@ -322,6 +347,8 @@ After generating the application manifest, deploy the application by running:
  
 ```bash
 #!/usr/bin/env bash
+
+set -e -o nounset
 
 kubectl create -f app-manifest.yml
 ```

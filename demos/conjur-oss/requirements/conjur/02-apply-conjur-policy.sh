@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -o nounset
+
 . ./env.sh
 
 cat << EOL | docker exec -i "conjur-cli-${OSS_CONJUR_NAMESPACE}" bash -
@@ -15,9 +17,17 @@ conjur policy load root tmp/conjur-policy.yml
 openssl genrsa -out tmp/ca.key 2048
 
 ## Generate root CA certificate
-openssl req -x509 -new -nodes -key tmp/ca.key -sha1 -days 3650 -set_serial 0x0 -out tmp/ca.crt \
-  -subj '/CN=conjur.authn-k8s.${AUTHENTICATOR_ID}/OU=Conjur Kubernetes CA/O=${CONJUR_ACCOUNT}' \
-  -config openssl-config
+openssl req \
+ -x509 \
+ -new \
+ -nodes \
+ -key tmp/ca.key \
+ -sha1 \
+ -days 3650 \
+ -set_serial 0x0 \
+ -out tmp/ca.crt \
+ -subj '/CN=conjur.authn-k8s.${AUTHENTICATOR_ID}/OU=Conjur Kubernetes CA/O=${CONJUR_ACCOUNT}' \
+ -config openssl-config
 
 ## Load variable values
 cat tmp/ca.key | conjur variable values add conjur/authn-k8s/${AUTHENTICATOR_ID}/ca/key

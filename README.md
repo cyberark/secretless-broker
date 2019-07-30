@@ -256,9 +256,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: conjur
-        id: path/to/the/token
+    accessToken:
+        from: conjur
+        get: path/to/the/token
 ...
 ```
 
@@ -272,9 +272,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: vault
-        id: path/to/the/token
+      accessToken:
+        from: vault
+        get: path/to/the/token
 ...
 ```
 
@@ -286,9 +286,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: kubernetes
-        id: secret_identifier#key
+      accessToken:
+        from: kubernetes
+        get: secret_identifier#key
 ...
 ```
 
@@ -301,9 +301,9 @@ Example:
 ```
 ...
     credentials:
-      - name: rsa
-        provider: file
-        id: /path/to/file
+      rsa:
+        from: file
+        get: /path/to/file
 ...
 ```
 
@@ -315,9 +315,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: env
-        id: ACCESS_TOKEN
+      accessToken:
+        from: env
+        get: ACCESS_TOKEN
 ...
 ```
 
@@ -332,9 +332,7 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: literal
-        id: supersecretaccesstoken
+      accessToken: "supersecretaccesstoken"
 ...
 ```
 
@@ -350,9 +348,9 @@ Example:
 ```
 ...
     credentials:
-      - name: rsa
-        provider: keychain
-        id: servicename#accountname
+      rsa:
+        from: keychain
+        get: servicename#accountname
 ...
 ```
 

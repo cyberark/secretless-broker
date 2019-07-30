@@ -268,29 +268,24 @@ replace `<GOOS>/<GOARCH>` with your particular operating system and compilation 
 1. Create a sample secretless.yml file in the project root that has:
 
    ```
-   listeners:
-     - name: pg_tcp
+   version: "2"
+   services:
+     pg_tcp:
        protocol: pg
-       address: 0.0.0.0:15432
-
-   handlers:
-     - name: pg_via_tcp
-       listener: pg_tcp
+       listenOn: tcp://0.0.0.0:15432
        credentials:
-         - name: address
-           provider: env
-           id: PG_ADDRESS
-         - name: username
-           provider: literal
-           id: test
-         - name: password
-           provider: env
-           id: PG_PASSWORD
+         host:
+           from: env
+           get: PG_HOST
+         username: test
+         password:
+           from: env
+           get: PG_PASSWORD
     ```
 
 1. The type of profiling is explicitly defined in the initial command that runs Secretless. Run Secretless with the profile desired like so:
    ```
-   $ PG_ADDRESS=localhost:5432/postgres \
+   $ PG_HOST=localhost \
        PG_PASSWORD=test \
        ./dist/<GOOS>/<GOARCH>/secretless-broker \
        -profile=<cpu or memory> \

@@ -164,7 +164,7 @@ services:
     protocol: pg
     listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
     credentials:
-      address: "postgres.my-service.internal:5432"
+      host: "postgres.my-service.internal"
       password:
         from: conjur
         get: id-of-secret-in-conjur
@@ -175,7 +175,7 @@ services:
       optionalStuff: foo
 ```
 
-In this sample, Secretless Broker is configured to connect to a service named `postgres-db`. Clients send connection requests to this service via localhost using port 5432. This service uses the `pg` protocol, which indicates that the PostgreSQL service connector should process requests that come in via this port. Credentials from this connection will be retrieved from multiple sources; the `address` is given as a string value, the `password` will be retrieved from the Conjur variable with ID `id-of-secret-in-conjur`, and the `username` is retrieved from the environment variable named `username`.
+In this sample, Secretless Broker is configured to connect to a service named `postgres-db`. Clients send connection requests to this service via localhost using the default port 5432. This service uses the `pg` protocol, which indicates that the PostgreSQL service connector should process requests that come in via this port. Credentials from this connection will be retrieved from multiple sources; the `host` is given as a literal string value, the `password` will be retrieved from the Conjur variable with ID `id-of-secret-in-conjur`, and the `username` is retrieved from the environment variable named `username`.
 
 ## Service Connectors
 
@@ -256,9 +256,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: conjur
-        id: path/to/the/token
+    accessToken:
+        from: conjur
+        get: path/to/the/token
 ...
 ```
 
@@ -272,9 +272,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: vault
-        id: path/to/the/token
+      accessToken:
+        from: vault
+        get: path/to/the/token
 ...
 ```
 
@@ -286,9 +286,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: kubernetes
-        id: secret_identifier#key
+      accessToken:
+        from: kubernetes
+        get: secret_identifier#key
 ...
 ```
 
@@ -301,9 +301,9 @@ Example:
 ```
 ...
     credentials:
-      - name: rsa
-        provider: file
-        id: /path/to/file
+      rsa:
+        from: file
+        get: /path/to/file
 ...
 ```
 
@@ -315,9 +315,9 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: env
-        id: ACCESS_TOKEN
+      accessToken:
+        from: env
+        get: ACCESS_TOKEN
 ...
 ```
 
@@ -332,9 +332,7 @@ Example:
 ```
 ...
     credentials:
-      - name: accessToken
-        provider: literal
-        id: supersecretaccesstoken
+      accessToken: "supersecretaccesstoken"
 ...
 ```
 
@@ -350,9 +348,9 @@ Example:
 ```
 ...
     credentials:
-      - name: rsa
-        provider: keychain
-        id: servicename#accountname
+      rsa:
+        from: keychain
+        get: servicename#accountname
 ...
 ```
 
@@ -464,10 +462,10 @@ services:
     protocol: pg
     listenOn: tcp://0.0.0.0:4321
     credentials:
+      host: localhost
       username: postgres
       password: mysecretpassword
       sslmode: disable
-      address: localhost:5432
 ```
 and run Secretless:
 ```

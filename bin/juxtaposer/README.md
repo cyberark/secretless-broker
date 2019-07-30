@@ -110,7 +110,8 @@ services:
     credentials:
       username: myuser
       password: mypassword
-      address: 127.0.0.1:5433
+      host: 127.0.0.1
+      port: 5433
       sslmode: disable
 ```
 

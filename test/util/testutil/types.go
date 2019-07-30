@@ -22,13 +22,13 @@ type SocketType string
 
 const (
 	// TCP is a socket type
-	TCP    SocketType = "TCP"
+	TCP SocketType = "TCP"
 	// Socket is a socket type
-	Socket            = "Unix Socket"
+	Socket = "Unix Socket"
 )
 
 // AllSocketTypes returns the available socket types.
-func AllSocketTypes()[]SocketType {
+func AllSocketTypes() []SocketType {
 	return []SocketType{TCP, Socket}
 }
 
@@ -37,13 +37,13 @@ type TLSSetting string
 
 const (
 	// TLS is a TLSSetting
-	TLS   TLSSetting = "DB_HOST_TLS"
+	TLS TLSSetting = "DB_HOST_TLS"
 	// NoTLS is a TLSSetting
-	NoTLS            = "DB_HOST_NO_TLS"
+	NoTLS = "DB_HOST_NO_TLS"
 )
 
 // AllTLSSettings returns the possible TLSSetting values: TLS or NoTLS
-func AllTLSSettings()[]TLSSetting {
+func AllTLSSettings() []TLSSetting {
 	return []TLSSetting{TLS, NoTLS}
 }
 
@@ -65,20 +65,25 @@ func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []config_v1.StoredSecr
 	switch dbConfig.Protocol {
 	case "pg":
 		secrets = append(secrets, config_v1.StoredSecret{
-			Name:     "address",
+			Name:     "host",
 			Provider: "literal",
-			ID:		  host + ":" + dbConfig.Port,
+			ID:       host,
+		})
+		secrets = append(secrets, config_v1.StoredSecret{
+			Name:     "port",
+			Provider: "literal",
+			ID:       dbConfig.Port,
 		})
 	case "mysql":
 		secrets = append(secrets, config_v1.StoredSecret{
 			Name:     "host",
 			Provider: "literal",
-			ID:		  host,
+			ID:       host,
 		})
 		secrets = append(secrets, config_v1.StoredSecret{
 			Name:     "port",
 			Provider: "literal",
-			ID:		  dbConfig.Port,
+			ID:       dbConfig.Port,
 		})
 	default:
 		panic("Invalid DB_PROTOCOL provided")
@@ -92,19 +97,19 @@ type SSLMode string
 
 const (
 	// Default SSLMode
-	Default    SSLMode = ""
+	Default SSLMode = ""
 	// Disable SSLMode
-	Disable            = "disable"
+	Disable = "disable"
 	// Require SSLMode
-	Require            = "require"
+	Require = "require"
 	// VerifyCA SSLMode
-	VerifyCA           = "verify-ca"
+	VerifyCA = "verify-ca"
 	// VerifyFull SSLMode
-	VerifyFull         = "verify-full"
+	VerifyFull = "verify-full"
 )
 
 // AllSSLModes returns a list of all possible SSLMode values.
-func AllSSLModes()[]SSLMode {
+func AllSSLModes() []SSLMode {
 	return []SSLMode{Default, Disable, Require, VerifyCA, VerifyFull}
 }
 
@@ -114,7 +119,7 @@ func (sslMode SSLMode) toSecret() config_v1.StoredSecret {
 	return config_v1.StoredSecret{
 		Name:     "sslmode",
 		Provider: "literal",
-		ID:		   string(sslMode),
+		ID:       string(sslMode),
 	}
 }
 
@@ -124,7 +129,7 @@ type AuthCredentialInvalidity bool
 
 // AllAuthCredentialsInvalidity returns all possible values (which are just
 // "true" and "false") that this setting can assume.
-func AllAuthCredentialsInvalidity()[]AuthCredentialInvalidity {
+func AllAuthCredentialsInvalidity() []AuthCredentialInvalidity {
 	return []AuthCredentialInvalidity{true, false}
 }
 
@@ -155,15 +160,15 @@ const (
 	// Undefined RootCertStatus
 	Undefined RootCertStatus = ""
 	// Valid RootCertStatus
-	Valid                    = "/secretless/test/util/ssl/ca.pem"
+	Valid = "/secretless/test/util/ssl/ca.pem"
 	// Malformed RootCertStatus
-	Malformed                = "malformed"
+	Malformed = "malformed"
 	// Invalid RootCertStatus
-	Invalid                  = "/secretless/test/util/ssl/ca-invalid.pem"
+	Invalid = "/secretless/test/util/ssl/ca-invalid.pem"
 )
 
 // AllRootCertStatuses returns all possible values for RootCertStatus.
-func AllRootCertStatuses()[]RootCertStatus {
+func AllRootCertStatuses() []RootCertStatus {
 	return []RootCertStatus{Undefined, Valid, Invalid, Malformed}
 }
 
@@ -178,7 +183,7 @@ func (sslRootCertType RootCertStatus) toSecret() config_v1.StoredSecret {
 	return config_v1.StoredSecret{
 		Name:     "sslrootcert",
 		Provider: provider,
-		ID:		  string(sslRootCertType),
+		ID:       string(sslRootCertType),
 	}
 }
 
@@ -187,13 +192,13 @@ type PrivateKeyStatus string
 
 const (
 	// PrivateKeyUndefined PrivateKeyStatus
-	PrivateKeyUndefined     PrivateKeyStatus = ""
+	PrivateKeyUndefined PrivateKeyStatus = ""
 	// PrivateKeyValid PrivateKeyStatus
-	PrivateKeyValid                          = "/secretless/test/util/ssl/client-valid-key.pem"
+	PrivateKeyValid = "/secretless/test/util/ssl/client-valid-key.pem"
 	// PrivateKeyNotSignedByCA PrivateKeyStatus
-	PrivateKeyNotSignedByCA                  = "/secretless/test/util/ssl/client-different-ca-key.pem"
+	PrivateKeyNotSignedByCA = "/secretless/test/util/ssl/client-different-ca-key.pem"
 	// PrivateKeyMalformed PrivateKeyStatus
-	PrivateKeyMalformed                      = "malformed"
+	PrivateKeyMalformed = "malformed"
 )
 
 // AllPrivateKeyStatuses returns all possible values of PrivateKeyStatus.
@@ -222,13 +227,13 @@ type PublicCertStatus string
 
 const (
 	// PublicCertUndefined PublicCertStatus
-	PublicCertUndefined     PublicCertStatus = ""
+	PublicCertUndefined PublicCertStatus = ""
 	// PublicCertValid PublicCertStatus
-	PublicCertValid                          = "/secretless/test/util/ssl/client-valid.pem"
+	PublicCertValid = "/secretless/test/util/ssl/client-valid.pem"
 	// PublicCertNotSignedByCA PublicCertStatus
-	PublicCertNotSignedByCA                  = "/secretless/test/util/ssl/client-different-ca.pem"
+	PublicCertNotSignedByCA = "/secretless/test/util/ssl/client-different-ca.pem"
 	// PublicCertMalformed PublicCertStatus
-	PublicCertMalformed                      = "malformed"
+	PublicCertMalformed = "malformed"
 )
 
 // AllPublicCertStatuses returns all possible values for a PublicCertStatus

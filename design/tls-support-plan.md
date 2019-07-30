@@ -251,84 +251,61 @@ depend on your use case.
 
 #### Listening on a network address with default `sslmode` of `require`
 ``` yaml
-listeners:
-  - name: pg_listener
+version: "2"
+services:
+  pg_connector:
     protocol: pg
-    address: 0.0.0.0:5432
-
-handlers:
-  - name: pg_handler
-    listener: pg_listener
+    listenOn: tcp://0.0.0.0:5432
     credentials:
-      - name: address
-        provider: literal
-        id: postgres.my-service.internal:5432
-      - name: username
-        provider: literal
-        id: my-service
-      - name: password
-        provider: env
-        id: PG_PASSWORD
+      host: postgres.my-service.internal
+      username: myservice
+      password:
+        from: env
+        get: PG_PASSWORD
 ```
 ---
 #### Listening on a network address with verifiable CA, revocation list and private key-pair
 ``` yaml
-listeners:
-  - name: pg_listener
+version: "2"
+services:
+  pg_connector:
     protocol: pg
-    address: 0.0.0.0:5432
-
-handlers:
-  - name: pg_handler
-    listener: pg_listener
+    listenOn: tcp://0.0.0.0:5432
     credentials:
-      - name: address
-        provider: literal
-        id: postgres.my-service.internal:5432
-      - name: username
-        provider: literal
-        id: my-service
-      - name: password
-        provider: env
-        id: PG_PASSWORD
-      - name: sslmode
-        provider: literal
-        id: verify-full
+      host: postgres.my-service.internal
+      username: myservice
+      password:
+        from: env
+        get: PG_PASSWORD
+      sslmode: verify-full
       # NOTE: if your CA is stored in the environment
       # or a secret store, rather than a file, you can
       # use the appropriate provider
-      - name: sslrootcert
-        provider: file
-        id: /etc/pg/root.crt
-      - name: sslcert
-        provider: file
-        id: /etc/pg/client.crt
-      - name: sslkey
-        provider: file
-        id: /etc/pg/client.key
-      - name: sslcrl
-        provider: file
-        id: /etc/pg/root.crl
+      sslrootcert:
+        from: file
+        get: /etc/pg/root.crt
+      sslcert:
+        from: file
+        get: /etc/pg/client.crt
+      sslkey:
+        from: file
+        get: /etc/pg/client.key
+      sslcrl:
+        from: file
+        get: /etc/pg/root.crl
 ```
 ---
 #### Listening on a Unix-domain socket
 ``` yaml
-listeners:
-  - name: pg_listener
+version: "2"
+services:
+  pg_connector:
     protocol: pg
-    socket: /sock/.s.PGSQL.5432
-
-handlers:
-  - name: pg_handler
-    listener: pg_listener
+    listenOn: unix:///sock/.s.PGSQL.5432
     credentials:
-      - name: address
-        provider: literal
-        id: postgres.my-service.internal:5432
-      - name: username
-        provider: literal
-        id: my-service
-      - name: password
-        provider: env
-        id: PG_PASSWORD
+      host: postgres.my-service.internal
+      username: myservice
+      password:
+        from: env
+        get: PG_PASSWORD
 ```

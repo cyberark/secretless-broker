@@ -140,7 +140,7 @@ services:
     protocol: pg
     listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
     credentials:
-      address: postgres.my-service.internal:5432
+      host: postgres.my-service.internal
       password:
         from: vault
         get: id-of-secret-in-vault

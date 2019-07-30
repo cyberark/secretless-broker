@@ -12,24 +12,24 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 	secretlessConfig := config_v1.Config{
 		Listeners: []config_v1.Listener{
 			{
-				Debug:       true,
-				Name:        "health-check",
-				Protocol:    "mysql",
-				Socket:      "/sock/mysql.sock",
+				Debug:    true,
+				Name:     "health-check",
+				Protocol: "mysql",
+				Socket:   "/sock/mysql.sock",
 			},
 			{
-				Debug:       true,
-				Name:        "pg-bench",
-				Protocol:    "pg",
-				Address:     "0.0.0.0:5432",
+				Debug:    true,
+				Name:     "pg-bench",
+				Protocol: "pg",
+				Address:  "0.0.0.0:5432",
 			},
 		},
-		Handlers:  []config_v1.Handler{
+		Handlers: []config_v1.Handler{
 			{
 				Name:         "health-check",
 				ListenerName: "health-check",
 				Debug:        true,
-				Credentials:  []config_v1.StoredSecret{
+				Credentials: []config_v1.StoredSecret{
 					{
 						Name:     "host",
 						Provider: "literal",
@@ -56,7 +56,7 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 				Name:         "pg-bench",
 				ListenerName: "pg-bench",
 				Debug:        true,
-				Credentials:  []config_v1.StoredSecret{
+				Credentials: []config_v1.StoredSecret{
 					{
 						Name:     "host",
 						Provider: "literal",
@@ -115,12 +115,12 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 								}
 								liveConfiguration := LiveConfiguration{
 									AbstractConfiguration: AbstractConfiguration{
-										SocketType:       socketType,
-										TLSSetting:       serverTLSSetting,
-										SSLMode:          sslMode,
-										RootCertStatus:   rootCertStatus,
-										PrivateKeyStatus: privateKeyStatus,
-										PublicCertStatus: publicCertStatus,
+										SocketType:               socketType,
+										TLSSetting:               serverTLSSetting,
+										SSLMode:                  sslMode,
+										RootCertStatus:           rootCertStatus,
+										PrivateKeyStatus:         privateKeyStatus,
+										PublicCertStatus:         publicCertStatus,
 										AuthCredentialInvalidity: areAuthCredentialsInvalid,
 									},
 									ConnectionPort: connectionPort,
@@ -140,7 +140,7 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 								// serverTLSSetting
 								handler.Credentials = append(
 									handler.Credentials,
-									serverTLSSetting.toSecrets(sampleDbConfig)...
+									serverTLSSetting.toSecrets(sampleDbConfig)...,
 								)
 
 								// socketType

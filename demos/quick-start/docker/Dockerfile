@@ -35,6 +35,9 @@ RUN apk add --no-cache apache2-utils \
     && sed \
         -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' \
         /etc/ssh/sshd_config \
+    # Go DNS resolution doesn't read /etc/hosts by default. See
+    # for more info: https://github.com/golang/go/issues/22846
+    && echo "hosts: files dns" > /etc/nsswitch.conf \
     && chown postgres:postgres /var/lib/postgresql/server.key \
     && chown postgres:postgres /var/lib/postgresql/server.crt \
     && chmod 0600 /var/lib/postgresql/server.key

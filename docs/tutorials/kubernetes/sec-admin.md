@@ -215,8 +215,8 @@ service "quick-start-backend" created
   service type, such as a <b>LoadBalancer</b>.
 </div>
 
-The database is now available at `$(minikube ip):30001`, which we'll call the
-`REMOTE_DB_URL`.
+The database is now available at `$(minikube ip):30001`, which we'll compose with
+`REMOTE_DB_HOST` and `REMOTE_DB_PORT` variables.
 
 The database has no data yet, but we can verify it works by logging in as the
 security admin and listing the users:
@@ -224,10 +224,11 @@ security admin and listing the users:
 ```bash
 export SECURITY_ADMIN_USER=security_admin_user
 export SECURITY_ADMIN_PASSWORD=security_admin_password
-export REMOTE_DB_URL=$(minikube ip):30001
+export REMOTE_DB_HOST=$(minikube ip)
+export REMOTE_DB_PORT=30001
 
 docker run --rm -it -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
-  psql -U ${SECURITY_ADMIN_USER} "postgres://${REMOTE_DB_URL}/postgres" -c "\du"
+  psql -U ${SECURITY_ADMIN_USER} "postgres://${REMOTE_DB_HOST}:${REMOTE_DB_PORT}/postgres" -c "\du"
 ```
 
 <pre>
@@ -245,7 +246,7 @@ docker run --rm -it -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
 In this section, we assume the following:
 
 - You already have a PostgreSQL database exposed as a Kubernetes service.
-- It's publicly available via the URL in `REMOTE_DB_URL`
+- It's publicly available at `$REMOTE_DB_HOST:$REMOTE_DB_PORT`
 - You have admin-level database credentials
 - The `SECURITY_ADMIN_USER` and `SECURITY_ADMIN_PASSWORD` environment variables
   hold those credentials
@@ -262,7 +263,8 @@ If you followed along in the last section and are using minikube, you can run:
 ``` bash
 export SECURITY_ADMIN_USER=security_admin_user
 export SECURITY_ADMIN_PASSWORD=security_admin_password
-export REMOTE_DB_URL="$(minikube ip):30001"
+export REMOTE_DB_HOST="$(minikube ip)"
+export REMOTE_DB_PORT="30001"
 ```
 
 Next, we'll create the application database and user, and securely store the
@@ -288,7 +290,7 @@ Finally, to perform the 4 steps listed above, run:
 
 ```bash
 docker run --rm -i -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
-    psql -U ${SECURITY_ADMIN_USER} "postgres://${REMOTE_DB_URL}/postgres" \
+    psql -U ${SECURITY_ADMIN_USER} "postgres://${REMOTE_DB_HOST}:${REMOTE_DB_PORT}/postgres" \
     << EOSQL
 
 CREATE DATABASE ${APPLICATION_DB_NAME};
@@ -339,7 +341,8 @@ Next we'll store the application-credentials in Kubernetes Secrets:
 ```bash
 kubectl --namespace quick-start-application-ns \
   create secret generic quick-start-backend-credentials \
-  --from-literal=address="${REMOTE_DB_URL}" \
+  --from-literal=host="${REMOTE_DB_HOST}" \
+  --from-literal=port="${REMOTE_DB_PORT}" \
   --from-literal=username="${APPLICATION_DB_USER}" \
   --from-literal=password="${APPLICATION_DB_INITIAL_PASSWORD}"
 ```
@@ -373,9 +376,12 @@ services:
     protocol: pg
     listenOn: tcp://localhost:5432
     credentials:
-      address:
+      host:
         from: kubernetes
-        get: quick-start-backend-credentials#address
+        get: quick-start-backend-credentials#host
+      port:
+        from: kubernetes
+        get: quick-start-backend-credentials#port
       username:
         from: kubernetes
         get: quick-start-backend-credentials#username
@@ -389,7 +395,7 @@ Here's what this does:
 
 - Defines a service called `pets-pg` that listens for PostgreSQL connections
   on `localhost:5432`
-- Says that the database `address`, `username` and `password` are stored in
+- Says that the database `host`, `port`, `username` and `password` are stored in
   Kubernetes Secrets
 - Lists the ids of those credentials within Kubernetes Secrets
 

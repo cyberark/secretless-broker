@@ -20,16 +20,6 @@ type ClientOptions struct {
 	Options  map[string]string
 }
 
-// BackendConfig stores the connection info to the real backend database.
-type BackendConfig struct {
-	Host         string
-	Port         string
-	Username     string
-	Password     string
-	Options      map[string]string
-	QueryStrings map[string]string
-}
-
 // Handler connects a client to a backend. It uses the handler Config and Providers to
 // establish the connectionDetails, which is used to make the Backend connection. Then the data
 // is transferred bidirectionally between the Client and Backend.

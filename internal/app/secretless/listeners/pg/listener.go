@@ -29,8 +29,8 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 	hs := value.([]config_v1.Handler)
 	errors := validation.Errors{}
 	for i, h := range hs {
-		if !h.HasCredential("host") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'host'")
+		if !h.HasCredential("host") && !h.HasCredential("address") {
+			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'host' or (deprecated) 'address'")
 		}
 		if !h.HasCredential("username") {
 			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'username'")

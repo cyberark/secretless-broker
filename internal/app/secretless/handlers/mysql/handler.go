@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"reflect"
-	"strconv"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
@@ -25,60 +24,27 @@ type Handler struct {
 	// details are thus encapsulated.  Within the MySQL code, we _only_
 	// deal with these decorated versions.
 
-	mySQLClientConn *Connection
+	mySQLClientConn  *Connection
 	mySQLBackendConn *Connection
 	plugin_v1.BaseHandler
 	connectionDetails *ConnectionDetails
 }
 
-// fetchConnectionDetails looks up the provider credentials and returns them
-// in a ConnectionDetails.  This almost could have been called
-// "NewConnectionDetails", but it's not quite a constructor.  I used "fetch" to
-// emphasize that this is not a pure contructor, but a side effectful one that
-// makes a network request and can return an error.  And, of course, it's a
-// method on handler.
+// fetchConnectionDetails looks up the provider credentials and returns a
+// ConnectionDetails object.
 //
 func (h *Handler) fetchConnectionDetails() (result *ConnectionDetails, err error) {
-	result = &ConnectionDetails{Options: make(map[string]string)}
-
-	var connectionDetails map[string][]byte
-	if connectionDetails, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
+	var credentials map[string][]byte
+	if credentials, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
 		return nil, err
 	}
 
 	if h.DebugModeOn() {
-		keys := reflect.ValueOf(connectionDetails).MapKeys()
+		keys := reflect.ValueOf(credentials).MapKeys()
 		log.Printf("%s backend connection parameters: %s", h.GetConfig().Name, keys)
 	}
 
-	if host := connectionDetails["host"]; host != nil {
-		result.Host = string(connectionDetails["host"])
-	}
-
-	if connectionDetails["port"] != nil {
-		port64, _ := strconv.ParseUint(string(connectionDetails["port"]), 10, 64)
-		result.Port = uint(port64)
-	}
-
-	if connectionDetails["username"] != nil {
-		result.Username = string(connectionDetails["username"])
-	}
-
-	if connectionDetails["password"] != nil {
-		result.Password = string(connectionDetails["password"])
-	}
-
-	delete(connectionDetails, "host")
-	delete(connectionDetails, "port")
-	delete(connectionDetails, "username")
-	delete(connectionDetails, "password")
-
-	result.Options = make(map[string]string)
-	for k, v := range connectionDetails {
-		result.Options[k] = string(v)
-	}
-
-	return result, nil
+	return NewConnectionDetails(credentials)
 }
 
 // If the error is not already a MySQL protocol error, then wrap it in an

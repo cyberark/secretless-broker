@@ -11,86 +11,42 @@ import (
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 )
 
-var sslOptions = []string{
-	"sslrootcert",
-	"sslmode",
-	"sslkey",
-	"sslcert",
-}
-
-const defaultPostgresPort = "5432"
-
 // ConfigureBackend resolves the backend connection settings and credentials and sets the
 // connectionDetails field.
-func (h *Handler) ConfigureBackend() (err error) {
-	result := BackendConfig{
-		Options:      make(map[string]string),
-		QueryStrings: make(map[string]string),
-	}
+func (h *Handler) ConfigureBackend() error {
+	var err error
+	var options map[string][]byte
 
-	var values map[string][]byte
-	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
-		return
+	if options, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
+		return err
 	}
 
 	if h.GetConfig().Debug {
-		keys := reflect.ValueOf(values).MapKeys()
+		keys := reflect.ValueOf(options).MapKeys()
 		log.Printf("%s backend connection parameters: %s", h.GetConfig().Name, keys)
 	}
 
-	if values["host"] != nil {
-		result.Host = string(values["host"])
+	backendConfig, err := NewBackendConfig(options)
+	if err != nil {
+		return err
 	}
 
-	result.Port = defaultPostgresPort
-	if values["port"] != nil {
-		result.Port = string(values["port"])
-	}
+	h.BackendConfig = backendConfig
 
-	if values["username"] != nil {
-		result.Username = string(values["username"])
-	}
-	if values["password"] != nil {
-		result.Password = string(values["password"])
-	}
-
-	for _, sslOption := range sslOptions {
-		if values[sslOption] != nil {
-			value := string(values[sslOption])
-			if value != "" {
-				result.QueryStrings[sslOption] = value
-			}
-		}
-		delete(values, sslOption)
-	}
-
-	delete(values, "host")
-	delete(values, "port")
-	delete(values, "username")
-	delete(values, "password")
-
-	for k, v := range values {
-		result.Options[k] = string(v)
-	}
-
-	h.BackendConfig = &result
-
-	return
+	return nil
 }
 
 // ConnectToBackend establishes the connection to the backend database and sets the Backend field.
 func (h *Handler) ConnectToBackend() (err error) {
 	var connection net.Conn
-
-	address := net.JoinHostPort(h.BackendConfig.Host, h.BackendConfig.Port)
-	if connection, err = net.Dial("tcp", address); err != nil {
+	if connection, err = net.Dial("tcp", h.BackendConfig.Address()); err != nil {
 		return
 	}
 
 	debug := util.OptionalDebug(h.GetConfig().Debug)
 	debug("Sending startup message")
 
-	tlsConf, err := ssl.NewDbSSLMode(h.BackendConfig.QueryStrings, true)
+	tlsConf, err := ssl.NewDbSSLMode(h.BackendConfig.SSLOptions, true)
 	if err != nil {
 		return
 	}

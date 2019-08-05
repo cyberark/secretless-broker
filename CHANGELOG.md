@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Added ability to configure PG connector with `host`/`port` combination
+- Deprecated support for PG connector configurations with `address` field
+
 ## [1.0.0] 2019-07-03
 
 ### Added

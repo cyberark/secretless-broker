@@ -118,7 +118,7 @@ func callEnableHealthCheck() {
 	enableHealthCheck()
 
 	// Server can be slow to come up :(
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(250 * time.Millisecond)
 }
 
 func enableAndReadyHealthCheck() {

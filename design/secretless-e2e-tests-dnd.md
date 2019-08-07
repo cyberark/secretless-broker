@@ -10,44 +10,37 @@ An R&amp;D Technical Design and Delivery Plan
 
 # Overview
 
-The Secretless project needs to add automated end-to-end (e2e) tests for Conjur OSS. The current e2e automation system which relies on [the kubernetes-conjur-demo repo](https://github.com/conjurdemos/kubernetes-conjur-demo) is bloated and likely running many redundant tests.
+The Secretless project needs to add automated end-to-end (e2e) tests for Conjur OSS. The current e2e automation system which relies on [the kubernetes-conjur-demo repo](https://github.com/conjurdemos/kubernetes-conjur-demo) is bloated and likely running redundant tests.
 
-The goal here is to determine the WHAT and the HOW of Secretless end-to-end tests. 
-1. For the WHAT, we seek to optimise the scope of the tests to avoid doing more testing than is necessary, ideally the bulk of the tests will reside in tests at a lower level of granularity i.e. unit tests.
-2. For the HOW, we seek to reduce the complexity of orchestrating tests, to simplify maintenance and to make the testing pipeline developer-friendly.
+Broadly speaking the optimisation needed are on the WHAT and the HOW of Secretless end-to-end tests.
+1. For the HOW, we focus on process and seek to reduce the complexity of orchestrating tests, to simplify maintenance and to make the testing pipeline developer-friendly.
+2. For the WHAT, we seek to optimise the scope of the tests to avoid doing more testing than is necessary, ideally the bulk of the tests will reside in tests at a lower level of granularity i.e. unit tests.
 
-Described more succinctly, the goal is to allow developers on the Secretless project to focus efforts on writing integration test cases with the assurance that some robust other thing will handle 
-1. the orchestration of dependency resources (fixtures, services etc.) for the tests
-2. the running of the tests
-3. the reporting of the outcome of the tests
+The goal of this particular effort is to improve the process of creating and maintaining Secretless end-to-end tests. It is inspired by the immediate need to add a test case for Conjur OSS. Our current test cases assume success implicitly as running through some number of steps without encountering failure. WHAT we test requires some thought and improvement, however we deffer this to a later effort while keeping in mind that this addressing this technical debt will become simpler as a result of an improved process.
+
+The improvements in process are expected to allow developers on the Secretless project to focus efforts on writing integration test cases with the assurance that some robust other thing will handle
+1. dependency service lifecycle management
+2. running of the tests
+3. measuring and reporting the outcomes of the tests
 
 # Technical Objectives
 
 _At a high-level, what are the technical requirements that this design needs to satisfy?  How can it meet the acceptance criteria presented in the Feature Proposal?_
 
 - [ ] Tests run in a realistic environment with DAP/OSS as the source of truth for secret data
+- [ ] Tests run on developer machine ?
 - [ ] Tests run in Kubernetes and OpenShift
 - [ ] Tests run against relevant versions of DAP (v10+), and Conjur OSS
 - [ ] Tests run against PostgreSQL and MySQL
 - [ ] Tests validate that a demo application is able to run as expected while making database connections via Secretless
 - [ ] The test suite does not need to run with every PR of Secretless, but should run daily and we should be able to run it against a local build of the Secretless image to prep for a release
 
-- [ ] Criteria exists for what is allowed to be an end to end test case
-- [ ] E2E test validate specific behavior and justification for the test is documented
-
 ## Out of Scope
 
 1. Creating sophisticated implementations of service lifecycle management will not be part of this effort e.g. pooling pre-existing dependency resources to streamline load times
 2. Being exhaustive in testing all the possible versions of services like Conjur. Though this would be thorough this would be time consuming and costly. In the future we might consider having test scenarios that are less costly and less representative of production but close enough to it to be of value. An example is running a branch follower against a stable master.
 3. juxtaposer will eventually need to be automated. This is not addressed as part of this effort
-
-# Stakeholder Solution Sign-Off
-
-| **Stakeholder Role** | **Name** | **Date** |
-| --- | --- | --- |
-| Product Manager |   |   |
-| Product Owner |   |   |
-| Feature Lead | Kumbirai Tanekha  |   |
+|
 
 # Experience
 
@@ -59,11 +52,12 @@ Moving the lifecycle management of dependency resources behind an opaque API is 
 
 ## Overview
 
-1. A developer makes changes to the Secretless source. The developer runs a script to run integration tests. The part of the script responsible for setting up external dependencies, such as Conjur and target service databases is opaque and delegated to some robust backend which is well-tested and reliable. The API merely requires configuration information for setting up the external dependencies.
- 
-2. A well-defined workflow with minimal boilerplate exists to add and modify integration tests. The experience of running integration tests is identical on Jenkins and on a developer's machine.
-
-3. There are clear criteria for what ought to be an integration test vs a unit test such that deciding to embark on 2 is easy.
+There is an idea for a test.
+1. A developer writes the test case in as close to declarative a fashion as possible, leveraging preexisting steps and assertions.
+2. A developer specifies the service dependencies for their test case.
+3. A developer runs a simple command to run the tests, this results in either success or failure, in both cases the outcome is reported and any resources used in the test are cleaned up (unless requested to stay). In the case of failure breadcrumbs are provided fo where in the test the failure occurred.
+4. A developer adds the test to CI and pushes the branch got Github
+5. A repetition of 3 occurs except this case it in CI
 
 ## Walkthroughs
 
@@ -73,8 +67,57 @@ TBD
 
 ## Architecture
 
-TBD
+[ Service ] is any software that tests rely on e.g. Conjur, Postgres etc.
 
+[ Service Config ] specifies details about a service e.g. for Conjur `CONJUR_ACCOUNT`, `version` etc. Conjur will have different configuration options to Postgres. These options will need to be documented. It's important for users of the Service Engine to know what they're able to configure on a service. Config also specifies the lifecyle method of the interface (start, stop, clean)
+
+[ Test Runner ] is software that provides a conventional way for defining and running test cases. They typically come with capabilities to measure test metrics, test outcomes and code coverage. This will also allow historical tracking. An example of a test-runner is Cucumber. Test cases can be defined in Gherkin
+
+[ Service Engine ] uses [ Service Config ] to create an instance of a [ Service ] 
+
+[ Test Case ] specifies a test case and contains some annotations detailing required [ Service ]s 
+
+[ Test Runner ] gathers annotations from [ Service ]s from [ Test Case ]s and issues requests for services to the [ Service Engine ] before running all [ Test Case ].
+
+[ Service Engine ] uses [ Service Config ] to create an instance of a [ Service ].
+
+Here is an example of the components in this architecture working together.
+0. A service definition exists for conjur and mysql
+```bash
+# Conjur service definition.  This is supplied to the start_services function and defines the service to be started
+declare -A conjur_service_config
+conjur_service_config=(
+["service_name"]="conjur_abc",
+["config"]="conjur.yaml",
+["start"]="conjur_start.sh",
+["stop"]="conjur_stop.sh"
+)
+
+declare -A mysql_service_config
+mysql_service_config=(
+["service_name"]="mysql_abc",
+["config"]="mysql.yaml",
+["start"]="mysql_start.sh",
+["stop"]="mysql_stop.sh"
+)
+``` 
+1. There is a test case written in Gherkin for validating using the MySQL service connector with Conjur.
+```
+Feature: Guess the word
+  
+  @conjur @mysql @mysql-conjur
+  Scenario: Connection to MySQL
+    Given Secretless is running as a sidecar in Kubernetes
+    Then the app is able to connect to MYSQL on "localhost:332"
+
+```
+2. Cucumber will register that there's a test case that requires Conjur, MySQL and MySQL credentials in Conjur.
+3. The developer calls `cucumber` to start the testss
+4. As a result of the annotations Cucumber will first call the engine to create the services.
+5. The configuration values
+ 
+TODO: provide examples of terms above
+TODO: split out components of the architecture by owner (infra, project developer etc.)
 
 ## Interfaces
 
@@ -104,19 +147,20 @@ Q: It's not clear if this requires new infrastructure
 
 TBD
 
+This section is still an open question. It's not clear at the moment if there are any security implications to the work under consideration.
+
 ## Documentation
 
-1. The API for requesting dependencies has documentation. The documentation covers 
+1. Seperate `secretless-e2e-tests` project shall document how to go about creating new tests, running them in a variety of environments (locally, and on jenkins after commit or pushe to master)
+2. API for service lifecycle management will be located in bash-lib.  There will be documentation of usage. It remains to be determined where service implementations will reside.
     1. Usage: how to request dependencies, how dependencies are exposed, procedures for cleanup
     2. General information: Assumptions, possibilities and limitations
     3. Configuration
- 
-1. The mechanism for running has documentation. The documentation covers how to run, gathering 
 
 ## Considerations and Alternatives
 
 ### Dependency Resources Lifecycle Management
-1. A fully fledged opaque API for managing the lifecycle of dependency resources would be ideal. 
+1. A fully fledged opaque API for managing the lifecycle of dependency resources would be ideal.
 2. 1 might might be cost-prohibitive so an alternative is to place the current mess of an implementation behind an API that allows us to carry out the clean up while maintaining a consistent interface
 
 ### What & How to test
@@ -167,11 +211,15 @@ TBD
 
 Q: How ambitious do we want to be in the short-term ?
 
+Q: What's a good test runner ?
+
 Q: How do we test a test runner ?
 
 Q: How do we test the opaque API for creating dependency resources ?
 
 Q: How will we ensure that improvements we'd like to have in the mid-term aren't put in the icebox forever ?
+
+Q: Where will service lifecycle management implementations reside ?
 
 Q: Do all Secretless test cases need a full cluster including master, standbys and followers ?
 
@@ -182,35 +230,26 @@ A: Some test cases do not need all the components of the cluster. For example, i
 TBD
 
 Parts of kubernetes-conjur-demo that are relevant to e2e testing for secretless need to be split out into a seperate project dedicated to secretless e2e testing.
-A test runner should be leveraged 
-test outcomes
-code coverage,
-testing metrics,
-historical tracking
 
-Idea: Fork `kubernetes-conjur-deploy`, `kubernetes-conjur-demo` to avoid modifying it and dealing with the implications. For now we implement the opaque API using the fork. This can be followed later by deprecation of kubernetes-conjur-deploy and adoption of the opaque API. 
+
+Idea: Fork `kubernetes-conjur-deploy`, `kubernetes-conjur-demo` to avoid modifying it and dealing with the implications. For now we implement the opaque API using the fork. This can be followed later by deprecation of kubernetes-conjur-deploy and adoption of the opaque API.
 Pros:
-+ Makes the first pass at implementation much simpler.
-+ Move the repo to `cyberark` org.
-+ Ignore version 4.
-+ Allows us to abstract the testing steps of setting up a demo application so that they can be reused for testing (not specific) to demo. We can hide this behind an API. It doesnt't have to be an example anymore.
+  + Makes the first pass at implementation much simpler.
+  + Move the repo to `cyberark` org.
+  + Ignore version 4.
+  + Allows us to abstract the testing steps of setting up a demo application so that they can be reused for testing (not specific) to demo. We can hide this behind an API. It doesnt't have to be an example anymore.
 Note: Might not want to fork `deploy` to avoid digging into DAP deployment details. `demo` on the other hand is more pressing because we need to overhaul the process of creating and running test cases.
 Note: Strongly consider Cucumber as test runner for non-unit tests. Great for composition etc. Ability to use previously defined steps to construct new test cases
 
-TODO: Ask Andy for an example test matrix 
+TODO: Ask Andy for an example test matrix
 
-NOTE: the goal of this is to improve the process. add OSS test case. the actual test cases can be technical debt which will become simpler to address given the improved process.
+TODO: Ask Matt to prioritise definition of the interface. This allows us to de-risk him being away. This would allow Secretless to create the `secretless-e2e-tests` repo so that we can use the interfaces while using mocks or `kubernetes-conjur-deploy`. We can create a throw away implementation to validate the interface for
 
- 
-For the architecture section we can talk about how cucumber and the API are used and interact. 
+For the architecture section we can talk about how cucumber and the API are used and interact.
 
-Infrastructure section: Requires new tools from infra but not new infrastrcture
+Infrastructure section: Requires new tools from infra but not new infrastructure
 
 Security section: Open question
-
-Docuemntation: 
-1. secretless-e2e-tests project documents how to go about creating new tests, running them locally and running them on jenkins after commit or pushed to master
-2. interfaces lives in bash-lib with documentation of usage. still not sure where our modules and all the implementation bits will live. 
 
 # Addendums
 

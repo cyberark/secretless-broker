@@ -368,6 +368,8 @@ _Please note: Plugin API interface signatures and supported plugin API version(s
    from your local machine).
 
 ### Build a release
+**Note:** Until the stable quality exercises have completed, the GitHub release
+should be officially marked as a `pre-release` (eg "non-production ready")
 1. From a **clean checkout of master** run `./bin/build_release` to generate
    the release artifacts.
 1. Create a GitHub release from the tag, add a description by copying the CHANGELOG entries

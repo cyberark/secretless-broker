@@ -6,9 +6,39 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Changed
+## [1.1.0] 2019-08-09
+
+### Added
+- Added version output to logs on startup
+- Added NOTICES.txt to the project
+- Added dependency tracking tools and info
 - Added ability to configure PG connector with `host`/`port` combination
+- Added gitleaks config to enable running gitleaks pre-push
+
+### Changed
 - Deprecated support for PG connector configurations with `address` field
+- Minor edits to website quick start instructions
+- Updated versioning method for the project to use version.go
+- Parallelized integration tests
+- Upgraded summon module dependency to 0.7.0
+- Cleaned up go.mod and go.sum with `go mod tidy`
+- Only pin to vault/api submodule rather than larger vault module
+- MySQL port defaults to 3306 if not specified
+- Updated health check test to wait longer for server to come up to prevent
+  test failures
+- Revised README for simplicity and to describe available releases
+
+### Removed
+- Removed custom script to check style in favor of code climate
+- Removed old benchmark proof of concepts
+- Removed GitLab pipeline
+- Removed ability to pass `dbname` in the `address` field of the PostgreSQL
+  config - the PostgreSQL `address` config now only accepts `host:[port]`
+
+### Fixed
+- Resolved shellcheck errors
+- Standardized spacing in `testutil` package
+- Fixed changelog prefill script
 
 ## [1.0.0] 2019-07-03
 
@@ -288,7 +318,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -304,3 +334,4 @@ The first tagged version.
 [0.7.1]: https://github.com/cyberark/secretless-broker/compare/v0.7.0...v0.7.1 
 [0.8.0]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...v0.8.0 
 [1.0.0]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...v1.0.0 
+[1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0 

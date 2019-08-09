@@ -144,6 +144,8 @@ Post-1.0, GitHub releases are created for GitHub tagged versions that have under
 
 At any given time there is only one Docker image with the `stable` tag - that of the latest `stable` release. Older stable versions (v1.0+) can be found on the official [GitHub releases page](https://github.com/cyberark/secretless-broker/releases).
 
+**Note:** the [GitHub releases page](https://github.com/cyberark/secretless-broker/releases) will also show `pre-releases`, which have not yet been promoted to stable.
+
 ### GitHub repository
 The code on `master` in the project's GitHub repository represents the development work done since the previous GitHub tag. It is possible to build Secretless from source (see [our contributing guidelines](#development) for more info), but for regular use we recommend using the `stable` Docker image from DockerHub or an official GitHub release.
 

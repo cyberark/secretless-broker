@@ -6,6 +6,13 @@ cd "$(dirname "$0")"
 
 . ./utils.sh
 
+if [ $# -lt 1 ]; then
+  echo "Usage $0 <test_path>"
+  exit 1
+fi
+
+readonly TEST_PATH="$1"
+
 # check for secretless-broker:latest
 docker inspect secretless-broker:latest > /dev/null 2>&1 || { 
   echo "ERROR: secretless-broker:latest must exist locally for test to run.";
@@ -32,22 +39,25 @@ function finish {
 }
 trap finish EXIT
 
-function testCRDs() {
+function runTest() {
+  local test_path="$1"
+
   runDockerCommand "
 # push the local secretless-broker image to the remote DOCKER_REGISTRY_PATH
 docker tag 'secretless-broker:latest' '${SECRETLESS_IMAGE}' > /dev/null;
 docker push '${SECRETLESS_IMAGE}' > /dev/null;
 
 export SECRETLESS_CRD_SUFFIX='${UNIQUE_TEST_ID}';
+export TEST_NAMESPACE='${TEST_NAMESPACE}';
 
 # create test namespace
-kubectl create namespace '${TEST_NAMESPACE}'
+kubectl create namespace '${TEST_NAMESPACE}';
 
 # switch to test namespace
-kubens '${TEST_NAMESPACE}'
+kubens '${TEST_NAMESPACE}';
 
 # run CRD tests
-cd k8s-ci/k8s_crds;
+cd $test_path;
 export SECRETLESS_IMAGE='${SECRETLESS_IMAGE}';
 ./test
 "
@@ -57,8 +67,9 @@ function main() {
   announce 'Preparing test environment'
   prepareTestEnvironment
 
-  announce 'Test CRD'
-  testCRDs
+  announce "Testing: $TEST_PATH..."
+  runTest "$TEST_PATH"
+  announce "Testing $TEST_PATH complete!"
 }
 
 main

@@ -70,16 +70,16 @@ roleRef:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: secretless-k8s-test
+  name: secretless-k8s-crd-test
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: secretless-k8s-test
+      app: secretless-k8s-crd-test
   template:
     metadata:
       labels:
-        app: secretless-k8s-test
+        app: secretless-k8s-crd-test
     spec:
       serviceAccountName: secretless-crd
       containers:

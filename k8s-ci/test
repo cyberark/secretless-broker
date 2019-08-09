@@ -12,9 +12,9 @@ docker inspect secretless-broker:latest > /dev/null 2>&1 || {
 
 # Set environment variables
 export UNIQUE_TEST_ID
-UNIQUE_TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
+UNIQUE_TEST_ID="k8s-test-$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
 export SECRETLESS_IMAGE="${DOCKER_REGISTRY_PATH}/secretless-broker:${UNIQUE_TEST_ID}"
-export TEST_NAMESPACE="test-secretless-${UNIQUE_TEST_ID}"
+export TEST_NAMESPACE="secretless-${UNIQUE_TEST_ID}"
 
 # Clean up when script completes
 function finish {

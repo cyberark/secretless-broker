@@ -1,7 +1,9 @@
 #!/bin/bash
 
 set -euo pipefail
+
 cd "$(dirname "$0")"
+
 . ./utils.sh
 
 # check for secretless-broker:latest
@@ -25,8 +27,8 @@ function finish {
 
   # Delete test namespace
   runDockerCommand "
-  kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}'
-"
+    kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}'
+  "
 }
 trap finish EXIT
 

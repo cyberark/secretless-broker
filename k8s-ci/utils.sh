@@ -4,9 +4,10 @@ set -euo pipefail
 
 # Sets additional required environment variables that aren't available in the
 # secrets.yml file, and performs other preparatory steps
+
+# Prepare Docker images
 function prepareTestEnvironment() {
-  # Prepare Docker images
-  docker build --rm --tag "gke-utils:latest" - < Dockerfile > /dev/null
+  docker build --rm --tag "gke-utils:latest" -f Dockerfile .
 }
 
 # Delete an image from GCR, unless it is has multiple tags pointing to it

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -euo pipefail
+set -u
 
-function main() {
+function log_in() {
   gcloud auth activate-service-account \
     --key-file "${GCLOUD_SERVICE_KEY}"
   gcloud container clusters get-credentials \
@@ -14,4 +14,23 @@ function main() {
     -p "$(gcloud auth print-access-token)"
 }
 
-main
+printf 'Loggging in...'
+
+attempt=0
+
+log_in
+until gcloud auth list --format='value(active_account)' 2>/dev/null; do
+  echo -n '.'
+  sleep 2
+
+  attempt=$(( attempt + 1 ))
+  if [ $attempt -gt 10 ]; then
+    echo
+    echo "ERROR: Could not log into gcloud!"
+    exit 1
+  fi
+
+  log_in
+done
+
+echo

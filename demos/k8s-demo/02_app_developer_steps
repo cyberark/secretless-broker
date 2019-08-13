@@ -16,8 +16,53 @@ step "Start application"
 kubectl --namespace "${APP_NAMESPACE}" \
   apply --filename "etc/quick-start-application.yml"
 
-echo "Detecting app url..."
-APPLICATION_URL="$(minikube service quick-start-application --namespace "${APP_NAMESPACE}" --wait 15 --url)"
+if [ ! "${SECRETLESS_IMAGE_NAME:-}" == "" ]; then
+  image_name="${SECRETLESS_IMAGE_NAME}:${SECRETLESS_IMAGE_TAG}"
+
+  step "Patching deployment with ${image_name}"
+
+  kubectl patch deployment "quick-start-application" \
+    --namespace="${APP_NAMESPACE}" \
+    --patch """
+  spec:
+    template:
+      spec:
+        containers:
+          - name: secretless
+            image: ${image_name}
+"""
+fi
+
+step "Making service externally visible"
+
+if is_minikube; then
+  APPLICATION_URL="$(minikube service quick-start-application --namespace "${APP_NAMESPACE}" --wait 15 --url)"
+else
+  readonly external_service_name="${APP_NAMESPACE}-external-svc"
+  kubectl expose deployment quick-start-application \
+    --namespace="${APP_NAMESPACE}" \
+    --type=LoadBalancer \
+    --name="${external_service_name}"
+
+  printf "Waiting for Kubernetes to expose the service..."
+
+  until [ "$(kubectl get svc \
+    --namespace="${APP_NAMESPACE}" \
+    -o jsonpath='{.status.loadBalancer.ingress[0].ip}' \
+    "${external_service_name}" 2>/dev/null)" != "" ]; do
+    echo -n '.'
+    sleep 2
+  done
+
+  echo
+
+  external_ip=$(kubectl get svc \
+    --namespace="${APP_NAMESPACE}" \
+    -o jsonpath='{.status.loadBalancer.ingress[0].ip}' \
+    "${external_service_name}")
+
+  APPLICATION_URL="http://${external_ip}:8080"
+fi
 
 echo "Using app URL: $APPLICATION_URL"
 

@@ -48,13 +48,17 @@ kubectl --namespace "${BACKEND_NAMESPACE}" \
 ##################################################
 step "Create Database Table and Permissions"
 
-db_url="$(minikube service quick-start-backend --namespace "${BACKEND_NAMESPACE}" --wait 15 --url | sed 's#http://##')/quick_start_db"
+db_url="quick-start-backend.${BACKEND_NAMESPACE}.svc.cluster.local:5432"
 
 echo "Using DB endpoint: $db_url"
 
-docker run --rm --interactive \
+kubectl run --rm -i \
  --env PGPASSWORD="${DB_ADMIN_PASSWORD}" \
- "postgres:9.6" \
+ --generator=run-pod/v1 \
+ --namespace "${BACKEND_NAMESPACE}" \
+ --wait \
+ postgres-cli \
+ --image="postgres:9.6" -- \
     psql \
     --username "${DB_ADMIN_USER}" \
     "postgres://$db_url" \

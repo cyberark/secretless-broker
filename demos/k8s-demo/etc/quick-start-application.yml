@@ -19,7 +19,7 @@ spec:
       containers:
       - name: quick-start-application
         image: cyberark/demo-app:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
@@ -32,7 +32,7 @@ spec:
           periodSeconds: 5
       - name: secretless
         image: cyberark/secretless-broker:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         args: ["-f", "/etc/secretless/secretless.yml"]
         volumeMounts:
         - name: config

@@ -238,7 +238,32 @@ TBD
 
 ## Story Breakdown
 
-TBD
+- [ ] Create repository to hold secretless-e2e-tests framework (**_TODO: Figure out if a separate repo is needed_**)
+
+- [ ] **Epic**: Implement service engine (**_Note: Service definition should be driven by implementation_**)
+  - [ ] Implement a _tested_ TBD-language dummy service engine (simple webserver)
+  - [ ] Implement a TBD-language CLI service runner for Conjur OSS
+  - [ ] Document service runner for Conjur OSS
+  - [ ] Implement a TBD-language CLI service runner for Postgres
+  - [ ] Document service runner for Postgres
+  - [ ] Implement a TBD-language CLI service runner for MySQL
+  - [ ] Document service runner for MySQL
+
+- [ ] **Epic**: Implement Cucumber runner
+  - [ ] (Spike/Throwaway) Find workable/appropriate combination of gherkin and backend languages
+  - [ ] Implement Cucumber runner based on spike learning (**_Note: This should have only a single sample test and Jenkins-parsed output_**)
+  - [ ] Implement invocation of dummy service runner by Cucumber
+  - [ ] Document Cucumber API for generic service runner invocation
+  - [ ] Implement invocation of Conjur OSS service runner by Cucumber
+  - [ ] Document Cucumber API for Conjur OSS service runner invocation
+  - [ ] Implement invocation of Postgres service runner by Cucumber
+  - [ ] Document Cucumber API for Postgres service runner invocation
+  - [ ] Implement invocation of MySQL service runner by Cucumber
+  - [ ] Document Cucumber API for MySQL service runner invocation
+
+- [ ] **Epic**: Implement E2E tests
+  - [ ] Secretless broker is tested against Conjur OSS using the new test runner
+  - [ ] TBD
 
 # Solution Sign-Off
 

@@ -4,19 +4,34 @@ set -euo pipefail
 
 # Sets additional required environment variables that aren't available in the
 # secrets.yml file, and performs other preparatory steps
+
+# Prepare Docker images
 function prepareTestEnvironment() {
-  # Prepare Docker images
-  docker build --rm --tag "gke-utils:latest" - < Dockerfile > /dev/null
+  docker build --rm --tag "gke-utils:latest" -f Dockerfile .
 }
 
 # Delete an image from GCR, unless it is has multiple tags pointing to it
 # This means another parallel build is using the image and we should
 # just untag it to be deleted by the later job
 function deleteRegistryImage() {
-  local image_and_tag=$1
+  if [ $# -ne 2 ]; then
+    echo "ERROR: Usage: deleteRegistryImage <image> <tag>" 1>&2
+    return 1
+  fi
+
+  local image=$1
+  local tag=$2
 
   runDockerCommand "
-    gcloud container images delete --force-delete-tags -q ${image_and_tag}
+    image_digest=\$(gcloud container images list-tags --filter='tags[]=${tag}' --format='get(digest)' '${image}')
+
+    gcloud container images untag -q '${image}:${tag}'
+
+    image_tags=\$(gcloud container images list-tags --filter=digest=\${image_digest} --format='get(tags)' '${image}' | awk -F';' '{print NF}')
+    if [ \${image_tags} -eq 0 ]; then
+      echo 'No tags left - completely deleting the image...'
+      gcloud container images delete -q ${image}@\${image_digest}
+    fi
   " > /dev/null
 }
 
@@ -36,7 +51,7 @@ function runDockerCommand() {
     -v "$PWD/..":/src \
     -w /src \
     "gke-utils:latest" \
-    bash -c "
+    bash -exc "
       ./k8s-ci/platform_login > /dev/null
       $1
     "

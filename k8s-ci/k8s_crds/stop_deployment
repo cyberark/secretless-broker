@@ -9,7 +9,7 @@ kubectl delete --wait=true --ignore-not-found=true rolebinding secretless-crd &
 kubectl delete --wait=true --ignore-not-found=true clusterrolebinding secretless-crd &
 kubectl delete --wait=true --ignore-not-found=true serviceaccount secretless-crd &
 
-kubectl delete --wait=true --ignore-not-found=true deployment secretless-k8s-test &
-kubectl delete --wait=true --ignore-not-found=true pods -l app=secretless-k8s-test &
+kubectl delete --wait=true --ignore-not-found=true deployment secretless-k8s-crd-test &
+kubectl delete --wait=true --ignore-not-found=true pods -l app=secretless-k8s-crd-test &
 
 wait

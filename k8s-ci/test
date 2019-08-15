@@ -1,8 +1,17 @@
 #!/bin/bash
 
 set -euo pipefail
+
 cd "$(dirname "$0")"
+
 . ./utils.sh
+
+if [ $# -lt 1 ]; then
+  echo "Usage $0 <test_path>"
+  exit 1
+fi
+
+readonly TEST_PATH="$1"
 
 # check for secretless-broker:latest
 docker inspect secretless-broker:latest > /dev/null 2>&1 || { 
@@ -12,41 +21,47 @@ docker inspect secretless-broker:latest > /dev/null 2>&1 || {
 
 # Set environment variables
 export UNIQUE_TEST_ID
-UNIQUE_TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
-export SECRETLESS_IMAGE="${DOCKER_REGISTRY_PATH}/secretless-broker:${UNIQUE_TEST_ID}"
-export TEST_NAMESPACE="test-secretless-${UNIQUE_TEST_ID}"
+UNIQUE_TEST_ID="k8s-test-$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
+export SECRETLESS_IMAGE_NAME="${DOCKER_REGISTRY_PATH}/secretless-broker"
+export SECRETLESS_IMAGE_TAG="${UNIQUE_TEST_ID}"
+
+export TEST_NAMESPACE="secretless-${UNIQUE_TEST_ID}"
 
 # Clean up when script completes
 function finish {
   announce 'Wrapping up and removing test environment'
 
   # Delete registry images that were used
-  deleteRegistryImage "${SECRETLESS_IMAGE}" > /dev/null
+  deleteRegistryImage "${SECRETLESS_IMAGE_NAME}" "${SECRETLESS_IMAGE_TAG}"
 
   # Delete test namespace
   runDockerCommand "
-  kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}'
-"
+    kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}'
+  "
 }
 trap finish EXIT
 
-function testCRDs() {
+function runTest() {
+  local test_path="$1"
+
   runDockerCommand "
 # push the local secretless-broker image to the remote DOCKER_REGISTRY_PATH
-docker tag 'secretless-broker:latest' '${SECRETLESS_IMAGE}' > /dev/null;
-docker push '${SECRETLESS_IMAGE}' > /dev/null;
+docker tag 'secretless-broker:latest' '${SECRETLESS_IMAGE_NAME}:${SECRETLESS_IMAGE_TAG}'> /dev/null;
+docker push '${SECRETLESS_IMAGE_NAME}:${SECRETLESS_IMAGE_TAG}' > /dev/null;
 
 export SECRETLESS_CRD_SUFFIX='${UNIQUE_TEST_ID}';
+export TEST_NAMESPACE='${TEST_NAMESPACE}';
 
 # create test namespace
-kubectl create namespace '${TEST_NAMESPACE}'
+kubectl create namespace '${TEST_NAMESPACE}';
 
 # switch to test namespace
-kubens '${TEST_NAMESPACE}'
+kubens '${TEST_NAMESPACE}';
 
 # run CRD tests
-cd k8s-ci/k8s_crds;
-export SECRETLESS_IMAGE='${SECRETLESS_IMAGE}';
+cd $test_path;
+export SECRETLESS_IMAGE_NAME='${SECRETLESS_IMAGE_NAME}';
+export SECRETLESS_IMAGE_TAG='${SECRETLESS_IMAGE_TAG}';
 ./test
 "
 }
@@ -55,8 +70,9 @@ function main() {
   announce 'Preparing test environment'
   prepareTestEnvironment
 
-  announce 'Test CRD'
-  testCRDs
+  announce "Testing: $TEST_PATH..."
+  runTest "$TEST_PATH"
+  announce "Testing $TEST_PATH complete!"
 }
 
 main

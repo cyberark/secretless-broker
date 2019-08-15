@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+# setup environment variables
+log=log.txt
+rm -rf ${log}
+
+function cleanup() {
+  echo "Cleaning up previous deployments"
+  ./stop &> ${log}
+}
+trap cleanup EXIT INT QUIT
+
+function main() {
+  cleanup
+
+  export BACKEND_NAMESPACE="${TEST_NAMESPACE}-backend"
+  export APP_NAMESPACE="${TEST_NAMESPACE}-app"
+
+  # Deploy and test the results
+  ./01_security_admin_steps
+  ./02_app_developer_steps
+}
+
+main

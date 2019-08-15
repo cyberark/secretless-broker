@@ -29,7 +29,7 @@ trap cleanup EXIT INT QUIT
 function POD_NAME() {
   kubectl get pods \
     --field-selector=status.phase=Running \
-    -l app=secretless-k8s-test \
+    -l app=secretless-k8s-crd-test \
     -o jsonpath="{.items[0].metadata.name}" \
     2> ${log}
 }

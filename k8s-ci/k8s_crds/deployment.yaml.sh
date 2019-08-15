@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-: "${SECRETLESS_IMAGE:?"Need to set SECRETLESS_IMAGE non-empty, and available to cluster e.g. cyberark/secretless-broker:latest"}"
+set -euo pipefail
 
 # returns current namespace if available, otherwise returns 'default'
 current_namespace() {
@@ -70,16 +70,16 @@ roleRef:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: secretless-k8s-test
+  name: secretless-k8s-crd-test
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: secretless-k8s-test
+      app: secretless-k8s-crd-test
   template:
     metadata:
       labels:
-        app: secretless-k8s-test
+        app: secretless-k8s-crd-test
     spec:
       serviceAccountName: secretless-crd
       containers:
@@ -91,7 +91,7 @@ spec:
         env:
         - name: SECRETLESS_CRD_SUFFIX
           value: "${SECRETLESS_CRD_SUFFIX}"
-        image: "${SECRETLESS_IMAGE}"
+        image: "${SECRETLESS_IMAGE_NAME}:${SECRETLESS_IMAGE_TAG}"
         readinessProbe:
           tcpSocket:
             port: 8080

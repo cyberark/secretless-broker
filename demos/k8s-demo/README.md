@@ -25,7 +25,7 @@ You'll play two roles in this tutorial:
 
 ## Prerequisites
 
-+ A running [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) cluster
++ A running GKE or [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) cluster
 + [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) configured
   to point to the cluster
 + [Docker CLI](https://docs.docker.com/install/)
@@ -48,8 +48,7 @@ To perform all these steps in one go, run:
 <p></p>
 <details>
   <summary>View expected output</summary>
-  <pre>
-Deleting namespace 'quick-start-backend-ns'...
+  <pre>Deleting namespace 'quick-start-backend-ns'...
 Deleting namespace 'quick-start-application-ns'...
 Namespaces cleared
 
@@ -74,11 +73,13 @@ CREATE DATABASE
 
 >>--- Create Database Table and Permissions
 
-Using DB endpoint: 192.168.99.100:30001/quick_start_db
+Using DB endpoint: quick-start-backend.quick-start-backend-ns.svc.cluster.local:5432
+If you don't see a command prompt, try pressing enter.
 CREATE ROLE
 CREATE TABLE
 GRANT
 GRANT
+pod "postgres-cli" deleted
 
 >>--- Store DB credentials in Kubernetes Secrets
 
@@ -126,39 +127,41 @@ To perform all these steps in one go, run:
 
 deployment.apps/quick-start-application created
 service/quick-start-application created
-Detecting app url...
-Using app URL: http://192.168.99.100:30002
+
+>>--- Patching deployment with us.gcr.io/conjur-gke-dev/secretless-broker:c56a710d358
+
+deployment.extensions/quick-start-application patched
+Using app URL: http://quick-start-application.quick-start-application-ns.svc.cluster.local:8080
 Waiting for application to boot up
-(This may take more than 1 minute)
-..............OK
+(This may take more than 1 minute)...
+If you don't see a command prompt, try pressing enter.
+........OK
 
->>--- Add a Sample Pet
+Adding a sample pet...
+  HTTP/1.1 201 
+  Location: http://quick-start-application.quick-start-application-ns.svc.cluster.local:8080/pet/1
+  Content-Length: 0
+  Date: Thu, 15 Aug 2019 21:40:32 GMT
+  Connection: close
+  
+OK
 
-HTTP/1.1 201 
-Location: http://192.168.99.100:30002/pet/1
-Content-Length: 0
-Date: Tue, 28 May 2019 16:47:43 GMT
-
-
->>--- Retrieve All Pets
-
-HTTP/1.1 200 
-Content-Type: application/json;charset=UTF-8
-Transfer-Encoding: chunked
-Date: Tue, 28 May 2019 16:47:43 GMT
-
+Retrieving all pets...
+  HTTP/1.1 200 
+  Content-Type: application/json;charset=UTF-8
+  Transfer-Encoding: chunked
+  Date: Thu, 15 Aug 2019 21:40:32 GMT
+  Connection: close
+  
 [{"id":1,"name":"Mr. Snuggles"}]
 
-*** All finished! Secretless is working! ***
-
+pod "alpine-curl" deleted
 
 >>--- Cleaning up
 
 Deleting namespace 'quick-start-backend-ns'...
 Deleting namespace 'quick-start-application-ns'...
-
-Namespaces cleared
-  </pre>
+Namespaces cleared</pre>
 </details>
 <p></p>
 

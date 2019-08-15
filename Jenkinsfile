@@ -100,15 +100,21 @@ pipeline {
           }
         }
 
-        stage('Demo tests') {
+        stage('Quick start') {
           steps {
             sh './bin/test_demo'
           }
         }
 
-        stage('CRD tests') {
+        stage('K8s Demo') {
           steps {
-            sh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test'
+            sh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test demos/k8s-demo'
+          }
+        }
+
+        stage('CRD test') {
+          steps {
+            sh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test k8s-ci/k8s_crds'
           }
         }
       }

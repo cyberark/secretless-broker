@@ -33,7 +33,3 @@ wait_for_app() {
     echo "OK"
   fi
 }
-
-is_minikube() {
-  [ "$(kubectl config current-context)" == "minikube" ]
-}

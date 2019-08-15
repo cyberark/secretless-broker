@@ -19,7 +19,7 @@ printf 'Loggging in...'
 attempt=0
 
 log_in
-until gcloud auth list --format='value(active_account)' 2>/dev/null; do
+until [[ "$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null)" != "" ]]; do
   echo -n '.'
   sleep 2
 

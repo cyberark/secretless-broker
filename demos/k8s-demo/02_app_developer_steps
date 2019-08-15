@@ -47,12 +47,14 @@ kubectl run --rm -i \
   --wait \
   --image "alpine:3.9" \
   alpine-curl << EOF
-
-  apk add -q --no-cache curl
-
   set -e
 
-  until curl --connect-timeout 3 --silent "${APPLICATION_URL}/pets" >/dev/null; do
+  until wget --tries=1 \
+             --timeout=1 \
+             --server-response \
+             --quiet \
+             --output-document=/dev/stdout \
+             "${APPLICATION_URL}/pets" &>/dev/null; do
     echo -n "."
     sleep 2
   done
@@ -61,18 +63,25 @@ kubectl run --rm -i \
   echo
 
   echo "Adding a sample pet..."
-  curl --silent \
-    -include \
-    --data '{"name": "Mr. Snuggles"}' \
-    --header "Content-Type: application/json" \
-    "${APPLICATION_URL}/pet"
+  wget --tries=1 \
+       --timeout=3 \
+       --server-response \
+       --quiet \
+       --output-document=/dev/stdout \
+       --header "Content-Type: application/json" \
+       --post-data '{"name": "Mr. Snuggles"}' \
+       "${APPLICATION_URL}/pet"
 
   echo "OK"
   echo
 
   echo "Retrieving all pets..."
-  curl --silent \
-    -include "${APPLICATION_URL}/pets"
+  wget --tries=1 \
+       --timeout=3 \
+       --server-response \
+       --quiet \
+       --output-document=/dev/stdout \
+       "${APPLICATION_URL}/pets"
   echo
   echo
 EOF

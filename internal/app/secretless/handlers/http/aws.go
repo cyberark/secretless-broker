@@ -58,11 +58,11 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 		return err
 	}
 
-	var accessKeyId, secretAccessKey, accessToken []byte
+	var accessKeyID, secretAccessKey, accessToken []byte
 	var header string
 
-	accessKeyId = values["accessKeyId"]
-	if accessKeyId == nil {
+	accessKeyID = values["accessKeyId"]
+	if accessKeyID == nil {
 		return fmt.Errorf("AWS connection parameter 'accessKeyId' is not available")
 	}
 	secretAccessKey = values["secretAccessKey"]
@@ -71,7 +71,7 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	}
 	accessToken = values["accessToken"]
 
-	creds := credentials.NewStaticCredentials(string(accessKeyId), string(secretAccessKey), string(accessToken))
+	creds := credentials.NewStaticCredentials(string(accessKeyID), string(secretAccessKey), string(accessToken))
 
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {

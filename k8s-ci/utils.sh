@@ -47,7 +47,6 @@ function runDockerCommand() {
     -e GCLOUD_PROJECT_NAME \
     -v "${GCLOUD_SERVICE_KEY}:/tmp${GCLOUD_SERVICE_KEY}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -v ~/.config:/root/.config \
     -v "$PWD/..":/src \
     -w /src \
     "gke-utils:latest" \

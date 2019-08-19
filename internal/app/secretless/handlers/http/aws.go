@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
@@ -59,7 +61,7 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 	var accessKeyID, secretAccessKey, accessToken []byte
 	var header string
 
-	accessKeyID = values["accessKeyID"]
+	accessKeyID = values["accessKeyId"]
 	if accessKeyID == nil {
 		return fmt.Errorf("AWS connection parameter 'accessKeyId' is not available")
 	}
@@ -111,8 +113,20 @@ func (h AWSHandler) Authenticate(values map[string][]byte, r *http.Request) erro
 		return err
 	}
 
-	// TODO: don't always force SSL, some services such as S3 don't require it.
-	r.URL.Scheme = "https"
+	// When the endpoint URL is http://secretless.empty
+	// use default resolver to get service endpoint
+	if r.URL.Scheme == "http" && r.URL.Host == "secretless.empty" {
+		// The endpoint will use TLS if possible
+		endpoint, _ := endpoints.DefaultResolver().EndpointFor(
+			serviceName,
+			region)
+
+		endpointURL, _ := url.Parse(endpoint.URL)
+
+		r.URL.Scheme = endpointURL.Scheme
+		r.URL.Host = endpointURL.Host
+	}
+
 	r.Body = ioutil.NopCloser(bytes.NewReader(bodyBytes))
 
 	return nil

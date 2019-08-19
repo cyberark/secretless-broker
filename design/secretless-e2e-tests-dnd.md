@@ -78,15 +78,14 @@ A `Service Config` is a JSON object that specifies information required for a se
 ```
 
 A `Service Definition` is a JSON object that specifies the lifecyle methods of a Service (start, stop). 
-    1. `start_command`. This command sets up the service and outputs any meaningful information as part of the JSON output. The JSON output must be written to the named pipe which is passed in as the second argument to the command. The first argument is the Service Configuration. The JSON output of any given Service must have a well-defined and documented schema.
-    2. `stop_command`. This command carries out any required regardless of test outcome. It is important for the test runner to ensure that this is run on both success and failure
+    1. `start_command`. This command sets up the service and outputs any meaningful information as part of the JSON output. The value is an array to avoid CLI ambiguity.
+    2. `stop_command`. This command carries out any required regardless of test outcome. It is important for the test runner to ensure that this is run on both success and failure. The value is an array to avoid CLI ambiguity.
     3. `service_type`. This is optional and for the future. The `service_type` specifies a internal implementation of a Service. The internal implementation come from a standard library provided by and maintened by the Infrastructure team.
 ```
 {
-  "service_name": "mysql_service",
-  "service_type": "myql",
-  "start_command": "mysql_start.sh",
-  "stop_command": "mysql_stop.sh"
+  "service_type": "mysql",
+  "start_command": [ "mysql_start.sh"
+  "stop_command": [ "mysql_stop.sh" ]
 }
 ```
 
@@ -96,18 +95,17 @@ The `Service Engine` is a combination of steps defined in the `Test Runner`. The
 
 A `Test Case` is a sequence of steps that goes through a scenario to validate some given functianlity. It should really include at least one step making an assertion as part of the validation.
 
-A `Context` is a temporary store within a test case. Steps can read and write from the store. The key `service_name` will be used to identify this output.
+A `Context` is a temporary store within a test case. Steps can read and write from the store.
 
 Here is an example of the components in this architecture working together.
 
 1. Service definitions exist for Conjur and MySQL
-    1. In this example it is MySQL and Conjur. As mentioned in the description of Service Definition, output from `start_command` is written into the test case `context` under a path corresponding to `service_name`. An example for MySQL is provided below.
+    1. In this example it is MySQL and Conjur. An example for MySQL is provided below.
     ```
     {
-      "service_name": "mysql_service",
-      "service_type": "myql",
-      "start_command": "mysql_start.sh", # imagine that "mysql_start.sh" calls out to "helm install"
-      "stop_command": "mysql_stop.sh"
+      "service_type": "mysql",
+      "start_command": [ "mysql_start.sh" ], # imagine that "mysql_start.sh" calls out to "helm install"
+      "stop_command": [ "mysql_stop.sh" ]
     }
     ```
 1. Service Configs exist for Conjur and MySQL. These files would exist as `./mysql_config.json` and `./conjur_config.json`. An example for Conjur is provided below
@@ -138,11 +136,11 @@ Here is an example of the components in this architecture working together.
     Feature: Secretless happy path with database connectors
     
       Scenario: Connection to MySQL with MySQL credentials stored in Conjur
-        Given services are running as defined in "./services.json" and the results are store in context path "services"
-        When I store secrets defined in "./conjur-secrets.json" to Conjur using credentials in context path "services.conjur_service.creds"
-        And I create an identity for an application as defined in "./application_identity.json" using credentials in context path "services.conjur_service.creds""
-        And I deploy a test app as defined in "./test-app.yml"
-        Then the app is able to connect to MYSQL on "localhost:332"
+        Given running services in ./services.json
+        When I store secrets ./conjur-secrets.json to Conjur
+        And I create an app identity ./application_identity.json
+        And I deploy a test app ./test-app.yml
+        Then the app can connect to MYSQL on "localhost:332"
     ```
 1. The command `cucumber` is called to run test cases. The command is configurable and allows the runner to select a subset of all tests to run.
 

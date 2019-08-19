@@ -7,7 +7,9 @@ set -euo pipefail
 
 # Prepare Docker images
 function prepareTestEnvironment() {
-  docker build --rm --tag "gke-utils:latest" -f Dockerfile .
+  # Pipe the Dockerfile into the command to avoid sending the whole
+  # context to Docker
+  docker build --rm --tag "gke-utils:latest" - < Dockerfile
 }
 
 # Delete an image from GCR, unless it is has multiple tags pointing to it

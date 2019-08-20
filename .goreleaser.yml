@@ -1,9 +1,12 @@
 project_name: secretless-broker
 
 builds:
-- binary: summon2
+- &summon-2-build
+  id: summon2-linux
+  main: ./cmd/summon2/main.go
+  binary: summon2
   env:
-  - CGO_ENABLED=0
+  - CGO_ENABLED=1
   # Tag 'netgo' is a Go build tag that ensures a pure Go networking stack
   # in the resulting binary instead of using the default host's stack to
   # ensure a fully statically-linked artifact that has no lib dependencies.
@@ -13,13 +16,32 @@ builds:
   - linux
   goarch:
   - amd64
-  id: summon2
   # These flags generate a statically-linked artifact that allows the binary
   # to run on any linux-based OS.
   ldflags: -s -w -linkmode external -extldflags "-static"
-  main: ./cmd/summon2/main.go
 
-- binary: secretless-broker
+- <<: *summon-2-build
+  id: summon2-osx
+  env:
+  - CGO_ENABLED=1
+  - CC=o64-clang
+  - CXX=o64-clang++
+  goos:
+  - darwin
+  goarch:
+  - amd64
+  # Building for OSX with -extldflags "-static" results in the error:
+  # ld: library not found for -lcrt0.o
+  # This is because static builds are only possible if all libraries
+  # (including libgcc.a) have also been compiled with -static.
+  # A static version of crt0.o is not provided
+  # with the OSX SDK
+  ldflags: -s -w -linkmode external
+
+- &secretless-broker-build
+  id: secretless-broker-linux
+  main: ./cmd/secretless-broker/main.go
+  binary: secretless-broker
   env:
   - CGO_ENABLED=1
   # Tag 'netgo' is a Go build tag that ensures a pure Go networking stack
@@ -31,12 +53,28 @@ builds:
   - linux
   goarch:
   - amd64
-  id: secretless-broker
   # The `Tag` override is there to provide the git commit information in the
   # final binary. See `Static long version tags` in the `Building` section
   # of `CONTRIBUTING.md` for more information.
   ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}" -extldflags "-static"
-  main: ./cmd/secretless-broker/main.go
+
+- <<: *secretless-broker-build
+  id: secretless-broker-osx
+  env:
+  - CGO_ENABLED=1
+  - CC=o64-clang
+  - CXX=o64-clang++
+  goos:
+  - darwin
+  goarch:
+  - amd64
+  # Building for OSX with -extldflags "-static" results in the error:
+  # ld: library not found for -lcrt0.o
+  # This is because static builds are only possible if all libraries
+  # (including libgcc.a) have also been compiled with -static.
+  # A static version of crt0.o is not provided
+  # with the OSX SDK
+  ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}"
 
 archives:
   - id: secretless-release-archive
@@ -55,6 +93,19 @@ checksum:
   name_template: 'SHA256SUMS.txt'
 
 dist: ./dist/goreleaser
+
+brews:
+  - description: Secures your apps by making them Secretless
+    homepage: https://secretless.io
+    url_template: https://github.com/cyberark/secretless-broker/releases/download/v{{.Version}}/secretless-broker_{{.Version}}_darwin_amd64.tar.gz
+    install: |
+      bin.install "secretless-broker"
+    test: |
+      system "#{bin}/secretless-broker", "-version"
+    github:
+      owner: cyberark
+      name: homebrew-tools
+    skip_upload: true
 
 nfpms:
   - bindir: /usr/bin

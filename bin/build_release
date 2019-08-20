@@ -2,20 +2,25 @@
 
 CURRENT_DIR=$("$(dirname "$0")/abspath")
 
-GORELEASER_IMAGE="goreleaser/goreleaser:latest-cgo"
+# xgo because it allows cross-compilation
+GORELEASER_IMAGE="cyberark/goreleaser:latest-xgo"
 
-GORELEASER_ARGS="--rm-dist"
+GORELEASER_ARGS=("--rm-dist")
 if [[ "${SNAPSHOT}" == "true" ]]; then
-  GORELEASER_ARGS+=" --snapshot"
+  GORELEASER_ARGS+=("--snapshot")
 fi
 
 echo "Current dir: $CURRENT_DIR"
 
-docker pull "${GORELEASER_IMAGE}"
+# TODO: the image cyberark/goreleaser:latest-xgo will need to be pushed
+# TODO: to Dockerhub, and the command below should become
+# TODO: docker pull cyberark/goreleaser:latest-xgo
+# NOTE: Piping the Dockerfile sends an empty context to docker build
+docker build -t "${GORELEASER_IMAGE}" - < "$CURRENT_DIR/Dockerfile.releaser"
 
 docker run --rm -it \
   --volume "$CURRENT_DIR/..:/secretless-broker" \
   --workdir /secretless-broker \
-  "${GORELEASER_IMAGE}" "${GORELEASER_ARGS}"
+  "${GORELEASER_IMAGE}" "${GORELEASER_ARGS[@]}"
 
 echo "Releases built. Archives can be found in dist/goreleaser"

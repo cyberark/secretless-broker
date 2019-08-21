@@ -70,6 +70,7 @@ A `Service` is any external software that end to end tests rely on e.g. Conjur, 
 A `Service Config` is a JSON object that specifies information required for a service to be created e.g. for Conjur `CONJUR_ACCOUNT`, `version` etc. Conjur will have different configuration options to Postgres. These options must be documented for each Service. Ideally this would be in a centralized repository. It's important for all users of a Service to know what they're able to configure on a service.
 ```
 {
+  "service_type": "conjur",
   "conjur_account": "test",
   "version": "10.9",
   "admin_user": "kumbi",
@@ -84,14 +85,14 @@ A `Service Definition` is a JSON object that specifies the lifecyle methods of a
 ```
 {
   "service_type": "mysql",
-  "start_command": [ "mysql_start.sh"
+  "start_command": [ "mysql_start.sh" ],
   "stop_command": [ "mysql_stop.sh" ]
 }
 ```
 
-A `Test Runner`  is software that provides a conventional way for defining and running test cases. They typically come with capabilities to measure test metrics, test outcomes and code coverage. This will also allow historical tracking. An example of a test-runner is Cucumber. Test cases can be defined as a sequence of steps in the Gherkin language. The step definitions are written in the language of the test runner e.g. Python, Ruby, Go. In this case we're strongly considering adopting `Cucumber` in Ruby as the test-runner. Ruby because of the ubiquity of working knowledge of that language in the team and the fact that there are Ruby Cucumber test suites that exist within some of our repos.
+A `Test Runner` is software that provides a conventional way for defining and running test cases. They typically come with capabilities to measure test metrics, test outcomes and code coverage. This will also allow historical tracking. An example of a test-runner is Cucumber. Test cases can be defined as a sequence of steps in the Gherkin language. The step definitions are written in the language of the test runner e.g. Python, Ruby, Go. In this case we're strongly considering adopting `Cucumber` in Ruby as the test-runner. Ruby because of the ubiquity of working knowledge of that language in the team and the fact that there are Ruby Cucumber test suites that exist within some of our repos.
 
-The `Service Engine` is a combination of steps defined in the `Test Runner`. The Engine orchestrates the lifecycle of a Service. It provides step definitions for starting Services, stopping services regardless of the test outcome, creating named pipes for the Service output and writing that to the test context.
+The `Service Engine` is a combination of steps defined in the `Test Runner`. The Engine orchestrates the lifecycle of a Service. It provides step definitions for starting Services, stopping services regardless of the test outcome, wrapping the Service output and writing that to either files or stdout of the launched service instance.
 
 A `Test Case` is a sequence of steps that goes through a scenario to validate some given functianlity. It should really include at least one step making an assertion as part of the validation.
 
@@ -111,6 +112,7 @@ Here is an example of the components in this architecture working together.
 1. Service Configs exist for Conjur and MySQL. These files would exist as `./mysql_config.json` and `./conjur_config.json`. An example for Conjur is provided below
     ```
     {
+      "service_type": "conjur"
       "conjur_account": "test",
       "version": "10.9",
       "docker_image": "registry.tld/conjur-appliance:10.9-stable"
@@ -118,18 +120,14 @@ Here is an example of the components in this architecture working together.
       "admin_password": "definetelyasecret"
     }
     ```
-1. A service instances file exists for the test case under consideration. This file contains an array of Service Definition and Service Config pairs. This files would be called `services.json`
+1. A service instances file exists for the test case under consideration. This file contains an array of Service Definition and Service Config pairs. This files would be called `services.json`. Names would be resolved into `./<name>.json` in the service configuration folder.
     ```
-    [
-      {
-          "config": "./mysql_config.json",
-          "service_definition": "mysql_service",
-      },
-      {
-          "config": "./conjur_config.json",
-          "service_definition": "conjur_service"
-      }
-    ]
+    {
+      "configs": [
+          "mysql_config",
+          "conjur_config"
+      ]
+    }
     ```
 1. There is a test case written in Gherkin for validating using the MySQL service connector with Conjur. See below that there is an expliit step specifying the services that are expected to be running. 
     ```

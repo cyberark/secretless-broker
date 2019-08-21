@@ -2,7 +2,6 @@ package v2
 
 //TODO: should we throw custom errors?
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,9 +13,9 @@ func v2DbExample() *Config {
 	return &Config{
 		Services: []*Service{
 			{
-				Name:     "test-db",
-				Protocol: "pg",
-				ListenOn: "tcp://0.0.0.0:2345",
+				Name:      "test-db",
+				Connector: "pg",
+				ListenOn:  "tcp://0.0.0.0:2345",
 				Credentials: []*Credential{
 					{
 						Name: "TestSecret1",
@@ -29,7 +28,7 @@ func v2DbExample() *Config {
 						Get:  "some-id-2",
 					},
 				},
-				ProtocolConfig: nil,
+				ConnectorConfig: nil,
 			},
 		},
 	}
@@ -39,9 +38,9 @@ func v2HttpExample() *Config {
 	return &Config{
 		Services: []*Service{
 			{
-				Name:     "test-http",
-				Protocol: "http",
-				ListenOn: "tcp://0.0.0.0:2345",
+				Name:      "test-http",
+				Connector: "aws",
+				ListenOn:  "tcp://0.0.0.0:2345",
 				Credentials: []*Credential{
 					{
 						Name: "TestSecret1",
@@ -54,9 +53,8 @@ func v2HttpExample() *Config {
 						Get:  "some-id-2",
 					},
 				},
-				ProtocolConfig: []byte(`
+				ConnectorConfig: []byte(`
 {
-	"authenticationStrategy": "aws",
 	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]
 }
 `),
@@ -82,27 +80,15 @@ func TestHttpServiceConversion(t *testing.T) {
 
 	t.Run("nil config errors", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v2.Services[0].ProtocolConfig = nil
-		_, err := NewV1ConfigFromV2Config(v2)
-		assert.Error(t, err)
-	})
-
-	t.Run("missing authenticationStrategy errors", func(t *testing.T) {
-		v2 := v2HttpExample()
-		v2.Services[0].ProtocolConfig = []byte(`
-{
-	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]
-}
-`)
+		v2.Services[0].ConnectorConfig = nil
 		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
 	})
 
 	t.Run("missing authenticateURLsMatching errors", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v2.Services[0].ProtocolConfig = []byte(`
+		v2.Services[0].ConnectorConfig = []byte(`
 {
-	"authenticationStrategy": "aws"
 }`)
 		_, err := NewV1ConfigFromV2Config(v2)
 		assert.Error(t, err)
@@ -112,33 +98,16 @@ func TestHttpServiceConversion(t *testing.T) {
 		v2 := v2HttpExample()
 
 		for _, strategy := range HTTPAuthenticationStrategies {
-			config := fmt.Sprintf(`
-{
-	"authenticationStrategy": "%s",
-	"authenticateURLsMatching": ["^http://blah*"]
-}`, strategy)
-			v2.Services[0].ProtocolConfig = []byte(config)
+			v2.Services[0].Connector = strategy.(string)
 			_, err := NewV1ConfigFromV2Config(v2)
 			assert.NoError(t, err)
 		}
 	})
 
-	t.Run("invalid auth strategies rejected", func(t *testing.T) {
-		v2 := v2HttpExample()
-		v2.Services[0].ProtocolConfig = []byte(`
-{
-	"authenticationStrategy": "SHOULD FAIL",
-	"authenticateURLsMatching": ["^http://aws*", "amzn.com"]
-}`)
-		_, err := NewV1ConfigFromV2Config(v2)
-		assert.Error(t, err)
-	})
-
 	t.Run("authenticateURLsMatching accepts strings", func(t *testing.T) {
 		v2 := v2HttpExample()
-		v2.Services[0].ProtocolConfig = []byte(`
+		v2.Services[0].ConnectorConfig = []byte(`
 {
-	"authenticationStrategy": "aws",
 	"authenticateURLsMatching": "^http://aws*"
 }`)
 		v1, err := NewV1ConfigFromV2Config(v2)

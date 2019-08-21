@@ -11,7 +11,14 @@ type configYAML struct {
 }
 
 type serviceYAML struct {
+	// Protocol specifies the service connector by protocol.
+	// It is an internal detail.
+	//
+	// Deprecated: Protocol exists for historical compatibility
+	// and should not be used. To specify the service connector,
+	// use the Connector field.
 	Protocol    string          `yaml:"protocol" json:"protocol"`
+	Connector   string          `yaml:"connector" json:"connector"`
 	ListenOn    string          `yaml:"listenOn" json:"listenOn"`
 	Credentials credentialsYAML `yaml:"credentials" json:"credentials"`
 	Config      interface{}     `yaml:"config" json:"config"`

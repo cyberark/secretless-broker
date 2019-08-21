@@ -1,8 +1,10 @@
 package v2
 
 import (
+	"fmt"
 	"sort"
 
+	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
@@ -19,11 +21,11 @@ type Config struct {
 // location of its required credentials, and (optionally) any additional
 // protocol specific configuration.
 type Service struct {
-	Credentials    []*Credential
-	ListenOn       string
-	Name           string
-	Protocol       string
-	ProtocolConfig []byte
+	Connector       string
+	ConnectorConfig []byte
+	Credentials     []*Credential
+	ListenOn        string
+	Name            string
 }
 
 // NewV1Config converts the bytes of a v2 YAML file to a v1.Config.  As such,
@@ -88,9 +90,42 @@ func NewConfig(v2YAML []byte) (*Config, error) {
 		services = append(services, svc)
 	}
 
+	// sort Services
+	sort.Slice(services, func(i, j int) bool {
+		return services[i].Name < services[j].Name
+	})
+
 	return &Config{
 		Services: services,
 	}, nil
+}
+
+// connectorFromLegacyHTTPConfig extracts authenticationStrategy.
+// This function is useful when the deprecated 'protocol' field equals 'http'
+// and you want to determine the connector name
+func connectorFromLegacyHTTPConfig(connectorConfigBytes []byte) (string, error) {
+	tempCfg := &struct {
+		AuthenticationStrategy string `yaml:"authenticationStrategy"`
+	}{}
+	err := yaml.Unmarshal(connectorConfigBytes, tempCfg)
+	if err != nil {
+		return "", err
+	}
+
+	err = validation.ValidateStruct(
+		tempCfg,
+		validation.Field(
+			&tempCfg.AuthenticationStrategy,
+			validation.Required,
+			validation.In(HTTPAuthenticationStrategies...),
+		),
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return tempCfg.AuthenticationStrategy, nil
 }
 
 // NewService creates a named v2.Service from yaml bytes
@@ -100,19 +135,37 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 		return nil, err
 	}
 
-	svc := &Service{
-		Credentials:    credentials,
-		ListenOn:       svcYAML.ListenOn,
-		Name:           svcName,
-		Protocol:       svcYAML.Protocol,
-		ProtocolConfig: nil,
+	connectorConfigBytes, err := yaml.Marshal(svcYAML.Config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse 'config' key for service '%s': %s", svcName, err)
 	}
 
-	configBytes, err := yaml.Marshal(svcYAML.Config)
-	if err != nil {
-		return nil, err
+	connector := svcYAML.Connector
+
+	// Attempt to use legacy 'protocol' when 'connector' is missing
+	if connector == "" {
+		connector = svcYAML.Protocol
+		if connector == "" {
+			return nil, fmt.Errorf("missing 'connector' key on service '%s'", svcName)
+		}
+
+		// When the deprecated 'protocol' field equals 'http'
+		// the connector name must be extracted from the http config
+		if connector == "http" {
+			connector, err = connectorFromLegacyHTTPConfig(connectorConfigBytes)
+			if err != nil {
+				return nil, fmt.Errorf("error on http config for service '%s': %s", svcName, err)
+			}
+		}
 	}
-	svc.ProtocolConfig = configBytes
+
+	svc := &Service{
+		Credentials:     credentials,
+		ListenOn:        svcYAML.ListenOn,
+		Name:            svcName,
+		Connector:       connector,
+		ConnectorConfig: connectorConfigBytes,
+	}
 
 	return svc, nil
 }

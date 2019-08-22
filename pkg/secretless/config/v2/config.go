@@ -2,6 +2,7 @@ package v2
 
 import (
 	"fmt"
+	"log"
 	"sort"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -157,15 +158,15 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 				return nil, fmt.Errorf("error on http config for service '%s': %s", svcName, err)
 			}
 		}
+	} else if svcYAML.Protocol != "" {
+		log.Printf("WARN: 'connector' and 'protocol' keys found on service '%s'. 'connector' key takes precendence, 'protocol' is deprecated.", svcName)
 	}
 
-	svc := &Service{
+	return &Service{
 		Credentials:     credentials,
 		ListenOn:        svcYAML.ListenOn,
 		Name:            svcName,
 		Connector:       connector,
 		ConnectorConfig: connectorConfigBytes,
-	}
-
-	return svc, nil
+	}, nil
 }

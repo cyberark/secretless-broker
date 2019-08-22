@@ -137,7 +137,7 @@ services:
   ###
 
   postgres-db:
-    protocol: pg
+    connector: pg
     listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
     credentials:
       host: postgres.my-service.internal
@@ -154,12 +154,11 @@ services:
   # http handler example
   ###
       
-  # the config for the http protocol has two required values:
-  #   `authenticationStrategy` which indicates which specific http protocol implementation to use (eg `type`)
+  # the config for the http protocol has one required value:
   #   `authenticateURLsMatching` which gives a regex pattern for request URIs that use Secretless for auth (eg `match`)
   
   aws-client:
-    protocol: http
+    connector: http
     listenOn: unix:///var/docker/docker.sock
     credentials:
       accessKeyID:
@@ -172,11 +171,10 @@ services:
         from: conjur
         get: id-of-secret-in-conjur
     config:
-      authenticationStrategy: aws
       authenticateURLsMatching: ^http.*
 
   conjur-client:
-    protocol: http
+    connector: http
     listenOn: http://127.0.0.1:8080
     credentials:
       accessToken:
@@ -184,7 +182,6 @@ services:
         get: /path/to/file
       forceSSL: true
     config:
-      authenticationStrategy: conjur
       authenticateURLsMatching: ^http://srdjan.com*
 
   ###
@@ -192,7 +189,7 @@ services:
   ###
 
   ssh-proxy:
-    protocol: ssh
+    connector: ssh
     listenOn: tcp://0.0.0.0:2222
     credentials:
       address: "localhost"

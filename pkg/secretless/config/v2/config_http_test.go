@@ -10,7 +10,6 @@ func TestNewHTTPConfig(t *testing.T) {
 	t.Run("http config hydration with 'authenticateURLsMatching' string", func(t *testing.T) {
 		configFileContents := []byte(
 			`
-authenticationStrategy: aws
 authenticateURLsMatching: "*"
 `)
 		cfg, _ := newHTTPConfig(configFileContents)
@@ -20,7 +19,6 @@ authenticateURLsMatching: "*"
 	t.Run("http config hydration with 'authenticateURLsMatching' string list", func(t *testing.T) {
 		configFileContents := []byte(
 			`
-authenticationStrategy: aws
 authenticateURLsMatching: 
  - "*"
 `)
@@ -31,7 +29,6 @@ authenticateURLsMatching:
 	t.Run("error on bad type for 'authenticateURLsMatching' list", func(t *testing.T) {
 		configFileContents := []byte(
 			`
-authenticationStrategy: aws
 authenticateURLsMatching: 
  - true
  - "meow"
@@ -43,7 +40,6 @@ authenticateURLsMatching:
 	t.Run("error on bad type for 'authenticateURLsMatching' scalar", func(t *testing.T) {
 		configFileContents := []byte(
 			`
-authenticationStrategy: aws
 authenticateURLsMatching: false
 `)
 		_, err := newHTTPConfig(configFileContents)

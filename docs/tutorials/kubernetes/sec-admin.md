@@ -373,7 +373,7 @@ cat << EOF > secretless.yml
 version: "2"
 services:
   pets-pg:
-    protocol: pg
+    connector: pg
     listenOn: tcp://localhost:5432
     credentials:
       host:

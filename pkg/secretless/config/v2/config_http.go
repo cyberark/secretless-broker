@@ -77,7 +77,8 @@ func (cfg *httpConfig) UnmarshalYAML(bytes []byte) error {
 	return nil
 }
 
-// validate ensures AuthenticationStrategy neither field is empty
+// validate carries out validation of httpConfig
+// ensuring that the validation rules of fields are met
 func (cfg *httpConfig) validate() error {
 	return validation.ValidateStruct(
 		cfg,

@@ -1,4 +1,5 @@
 .env
+c.out
 bench.*
 debug
 debug.*

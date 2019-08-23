@@ -2,22 +2,29 @@ package v2
 
 import (
 	"errors"
-
 	"github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
 
 type httpConfig struct {
-	AuthenticationStrategy   string   `yaml:"authenticationStrategy"`
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
 }
 
 // HTTPAuthenticationStrategies are the different ways an http service
 // can authenticate.
-var HTTPAuthenticationStrategies = []string{
+var HTTPAuthenticationStrategies = []interface{}{
 	"aws",
 	"basic_auth",
 	"conjur",
+}
+
+func isHTTPConnector(connector string) bool {
+	for _, strategy := range HTTPAuthenticationStrategies {
+		if strategy == connector {
+			return true
+		}
+	}
+	return false
 }
 
 func newHTTPConfig(cfgBytes []byte) (*httpConfig, error) {
@@ -36,49 +43,45 @@ func newHTTPConfig(cfgBytes []byte) (*httpConfig, error) {
 }
 
 func (cfg *httpConfig) UnmarshalYAML(bytes []byte) error {
-	err := yaml.Unmarshal(bytes, cfg)
-
-	// A string type is converted into [] by default, so we must verify length.
-	// If this passes, all is good and we can return.
-	if ok := err == nil && len(cfg.AuthenticateURLsMatching) > 0; ok {
-		return nil
-	}
-
-	// Unmarshall into a temp struct that expects a string
+	// Unmarshall into a temp struct
+	//
+	// This temp struct makes it possible to parse 'authenticateURLsMatching' as
+	// string or []string
 	tempCfg := &struct {
-		AuthenticationStrategy   string `yaml:"authenticationStrategy"`
-		AuthenticateURLsMatching string `yaml:"authenticateURLsMatching"`
+		AuthenticateURLsMatching interface{} `yaml:"authenticateURLsMatching"`
 	}{}
-	err = yaml.Unmarshal(bytes, tempCfg)
-
-	// It must succeed with a non-empty string
-	if ok := err == nil && len(tempCfg.AuthenticateURLsMatching) > 0; !ok {
-		return errors.New("http ProtocolConfig could not be parsed")
+	err := yaml.Unmarshal(bytes, tempCfg)
+	if err != nil {
+		return errors.New("http ConnectorConfig could not be parsed")
 	}
 
-	// It's a string, let's convert it to a []string
-	cfg.AuthenticationStrategy = tempCfg.AuthenticationStrategy
-	cfg.AuthenticateURLsMatching = []string{ tempCfg.AuthenticateURLsMatching }
+	// Populate actual http config from tempCfg
+	switch v := tempCfg.AuthenticateURLsMatching.(type) {
+	case string:
+		cfg.AuthenticateURLsMatching = []string{ v }
+	case []interface{}:
+		urlMatchStrings := make([]string, len(v))
+		for i, urlMatch := range v {
+			urlMatchString, ok := urlMatch.(string)
+			if !ok {
+				return errors.New("'authenticateURLsMatching' key has incorrect type, must be a string or list of strings")
+			}
+			urlMatchStrings[i] = urlMatchString
+		}
+
+		cfg.AuthenticateURLsMatching = urlMatchStrings
+	default:
+		return errors.New("'authenticateURLsMatching' key has incorrect type, must be a string or list of strings")
+	}
 
 	return nil
 }
 
-// validate ensures AuthenticationStrategy neither field is empty, and that
-// AuthentcationStrategy is a valid value
+// validate carries out validation of httpConfig
+// ensuring that the validation rules of fields are met
 func (cfg *httpConfig) validate() error {
-	// convert strategies from []string to []interface{} for validation.In
-	var availStrategies []interface{}
-	for _, s := range HTTPAuthenticationStrategies {
-		availStrategies = append(availStrategies, s)
-	}
-
 	return validation.ValidateStruct(
 		cfg,
-		validation.Field(
-			&cfg.AuthenticationStrategy,
-			validation.Required,
-			validation.In(availStrategies...),
-		),
 		// AuthenticateURLsMatching cannot be empty
 		validation.Field(&cfg.AuthenticateURLsMatching, validation.Required),
 	)

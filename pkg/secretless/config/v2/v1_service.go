@@ -26,10 +26,16 @@ type v1Service struct {
 func newV1Service(v2Svc Service) (ret *v1Service, err error) {
 	// Create basic Service
 
+	// Extract v1 Protocol from v2 Connector
+	protocol := v2Svc.Connector
+	if isHTTPConnector(protocol) {
+		protocol = "http"
+	}
+
 	ret = &v1Service{
 		Listener: &config_v1.Listener{
 			Name:     v2Svc.Name,
-			Protocol: v2Svc.Protocol,
+			Protocol: protocol,
 		},
 		Handler: &config_v1.Handler{
 			Name:         v2Svc.Name,
@@ -71,24 +77,25 @@ func newV1Service(v2Svc Service) (ret *v1Service, err error) {
 
 	// Apply protocol specific config
 
-	if err = ret.applyProtocolConfig(v2Svc.ProtocolConfig); err != nil {
+	if err = ret.applyProtocolConfig(v2Svc); err != nil {
 		return nil, err
 	}
 
 	return ret, nil
 }
 
-func (v1Svc *v1Service) applyProtocolConfig(cfgBytes []byte) error {
+func (v1Svc *v1Service) applyProtocolConfig(v2Svc Service) error {
+	cfgBytes := v2Svc.ConnectorConfig
 	switch v1Svc.Listener.Protocol {
 	case "http":
-		if err := v1Svc.configureHTTP(cfgBytes); err != nil {
+		if err := v1Svc.configureHTTP(v2Svc.Connector, cfgBytes); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (v1Svc *v1Service) configureHTTP(cfgBytes []byte) error {
+func (v1Svc *v1Service) configureHTTP(connectorName string, cfgBytes []byte) error {
 	if len(cfgBytes) == 0 {
 		return fmt.Errorf("empty http config")
 	}
@@ -99,7 +106,7 @@ func (v1Svc *v1Service) configureHTTP(cfgBytes []byte) error {
 	}
 
 	v1Svc.Handler.Match = httpCfg.AuthenticateURLsMatching
-	v1Svc.Handler.Type = httpCfg.AuthenticationStrategy
+	v1Svc.Handler.Type = connectorName
 
 	return nil
 }

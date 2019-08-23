@@ -23,7 +23,7 @@ Broker should be running. Your `secretless.yml` might look something like:
 version: "2"
 services:
   my_webapp_connector:
-    protocol: http
+    connector: basic_auth
     listenOn: tcp://0.0.0.0:8080
     credentials:
       username:
@@ -33,7 +33,6 @@ services:
         from: env
         get: WEBAPP_PASSWORD
     config:
-      authenticationStrategy: basic_auth
       authenticateURLsMatching:
         - ^http.*
 ```

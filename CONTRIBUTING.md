@@ -271,7 +271,7 @@ replace `<GOOS>/<GOARCH>` with your particular operating system and compilation 
    version: "2"
    services:
      pg_tcp:
-       protocol: pg
+       connector: pg
        listenOn: tcp://0.0.0.0:15432
        credentials:
          host:

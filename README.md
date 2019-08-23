@@ -232,7 +232,7 @@ Write a `secretless.yml` file that includes:
 version: "2"
 services:
   pg-db:
-    protocol: pg
+    connector: pg
     listenOn: tcp://0.0.0.0:4321
     credentials:
       host: localhost

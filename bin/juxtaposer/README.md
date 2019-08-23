@@ -95,7 +95,7 @@ performance._
 version: 2
 services:
   mysql-socket:
-    protocol: mysql
+    connector: mysql
     listenOn: unix:///tmp/mysql
     credentials:
       username: myuser
@@ -105,7 +105,7 @@ services:
       sslmode: disable
 
   pg-socket:
-    protocol: pg
+    connector: pg
     listenOn: unix:///tmp/.s.PGSQL.5432
     credentials:
       username: myuser

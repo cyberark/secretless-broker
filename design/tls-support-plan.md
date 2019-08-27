@@ -254,7 +254,7 @@ depend on your use case.
 version: "2"
 services:
   pg_connector:
-    protocol: pg
+    connector: pg
     listenOn: tcp://0.0.0.0:5432
     credentials:
       host: postgres.my-service.internal
@@ -269,7 +269,7 @@ services:
 version: "2"
 services:
   pg_connector:
-    protocol: pg
+    connector: pg
     listenOn: tcp://0.0.0.0:5432
     credentials:
       host: postgres.my-service.internal
@@ -300,7 +300,7 @@ services:
 version: "2"
 services:
   pg_connector:
-    protocol: pg
+    connector: pg
     listenOn: unix:///sock/.s.PGSQL.5432
     credentials:
       host: postgres.my-service.internal

@@ -12,7 +12,7 @@ demonstrates all the features of a v2 yaml file:
     version: 2
     services:
       http_basic_auth:
-        protocol: http
+        connector: basic_auth
         listenOn: tcp://0.0.0.0:8080
         credentials:
           username: someuser
@@ -20,7 +20,6 @@ demonstrates all the features of a v2 yaml file:
             from: conjur
             get: testpassword
           config:
-            authenticationStrategy: basic_auth
             authenticateURLsMatching:
               - ^http.
 

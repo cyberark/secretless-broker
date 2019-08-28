@@ -85,6 +85,12 @@ func prependString(prependString string, args ...interface{}) []interface{} {
 	return newArgs
 }
 
+// DebugEnabled returns if the debug logging should be displayed for a particular
+// logger instance
+func (logger *Logger) DebugEnabled() bool {
+	return logger.IsDebug
+}
+
 // ---------------------------
 // Main logging methods that funnel all the info here
 

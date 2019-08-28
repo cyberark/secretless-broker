@@ -87,6 +87,16 @@ func newOutputTest(methodName string, isDebug bool, prefix string) OutputTest {
 	}
 }
 
+func TestDebugEnabled(t *testing.T) {
+	assert.True(t, New(true).DebugEnabled())
+	assert.True(t, NewForService("abc", true).DebugEnabled())
+	assert.True(t, NewWithOptions(&bytes.Buffer{}, "abc", true).DebugEnabled())
+
+	assert.False(t, New(false).DebugEnabled())
+	assert.False(t, NewForService("abc", false).DebugEnabled())
+	assert.False(t, NewWithOptions(&bytes.Buffer{}, "abc", false).DebugEnabled())
+}
+
 func TestFormattedLogging(t *testing.T) {
 	// Iterate over prefixes and their string representation of the
 	// corresponding regexes

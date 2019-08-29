@@ -79,6 +79,7 @@ func NewConfig(buffer []byte) (*Config, error) {
 func (h Handler) Validate() (err error) {
 	err = validation.ValidateStruct(&h,
 		validation.Field(&h.Name, validation.Required),
+		validation.Field(&h.ListenerName, validation.Required),
 	)
 
 	return
@@ -115,6 +116,11 @@ func (l Listener) Validate() error {
 		allErrs["AddressOrSocket"] = fmt.Errorf("address or socket is required")
 	}
 
+	// Only one of Address or Socket must be non-empty
+	if l.Address != "" && l.Socket != "" {
+		allErrs["AddressOrSocket"] = fmt.Errorf("only one of address or socket must be provided")
+	}
+
 	return allErrs.Filter()
 }
 
@@ -131,6 +137,8 @@ func (c Config) Validate() error {
 
 	return validation.ValidateStruct(&c,
 		validation.Field(&c.Handlers, validation.Required, c.listenerRequired()),
+		validation.Field(&c.Listeners, validation.Required, c.handlerRequired()),
+		validation.Field(&c.Handlers, validation.Required),
 		validation.Field(&c.Listeners, validation.Required),
 		validation.Field(&c.Handlers),
 		validation.Field(&c.Listeners),
@@ -153,6 +161,32 @@ func (c Config) listenerRequired() validation.Rule {
 			if _, ok := availListeners[h.ListenerName]; !ok {
 				errors[strconv.Itoa(i)] = fmt.Errorf(
 					"has no associated listener",
+				)
+			}
+		}
+
+		return errors.Filter()
+	}
+
+	return validation.By(ruleFunc)
+}
+
+// handlerRequired returns a validation.Rule that will ensure every Listener has
+// an associated Handler.  We cannot define this rule on Listener itself,
+// because it needs access to the list of available handlers, which we provide
+// here by using a closure.
+func (c Config) handlerRequired() validation.Rule {
+	availHandlers := c.Handlers
+
+	// Create a custom validation.RuleFunc
+	ruleFunc := func(listeners interface{}) error {
+		errors := validation.Errors{}
+
+		for i, l := range listeners.([]Listener) {
+			lHandlers := l.LinkedHandlers(availHandlers)
+			if len(lHandlers) == 0 {
+				errors[strconv.Itoa(i)] = fmt.Errorf(
+					"has no associated handler",
 				)
 			}
 		}

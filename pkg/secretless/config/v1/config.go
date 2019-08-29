@@ -180,10 +180,9 @@ func (c Config) handlerRequired() validation.Rule {
 
 	// Create a custom validation.RuleFunc
 	ruleFunc := func(listeners interface{}) error {
-		ls := listeners.([]Listener)
 		errors := validation.Errors{}
 
-		for i, l := range ls {
+		for i, l := range listeners.([]Listener) {
 			lHandlers := l.LinkedHandlers(availHandlers)
 			if len(lHandlers) == 0 {
 				errors[strconv.Itoa(i)] = fmt.Errorf(

@@ -1,5 +1,4 @@
 .env
-c.out
 bench.*
 debug
 debug.*
@@ -39,3 +38,7 @@ github.com/cyberark/
 
 # Ignore any JSON results files
 results.json
+
+# Ignore test coverage files
+c.out
+coverage.xml

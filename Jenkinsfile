@@ -28,6 +28,7 @@ pipeline {
             sh './bin/test_unit'
 
             junit 'test/unit-test-output/junit.xml'
+            cobertura autoUpdateHealth: true, autoUpdateStability: true, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '30, 0, 0', failUnhealthy: true, failUnstable: false, lineCoverageTargets: '30, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '30, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
             ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
           }
         }

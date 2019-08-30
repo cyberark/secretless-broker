@@ -42,9 +42,18 @@ set -e
 
 rm -f "$junit_output_dir"/junit.xml
 
+# format test output XML
 docker run --rm \
   --volume "$junit_output_dir"/:/secretless/test/output/ \
   secretless-dev \
   bash -exc "
     cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml
+  "
+
+# format coverage output XML
+docker run --rm \
+  --volume "$toplevel_dir"/:/secretless/test/output/ \
+  secretless-dev \
+  bash -exc "
+    gocov convert ./test/output/c.out | gocov-xml > ./test/output/coverage.xml
   "

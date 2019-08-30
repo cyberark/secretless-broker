@@ -45,15 +45,15 @@ func TestAllOutputMethods(t *testing.T) {
 type logMethod func(...interface{})
 type logMethodF func(string, ...interface{})
 
-func isFormattedMethod(methName string) bool {
+func isFormattedMethod(methodName string) bool {
 	// Only formatted methods end in the letter f
 	formattedRe := regexp.MustCompile("f$")
-	return formattedRe.MatchString(methName)
+	return formattedRe.MatchString(methodName)
 }
 
-func isDebugOnlyMethod(methName string) bool {
-	return strings.HasPrefix(methName, "Debug") ||
-		strings.HasPrefix(methName, "Info")
+func isDebugOnlyMethod(methodName string) bool {
+	return strings.HasPrefix(methodName, "Debug") ||
+		strings.HasPrefix(methodName, "Info")
 }
 
 // Format strings and sample arguments used in the test cases
@@ -80,7 +80,7 @@ func NewLogTest(isDebug bool, prefix string) *LogTest {
 func (lt *LogTest) RunAllTests(t *testing.T) {
 
 	// Formatted methods
-	for methName, meth := range map[string]logMethodF{
+	for methodName, method := range map[string]logMethodF{
 		"Debugf": lt.logger.Debugf,
 		"Infof": lt.logger.Infof,
 		"Warnf": lt.logger.Warnf,
@@ -89,16 +89,16 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 	} {
 		lt.ResetBuffer()
 		t.Run(
-			lt.testName(methName),
+			lt.testDescription(methodName),
 			func(t *testing.T) {
-				meth(testCaseFormatStr, testCaseArgs...)
-				assert.Regexp(t, lt.expectedOutput(methName), lt.CurrentOutput())
+				method(testCaseFormatStr, testCaseArgs...)
+				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
 			},
 		)
 	}
 
 	// Unformatted methods
-	for methName, meth := range map[string]logMethod{
+	for methodName, method := range map[string]logMethod{
 		"Debug":   lt.logger.Debug,
 		"Debugln": lt.logger.Debugln,
 		"Info":    lt.logger.Info,
@@ -112,18 +112,18 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 	} {
 		lt.ResetBuffer()
 		t.Run(
-			lt.testName(methName),
+			lt.testDescription(methodName),
 			func(t *testing.T) {
-				meth(testCaseArgs...)
-				assert.Regexp(t, lt.expectedOutput(methName), lt.CurrentOutput())
+				method(testCaseArgs...)
+				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
 			},
 		)
 	}
 }
 
-func (lt *LogTest) expectedOutput(methName string) *regexp.Regexp {
+func (lt *LogTest) expectedOutput(methodName string) *regexp.Regexp {
 	// Debug methods produce no output unless debug is enabled
-	if isDebugOnlyMethod(methName) && !lt.logger.DebugEnabled() {
+	if isDebugOnlyMethod(methodName) && !lt.logger.DebugEnabled() {
 		return regexp.MustCompile("")
 	}
 
@@ -131,7 +131,7 @@ func (lt *LogTest) expectedOutput(methName string) *regexp.Regexp {
 
 	// expected content is different for formatted and unformatted methods
 	methodResultRe := `stringval 123 1\.234`
-	if isFormattedMethod(methName) {
+	if isFormattedMethod(methodName) {
 		methodResultRe = `aaa stringval bbb 123 ccc 1\.2 ddd\s{1,8}eee`
 	}
 
@@ -145,10 +145,10 @@ func (lt *LogTest) expectedOutput(methName string) *regexp.Regexp {
 	return regexp.MustCompile(fullLineRe)
 }
 
-func (lt *LogTest) testName(methName string) string {
+func (lt *LogTest) testDescription(methodName string) string {
 	return fmt.Sprintf(
 		"%s/prefix='%s'/isDebug=%t",
-		methName,
+		methodName,
 		lt.logger.Prefix(),
 		lt.logger.DebugEnabled(),
 	)

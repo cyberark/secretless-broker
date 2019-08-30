@@ -47,6 +47,9 @@ var formattedMethods = []string{
 	"Debugf", "Infof", "Warnf", "Errorf", "Panicf",
 }
 
+type logMethod func(...interface{})
+type logMethodF func(string, ...interface{})
+
 func isFormattedMethod(methName string) bool {
 	ret := false
 	for _, meth := range formattedMethods {
@@ -77,6 +80,31 @@ func NewLogTest(isDebug bool, prefix string) *LogTest {
 	}
 }
 
+func (lt *LogTest) LogMethodsF() map[string]logMethodF {
+	return map[string]logMethodF{
+		"Debugf": lt.logger.Debugf,
+		"Infof": lt.logger.Infof,
+		"Warnf": lt.logger.Warnf,
+		"Errorf": lt.logger.Errorf,
+		"Panicf": lt.logger.Panicf,
+	}
+}
+
+func (lt *LogTest) LogMethods() map[string]logMethod {
+	return map[string]logMethod{
+		"Debug": lt.logger.Debug,
+		"Debugln": lt.logger.Debugln,
+		"Info": lt.logger.Info,
+		"Infoln": lt.logger.Infoln,
+		"Warn": lt.logger.Warn,
+		"Warnln": lt.logger.Warnln,
+		"Error": lt.logger.Error,
+		"Errorln": lt.logger.Errorln,
+		"Panic": lt.logger.Panic,
+		"Panicln": lt.logger.Panicln,
+	}
+}
+
 func (lt *LogTest) ResetBuffer() {
 	lt.backingBuffer.Reset()
 }
@@ -89,60 +117,28 @@ func (lt *LogTest) CurrentOutput() string {
 func (lt *LogTest) RunAllTests(t *testing.T) {
 
 	// Formatted methods
-	lt.ResetBuffer()
-	t.Run(
-		lt.testName("Debugf"),
-		func(t *testing.T) {
-			lt.logger.Debugf(lt.formatStr(), lt.args()...)
-			assert.Regexp(t, lt.expectedOutput("Debugf"), lt.CurrentOutput())
-		},
-	)
-
-	lt.ResetBuffer()
-	t.Run(
-		lt.testName("Infof"),
-		func(t *testing.T) {
-			lt.logger.Infof(lt.formatStr(), lt.args()...)
-			assert.Regexp(t, lt.expectedOutput("Infof"), lt.CurrentOutput())
-		},
-	)
-
-	lt.ResetBuffer()
-	t.Run(
-		lt.testName("Warnf"),
-		func(t *testing.T) {
-			lt.logger.Warnf(lt.formatStr(), lt.args()...)
-			assert.Regexp(t, lt.expectedOutput("Warnf"), lt.CurrentOutput())
-		},
-	)
-
-	lt.ResetBuffer()
-	t.Run(
-		lt.testName("Errorf"),
-		func(t *testing.T) {
-			lt.logger.Errorf(lt.formatStr(), lt.args()...)
-			assert.Regexp(t, lt.expectedOutput("Errorf"), lt.CurrentOutput())
-		},
-	)
-
-	lt.ResetBuffer()
-	t.Run(
-		lt.testName("Panicf"),
-		func(t *testing.T) {
-			lt.logger.Panicf(lt.formatStr(), lt.args()...)
-			assert.Regexp(t, lt.expectedOutput("Panicf"), lt.CurrentOutput())
-		},
-	)
+	for methName, meth := range lt.LogMethodsF() {
+		lt.ResetBuffer()
+		t.Run(
+			lt.testName(methName),
+			func(t *testing.T) {
+				meth(lt.formatStr(), lt.args()...)
+				assert.Regexp(t, lt.expectedOutput(methName), lt.CurrentOutput())
+			},
+		)
+	}
 
 	// Unformatted methods
-	lt.ResetBuffer()
-	t.Run(
-		lt.testName("Debugln"),
-		func(t *testing.T) {
-			lt.logger.Debugln(lt.args()...)
-			assert.Regexp(t, lt.expectedOutput("Debugln"), lt.CurrentOutput())
-		},
-	)
+	for methName, meth := range lt.LogMethods() {
+		lt.ResetBuffer()
+		t.Run(
+			lt.testName(methName),
+			func(t *testing.T) {
+				meth(lt.args()...)
+				assert.Regexp(t, lt.expectedOutput(methName), lt.CurrentOutput())
+			},
+		)
+	}
 }
 
 func (lt *LogTest) formatStr() string {

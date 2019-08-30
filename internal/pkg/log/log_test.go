@@ -21,6 +21,8 @@ func TestDebugEnabled(t *testing.T) {
 	assert.False(t, NewWithOptions(&bytes.Buffer{}, "abc", false).DebugEnabled())
 }
 
+// Each LogTest tests every method on a single, configured Logger instance.
+// We create one test for each of the 4 possible tests
 func TestAllOutputMethods(t *testing.T) {
 	test := NewLogTest(true, "prefix")
 	test.RunAllTests(t)
@@ -35,20 +37,12 @@ func TestAllOutputMethods(t *testing.T) {
 	test.RunAllTests(t)
 }
 
-var allMethods = []string{
-	"Debug", "Debugf", "Debugln",
-	"Info", "Infof", "Infoln",
-	"Warn", "Warnf", "Warnln",
-	"Error", "Errorf", "Errorln",
-	"Panic", "Panicf", "Panicln",
-}
+type logMethod func(...interface{})
+type logMethodF func(string, ...interface{})
 
 var formattedMethods = []string{
 	"Debugf", "Infof", "Warnf", "Errorf", "Panicf",
 }
-
-type logMethod func(...interface{})
-type logMethodF func(string, ...interface{})
 
 func isFormattedMethod(methName string) bool {
 	ret := false
@@ -65,6 +59,8 @@ func isDebugOnlyMethod(methName string) bool {
 		strings.HasPrefix(methName, "Info")
 }
 
+// Type that represents a full test of a single Logger instance
+
 type LogTest struct {
 	logger logapi.Logger
 	backingBuffer *bytes.Buffer
@@ -80,44 +76,16 @@ func NewLogTest(isDebug bool, prefix string) *LogTest {
 	}
 }
 
-func (lt *LogTest) LogMethodsF() map[string]logMethodF {
-	return map[string]logMethodF{
+func (lt *LogTest) RunAllTests(t *testing.T) {
+
+	// Formatted methods
+	for methName, meth := range map[string]logMethodF{
 		"Debugf": lt.logger.Debugf,
 		"Infof": lt.logger.Infof,
 		"Warnf": lt.logger.Warnf,
 		"Errorf": lt.logger.Errorf,
 		"Panicf": lt.logger.Panicf,
-	}
-}
-
-func (lt *LogTest) LogMethods() map[string]logMethod {
-	return map[string]logMethod{
-		"Debug": lt.logger.Debug,
-		"Debugln": lt.logger.Debugln,
-		"Info": lt.logger.Info,
-		"Infoln": lt.logger.Infoln,
-		"Warn": lt.logger.Warn,
-		"Warnln": lt.logger.Warnln,
-		"Error": lt.logger.Error,
-		"Errorln": lt.logger.Errorln,
-		"Panic": lt.logger.Panic,
-		"Panicln": lt.logger.Panicln,
-	}
-}
-
-func (lt *LogTest) ResetBuffer() {
-	lt.backingBuffer.Reset()
-}
-
-func (lt *LogTest) CurrentOutput() string {
-	return lt.backingBuffer.String()
-}
-
-
-func (lt *LogTest) RunAllTests(t *testing.T) {
-
-	// Formatted methods
-	for methName, meth := range lt.LogMethodsF() {
+	} {
 		lt.ResetBuffer()
 		t.Run(
 			lt.testName(methName),
@@ -129,7 +97,18 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 	}
 
 	// Unformatted methods
-	for methName, meth := range lt.LogMethods() {
+	for methName, meth := range map[string]logMethod{
+		"Debug":   lt.logger.Debug,
+		"Debugln": lt.logger.Debugln,
+		"Info":    lt.logger.Info,
+		"Infoln":  lt.logger.Infoln,
+		"Warn":    lt.logger.Warn,
+		"Warnln":  lt.logger.Warnln,
+		"Error":   lt.logger.Error,
+		"Errorln": lt.logger.Errorln,
+		"Panic":   lt.logger.Panic,
+		"Panicln": lt.logger.Panicln,
+	} {
 		lt.ResetBuffer()
 		t.Run(
 			lt.testName(methName),
@@ -139,15 +118,6 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 			},
 		)
 	}
-}
-
-func (lt *LogTest) formatStr() string {
-	return "aaa %s bbb %d ccc %2.1f ddd \t eee"
-}
-
-// testArgsF returns sample arguments for formatting methods ending with an "f"
-func (lt *LogTest) args() []interface{} {
-	return []interface{}{ "stringval", 123, 1.234 }
 }
 
 func (lt *LogTest) expectedOutput(methName string) *regexp.Regexp {
@@ -174,6 +144,15 @@ func (lt *LogTest) expectedOutput(methName string) *regexp.Regexp {
 	return regexp.MustCompile(fullLineRe)
 }
 
+func (lt *LogTest) formatStr() string {
+	return "aaa %s bbb %d ccc %2.1f ddd \t eee"
+}
+
+// testArgsF returns sample arguments for formatting methods ending with an "f"
+func (lt *LogTest) args() []interface{} {
+	return []interface{}{ "stringval", 123, 1.234 }
+}
+
 func (lt *LogTest) testName(methName string) string {
 	return fmt.Sprintf(
 		"%s/prefix='%s'/isDebug=%t",
@@ -181,4 +160,12 @@ func (lt *LogTest) testName(methName string) string {
 		lt.logger.Prefix(),
 		lt.logger.DebugEnabled(),
 	)
+}
+
+func (lt *LogTest) ResetBuffer() {
+	lt.backingBuffer.Reset()
+}
+
+func (lt *LogTest) CurrentOutput() string {
+	return lt.backingBuffer.String()
 }

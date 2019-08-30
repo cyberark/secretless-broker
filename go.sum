@@ -16,6 +16,8 @@ github.com/cenkalti/backoff v2.0.0+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QH
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/codegangsta/cli v1.20.0 h1:iX1FXEgwzd5+XN6wk5cVHOGQj6Q3Dcp20lUeS4lHNTw=
 github.com/codegangsta/cli v1.20.0/go.mod h1:/qJNoX69yVSKu5o4jLyXAENLRyk1uhi7zkbQ3slBdOA=
+github.com/containous/yaegi v0.0.4 h1:ECZhLx2aA76lqZpCbM5mLdcIga9j8MmlcaJP2o1j044=
+github.com/containous/yaegi v0.0.4/go.mod h1:RLj4MAvN8JB1w40l4fn9dd/U1hH23CXABvro3D3gOBE=
 github.com/cyberark/conjur-api-go v0.5.2 h1:8ntk07YNRz5bBwjNXkDEAPR70Yr+J2MN8NGlkhaMC3k=
 github.com/cyberark/conjur-api-go v0.5.2/go.mod h1:hwaReWirzgKor+JtH6vbwZaASDXulvd0SzGCloC5uOc=
 github.com/cyberark/conjur-authn-k8s-client v0.13.0 h1:sKh0yS6lSHT34FnMRR738+Q0dP+ebC6N/h4Bm9rhq0A=

@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/base64"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -17,6 +18,7 @@ type BasicAuthHandler struct {
 // Authenticate applies the "username" and "password" credential to the Authorization header, following the
 // RFC: Basic "<base64(<username> + ":" + <password>)>"
 func (h BasicAuthHandler) Authenticate(values map[string][]byte, r *http.Request) error {
+	log.Println("Authenticating...")
 	var ok bool
 
 	username, ok := values["username"]

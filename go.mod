@@ -5,6 +5,7 @@ require (
 	github.com/aws/aws-sdk-go v1.15.79
 	github.com/cenkalti/backoff v2.0.0+incompatible
 	github.com/codegangsta/cli v1.20.0
+	github.com/containous/yaegi v0.0.4
 	github.com/cyberark/conjur-api-go v0.5.2
 	github.com/cyberark/conjur-authn-k8s-client v0.13.0
 	github.com/cyberark/summon v0.7.0

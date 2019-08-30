@@ -15,7 +15,7 @@ var defaultOutputBuffer = os.Stdout
 type Logger struct {
 	BackingLogger *stdlib_log.Logger
 	IsDebug       bool
-	Prefix        string
+	prefix        string
 }
 
 // severity is an integer representation of the severity level associated with
@@ -63,7 +63,7 @@ func NewWithOptions(outputBuffer io.Writer, prefix string, isDebug bool) log_api
 	return &Logger{
 		BackingLogger: stdlib_log.New(outputBuffer, "", stdlib_log.LstdFlags),
 		IsDebug:       isDebug,
-		Prefix:        prefix,
+		prefix:        prefix,
 	}
 }
 
@@ -91,6 +91,11 @@ func (logger *Logger) DebugEnabled() bool {
 	return logger.IsDebug
 }
 
+// Prefix returns the prefix that will be prepended to all output messages
+func (logger *Logger) Prefix() string {
+	return logger.prefix
+}
+
 // ---------------------------
 // Main logging methods that funnel all the info here
 
@@ -99,9 +104,9 @@ func (logger *Logger) logf(severityLevel severity, format string, args ...interf
 		return
 	}
 
-	if logger.Prefix != "" {
+	if logger.prefix != "" {
 		format = "%s: " + format
-		args = prependString(logger.Prefix, args...)
+		args = prependString(logger.prefix, args...)
 	}
 
 	logger.BackingLogger.Printf(format, args...)
@@ -112,8 +117,8 @@ func (logger *Logger) logln(severityLevel severity, args ...interface{}) {
 		return
 	}
 
-	if logger.Prefix != "" {
-		args = prependString(logger.Prefix+":", args...)
+	if logger.prefix != "" {
+		args = prependString(logger.prefix+":", args...)
 	}
 
 	logger.BackingLogger.Println(args...)

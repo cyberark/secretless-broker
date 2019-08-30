@@ -3,89 +3,13 @@ package log
 import (
 	"bytes"
 	"fmt"
-	"reflect"
 	"regexp"
 	"strings"
 	"testing"
 
+	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/stretchr/testify/assert"
 )
-
-var formattedLoggingMethods = []string{
-	"Debugf",
-	"Infof",
-	"Warnf",
-	"Errorf",
-	"Panicf",
-}
-
-var unformattedLoggingMethods = []string{
-	"Debug",
-	"Debugln",
-	"Info",
-	"Infoln",
-	"Warn",
-	"Warnln",
-	"Error",
-	"Errorln",
-	"Panic",
-	"Panicln",
-}
-
-type OutputTest struct {
-	name         string
-	outputMethod reflect.Value
-	outputBuffer *bytes.Buffer
-}
-
-// Datetime string should look something like: `2019/01/01 13:14:15`
-var datetimeRegexString = `\d{4}\/\d{2}\/\d{2} \d{1,2}:\d{2}:\d{2}`
-
-// Formatted string should include a string, int, and a float working
-var formattedArgsResultsRegexString = `aaa stringval bbb 123 ccc 1\.2 ddd\s{1,8}eee`
-
-// Unformatted string should include a string, int, and a float working
-var unformattedArgsResultsRegexString = `stringval 123 1\.234 aaa`
-
-type ExpectedEntry struct {
-	prefix          string
-	expectedContent *regexp.Regexp
-}
-
-func NewExpectedEntry(prefix string, contentRegexString string) *ExpectedEntry {
-	return &ExpectedEntry{
-		prefix:          prefix,
-		expectedContent: regexp.MustCompile(contentRegexString),
-	}
-}
-
-var formattedPrefixMatchers = []*ExpectedEntry{
-	NewExpectedEntry("",
-		"^"+datetimeRegexString+" "+formattedArgsResultsRegexString+"\n"),
-	NewExpectedEntry("prefix",
-		"^"+datetimeRegexString+" prefix: "+formattedArgsResultsRegexString+"\n"),
-}
-
-var unformattedPrefixMatchers = []*ExpectedEntry{
-	NewExpectedEntry("",
-		"^"+datetimeRegexString+" "+unformattedArgsResultsRegexString+"\n"),
-	NewExpectedEntry("prefix",
-		"^"+datetimeRegexString+" prefix: "+unformattedArgsResultsRegexString+"\n"),
-}
-
-func newOutputTest(methodName string, isDebug bool, prefix string) OutputTest {
-	outputBuffer := &bytes.Buffer{}
-	logger := NewWithOptions(outputBuffer, prefix, isDebug)
-
-	loggerType := reflect.ValueOf(logger)
-	methodPointer := loggerType.MethodByName(methodName)
-
-	return OutputTest{
-		name:         methodName,
-		outputMethod: methodPointer,
-		outputBuffer: outputBuffer,
-	}
-}
 
 func TestDebugEnabled(t *testing.T) {
 	assert.True(t, New(true).DebugEnabled())
@@ -97,102 +21,147 @@ func TestDebugEnabled(t *testing.T) {
 	assert.False(t, NewWithOptions(&bytes.Buffer{}, "abc", false).DebugEnabled())
 }
 
-func TestFormattedLogging(t *testing.T) {
-	// Iterate over prefixes and their string representation of the
-	// corresponding regexes
-	for _, prefixMatcher := range formattedPrefixMatchers {
-		// Iterate over all the logging methods that accept formatting string
-		// as an argument
-		for _, methodName := range formattedLoggingMethods {
+// TestAllOutputMethods tests the logger's output-generating methods over the
+// logger's 4 possible states.
+func TestAllOutputMethods(t *testing.T) {
+	test := NewLogTest(true, "prefix")
+	test.RunAllTests(t)
 
-			// Iterate over both true and false values of the debug flag
-			for _, isDebug := range []bool{true, false} {
-				// Use the specified prefix, flag, and method name to create a struct
-				// containing all the information needed to run the specific test for
-				// a combination of those parameters
-				testCase := newOutputTest(methodName, isDebug, prefixMatcher.prefix)
+	test = NewLogTest(true, "")
+	test.RunAllTests(t)
 
-				// Create a unique test case for this iteration
-				t.Run(fmt.Sprintf("%s/prefix='%s'/isDebug=%t", testCase.name,
-					prefixMatcher.prefix, isDebug), func(t *testing.T) {
+	test = NewLogTest(false, "prefix")
+	test.RunAllTests(t)
 
-					// Create a list of arguments that we will send to the formatted
-					// logging method. We must use reflect.Value since that's what
-					// the method pointer will expect
-					args := []reflect.Value{
-						reflect.ValueOf("aaa %s bbb %d ccc %2.1f ddd \t eee"),
-						reflect.ValueOf("stringval"),
-						reflect.ValueOf(123),
-						reflect.ValueOf(1.234),
-					}
+	test = NewLogTest(false, "")
+	test.RunAllTests(t)
+}
 
-					// Invoke the specified `logger.<methodName>` with the arguments
-					// defined above
-					testCase.outputMethod.Call(args)
+// Methods and types for describing and classifying the methods of a Logger
 
-					if !isDebug &&
-						(strings.HasPrefix(methodName, "Debug") ||
-							strings.HasPrefix(methodName, "Info")) {
-						// If we have the debug flag on, expect that debug and
-						// info messages don't show up
-						assert.Empty(t, testCase.outputBuffer.String())
-					} else {
-						// Otherwise assert that the printed output matches
-						// the defined regex
-						assert.Regexp(t, prefixMatcher.expectedContent, testCase.outputBuffer.String())
-					}
-				})
-			}
-		}
+// Logger methods have two possible signatures: one for "formatted" methods
+// that end in "f" and use "Printf" style format strings, and for normal methods
+// that just print their arguments
+type logMethod func(...interface{})
+type logMethodF func(string, ...interface{})
+
+// isFormattedMethod identifies methods of type "logMethodF" -- ie, "printf"
+// style methods that require a format string.
+func isFormattedMethod(methodName string) bool {
+	// Only formatted methods end in the letter f
+	formattedRe := regexp.MustCompile("f$")
+	return formattedRe.MatchString(methodName)
+}
+
+// isDebugOnlyMethod identifies methods that produce output only when the
+// Logger is in debug mode.
+func isDebugOnlyMethod(methodName string) bool {
+	return strings.HasPrefix(methodName, "Debug") ||
+		strings.HasPrefix(methodName, "Info")
+}
+
+// Format strings and sample arguments used in the test cases
+
+const testCaseFormatStr = "aaa %s bbb %d ccc %2.1f ddd \t eee"
+var testCaseArgs = []interface{}{ "stringval", 123, 1.234 }
+
+// LogTest represents a full test of all output-generating methods on a Logger.
+type LogTest struct {
+	logger logapi.Logger
+	backingBuffer *bytes.Buffer
+}
+
+func NewLogTest(isDebug bool, prefix string) *LogTest {
+	backingBuffer := &bytes.Buffer{}
+	logger := NewWithOptions(backingBuffer, prefix, isDebug)
+
+	return &LogTest{
+		logger: logger,
+		backingBuffer: backingBuffer,
 	}
 }
 
-func TestUnformattedLogging(t *testing.T) {
-	// Iterate over prefixes and their string representation of the
-	// corresponding regexes
-	for _, prefixMatcher := range unformattedPrefixMatchers {
-		// Iterate over all the logging methods that accept unformatted list
-		// of arguments
-		for _, methodName := range unformattedLoggingMethods {
+func (lt *LogTest) RunAllTests(t *testing.T) {
 
-			// Iterate over both true and false values of the debug flag
-			for _, isDebug := range []bool{true, false} {
-				// Use the specified prefix, flag, and method name to create a struct
-				// containing all the information needed to run the specific test for
-				// a combination of those parameters
-				testCase := newOutputTest(methodName, isDebug, prefixMatcher.prefix)
-
-				// Create a unique test case for this iteration
-				t.Run(fmt.Sprintf("%s/prefix='%s'/isDebug=%t", testCase.name,
-					prefixMatcher.prefix, isDebug), func(t *testing.T) {
-
-					// Create a list of arguments that we will send to the unformatted
-					// logging method. We must use reflect.Value since that's what
-					// the method pointer will expect
-					args := []reflect.Value{
-						reflect.ValueOf("stringval"),
-						reflect.ValueOf(123),
-						reflect.ValueOf(1.234),
-						reflect.ValueOf("aaa"),
-					}
-
-					// Invoke the specified `logger.<methodName>` with the arguments
-					// defined above
-					testCase.outputMethod.Call(args)
-
-					if !isDebug &&
-						(strings.HasPrefix(methodName, "Debug") ||
-							strings.HasPrefix(methodName, "Info")) {
-						// If we have the debug flag on, expect that debug and
-						// info messages don't show up
-						assert.Empty(t, testCase.outputBuffer.String())
-					} else {
-						// Otherwise assert that the printed output matches
-						// the defined regex
-						assert.Regexp(t, prefixMatcher.expectedContent, testCase.outputBuffer.String())
-					}
-				})
-			}
-		}
+	// Formatted methods
+	for methodName, method := range map[string]logMethodF{
+		"Debugf": lt.logger.Debugf,
+		"Infof": lt.logger.Infof,
+		"Warnf": lt.logger.Warnf,
+		"Errorf": lt.logger.Errorf,
+		"Panicf": lt.logger.Panicf,
+	} {
+		lt.ResetBuffer()
+		t.Run(
+			lt.testDescription(methodName),
+			func(t *testing.T) {
+				method(testCaseFormatStr, testCaseArgs...)
+				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
+			},
+		)
 	}
+
+	// Unformatted methods
+	for methodName, method := range map[string]logMethod{
+		"Debug":   lt.logger.Debug,
+		"Debugln": lt.logger.Debugln,
+		"Info":    lt.logger.Info,
+		"Infoln":  lt.logger.Infoln,
+		"Warn":    lt.logger.Warn,
+		"Warnln":  lt.logger.Warnln,
+		"Error":   lt.logger.Error,
+		"Errorln": lt.logger.Errorln,
+		"Panic":   lt.logger.Panic,
+		"Panicln": lt.logger.Panicln,
+	} {
+		lt.ResetBuffer()
+		t.Run(
+			lt.testDescription(methodName),
+			func(t *testing.T) {
+				method(testCaseArgs...)
+				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
+			},
+		)
+	}
+}
+
+func (lt *LogTest) expectedOutput(methodName string) *regexp.Regexp {
+	// Debug methods produce no output unless debug is enabled
+	if isDebugOnlyMethod(methodName) && !lt.logger.DebugEnabled() {
+		return regexp.MustCompile("")
+	}
+
+	datetimeRe := `\d{4}\/\d{2}\/\d{2} \d{1,2}:\d{2}:\d{2}`
+
+	// expected content is different for formatted and unformatted methods
+	methodResultRe := `stringval 123 1\.234`
+	if isFormattedMethod(methodName) {
+		methodResultRe = `aaa stringval bbb 123 ccc 1\.2 ddd\s{1,8}eee`
+	}
+
+	// expected content also changes if there is a prefix
+	fullLineRe := "^"+datetimeRe+" "+methodResultRe+"\n"
+	if lt.logger.Prefix() != "" {
+		prefix := lt.logger.Prefix()
+		fullLineRe = "^"+datetimeRe+" "+prefix+": "+methodResultRe+"\n"
+	}
+
+	return regexp.MustCompile(fullLineRe)
+}
+
+func (lt *LogTest) testDescription(methodName string) string {
+	return fmt.Sprintf(
+		"%s/prefix='%s'/isDebug=%t",
+		methodName,
+		lt.logger.Prefix(),
+		lt.logger.DebugEnabled(),
+	)
+}
+
+func (lt *LogTest) ResetBuffer() {
+	lt.backingBuffer.Reset()
+}
+
+func (lt *LogTest) CurrentOutput() string {
+	return lt.backingBuffer.String()
 }

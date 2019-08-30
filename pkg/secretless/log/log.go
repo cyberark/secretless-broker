@@ -4,6 +4,7 @@ package log
 // broker to common output(s).
 type Logger interface {
 	DebugEnabled() bool
+	Prefix() string
 
 	Debug(...interface{})
 	Debugf(string, ...interface{})

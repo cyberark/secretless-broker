@@ -37,27 +37,28 @@ func TestAllOutputMethods(t *testing.T) {
 	test.RunAllTests(t)
 }
 
+// Methods and types for describing and classifying the methods of a Logger
+
+// Logger methods have two possible signatures: one for "formatted" methods
+// that end in "f" and use "Printf" style format strings, and for normal methods
+// that just print their arguments
 type logMethod func(...interface{})
 type logMethodF func(string, ...interface{})
 
-var formattedMethods = []string{
-	"Debugf", "Infof", "Warnf", "Errorf", "Panicf",
-}
-
 func isFormattedMethod(methName string) bool {
-	ret := false
-	for _, meth := range formattedMethods {
-		if methName == meth {
-			ret = true
-		}
-	}
-	return ret
+	// Only formatted methods end in the letter f
+	formattedRe := regexp.MustCompile("f$")
+	return formattedRe.MatchString(methName)
 }
 
 func isDebugOnlyMethod(methName string) bool {
 	return strings.HasPrefix(methName, "Debug") ||
 		strings.HasPrefix(methName, "Info")
 }
+
+// Format strings and sample arguments used in the test cases
+const testCaseFormatStr = "aaa %s bbb %d ccc %2.1f ddd \t eee"
+var testCaseArgs = []interface{}{ "stringval", 123, 1.234 }
 
 // Type that represents a full test of a single Logger instance
 
@@ -90,7 +91,7 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 		t.Run(
 			lt.testName(methName),
 			func(t *testing.T) {
-				meth(lt.formatStr(), lt.args()...)
+				meth(testCaseFormatStr, testCaseArgs...)
 				assert.Regexp(t, lt.expectedOutput(methName), lt.CurrentOutput())
 			},
 		)
@@ -113,7 +114,7 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 		t.Run(
 			lt.testName(methName),
 			func(t *testing.T) {
-				meth(lt.args()...)
+				meth(testCaseArgs...)
 				assert.Regexp(t, lt.expectedOutput(methName), lt.CurrentOutput())
 			},
 		)
@@ -142,15 +143,6 @@ func (lt *LogTest) expectedOutput(methName string) *regexp.Regexp {
 	}
 
 	return regexp.MustCompile(fullLineRe)
-}
-
-func (lt *LogTest) formatStr() string {
-	return "aaa %s bbb %d ccc %2.1f ddd \t eee"
-}
-
-// testArgsF returns sample arguments for formatting methods ending with an "f"
-func (lt *LogTest) args() []interface{} {
-	return []interface{}{ "stringval", 123, 1.234 }
 }
 
 func (lt *LogTest) testName(methName string) string {

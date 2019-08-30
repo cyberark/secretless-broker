@@ -21,8 +21,8 @@ func TestDebugEnabled(t *testing.T) {
 	assert.False(t, NewWithOptions(&bytes.Buffer{}, "abc", false).DebugEnabled())
 }
 
-// Each LogTest tests every method on a single, configured Logger instance.
-// We create one test for each of the 4 possible tests
+// TestAllOutputMethods tests the logger's output-generating methods over the
+// logger's 4 possible states.
 func TestAllOutputMethods(t *testing.T) {
 	test := NewLogTest(true, "prefix")
 	test.RunAllTests(t)
@@ -45,23 +45,27 @@ func TestAllOutputMethods(t *testing.T) {
 type logMethod func(...interface{})
 type logMethodF func(string, ...interface{})
 
+// isFormattedMethod identifies methods of type "logMethodF" -- ie, "printf"
+// style methods that require a format string.
 func isFormattedMethod(methodName string) bool {
 	// Only formatted methods end in the letter f
 	formattedRe := regexp.MustCompile("f$")
 	return formattedRe.MatchString(methodName)
 }
 
+// isDebugOnlyMethod identifies methods that produce output only when the
+// Logger is in debug mode.
 func isDebugOnlyMethod(methodName string) bool {
 	return strings.HasPrefix(methodName, "Debug") ||
 		strings.HasPrefix(methodName, "Info")
 }
 
 // Format strings and sample arguments used in the test cases
+
 const testCaseFormatStr = "aaa %s bbb %d ccc %2.1f ddd \t eee"
 var testCaseArgs = []interface{}{ "stringval", 123, 1.234 }
 
-// Type that represents a full test of a single Logger instance
-
+// LogTest represents a full test of all output-generating methods on a Logger.
 type LogTest struct {
 	logger logapi.Logger
 	backingBuffer *bytes.Buffer

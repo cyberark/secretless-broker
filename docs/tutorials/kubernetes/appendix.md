@@ -33,7 +33,7 @@ We'll focus on the Pod's template, which is where the magic happens:
               value: postgresql://localhost:5432/${APPLICATION_DB_NAME}?sslmode=disable
         - name: secretless-broker
           image: cyberark/secretless-broker:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           args: ["-f", "/etc/secretless/secretless.yml"]
           volumeMounts:
             - name: config

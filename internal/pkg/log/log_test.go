@@ -60,11 +60,6 @@ func isDebugOnlyMethod(methodName string) bool {
 		strings.HasPrefix(methodName, "Info")
 }
 
-// Format strings and sample arguments used in the test cases
-
-const testCaseFormatStr = "aaa %s bbb %d ccc %2.1f ddd \t eee"
-var testCaseArgs = []interface{}{ "stringval", 123, 1.234 }
-
 // LogTest represents a full test of all output-generating methods on a Logger.
 type LogTest struct {
 	logger logapi.Logger
@@ -82,6 +77,10 @@ func NewLogTest(isDebug bool, prefix string) *LogTest {
 }
 
 func (lt *LogTest) RunAllTests(t *testing.T) {
+
+	// Format strings and sample arguments used in the test cases
+	const testCaseFormatStr = "aaa %s bbb %d ccc %2.1f ddd \t eee"
+	testCaseArgs := []interface{}{ "stringval", 123, 1.234 }
 
 	// Formatted methods
 	for methodName, method := range map[string]logMethodF{

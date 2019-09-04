@@ -96,7 +96,7 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 	} {
 		lt.ResetBuffer()
 		t.Run(
-			lt.testDescription(methodName),
+			lt.descriptionForTest(methodName),
 			func(t *testing.T) {
 				method(testCaseFormatStr, testCaseArgs...)
 				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
@@ -119,7 +119,7 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 	} {
 		lt.ResetBuffer()
 		t.Run(
-			lt.testDescription(methodName),
+			lt.descriptionForTest(methodName),
 			func(t *testing.T) {
 				method(testCaseArgs...)
 				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
@@ -154,7 +154,7 @@ func (lt *LogTest) expectedOutput(methNameStr string) *regexp.Regexp {
 	return regexp.MustCompile(fullLineRe)
 }
 
-func (lt *LogTest) testDescription(methodName string) string {
+func (lt *LogTest) descriptionForTest(methodName string) string {
 	return fmt.Sprintf(
 		"%s/prefix='%s'/isDebug=%t",
 		methodName,

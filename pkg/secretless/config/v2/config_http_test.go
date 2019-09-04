@@ -1,19 +1,31 @@
 package v2
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewHTTPConfig(t *testing.T) {
+	t.Run("http config yaml converts to", func(t *testing.T) {
+		configFileContents := []byte(
+			`
+authenticateURLsMatching: ".*"
+`)
+		cfg, _ := NewHTTPConfig(configFileContents)
+		assert.Equal(t, cfg.AuthenticateURLsMatching[0], regexp.MustCompile(".*"))
+	})
+}
+
+func TestNewHTTPConfigYAML(t *testing.T) {
 	t.Run("http config hydration with 'authenticateURLsMatching' string", func(t *testing.T) {
 		configFileContents := []byte(
 			`
-authenticateURLsMatching: "*"
+authenticateURLsMatching: ".*"
 `)
-		cfg, _ := newHTTPConfig(configFileContents)
-		assert.Equal(t, cfg.AuthenticateURLsMatching, []string{"*"})
+		cfg, _ := newHTTPConfigYAML(configFileContents)
+		assert.Equal(t, cfg.AuthenticateURLsMatching, []string{".*"})
 	})
 
 	t.Run("http config hydration with 'authenticateURLsMatching' string list", func(t *testing.T) {
@@ -22,7 +34,7 @@ authenticateURLsMatching: "*"
 authenticateURLsMatching: 
  - "*"
 `)
-		cfg, _ := newHTTPConfig(configFileContents)
+		cfg, _ := newHTTPConfigYAML(configFileContents)
 		assert.Equal(t, cfg.AuthenticateURLsMatching, []string{"*"})
 	})
 
@@ -33,7 +45,7 @@ authenticateURLsMatching:
  - true
  - "meow"
 `)
-		_, err := newHTTPConfig(configFileContents)
+		_, err := newHTTPConfigYAML(configFileContents)
 		assert.Error(t, err)
 	})
 
@@ -42,7 +54,7 @@ authenticateURLsMatching:
 			`
 authenticateURLsMatching: false
 `)
-		_, err := newHTTPConfig(configFileContents)
+		_, err := newHTTPConfigYAML(configFileContents)
 		assert.Error(t, err)
 	})
 
@@ -53,7 +65,7 @@ authenticateURLsMatching: false
 "x": false
 }
 `)
-		_, err := newHTTPConfig(configFileContents)
+		_, err := newHTTPConfigYAML(configFileContents)
 		assert.Error(t, err)
 	})
 

@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Resolver is used to instantiate providers and resolve credentials
@@ -70,8 +70,8 @@ func (resolver *Resolver) Provider(name string) (provider plugin_v1.Provider, er
 
 // Resolve accepts an list of Providers and a list of StoredSecrets and
 // attempts to obtain the value of each StoredSecret from the appropriate Provider.
-func (resolver *Resolver) Resolve(secrets []config_v1.StoredSecret) (map[string][]byte, error) {
-	if secrets == nil {
+func (resolver *Resolver) Resolve(secrets []*config_v2.Credential) (map[string][]byte, error) {
+	if len(secrets) == 0 {
 		resolver.LogFatalf("ERROR! StoredSecrets not defined in Resolve call!")
 	}
 
@@ -83,15 +83,15 @@ func (resolver *Resolver) Resolve(secrets []config_v1.StoredSecret) (map[string]
 		var provider plugin_v1.Provider
 		var value []byte
 
-		if provider, err = resolver.Provider(variable.Provider); err != nil {
-			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", variable.Provider, err)
+		if provider, err = resolver.Provider(variable.From); err != nil {
+			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", variable.From, err)
 		}
 
 		// This provider cannot resolve the named variable
-		if value, err = provider.GetValue(variable.ID); err != nil {
+		if value, err = provider.GetValue(variable.Get); err != nil {
 			errInfo := fmt.Sprintf("ERROR: Resolving variable '%s' from provider '%s' failed: %v",
-				variable.ID,
-				variable.Provider,
+				variable.Get,
+				variable.From,
 				err)
 			log.Println(errInfo)
 

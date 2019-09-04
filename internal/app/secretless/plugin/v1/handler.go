@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // HandlerShutdownNotifier is a function signature for notifying of a Handler's Shutdown
@@ -17,7 +17,7 @@ type HandlerShutdownNotifier func(Handler)
 
 // HandlerOptions contains the configuration for the handler
 type HandlerOptions struct {
-	HandlerConfig    config_v1.Handler
+	HandlerConfig    config_v2.Service
 	Channels         <-chan ssh.NewChannel
 	ClientConnection net.Conn
 	EventNotifier    EventNotifier
@@ -30,7 +30,7 @@ type HandlerOptions struct {
 // TODO: Remove LoadKeys as it's only used by sshagent listener
 type Handler interface {
 	Authenticate(map[string][]byte, *http.Request) error
-	GetConfig() config_v1.Handler
+	GetConfig() config_v2.Service
 	GetClientConnection() net.Conn
 	GetBackendConnection() net.Conn
 	LoadKeys(keyring agent.Agent) error
@@ -51,7 +51,7 @@ type BaseHandler struct {
 	BackendConnection net.Conn
 	ClientConnection  net.Conn
 	EventNotifier     EventNotifier
-	HandlerConfig     config_v1.Handler
+	HandlerConfig     config_v2.Service
 	Resolver          Resolver
 	ShutdownNotifier  HandlerShutdownNotifier
 }
@@ -59,11 +59,11 @@ type BaseHandler struct {
 // NewBaseHandler creates a BaseHandler from HandlerOptions
 func NewBaseHandler(options HandlerOptions) BaseHandler {
 	return BaseHandler{
-		ClientConnection:  options.ClientConnection,
-		EventNotifier:     options.EventNotifier,
-		HandlerConfig:     options.HandlerConfig,
-		Resolver:          options.Resolver,
-		ShutdownNotifier:  options.ShutdownNotifier,
+		ClientConnection: options.ClientConnection,
+		EventNotifier:    options.EventNotifier,
+		HandlerConfig:    options.HandlerConfig,
+		Resolver:         options.Resolver,
+		ShutdownNotifier: options.ShutdownNotifier,
 	}
 }
 
@@ -73,7 +73,7 @@ func (h *BaseHandler) Authenticate(map[string][]byte, *http.Request) error {
 }
 
 // GetConfig implements plugin_v1.Handler
-func (h *BaseHandler) GetConfig() config_v1.Handler {
+func (h *BaseHandler) GetConfig() config_v2.Service {
 	return h.HandlerConfig
 }
 

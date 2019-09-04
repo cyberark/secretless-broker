@@ -5,22 +5,22 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"reflect"
-	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Listener listens for and handles new connections
 type Listener struct {
 	plugin_v1.BaseListener
-	Transport *http.Transport
+	Transport  *http.Transport
+	HttpConfig *config_v2.HttpConfig
 }
 
 // HandlerHasCredentials validates that a handler has all necessary credentials.
@@ -29,39 +29,37 @@ type handlerHasCredentials struct {
 
 // Validate checks that a handler has all necessary credentials.
 func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config_v1.Handler)
-	errors := validation.Errors{}
-	for i, h := range hs {
-		if h.Type == "aws" {
-			if !h.HasCredential("accessKeyId") {
-				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessKeyId'")
-			}
-			if !h.HasCredential("secretAccessKey") {
-				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'secretAccessKey'")
-			}
-		} else if h.Type == "conjur" {
-			if !h.HasCredential("accessToken") {
-				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessToken'")
-			}
-		} else if h.Type == "basic_auth" {
-			for _, credential := range [...]string{"username", "password"} {
-				if !h.HasCredential(credential) {
-					errors[strconv.Itoa(i)] = fmt.Errorf("must have credential '" + credential + "'")
-				}
-			}
-		} else {
-			errors[strconv.Itoa(i)] = fmt.Errorf("Handler type is not supported")
+	h := value.(config_v2.Service)
+	var err error
+	if h.Connector == "aws" {
+		if !h.HasCredential("accessKeyId") {
+			err = fmt.Errorf("must have credential 'accessKeyId'")
 		}
+		if !h.HasCredential("secretAccessKey") {
+			err = fmt.Errorf("must have credential 'secretAccessKey'")
+		}
+	} else if h.Connector == "conjur" {
+		if !h.HasCredential("accessToken") {
+			err = fmt.Errorf("must have credential 'accessToken'")
+		}
+	} else if h.Connector == "basic_auth" {
+		for _, credential := range [...]string{"username", "password"} {
+			if !h.HasCredential(credential) {
+				err = fmt.Errorf("must have credential '" + credential + "'")
+			}
+		}
+	} else {
+		err = fmt.Errorf("Handler type is not supported")
 	}
 
-	return errors.Filter()
+	return err
 }
 
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.HandlerConfigs, validation.Required),
-		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
+		validation.Field(&l.Config, validation.Required),
+		validation.Field(&l.Config, handlerHasCredentials{}),
 	)
 }
 
@@ -91,21 +89,19 @@ func zeroizeSecrets(backendSecrets map[string][]byte) {
 
 // LookupHandler returns the handler that matches the request URL
 func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
-	for _, handlerConfig := range l.HandlerConfigs {
-		for _, pattern := range handlerConfig.Patterns {
-			log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
-			if pattern.MatchString(r.URL.String()) {
-				if handlerConfig.Debug {
-					log.Printf("Using handler '%s' for request %s", handlerConfig.Name, r.URL.String())
-				}
-
-				handlerOptions := plugin_v1.HandlerOptions{
-					HandlerConfig: handlerConfig,
-					Resolver:      l.Resolver,
-				}
-
-				return l.RunHandlerFunc("http/"+handlerConfig.Type, handlerOptions)
+	for _, pattern := range l.HttpConfig.AuthenticateURLsMatching {
+		log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
+		if pattern.MatchString(r.URL.String()) {
+			if l.Config.Debug {
+				log.Printf("Using handler '%s' for request %s", l.Config.Name, r.URL.String())
 			}
+
+			handlerOptions := plugin_v1.HandlerOptions{
+				HandlerConfig: l.Config,
+				Resolver:      l.Resolver,
+			}
+
+			return l.RunHandlerFunc("http/"+l.Config.Connector, handlerOptions)
 		}
 	}
 	return nil
@@ -201,13 +197,14 @@ func (l *Listener) Listen() {
 		log.Printf("Error '%s' loading system cert pool; will use an empty cert pool", err)
 		caCertPool = x509.NewCertPool()
 	}
-	for _, fname := range l.Config.CACertFiles {
-		severCert, err := ioutil.ReadFile(fname)
-		if err != nil {
-			log.Panicf("Could not load CA certificate file %s : %s", fname, err)
-		}
-		caCertPool.AppendCertsFromPEM(severCert)
-	}
+	// TODO: figure out if need CACertFiles in v2 Config
+	//for _, fname := range l.Config.CACertFiles {
+	//	severCert, err := ioutil.ReadFile(fname)
+	//	if err != nil {
+	//		log.Panicf("Could not load CA certificate file %s : %s", fname, err)
+	//	}
+	//	caCertPool.AppendCertsFromPEM(severCert)
+	//}
 
 	l.Transport = &http.Transport{TLSClientConfig: &tls.Config{RootCAs: caCertPool}}
 
@@ -226,5 +223,13 @@ func (l *Listener) GetName() string {
 
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	return &Listener{BaseListener: plugin_v1.NewBaseListener(options)}
+	httpConfig, err := v2.NewHTTPConfig(options.ServiceConfig.ConnectorConfig)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return &Listener{
+		BaseListener: plugin_v1.NewBaseListener(options),
+		HttpConfig:   httpConfig,
+	}
 }

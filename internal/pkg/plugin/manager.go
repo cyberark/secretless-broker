@@ -22,7 +22,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/app/secretless"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 var _SupportedFileSuffixes = []string{".so"}
@@ -82,12 +82,12 @@ func (manager *Manager) SetFlags(profileFlag string, debugFlag bool) {
 }
 
 // ConfigurationChanged is an interface adapter for plugin_v1.ConfigurationChangedHandler
-func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig config_v1.Config) error {
+func (manager *Manager) ConfigurationChanged(configManagerName string, newConfig config_v2.Config) error {
 	log.Printf("Configuration manager '%s' provided new configuration...",
 		configManagerName)
 	return manager._ReloadConfig(newConfig)
 }
-func (manager *Manager) _ReloadConfig(newConfig config_v1.Config) error {
+func (manager *Manager) _ReloadConfig(newConfig config_v2.Config) error {
 	log.Println("Reloading...")
 	manager.configReloadMutex.Lock()
 
@@ -98,11 +98,8 @@ func (manager *Manager) _ReloadConfig(newConfig config_v1.Config) error {
 		log.Printf("New configuration: %s", configStr)
 
 		// Range uses a struct copy so we can't mod the actual items directly
-		for index := range newConfig.Listeners {
-			newConfig.Listeners[index].Debug = true
-		}
-		for index := range newConfig.Handlers {
-			newConfig.Handlers[index].Debug = true
+		for index := range newConfig.Services {
+			newConfig.Services[index].Debug = true
 		}
 	}
 
@@ -161,7 +158,7 @@ func (manager *Manager) RegisterSignalHandlers() {
 }
 
 // LoadConfigurationFile creates a configuration instance from a filesystem path
-func (manager *Manager) LoadConfigurationFile(configFile string) config_v1.Config {
+func (manager *Manager) LoadConfigurationFile(configFile string) config_v2.Config {
 	configuration, err := config.LoadFromFile(configFile)
 
 	if err != nil {
@@ -314,6 +311,13 @@ func (manager *Manager) _RunHandler(id string, options plugin_v1.HandlerOptions)
 }
 
 func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener {
+	// The listener type is therefore HTTP
+	// TODO: add ability for one http listener to have multiple connectors
+	//  probably this will leverage some dictionary of preexisting listeners
+	if config_v2.IsHTTPConnector(id) {
+		id = "http"
+	}
+
 	// Ensure that we have this listener
 	if _, ok := manager.ListenerFactories[id]; !ok {
 		log.Panicf("Error: Unrecognized listener id '%s'", id)
@@ -332,7 +336,7 @@ func (manager *Manager) Run(configManagerID string, configManagerSpec string) er
 		manager.InitializeConfigurationManager(configManagerID, configManagerSpec)
 	}
 
-	configuration := config_v1.Config{}
+	configuration := config_v2.Config{}
 	manager.InitializeConnectionManagers(configuration)
 
 	log.Println("Initialization of plugins done.")
@@ -515,7 +519,7 @@ func (manager *Manager) InitializeConfigurationManager(id string, configSpec str
 }
 
 // InitializeConnectionManagers loops through the connection managers and initializes them
-func (manager *Manager) InitializeConnectionManagers(c config_v1.Config) error {
+func (manager *Manager) InitializeConnectionManagers(c config_v2.Config) error {
 	log.Println("Initializing connection managers...")
 	for managerID, connManagerPlugin := range manager.ConnectionManagers {
 		err := connManagerPlugin.Initialize(c, manager._ReloadConfig)

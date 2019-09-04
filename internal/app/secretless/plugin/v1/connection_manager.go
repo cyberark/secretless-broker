@@ -3,14 +3,14 @@ package v1
 import (
 	"net"
 
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // ConnectionManager is an interface to be implemented by plugins that want to
 // manage connections for handlers and listeners.
 type ConnectionManager interface {
 	// Initialize is called before proxy initialization
-	Initialize(config_v1.Config, func(config_v1.Config) error) error
+	Initialize(config_v2.Config, func(config_v2.Config) error) error
 
 	// CreateListener is called for every listener created by Proxy
 	CreateListener(Listener)

@@ -73,7 +73,7 @@ func v1HttpExample() *config_v1.Config {
 func TestV1HttpHandlerConversion(t *testing.T) {
 	t.Run("ConnectorConfig field maps correctly", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
-		v2Cfg, err := newV2Config(v1Cfg)
+		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -89,7 +89,7 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 
 	t.Run("Connector field maps correctly", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
-		v2Cfg, err := newV2Config(v1Cfg)
+		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -107,7 +107,7 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 		otherHandler.Match = []string{"not-amzn.com"}
 		v1Cfg.Handlers = append(v1Cfg.Handlers, otherHandler)
 
-		v2Cfg, err := newV2Config(v1Cfg)
+		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -157,7 +157,7 @@ func TestV1ValidationConversion(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		v1Cfg.Handlers = []config_v1.Handler{}
 		v1Cfg.Listeners = []config_v1.Listener{}
-		_, err := newV2Config(v1Cfg)
+		_, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "Listeners: cannot be blank")
 		assert.Contains(t, err.Error(), "Handlers: cannot be blank")
@@ -166,7 +166,7 @@ func TestV1ValidationConversion(t *testing.T) {
 	t.Run("V1 Config validation fails and reports un-associated handler or listener errors", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		v1Cfg.Handlers[0].ListenerName = "xyz"
-		_, err := newV2Config(v1Cfg)
+		_, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "Listeners: (0: has no associated handler.)")
 		assert.Contains(t, err.Error(), "Handlers: (0: has no associated listener.)")
@@ -176,7 +176,7 @@ func TestV1AddressSocketConversion(t *testing.T) {
 
 	t.Run("Address maps to TCP listenOn", func(t *testing.T) {
 		v1Cfg := v1DbExample()
-		v2, err := newV2Config(v1Cfg)
+		v2, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -189,7 +189,7 @@ func TestV1AddressSocketConversion(t *testing.T) {
 		v1Cfg := v1DbExample()
 		v1Cfg.Listeners[0].Socket = "/some/socket/path"
 		v1Cfg.Listeners[0].Address = ""
-		v2Cfg, err := newV2Config(v1Cfg)
+		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -202,7 +202,7 @@ func TestV1AddressSocketConversion(t *testing.T) {
 		v1Cfg := v1DbExample()
 		v1Cfg.Listeners[0].Socket = ""
 		v1Cfg.Listeners[0].Address = ""
-		_, err := newV2Config(v1Cfg)
+		_, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.Error(t, err)
 	})
 
@@ -210,7 +210,7 @@ func TestV1AddressSocketConversion(t *testing.T) {
 		v1Cfg := v1DbExample()
 		v1Cfg.Listeners[0].Socket = "0.0.0.0:5432"
 		v1Cfg.Listeners[0].Address = "/some/socket/path"
-		_, err := newV2Config(v1Cfg)
+		_, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.Error(t, err)
 	})
 }
@@ -218,7 +218,7 @@ func TestV1AddressSocketConversion(t *testing.T) {
 func TestV1StoredSecretConversion(t *testing.T) {
 	t.Run("Handler Credentials map to Service Credentials", func(t *testing.T) {
 		v1Cfg := v1DbExample()
-		v2Cfg, err := newV2Config(v1Cfg)
+		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -242,7 +242,7 @@ func TestV1StoredSecretConversion(t *testing.T) {
 func TestV1HandlersConversion(t *testing.T) {
 	t.Run("V2 Service assumes the name of the first Handler matching Listener", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
-		v2Cfg, err := newV2Config(v1Cfg)
+		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -258,7 +258,7 @@ func TestV1HandlersConversion(t *testing.T) {
 		otherHandler.Credentials = nil
 		v1Cfg.Handlers = append(v1Cfg.Handlers, otherHandler)
 
-		v2Cfg, err := newV2Config(v1Cfg)
+		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
 		if err != nil {
 			return

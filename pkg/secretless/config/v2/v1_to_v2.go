@@ -10,10 +10,10 @@ import (
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 
-// newV2Service translates an associated v1 Listener-Handler pair to a v2 Service.
+// newV2ServiceFromListenerAndHandler translates an associated v1 Listener-Handler pair to a v2 Service.
 // This method illustrates how the conceptual model of V2 Services combines
 // the legacy concept of Handlers and Listeners into a singular entity.
-func newV2Service(listener config_v1.Listener, linkedHandler config_v1.Handler) (*Service, error) {
+func newV2ServiceFromListenerAndHandler(listener config_v1.Listener, linkedHandler config_v1.Handler) (*Service, error) {
 	// Extract Connector and ConnectorConfig
 	var connectorConfig []byte
 
@@ -64,7 +64,8 @@ func newV2Service(listener config_v1.Listener, linkedHandler config_v1.Handler) 
 	}, nil
 }
 
-func newV2Config(v1Cfg *config_v1.Config) (*Config, error) {
+// NewV2ConfigFromV1Config translates v1 Config (composed of listeners and handlers) to a v2 Config (composed of Services).
+func NewV2ConfigFromV1Config(v1Cfg *config_v1.Config) (*Config, error) {
 	// Validate v1 Config
 	if err := v1Cfg.Validate(); err != nil {
 		return nil, err
@@ -82,7 +83,7 @@ func newV2Config(v1Cfg *config_v1.Config) (*Config, error) {
 
 		// Create v2 Service from each v1 Listener-Handler pair
 		for _, linkedHandler := range linkedHandlers {
-			v2Service, err := newV2Service(listener, linkedHandler)
+			v2Service, err := newV2ServiceFromListenerAndHandler(listener, linkedHandler)
 			if err != nil {
 				return nil, err
 			}

@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -18,25 +17,6 @@ func Test_Config(t *testing.T) {
 		_, err := Load([]byte(yaml))
 		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Handlers: cannot be blank")
 		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Listeners: cannot be blank")
-	})
-
-	Convey("Compiles the handler match expressions into patterns", t, func() {
-		yaml := `
-listeners:
-  - name: conjur
-    protocol: http
-    address: 0.0.0.0:1080
-
-handlers:
-  - name: conjur
-    match: [ ".*" ]
-`
-		pattern, err := regexp.Compile(".*")
-		So(err, ShouldBeNil)
-
-		config, err := Load([]byte(yaml))
-		So(err, ShouldBeNil)
-		So(config.Handlers[0].Patterns[0].String(), ShouldEqual, pattern.String())
 	})
 
 	Convey("Loads a realistic configuration without errors", t, func() {
@@ -57,8 +37,7 @@ handlers:
 `
 		config, err := Load([]byte(yaml))
 		So(err, ShouldBeNil)
-		So(config.Handlers, ShouldHaveLength, 1)
-		So(config.Listeners, ShouldHaveLength, 1)
+		So(config.Services, ShouldHaveLength, 1)
 	})
 
 	Convey("Allows listeners to have debug flag", t, func() {
@@ -80,8 +59,7 @@ handlers:
 `
 		config, err := Load([]byte(yaml))
 		So(err, ShouldBeNil)
-		So(config.Handlers, ShouldHaveLength, 1)
-		So(config.Listeners, ShouldHaveLength, 1)
+		So(config.Services, ShouldHaveLength, 1)
 	})
 
 	Convey("Reports an unnamed Listener definition", t, func() {
@@ -111,6 +89,7 @@ listeners:
 
 handlers:
   - name: myhandler
+    listener: none
 `
 		_, err := Load([]byte(yaml))
 		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Handlers: (0: has no associated listener.)")
@@ -146,12 +125,16 @@ handlers:
 		yaml := `
 listeners:
   - name: http_default
-    protocol: tcp
+    protocol: http
     address: 0.0.0.0:1080
 
 handlers:
   - name: http_default
     listener: http_default
+    credentials:
+      - name: accessToken
+        provider: conjur
+        id: accessToken
     match:
       - test_for_secretless_issues_216
 `
@@ -164,12 +147,16 @@ handlers:
 		expectedConfigYaml := `
 listeners:
   - name: http_default
-    protocol: tcp
+    protocol: http
     address: 0.0.0.0:1080
 
 handlers:
   - name: http_default_handler
     listener: http_default
+    credentials:
+    - name: accessToken
+      provider: conjur
+      id: accessToken
     match:
     - http://*
 `
@@ -188,12 +175,19 @@ handlers:
 						Match: []string{
 							"http://*",
 						},
+						Credentials: []crd_api_v1.Variable{
+							{
+								Name:       "accessToken",
+								Provider:   "conjur",
+								ID:         "accessToken",
+							},
+						},
 					},
 				},
 				Listeners: []crd_api_v1.Listener{
 					crd_api_v1.Listener{
 						Name:     "http_default",
-						Protocol: "tcp",
+						Protocol: "http",
 						Address:  "0.0.0.0:1080",
 					},
 				},

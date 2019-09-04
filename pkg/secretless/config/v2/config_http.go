@@ -2,13 +2,18 @@ package v2
 
 import (
 	"errors"
+	"regexp"
 
 	"github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
 
-type httpConfig struct {
+type httpConfigYAML struct {
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
+}
+
+type HttpConfig struct {
+	AuthenticateURLsMatching []*regexp.Regexp
 }
 
 // HTTPAuthenticationStrategies are the different ways an http service
@@ -19,7 +24,7 @@ var HTTPAuthenticationStrategies = []interface{}{
 	"conjur",
 }
 
-func isHTTPConnector(connector string) bool {
+func IsHTTPConnector(connector string) bool {
 	for _, strategy := range HTTPAuthenticationStrategies {
 		if strategy == connector {
 			return true
@@ -28,8 +33,8 @@ func isHTTPConnector(connector string) bool {
 	return false
 }
 
-func newHTTPConfig(cfgBytes []byte) (*httpConfig, error) {
-	cfg := &httpConfig{}
+func newHTTPConfigYAML(cfgBytes []byte) (*httpConfigYAML, error) {
+	cfg := &httpConfigYAML{}
 	err := cfg.UnmarshalYAML(cfgBytes)
 	if err != nil {
 		return nil, err
@@ -43,7 +48,28 @@ func newHTTPConfig(cfgBytes []byte) (*httpConfig, error) {
 	return cfg, nil
 }
 
-func (cfg *httpConfig) UnmarshalYAML(bytes []byte) error {
+func NewHTTPConfig(cfgBytes []byte) (*HttpConfig, error) {
+	cfg, err := newHTTPConfigYAML(cfgBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	AuthenticateURLsMatching := make([]*regexp.Regexp, len(cfg.AuthenticateURLsMatching))
+	for i, matchPattern := range cfg.AuthenticateURLsMatching{
+		pattern, err := regexp.Compile(matchPattern)
+		if err != nil {
+			panic(err.Error())
+		} else {
+			AuthenticateURLsMatching[i] = pattern
+		}
+	}
+
+	return &HttpConfig{
+		AuthenticateURLsMatching: AuthenticateURLsMatching,
+	}, nil
+}
+
+func (cfg *httpConfigYAML) UnmarshalYAML(bytes []byte) error {
 	// Unmarshall into a temp struct
 	//
 	// This temp struct makes it possible to parse 'authenticateURLsMatching' as
@@ -80,7 +106,7 @@ func (cfg *httpConfig) UnmarshalYAML(bytes []byte) error {
 
 // validate carries out validation of httpConfig
 // ensuring that the validation rules of fields are met
-func (cfg *httpConfig) validate() error {
+func (cfg *httpConfigYAML) validate() error {
 	return validation.ValidateStruct(
 		cfg,
 		// AuthenticateURLsMatching cannot be empty

@@ -3,11 +3,12 @@ package secretless
 import (
 	"log"
 	"net"
+	"strings"
 	"sync"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 const (
@@ -24,7 +25,7 @@ type Proxy struct {
 	cleanupMutex    sync.Mutex
 	runEventChan    chan int
 	EventNotifier   plugin_v1.EventNotifier
-	Config          config_v1.Config
+	Config          config_v2.Config
 	Listeners       []plugin_v1.Listener
 	Resolver        plugin_v1.Resolver
 	RunHandlerFunc  func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
@@ -32,34 +33,33 @@ type Proxy struct {
 }
 
 // Listen runs the listen loop for a specific Listener.
-func (p *Proxy) Listen(listenerConfig config_v1.Listener) plugin_v1.Listener {
+func (p *Proxy) Listen(listenerConfig config_v2.Service) plugin_v1.Listener {
 	var netListener net.Listener
 	var err error
 
-	if listenerConfig.Address != "" {
-		netListener, err = net.Listen("tcp", listenerConfig.Address)
+	if strings.HasPrefix(listenerConfig.ListenOn, "tcp://") {
+		netListener, err = net.Listen("tcp", strings.TrimPrefix(listenerConfig.ListenOn, "tcp://"))
 	} else {
-		netListener, err = net.Listen("unix", listenerConfig.Socket)
+		netListener, err = net.Listen("unix", strings.TrimPrefix(listenerConfig.ListenOn, "unix://"))
 	}
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Printf("%s listener '%s' listening at: %s",
-		listenerConfig.Protocol,
+		listenerConfig.Connector,
 		listenerConfig.Name,
 		netListener.Addr())
 
 	options := plugin_v1.ListenerOptions{
 		EventNotifier:  p.EventNotifier,
-		ListenerConfig: listenerConfig,
-		HandlerConfigs: listenerConfig.LinkedHandlers(p.Config.Handlers),
+		ServiceConfig: listenerConfig,
 		NetListener:    netListener,
 		Resolver:       p.Resolver,
 		RunHandlerFunc: p.RunHandlerFunc,
 	}
 
-	listener := p.RunListenerFunc(listenerConfig.Protocol, options)
+	listener := p.RunListenerFunc(listenerConfig.Connector, options)
 
 	err = listener.Validate()
 	if err != nil {
@@ -145,14 +145,14 @@ func (p *Proxy) Run() {
 			// TODO: Delegate logic of this `if` check to connection managers
 			// XXX: App is not marked as live if we are not listening to anything. This
 			//      may need clarification later.
-			if len(p.Config.Listeners) < 1 {
+			if len(p.Config.Services) < 1 {
 				log.Println("Waiting for valid configuration to be provided...")
 				break
 			}
 
 			log.Println("Starting all listeners and handlers...")
-			for _, config := range p.Config.Listeners {
-				listener := p.Listen(config)
+			for _, config := range p.Config.Services {
+				listener := p.Listen(*config)
 				p.Listeners = append(p.Listeners, listener)
 			}
 

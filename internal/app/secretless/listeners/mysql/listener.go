@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 
-	// TODO: These errors should be abstracted out ideally
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Listener listens for and handles new connections.
@@ -26,30 +23,30 @@ type handlerHasCredentials struct {
 
 // Validate checks that a handler has all necessary credentials.
 func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config_v1.Handler)
-	errors := validation.Errors{}
-	for i, h := range hs {
-		if !h.HasCredential("host") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'host'")
-		}
-		if !h.HasCredential("port") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'port'")
-		}
-		if !h.HasCredential("username") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'username'")
-		}
-		if !h.HasCredential("password") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'password'")
-		}
+	h := value.(config_v2.Service)
+
+	var err error
+	if !h.HasCredential("host") {
+		err = fmt.Errorf("must have credential 'host'")
 	}
-	return errors.Filter()
+	if !h.HasCredential("port") {
+		err = fmt.Errorf("must have credential 'port'")
+	}
+	if !h.HasCredential("username") {
+		err = fmt.Errorf("must have credential 'username'")
+	}
+	if !h.HasCredential("password") {
+		err = fmt.Errorf("must have credential 'password'")
+	}
+
+	return err
 }
 
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.HandlerConfigs, validation.Required),
-		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
+		validation.Field(&l.Config, validation.Required),
+		validation.Field(&l.Config, handlerHasCredentials{}),
 	)
 }
 
@@ -64,23 +61,18 @@ func (l *Listener) Listen() {
 		}
 
 		// Serve the first Handler which is attached to this listener
-		if len(l.HandlerConfigs) > 0 {
-			handlerOptions := plugin_v1.HandlerOptions{
-				HandlerConfig:    l.HandlerConfigs[0],
-				ClientConnection: client,
-				EventNotifier:    l.EventNotifier,
-				Resolver:         l.Resolver,
-				ShutdownNotifier: func(handler plugin_v1.Handler) {
-					l.RemoveHandler(handler)
-				},
-			}
-
-			handler := l.RunHandlerFunc("mysql", handlerOptions)
-			l.AddHandler(handler)
-		} else {
-			mysqlError := protocol.NewGenericError(fmt.Errorf("No handler found for listener %s", l.Config.Name))
-			client.Write(mysqlError.GetPacket())
+		handlerOptions := plugin_v1.HandlerOptions{
+			HandlerConfig:    l.Config,
+			ClientConnection: client,
+			EventNotifier:    l.EventNotifier,
+			Resolver:         l.Resolver,
+			ShutdownNotifier: func(handler plugin_v1.Handler) {
+				l.RemoveHandler(handler)
+			},
 		}
+
+		handler := l.RunHandlerFunc("mysql", handlerOptions)
+		l.AddHandler(handler)
 	}
 }
 

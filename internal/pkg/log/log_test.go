@@ -37,33 +37,6 @@ func TestAllOutputMethods(t *testing.T) {
 	test.RunAllTests(t)
 }
 
-// Methods and types for describing and classifying the methods of a Logger
-
-// Logger methods have two possible signatures: one for "formatted" methods
-// that end in "f" and use "Printf" style format strings, and for normal methods
-// that just print their arguments
-type logMethod func(...interface{})
-type logMethodF func(string, ...interface{})
-
-// methodName elevates the string name of log methods to a proper type. This
-// is good because the behavior of the various log methods can be inferred from
-// their names.
-type methodName string
-
-// Names ending in "f" require a format string
-func (name methodName) requiresFormatString()  bool {
-	// Only formatted methods end in the letter f
-	formattedRe := regexp.MustCompile("f$")
-	return formattedRe.MatchString(string(name))
-}
-
-// debugOnly identifies methods that produce output only when the Logger is in
-// debug mode.
-func (name methodName) debugOnly()  bool {
-	return strings.HasPrefix(string(name), "Debug") ||
-		strings.HasPrefix(string(name), "Info")
-}
-
 // LogTest represents a full test of all output-generating methods on a Logger.
 type LogTest struct {
 	logger logapi.Logger
@@ -170,3 +143,31 @@ func (lt *LogTest) ResetBuffer() {
 func (lt *LogTest) CurrentOutput() string {
 	return lt.backingBuffer.String()
 }
+
+// Methods and types for describing and classifying the methods of a Logger
+
+// Logger methods have two possible signatures: one for "formatted" methods
+// that end in "f" and use "Printf" style format strings, and for normal methods
+// that just print their arguments
+type logMethod func(...interface{})
+type logMethodF func(string, ...interface{})
+
+// methodName elevates the string name of log methods to a proper type. This
+// is good because the behavior of the various log methods can be inferred from
+// their names.
+type methodName string
+
+// Names ending in "f" require a format string
+func (name methodName) requiresFormatString()  bool {
+	// Only formatted methods end in the letter f
+	formattedRe := regexp.MustCompile("f$")
+	return formattedRe.MatchString(string(name))
+}
+
+// debugOnly identifies methods that produce output only when the Logger is in
+// debug mode.
+func (name methodName) debugOnly()  bool {
+	return strings.HasPrefix(string(name), "Debug") ||
+		strings.HasPrefix(string(name), "Info")
+}
+

@@ -11,6 +11,6 @@ type Resolver interface {
 	// one already doesn't exist
 	Provider(name string) (Provider, error)
 
-	// Resolve accepts an array of variables and returns a map of resolved ones
-	Resolve(variables []*config_v2.Credential) (result map[string][]byte, err error)
+	// Resolve accepts an array of credentials and returns a map of resolved ones
+	Resolve(credentials []*config_v2.Credential) (result map[string][]byte, err error)
 }

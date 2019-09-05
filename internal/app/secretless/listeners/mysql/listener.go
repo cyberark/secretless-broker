@@ -17,36 +17,30 @@ type Listener struct {
 	plugin_v1.BaseListener
 }
 
-// HandlerHasCredentials validates that a handler has all necessary credentials.
-type handlerHasCredentials struct {
+// serviceHasCredentials validates that a service has all necessary credentials.
+type serviceHasCredentials struct {
 }
 
-// Validate checks that a handler has all necessary credentials.
-func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	h := value.(config_v2.Service)
+// Validate checks that a service has all necessary credentials.
+func (svc serviceHasCredentials) Validate(value interface{}) error {
+	s := value.(config_v2.Service)
 
-	var err error
-	if !h.HasCredential("host") {
-		err = fmt.Errorf("must have credential 'host'")
-	}
-	if !h.HasCredential("port") {
-		err = fmt.Errorf("must have credential 'port'")
-	}
-	if !h.HasCredential("username") {
-		err = fmt.Errorf("must have credential 'username'")
-	}
-	if !h.HasCredential("password") {
-		err = fmt.Errorf("must have credential 'password'")
+	errors := validation.Errors{}
+
+	for _, credential := range [...]string{"host", "port", "username", "password"} {
+		if !s.HasCredential(credential) {
+			errors[credential] = fmt.Errorf("must have credential '%s'", credential)
+		}
 	}
 
-	return err
+	return errors.Filter()
 }
 
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Config, validation.Required),
-		validation.Field(&l.Config, handlerHasCredentials{}),
+		validation.Field(&l.Config, serviceHasCredentials{}),
 	)
 }
 

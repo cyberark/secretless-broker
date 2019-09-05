@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 
@@ -22,22 +21,22 @@ type Listener struct {
 	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
-// HandlerHasCredentials validates that a handler has all necessary credentials.
-type handlerHasCredentials struct {
+// serviceHasCredentials validates that a service has all necessary credentials.
+type serviceHasCredentials struct {
 }
 
-// Validate checks that a handler has all necessary credentials.
-func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config_v2.Service)
+// Validate checks that a service has all necessary credentials.
+func (svc serviceHasCredentials) Validate(value interface{}) error {
+	s := value.(config_v2.Service)
+
 	errors := validation.Errors{}
-	for i, h := range hs {
-		if !h.HasCredential("host") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'host'")
-		}
-		if !h.HasCredential("port") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'port'")
+
+	for _, credential := range [...]string{"host", "port"} {
+		if !s.HasCredential(credential) {
+			errors[credential] = fmt.Errorf("must have credential '%s'", credential)
 		}
 	}
+
 	return errors.Filter()
 }
 
@@ -45,7 +44,7 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Config, validation.Required),
-		validation.Field(&l.Config, handlerHasCredentials{}),
+		validation.Field(&l.Config, serviceHasCredentials{}),
 	)
 }
 

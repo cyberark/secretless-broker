@@ -17,16 +17,16 @@ type Listener struct {
 	plugin_v1.BaseListener
 }
 
-// HandlerHasCredentials validates that a handler has all necessary credentials.
-type handlerHasCredentials struct {
+// serviceHasCredentials validates that a service has all necessary credentials.
+type serviceHasCredentials struct {
 }
 
-// Validate checks that a handler has all necessary credentials.
-func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	h := value.(config_v2.Service)
+// Validate checks that a service has all necessary credentials.
+func (hhc serviceHasCredentials) Validate(value interface{}) error {
+	s := value.(config_v2.Service)
 
 	var err error
-	if !h.HasCredential("rsa") && !h.HasCredential("ecdsa") {
+	if !s.HasCredential("rsa") && !s.HasCredential("ecdsa") {
 		err = fmt.Errorf("must have credential 'rsa' or 'ecdsa'")
 	}
 	return err
@@ -36,7 +36,7 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Config, validation.Required),
-		validation.Field(&l.Config, handlerHasCredentials{}),
+		validation.Field(&l.Config, serviceHasCredentials{}),
 	)
 }
 

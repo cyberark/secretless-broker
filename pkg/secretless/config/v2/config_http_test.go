@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewHTTPConfig(t *testing.T) {
-	t.Run("http config yaml converts to", func(t *testing.T) {
+	t.Run("input 'authenticateURLsMatching' converts to regex", func(t *testing.T) {
 		configFileContents := []byte(
 			`
 authenticateURLsMatching: ".*"
@@ -19,7 +19,7 @@ authenticateURLsMatching: ".*"
 }
 
 func TestNewHTTPConfigYAML(t *testing.T) {
-	t.Run("http config hydration with 'authenticateURLsMatching' string", func(t *testing.T) {
+	t.Run("'authenticateUrlsMatching' accepts a single string", func(t *testing.T) {
 		configFileContents := []byte(
 			`
 authenticateURLsMatching: ".*"
@@ -28,7 +28,7 @@ authenticateURLsMatching: ".*"
 		assert.Equal(t, cfg.AuthenticateURLsMatching, []string{".*"})
 	})
 
-	t.Run("http config hydration with 'authenticateURLsMatching' string list", func(t *testing.T) {
+	t.Run("'authenticateUrlsMatching' accepts an array of strings", func(t *testing.T) {
 		configFileContents := []byte(
 			`
 authenticateURLsMatching: 

@@ -34,14 +34,12 @@ type Proxy struct {
 
 // Listen runs the listen loop for a specific Listener.
 func (p *Proxy) Listen(listenerConfig config_v2.Service) plugin_v1.Listener {
-	var netListener net.Listener
-	var err error
-
-	if strings.HasPrefix(listenerConfig.ListenOn, "tcp://") {
-		netListener, err = net.Listen("tcp", strings.TrimPrefix(listenerConfig.ListenOn, "tcp://"))
-	} else {
-		netListener, err = net.Listen("unix", strings.TrimPrefix(listenerConfig.ListenOn, "unix://"))
+	network := "tcp"
+	if strings.HasPrefix(listenerConfig.ListenOn, "unix") {
+		network = "unix"
 	}
+	address := strings.TrimPrefix(listenerConfig.ListenOn, network + "://")
+	netListener, err := net.Listen(network, address)
 	if err != nil {
 		log.Fatal(err)
 	}

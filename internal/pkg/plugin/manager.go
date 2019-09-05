@@ -572,10 +572,10 @@ func (manager *Manager) DestroyHandler(h plugin_v1.Handler) {
 	}
 }
 
-// ResolveSecret loops through the connection managers to resolve the secret specified
-func (manager *Manager) ResolveSecret(provider plugin_v1.Provider, id string, value []byte) {
+// ResolveCredential loops through the connection managers to resolve the secret specified
+func (manager *Manager) ResolveCredential(provider plugin_v1.Provider, id string, value []byte) {
 	for _, connectionManager := range manager.ConnectionManagers {
-		connectionManager.ResolveSecret(provider, id, value)
+		connectionManager.ResolveCredential(provider, id, value)
 	}
 }
 

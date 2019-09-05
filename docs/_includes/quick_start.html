@@ -15,10 +15,12 @@ $ docker container run \
 cyberark/secretless-broker-quickstart</pre>
     </li>
     <li>
+      <p>In a separate terminal window, you can try to send requests to PostgreSQL from outside the container.
+      </p>
       <p>Direct access to the PostgreSQL database is available over port
-      <code>5432</code>. You can try querying some data, but you don't
+      <code>5432</code>. Try to query some data. Since you don't
       have the credentials required to connect (even if you know the
-      username):</p>
+      username), your attempt will fail:</p>
       <pre>
 $ psql \
 "host=localhost port=5432 user=secretless dbname=quickstart sslmode=disable" \
@@ -69,9 +71,11 @@ $ docker container run \
 cyberark/secretless-broker-quickstart</pre>
     </li>
     <li>
-      <p>The default SSH service is exposed over port <code>2221</code>. You
-      can try opening an SSH connection to the server, but you don't have
-      the credentials to log in:</p>
+      <p>In a separate terminal window, you can try to SSH into the container.
+      </p>
+      <p>The default SSH service is exposed over port <code>2221</code>. Try
+      to open an SSH connection to the server. Since you don't have
+      the credentials to log in, your attempt will fail:</p>
       <pre>
 $ ssh -p 2221 user@localhost
 
@@ -113,9 +117,12 @@ $ docker container run \
 cyberark/secretless-broker-quickstart</pre>
     </li>
     <li>
+      <p>In a separate terminal window, you can try to send the service HTTP requests from outside the container.
+      </p>
       <p>The service we're trying to connect to is listening on port
-      <code>8080</code>. If you try to access it, the service will inform
-      you that you're unauthorized:</p>
+      <code>8080</code>. Try to access the service directly. Since you don't
+      know the credentials, the service will inform you that you're
+      unauthorized:</p>
       <pre>
 $ curl -i localhost:8080
 

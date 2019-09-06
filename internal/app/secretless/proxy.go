@@ -57,12 +57,12 @@ func (p *Proxy) Listen(listenerConfig config_v2.Service) plugin_v1.Listener {
 		RunHandlerFunc: p.RunHandlerFunc,
 	}
 
-	listenerId := listenerConfig.Connector
+	listenerID := listenerConfig.Connector
 	// At present, we still need to use the http listener for http service connectors
-	if config_v2.IsHTTPConnector(listenerId) {
-		listenerId = "http"
+	if config_v2.IsHTTPConnector(listenerID) {
+		listenerID = "http"
 	}
-	listener := p.RunListenerFunc(listenerId, options)
+	listener := p.RunListenerFunc(listenerID, options)
 
 	err = listener.Validate()
 	if err != nil {

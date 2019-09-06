@@ -3,7 +3,6 @@ package v2
 import (
 	"sort"
 
-	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
 
@@ -12,13 +11,6 @@ import (
 type Config struct {
 	Debug bool
 	Services []*Service
-}
-
-// Validate verifies the completeness and correctness of the Config.
-func (c Config) Validate() error {
-	return validation.ValidateStruct(&c,
-		validation.Field(&c.Services, validation.Required),
-	)
 }
 
 // Serialize Config to YAML

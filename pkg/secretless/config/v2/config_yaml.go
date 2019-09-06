@@ -46,5 +46,9 @@ func newConfigYAML(rawYAML []byte) (*configYAML, error) {
 		return nil, err
 	}
 
+	if err := cfgYAML.Validate(); err != nil {
+		return nil, err
+	}
+
 	return cfgYAML, nil
 }

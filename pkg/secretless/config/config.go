@@ -77,10 +77,5 @@ func Load(data []byte) (config config_v2.Config, err error) {
 	}
 	config = *configPointer
 
-	if err = config.Validate(); err != nil {
-		err = fmt.Errorf("configuration is not valid: %s", err)
-		return
-	}
-
 	return
 }

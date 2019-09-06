@@ -92,18 +92,22 @@ func connectorFromLegacyHTTPConfig(connectorConfigBytes []byte) (string, error) 
 
 // NewService creates a named v2.Service from yaml bytes
 func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
-	if err := svcYAML.Validate(); err != nil {
-		return nil, err
+	var err error
+	errors := validation.Errors{}
+
+	err = svcYAML.Validate()
+	if err != nil {
+		errors["validation"] = err
 	}
 
 	credentials, err := NewCredentials(svcYAML.Credentials)
 	if err != nil {
-		return nil, err
+		errors["credentials"] = err
 	}
 
 	connectorConfigBytes, err := yaml.Marshal(svcYAML.Config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse 'config' key for service '%s': %s", svcName, err)
+		errors["config"] = fmt.Errorf("failed to parse 'config' key for service '%s': %s", svcName, err)
 	}
 
 	hasConnector := svcYAML.Connector != ""
@@ -128,7 +132,13 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 		// Neither given
 	} else {
-		return nil, fmt.Errorf("missing 'connector' key on service '%s'", svcName)
+		errors["connector"] = fmt.Errorf("missing 'connector' key on service '%s'", svcName)
+	}
+
+	// Accumulate errors from top-level keys on serviceYAML
+	err = errors.Filter()
+	if err != nil {
+		return nil, err
 	}
 
 	// When only the deprecated 'protocol' field

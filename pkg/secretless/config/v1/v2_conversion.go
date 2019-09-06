@@ -1,4 +1,4 @@
-package v2
+package v1
 
 import (
 	"fmt"
@@ -7,13 +7,13 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // newV2ServiceFromListenerAndHandler translates an associated v1 Listener-Handler pair to a v2 Service.
 // This method illustrates how the conceptual model of V2 Services combines
 // the legacy concept of Handlers and Listeners into a singular entity.
-func newV2ServiceFromListenerAndHandler(listener config_v1.Listener, linkedHandler config_v1.Handler) (*Service, error) {
+func newV2ServiceFromListenerAndHandler(listener Listener, linkedHandler Handler) (*config_v2.Service, error) {
 	// Extract Connector and connectorConfig
 	var connectorConfig []byte
 
@@ -41,9 +41,9 @@ func newV2ServiceFromListenerAndHandler(listener config_v1.Listener, linkedHandl
 	}
 
 	// Extract Credentials
-	credentials := make([]*Credential, 0)
+	credentials := make([]*config_v2.Credential, 0)
 	for _, storedSecret := range linkedHandler.Credentials {
-		credentials = append(credentials, &Credential{
+		credentials = append(credentials, &config_v2.Credential{
 			Name: storedSecret.Name,
 			From: storedSecret.Provider,
 			Get:  storedSecret.ID,
@@ -55,7 +55,7 @@ func newV2ServiceFromListenerAndHandler(listener config_v1.Listener, linkedHandl
 	})
 
 	// Create Service
-	return &Service{
+	return &config_v2.Service{
 		Connector:       connector,
 		ConnectorConfig: connectorConfig,
 		Credentials:     credentials,
@@ -64,15 +64,15 @@ func newV2ServiceFromListenerAndHandler(listener config_v1.Listener, linkedHandl
 	}, nil
 }
 
-// NewV2ConfigFromV1Config translates v1 Config (composed of listeners and handlers) to a v2 Config (composed of Services).
-func NewV2ConfigFromV1Config(v1Cfg *config_v1.Config) (*Config, error) {
+// NewV2Config translates v1 Config (composed of listeners and handlers) to a v2 Config (composed of Services).
+func NewV2Config(v1Cfg *Config) (*config_v2.Config, error) {
 	// Validate v1 Config
 	if err := v1Cfg.Validate(); err != nil {
 		return nil, err
 	}
 
 	// Create list of v2 Services
-	v2Services := make([]*Service, 0)
+	v2Services := make([]*config_v2.Service, 0)
 	for _, listener := range v1Cfg.Listeners {
 		linkedHandlers := listener.LinkedHandlers(v1Cfg.Handlers)
 
@@ -97,7 +97,7 @@ func NewV2ConfigFromV1Config(v1Cfg *config_v1.Config) (*Config, error) {
 		return v2Services[i].Name < v2Services[j].Name
 	})
 
-	return &Config{
+	return &config_v2.Config{
 		Services: v2Services,
 	}, nil
 }

@@ -58,7 +58,7 @@ func Load(data []byte) (config config_v2.Config, err error) {
 			err = fmt.Errorf("unable to load configuration when parsing version 1: '%s'", err)
 		}
 
-		if configPointer, err = config_v2.NewV2ConfigFromV1Config(v1Config); err != nil {
+		if configPointer, err = config_v1.NewV2Config(v1Config); err != nil {
 			err = fmt.Errorf("unable to load configuration when parsing version 1: '%s'", err)
 		}
 	case "2":

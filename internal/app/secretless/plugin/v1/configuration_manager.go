@@ -1,7 +1,7 @@
 package v1
 
 import (
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // ConfigurationChangedHandler interface specifies what method is required to support
@@ -9,7 +9,7 @@ import (
 type ConfigurationChangedHandler interface {
 	// ConfigurationChanged is a method that gets triggered when a ConfigurationManager
 	// has a new configuration that should be loaded.
-	ConfigurationChanged(string, config_v1.Config) error
+	ConfigurationChanged(string, config_v2.Config) error
 }
 
 // ConfigurationManagerOptions contains the configuration for the configuration

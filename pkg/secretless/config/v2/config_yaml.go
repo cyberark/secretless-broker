@@ -3,6 +3,7 @@ package v2
 import (
 	"fmt"
 
+	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
 
@@ -10,18 +11,23 @@ type configYAML struct {
 	Services map[string]*serviceYAML
 }
 
-type serviceYAML struct {
-	// Protocol specifies the service connector by protocol.
-	// It is an internal detail.
-	//
-	// Deprecated: Protocol exists for historical compatibility
-	// and should not be used. To specify the service connector,
-	// use the Connector field.
-	Protocol    string          `yaml:"protocol" json:"protocol"`
-	Connector   string          `yaml:"connector" json:"connector"`
-	ListenOn    string          `yaml:"listenOn" json:"listenOn"`
-	Credentials credentialsYAML `yaml:"credentials" json:"credentials"`
-	Config      interface{}     `yaml:"config" json:"config"`
+// Validate verifies the completeness and correctness of the configYAML.
+func (c configYAML) Validate() error {
+	// Validate ServiceYAML map
+	errors := validation.Errors{}
+	for serviceName, serviceYAML := range c.Services {
+		if err := serviceYAML.Validate(); err != nil {
+			errors[serviceName] = err
+		}
+	}
+	if err := errors.Filter(); err != nil {
+		return err
+	}
+
+	// Validate configYAML
+	return validation.ValidateStruct(&c,
+		validation.Field(&c.Services, validation.Required),
+	)
 }
 
 // CredentialYAML needs to be an interface because it contains arbitrary YAML
@@ -37,6 +43,10 @@ func newConfigYAML(rawYAML []byte) (*configYAML, error) {
 	cfgYAML := &configYAML{}
 	err := yaml.Unmarshal(rawYAML, cfgYAML)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := cfgYAML.Validate(); err != nil {
 		return nil, err
 	}
 

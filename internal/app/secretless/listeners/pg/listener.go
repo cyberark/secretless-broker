@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 
-	// TODO: Ideally this protocol-specific import shouldn't be needed
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Listener listens for and handles new connections.
@@ -20,33 +17,32 @@ type Listener struct {
 	plugin_v1.BaseListener
 }
 
-// HandlerHasCredentials validates that a handler has all necessary credentials.
-type handlerHasCredentials struct {
+// serviceHasCredentials validates that a service has all necessary credentials.
+type serviceHasCredentials struct {
 }
 
-// Validate checks that a handler has all necessary credentials.
-func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config_v1.Handler)
+// Validate checks that a service has all necessary credentials.
+func (svc serviceHasCredentials) Validate(value interface{}) error {
+	s := value.(config_v2.Service)
 	errors := validation.Errors{}
-	for i, h := range hs {
-		if !h.HasCredential("host") && !h.HasCredential("address") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'host' or (deprecated) 'address'")
-		}
-		if !h.HasCredential("username") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'username'")
-		}
-		if !h.HasCredential("password") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'password'")
+	if !s.HasCredential("host") && !s.HasCredential("address") {
+		errors["host"] = fmt.Errorf("must have credential 'host' or (deprecated) 'address'")
+	}
+
+	for _, credential := range [...]string{"username", "password"} {
+		if !s.HasCredential(credential) {
+			errors[credential] = fmt.Errorf("must have credential '%s'", credential)
 		}
 	}
+
 	return errors.Filter()
 }
 
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.HandlerConfigs, validation.Required),
-		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
+		validation.Field(&l.Config, validation.Required),
+		validation.Field(&l.Config, serviceHasCredentials{}),
 	)
 }
 
@@ -61,27 +57,18 @@ func (l *Listener) Listen() {
 		}
 
 		// Serve the first Handler which is attached to this listener
-		if len(l.HandlerConfigs) > 0 {
-			handlerOptions := plugin_v1.HandlerOptions{
-				HandlerConfig:    l.HandlerConfigs[0],
-				ClientConnection: client,
-				EventNotifier:    l.EventNotifier,
-				ShutdownNotifier: func(handler plugin_v1.Handler) {
-					l.RemoveHandler(handler)
-				},
-				Resolver: l.Resolver,
-			}
-
-			handler := l.RunHandlerFunc("pg", handlerOptions)
-			l.AddHandler(handler)
-		} else {
-			pgError := protocol.Error{
-				Severity: protocol.ErrorSeverityFatal,
-				Code:     protocol.ErrorCodeInternalError,
-				Message:  fmt.Sprintf("No handler found for listener %s", l.Config.Name),
-			}
-			client.Write(pgError.GetPacket())
+		handlerOptions := plugin_v1.HandlerOptions{
+			HandlerConfig:    l.Config,
+			ClientConnection: client,
+			EventNotifier:    l.EventNotifier,
+			ShutdownNotifier: func(handler plugin_v1.Handler) {
+				l.RemoveHandler(handler)
+			},
+			Resolver: l.Resolver,
 		}
+
+		handler := l.RunHandlerFunc("pg", handlerOptions)
+		l.AddHandler(handler)
 	}
 }
 

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // connectionManager is an empty struct
@@ -14,7 +14,7 @@ type connectionManager struct {
 }
 
 // Initialize is called before proxy initialization
-func (manager *connectionManager) Initialize(c config_v1.Config, configChangedFunc func(config_v1.Config) error) error {
+func (manager *connectionManager) Initialize(c config_v2.Config, configChangedFunc func(config_v2.Config) error) error {
 	log.Println("Initialized manager event...")
 	return nil
 }
@@ -63,8 +63,8 @@ func (manager *connectionManager) DestroyHandler(h plugin_v1.Handler) {
 	log.Println("Destroy handler manager event...")
 }
 
-// ResolveSecret is called when a provider resolves a variable
-func (manager *connectionManager) ResolveSecret(provider plugin_v1.Provider, id string, value []byte) {
+// ResolveCredential is called when a provider resolves a variable
+func (manager *connectionManager) ResolveCredential(provider plugin_v1.Provider, id string, value []byte) {
 	log.Printf("Example-plugin ConnectionManager: Resolve secret manager event: %s = %s", id, string(value))
 }
 

@@ -9,14 +9,13 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/ssh"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Listener accepts SSH connections and MITMs them using a Handler.
@@ -27,19 +26,18 @@ type Listener struct {
 	plugin_v1.BaseListener
 }
 
-// HandlerHasCredentials validates that a handler has all necessary credentials.
-type handlerHasCredentials struct {
+// serviceHasCredentials validates that a service has all necessary credentials.
+type serviceHasCredentials struct {
 }
 
-// Validate checks that a handler has all necessary credentials.
-func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config_v1.Handler)
+// Validate checks that a service has all necessary credentials.
+func (svc serviceHasCredentials) Validate(value interface{}) error {
+	s := value.(config_v2.Service)
+
 	errors := validation.Errors{}
-	for i, h := range hs {
-		for _, credential := range [...]string{"address", "privateKey"} {
-			if !h.HasCredential(credential) {
-				errors[strconv.Itoa(i)] = fmt.Errorf(credential)
-			}
+	for _, credential := range [...]string{"address", "privateKey"} {
+		if !s.HasCredential(credential) {
+			errors[credential] = fmt.Errorf("must have credential '%s'", credential)
 		}
 	}
 	return errors.Filter()
@@ -48,8 +46,8 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.HandlerConfigs, validation.Required),
-		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
+		validation.Field(&l.Config, validation.Required),
+		validation.Field(&l.Config, serviceHasCredentials{}),
 	)
 }
 
@@ -152,13 +150,8 @@ func (l *Listener) Listen() {
 			}
 		}()
 
-		// Serve the first Handler which is attached to this listener
-		if len(l.HandlerConfigs) == 0 {
-			log.Panicf("No ssh handler is available")
-		}
-
 		handlerOptions := plugin_v1.HandlerOptions{
-			HandlerConfig:    l.HandlerConfigs[0],
+			HandlerConfig:    l.Config,
 			Channels:         chans,
 			ClientConnection: nil,
 			EventNotifier:    l.EventNotifier,

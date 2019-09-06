@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
-	"regexp"
+	"log"
 
 	"gopkg.in/yaml.v2"
 
@@ -13,7 +13,7 @@ import (
 )
 
 // LoadFromFile loads a configuration file into a Config object.
-func LoadFromFile(fileName string) (config config_v1.Config, err error) {
+func LoadFromFile(fileName string) (config config_v2.Config, err error) {
 	var buffer []byte
 	if buffer, err = ioutil.ReadFile(fileName); err != nil {
 		err = fmt.Errorf("error reading config file '%s': '%s'", fileName, err)
@@ -23,7 +23,7 @@ func LoadFromFile(fileName string) (config config_v1.Config, err error) {
 }
 
 // LoadFromCRD loads a configuration from a CRD API Configuration object
-func LoadFromCRD(crdConfig crd_api_v1.Configuration) (config config_v1.Config, err error) {
+func LoadFromCRD(crdConfig crd_api_v1.Configuration) (config config_v2.Config, err error) {
 	var specData []byte
 	if specData, err = yaml.Marshal(crdConfig.Spec); err != nil {
 		return
@@ -37,7 +37,7 @@ func LoadFromCRD(crdConfig crd_api_v1.Configuration) (config config_v1.Config, e
 }
 
 // Load parses a YAML string into a Config object.
-func Load(data []byte) (config config_v1.Config, err error) {
+func Load(data []byte) (config config_v2.Config, err error) {
 	versionStruct := &struct {
 		Version string `yaml:"version"`
 	}{}
@@ -47,18 +47,25 @@ func Load(data []byte) (config config_v1.Config, err error) {
 		return
 	}
 
-	var configPointer *config_v1.Config
+	var configPointer *config_v2.Config
 	if versionStruct.Version == "" {
 		versionStruct.Version = "1"
 	}
 
 	switch versionStruct.Version {
 	case "1":
-		if configPointer, err = config_v1.NewConfig(data); err != nil {
+		log.Printf("WARN: v1 configuration is now deprecated and will be removed in a future release")
+
+		var v1Config *config_v1.Config
+		if v1Config, err = config_v1.NewConfig(data); err != nil {
+			err = fmt.Errorf("unable to load configuration when parsing version 1: '%s'", err)
+		}
+
+		if configPointer, err = config_v1.NewV2Config(v1Config); err != nil {
 			err = fmt.Errorf("unable to load configuration when parsing version 1: '%s'", err)
 		}
 	case "2":
-		if configPointer, err = config_v2.NewV1Config(data); err != nil {
+		if configPointer, err = config_v2.NewConfig(data); err != nil {
 			err = fmt.Errorf("unable to load configuration when parsing version 2: '%s'", err)
 		}
 	default:
@@ -69,38 +76,6 @@ func Load(data []byte) (config config_v1.Config, err error) {
 		return
 	}
 	config = *configPointer
-
-	for i := range config.Listeners {
-		l := &config.Listeners[i]
-		if l.Protocol == "" {
-			l.Protocol = l.Name
-		}
-	}
-
-	for i := range config.Handlers {
-		h := &config.Handlers[i]
-		if h.Type == "" {
-			h.Type = h.Name
-		}
-		if h.ListenerName == "" {
-			h.ListenerName = h.Name
-		}
-
-		h.Patterns = make([]*regexp.Regexp, len(h.Match))
-		for i, matchPattern := range h.Match {
-			pattern, err := regexp.Compile(matchPattern)
-			if err != nil {
-				panic(err.Error())
-			} else {
-				h.Patterns[i] = pattern
-			}
-		}
-	}
-
-	if err = config.Validate(); err != nil {
-		err = fmt.Errorf("configuration is not valid: %s", err)
-		return
-	}
 
 	return
 }

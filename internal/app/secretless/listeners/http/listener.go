@@ -5,53 +5,52 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"reflect"
-	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Listener listens for and handles new connections
 type Listener struct {
 	plugin_v1.BaseListener
-	Transport *http.Transport
+	Transport  *http.Transport
+	HTTPConfig *config_v2.HTTPConfig
 }
 
-// HandlerHasCredentials validates that a handler has all necessary credentials.
-type handlerHasCredentials struct {
+// serviceHasCredentials validates that a service has all necessary credentials.
+type serviceHasCredentials struct {
 }
 
-// Validate checks that a handler has all necessary credentials.
-func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config_v1.Handler)
+// Validate checks that a service has all necessary credentials.
+func (svc serviceHasCredentials) Validate(value interface{}) error {
+	s := value.(config_v2.Service)
 	errors := validation.Errors{}
-	for i, h := range hs {
-		if h.Type == "aws" {
-			if !h.HasCredential("accessKeyId") {
-				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessKeyId'")
+
+	if s.Connector == "aws" {
+		for _, credential := range [...]string{"accessKeyId", "secretAccessKey"} {
+			if !s.HasCredential(credential) {
+				errors[credential] = fmt.Errorf("must have credential '%s'", credential)
 			}
-			if !h.HasCredential("secretAccessKey") {
-				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'secretAccessKey'")
-			}
-		} else if h.Type == "conjur" {
-			if !h.HasCredential("accessToken") {
-				errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'accessToken'")
-			}
-		} else if h.Type == "basic_auth" {
-			for _, credential := range [...]string{"username", "password"} {
-				if !h.HasCredential(credential) {
-					errors[strconv.Itoa(i)] = fmt.Errorf("must have credential '" + credential + "'")
-				}
-			}
-		} else {
-			errors[strconv.Itoa(i)] = fmt.Errorf("Handler type is not supported")
 		}
+	} else if s.Connector == "conjur" {
+		for _, credential := range [...]string{"accessToken"} {
+			if !s.HasCredential(credential) {
+				errors[credential] = fmt.Errorf("must have credential '%s'", credential)
+			}
+		}
+	} else if s.Connector == "basic_auth" {
+		for _, credential := range [...]string{"username", "password"} {
+			if !s.HasCredential(credential) {
+				errors[credential] = fmt.Errorf("must have credential '%s'", credential)
+			}
+		}
+	} else {
+		return fmt.Errorf("http service connector type is not supported")
 	}
 
 	return errors.Filter()
@@ -60,8 +59,8 @@ func (hhc handlerHasCredentials) Validate(value interface{}) error {
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.HandlerConfigs, validation.Required),
-		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
+		validation.Field(&l.Config, validation.Required),
+		validation.Field(&l.Config, serviceHasCredentials{}),
 	)
 }
 
@@ -77,35 +76,33 @@ func copyHeaders(dst, src http.Header) {
 	}
 }
 
-// Zeroizes credentials in the fetched variables. We don't want to
+// Zeroizes the values of the fetched credentials. We don't want to
 // rely on garbage collection for this (it might be slow and/or only free them) so
 // we manually clear
-func zeroizeSecrets(backendSecrets map[string][]byte) {
-	for _, rawCredential := range reflect.ValueOf(backendSecrets).MapKeys() {
+func zeroizeCredentials(backendCredentials map[string][]byte) {
+	for _, rawCredential := range reflect.ValueOf(backendCredentials).MapKeys() {
 		credential := rawCredential.String()
-		for byteIndex := range backendSecrets[credential] {
-			backendSecrets[credential][byteIndex] = 0
+		for byteIndex := range backendCredentials[credential] {
+			backendCredentials[credential][byteIndex] = 0
 		}
 	}
 }
 
 // LookupHandler returns the handler that matches the request URL
 func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
-	for _, handlerConfig := range l.HandlerConfigs {
-		for _, pattern := range handlerConfig.Patterns {
-			log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
-			if pattern.MatchString(r.URL.String()) {
-				if handlerConfig.Debug {
-					log.Printf("Using handler '%s' for request %s", handlerConfig.Name, r.URL.String())
-				}
-
-				handlerOptions := plugin_v1.HandlerOptions{
-					HandlerConfig: handlerConfig,
-					Resolver:      l.Resolver,
-				}
-
-				return l.RunHandlerFunc("http/"+handlerConfig.Type, handlerOptions)
+	for _, pattern := range l.HTTPConfig.AuthenticateURLsMatching {
+		log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
+		if pattern.MatchString(r.URL.String()) {
+			if l.Config.Debug {
+				log.Printf("Using handler '%s' for request %s", l.Config.Name, r.URL.String())
 			}
+
+			handlerOptions := plugin_v1.HandlerOptions{
+				HandlerConfig: l.Config,
+				Resolver:      l.Resolver,
+			}
+
+			return l.RunHandlerFunc("http/"+l.Config.Connector, handlerOptions)
 		}
 	}
 	return nil
@@ -137,18 +134,18 @@ func (l *Listener) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler := l.LookupHandler(r)
 
 	if handler != nil {
-		var backendSecrets map[string][]byte
-		if backendSecrets, err = l.Resolver.Resolve(handler.GetConfig().Credentials); err != nil {
+		var backendCredentials map[string][]byte
+		if backendCredentials, err = l.Resolver.Resolve(handler.GetConfig().Credentials); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
 		if listenerDebug || handler.GetConfig().Debug {
-			keys := reflect.ValueOf(backendSecrets).MapKeys()
+			keys := reflect.ValueOf(backendCredentials).MapKeys()
 			log.Printf("%s backend connection parameters: %s", handler.GetConfig().Name, keys)
 		}
 
-		err = handler.Authenticate(backendSecrets, r)
-		zeroizeSecrets(backendSecrets)
+		err = handler.Authenticate(backendCredentials, r)
+		zeroizeCredentials(backendCredentials)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
@@ -201,13 +198,6 @@ func (l *Listener) Listen() {
 		log.Printf("Error '%s' loading system cert pool; will use an empty cert pool", err)
 		caCertPool = x509.NewCertPool()
 	}
-	for _, fname := range l.Config.CACertFiles {
-		severCert, err := ioutil.ReadFile(fname)
-		if err != nil {
-			log.Panicf("Could not load CA certificate file %s : %s", fname, err)
-		}
-		caCertPool.AppendCertsFromPEM(severCert)
-	}
 
 	l.Transport = &http.Transport{TLSClientConfig: &tls.Config{RootCAs: caCertPool}}
 
@@ -226,5 +216,13 @@ func (l *Listener) GetName() string {
 
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	return &Listener{BaseListener: plugin_v1.NewBaseListener(options)}
+	httpConfig, err := config_v2.NewHTTPConfig(options.ServiceConfig.ConnectorConfig)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return &Listener{
+		BaseListener: plugin_v1.NewBaseListener(options),
+		HTTPConfig:   httpConfig,
+	}
 }

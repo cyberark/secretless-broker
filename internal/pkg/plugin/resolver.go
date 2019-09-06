@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Resolver is used to instantiate providers and resolve credentials
@@ -68,30 +68,30 @@ func (resolver *Resolver) Provider(name string) (provider plugin_v1.Provider, er
 	return
 }
 
-// Resolve accepts an list of Providers and a list of StoredSecrets and
-// attempts to obtain the value of each StoredSecret from the appropriate Provider.
-func (resolver *Resolver) Resolve(secrets []config_v1.StoredSecret) (map[string][]byte, error) {
-	if secrets == nil {
-		resolver.LogFatalf("ERROR! StoredSecrets not defined in Resolve call!")
+// Resolve accepts an list of Providers and a list of Credentials and
+// attempts to obtain the value of each Credential from the appropriate Provider.
+func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[string][]byte, error) {
+	if len(credentials) == 0 {
+		resolver.LogFatalf("ERROR! Credentials not defined in Resolve call!")
 	}
 
 	result := make(map[string][]byte)
-	errorStrings := make([]string, 0, len(secrets))
+	errorStrings := make([]string, 0, len(credentials))
 
 	var err error
-	for _, variable := range secrets {
+	for _, credential := range credentials {
 		var provider plugin_v1.Provider
 		var value []byte
 
-		if provider, err = resolver.Provider(variable.Provider); err != nil {
-			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", variable.Provider, err)
+		if provider, err = resolver.Provider(credential.From); err != nil {
+			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", credential.From, err)
 		}
 
-		// This provider cannot resolve the named variable
-		if value, err = provider.GetValue(variable.ID); err != nil {
-			errInfo := fmt.Sprintf("ERROR: Resolving variable '%s' from provider '%s' failed: %v",
-				variable.ID,
-				variable.Provider,
+		// This provider cannot resolve the named credential
+		if value, err = provider.GetValue(credential.Get); err != nil {
+			errInfo := fmt.Sprintf("ERROR: Resolving credential '%s' from provider '%s' failed: %v",
+				credential.Get,
+				credential.From,
 				err)
 			log.Println(errInfo)
 
@@ -99,10 +99,10 @@ func (resolver *Resolver) Resolve(secrets []config_v1.StoredSecret) (map[string]
 			continue
 		}
 
-		result[variable.Name] = value
+		result[credential.Name] = value
 
 		if resolver.EventNotifier != nil {
-			resolver.EventNotifier.ResolveSecret(provider, variable.Name, value)
+			resolver.EventNotifier.ResolveCredential(provider, credential.Name, value)
 		}
 	}
 

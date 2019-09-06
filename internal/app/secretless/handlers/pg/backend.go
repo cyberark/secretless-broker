@@ -2,12 +2,12 @@ package pg
 
 import (
 	"fmt"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
 	"log"
 	"net"
 	"reflect"
 
 	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
 )
 

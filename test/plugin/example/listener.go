@@ -4,49 +4,47 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strconv"
 
 	"github.com/go-ozzo/ozzo-validation"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/pkg/util"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // Listener listens for and handles new connections.
 type Listener struct {
-	Config         config_v1.Listener
+	Config         config_v2.Service
 	EventNotifier  plugin_v1.EventNotifier
-	HandlerConfigs []config_v1.Handler
 	NetListener    net.Listener
 	Resolver       plugin_v1.Resolver
 	RunHandlerFunc func(id string, options plugin_v1.HandlerOptions) plugin_v1.Handler
 }
 
-// HandlerHasCredentials validates that a handler has all necessary credentials.
-type handlerHasCredentials struct {
+// serviceHasCredentials validates that a service has all necessary credentials.
+type serviceHasCredentials struct {
 }
 
-// Validate checks that a handler has all necessary credentials.
-func (hhc handlerHasCredentials) Validate(value interface{}) error {
-	hs := value.([]config_v1.Handler)
+// Validate checks that a service has all necessary credentials.
+func (svc serviceHasCredentials) Validate(value interface{}) error {
+	s := value.(config_v2.Service)
+
 	errors := validation.Errors{}
-	for i, h := range hs {
-		if !h.HasCredential("host") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'host'")
-		}
-		if !h.HasCredential("port") {
-			errors[strconv.Itoa(i)] = fmt.Errorf("must have credential 'port'")
+
+	for _, credential := range [...]string{"host", "port"} {
+		if !s.HasCredential(credential) {
+			errors[credential] = fmt.Errorf("must have credential '%s'", credential)
 		}
 	}
+
 	return errors.Filter()
 }
 
 // Validate verifies the completeness and correctness of the Listener.
 func (l Listener) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.HandlerConfigs, validation.Required),
-		validation.Field(&l.HandlerConfigs, handlerHasCredentials{}),
+		validation.Field(&l.Config, validation.Required),
+		validation.Field(&l.Config, serviceHasCredentials{}),
 	)
 }
 
@@ -59,20 +57,16 @@ func (l *Listener) Listen() {
 			continue
 		}
 
-		// Serve the first Handler which is attached to this listener
-		if len(l.HandlerConfigs) > 0 {
-			options := plugin_v1.HandlerOptions{
-				ClientConnection: client,
-				HandlerConfig:    l.HandlerConfigs[0],
-				EventNotifier:    l.EventNotifier,
-				Resolver:         l.Resolver,
-				ShutdownNotifier: func(handler plugin_v1.Handler) {},
-			}
-
-			l.RunHandlerFunc("example-handler", options)
-		} else {
-			client.Write([]byte("Error - no handlers were defined!"))
+		options := plugin_v1.HandlerOptions{
+			ClientConnection: client,
+			HandlerConfig:    l.Config,
+			EventNotifier:    l.EventNotifier,
+			Resolver:         l.Resolver,
+			ShutdownNotifier: func(handler plugin_v1.Handler) {},
 		}
+
+		l.RunHandlerFunc("example-handler", options)
+
 	}
 }
 
@@ -82,7 +76,7 @@ func (l *Listener) GetName() string {
 }
 
 // GetConfig implements plugin_v1.Listener
-func (l *Listener) GetConfig() config_v1.Listener {
+func (l *Listener) GetConfig() config_v2.Service {
 	return l.Config
 }
 
@@ -120,9 +114,8 @@ func (l *Listener) Shutdown() error {
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
 	return &Listener{
-		Config:         options.ListenerConfig,
+		Config:         options.ServiceConfig,
 		EventNotifier:  options.EventNotifier,
-		HandlerConfigs: options.HandlerConfigs,
 		NetListener:    options.NetListener,
 		Resolver:       options.Resolver,
 		RunHandlerFunc: options.RunHandlerFunc,

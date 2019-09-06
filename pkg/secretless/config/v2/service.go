@@ -30,17 +30,13 @@ func (s serviceYAML) Validate() error {
 	)
 }
 
-// ConnectorConfig is a wrapper around byte slice
+// connectorConfig is a wrapper around byte slice
 // that allows the connector configuration
 // to be Marshalled to YAML.
-type ConnectorConfig []byte
+type connectorConfig []byte
 
-func (c ConnectorConfig) MarshalYAML() (interface{}, error) {
+func (c connectorConfig) MarshalYAML() (interface{}, error) {
 	return string(c), nil
-}
-
-func (c ConnectorConfig) Bytes() []byte {
-	return c
 }
 
 // Service represents a the configuration of a Secretless proxy service. It
@@ -48,9 +44,9 @@ func (c ConnectorConfig) Bytes() []byte {
 // location of its required credentials, and (optionally) any additional
 // protocol specific configuration.
 type Service struct {
-	Debug 			bool
+	Debug           bool
 	Connector       string
-	ConnectorConfig ConnectorConfig
+	ConnectorConfig connectorConfig
 	Credentials     []*Credential
 	ListenOn        string
 	Name            string

@@ -12,7 +12,10 @@ type httpConfigYAML struct {
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
 }
 
-type HttpConfig struct {
+
+// HTTPConfig represents service-specific configuration for service connectors
+// built on top of the http protocol
+type HTTPConfig struct {
 	AuthenticateURLsMatching []*regexp.Regexp
 }
 
@@ -24,6 +27,8 @@ var HTTPAuthenticationStrategies = []interface{}{
 	"conjur",
 }
 
+// IsHTTPConnector returns true iff the connector provided
+// uses the http protocol
 func IsHTTPConnector(connector string) bool {
 	for _, strategy := range HTTPAuthenticationStrategies {
 		if strategy == connector {
@@ -48,7 +53,8 @@ func newHTTPConfigYAML(cfgBytes []byte) (*httpConfigYAML, error) {
 	return cfg, nil
 }
 
-func NewHTTPConfig(cfgBytes []byte) (*HttpConfig, error) {
+// NewHTTPConfig creates an HTTPConfig from yaml bytes
+func NewHTTPConfig(cfgBytes []byte) (*HTTPConfig, error) {
 	cfg, err := newHTTPConfigYAML(cfgBytes)
 	if err != nil {
 		return nil, err
@@ -64,7 +70,7 @@ func NewHTTPConfig(cfgBytes []byte) (*HttpConfig, error) {
 		}
 	}
 
-	return &HttpConfig{
+	return &HTTPConfig{
 		AuthenticateURLsMatching: AuthenticateURLsMatching,
 	}, nil
 }
@@ -79,7 +85,7 @@ func (cfg *httpConfigYAML) UnmarshalYAML(bytes []byte) error {
 	}{}
 	err := yaml.Unmarshal(bytes, tempCfg)
 	if err != nil {
-		return errors.New("http ConnectorConfig could not be parsed")
+		return errors.New("http connectorConfig could not be parsed")
 	}
 
 	// Populate actual http config from tempCfg

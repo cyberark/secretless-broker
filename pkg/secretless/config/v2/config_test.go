@@ -112,7 +112,7 @@ func RunNewConfigTestCases(t *testing.T, label string, sampleContents string) {
 		}
 
 		expectedBytes := []byte("optionalStuff: blah\n")
-		assert.Equal(t, expectedBytes, cfg.Services[1].ConnectorConfig.Bytes())
+		assert.Equal(t, string(expectedBytes), string(cfg.Services[1].ConnectorConfig))
 	})
 
 	t.Run(label + ": http hydration", func(t *testing.T) {

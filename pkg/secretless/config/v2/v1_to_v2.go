@@ -14,7 +14,7 @@ import (
 // This method illustrates how the conceptual model of V2 Services combines
 // the legacy concept of Handlers and Listeners into a singular entity.
 func newV2ServiceFromListenerAndHandler(listener config_v1.Listener, linkedHandler config_v1.Handler) (*Service, error) {
-	// Extract Connector and ConnectorConfig
+	// Extract Connector and connectorConfig
 	var connectorConfig []byte
 
 	connector := listener.Protocol

@@ -12,7 +12,6 @@ import (
 	"github.com/go-ozzo/ozzo-validation"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
@@ -20,7 +19,7 @@ import (
 type Listener struct {
 	plugin_v1.BaseListener
 	Transport  *http.Transport
-	HttpConfig *config_v2.HttpConfig
+	HTTPConfig *config_v2.HTTPConfig
 }
 
 // serviceHasCredentials validates that a service has all necessary credentials.
@@ -91,7 +90,7 @@ func zeroizeCredentials(backendCredentials map[string][]byte) {
 
 // LookupHandler returns the handler that matches the request URL
 func (l *Listener) LookupHandler(r *http.Request) plugin_v1.Handler {
-	for _, pattern := range l.HttpConfig.AuthenticateURLsMatching {
+	for _, pattern := range l.HTTPConfig.AuthenticateURLsMatching {
 		log.Printf("Matching handler pattern %s to request %s", pattern.String(), r.URL)
 		if pattern.MatchString(r.URL.String()) {
 			if l.Config.Debug {
@@ -217,13 +216,13 @@ func (l *Listener) GetName() string {
 
 // ListenerFactory returns a Listener created from options
 func ListenerFactory(options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	httpConfig, err := v2.NewHTTPConfig(options.ServiceConfig.ConnectorConfig)
+	httpConfig, err := config_v2.NewHTTPConfig(options.ServiceConfig.ConnectorConfig)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	return &Listener{
 		BaseListener: plugin_v1.NewBaseListener(options),
-		HttpConfig:   httpConfig,
+		HTTPConfig:   httpConfig,
 	}
 }

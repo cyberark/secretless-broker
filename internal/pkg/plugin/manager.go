@@ -311,12 +311,8 @@ func (manager *Manager) _RunHandler(id string, options plugin_v1.HandlerOptions)
 }
 
 func (manager *Manager) _RunListener(id string, options plugin_v1.ListenerOptions) plugin_v1.Listener {
-	// The listener type is therefore HTTP
 	// TODO: add ability for one http listener to have multiple connectors
 	//  probably this will leverage some dictionary of preexisting listeners
-	if config_v2.IsHTTPConnector(id) {
-		id = "http"
-	}
 
 	// Ensure that we have this listener
 	if _, ok := manager.ListenerFactories[id]; !ok {

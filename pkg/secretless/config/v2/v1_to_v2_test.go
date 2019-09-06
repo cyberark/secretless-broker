@@ -71,7 +71,7 @@ func v1HttpExample() *config_v1.Config {
 }
 
 func TestV1HttpHandlerConversion(t *testing.T) {
-	t.Run("ConnectorConfig field maps correctly", func(t *testing.T) {
+	t.Run("connectorConfig field maps correctly", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		v2Cfg, err := NewV2ConfigFromV1Config(v1Cfg)
 		assert.NoError(t, err)
@@ -139,7 +139,7 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 		}, v2Cfg.Services[0].Credentials)
 		assert.Equal(t, []*Credential{}, v2Cfg.Services[1].Credentials)
 
-		// ConnectorConfig
+		// connectorConfig
 		assert.Equal(t,
 			`authenticateURLsMatching:
 - ^http://aws*

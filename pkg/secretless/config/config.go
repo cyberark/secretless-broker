@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"gopkg.in/yaml.v2"
 
@@ -53,6 +54,8 @@ func Load(data []byte) (config config_v2.Config, err error) {
 
 	switch versionStruct.Version {
 	case "1":
+		log.Printf("WARN: v1 configuration is now deprecated and will be removed in a future release")
+
 		var v1Config *config_v1.Config
 		if v1Config, err = config_v1.NewConfig(data); err != nil {
 			err = fmt.Errorf("unable to load configuration when parsing version 1: '%s'", err)

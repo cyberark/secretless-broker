@@ -11,7 +11,6 @@ import (
 
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/plugin"
-
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 

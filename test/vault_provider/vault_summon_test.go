@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cyberark/secretless-broker/internal/summon/command"
+	_ "github.com/joho/godotenv/autoload"
 	. "github.com/smartystreets/goconvey/convey"
 
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/cyberark/secretless-broker/internal/summon/command"
 )
 
 func TestVault_Summon(t *testing.T) {

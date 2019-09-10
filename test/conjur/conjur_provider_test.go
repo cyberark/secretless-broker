@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
+	_ "github.com/joho/godotenv/autoload"
 	. "github.com/smartystreets/goconvey/convey"
 
 	pluginV1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/providers"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 // TestConjur_Provider tests the ability of the ConjurProvider to provide a Conjur accessToken

@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/internal/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 )
 

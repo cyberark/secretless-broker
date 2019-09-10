@@ -3,14 +3,15 @@ package main
 import (
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
-
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/providers/kubernetessecrets"
-	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
+
+	. "github.com/smartystreets/goconvey/convey"
+
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/providers"
+	"github.com/cyberark/secretless-broker/internal/providers/kubernetessecrets"
+	"k8s.io/api/core/v1"
 )
 
 func TestKubernetes_Provider(t *testing.T) {

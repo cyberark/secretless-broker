@@ -1,12 +1,12 @@
 package listeners
 
 import (
-	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/http"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/mysql"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/pg"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/ssh"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners/sshagent"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/listeners/http"
+	"github.com/cyberark/secretless-broker/internal/listeners/mysql"
+	"github.com/cyberark/secretless-broker/internal/listeners/pg"
+	"github.com/cyberark/secretless-broker/internal/listeners/ssh"
+	"github.com/cyberark/secretless-broker/internal/listeners/sshagent"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // ListenerFactories contains the list of built-in listener factories

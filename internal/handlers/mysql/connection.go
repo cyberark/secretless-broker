@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
 	"net"
 )
 

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // ConjurHandler applies Conjur authentication to the HTTP Authorization header.

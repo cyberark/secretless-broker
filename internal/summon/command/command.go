@@ -9,10 +9,10 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/cyberark/summon/secretsyml"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless"
-	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/internal"
+	"github.com/cyberark/secretless-broker/internal/plugin"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // The code in this file operates at the CLI level; it reads CLI arguments and will exit the process.
@@ -88,7 +88,7 @@ func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err
 
 	// Load all internal Providers
 	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error))
-	for providerID, providerFactory := range secretless.InternalProviders {
+	for providerID, providerFactory := range internal.InternalProviders {
 		providerFactories[providerID] = providerFactory
 	}
 

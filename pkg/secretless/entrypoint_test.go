@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/internal/plugin"
 )
 
 var testManager = &plugin.Manager{}

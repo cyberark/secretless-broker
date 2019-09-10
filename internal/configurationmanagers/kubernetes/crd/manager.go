@@ -5,7 +5,7 @@ import (
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"

@@ -1,4 +1,4 @@
-package secretless
+package internal
 
 import (
 	"log"
@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	"github.com/cyberark/secretless-broker/internal/pkg/util"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/util"
 	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 

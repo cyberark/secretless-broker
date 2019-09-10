@@ -6,8 +6,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/handlers/pg/protocol"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // ClientOptions stores the option that were specified by the connection client.

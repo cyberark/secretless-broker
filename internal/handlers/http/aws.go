@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // AWSHandler applies AWS signature authentication to the HTTP Authorization header.

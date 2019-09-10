@@ -49,7 +49,7 @@ is not supported at this time.
  (returns `string`)
   
 `PluginAPIVersion` string indicates the target API version of the Secretless Broker and must match the
-[supported version](https://github.com/cyberark/secretless-broker/blob/master/internal/pkg/plugin/manager.go#L108) list in the
+[supported version](https://github.com/cyberark/secretless-broker/blob/master/internal/plugin/manager.go#L108) list in the
 main daemon.
 
 ### PluginInfo

@@ -1,6 +1,6 @@
 package literal
 
-import plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+import plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 
 // Provider provides the ID as the value.
 type Provider struct {

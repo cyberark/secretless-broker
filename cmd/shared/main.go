@@ -13,10 +13,10 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	secretless "github.com/cyberark/secretless-broker/internal"
+	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/plugin"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
 )
 

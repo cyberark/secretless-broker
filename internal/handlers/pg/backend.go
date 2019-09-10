@@ -6,9 +6,9 @@ import (
 	"net"
 	"reflect"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg/protocol"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssl"
-	"github.com/cyberark/secretless-broker/internal/pkg/util"
+	"github.com/cyberark/secretless-broker/internal/handlers/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/handlers/ssl"
+	"github.com/cyberark/secretless-broker/internal/util"
 )
 
 // ConfigureBackend resolves the backend connection settings and credentials and sets the

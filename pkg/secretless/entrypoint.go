@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/cyberark/secretless-broker/internal/pkg/plugin"
+	"github.com/cyberark/secretless-broker/internal/plugin"
 )
 
 const programName = "secretless-broker"

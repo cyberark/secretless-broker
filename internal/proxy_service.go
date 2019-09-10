@@ -1,4 +1,4 @@
-package secretless
+package internal
 
 // ProxyService is the interface the Secretless framework uses to start and stop
 // ProxyServices. This interface allows ProxyServices to be implemented

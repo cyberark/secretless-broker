@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/cyberark/secretless-broker/internal/pkg/log"
+	"github.com/cyberark/secretless-broker/internal/log"
 )
 
 func TestNewResources(t *testing.T) {

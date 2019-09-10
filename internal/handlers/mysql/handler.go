@@ -7,8 +7,8 @@ import (
 	"net"
 	"reflect"
 
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql/protocol"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // Handler connects a client to a backend. It uses the handler Config and Providers to

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cyberark/secretless-broker/internal/app/summon/command"
+	"github.com/cyberark/secretless-broker/internal/summon/command"
 	. "github.com/smartystreets/goconvey/convey"
 
 	_ "github.com/joho/godotenv/autoload"

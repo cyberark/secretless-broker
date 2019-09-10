@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/cyberark/secretless-broker/internal/app/summon/command"
+	"github.com/cyberark/secretless-broker/internal/summon/command"
 )
 
 func main() {

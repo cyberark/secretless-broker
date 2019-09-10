@@ -9,8 +9,8 @@ import (
 
 	"github.com/cyberark/summon/secretsyml"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	"github.com/cyberark/secretless-broker/internal/app/summon/command"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/summon/command"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

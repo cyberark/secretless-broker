@@ -320,9 +320,9 @@ Plugins can be used to extend the functionality of the Secretless Broker via a s
 - Handler plugins
 - Connection management plugins
 
-Currently, these API definitions reside [here](internal/app/secretless/plugin/v1) and an example plugin can be found in the [`test/plugin`](test/plugin) directory.
+Currently, these API definitions reside [here](internal/plugin/v1) and an example plugin can be found in the [`test/plugin`](test/plugin) directory.
 
-You can read more about how to make plugins and the underlying architecture in the [API directory](internal/app/secretless/plugin).
+You can read more about how to make plugins and the underlying architecture in the [API directory](internal/plugin).
 
 _Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
 

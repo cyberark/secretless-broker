@@ -1,11 +1,11 @@
-package secretless
+package internal
 
 import (
-	"github.com/cyberark/secretless-broker/internal/app/secretless/configurationmanagers"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/listeners"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/providers"
+	"github.com/cyberark/secretless-broker/internal/configurationmanagers"
+	"github.com/cyberark/secretless-broker/internal/handlers"
+	"github.com/cyberark/secretless-broker/internal/listeners"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/providers"
 )
 
 // InternalHandlers is the set of built-in handlers

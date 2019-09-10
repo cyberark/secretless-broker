@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/http"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/mysql"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/pg"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/ssh"
-	"github.com/cyberark/secretless-broker/internal/app/secretless/handlers/sshagent"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/handlers/http"
+	"github.com/cyberark/secretless-broker/internal/handlers/mysql"
+	"github.com/cyberark/secretless-broker/internal/handlers/pg"
+	"github.com/cyberark/secretless-broker/internal/handlers/ssh"
+	"github.com/cyberark/secretless-broker/internal/handlers/sshagent"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // HandlerFactories contains the list of built-in handler factories

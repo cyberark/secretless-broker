@@ -90,7 +90,7 @@ into the Secretless Broker.
 
   // PluginAPIVersion is the target API version of the Secretless Broker and must
   // match the supported version defined in
-  // internal/pkg/plugin/manager.go:_IsSupportedPluginAPIVersion
+  // internal/plugin/manager.go:_IsSupportedPluginAPIVersion
   string PluginAPIVersion
 
   // PluginInfo is a map that has information about the plugin that the daemon

@@ -1,16 +1,16 @@
 package providers
 
 import (
-	awsProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/awssecrets"
-	conjurProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/conjur"
-	envProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/env"
-	fileProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/file"
-	keychainProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/keychain"
-	kubernetesProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/kubernetessecrets"
-	literalProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/literal"
-	vaultProvider "github.com/cyberark/secretless-broker/internal/app/secretless/providers/vault"
+	awsProvider "github.com/cyberark/secretless-broker/internal/providers/awssecrets"
+	conjurProvider "github.com/cyberark/secretless-broker/internal/providers/conjur"
+	envProvider "github.com/cyberark/secretless-broker/internal/providers/env"
+	fileProvider "github.com/cyberark/secretless-broker/internal/providers/file"
+	keychainProvider "github.com/cyberark/secretless-broker/internal/providers/keychain"
+	kubernetesProvider "github.com/cyberark/secretless-broker/internal/providers/kubernetessecrets"
+	literalProvider "github.com/cyberark/secretless-broker/internal/providers/literal"
+	vaultProvider "github.com/cyberark/secretless-broker/internal/providers/vault"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/app/secretless/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // ProviderFactories contains the list of built-in provider factories

@@ -1,8 +1,9 @@
 package mysql
 
 import (
-	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
 	"net"
+
+	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
 )
 
 // Connection represents the entire process of sending bytes back and forth

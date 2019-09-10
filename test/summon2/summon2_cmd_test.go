@@ -1,16 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"os"
 	"strings"
 	"testing"
 
-	"github.com/cyberark/secretless-broker/internal/summon/command"
-
-	"bufio"
-
 	. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/cyberark/secretless-broker/internal/summon/command"
 )
 
 // TestSummon2_Run tests Summon at the CLI level, including argument parsing etc.

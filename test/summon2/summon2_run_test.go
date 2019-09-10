@@ -8,11 +8,10 @@ import (
 	"testing"
 
 	"github.com/cyberark/summon/secretsyml"
+	. "github.com/smartystreets/goconvey/convey"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/summon/command"
-
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 type MapProvider struct {

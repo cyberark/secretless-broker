@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
+
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 

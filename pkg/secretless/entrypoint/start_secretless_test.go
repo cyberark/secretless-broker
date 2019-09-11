@@ -1,4 +1,4 @@
-package secretless
+package entrypoint
 
 import (
 	"bytes"
@@ -8,12 +8,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/cyberark/secretless-broker/internal/plugin"
 )
-
-var testManager = &plugin.Manager{}
 
 func runEntrypoint(params *CLIParams) (stdoutOutput string, stderrOutput string) {
 	// Swap our stdout with a special one for capture
@@ -49,7 +46,7 @@ func runEntrypoint(params *CLIParams) (stdoutOutput string, stderrOutput string)
 		stderrOutputChan <- buf.String()
 	}()
 
-	Start(params, testManager)
+	StartSecretless(params)
 
 	// Restore stdout
 	stdoutWritePipe.Close()
@@ -70,6 +67,6 @@ func TestVersionParamShowsOutput(t *testing.T) {
 		ShowVersion:       true,
 	})
 
-	assert.Regexp(t, fmt.Sprintf("^secretless-broker v%s\n$", FullVersionName), stdout)
+	assert.Regexp(t, fmt.Sprintf("^secretless-broker v%s\n$", secretless.FullVersionName), stdout)
 	assert.Regexp(t, "", stderr)
 }

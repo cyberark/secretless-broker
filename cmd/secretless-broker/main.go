@@ -3,16 +3,21 @@ package main
 import (
 	"flag"
 
-	"github.com/cyberark/secretless-broker/internal/plugin"
-	"github.com/cyberark/secretless-broker/pkg/secretless"
+	"github.com/cyberark/secretless-broker/pkg/secretless/entrypoint"
 )
 
 func main() {
+	params := CmdLineParams()
+	entrypoint.StartSecretless(params)
+}
+
+// CmdLineParams parses all cmd line options and returns the resulting CLIParams.
+func CmdLineParams() *entrypoint.CLIParams {
 	configManagerHelp := "(Optional) Specify a config manager ID and an optional manager-specific spec string "
 	configManagerHelp += "(eg '<name>[#<filterSpec>]'). "
 	configManagerHelp += "Default will try to use 'secretless.yml' configuration."
 
-	params := secretless.CLIParams{}
+	params := entrypoint.CLIParams{}
 
 	flag.StringVar(&params.ConfigFile, "f", "", "Location of the configuration file.")
 
@@ -41,5 +46,5 @@ func main() {
 	// Either the flag or the arg should be enough to show the version
 	params.ShowVersion = *showVersion || flag.Arg(0) == "version"
 
-	secretless.Start(&params, plugin.GetManager())
+	return &params
 }

@@ -115,8 +115,11 @@ func (proxy *proxyService) OperationalError() chan error {
 
 // Start initiates the net.Listener to listen for incoming connections
 func (proxy *proxyService) Start() error {
-	go func() { // n go routines for n tcp proxyservices
-		// TODO: add mutex to done
+	if proxy.done {
+		return fmt.Errorf("unable to call Start on stopped ProxyService")
+	}
+
+	go func() { // n go routines for n tcp ProxyServices
 		for !proxy.done {
 			// TODO: can accepts happen in parallel ?
 			conn, err := proxy.listener.Accept()

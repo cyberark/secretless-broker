@@ -40,6 +40,12 @@ func (l *listenerMock) Accept() (net.Conn, error) {
 	return args.Get(0).(net.Conn), args.Error(1)
 }
 
+func (l *listenerMock) Close() error {
+	args := l.Called()
+
+	return args.Error(0)
+}
+
 // NewListener creates a net.Listener mock with an Accept method that returns
 // the expectation values only on the first call, otherwise it blocks forever for
 // all subsequent calls or if expected return values are not set.

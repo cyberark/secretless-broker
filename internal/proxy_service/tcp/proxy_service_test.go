@@ -77,6 +77,30 @@ func TestNewProxyService(t *testing.T) {
 }
 
 func TestProxyService_Start(t *testing.T) {
+    t.Run("stopped proxy service cannot be restarted", func(t *testing.T) {
+		connector := mock.NewConnector()
+		credentialRetriever := mock.NewCredentialRetriever()
+		listener := mock.NewListener()
+		listener.On("Close").Return(nil)
+
+		ps, err := NewProxyService(
+			connector.Connect,
+			credentialRetriever.RetrieveCredentials,
+			listener)
+
+		err = ps.Stop()
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		err = ps.Start()
+		assert.Error(t, err)
+		if err == nil {
+			return
+		}
+	})
+
     t.Run("proxy service streams from source to dest", func(t *testing.T) {
     	// prepare
 

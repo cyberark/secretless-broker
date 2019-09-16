@@ -17,9 +17,9 @@ import (
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
-// CLIParams holds the command line flag information that StartProxyServices was started
+// SecretlessOptions holds the command line flag information that StartProxyServices was started
 // with.
-type CLIParams struct {
+type SecretlessOptions struct {
 	ConfigFile          string
 	ConfigManagerSpec   string
 	DebugEnabled        bool
@@ -32,7 +32,7 @@ type CLIParams struct {
 
 // StartSecretless method is the main entry point into the broker after the CLI
 // flags have been parsed
-func StartSecretless(params *CLIParams) {
+func StartSecretless(params *SecretlessOptions) {
 	showVersion(params.ShowVersion)
 
 	verifyPlugins(params.PluginDir, params.PluginChecksumsFile)

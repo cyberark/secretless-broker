@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func runEntrypoint(params *CLIParams) (stdoutOutput string, stderrOutput string) {
+func runEntrypoint(params *SecretlessOptions) (stdoutOutput string, stderrOutput string) {
 	// Swap our stdout with a special one for capture
 	oldStdout := os.Stdout
 	oldStderr := os.Stderr
@@ -62,7 +62,7 @@ func runEntrypoint(params *CLIParams) (stdoutOutput string, stderrOutput string)
 }
 
 func TestVersionParamShowsOutput(t *testing.T) {
-	stdout, stderr := runEntrypoint(&CLIParams{
+	stdout, stderr := runEntrypoint(&SecretlessOptions{
 		ConfigManagerSpec: "configfile",
 		ShowVersion:       true,
 	})

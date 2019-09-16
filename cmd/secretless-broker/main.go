@@ -11,13 +11,13 @@ func main() {
 	entrypoint.StartSecretless(params)
 }
 
-// CmdLineParams parses all cmd line options and returns the resulting CLIParams.
-func CmdLineParams() *entrypoint.CLIParams {
+// CmdLineParams parses all cmd line options and returns the resulting SecretlessOptions.
+func CmdLineParams() *entrypoint.SecretlessOptions {
 	configManagerHelp := "(Optional) Specify a config manager ID and an optional manager-specific spec string "
 	configManagerHelp += "(eg '<name>[#<filterSpec>]'). "
 	configManagerHelp += "Default will try to use 'secretless.yml' configuration."
 
-	params := entrypoint.CLIParams{}
+	params := entrypoint.SecretlessOptions{}
 
 	flag.StringVar(&params.ConfigFile, "f", "", "Location of the configuration file.")
 

@@ -113,6 +113,12 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 	hasConnector := svcYAML.Connector != ""
 	hasProtocol := svcYAML.Protocol != ""
 
+	// Protocol given
+	if hasProtocol {
+		log.Printf("WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
+		"deprecated and will be removed in a future release.", svcName)
+	}
+
 	// Both connector and protocol given
 	if hasConnector && hasProtocol {
 		log.Printf("WARN: 'connector' and 'protocol' keys found on "+

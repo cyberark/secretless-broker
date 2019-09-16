@@ -6,18 +6,18 @@ import (
 	"log"
 	"os"
 
-	"github.com/cyberark/secretless-broker/internal"
 	secretlessLog "github.com/cyberark/secretless-broker/internal/log"
 	"github.com/cyberark/secretless-broker/internal/plugin"
 	"github.com/cyberark/secretless-broker/internal/plugin/v1/event_notifier"
 	"github.com/cyberark/secretless-broker/internal/profile"
+	"github.com/cyberark/secretless-broker/internal/proxy_service"
 	"github.com/cyberark/secretless-broker/internal/signal"
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
-// CLIParams holds the command line flag information that Secretless was started
+// CLIParams holds the command line flag information that StartProxyServices was started
 // with.
 type CLIParams struct {
 	ConfigFile          string
@@ -33,27 +33,26 @@ type CLIParams struct {
 // StartSecretless method is the main entry point into the broker after the CLI
 // flags have been parsed
 func StartSecretless(params *CLIParams) {
+	showVersion(params.ShowVersion)
 
-	ShowVersion(params.ShowVersion)
+	verifyPlugins(params.PluginDir, params.PluginChecksumsFile)
 
-	VerifyPlugins(params.PluginDir, params.PluginChecksumsFile)
-
-	// Construct the deps of Secretless
-	cfg := ReadConfig(params.ConfigFile)
+	// Construct the deps of StartProxyServices
+	cfg := readConfig(params.ConfigFile)
 	logger := secretlessLog.New(params.DebugEnabled)
 	evtNotifier := event_notifier.New(nil)
-	availPlugins := &internal.AvailPluginStub{}
+	availPlugins := &proxy_service.AvailPluginStub{}
 
-	// Prepare Secretless
-	secretless := internal.NewSecretless(cfg, availPlugins, logger, evtNotifier)
+	// Prepare StartProxyServices
+	secretless := proxy_service.NewStartProxyServices(cfg, availPlugins, logger, evtNotifier)
 	signal.StopOnExitSignal(secretless)
 
-	HandlePerformanceProfiling(params.ProfilingMode)
+	handlePerformanceProfiling(params.ProfilingMode)
 
 	secretless.Start()
 }
 
-func ReadConfig(cfgFile string) v2.Config {
+func readConfig(cfgFile string) v2.Config {
 	// TODO: Add back in CRD / generalized config option
 	cfg, err := config.LoadFromFile(cfgFile)
 	if err != nil {
@@ -62,18 +61,18 @@ func ReadConfig(cfgFile string) v2.Config {
 	return cfg
 }
 
-func ShowVersion(showVersionAndExit bool) {
-	if showVersionAndExit {
+func showVersion(showAndExit bool) {
+	if showAndExit {
 		fmt.Printf("secretless-broker v%s\n", secretless.FullVersionName)
 		os.Exit(0)
 	}
 	log.Printf("Secretless v%s starting up...", secretless.FullVersionName)
 }
 
-// HandlePerformanceProfiling starts a perfomance profiling, and sets up an
+// handlePerformanceProfiling starts a perfomance profiling, and sets up an
 // os.Signal listener that will automatically call Stop() on the profile
 // when an system halt is raised.
-func HandlePerformanceProfiling(profileType string) {
+func handlePerformanceProfiling(profileType string) {
 	// No profiling was requested
 	if profileType == "" {
 		return
@@ -90,11 +89,11 @@ func HandlePerformanceProfiling(profileType string) {
 	perfProfile.Start()
 }
 
-// VerifyPlugins is responsible only for the verification of the plugin
+// verifyPlugins is responsible only for the verification of the plugin
 // checksum file, and warnings when no file is present.  Even though it
 // currently delegates to VerifyPluginChecksums, it is not concerned with
 // the validated files that function returns.
-func VerifyPlugins(pluginDir string, checksumFile string) {
+func verifyPlugins(pluginDir string, checksumFile string) {
 	// No external plugin loading was requested
 	if pluginDir == "" {
 		return

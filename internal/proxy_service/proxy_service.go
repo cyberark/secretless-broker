@@ -1,4 +1,4 @@
-package internal
+package proxy_service
 
 import (
 	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
@@ -26,6 +26,7 @@ func (ap *AvailPluginStub) TCPPlugins() map[string]tcp.Plugin {
 	return nil
 }
 
+// TODO: Rename to Call or Run and return a Stopper instead of having Stop()
 func (s *_secretless) Start() {
 	// TODO: Implement
 
@@ -41,14 +42,14 @@ func (s *_secretless) Stop() {
 }
 
 // called in StartSecretless
-func NewSecretless(
+func NewStartProxyServices(
 	cfg v2.Config,
 	availPlugins secretless.AvailablePlugins,
 	logger log.Logger,
 	evtNotifier v1.EventNotifier,
-) secretless.Secretless {
+) secretless.StartProxyServices {
 
-	ret := _secretless{
+	secretlessObj := _secretless{
 		config:        cfg,
 		logger:        logger,
 		eventNotifier: evtNotifier,
@@ -58,5 +59,5 @@ func NewSecretless(
 	// TODO: create our unstarted ProxyServices here
 	//   logic uses availPlugins and config to figure out what services to start
 
-	return &ret
+	return &secretlessObj
 }

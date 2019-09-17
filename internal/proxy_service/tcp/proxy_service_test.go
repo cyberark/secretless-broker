@@ -5,7 +5,6 @@ import (
 	"net"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -135,10 +134,8 @@ func TestProxyService_Start(t *testing.T) {
 			return
 		}
 
-		// artificial sleep needed to wait for Errorf
-		time.Sleep(time.Millisecond)
-
 		// assert
+		<-logger.ReceivedCall
 		logger.AssertCalled(t, "Errorf")
 	})
 
@@ -175,11 +172,8 @@ func TestProxyService_Start(t *testing.T) {
 			return
 		}
 
-
-		// artificial sleep needed to wait for Errorf
-		time.Sleep(time.Millisecond)
-
 		// assert
+		<-logger.ReceivedCall
 		logger.AssertCalled(t, "Errorf")
 	})
 
@@ -217,10 +211,8 @@ func TestProxyService_Start(t *testing.T) {
 			return
 		}
 
-		// artificial sleep needed to wait for Errorf
-		time.Sleep(time.Millisecond)
-
 		// assert
+		<- logger.ReceivedCall
 		logger.AssertCalled(t, "Errorf")
 	})
 

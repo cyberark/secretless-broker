@@ -96,9 +96,6 @@ func TestProxyService_Start(t *testing.T) {
 
 		err = ps.Start()
 		assert.Error(t, err)
-		if err == nil {
-			return
-		}
 	})
 
 	t.Run("proxy service streams from source to dest", func(t *testing.T) {
@@ -112,14 +109,10 @@ func TestProxyService_Start(t *testing.T) {
 		backendConn, backendConnDest := net.Pipe()
 
 		connector := mock.NewConnector()
-		connector.On("Connect").Return(
-			backendConn,
-			nil)
+		connector.On("Connect").Return(backendConn, nil)
 
 		credentialRetriever := mock.NewCredentialRetriever()
-		credentialRetriever.On("RetrieveCredentials").Return(
-			nil,
-			nil)
+		credentialRetriever.On("RetrieveCredentials").Return(nil, nil)
 
 		listener := mock.NewListener()
 		listener.On("Accept").Return(clientConn, nil)

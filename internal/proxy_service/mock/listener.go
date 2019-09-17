@@ -11,7 +11,7 @@ type listenerMock struct {
 	mock.Mock
 }
 
-func NumberOfMethodCalls(mock mock.Mock, method string) int {
+func numberOfMockMethodCalls(mock mock.Mock, method string) int {
 	count := 0
 	for _, call := range mock.Calls {
 		if call.Method == method {
@@ -28,7 +28,7 @@ func (l *listenerMock) Accept() (net.Conn, error) {
 	args := l.Called()
 
 	// block forever for calls that are not expected
-	if NumberOfMethodCalls(l.Mock, "Accept") > 1 {
+	if numberOfMockMethodCalls(l.Mock, "Accept") > 1 {
 		select {}
 	}
 

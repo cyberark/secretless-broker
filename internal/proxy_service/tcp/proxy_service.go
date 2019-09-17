@@ -56,7 +56,7 @@ type proxyService struct {
 // bytes between client and target service
 func NewProxyService(
 	connector tcp.Connector,
-	resolveCredentials internal.CredentialsRetriever,
+	retrieveCredentials internal.CredentialsRetriever,
 	listener net.Listener,
 ) (internal.ProxyService, error) {
 	errors := validation.Errors{}
@@ -64,7 +64,7 @@ func NewProxyService(
 	if connector == nil {
 		errors["connector"] = fmt.Errorf("connector cannot be nil")
 	}
-	if resolveCredentials == nil {
+	if retrieveCredentials == nil {
 		errors["retrieveCredentials"] = fmt.Errorf("retrieveCredentials cannot be nil")
 	}
 	if listener == nil {
@@ -77,7 +77,7 @@ func NewProxyService(
 
 	return &proxyService{
 		connector:           connector,
-		retrieveCredentials: resolveCredentials,
+		retrieveCredentials: retrieveCredentials,
 		listener:            listener,
 		done:                false,
 		error:               make(chan error),

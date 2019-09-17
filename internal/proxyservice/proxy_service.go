@@ -6,8 +6,6 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
 // TODO: move to impl package
@@ -16,17 +14,6 @@ type proxyServices struct {
 	logger        log.Logger
 	eventNotifier v1.EventNotifier
 	availPlugins  plugin.AvailablePlugins
-}
-
-// AvailPluginStub is a temporary placeholder for AvailablePlugins
-type AvailPluginStub struct {}
-// HTTPPlugins returns the available HTTP plugins.
-func (ap *AvailPluginStub) HTTPPlugins() map[string]http.Plugin {
-	return nil
-}
-// TCPPlugins returns the available TCP plugins.
-func (ap *AvailPluginStub) TCPPlugins() map[string]tcp.Plugin {
-	return nil
 }
 
 // TODO: Rename to Call or Run and return a Stopper instead of having Stop()

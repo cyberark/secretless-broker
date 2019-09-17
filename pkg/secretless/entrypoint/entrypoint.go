@@ -2,7 +2,6 @@ package entrypoint
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -35,13 +34,19 @@ type SecretlessOptions struct {
 func StartSecretless(params *SecretlessOptions) {
 	showVersion(params.ShowVersion)
 
-	verifyPlugins(params.PluginDir, params.PluginChecksumsFile)
-
 	// Construct the deps of Service
 	cfg := readConfig(params.ConfigFile)
 	logger := secretlessLog.New(params.DebugEnabled)
 	evtNotifier := eventnotifier.New(nil)
-	availPlugins := &proxyservice.AvailPluginStub{}
+	availPlugins, err := plugin.AllAvailablePlugins(
+		params.PluginDir,
+		params.PluginChecksumsFile,
+		logger,
+	)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// Prepare Service
 	secretless := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
@@ -87,37 +92,4 @@ func handlePerformanceProfiling(profileType string) {
 	perfProfile := profile.New(profileType)
 	signal.StopOnExitSignal(perfProfile)
 	perfProfile.Start()
-}
-
-// verifyPlugins is responsible only for the verification of the plugin
-// checksum file, and warnings when no file is present.  Even though it
-// currently delegates to VerifyPluginChecksums, it is not concerned with
-// the validated files that function returns.
-func verifyPlugins(pluginDir string, checksumFile string) {
-	// No external plugin loading was requested
-	if pluginDir == "" {
-		return
-	}
-
-	// Read the requested files
-	files, err := ioutil.ReadDir(pluginDir)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	// No files to verify, just return
-	if len(files) == 0 {
-		return
-	}
-
-	// Warn if we're loading plugins without a checksum
-	if checksumFile == "" {
-		log.Println("WARN: No PluginChecksumsFile provided - plugin tampering" +
-			" is possible!")
-		return
-	}
-
-	if _, err = plugin.VerifyPluginChecksums(pluginDir, checksumFile); err != nil {
-		log.Fatalln(err)
-	}
 }

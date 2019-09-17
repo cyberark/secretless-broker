@@ -21,6 +21,7 @@ var exitSignals = []os.Signal{
 	syscall.SIGTERM,
 }
 
+// Stopper is an interface for anything with a Stop method.
 type Stopper interface {
 	Stop()
 }

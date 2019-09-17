@@ -1,22 +1,7 @@
 package secretless
 
-import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
-)
-
-type StartProxyServices interface {
+// Service is a generic service that can be started and stopped.
+type Service interface {
 	Start()
 	Stop()
 }
-
-type AvailablePlugins interface {
-	HTTPPlugins() map[string]http.Plugin
-	TCPPlugins() map[string]tcp.Plugin
-}
-
-// stubs to be replaced when PRs for these arrive
-
-//func AllAvailablePlugins(pluginDir string) (AvailablePlugins, error) {
-//	return nil, nil
-//}

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	loggerMock "github.com/cyberark/secretless-broker/internal/log/mock"
-	"github.com/cyberark/secretless-broker/internal/proxy_service/mock"
+	"github.com/cyberark/secretless-broker/internal/proxyservice/mock"
 )
 
 const testString1 = "good heavens"

@@ -1,4 +1,4 @@
-package event_notifier
+package eventnotifier
 
 import (
 	"net"
@@ -10,8 +10,8 @@ type defaultNotifier struct {
 	connectionManagers []v1.ConnectionManager
 }
 
-// event_notifier.New returns an EventNotifier that delegates all event
-// notifications to the ConnectionManagers it's been started with
+// New returns an EventNotifier that delegates all event notifications to the
+// ConnectionManagers it's been started with
 func New(cxnManagers []v1.ConnectionManager) v1.EventNotifier {
 	return &defaultNotifier{
 		connectionManagers: cxnManagers,

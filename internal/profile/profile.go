@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/pkg/profile"
 )
 
@@ -28,6 +29,7 @@ type perfProfile struct {
 	stopper interface { Stop() }
 }
 
+// ValidTypes are the valid types of profiling you can perform.
 var ValidTypes = []string{"cpu", "memory"}
 
 func isValidType(profileType string) bool {
@@ -39,6 +41,7 @@ func isValidType(profileType string) bool {
 	return false
 }
 
+// ValidateType returns an error unless its argument is a valid profile type.
 func ValidateType(profileType string) error {
 	if !isValidType(profileType) {
 		return fmt.Errorf(
@@ -50,7 +53,8 @@ func ValidateType(profileType string) error {
 	return nil
 }
 
-func New(profileType string) *perfProfile {
+// New returns a new performance profile of the specified type.
+func New(profileType string) secretless.Service {
 	// Clients are expected to have validated the type
 	if !isValidType(profileType) {
 		panic("profile type must be 'cpu' or 'memory'")

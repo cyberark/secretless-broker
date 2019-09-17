@@ -1,6 +1,7 @@
-package proxy_service
+package proxyservice
 
 import (
+	"github.com/cyberark/secretless-broker/internal/plugin"
 	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
@@ -10,24 +11,27 @@ import (
 )
 
 // TODO: move to impl package
-type _secretless struct {
+type proxyServices struct {
 	config        v2.Config
 	logger        log.Logger
 	eventNotifier v1.EventNotifier
-	availPlugins  secretless.AvailablePlugins
+	availPlugins  plugin.AvailablePlugins
 }
 
-// TODO: This will be replaced by real impl with Srdjan's PR
+// AvailPluginStub is a temporary placeholder for AvailablePlugins
 type AvailPluginStub struct {}
+// HTTPPlugins returns the available HTTP plugins.
 func (ap *AvailPluginStub) HTTPPlugins() map[string]http.Plugin {
 	return nil
 }
+// TCPPlugins returns the available TCP plugins.
 func (ap *AvailPluginStub) TCPPlugins() map[string]tcp.Plugin {
 	return nil
 }
 
 // TODO: Rename to Call or Run and return a Stopper instead of having Stop()
-func (s *_secretless) Start() {
+// Start starts all proxy services
+func (s *proxyServices) Start() {
 	// TODO: Implement
 
 	// For each ProxyService:
@@ -37,26 +41,27 @@ func (s *_secretless) Start() {
 	// etc...
 }
 
-func (s *_secretless) Stop() {
-	// Stop all the ProxyServices
+// Stop stops all proxy services
+func (s *proxyServices) Stop() {
+	// Stop all the Service
 }
 
-// called in StartSecretless
-func NewStartProxyServices(
+// NewProxyServices returns a new ProxyServices instance.
+func NewProxyServices(
 	cfg v2.Config,
-	availPlugins secretless.AvailablePlugins,
+	availPlugins plugin.AvailablePlugins,
 	logger log.Logger,
 	evtNotifier v1.EventNotifier,
-) secretless.StartProxyServices {
+) secretless.Service {
 
-	secretlessObj := _secretless{
+	secretlessObj := proxyServices{
 		config:        cfg,
 		logger:        logger,
 		eventNotifier: evtNotifier,
 		availPlugins:  availPlugins,
 	}
 
-	// TODO: create our unstarted ProxyServices here
+	// TODO: create our unstarted Service here
 	//   logic uses availPlugins and config to figure out what services to start
 
 	return &secretlessObj

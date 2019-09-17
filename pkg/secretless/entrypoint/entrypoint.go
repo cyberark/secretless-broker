@@ -8,16 +8,16 @@ import (
 
 	secretlessLog "github.com/cyberark/secretless-broker/internal/log"
 	"github.com/cyberark/secretless-broker/internal/plugin"
-	"github.com/cyberark/secretless-broker/internal/plugin/v1/event_notifier"
+	"github.com/cyberark/secretless-broker/internal/plugin/v1/eventnotifier"
 	"github.com/cyberark/secretless-broker/internal/profile"
-	"github.com/cyberark/secretless-broker/internal/proxy_service"
+	"github.com/cyberark/secretless-broker/internal/proxyservice"
 	"github.com/cyberark/secretless-broker/internal/signal"
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
-// SecretlessOptions holds the command line flag information that StartProxyServices was started
+// SecretlessOptions holds the command line flag information that Service was started
 // with.
 type SecretlessOptions struct {
 	ConfigFile          string
@@ -37,14 +37,14 @@ func StartSecretless(params *SecretlessOptions) {
 
 	verifyPlugins(params.PluginDir, params.PluginChecksumsFile)
 
-	// Construct the deps of StartProxyServices
+	// Construct the deps of Service
 	cfg := readConfig(params.ConfigFile)
 	logger := secretlessLog.New(params.DebugEnabled)
-	evtNotifier := event_notifier.New(nil)
-	availPlugins := &proxy_service.AvailPluginStub{}
+	evtNotifier := eventnotifier.New(nil)
+	availPlugins := &proxyservice.AvailPluginStub{}
 
-	// Prepare StartProxyServices
-	secretless := proxy_service.NewStartProxyServices(cfg, availPlugins, logger, evtNotifier)
+	// Prepare Service
+	secretless := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
 	signal.StopOnExitSignal(secretless)
 
 	handlePerformanceProfiling(params.ProfilingMode)

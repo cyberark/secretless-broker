@@ -8,11 +8,13 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 )
 
-type connectorMock struct {
+// ConnectorMock has a `Connect` method that matches the signature of the
+// Connector func type
+type ConnectorMock struct {
 	mock.Mock
 }
 
-func (c *connectorMock) Connect(clientConn net.Conn, secrets plugin.SecretsByID) (backendConn net.Conn, err error) {
+func (c *ConnectorMock) Connect(clientConn net.Conn, secrets plugin.SecretsByID) (backendConn net.Conn, err error) {
 	args := c.Called()
 
 	// check for nil because the mock package is unable type assert nil
@@ -25,6 +27,6 @@ func (c *connectorMock) Connect(clientConn net.Conn, secrets plugin.SecretsByID)
 
 // NewConnector creates mock with the `Connect` method that matches the signature
 // of the Connector func type
-func NewConnector() *connectorMock {
-	return new(connectorMock)
+func NewConnector() *ConnectorMock {
+	return new(ConnectorMock)
 }

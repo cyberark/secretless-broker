@@ -4,11 +4,13 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type credentialRetrieverMock struct {
+// CredentialRetrieverMock has a `RetrieveCredentials` method that matches the
+// signature of the CredentialsRetriever func type
+type CredentialRetrieverMock struct {
 	mock.Mock
 }
 
-func (cr *credentialRetrieverMock) RetrieveCredentials() (bytes map[string][]byte, e error) {
+func (cr *CredentialRetrieverMock) RetrieveCredentials() (bytes map[string][]byte, e error) {
 	args := cr.Called()
 
 	// check for nil because the mock package is unable type assert nil
@@ -21,6 +23,6 @@ func (cr *credentialRetrieverMock) RetrieveCredentials() (bytes map[string][]byt
 
 // NewCredentialRetriever creates a mock with the `RetrieveCredentials` method
 // that matches the signature of the CredentialsRetriever func type
-func NewCredentialRetriever() *credentialRetrieverMock {
-	return new(credentialRetrieverMock)
+func NewCredentialRetriever() *CredentialRetrieverMock {
+	return new(CredentialRetrieverMock)
 }

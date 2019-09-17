@@ -6,13 +6,14 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 )
 
-type loggerMock struct {
+// LoggerMock conforms to the Secretless Logger interface
+type LoggerMock struct {
 	mock.Mock
 	log.Logger
 	ReceivedCall chan struct{}
 }
 
-func (l *loggerMock) Errorf(format string, args ...interface{}) {
+func (l *LoggerMock) Errorf(format string, args ...interface{}) {
 	l.Called()
 	l.ReceivedCall <- struct{}{}
 
@@ -20,8 +21,8 @@ func (l *loggerMock) Errorf(format string, args ...interface{}) {
 }
 
 // NewLogger creates a mock that conforms to the Secretless Logger interface
-func NewLogger() *loggerMock {
-	mock := new(loggerMock)
+func NewLogger() *LoggerMock {
+	mock := new(LoggerMock)
 	mock.ReceivedCall = make(chan struct{})
 	return mock
 }

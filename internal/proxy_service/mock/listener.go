@@ -6,7 +6,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type listenerMock struct {
+// ListenerMock conforms to the net.Listener interface
+type ListenerMock struct {
 	net.Listener
 	mock.Mock
 }
@@ -24,7 +25,7 @@ func numberOfMockMethodCalls(mock mock.Mock, method string) int {
 
 // Accept is a special mock method that normally blocks forever. When expected
 // return values are set it will return those for the first call.
-func (l *listenerMock) Accept() (net.Conn, error) {
+func (l *ListenerMock) Accept() (net.Conn, error) {
 	args := l.Called()
 
 	// block forever for calls that are not expected
@@ -40,7 +41,7 @@ func (l *listenerMock) Accept() (net.Conn, error) {
 	return args.Get(0).(net.Conn), args.Error(1)
 }
 
-func (l *listenerMock) Close() error {
+func (l *ListenerMock) Close() error {
 	args := l.Called()
 
 	return args.Error(0)
@@ -49,6 +50,6 @@ func (l *listenerMock) Close() error {
 // NewListener creates a net.Listener mock with an `Accept` method that returns
 // the expectation values only on the first call, otherwise it blocks forever for
 // all subsequent calls or if expected return values are not set.
-func NewListener() *listenerMock {
-	return new(listenerMock)
+func NewListener() *ListenerMock {
+	return new(ListenerMock)
 }

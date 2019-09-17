@@ -91,19 +91,19 @@ func NewProxyService(
 
 func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	var targetConn net.Conn
+
+	closeConn := func(conn net.Conn, connDescription string) {
+		if conn == nil {
+			return
+		}
+		err := conn.Close()
+		if err != nil {
+			proxy.logger.Warnf("failed on closing %s connection: %s", connDescription, err)
+		}
+	}
 	defer func() {
-		if clientConn != nil {
-			err := clientConn.Close()
-			if err != nil {
-				proxy.logger.Warnf("failed on closing client connection: %s", err)
-			}
-		}
-		if targetConn != nil {
-			err := targetConn.Close()
-			if err != nil {
-				proxy.logger.Warnf("failed on closing target connection: %s", err)
-			}
-		}
+		closeConn(clientConn, "client")
+		closeConn(targetConn, "target")
 	}()
 
 	backendCredentials, err := proxy.retrieveCredentials()

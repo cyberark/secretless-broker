@@ -7,8 +7,8 @@ import (
 )
 
 type listenerMock struct {
-	mock.Mock
 	net.Listener
+	mock.Mock
 }
 
 func numberOfMockMethodCalls(mock mock.Mock, method string) int {

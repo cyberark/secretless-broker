@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	loggerMock "github.com/cyberark/secretless-broker/internal/log/mock"
 	"github.com/cyberark/secretless-broker/internal/proxy_service/mock"
 )
 
@@ -34,7 +35,7 @@ func TestNewProxyService(t *testing.T) {
 		_, err := NewProxyService(
 			mock.NewConnector().Connect,
 			mock.NewListener(),
-			mock.NewLogger(),
+			loggerMock.NewLogger(),
 			mock.NewCredentialRetriever().RetrieveCredentials,
 		)
 		assert.NoError(t, err)
@@ -84,7 +85,7 @@ func TestProxyService_Start(t *testing.T) {
 		credentialRetriever := mock.NewCredentialRetriever()
 		listener := mock.NewListener()
 		listener.On("Close").Return(nil)
-		logger := mock.NewLogger()
+		logger := loggerMock.NewLogger()
 
 		ps, _ := NewProxyService(
 			connector.Connect,
@@ -105,7 +106,7 @@ func TestProxyService_Start(t *testing.T) {
 
 	t.Run("propagates error from Accept", func(t *testing.T) {
 		// prepare
-		logger := mock.NewLogger()
+		logger := loggerMock.NewLogger()
 		logger.On("Errorf").Return()
 
 		connector := mock.NewConnector()
@@ -145,7 +146,7 @@ func TestProxyService_Start(t *testing.T) {
 		// prepare
 		clientConn, _ := net.Pipe()
 
-		logger := mock.NewLogger()
+		logger := loggerMock.NewLogger()
 		logger.On("Errorf").Return()
 
 		connector := mock.NewConnector()
@@ -187,7 +188,7 @@ func TestProxyService_Start(t *testing.T) {
 		clientConn, _ := net.Pipe()
 		backendConn, _ := net.Pipe()
 
-		logger := mock.NewLogger()
+		logger := loggerMock.NewLogger()
 		logger.On("Errorf").Return()
 
 		connector := mock.NewConnector()
@@ -233,7 +234,7 @@ func TestProxyService_Start(t *testing.T) {
 		clientConn, clientConnSrc := net.Pipe()
 		backendConn, backendConnDest := net.Pipe()
 
-		logger := mock.NewLogger()
+		logger := loggerMock.NewLogger()
 
 		connector := mock.NewConnector()
 		connector.On("Connect").Return(backendConn, nil)
@@ -297,7 +298,7 @@ func TestProxyService_Start(t *testing.T) {
 		clientConn, clientConnSrc := net.Pipe()
 		backendConn, backendConnDest := net.Pipe()
 
-		logger := mock.NewLogger()
+		logger := loggerMock.NewLogger()
 
 		connector := mock.NewConnector()
 		connector.On("Connect").Return(backendConn, nil)

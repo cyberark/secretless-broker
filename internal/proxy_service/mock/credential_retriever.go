@@ -19,8 +19,8 @@ func (cr *credentialRetrieverMock) RetrieveCredentials() (bytes map[string][]byt
 	return args.Get(0).(map[string][]byte), args.Error(1)
 }
 
-// NewCredentialRetriever creates mock with a method that matches the signature
-// of the CredentialsRetriever func type
+// NewCredentialRetriever creates a mock with the `RetrieveCredentials` method
+// that matches the signature of the CredentialsRetriever func type
 func NewCredentialRetriever() *credentialRetrieverMock {
 	return new(credentialRetrieverMock)
 }

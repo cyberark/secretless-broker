@@ -5,6 +5,7 @@ import (
 	"net"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -13,10 +14,12 @@ import (
 
 const testString1 = "good heavens"
 const testString2 = "moderate heavens"
+const testString3 = "best of heavens"
 
 func TestNewProxyService(t *testing.T) {
 	t.Run("empty constructor arguments result in errors", func(t *testing.T) {
 		_, err := NewProxyService(
+			nil,
 			nil,
 			nil,
 			nil,
@@ -30,16 +33,15 @@ func TestNewProxyService(t *testing.T) {
 	t.Run("non-empty constructor arguments result in no error", func(t *testing.T) {
 		_, err := NewProxyService(
 			mock.NewConnector().Connect,
-			mock.NewCredentialRetriever().RetrieveCredentials,
 			mock.NewListener(),
+			mock.NewLogger(),
+			mock.NewCredentialRetriever().RetrieveCredentials,
 		)
 		assert.NoError(t, err)
 		if err != nil {
 			return
 		}
 	})
-
-	// TODO: propagates error from retrieveCredentials
 
 	t.Run("zeroizes credentials from retrieveCredentials", func(t *testing.T) {
 		// prepare
@@ -82,13 +84,16 @@ func TestProxyService_Start(t *testing.T) {
 		credentialRetriever := mock.NewCredentialRetriever()
 		listener := mock.NewListener()
 		listener.On("Close").Return(nil)
+		logger := mock.NewLogger()
 
-		ps, err := NewProxyService(
+		ps, _ := NewProxyService(
 			connector.Connect,
+			listener,
+			logger,
 			credentialRetriever.RetrieveCredentials,
-			listener)
+		)
 
-		err = ps.Stop()
+		err := ps.Stop()
 		assert.NoError(t, err)
 		if err != nil {
 			return
@@ -98,7 +103,127 @@ func TestProxyService_Start(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("proxy service streams from source to dest", func(t *testing.T) {
+	t.Run("propagates error from Accept", func(t *testing.T) {
+		// prepare
+		logger := mock.NewLogger()
+		logger.On("Errorf").Return()
+
+		connector := mock.NewConnector()
+		connector.On("Connect").Return(nil, nil)
+
+		credentialRetriever := mock.NewCredentialRetriever()
+		credentialRetriever.On(
+			"RetrieveCredentials",
+		).Return(nil, nil)
+
+		listener := mock.NewListener()
+		listener.On("Accept").Return(nil, fmt.Errorf("some error"))
+
+		// exercise
+
+		ps, err := NewProxyService(
+			connector.Connect,
+			listener,
+			logger,
+			credentialRetriever.RetrieveCredentials)
+		err = ps.Start()
+
+		// sanity assert
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		// artificial sleep needed to wait for Errorf
+		time.Sleep(time.Millisecond)
+
+		// assert
+		logger.AssertCalled(t, "Errorf")
+	})
+
+	t.Run("propagates error from connector", func(t *testing.T) {
+		// prepare
+		clientConn, _ := net.Pipe()
+
+		logger := mock.NewLogger()
+		logger.On("Errorf").Return()
+
+		connector := mock.NewConnector()
+		connector.On("Connect").Return(nil, fmt.Errorf("some error"))
+
+		credentialRetriever := mock.NewCredentialRetriever()
+		credentialRetriever.On(
+			"RetrieveCredentials",
+		).Return(nil, nil)
+
+		listener := mock.NewListener()
+		listener.On("Accept").Return(clientConn, nil)
+
+		// exercise
+
+		ps, err := NewProxyService(
+			connector.Connect,
+			listener,
+			logger,
+			credentialRetriever.RetrieveCredentials)
+		err = ps.Start()
+
+		// sanity assert
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+
+		// artificial sleep needed to wait for Errorf
+		time.Sleep(time.Millisecond)
+
+		// assert
+		logger.AssertCalled(t, "Errorf")
+	})
+
+	t.Run("propagates error from retrieveCredentials", func(t *testing.T) {
+		// prepare
+		clientConn, _ := net.Pipe()
+		backendConn, _ := net.Pipe()
+
+		logger := mock.NewLogger()
+		logger.On("Errorf").Return()
+
+		connector := mock.NewConnector()
+		connector.On("Connect").Return(backendConn, nil)
+
+		credentialRetriever := mock.NewCredentialRetriever()
+		credentialRetriever.On(
+			"RetrieveCredentials",
+		).Return(nil, fmt.Errorf("some error"))
+
+		listener := mock.NewListener()
+		listener.On("Accept").Return(clientConn, nil)
+
+		// exercise
+
+		ps, err := NewProxyService(
+			connector.Connect,
+			listener,
+			logger,
+			credentialRetriever.RetrieveCredentials)
+		err = ps.Start()
+
+		// sanity assert
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		// artificial sleep needed to wait for Errorf
+		time.Sleep(time.Millisecond)
+
+		// assert
+		logger.AssertCalled(t, "Errorf")
+	})
+
+	t.Run("proxy service streams packets in order from source to dest", func(t *testing.T) {
 		// prepare
 
 		// This allows us to control and view what happens in the client and
@@ -107,6 +232,8 @@ func TestProxyService_Start(t *testing.T) {
 		// ProxyService, and whatever the ProxyService writes into backendConn will be pipe into backendConnDest, so we can verify it.
 		clientConn, clientConnSrc := net.Pipe()
 		backendConn, backendConnDest := net.Pipe()
+
+		logger := mock.NewLogger()
 
 		connector := mock.NewConnector()
 		connector.On("Connect").Return(backendConn, nil)
@@ -118,46 +245,100 @@ func TestProxyService_Start(t *testing.T) {
 		listener.On("Accept").Return(clientConn, nil)
 
 		// exercise
-
-		// tcp service with 'backendConn" mock and listener whose first call to Accept return the
-		// "clientConn" mock then blocks forever
 		ps, err := NewProxyService(
 			connector.Connect,
-			credentialRetriever.RetrieveCredentials,
-			listener)
-		err = ps.Start()
+			listener,
+			logger,
+			credentialRetriever.RetrieveCredentials)
 
-		// sanity assert
+		err = ps.Start()
+		// sanity check
 		assert.NoError(t, err)
 		if err != nil {
 			return
 		}
 
-		go clientConnSrc.Write([]byte(testString1))
-
-		data := make([]byte, 256)
-		dataLen, err := backendConnDest.Read(data)
+		go func() {
+			_, _ = clientConnSrc.Write([]byte(testString1))
+			_, _ = clientConnSrc.Write([]byte(testString2))
+			_, _ = clientConnSrc.Write([]byte(testString3))
+		}()
 
 		// assert
-		assert.NoError(t, err)
-		if err != nil {
-			return
-		}
+		data := make([]byte, 256)
+
+		// assert first packet
+		dataLen, err := backendConnDest.Read(data)
 		assert.Equal(
 			t,
 			string(data[:dataLen]),
 			testString1,
 		)
 
-		go clientConnSrc.Write([]byte(testString2))
-
+		// assert second packet
 		dataLen, err = backendConnDest.Read(data)
+		assert.Equal(
+			t,
+			string(data[:dataLen]),
+			testString2,
+		)
 
-		// assert
+		// assert third packet
+		dataLen, err = backendConnDest.Read(data)
+		assert.Equal(
+			t,
+			string(data[:dataLen]),
+			testString3,
+		)
+	})
+
+	t.Run("proxy service streams packets between source and dest", func(t *testing.T) {
+		// prepare
+		clientConn, clientConnSrc := net.Pipe()
+		backendConn, backendConnDest := net.Pipe()
+
+		logger := mock.NewLogger()
+
+		connector := mock.NewConnector()
+		connector.On("Connect").Return(backendConn, nil)
+
+		credentialRetriever := mock.NewCredentialRetriever()
+		credentialRetriever.On("RetrieveCredentials").Return(nil, nil)
+
+		listener := mock.NewListener()
+		listener.On("Accept").Return(clientConn, nil)
+
+		// exercise
+		ps, err := NewProxyService(
+			connector.Connect,
+			listener,
+			logger,
+			credentialRetriever.RetrieveCredentials)
+		err = ps.Start()
+		// sanity check
 		assert.NoError(t, err)
 		if err != nil {
 			return
 		}
+
+		go func() {
+			_, _ = clientConnSrc.Write([]byte(testString1))
+			_, _ = backendConnDest.Write([]byte(testString2))
+		}()
+
+		// assert
+		data := make([]byte, 256)
+
+		// assert on client write
+		dataLen, err := backendConnDest.Read(data)
+		assert.Equal(
+			t,
+			string(data[:dataLen]),
+			testString1,
+		)
+
+		// assert on backend write
+		dataLen, err = clientConnSrc.Read(data)
 		assert.Equal(
 			t,
 			string(data[:dataLen]),

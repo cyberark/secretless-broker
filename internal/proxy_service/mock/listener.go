@@ -7,8 +7,8 @@ import (
 )
 
 type listenerMock struct {
-	net.Listener
 	mock.Mock
+	net.Listener
 }
 
 func numberOfMockMethodCalls(mock mock.Mock, method string) int {
@@ -46,7 +46,7 @@ func (l *listenerMock) Close() error {
 	return args.Error(0)
 }
 
-// NewListener creates a net.Listener mock with an Accept method that returns
+// NewListener creates a net.Listener mock with an `Accept` method that returns
 // the expectation values only on the first call, otherwise it blocks forever for
 // all subsequent calls or if expected return values are not set.
 func NewListener() *listenerMock {

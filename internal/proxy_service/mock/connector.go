@@ -23,7 +23,7 @@ func (c *connectorMock) Connect(clientConn net.Conn, secrets plugin.SecretsByID)
 	return args.Get(0).(net.Conn), args.Error(1)
 }
 
-// NewConnector creates mock with a method that matches the signature
+// NewConnector creates mock with the `Connect` method that matches the signature
 // of the Connector func type
 func NewConnector() *connectorMock {
 	return new(connectorMock)

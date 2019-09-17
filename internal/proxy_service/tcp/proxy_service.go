@@ -8,6 +8,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal"
+	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
@@ -44,10 +45,10 @@ func stream(source io.Reader, destination io.Writer) error {
 
 type proxyService struct {
 	connector           tcp.Connector
-	retrieveCredentials internal.CredentialsRetriever
-	listener            net.Listener
 	done                bool
-	error               chan error
+	listener            net.Listener
+	logger              log.Logger
+	retrieveCredentials internal.CredentialsRetriever
 }
 
 // NewProxyService constructs a new instance of a TCP ProxyService. The
@@ -56,8 +57,9 @@ type proxyService struct {
 // bytes between client and target service
 func NewProxyService(
 	connector tcp.Connector,
-	retrieveCredentials internal.CredentialsRetriever,
 	listener net.Listener,
+	logger log.Logger,
+	retrieveCredentials internal.CredentialsRetriever,
 ) (internal.ProxyService, error) {
 	errors := validation.Errors{}
 
@@ -66,6 +68,9 @@ func NewProxyService(
 	}
 	if retrieveCredentials == nil {
 		errors["retrieveCredentials"] = fmt.Errorf("retrieveCredentials cannot be nil")
+	}
+	if listener == nil {
+		errors["logger"] = fmt.Errorf("logger cannot be nil")
 	}
 	if listener == nil {
 		errors["listener"] = fmt.Errorf("listener cannot be nil")
@@ -79,8 +84,8 @@ func NewProxyService(
 		connector:           connector,
 		retrieveCredentials: retrieveCredentials,
 		listener:            listener,
+		logger:              logger,
 		done:                false,
-		error:               make(chan error),
 	}, nil
 }
 
@@ -88,29 +93,31 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	var targetConn net.Conn
 	defer func() {
 		if clientConn != nil {
-			_ = clientConn.Close()
+			err := clientConn.Close()
+			if err != nil {
+				proxy.logger.Warnf("failed on closing client connection: %s", err)
+			}
 		}
-		if clientConn != nil {
-			_ = targetConn.Close()
+		if targetConn != nil {
+			err := targetConn.Close()
+			if err != nil {
+				proxy.logger.Warnf("failed on closing target connection: %s", err)
+			}
 		}
 	}()
 
 	backendCredentials, err := proxy.retrieveCredentials()
 	defer zeroizeCredentials(backendCredentials)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed on retrieve credentials: %s", err)
 	}
 
 	targetConn, err = proxy.connector(clientConn, backendCredentials)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed on connect: %s", err)
 	}
 
 	return <-duplexStream(clientConn, targetConn)
-}
-
-func (proxy *proxyService) OperationalError() chan error {
-	return proxy.error
 }
 
 // Start initiates the net.Listener to listen for incoming connections
@@ -124,12 +131,12 @@ func (proxy *proxyService) Start() error {
 			// TODO: can accepts happen in parallel ?
 			conn, err := proxy.listener.Accept()
 			if err != nil {
-				proxy.error <- err
+				proxy.logger.Errorf("failed on accept connection: %s", err)
 				return
 			}
 			go func() {
 				err := proxy.handleConnection(conn)
-				proxy.error <- err
+				proxy.logger.Errorf("failed on handle connection: %s", err)
 			}()
 		}
 	}()

@@ -13,6 +13,7 @@ type LoggerMock struct {
 	ReceivedCall chan struct{}
 }
 
+// Errorf mocks the method of the same name on the log.Logger interface
 func (l *LoggerMock) Errorf(format string, args ...interface{}) {
 	l.Called()
 	l.ReceivedCall <- struct{}{}

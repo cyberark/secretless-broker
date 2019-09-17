@@ -10,6 +10,7 @@ type CredentialRetrieverMock struct {
 	mock.Mock
 }
 
+// RetrieveCredentials mocks the CredentialsRetriever func type
 func (cr *CredentialRetrieverMock) RetrieveCredentials() (bytes map[string][]byte, e error) {
 	args := cr.Called()
 

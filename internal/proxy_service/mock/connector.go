@@ -14,6 +14,7 @@ type ConnectorMock struct {
 	mock.Mock
 }
 
+// Connect mocks the Connector func type
 func (c *ConnectorMock) Connect(clientConn net.Conn, secrets plugin.SecretsByID) (backendConn net.Conn, err error) {
 	args := c.Called()
 

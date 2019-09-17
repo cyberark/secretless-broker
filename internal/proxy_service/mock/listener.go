@@ -23,7 +23,8 @@ func numberOfMockMethodCalls(mock mock.Mock, method string) int {
 	return count
 }
 
-// Accept is a special mock method that normally blocks forever. When expected
+// Accept mocks the method of the same name on the net.Listener interface.
+// It is a special mock method that normally blocks forever. When expected
 // return values are set it will return those for the first call.
 func (l *ListenerMock) Accept() (net.Conn, error) {
 	args := l.Called()
@@ -41,6 +42,7 @@ func (l *ListenerMock) Accept() (net.Conn, error) {
 	return args.Get(0).(net.Conn), args.Error(1)
 }
 
+// Close mocks the method of the same name on the net.Listener interface
 func (l *ListenerMock) Close() error {
 	args := l.Called()
 

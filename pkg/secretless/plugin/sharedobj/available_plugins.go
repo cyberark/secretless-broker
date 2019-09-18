@@ -50,7 +50,7 @@ func AllAvailablePlugins(
 		pluginDir,
 		checksumsFile,
 		GetInternalPluginsFunc,
-		LoadPluginsFromDir,
+		ExternalPlugins,
 		logger,
 	)
 }
@@ -70,17 +70,25 @@ func AllAvailablePluginsWithOptions(
 		return nil, err
 	}
 
-	externalPlugins, err := ExternalPlugins(
+	externalPlugins, err := externalLookupfunc(
 		pluginDir,
-		externalLookupfunc,
-		logger,
 		checksumsFile,
+		logger,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	httpPlugins := internalPlugins.HTTPPlugins()
+	httpPlugins := map[string]http.Plugin{}
+
+	for name, httpPlugin := range internalPlugins.HTTPPlugins() {
+		if _, ok := httpPlugins[name]; ok {
+			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
+				name)
+		}
+
+		httpPlugins[name] = httpPlugin
+	}
 	for name, httpPlugin := range externalPlugins.HTTPPlugins() {
 		if _, ok := httpPlugins[name]; ok {
 			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
@@ -90,7 +98,16 @@ func AllAvailablePluginsWithOptions(
 		httpPlugins[name] = httpPlugin
 	}
 
-	tcpPlugins := internalPlugins.TCPPlugins()
+	tcpPlugins := map[string]tcp.Plugin{}
+
+	for name, tcpPlugin := range internalPlugins.TCPPlugins() {
+		if _, ok := tcpPlugins[name]; ok {
+			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
+				name)
+		}
+
+		tcpPlugins[name] = tcpPlugin
+	}
 	for name, tcpPlugin := range externalPlugins.TCPPlugins() {
 		if _, ok := tcpPlugins[name]; ok {
 			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",

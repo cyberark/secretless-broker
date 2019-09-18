@@ -48,16 +48,27 @@ kubectl run --rm -i \
   --image "alpine:3.9" \
   alpine-curl << EOF
   set -e
-
+  
+  attempt_count=0
+  max_attempts=10
   until wget --tries=1 \
              --timeout=1 \
              --server-response \
              --quiet \
              --output-document=/dev/stdout \
              "${APPLICATION_URL}/pets" &>/dev/null; do
+    attempt_count=\$[\$attempt_count+1]
+    if [[ "\$attempt_count" -ge "\$max_attempts" ]]; then
+      echo ""
+      echo "Application failed to boot up after \$attempt_count pings at 2 second intervals." >&2
+      exit 1
+    fi
+
     echo -n "."
     sleep 2
   done
+  echo ""
+  
 
   echo "OK"
   echo

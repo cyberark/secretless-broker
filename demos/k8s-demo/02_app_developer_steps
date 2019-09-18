@@ -57,7 +57,7 @@ kubectl run --rm -i \
              --quiet \
              --output-document=/dev/stdout \
              "${APPLICATION_URL}/pets" &>/dev/null; do
-    attempt_count=\$[\$attempt_count+1]
+    attempt_count=\$(( attempt_count + 1 ))
     if [[ "\$attempt_count" -ge "\$max_attempts" ]]; then
       echo ""
       echo "Application failed to boot up after \$attempt_count pings at 2 second intervals." >&2

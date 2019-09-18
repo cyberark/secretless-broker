@@ -261,4 +261,4 @@ writing plugins to extend the functionality of Secretless Broker.
 
 # License
 
-The Secretless Broker is licensed under Apache License 2.0 - see [`LICENSE.md`](LICENSE.md) for more details.
+The Secretless Broker is licensed under Apache License 2.0 - see [`LICENSE`](LICENSE) for more details.

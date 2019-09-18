@@ -42,15 +42,25 @@ function http_proxy_resp() {
   kubectl exec -i "$(POD_NAME)" -c echo-server -- \
     env http_proxy=localhost:8000 curl -v localhost:8080 2> ${log}
 }
+
 function http_resp() {
   kubectl exec -i "$(POD_NAME)" -c echo-server -- curl --connect-timeout 4 -s localhost:8080 &> ${log}
 }
 
 function wait_for_CRD() {
   echo "waiting for CRD to be ready"
+
+  local attempt_count=0
+  local max_attempts=10
   until kubectl get "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" &> ${log}; do
-    printf ".";
-    sleep 2;
+    attempt_count=$(( attempt_count + 1 ))
+    if [[ "$attempt_count" -ge "$max_attempts" ]]; then
+      echo ""
+      echo "CRD is not ready after $attempt_count readiness checks at 2 second intervals." >&2
+      exit 1
+    fi
+    echo -n "."
+    sleep 2
   done
   echo ""
   echo "ready"
@@ -59,13 +69,31 @@ function wait_for_CRD() {
 
 function wait_for_pod() {
   echo "waiting for pod to be ready"
+  
+  local attempt_count=0
+  local max_attempts=10
   until pod_ready; do
-    printf ".";
-    sleep 2;
+    attempt_count=$(( attempt_count + 1 ))
+    if [[ "$attempt_count" -ge "$max_attempts" ]]; then
+      echo ""
+      echo "pod is not ready after $attempt_count readiness checks at 2 second intervals." >&2
+      exit 1
+    fi
+    echo -n "."
+    sleep 2
   done
+  echo ""
+
+  attempt_count=0
   until http_resp; do
-    printf ".";
-    sleep 2;
+    attempt_count=$(( attempt_count + 1 ))
+    if [[ "$attempt_count" -ge "$max_attempts" ]]; then
+      echo ""
+      echo "pod endpoint is not ready after $attempt_count readiness checks at 2 second intervals." >&2
+      exit 1
+    fi
+    echo -n "."
+    sleep 2
   done
   echo ""
   echo "ready"

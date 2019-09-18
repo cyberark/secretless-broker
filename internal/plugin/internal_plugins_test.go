@@ -68,3 +68,30 @@ func TestInternalPlugins(t *testing.T) {
 		assert.Equal(t, mockError, err)
 	})
 }
+
+func TestGetInternalPlugins(t *testing.T) {
+	t.Run("GetInternalPluginsFunc does not error out", func(t *testing.T) {
+		_, err := GetInternalPluginsFunc()
+		assert.Nil(t, err)
+	})
+
+	t.Run("GetInternalPluginsFunc returns the expected plugin list", func(t *testing.T) {
+		internalPlugins, err := GetInternalPluginsFunc()
+		assert.Nil(t, err)
+
+		if err != nil {
+			t.Fail()
+		}
+
+		assert.NotNil(t, internalPlugins.HTTPPlugins())
+		assert.NotNil(t, internalPlugins.TCPPlugins())
+
+		if internalPlugins.HTTPPlugins() != nil {
+			assert.Equal(t, 0, len(internalPlugins.HTTPPlugins()))
+		}
+
+		if internalPlugins.TCPPlugins() != nil {
+			assert.Equal(t, 0, len(internalPlugins.TCPPlugins()))
+		}
+	})
+}

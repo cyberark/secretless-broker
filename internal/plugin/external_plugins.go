@@ -19,6 +19,13 @@ type ExternalPluginLookupFunc func(
 	pluginDir string,
 	checksumfile string,
 	logger log.Logger,
+) (AvailablePlugins, error)
+
+// DirectoryPluginLookupFunc returns all available external plugins.
+type DirectoryPluginLookupFunc func(
+	pluginDir string,
+	checksumfile string,
+	logger log.Logger,
 ) (map[string]*go_plugin.Plugin, error)
 
 // LoadPluginsFromDir loads all plugins from a specified directory and returns
@@ -106,9 +113,27 @@ func loadPluginFiles(
 //TODO: Test this
 func ExternalPlugins(
 	pluginDir string,
-	getRawPlugins ExternalPluginLookupFunc,
-	logger log.Logger,
 	checksumsFile string,
+	logger log.Logger,
+) (AvailablePlugins, error) {
+
+	return ExternalPluginsWithOptions(
+		pluginDir,
+		checksumsFile,
+		LoadPluginsFromDir,
+		logger,
+	)
+}
+
+// ExternalPluginsWithOptions is used to enumerate all externally-available plugins
+// in a sepcified directory to the clients of this method with the additional option
+// of being able to specify the lookup function.
+//TODO: Test this
+func ExternalPluginsWithOptions(
+	pluginDir string,
+	checksumsFile string,
+	getRawPlugins DirectoryPluginLookupFunc,
+	logger log.Logger,
 ) (AvailablePlugins, error) {
 
 	rawPlugins, err := getRawPlugins(pluginDir, checksumsFile, logger)

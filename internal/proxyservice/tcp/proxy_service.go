@@ -136,7 +136,9 @@ func (proxy *proxyService) Start() error {
 			}
 			go func() {
 				err := proxy.handleConnection(conn)
-				proxy.logger.Errorf("failed on handle connection: %s", err)
+				if err != nil {
+					proxy.logger.Errorf("failed on handle connection: %s", err)
+				}
 			}()
 		}
 	}()

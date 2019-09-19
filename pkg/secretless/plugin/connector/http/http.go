@@ -10,10 +10,6 @@ import (
 // Plugin is the main interface that HTTP plugins need to implement
 // to be loaded by our codebase.
 type Plugin interface {
-	// PluginInfo contains a key-value map of informational fields
-	// about the plugin.
-	PluginInfo() map[string]string
-
 	// NewConnector creates a new Connector based on the ConnectorResources
 	// passed into it.
 	NewConnector(connector.Resources) Connector

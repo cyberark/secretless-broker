@@ -96,6 +96,8 @@ func handlePerformanceProfiling(profileType string) {
 	perfProfile := profile.New(profileType)
 
 	// Wrap the exit signal handler in go routine so it won't block
-	go func() { signal.StopOnExitSignal(perfProfile) }()
+	go func() {
+		signal.StopOnExitSignal(perfProfile)
+	}()
 	perfProfile.Start()
 }

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless"
 	validation "github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal"
@@ -60,7 +61,7 @@ func NewProxyService(
 	listener net.Listener,
 	logger log.Logger,
 	retrieveCredentials internal.CredentialsRetriever,
-) (internal.ProxyService, error) {
+) (secretless.Service, error) {
 	errors := validation.Errors{}
 
 	if connector == nil {
@@ -122,6 +123,8 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 
 // Start initiates the net.Listener to listen for incoming connections
 func (proxy *proxyService) Start() error {
+	proxy.logger.Infof("starting service")
+
 	if proxy.done {
 		return fmt.Errorf("unable to call Start on stopped ProxyService")
 	}
@@ -148,6 +151,7 @@ func (proxy *proxyService) Start() error {
 
 // Stop terminates proxyService by closing the listening net.Listener
 func (proxy *proxyService) Stop() error {
+	proxy.logger.Infof("stopping service")
 	proxy.done = true
 	return proxy.listener.Close()
 }

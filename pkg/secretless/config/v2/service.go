@@ -39,7 +39,7 @@ func (c connectorConfig) MarshalYAML() (interface{}, error) {
 	return string(c), nil
 }
 
-// Service represents a the configuration of a Secretless proxy service. It
+// Service represents the configuration of a Secretless proxy service. It
 // includes the service's protocol, the socket or address it listens on, the
 // location of its required credentials, and (optionally) any additional
 // protocol specific configuration.

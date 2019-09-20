@@ -24,26 +24,6 @@ type proxyServices struct {
 	runningServices []secretless.Service
 }
 
-type connectorResources struct {
-	logger logapi.Logger
-	config []byte
-}
-
-func (cr *connectorResources) Logger() logapi.Logger {
-	return cr.logger
-}
-
-func (cr *connectorResources) Config() []byte {
-	return cr.config
-}
-
-func newConnectorResources(l logapi.Logger, cfg []byte) connector.Resources {
-	return &connectorResources{
-		logger: l,
-		config: cfg,
-	}
-}
-
 // Start starts all proxy services
 func (s *proxyServices) Start() error {
 	for _, svc := range s.servicesToStart() {
@@ -111,7 +91,7 @@ func (s *proxyServices) createTCPService(
 	}
 
 	svcLogger := s.logger.CopyWith(svc.Name, s.logger.DebugEnabled())
-	connResources := newConnectorResources(svcLogger, svc.ConnectorConfig)
+	connResources := connector.NewResources(svc.ConnectorConfig, svcLogger)
 	connector_ := plugin.NewConnector(connResources)
 
 	// Temp var required so that the function closes over the current

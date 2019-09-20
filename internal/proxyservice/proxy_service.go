@@ -1,6 +1,7 @@
 package proxyservice
 
 import (
+	"fmt"
 	"net"
 	"strings"
 
@@ -28,8 +29,10 @@ type proxyServices struct {
 func (s *proxyServices) Start() error {
 	for _, svc := range s.servicesToStart() {
 		err := svc.Start()
+		// Showstopper: Failure to start a service is fatal.
 		if err != nil {
-			s.logger.Errorf("could not start proxy service: %s", err)
+			// TODO: Upgrade our logger so we can use Fatalf here
+			s.logger.Panicf("could not start proxy service: %s", err)
 			continue
 		}
 		s.runningServices = append(s.runningServices, svc)
@@ -69,10 +72,13 @@ func (s *proxyServices) servicesToStart() []secretless.Service {
 		// first check the available TCP Plugins
 		tcpPlugin, found := tcpPlugins[requestedPlugin]
 		if found {
-			if tcpSvc := s.createTCPService(svc, tcpPlugin); tcpSvc != nil {
-				servicesToStart = append(servicesToStart, tcpSvc)
+			tcpSvc, err := s.createTCPService(svc, tcpPlugin)
+			// Failure to create is fatal.
+			if err != nil {
+				// TODO: Add Fatalf to our logger and use that
+				s.logger.Panicf("unable to create TCP service '%s'", svc.Name)
 			}
-			continue
+			servicesToStart = append(servicesToStart, tcpSvc)
 		}
 
 		// TODO: next check available HTTP Plugins
@@ -81,7 +87,8 @@ func (s *proxyServices) servicesToStart() []secretless.Service {
 		// TODO: Deal with SSH in a hardcoded way
 
 		// Default case: not found
-		s.logger.Errorf("plugin '%s' not available.", requestedPlugin)
+		// TODO: Add Fatalf to our logger and use that
+		s.logger.Panicf("plugin '%s' not available.", requestedPlugin)
 	}
 	return servicesToStart
 }
@@ -89,14 +96,13 @@ func (s *proxyServices) servicesToStart() []secretless.Service {
 func (s *proxyServices) createTCPService(
 	svc *v2.Service,
 	plugin tcp.Plugin,
-) secretless.Service {
+) (secretless.Service, error) {
 
 	//TODO: Add validation somewhere about overlapping listenOns
 	listener, err := net.Listen("tcp", strings.TrimLeft(svc.ListenOn, "tcp://"))
 	if err != nil {
-		// TODO: Should we do more than this?
 		s.logger.Errorf("could not create listener on: %s", svc.ListenOn)
-		return nil
+		return nil, err
 	}
 
 	svcLogger := s.logger.CopyWith(svc.Name, s.logger.DebugEnabled())
@@ -118,12 +124,11 @@ func (s *proxyServices) createTCPService(
 	)
 
 	if err != nil {
-		// TODO: Should we do more than this?
 		s.logger.Errorf("could not create proxy service '%s'", svc.Name)
-		return nil
+		return nil, err
 	}
 
-	return newSvc
+	return newSvc, nil
 }
 
 // NewProxyServices returns a new ProxyServices instance.

@@ -23,7 +23,7 @@ var exitSignals = []os.Signal{
 
 // Stopper is an interface for anything with a Stop method.
 type Stopper interface {
-	Stop()
+	Stop() error
 }
 
 // newHaltSignalChan returns a new channel containing any "halt"-like signal.

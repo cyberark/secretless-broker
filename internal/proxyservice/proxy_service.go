@@ -39,11 +39,20 @@ func (s *proxyServices) Start() error {
 
 // Stop stops all proxy services
 func (s *proxyServices) Stop() error {
+	var stopFailures []string
 	for _, svc := range s.runningServices {
 		err := svc.Stop()
 		if err != nil {
 			s.logger.Errorf("could not stop proxy service: %s", err)
+			stopFailures = append(stopFailures, err.Error())
 		}
+	}
+
+	if len(stopFailures) > 0 {
+		return fmt.Errorf(
+			"these errors occured while stopping all services: %s",
+			strings.Join(stopFailures, "; "),
+		)
 	}
 	return nil
 }

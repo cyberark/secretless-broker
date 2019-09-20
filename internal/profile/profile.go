@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/profile"
 )
 
-func (pp *perfProfile) Start() {
+func (pp *perfProfile) Start() error {
 	switch pp.profileType {
 	case "cpu":
 		pp.stopper = profile.Start(profile.NoShutdownHook)
@@ -16,12 +16,14 @@ func (pp *perfProfile) Start() {
 		pp.stopper = profile.Start(profile.MemProfile, profile.NoShutdownHook)
 	default:
 		// will be impossible when New is used as ctor
-		panic("Attempt to start profiling with invalid profileType")
+		return fmt.Errorf("attempt to start profiling with invalid profileType")
 	}
+	return nil
 }
 
-func (pp *perfProfile) Stop() {
+func (pp *perfProfile) Stop() error {
 	pp.stopper.Stop()
+	return nil
 }
 
 type perfProfile struct {

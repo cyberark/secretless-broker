@@ -42,9 +42,6 @@ func newHaltSignalChan() chan os.Signal {
 //   the signal package.  Not ideal.
 func StopOnExitSignal(s Stopper) {
 	killSignals := newHaltSignalChan()
-
-	go func() {
-		<-killSignals
-		s.Stop()
-	}()
+	<-killSignals
+	s.Stop()
 }

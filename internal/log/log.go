@@ -91,6 +91,14 @@ func (logger *Logger) DebugEnabled() bool {
 	return logger.IsDebug
 }
 
+func (logger *Logger) CopyWith(prefix string, isDebug bool) log_api.Logger {
+	return NewWithOptions(
+		logger.BackingLogger.Writer(),
+		prefix,
+		isDebug,
+	)
+}
+
 // Prefix returns the prefix that will be prepended to all output messages
 func (logger *Logger) Prefix() string {
 	return logger.prefix

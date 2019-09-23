@@ -1,10 +1,7 @@
-// Package signal is a thin wrapper wrapper over the os/signal package that
-// allows any type with a Stop() method to be conveniently stopped when any
-// of the standard os "halt" signals are raised.
-//
-// The package only exposes a single method StopOnExitSignal(Stopper).  Just
-// pass any Stopper to that function, and its Stop() method will be called
-// when a halt signal is raised.
+// Package signal is a wrapper over the os/signal package that allows multiple
+// subscribers to subscribe to notifications of "exit" signals. Subscribers are
+// guaranteed to be notified in the order in which subscriptions were made, so
+// that the last subscriber will be last to be notified.
 package signal
 
 import (
@@ -21,29 +18,63 @@ var exitSignals = []os.Signal{
 	syscall.SIGTERM,
 }
 
-// Stopper is an interface for anything with a Stop method.
-type Stopper interface {
-	Stop() error
+// Subscriber represents anything than wants to be notified of exit signals.
+// It's simply a function that takes no arguments.  Actual subscribers will
+// typically use this function as a closure to wrap up relevant logic at
+// the call site.
+type Subscriber func()
+
+// Publisher defines the interface of a publisher.
+type Publisher interface {
+	Subscribe(Subscriber)
+	Start()
+	Stop()
 }
 
-// NewExitSignalChan returns a new channel containing any "halt"-like signal.
-// See exitSignals for a definition of a "halt"-like signal.
-func NewExitSignalChan() chan os.Signal {
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, exitSignals...)
-	return signalChannel
+type exitSignalPublisher struct {
+	subscribers   []Subscriber
+	signalChannel chan os.Signal
+	doneChannel   chan struct{}
 }
 
-// StopOnExitSignal will make any "Stopper" automatically Stop() when OS kill
-// or kill like signals are received.
-// TODO: Possible synchronization to ensure all go routines complete.
-// TODO: Current usage in main relies on the fact that these will be triggered
-//   in the order they're setup -- an assumption that relies on impl details of
-//   the signal package.  Not ideal.
-func StopOnExitSignal(s Stopper) {
-	killSignals := NewExitSignalChan()
+// Subscribe adds a new subscriber to be notified when an exit signal is
+// received. Subscribers are guaranteed to be notified in the same order the
+// are added.
+func (p *exitSignalPublisher) Subscribe(subscriber Subscriber) {
+	p.subscribers = append(p.subscribers, subscriber)
+}
+
+// Start must be called to kick off the publication process.
+func (p *exitSignalPublisher) Start() {
 	go func() {
-		<-killSignals
-		s.Stop()
+		for {
+			select {
+			case <-p.signalChannel:
+				for _, sub := range p.subscribers {
+					sub()
+				}
+			case <-p.doneChannel:
+				return
+			}
+		}
 	}()
+}
+
+// Stop makes the publisher stop listening for and publishing signal events.
+func (p *exitSignalPublisher) Stop() {
+	p.doneChannel <- struct{}{}
+}
+
+// NewExitSignalPublisher creates a new instance of publisher.  The publisher
+// will not start actually publishing exit signal events until Start is called.
+func NewExitSignalPublisher() Publisher {
+	doneChannel := make(chan struct{})
+	signalChannel := make(chan os.Signal, 1) //TODO: should this be 0?
+	signal.Notify(signalChannel, exitSignals...)
+
+	return &exitSignalPublisher{
+		subscribers:   []Subscriber{},
+		signalChannel: signalChannel,
+		doneChannel: doneChannel,
+	}
 }

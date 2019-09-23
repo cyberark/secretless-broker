@@ -48,11 +48,21 @@ func StartSecretless(params *SecretlessOptions) {
 		log.Fatalln(err)
 	}
 
-	handlePerformanceProfiling(params.ProfilingMode)
+	// Create a single exit signal publisher for so we can coordinate all the
+	// process interested in responding to those signals.
+	exitSignals := signal.NewExitSignalPublisher()
+
+	handlePerformanceProfiling(params.ProfilingMode, exitSignals)
 
 	// Start Services
 	allServices := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
-	signal.StopOnExitSignal(allServices)
+	exitSignals.Subscribe(func() {
+		err := allServices.Stop()
+		if err != nil {
+			// Log but but allow cleanup of other subscribers to continue.
+			log.Println(err)
+		}
+	})
 
 	err = allServices.Start()
 	if err != nil {
@@ -60,7 +70,9 @@ func StartSecretless(params *SecretlessOptions) {
 	}
 
 	// Block until we receive an exit signal
-	<- signal.NewExitSignalChan()
+	waitForExitSignal := make(chan struct{})
+	exitSignals.Subscribe( func() { waitForExitSignal <- struct{}{} } )
+	<- waitForExitSignal
 }
 
 func readConfig(cfgFile string) v2.Config {
@@ -80,10 +92,10 @@ func showVersion(showAndExit bool) {
 	log.Printf("Secretless v%s starting up...", secretless.FullVersionName)
 }
 
-// handlePerformanceProfiling starts a perfomance profiling, and sets up an
+// handlePerformanceProfiling starts a performance profiling, and sets up an
 // os.Signal listener that will automatically call Stop() on the profile
 // when an system halt is raised.
-func handlePerformanceProfiling(profileType string) {
+func handlePerformanceProfiling(profileType string, exitSignals signal.Publisher) {
 	// No profiling was requested
 	if profileType == "" {
 		return
@@ -96,6 +108,10 @@ func handlePerformanceProfiling(profileType string) {
 
 	// Start profiling
 	perfProfile := profile.New(profileType)
-	signal.StopOnExitSignal(perfProfile)
-	perfProfile.Start()
+	exitSignals.Subscribe( func() { _ = perfProfile.Stop() } )
+
+	err := perfProfile.Start()
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

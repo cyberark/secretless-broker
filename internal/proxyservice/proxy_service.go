@@ -45,7 +45,6 @@ func (s *proxyServices) Stop() error {
 	for _, svc := range s.runningServices {
 		err := svc.Stop()
 		if err != nil {
-			s.logger.Errorf("could not stop proxy service: %s", err)
 			stopFailures = append(stopFailures, err.Error())
 		}
 	}
@@ -78,6 +77,7 @@ func (s *proxyServices) servicesToStart() []secretless.Service {
 				s.logger.Panicf("unable to create TCP service '%s'", svc.Name)
 			}
 			servicesToStart = append(servicesToStart, tcpSvc)
+			continue
 		}
 
 		// TODO: next check available HTTP Plugins

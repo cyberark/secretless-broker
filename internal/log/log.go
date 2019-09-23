@@ -138,6 +138,37 @@ func (logger *Logger) log(severityLevel severity, args ...interface{}) {
 	logger.logln(severityLevel, args...)
 }
 
+// TODO: This duplication is quite hideous, and should be cleaned up by
+//   delegating everything to stdlib logger in a more straightforward way.
+func (logger *Logger) panicf(severityLevel severity, format string, args ...interface{}) {
+	if !logger.shouldPrint(severityLevel) {
+		return
+	}
+
+	if logger.prefix != "" {
+		format = "%s: " + format
+		args = prependString(logger.prefix, args...)
+	}
+
+	logger.BackingLogger.Panicf(format, args...)
+}
+
+func (logger *Logger) panicln(severityLevel severity, args ...interface{}) {
+	if !logger.shouldPrint(severityLevel) {
+		return
+	}
+
+	if logger.prefix != "" {
+		args = prependString(logger.prefix+":", args...)
+	}
+
+	logger.BackingLogger.Panicln(args...)
+}
+
+func (logger *Logger) panic(severityLevel severity, args ...interface{}) {
+	logger.panicln(severityLevel, args...)
+}
+
 // ---------------------------
 // Specific API implementation
 
@@ -163,7 +194,7 @@ func (logger *Logger) Errorf(format string, args ...interface{}) {
 
 // Panicf prints to stdout a formatted panic-level logging message
 func (logger *Logger) Panicf(format string, args ...interface{}) {
-	logger.logf(PanicSeverity, format, args...)
+	logger.panicf(PanicSeverity, format, args...)
 }
 
 // Debugln prints to stdout a debug-level logging message
@@ -188,7 +219,7 @@ func (logger *Logger) Errorln(args ...interface{}) {
 
 // Panicln prints to stdout a panic-level logging message
 func (logger *Logger) Panicln(args ...interface{}) {
-	logger.logln(PanicSeverity, args...)
+	logger.panicln(PanicSeverity, args...)
 }
 
 // Debug prints to stdout a debug-level logging message. Alias of
@@ -218,5 +249,5 @@ func (logger *Logger) Error(args ...interface{}) {
 // Panic prints to stdout a panic-level logging message. Alias of
 // Panicln method.
 func (logger *Logger) Panic(args ...interface{}) {
-	logger.log(PanicSeverity, args...)
+	logger.panic(PanicSeverity, args...)
 }

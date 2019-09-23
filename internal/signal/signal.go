@@ -26,9 +26,9 @@ type Stopper interface {
 	Stop() error
 }
 
-// newHaltSignalChan returns a new channel containing any "halt"-like signal.
+// NewExitSignalChan returns a new channel containing any "halt"-like signal.
 // See exitSignals for a definition of a "halt"-like signal.
-func newHaltSignalChan() chan os.Signal {
+func NewExitSignalChan() chan os.Signal {
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, exitSignals...)
 	return signalChannel
@@ -41,7 +41,9 @@ func newHaltSignalChan() chan os.Signal {
 //   in the order they're setup -- an assumption that relies on impl details of
 //   the signal package.  Not ideal.
 func StopOnExitSignal(s Stopper) {
-	killSignals := newHaltSignalChan()
-	<-killSignals
-	s.Stop()
+	killSignals := NewExitSignalChan()
+	go func() {
+		<-killSignals
+		s.Stop()
+	}()
 }

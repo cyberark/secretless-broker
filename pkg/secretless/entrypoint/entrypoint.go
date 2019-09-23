@@ -52,13 +52,15 @@ func StartSecretless(params *SecretlessOptions) {
 
 	// Start Services
 	allServices := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
+	signal.StopOnExitSignal(allServices)
+
 	err = allServices.Start()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// The program will wait here until it receives an exit signal
-	signal.StopOnExitSignal(allServices)
+	// Block until we receive an exit signal
+	<- signal.NewExitSignalChan()
 }
 
 func readConfig(cfgFile string) v2.Config {
@@ -94,10 +96,6 @@ func handlePerformanceProfiling(profileType string) {
 
 	// Start profiling
 	perfProfile := profile.New(profileType)
-
-	// Wrap the exit signal handler in go routine so it won't block
-	go func() {
-		signal.StopOnExitSignal(perfProfile)
-	}()
+	signal.StopOnExitSignal(perfProfile)
 	perfProfile.Start()
 }

@@ -33,7 +33,6 @@ func (s *proxyServices) Start() error {
 		if err != nil {
 			// TODO: Upgrade our logger so we can use Fatalf here
 			s.logger.Panicf("could not start proxy service: %s", err)
-			continue
 		}
 		s.runningServices = append(s.runningServices, svc)
 	}
@@ -152,7 +151,8 @@ func NewProxyServices(
 	return &secretlessObj
 }
 
-// Move this up one level, pass it down for now
+// TODO: Move this up one level, pass it down as dep.  Also, reconsider the
+//   Resolver design so it's exactly what we need for the new code.
 func GetSecrets(secrets []*v2.Credential) (map[string][]byte, error) {
 	providerFactories := make(map[string]func(v1.ProviderOptions) (v1.Provider, error))
 

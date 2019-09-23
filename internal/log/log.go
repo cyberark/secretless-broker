@@ -91,6 +91,8 @@ func (logger *Logger) DebugEnabled() bool {
 	return logger.IsDebug
 }
 
+// CopyWith creates a copy of the logger with the prefix and debug values
+// overridden by the arguments.
 func (logger *Logger) CopyWith(prefix string, isDebug bool) log_api.Logger {
 	return NewWithOptions(
 		logger.BackingLogger.Writer(),

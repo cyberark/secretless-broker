@@ -106,7 +106,7 @@ func (s *proxyServices) createTCPService(
 
 	svcLogger := s.logger.CopyWith(svc.Name, s.logger.DebugEnabled())
 	connResources := connector.NewResources(svc.ConnectorConfig, svcLogger)
-	connector_ := plugin.NewConnector(connResources)
+	svcConnector := plugin.NewConnector(connResources)
 
 	// Temp var required so that the function closes over the current
 	// loop value.
@@ -116,7 +116,7 @@ func (s *proxyServices) createTCPService(
 	}
 
 	newSvc, err := tcpproxy.NewProxyService(
-		connector_,
+		svcConnector,
 		listener,
 		svcLogger,
 		credsRetriever,
@@ -151,6 +151,7 @@ func NewProxyServices(
 	return &secretlessObj
 }
 
+// GetSecrets returns the secret values for the requested credentials.
 // TODO: Move this up one level, pass it down as dep.  Also, reconsider the
 //   Resolver design so it's exactly what we need for the new code.
 func GetSecrets(secrets []*v2.Credential) (map[string][]byte, error) {

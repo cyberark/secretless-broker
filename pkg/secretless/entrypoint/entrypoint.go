@@ -74,7 +74,10 @@ func StartSecretless(params *SecretlessOptions) {
 	exitSignals.Subscribe(func() {
 		waitForExitSignal <- struct{}{}
 	})
+
+	exitSignals.Start()
 	<-waitForExitSignal
+	exitSignals.Stop()
 }
 
 func readConfig(cfgFile string) v2.Config {

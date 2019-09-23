@@ -71,8 +71,10 @@ func StartSecretless(params *SecretlessOptions) {
 
 	// Block until we receive an exit signal
 	waitForExitSignal := make(chan struct{})
-	exitSignals.Subscribe( func() { waitForExitSignal <- struct{}{} } )
-	<- waitForExitSignal
+	exitSignals.Subscribe(func() {
+		waitForExitSignal <- struct{}{}
+	})
+	<-waitForExitSignal
 }
 
 func readConfig(cfgFile string) v2.Config {
@@ -108,7 +110,9 @@ func handlePerformanceProfiling(profileType string, exitSignals signal.Publisher
 
 	// Start profiling
 	perfProfile := profile.New(profileType)
-	exitSignals.Subscribe( func() { _ = perfProfile.Stop() } )
+	exitSignals.Subscribe(func() {
+		_ = perfProfile.Stop()
+	})
 
 	err := perfProfile.Start()
 	if err != nil {

@@ -1,5 +1,5 @@
 // Package signal is a wrapper over the os/signal package that allows multiple
-// subscribers to subscribe to notifications of "exit" signals. Subscribers are
+// handlers to subscribe to notifications of "exit" signals. Subscribers are
 // guaranteed to be notified in the order in which subscriptions were made, so
 // that the last subscriber will be last to be notified.
 package signal
@@ -18,63 +18,56 @@ var exitSignals = []os.Signal{
 	syscall.SIGTERM,
 }
 
-// Subscriber represents anything than wants to be notified of exit signals.
-// It's simply a function that takes no arguments.  Actual subscribers will
-// typically use this function as a closure to wrap up relevant logic at
-// the call site.
-type Subscriber func()
+// Handler is a simply a function intended to be called in response to a signal.
+type Handler func()
 
-// Publisher defines the interface of a publisher.
-type Publisher interface {
-	Subscribe(Subscriber)
-	Start()
-	Stop()
+// Exit reifies the idea of "an exit signal" so that such an exit is smart: It
+// allows you to add handlers that will be called when it occurs (AddHandler),
+// and to block until it does occur (Await).
+type Exit interface {
+	AddHandler(Handler)
+	Await()
 }
 
-type exitSignalPublisher struct {
-	subscribers   []Subscriber
-	signalChannel chan os.Signal
-	doneChannel   chan struct{}
+type exit struct {
+	handlers          []Handler
+	exitSignalChannel chan os.Signal
+	doneChannel       chan struct{}
 }
 
-// Subscribe adds a new subscriber to be notified when an exit signal is
+// AddHandler adds a new subscriber to be notified when an exit signal is
 // received. Subscribers are guaranteed to be notified in the same order the
 // are added.
-func (p *exitSignalPublisher) Subscribe(subscriber Subscriber) {
-	p.subscribers = append(p.subscribers, subscriber)
+func (p *exit) AddHandler(exitHandler Handler) {
+	p.handlers = append(p.handlers, exitHandler)
 }
 
-// Start must be called to kick off the publication process.
-func (p *exitSignalPublisher) Start() {
+// Await does two things: 1. It kicks off the "listening" process, so that
+// Handlers will be notified of an exit. 2.  Blocks until an exit occurs.
+func (p *exit) Await() {
 	go func() {
-		for {
-			select {
-			case <-p.signalChannel:
-				for _, sub := range p.subscribers {
-					sub()
-				}
-			case <-p.doneChannel:
-				return
-			}
+		<-p.exitSignalChannel
+
+		for _, sub := range p.handlers {
+			sub()
 		}
+
+		p.doneChannel <- struct{}{}
 	}()
+
+	<- p.doneChannel
 }
 
-// Stop makes the publisher stop listening for and publishing signal events.
-func (p *exitSignalPublisher) Stop() {
-	p.doneChannel <- struct{}{}
-}
-
-// NewExitSignalPublisher creates a new instance of publisher.  The publisher
-// will not start actually publishing exit signal events until Start is called.
-func NewExitSignalPublisher() Publisher {
+// NewExit creates a new instance of Exit.  Clients are responsible for adding
+// handlers and calling Await() to kick it off.
+func NewExit() Exit {
 	doneChannel := make(chan struct{})
-	signalChannel := make(chan os.Signal, 1) //TODO: should this be 0?
-	signal.Notify(signalChannel, exitSignals...)
+	exitSignalChannel := make(chan os.Signal) //TODO: should this be 0?
+	signal.Notify(exitSignalChannel, exitSignals...)
 
-	return &exitSignalPublisher{
-		subscribers:   []Subscriber{},
-		signalChannel: signalChannel,
-		doneChannel: doneChannel,
+	return &exit{
+		handlers:          []Handler{},
+		exitSignalChannel: exitSignalChannel,
+		doneChannel:       doneChannel,
 	}
 }

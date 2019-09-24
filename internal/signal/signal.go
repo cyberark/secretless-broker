@@ -1,7 +1,6 @@
 // Package signal is a wrapper over the os/signal package that allows multiple
-// handlers to subscribe to notifications of "exitListener" signals. Subscribers are
-// guaranteed to be notified in the order in which subscriptions were made, so
-// that the last subscriber will be last to be notified.
+// handlers to respond to an exit signal, and blocks until that exit signal is
+// received.
 package signal
 
 import (
@@ -21,9 +20,10 @@ var exitSignals = []os.Signal{
 // Handler is a simply a function intended to be called in response to a signal.
 type Handler func()
 
-// ExitListener reifies the idea of "an exitListener signal" so that such an exitListener is smart: It
-// allows you to add handlers that will be called when it occurs (AddHandler),
-// and to block until it does occur (Wait).
+// ExitListener listens for exit signals, and responds by invoking any handlers
+// that have been added.  It start listening until Wait() in invoked, at which
+// point it will block until it receives any exit signal, call the handlers in
+// the order they were added, and then stop listening.
 type ExitListener interface {
 	AddHandler(Handler)
 	Wait()
@@ -35,15 +35,15 @@ type exitListener struct {
 	doneChannel       chan struct{}
 }
 
-// AddHandler adds a new subscriber to be notified when an exitListener signal is
-// received. Subscribers are guaranteed to be notified in the same order the
-// are added.
+// AddHandler adds a new handler that will be invoked when an exit signal is
+// received. Handlers are invoked in the order they were added.
 func (p *exitListener) AddHandler(exitHandler Handler) {
 	p.handlers = append(p.handlers, exitHandler)
 }
 
 // Wait does two things: 1. It kicks off the "listening" process, so that
-// Handlers will be notified of an exitListener. 2.  Blocks until an exitListener occurs.
+// Handlers will be notified of an exit event. 2.  Blocks until an
+// exit signal is received.
 func (p *exitListener) Wait() {
 	go func() {
 		<-p.exitSignalChannel
@@ -58,8 +58,8 @@ func (p *exitListener) Wait() {
 	<- p.doneChannel
 }
 
-// NewExitListener creates a new instance of ExitListener.  Clients are responsible for adding
-// handlers and calling Wait() to kick it off.
+// NewExitListener creates a new instance of ExitListener.  Clients are
+// responsible for adding handlers and calling Wait() to kick it off.
 func NewExitListener() ExitListener {
 	doneChannel := make(chan struct{})
 	exitSignalChannel := make(chan os.Signal)

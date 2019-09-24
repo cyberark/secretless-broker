@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless"
+	"github.com/cyberark/secretless-broker/internal"
 	"github.com/pkg/profile"
 )
 
@@ -56,7 +56,7 @@ func ValidateType(profileType string) error {
 }
 
 // New returns a new performance profile of the specified type.
-func New(profileType string) secretless.Service {
+func New(profileType string) internal.Service {
 	// Clients are expected to have validated the type
 	if !isValidType(profileType) {
 		panic("profile type must be 'cpu' or 'memory'")

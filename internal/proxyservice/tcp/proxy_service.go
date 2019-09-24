@@ -5,7 +5,6 @@ import (
 	"io"
 	"net"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless"
 	validation "github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal"
@@ -61,7 +60,7 @@ func NewProxyService(
 	listener net.Listener,
 	logger log.Logger,
 	retrieveCredentials internal.CredentialsRetriever,
-) (secretless.Service, error) {
+) (internal.Service, error) {
 	errors := validation.Errors{}
 
 	if connector == nil {

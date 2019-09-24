@@ -9,7 +9,6 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin"
 	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	tcpproxy "github.com/cyberark/secretless-broker/internal/proxyservice/tcp"
-	"github.com/cyberark/secretless-broker/pkg/secretless"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
@@ -22,7 +21,7 @@ type proxyServices struct {
 	config          v2.Config
 	eventNotifier   v1.EventNotifier
 	logger          logapi.Logger
-	runningServices []secretless.Service
+	runningServices []internal.Service
 }
 
 // Start starts all proxy services
@@ -58,8 +57,8 @@ func (s *proxyServices) Stop() error {
 	return nil
 }
 
-func (s *proxyServices) servicesToStart() []secretless.Service {
-	var servicesToStart []secretless.Service
+func (s *proxyServices) servicesToStart() []internal.Service {
+	var servicesToStart []internal.Service
 
 	tcpPlugins := s.availPlugins.TCPPlugins()
 	// httpPlugins := s.availPlugins.HTTPPlugins()
@@ -95,7 +94,7 @@ func (s *proxyServices) servicesToStart() []secretless.Service {
 func (s *proxyServices) createTCPService(
 	svc *v2.Service,
 	plugin tcp.Plugin,
-) (secretless.Service, error) {
+) (internal.Service, error) {
 
 	//TODO: Add validation somewhere about overlapping listenOns
 	listener, err := net.Listen("tcp", strings.TrimLeft(svc.ListenOn, "tcp://"))
@@ -136,7 +135,7 @@ func NewProxyServices(
 	availPlugins plugin.AvailablePlugins,
 	logger logapi.Logger,
 	evtNotifier v1.EventNotifier,
-) secretless.Service {
+) internal.Service {
 
 	secretlessObj := proxyServices{
 		config:        cfg,

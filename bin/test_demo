@@ -5,6 +5,9 @@ set -eo pipefail
 CURRENT_DIR=$("$(dirname "$0")"/abspath)
 TOPLEVEL_DIR="$CURRENT_DIR/.."
 QUICK_START_DIR="${TOPLEVEL_DIR}/demos/quick-start"
+COMPOSE_PROJECT_NAME="$(openssl rand -hex 3)"
+
+export COMPOSE_PROJECT_NAME
 
 pushd "$QUICK_START_DIR" >/dev/null
 

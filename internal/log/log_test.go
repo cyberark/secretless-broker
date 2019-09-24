@@ -103,12 +103,12 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 		lt.descriptionForTest("panicf"),
 		func(t *testing.T) {
 			defer func() {
-				paniced := false
+				panicked := false
 				if r := recover(); r != nil {
-					paniced = true
+					panicked = true
 				}
-				if !paniced {
-					assert.FailNow(t, "Should have paniced but didn't")
+				if !panicked {
+					assert.FailNow(t, "Should have panicked but didn't")
 				}
 				assert.Regexp(t, lt.expectedOutput("panicf"), lt.CurrentOutput())
 			}()
@@ -126,12 +126,12 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 			lt.descriptionForTest(methodName),
 			func(t *testing.T) {
 				defer func() {
-					paniced := false
+					panicked := false
 					if r := recover(); r != nil {
-						paniced = true
+						panicked = true
 					}
-					if !paniced {
-						assert.FailNow(t, "Should have paniced but didn't")
+					if !panicked {
+						assert.FailNow(t, "Should have panicked but didn't")
 					}
 					assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
 				}()

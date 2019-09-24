@@ -68,27 +68,31 @@ func NewWithOptions(outputBuffer io.Writer, prefix string, isDebug bool) log_api
 }
 
 func (logger *Logger) shouldPrint(severityLevel severity) bool {
-	if !logger.IsDebug && (severityLevel == InfoSeverity || severityLevel == DebugSeverity) {
-		return false
-	}
+	debugOnlySeverity := severityLevel == DebugSeverity ||
+		severityLevel == InfoSeverity
 
-	return true
+	return !debugOnlySeverity || logger.IsDebug
 }
 
 func prependString(prependString string, args ...interface{}) []interface{} {
-	newArgs := make([]interface{}, len(args)+1)
-	newArgs[0] = prependString
-	for idx, val := range args {
-		newArgs[idx+1] = val
-	}
-
-	return newArgs
+	prependSlice := []interface{}{prependString}
+	return append(prependSlice, args...)
 }
 
 // DebugEnabled returns if the debug logging should be displayed for a particular
 // logger instance
 func (logger *Logger) DebugEnabled() bool {
 	return logger.IsDebug
+}
+
+// CopyWith creates a copy of the logger with the prefix and debug values
+// overridden by the arguments.
+func (logger *Logger) CopyWith(prefix string, isDebug bool) log_api.Logger {
+	return NewWithOptions(
+		logger.BackingLogger.Writer(),
+		prefix,
+		isDebug,
+	)
 }
 
 // Prefix returns the prefix that will be prepended to all output messages
@@ -128,6 +132,37 @@ func (logger *Logger) log(severityLevel severity, args ...interface{}) {
 	logger.logln(severityLevel, args...)
 }
 
+// TODO: This duplication is quite hideous, and should be cleaned up by
+//   delegating everything to stdlib logger in a more straightforward way.
+func (logger *Logger) panicf(severityLevel severity, format string, args ...interface{}) {
+	if !logger.shouldPrint(severityLevel) {
+		return
+	}
+
+	if logger.prefix != "" {
+		format = "%s: " + format
+		args = prependString(logger.prefix, args...)
+	}
+
+	logger.BackingLogger.Panicf(format, args...)
+}
+
+func (logger *Logger) panicln(severityLevel severity, args ...interface{}) {
+	if !logger.shouldPrint(severityLevel) {
+		return
+	}
+
+	if logger.prefix != "" {
+		args = prependString(logger.prefix+":", args...)
+	}
+
+	logger.BackingLogger.Panicln(args...)
+}
+
+func (logger *Logger) panic(severityLevel severity, args ...interface{}) {
+	logger.panicln(severityLevel, args...)
+}
+
 // ---------------------------
 // Specific API implementation
 
@@ -153,7 +188,7 @@ func (logger *Logger) Errorf(format string, args ...interface{}) {
 
 // Panicf prints to stdout a formatted panic-level logging message
 func (logger *Logger) Panicf(format string, args ...interface{}) {
-	logger.logf(PanicSeverity, format, args...)
+	logger.panicf(PanicSeverity, format, args...)
 }
 
 // Debugln prints to stdout a debug-level logging message
@@ -178,7 +213,7 @@ func (logger *Logger) Errorln(args ...interface{}) {
 
 // Panicln prints to stdout a panic-level logging message
 func (logger *Logger) Panicln(args ...interface{}) {
-	logger.logln(PanicSeverity, args...)
+	logger.panicln(PanicSeverity, args...)
 }
 
 // Debug prints to stdout a debug-level logging message. Alias of
@@ -208,5 +243,5 @@ func (logger *Logger) Error(args ...interface{}) {
 // Panic prints to stdout a panic-level logging message. Alias of
 // Panicln method.
 func (logger *Logger) Panic(args ...interface{}) {
-	logger.log(PanicSeverity, args...)
+	logger.panic(PanicSeverity, args...)
 }

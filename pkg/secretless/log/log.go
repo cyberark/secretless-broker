@@ -3,6 +3,7 @@ package log
 // Logger interface is used to emit logging information about the
 // broker to common output(s).
 type Logger interface {
+	CopyWith(prefix string, isDebug bool) Logger
 	DebugEnabled() bool
 	Prefix() string
 

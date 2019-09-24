@@ -1,10 +1,6 @@
-// Package signal is a thin wrapper wrapper over the os/signal package that
-// allows any type with a Stop() method to be conveniently stopped when any
-// of the standard os "halt" signals are raised.
-//
-// The package only exposes a single method StopOnExitSignal(Stopper).  Just
-// pass any Stopper to that function, and its Stop() method will be called
-// when a halt signal is raised.
+// Package signal is a wrapper over the os/signal package that allows multiple
+// handlers to respond to an exit signal, and blocks until that exit signal is
+// received.
 package signal
 
 import (
@@ -21,30 +17,57 @@ var exitSignals = []os.Signal{
 	syscall.SIGTERM,
 }
 
-// Stopper is an interface for anything with a Stop method.
-type Stopper interface {
-	Stop()
+// Handler is a simply a function intended to be called in response to a signal.
+type Handler func()
+
+// ExitListener listens for exit signals, and responds by invoking any handlers
+// that have been added.  It start listening until Wait() in invoked, at which
+// point it will block until it receives any exit signal, call the handlers in
+// the order they were added, and then stop listening.
+type ExitListener interface {
+	AddHandler(Handler)
+	Wait()
 }
 
-// newHaltSignalChan returns a new channel containing any "halt"-like signal.
-// See exitSignals for a definition of a "halt"-like signal.
-func newHaltSignalChan() chan os.Signal {
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, exitSignals...)
-	return signalChannel
+type exitListener struct {
+	handlers          []Handler
+	exitSignalChannel chan os.Signal
+	doneChannel       chan struct{}
 }
 
-// StopOnExitSignal will make any "Stopper" automatically Stop() when OS kill
-// or kill like signals are received.
-// TODO: Possible synchronization to ensure all go routines complete.
-// TODO: Current usage in main relies on the fact that these will be triggered
-//   in the order they're setup -- an assumption that relies on impl details of
-//   the signal package.  Not ideal.
-func StopOnExitSignal(s Stopper) {
-	killSignals := newHaltSignalChan()
+// AddHandler adds a new handler that will be invoked when an exit signal is
+// received. Handlers are invoked in the order they were added.
+func (p *exitListener) AddHandler(exitHandler Handler) {
+	p.handlers = append(p.handlers, exitHandler)
+}
 
+// Wait does two things: 1. It kicks off the "listening" process, so that
+// Handlers will be notified of an exit event. 2.  Blocks until an
+// exit signal is received.
+func (p *exitListener) Wait() {
 	go func() {
-		<-killSignals
-		s.Stop()
+		<-p.exitSignalChannel
+
+		for _, h := range p.handlers {
+			h()
+		}
+
+		p.doneChannel <- struct{}{}
 	}()
+
+	<- p.doneChannel
+}
+
+// NewExitListener creates a new instance of ExitListener.  Clients are
+// responsible for adding handlers and calling Wait() to kick it off.
+func NewExitListener() ExitListener {
+	doneChannel := make(chan struct{})
+	exitSignalChannel := make(chan os.Signal)
+	signal.Notify(exitSignalChannel, exitSignals...)
+
+	return &exitListener{
+		handlers:          []Handler{},
+		exitSignalChannel: exitSignalChannel,
+		doneChannel:       doneChannel,
+	}
 }

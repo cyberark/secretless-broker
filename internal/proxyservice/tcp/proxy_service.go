@@ -60,7 +60,7 @@ func NewProxyService(
 	listener net.Listener,
 	logger log.Logger,
 	retrieveCredentials internal.CredentialsRetriever,
-) (internal.ProxyService, error) {
+) (internal.Service, error) {
 	errors := validation.Errors{}
 
 	if connector == nil {
@@ -122,6 +122,8 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 
 // Start initiates the net.Listener to listen for incoming connections
 func (proxy *proxyService) Start() error {
+	proxy.logger.Infof("starting service")
+
 	if proxy.done {
 		return fmt.Errorf("unable to call Start on stopped ProxyService")
 	}
@@ -136,7 +138,9 @@ func (proxy *proxyService) Start() error {
 			}
 			go func() {
 				err := proxy.handleConnection(conn)
-				proxy.logger.Errorf("failed on handle connection: %s", err)
+				if err != nil {
+					proxy.logger.Errorf("failed on handle connection: %s", err)
+				}
 			}()
 		}
 	}()
@@ -146,6 +150,7 @@ func (proxy *proxyService) Start() error {
 
 // Stop terminates proxyService by closing the listening net.Listener
 func (proxy *proxyService) Stop() error {
+	proxy.logger.Infof("stopping service")
 	proxy.done = true
 	return proxy.listener.Close()
 }

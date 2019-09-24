@@ -18,10 +18,10 @@ import (
 
 // TODO: move to impl package
 type proxyServices struct {
-	config          v2.Config
-	logger          logapi.Logger
-	eventNotifier   v1.EventNotifier
 	availPlugins    plugin.AvailablePlugins
+	config          v2.Config
+	eventNotifier   v1.EventNotifier
+	logger          logapi.Logger
 	runningServices []secretless.Service
 }
 

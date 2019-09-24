@@ -1,5 +1,5 @@
 // Package signal is a wrapper over the os/signal package that allows multiple
-// handlers to subscribe to notifications of "exit" signals. Subscribers are
+// handlers to subscribe to notifications of "exitListener" signals. Subscribers are
 // guaranteed to be notified in the order in which subscriptions were made, so
 // that the last subscriber will be last to be notified.
 package signal
@@ -21,35 +21,35 @@ var exitSignals = []os.Signal{
 // Handler is a simply a function intended to be called in response to a signal.
 type Handler func()
 
-// Exit reifies the idea of "an exit signal" so that such an exit is smart: It
+// ExitListener reifies the idea of "an exitListener signal" so that such an exitListener is smart: It
 // allows you to add handlers that will be called when it occurs (AddHandler),
-// and to block until it does occur (Await).
-type Exit interface {
+// and to block until it does occur (Wait).
+type ExitListener interface {
 	AddHandler(Handler)
-	Await()
+	Wait()
 }
 
-type exit struct {
+type exitListener struct {
 	handlers          []Handler
 	exitSignalChannel chan os.Signal
 	doneChannel       chan struct{}
 }
 
-// AddHandler adds a new subscriber to be notified when an exit signal is
+// AddHandler adds a new subscriber to be notified when an exitListener signal is
 // received. Subscribers are guaranteed to be notified in the same order the
 // are added.
-func (p *exit) AddHandler(exitHandler Handler) {
+func (p *exitListener) AddHandler(exitHandler Handler) {
 	p.handlers = append(p.handlers, exitHandler)
 }
 
-// Await does two things: 1. It kicks off the "listening" process, so that
-// Handlers will be notified of an exit. 2.  Blocks until an exit occurs.
-func (p *exit) Await() {
+// Wait does two things: 1. It kicks off the "listening" process, so that
+// Handlers will be notified of an exitListener. 2.  Blocks until an exitListener occurs.
+func (p *exitListener) Wait() {
 	go func() {
 		<-p.exitSignalChannel
 
-		for _, sub := range p.handlers {
-			sub()
+		for _, h := range p.handlers {
+			h()
 		}
 
 		p.doneChannel <- struct{}{}
@@ -58,14 +58,14 @@ func (p *exit) Await() {
 	<- p.doneChannel
 }
 
-// NewExit creates a new instance of Exit.  Clients are responsible for adding
-// handlers and calling Await() to kick it off.
-func NewExit() Exit {
+// NewExitListener creates a new instance of ExitListener.  Clients are responsible for adding
+// handlers and calling Wait() to kick it off.
+func NewExitListener() ExitListener {
 	doneChannel := make(chan struct{})
-	exitSignalChannel := make(chan os.Signal) //TODO: should this be 0?
+	exitSignalChannel := make(chan os.Signal)
 	signal.Notify(exitSignalChannel, exitSignals...)
 
-	return &exit{
+	return &exitListener{
 		handlers:          []Handler{},
 		exitSignalChannel: exitSignalChannel,
 		doneChannel:       doneChannel,

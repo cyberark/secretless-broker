@@ -77,7 +77,7 @@ func StartSecretless(params *SecretlessOptions) {
 
 	exitSignals.Start()
 	<-waitForExitSignal
-	exitSignals.Stop()
+	//exitSignals.Stop()
 }
 
 func readConfig(cfgFile string) v2.Config {

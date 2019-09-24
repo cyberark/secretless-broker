@@ -65,7 +65,6 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 		"Infof": lt.logger.Infof,
 		"Warnf": lt.logger.Warnf,
 		"Errorf": lt.logger.Errorf,
-		"Panicf": lt.logger.Panicf,
 	} {
 		lt.ResetBuffer()
 		t.Run(
@@ -87,8 +86,6 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 		"Warnln":  lt.logger.Warnln,
 		"Error":   lt.logger.Error,
 		"Errorln": lt.logger.Errorln,
-		"Panic":   lt.logger.Panic,
-		"Panicln": lt.logger.Panicln,
 	} {
 		lt.ResetBuffer()
 		t.Run(
@@ -96,6 +93,49 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 			func(t *testing.T) {
 				method(testCaseArgs...)
 				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
+			},
+		)
+	}
+
+	// Formatted panic: panicf
+	lt.ResetBuffer()
+	t.Run(
+		lt.descriptionForTest("panicf"),
+		func(t *testing.T) {
+			defer func() {
+				paniced := false
+				if r := recover(); r != nil {
+					paniced = true
+				}
+				if !paniced {
+					assert.FailNow(t, "Should have paniced but didn't")
+				}
+				assert.Regexp(t, lt.expectedOutput("panicf"), lt.CurrentOutput())
+			}()
+			lt.logger.Panicf(testCaseFormatStr, testCaseArgs...)
+		},
+	)
+
+	// Unformatted panic methods
+	for methodName, method := range map[string]logMethod{
+		"Panic":   lt.logger.Panic,
+		"Panicln": lt.logger.Panicln,
+	} {
+		lt.ResetBuffer()
+		t.Run(
+			lt.descriptionForTest(methodName),
+			func(t *testing.T) {
+				defer func() {
+					paniced := false
+					if r := recover(); r != nil {
+						paniced = true
+					}
+					if !paniced {
+						assert.FailNow(t, "Should have paniced but didn't")
+					}
+					assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
+				}()
+				method(testCaseArgs...)
 			},
 		)
 	}

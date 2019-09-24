@@ -68,21 +68,15 @@ func NewWithOptions(outputBuffer io.Writer, prefix string, isDebug bool) log_api
 }
 
 func (logger *Logger) shouldPrint(severityLevel severity) bool {
-	if !logger.IsDebug && (severityLevel == InfoSeverity || severityLevel == DebugSeverity) {
-		return false
-	}
+	debugOnlySeverity := severityLevel == DebugSeverity ||
+		severityLevel == InfoSeverity
 
-	return true
+	return !debugOnlySeverity || logger.IsDebug
 }
 
 func prependString(prependString string, args ...interface{}) []interface{} {
-	newArgs := make([]interface{}, len(args)+1)
-	newArgs[0] = prependString
-	for idx, val := range args {
-		newArgs[idx+1] = val
-	}
-
-	return newArgs
+	prependSlice := []interface{}{prependString}
+	return append(prependSlice, args...)
 }
 
 // DebugEnabled returns if the debug logging should be displayed for a particular

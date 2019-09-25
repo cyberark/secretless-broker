@@ -9,8 +9,8 @@ services:
     build:
       context: .
     environment:
-      - ECHO_HOST=echo
-    command: secretless-broker -config-mgr example-plugin-config-manager#/secretless-test.yml
+      ECHO_ADDRESS: echo:6174
+    command: secretless-broker -f /secretless-test.yml -debug
     volumes:
       - ./secretless.yml:/secretless-test.yml
     depends_on:
@@ -19,16 +19,8 @@ services:
   test:
     image: secretless-dev
     environment:
-      - SECRETLESS_HOST=secretless-with-plugin
+      SECRETLESS_HOST: secretless-with-plugin
     command: go test -v ./test/plugin
-    volumes:
-      - ./secretless.yml:/secretless.yml
     depends_on:
       - secretless-with-plugin
       - echo
-
-
-  dev:
-    image: secretless-dev
-    volumes:
-      - ../../:/secretless

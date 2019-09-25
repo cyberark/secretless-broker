@@ -23,24 +23,28 @@ func zeroizeCredentials(backendCredentials map[string][]byte) {
 	}
 }
 
-func duplexStream(source io.ReadWriter, destination io.ReadWriter) <-chan error {
-	errChan := make(chan error)
+func duplexStream(
+	source io.ReadWriter,
+	destination io.ReadWriter,
+) (sourceErrorChan <-chan error, destinationErrorChan <-chan error) {
+	_sourceErrorChan := make(chan error)
+	_destinationErrorChan := make(chan error)
+
 	go func() {
-		errChan <- stream(source, destination)
+		_sourceErrorChan <- stream(source, destination)
 	}()
 	go func() {
-		errChan <- stream(destination, source)
+		_destinationErrorChan <- stream(destination, source)
 	}()
-	return errChan
+
+	sourceErrorChan = _sourceErrorChan
+	destinationErrorChan = _destinationErrorChan
+	return
 }
 
 func stream(source io.Reader, destination io.Writer) error {
-	for {
-		if _, err := io.Copy(destination, source); err != nil {
-			return err
-		}
-		return nil
-	}
+	_, err := io.Copy(destination, source)
+	return err
 }
 
 type proxyService struct {
@@ -89,21 +93,23 @@ func NewProxyService(
 	}, nil
 }
 
+func closeConn(conn net.Conn, connDescription string, logger log.Logger) {
+	if conn == nil {
+		return
+	}
+	err := conn.Close()
+	if err != nil {
+		logger.Warnf("Failed on closing %s connection: %s", connDescription, err)
+	}
+}
+
 func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	var targetConn net.Conn
+	logger := proxy.logger
 
-	closeConn := func(conn net.Conn, connDescription string) {
-		if conn == nil {
-			return
-		}
-		err := conn.Close()
-		if err != nil {
-			proxy.logger.Warnf("failed on closing %s connection: %s", connDescription, err)
-		}
-	}
 	defer func() {
-		closeConn(clientConn, "client")
-		closeConn(targetConn, "target")
+		closeConn(clientConn, "client", logger)
+		closeConn(targetConn, "target", logger)
 	}()
 
 	backendCredentials, err := proxy.retrieveCredentials()
@@ -112,20 +118,45 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 		return fmt.Errorf("failed on retrieve credentials: %s", err)
 	}
 
+	logger.Infof("New connection on %v.\n", clientConn.LocalAddr())
+
 	targetConn, err = proxy.connector(clientConn, backendCredentials)
 	if err != nil {
 		return fmt.Errorf("failed on connect: %s", err)
 	}
 
-	return <-duplexStream(clientConn, targetConn)
+	logger.Infof("Connection opened from %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
+
+	clientErrChan, destErrChan := duplexStream(clientConn, targetConn)
+
+	var closer string
+	select {
+	case err = <-clientErrChan:
+		closer = "client"
+	case err = <-destErrChan:
+		closer = "target"
+	}
+
+	if err != nil {
+		return fmt.Errorf(
+			`connection on %v failed while streaming from %s connection: %s`,
+			clientConn.LocalAddr(),
+			closer,
+			err)
+	}
+
+	logger.Infof("Connection on %v closed by %s.\n", clientConn.LocalAddr(), closer)
+	return nil
 }
 
 // Start initiates the net.Listener to listen for incoming connections
 func (proxy *proxyService) Start() error {
-	proxy.logger.Infof("starting service")
+	logger := proxy.logger
+
+	logger.Infof("Starting service")
 
 	if proxy.done {
-		return fmt.Errorf("unable to call Start on stopped ProxyService")
+		return fmt.Errorf("cannot call Start on stopped ProxyService")
 	}
 
 	go func() { // n go routines for n tcp ProxyServices
@@ -133,14 +164,16 @@ func (proxy *proxyService) Start() error {
 			// TODO: can accepts happen in parallel ?
 			conn, err := proxy.listener.Accept()
 			if err != nil {
-				proxy.logger.Errorf("failed on accept connection: %s", err)
+				logger.Errorf("Failed on accept connection: %s", err)
 				return
 			}
 			go func() {
-				err := proxy.handleConnection(conn)
-				if err != nil {
-					proxy.logger.Errorf("failed on handle connection: %s", err)
+				if err := proxy.handleConnection(conn); err != nil {
+					logger.Errorf("Failed on handle connection: %s", err)
+					return
 				}
+
+				logger.Infof("Connection closed on %v", conn.LocalAddr())
 			}()
 		}
 	}()
@@ -150,7 +183,7 @@ func (proxy *proxyService) Start() error {
 
 // Stop terminates proxyService by closing the listening net.Listener
 func (proxy *proxyService) Stop() error {
-	proxy.logger.Infof("stopping service")
+	proxy.logger.Infof("Stopping service")
 	proxy.done = true
 	return proxy.listener.Close()
 }

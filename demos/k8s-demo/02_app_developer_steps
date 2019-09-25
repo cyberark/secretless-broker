@@ -16,8 +16,8 @@ step "Start application"
 kubectl --namespace "${APP_NAMESPACE}" \
   apply --filename "etc/quick-start-application.yml"
 
-if [ ! "${SECRETLESS_IMAGE_NAME:-}" == "" ]; then
-  image_name="${SECRETLESS_IMAGE_NAME}:${SECRETLESS_IMAGE_TAG}"
+if [ ! "${SECRETLESS_IMAGE:-}" == "" ]; then
+  image_name="${SECRETLESS_IMAGE}"
 
   step "Patching deployment with ${image_name}"
 

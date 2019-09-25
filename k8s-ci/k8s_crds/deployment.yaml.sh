@@ -91,7 +91,7 @@ spec:
         env:
         - name: SECRETLESS_CRD_SUFFIX
           value: "${SECRETLESS_CRD_SUFFIX}"
-        image: "${SECRETLESS_IMAGE_NAME}:${SECRETLESS_IMAGE_TAG}"
+        image: "${SECRETLESS_IMAGE}"
         readinessProbe:
           tcpSocket:
             port: 8080

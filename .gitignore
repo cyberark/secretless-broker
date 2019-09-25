@@ -27,6 +27,9 @@ test/plugin/out/
 # Remove sed tempfiles
 *.bak
 
+# Remove compiled go plugin files
+*.so
+
 # Remove OSX-specific temp files
 .DS_Store
 

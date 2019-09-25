@@ -23,10 +23,12 @@ function finish {
   # Delete registry images that were used
   deleteRegistryImage "${SECRETLESS_IMAGE}" > /dev/null
 
-  # Delete test namespace
+  # Delete test namespace for CRD tests and app/backend namespaces for demo test
   runDockerCommand "
-  kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}'
-"
+    kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}'
+    kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}-backend'
+    kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}-app'
+  "
 }
 trap finish EXIT
 

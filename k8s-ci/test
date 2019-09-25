@@ -11,10 +11,10 @@ docker inspect secretless-broker:latest > /dev/null 2>&1 || {
 }
 
 # Set environment variables
-export UNIQUE_TEST_ID
-UNIQUE_TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
-export SECRETLESS_IMAGE="${DOCKER_REGISTRY_PATH}/secretless-broker:${UNIQUE_TEST_ID}"
-export TEST_NAMESPACE="test-secretless-${UNIQUE_TEST_ID}"
+export TEST_ID
+TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
+export SECRETLESS_IMAGE="${DOCKER_REGISTRY_PATH}/secretless-broker:${TEST_ID}"
+export TEST_NAMESPACE="test-secretless-${TEST_ID}"
 
 # Clean up when script completes
 function finish {
@@ -23,11 +23,9 @@ function finish {
   # Delete registry images that were used
   deleteRegistryImage "${SECRETLESS_IMAGE}" > /dev/null
 
-  # Delete test namespace for CRD tests and app/backend namespaces for demo test
+  # Delete test namespace
   runDockerCommand "
     kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}'
-    kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}-backend'
-    kubectl delete --wait=true --ignore-not-found=true namespace '${TEST_NAMESPACE}-app'
   "
 }
 trap finish EXIT
@@ -38,15 +36,15 @@ function testCRDs() {
 docker tag 'secretless-broker:latest' '${SECRETLESS_IMAGE}' > /dev/null;
 docker push '${SECRETLESS_IMAGE}' > /dev/null;
 
-export SECRETLESS_CRD_SUFFIX='${UNIQUE_TEST_ID}';
-
 # create test namespace
 kubectl create namespace '${TEST_NAMESPACE}'
 
 # switch to test namespace
 kubens '${TEST_NAMESPACE}'
 
-# run CRD tests
+export TEST_ID='${TEST_ID}'
+
+# run tests
 cd k8s-ci/k8s_crds;
 export SECRETLESS_IMAGE='${SECRETLESS_IMAGE}';
 ./test

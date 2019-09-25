@@ -4,7 +4,7 @@
 
 docker-compose build
 docker-compose up -d conjur
-docker-compose exec -T conjur conjurctl wait
+docker-compose exec -T conjur conjurctl wait -r 120
 
 admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
 export CONJUR_AUTHN_API_KEY=$admin_api_key
@@ -33,5 +33,5 @@ sleep 2
 docker-compose run \
   --rm \
   --no-deps \
-  -e http_proxy=http://secretless:8080 \
-  conjur-cli variable values add db/password secret
+  client \
+  variable values add db/password secret

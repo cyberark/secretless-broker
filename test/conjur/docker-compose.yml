@@ -4,7 +4,7 @@ services:
     image: postgres:9.4
 
   conjur:
-    image: cyberark/conjur:0.3.0-stable
+    image: cyberark/conjur:latest
     command: server -a dev -f /work/conjur.yml
     environment:
       DATABASE_URL: postgres://postgres@pg/postgres
@@ -16,6 +16,16 @@ services:
       - .:/work
     depends_on:
       - pg
+
+  client:
+    image: cyberark/conjur-cli:5
+    depends_on:
+      - conjur
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY:
 
   secretless:
     image: secretless-broker
@@ -30,9 +40,7 @@ services:
       - ./secretless.yml:/secretless.yml
 
   test:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    image: secretless-dev
     command: env http_proxy=http://secretless:8080 go test -v ./test/conjur
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
@@ -43,9 +51,7 @@ services:
       - secretless
 
   dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    image: secretless-dev
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev

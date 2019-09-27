@@ -41,6 +41,11 @@ if [[ ${#non_flag_args[@]} != 1 ]]; then
   exit 1
 fi
 
+# set the COMPOSE_PROJECT_NAME for the tests you'll be running
+COMPOSE_PROJECT_NAME="$(openssl rand -hex 3)"
+
+export COMPOSE_PROJECT_NAME
+
 # Validate the required scripts exists in the TEST_SUBDIR
 
 project_dir=$PWD

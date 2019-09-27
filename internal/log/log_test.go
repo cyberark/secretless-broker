@@ -39,7 +39,7 @@ func TestAllOutputMethods(t *testing.T) {
 
 // LogTest represents a full test of all output-generating methods on a Logger.
 type LogTest struct {
-	logger logapi.Logger
+	logger        logapi.Logger
 	backingBuffer *bytes.Buffer
 }
 
@@ -48,7 +48,7 @@ func NewLogTest(isDebug bool, prefix string) *LogTest {
 	logger := NewWithOptions(backingBuffer, prefix, isDebug)
 
 	return &LogTest{
-		logger: logger,
+		logger:        logger,
 		backingBuffer: backingBuffer,
 	}
 }
@@ -57,13 +57,13 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 
 	// Format strings and sample arguments used in the test cases
 	const testCaseFormatStr = "aaa %s bbb %d ccc %2.1f ddd \t eee"
-	testCaseArgs := []interface{}{ "stringval", 123, 1.234 }
+	testCaseArgs := []interface{}{"stringval", 123, 1.234}
 
 	// Formatted methods
 	for methodName, method := range map[string]logMethodF{
 		"Debugf": lt.logger.Debugf,
-		"Infof": lt.logger.Infof,
-		"Warnf": lt.logger.Warnf,
+		"Infof":  lt.logger.Infof,
+		"Warnf":  lt.logger.Warnf,
 		"Errorf": lt.logger.Errorf,
 	} {
 		lt.ResetBuffer()
@@ -71,7 +71,12 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 			lt.descriptionForTest(methodName),
 			func(t *testing.T) {
 				method(testCaseFormatStr, testCaseArgs...)
-				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
+				severityLevelStr := strings.ToUpper(methodName[:len(methodName)-1])
+				assert.Regexp(
+					t,
+					lt.expectedOutput(methodName, severityLevelStr),
+					lt.CurrentOutput(),
+				)
 			},
 		)
 	}
@@ -92,7 +97,15 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 			lt.descriptionForTest(methodName),
 			func(t *testing.T) {
 				method(testCaseArgs...)
-				assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
+
+				baseMethodName := strings.Replace(methodName, "ln", "", 1)
+				severityLevelStr := strings.ToUpper(baseMethodName)
+
+				assert.Regexp(
+					t,
+					lt.expectedOutput(methodName, severityLevelStr),
+					lt.CurrentOutput(),
+				)
 			},
 		)
 	}
@@ -110,7 +123,7 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 				if !panicked {
 					assert.FailNow(t, "Should have panicked but didn't")
 				}
-				assert.Regexp(t, lt.expectedOutput("panicf"), lt.CurrentOutput())
+				assert.Regexp(t, lt.expectedOutput("panicf", "PANIC"), lt.CurrentOutput())
 			}()
 			lt.logger.Panicf(testCaseFormatStr, testCaseArgs...)
 		},
@@ -133,7 +146,7 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 					if !panicked {
 						assert.FailNow(t, "Should have panicked but didn't")
 					}
-					assert.Regexp(t, lt.expectedOutput(methodName), lt.CurrentOutput())
+					assert.Regexp(t, lt.expectedOutput(methodName, "PANIC"), lt.CurrentOutput())
 				}()
 				method(testCaseArgs...)
 			},
@@ -141,7 +154,7 @@ func (lt *LogTest) RunAllTests(t *testing.T) {
 	}
 }
 
-func (lt *LogTest) expectedOutput(methNameStr string) *regexp.Regexp {
+func (lt *LogTest) expectedOutput(methNameStr string, severityStr string) *regexp.Regexp {
 	methodName := methodName(methNameStr)
 
 	// Debug methods produce no output unless debug is enabled
@@ -157,11 +170,14 @@ func (lt *LogTest) expectedOutput(methNameStr string) *regexp.Regexp {
 		methodResultRe = `aaa stringval bbb 123 ccc 1\.2 ddd\s{1,8}eee`
 	}
 
+	fullLineRe := "^" + datetimeRe + " \\[" + severityStr + "\\]\\s{1,2}" +
+		methodResultRe + "\n"
+
 	// expected content also changes if there is a prefix
-	fullLineRe := "^"+datetimeRe+" "+methodResultRe+"\n"
 	if lt.logger.Prefix() != "" {
 		prefix := lt.logger.Prefix()
-		fullLineRe = "^"+datetimeRe+" "+prefix+": "+methodResultRe+"\n"
+		fullLineRe = "^" + datetimeRe + " \\[" + severityStr + "\\]\\s{1,2}" +
+			prefix + ": " + methodResultRe + "\n"
 	}
 
 	return regexp.MustCompile(fullLineRe)
@@ -198,7 +214,7 @@ type logMethodF func(string, ...interface{})
 type methodName string
 
 // Names ending in "f" require a format string
-func (name methodName) requiresFormatString()  bool {
+func (name methodName) requiresFormatString() bool {
 	// Only formatted methods end in the letter f
 	formattedRe := regexp.MustCompile("f$")
 	return formattedRe.MatchString(string(name))
@@ -206,8 +222,7 @@ func (name methodName) requiresFormatString()  bool {
 
 // debugOnly identifies methods that produce output only when the Logger is in
 // debug mode.
-func (name methodName) debugOnly()  bool {
+func (name methodName) debugOnly() bool {
 	return strings.HasPrefix(string(name), "Debug") ||
 		strings.HasPrefix(string(name), "Info")
 }
-

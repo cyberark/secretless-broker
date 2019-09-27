@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"io"
 	stdlib_log "log"
 	"os"
@@ -36,14 +37,14 @@ const (
 	PanicSeverity
 )
 
-// severityLevels is a list of all available severity levels. This is a shorthand
-// to work around the fact that Golang cannot `range` over an enum.
-var severityLevels = []severity{
-	DebugSeverity,
-	InfoSeverity,
-	WarnSeverity,
-	ErrorSeverity,
-	PanicSeverity,
+// severityLevels is a mapping of all available severity levels to their printed
+// values.
+var severityLevels = map[severity]string{
+	DebugSeverity: "DEBUG",
+	InfoSeverity:  "INFO",
+	WarnSeverity:  "WARN",
+	ErrorSeverity: "ERROR",
+	PanicSeverity: "PANIC",
 }
 
 // New method instantiates a new logger that we can write things to.
@@ -100,11 +101,15 @@ func (logger *Logger) Prefix() string {
 	return logger.prefix
 }
 
+func severityPrefix(sev severity) string {
+	return fmt.Sprintf("%-7s", "["+severityLevels[sev]+"]")
+}
+
 // ---------------------------
 // Main logging methods that funnel all the info here
 
-func (logger *Logger) logf(severityLevel severity, format string, args ...interface{}) {
-	if !logger.shouldPrint(severityLevel) {
+func (logger *Logger) logf(sev severity, format string, args ...interface{}) {
+	if !logger.shouldPrint(sev) {
 		return
 	}
 
@@ -112,12 +117,15 @@ func (logger *Logger) logf(severityLevel severity, format string, args ...interf
 		format = "%s: " + format
 		args = prependString(logger.prefix, args...)
 	}
+
+	format = "%s " + format
+	args = prependString(severityPrefix(sev), args...)
 
 	logger.BackingLogger.Printf(format, args...)
 }
 
-func (logger *Logger) logln(severityLevel severity, args ...interface{}) {
-	if !logger.shouldPrint(severityLevel) {
+func (logger *Logger) logln(sev severity, args ...interface{}) {
+	if !logger.shouldPrint(sev) {
 		return
 	}
 
@@ -125,17 +133,19 @@ func (logger *Logger) logln(severityLevel severity, args ...interface{}) {
 		args = prependString(logger.prefix+":", args...)
 	}
 
+	args = prependString(severityPrefix(sev), args...)
+
 	logger.BackingLogger.Println(args...)
 }
 
-func (logger *Logger) log(severityLevel severity, args ...interface{}) {
-	logger.logln(severityLevel, args...)
+func (logger *Logger) log(sev severity, args ...interface{}) {
+	logger.logln(sev, args...)
 }
 
 // TODO: This duplication is quite hideous, and should be cleaned up by
 //   delegating everything to stdlib logger in a more straightforward way.
-func (logger *Logger) panicf(severityLevel severity, format string, args ...interface{}) {
-	if !logger.shouldPrint(severityLevel) {
+func (logger *Logger) panicf(sev severity, format string, args ...interface{}) {
+	if !logger.shouldPrint(sev) {
 		return
 	}
 
@@ -144,11 +154,14 @@ func (logger *Logger) panicf(severityLevel severity, format string, args ...inte
 		args = prependString(logger.prefix, args...)
 	}
 
+	format = "%s " + format
+	args = prependString(severityPrefix(sev), args...)
+
 	logger.BackingLogger.Panicf(format, args...)
 }
 
-func (logger *Logger) panicln(severityLevel severity, args ...interface{}) {
-	if !logger.shouldPrint(severityLevel) {
+func (logger *Logger) panicln(sev severity, args ...interface{}) {
+	if !logger.shouldPrint(sev) {
 		return
 	}
 
@@ -156,11 +169,13 @@ func (logger *Logger) panicln(severityLevel severity, args ...interface{}) {
 		args = prependString(logger.prefix+":", args...)
 	}
 
+	args = prependString(severityPrefix(sev), args...)
+
 	logger.BackingLogger.Panicln(args...)
 }
 
-func (logger *Logger) panic(severityLevel severity, args ...interface{}) {
-	logger.panicln(severityLevel, args...)
+func (logger *Logger) panic(sev severity, args ...interface{}) {
+	logger.panicln(sev, args...)
 }
 
 // ---------------------------

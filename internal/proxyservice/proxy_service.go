@@ -96,8 +96,15 @@ func (s *proxyServices) createTCPService(
 	plugin tcp.Plugin,
 ) (internal.Service, error) {
 
+	// XXX/TBD: We mght also consider `tcp://` to be the default socket type
+	addressParts := strings.SplitN(svc.ListenOn, "://", 2)
+	if len(addressParts) != 2 {
+		return nil, fmt.Errorf("listenOn requires a socket type schema prefix (e.g. 'tcp://' or 'unix://')")
+	}
+
+	//TODO: Add validation to only support expected socket types
 	//TODO: Add validation somewhere about overlapping listenOns
-	listener, err := net.Listen("tcp", strings.TrimLeft(svc.ListenOn, "tcp://"))
+	listener, err := net.Listen(addressParts[0], addressParts[1])
 	if err != nil {
 		s.logger.Errorf("could not create listener on: %s", svc.ListenOn)
 		return nil, err

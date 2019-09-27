@@ -29,6 +29,16 @@ func LoadPluginsFromDir(
 	logger log.Logger,
 ) (map[string]*go_plugin.Plugin, error) {
 
+	// Missing external plugin folder is a warning not a fatal error
+	_, err := os.Stat(pluginDir)
+	if os.IsNotExist(err) {
+		logger.Warnf(
+			"Plugin directory '%s' not found. Ignoring external plugins...",
+			pluginDir,
+		)
+		return nil, nil
+	}
+
 	filePaths, err := checkedPlugins(pluginDir, checksumsFile, logger)
 	if err != nil {
 		return nil, err

@@ -20,7 +20,8 @@ docker inspect secretless-broker:latest > /dev/null 2>&1 || {
 }
 
 # Set environment variables
-export TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
+TEST_ID="$(uuidgen | tr "[:upper:]" "[:lower:]" | head -c 12 | tr -d -)"
+export TEST_ID
 export SECRETLESS_IMAGE_NAME="${DOCKER_REGISTRY_PATH}/secretless-broker"
 export SECRETLESS_IMAGE_TAG="${TEST_ID}"
 export SECRETLESS_IMAGE="${SECRETLESS_IMAGE_NAME}:${SECRETLESS_IMAGE_TAG}";
@@ -60,7 +61,7 @@ kubectl create namespace '${TEST_NAMESPACE}';
 kubens '${TEST_NAMESPACE}';
 
 # run tests
-cd "$test_path";
+cd '$test_path';
 ./test
 "
 }

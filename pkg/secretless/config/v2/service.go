@@ -3,6 +3,7 @@ package v2
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
@@ -172,4 +173,21 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 		Connector:       connector,
 		ConnectorConfig: connectorConfigBytes,
 	}, nil
+}
+
+// A utility type for handling string manipulation / destructuring for listenOn
+// addresses that include a network. Currently only used outside this package.
+// TODO: Update all instances of listenOn to use this type
+type NetworkAddress string
+
+func (a *NetworkAddress) Network() string {
+	return a.split()[0]
+}
+
+func (a *NetworkAddress) Address() string {
+	return a.split()[0]
+}
+
+func (a *NetworkAddress) split() []string {
+	return strings.Split(string(*a), "://")
 }

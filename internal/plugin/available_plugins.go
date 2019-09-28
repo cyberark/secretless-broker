@@ -17,6 +17,15 @@ type AvailablePlugins interface {
 	TCPPlugins() map[string]tcp.Plugin
 }
 
+func IsHTTPPlugin(availPlugins AvailablePlugins, pluginId string) bool {
+	for id, _ := range availPlugins.HTTPPlugins() {
+		if pluginId == id {
+			return true
+		}
+	}
+	return false
+}
+
 // Plugins represent a holding object for a bundle of plugins of different types.
 type Plugins struct {
 	HTTPPluginsByID map[string]http.Plugin

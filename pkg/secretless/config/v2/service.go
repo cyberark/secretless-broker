@@ -107,7 +107,11 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	connectorConfigBytes, err := yaml.Marshal(svcYAML.Config)
 	if err != nil {
-		errors["config"] = fmt.Errorf("failed to parse 'config' key for service '%s': %s", svcName, err)
+		errors["config"] = fmt.Errorf(
+			"failed to parse 'config' key for service '%s': %s",
+			svcName,
+			err,
+		)
 	}
 
 	hasConnector := svcYAML.Connector != ""
@@ -115,8 +119,11 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	// Protocol given
 	if hasProtocol {
-		log.Printf("WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
-		"deprecated and will be removed in a future release.", svcName)
+		log.Printf(
+			"WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
+			"deprecated and will be removed in a future release.",
+			svcName,
+		)
 	}
 
 	// Both connector and protocol given
@@ -128,17 +135,18 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	var connector string
 
+	switch {
 	// Connector given, always takes precedence
-	if hasConnector {
+	case hasConnector:
 		connector = svcYAML.Connector
-
-		// Only use protocol when connector not given
-	} else if hasProtocol {
+	// Only use protocol when connector not given
+	case hasProtocol:
 		connector = svcYAML.Protocol
-
-		// Neither given
-	} else {
-		errors["connector"] = fmt.Errorf("missing 'connector' key on service '%s'", svcName)
+	default:
+		errors["connector"] = fmt.Errorf(
+			"missing 'connector' key on service '%s'",
+			svcName,
+		)
 	}
 
 	// Accumulate errors from top-level keys on serviceYAML

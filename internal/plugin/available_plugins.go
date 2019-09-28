@@ -17,9 +17,11 @@ type AvailablePlugins interface {
 	TCPPlugins() map[string]tcp.Plugin
 }
 
-func IsHTTPPlugin(availPlugins AvailablePlugins, pluginId string) bool {
-	for id, _ := range availPlugins.HTTPPlugins() {
-		if pluginId == id {
+// IsHTTPPlugin uses AvailablePlugins to determine if a pluginId is an HTTP
+// plugin.
+func IsHTTPPlugin(availPlugins AvailablePlugins, pluginID string) bool {
+	for id := range availPlugins.HTTPPlugins() {
+		if pluginID == id {
 			return true
 		}
 	}

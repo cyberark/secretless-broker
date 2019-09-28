@@ -156,9 +156,8 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 		return nil, err
 	}
 
-	// When only the deprecated 'protocol' field
-	// is given and it equals 'http' the connector name
-	// must be extracted from the http config
+	// When only the deprecated 'protocol' field is given and it equals 'http'
+	// the connector name must be extracted from the http config
 	if !hasConnector && hasProtocol && connector == "http" {
 		connector, err = connectorFromLegacyHTTPConfig(connectorConfigBytes)
 		if err != nil {
@@ -175,15 +174,18 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 	}, nil
 }
 
-// A utility type for handling string manipulation / destructuring for listenOn
-// addresses that include a network. Currently only used outside this package.
+// NetworkAddress is a utility type for handling string manipulation /
+// destructuring for listenOn addresses that include a network. Currently only
+// used outside this package.
 // TODO: Update all instances of listenOn to use this type
 type NetworkAddress string
 
+// Network returns the "network" part of a network address, eg, "tcp" or "unix".
 func (a *NetworkAddress) Network() string {
 	return a.split()[0]
 }
 
+// Address returns the "address" part of a network address, eg, "127.0.0.1".
 func (a *NetworkAddress) Address() string {
 	return a.split()[0]
 }

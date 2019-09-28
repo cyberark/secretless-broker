@@ -9,11 +9,14 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 )
 
+// Subservice handles specific traffic within an HTTP proxy service, using
+// traffic filtering rules and a devoted Connector.
 type Subservice struct {
 	Connector http.Connector
 	RetrieveCredentials internal.CredentialsRetriever
 }
 
+// NewProxyService create a new HTTP proxy service.
 // TODO: Replace this stub with real implementation:
 //   https://github.com/cyberark/secretless-broker/issues/848
 func NewProxyService(

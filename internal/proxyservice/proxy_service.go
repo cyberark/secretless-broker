@@ -50,7 +50,6 @@ TODO: Add a principled explanation about how logging is working.
   Eg, when do we return errors, when is it fatal?  what do we log, everything?
 TODO: This is long, perhaps move it into doc.go
  */
-
 package proxyservice
 
 import (

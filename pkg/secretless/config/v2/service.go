@@ -10,12 +10,11 @@ import (
 )
 
 type serviceYAML struct {
-	// Protocol specifies the service connector by protocol.
-	// It is an internal detail.
+	// Protocol specifies the service connector by protocol. It is an internal
+	// detail.
 	//
-	// Deprecated: Protocol exists for historical compatibility
-	// and should not be used. To specify the service connector,
-	// use the Connector field.
+	// Deprecated: Protocol exists for historical compatibility and should not
+	// be used. To specify the service connector, use the Connector field.
 	Protocol    string          `yaml:"protocol" json:"protocol"`
 	Connector   string          `yaml:"connector" json:"connector"`
 	ListenOn    string          `yaml:"listenOn" json:"listenOn"`
@@ -31,9 +30,8 @@ func (s serviceYAML) Validate() error {
 	)
 }
 
-// connectorConfig is a wrapper around byte slice
-// that allows the connector configuration
-// to be Marshalled to YAML.
+// connectorConfig is a wrapper around byte slice that allows the connector
+// configuration to be Marshalled to YAML.
 type connectorConfig []byte
 
 func (c connectorConfig) MarshalYAML() (interface{}, error) {
@@ -115,6 +113,34 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 		)
 	}
 
+	connector, err := connectorID(svcName, svcYAML, connectorConfigBytes)
+	if err != nil {
+		errors["connector"] = err
+	}
+
+	// Accumulate errors from top-level keys on serviceYAML
+	err = errors.Filter()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Service{
+		Credentials:     credentials,
+		ListenOn:        svcYAML.ListenOn,
+		Name:            svcName,
+		Connector:       connector,
+		ConnectorConfig: connectorConfigBytes,
+	}, nil
+}
+
+// connectorID determines the connectorID or errors.  It handles identification
+// of the deprecated 'protocol' field, and issues appropriate warnings.
+func connectorID(
+	svcName string,
+	svcYAML *serviceYAML,
+	connectorConfigBytes []byte,
+) (string, error) {
+	var err error
 	hasConnector := svcYAML.Connector != ""
 	hasProtocol := svcYAML.Protocol != ""
 
@@ -122,7 +148,7 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 	if hasProtocol {
 		log.Printf(
 			"WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
-			"deprecated and will be removed in a future release.",
+				"deprecated and will be removed in a future release.",
 			svcName,
 		)
 	}
@@ -134,44 +160,30 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 			"deprecated.", svcName)
 	}
 
-	var connector string
-
+	var connectorID string
 	switch {
-	// Connector given, always takes precedence
-	case hasConnector:
-		connector = svcYAML.Connector
-	// Only use protocol when connector not given
-	case hasProtocol:
-		connector = svcYAML.Protocol
+	case hasConnector: // Connector given, always takes precedence
+		connectorID = svcYAML.Connector
+	case hasProtocol:  // Only use protocol when connector not given
+		connectorID = svcYAML.Protocol
 	default:
-		errors["connector"] = fmt.Errorf(
-			"missing 'connector' key on service '%s'",
-			svcName,
-		)
-	}
-
-	// Accumulate errors from top-level keys on serviceYAML
-	err = errors.Filter()
-	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("missing 'connector' key on service '%s'", svcName)
 	}
 
 	// When only the deprecated 'protocol' field is given and it equals 'http'
 	// the connector name must be extracted from the http config
-	if !hasConnector && hasProtocol && connector == "http" {
-		connector, err = connectorFromLegacyHTTPConfig(connectorConfigBytes)
+	if !hasConnector && hasProtocol && connectorID == "http" {
+		connectorID, err = connectorFromLegacyHTTPConfig(connectorConfigBytes)
 		if err != nil {
-			return nil, fmt.Errorf("error on http config for service '%s': %s", svcName, err)
+			return "", fmt.Errorf(
+				"error on http config for service '%s': %s",
+				svcName,
+				err,
+			)
 		}
 	}
 
-	return &Service{
-		Credentials:     credentials,
-		ListenOn:        svcYAML.ListenOn,
-		Name:            svcName,
-		Connector:       connector,
-		ConnectorConfig: connectorConfigBytes,
-	}, nil
+	return connectorID, nil
 }
 
 // NetworkAddress is a utility type for handling string manipulation /

@@ -1,8 +1,9 @@
-package plugin
+package so
 
 import (
 	"testing"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
@@ -25,7 +26,7 @@ var mockTCPPlugins = map[string]tcp.Plugin{
 	"three": mockTCPPlugin{},
 }
 
-func getMockPlugins() AvailablePlugins {
+func getMockPlugins() plugin.AvailablePlugins {
 	return &Plugins{
 		HTTPPluginsByID: mockHTTPPlugins,
 		TCPPluginsByID:  mockTCPPlugins,
@@ -34,7 +35,7 @@ func getMockPlugins() AvailablePlugins {
 
 func TestPlugins(t *testing.T) {
 	t.Run("HTTPPlugins", func(t *testing.T) {
-		httpPlugins := getMockPlugins().HTTPPlugins()
+		httpPlugins := HTTPPlugins()
 
 		assert.NotNil(t, httpPlugins)
 		if httpPlugins == nil {
@@ -45,7 +46,7 @@ func TestPlugins(t *testing.T) {
 	})
 
 	t.Run("TCPPlugins", func(t *testing.T) {
-		tcpPlugins := getMockPlugins().TCPPlugins()
+		tcpPlugins := TCPPlugins()
 
 		assert.NotNil(t, tcpPlugins)
 		if tcpPlugins == nil {

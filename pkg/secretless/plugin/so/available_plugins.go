@@ -1,7 +1,8 @@
-package plugin
+package so
 
 import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
@@ -10,16 +11,9 @@ import (
 // must have so that we are capable of loading it.
 var CompatiblePluginAPIVersion = "0.1.0"
 
-// AvailablePlugins is an interface that provides a list of all the available
-// plugins for each type that the broker supports.
-type AvailablePlugins interface {
-	HTTPPlugins() map[string]http.Plugin
-	TCPPlugins() map[string]tcp.Plugin
-}
-
 // IsHTTPPlugin uses AvailablePlugins to determine if a pluginId is an HTTP
 // plugin.
-func IsHTTPPlugin(availPlugins AvailablePlugins, pluginID string) bool {
+func IsHTTPPlugin(availPlugins plugin.AvailablePlugins, pluginID string) bool {
 	for id := range availPlugins.HTTPPlugins() {
 		if pluginID == id {
 			return true
@@ -50,7 +44,7 @@ func AllAvailablePlugins(
 	pluginDir string,
 	checksumsFile string,
 	logger log.Logger,
-) (AvailablePlugins, error) {
+) (plugin.AvailablePlugins, error) {
 
 	return AllAvailablePluginsWithOptions(
 		pluginDir,
@@ -70,7 +64,7 @@ func AllAvailablePluginsWithOptions(
 	internalLookupFunc InternalPluginLookupFunc,
 	externalLookupfunc ExternalPluginLookupFunc,
 	logger log.Logger,
-) (AvailablePlugins, error) {
+) (plugin.AvailablePlugins, error) {
 
 	internalPlugins, err := InternalPlugins(internalLookupFunc)
 	if err != nil {

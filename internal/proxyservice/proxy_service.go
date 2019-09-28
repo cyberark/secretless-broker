@@ -64,6 +64,7 @@ import (
 	tcpproxy "github.com/cyberark/secretless-broker/internal/proxyservice/tcp"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
+	plugin2 "github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
@@ -71,7 +72,7 @@ import (
 
 // TODO: move to impl package
 type proxyServices struct {
-	availPlugins    plugin.AvailablePlugins
+	availPlugins    plugin2.AvailablePlugins
 	config          v2.Config
 	eventNotifier   v1.EventNotifier
 	logger          logapi.Logger
@@ -242,7 +243,7 @@ func (s *proxyServices) credsRetriever(
 // NewProxyServices returns a new ProxyServices instance.
 func NewProxyServices(
 	cfg v2.Config,
-	availPlugins plugin.AvailablePlugins,
+	availPlugins plugin2.AvailablePlugins,
 	logger logapi.Logger,
 	evtNotifier v1.EventNotifier,
 ) internal.Service {

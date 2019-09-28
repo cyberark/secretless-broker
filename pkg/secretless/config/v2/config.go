@@ -5,7 +5,8 @@ import (
 	"log"
 	"sort"
 
-	"github.com/cyberark/secretless-broker/internal/plugin"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/so"
 	"gopkg.in/yaml.v2"
 )
 
@@ -132,7 +133,7 @@ func separatedHTTPAndTCPConfigs(
 	//   IsHTTPPlugin, whose API will likely change to returning a type or an
 	//   error
 	for _, cfg := range configs {
-		if plugin.IsHTTPPlugin(availPlugins, cfg.Connector) {
+		if so.IsHTTPPlugin(availPlugins, cfg.Connector) {
 			httpConfigs = append(httpConfigs, cfg)
 			continue
 		}

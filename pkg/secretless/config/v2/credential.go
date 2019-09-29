@@ -8,6 +8,7 @@ import (
 
 // Credential is the v2 representation of a named secret stored in a provider.
 // It's the analog of the v1.StoredSecret.
+// TODO: Move to types file along with other non-dependency types.
 type Credential struct {
 	Name string
 	From string

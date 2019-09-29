@@ -112,6 +112,8 @@ func (s *proxyServices) Stop() error {
 }
 
 func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
+	// TODO: v2.NewConfigsByType should be an interface, so we can remove this
+	//   hardcoded dep on an impl type of v2.  All deps need to be injected.
 	configsByType := v2.NewConfigsByType(s.config.Services, s.availPlugins)
 	httpPlugins := s.availPlugins.HTTPPlugins()
 	tcpPlugins := s.availPlugins.TCPPlugins()
@@ -146,6 +148,8 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	return servicesToStart
 }
 
+// TODO: v2.HTTPServiceConfig is a value type.  It needs to be moved to a
+//   separate package  All hardcoded deps that has no dependencies.
 func (s *proxyServices) createHTTPService(
 	httpSvcCfg v2.HTTPServiceConfig,
 	plugins map[string]http.Plugin,
@@ -193,10 +197,12 @@ func (s *proxyServices) createHTTPService(
 
 func (s *proxyServices) createTCPService(
 	config v2.Service,
-	plugin tcp.Plugin,
+	pluginInst tcp.Plugin,
 ) (internal.Service, error) {
 
-	//TODO: Add validation somewhere about overlapping listenOns
+	// TODO: Add validation somewhere about overlapping listenOns
+	// TODO: v2.NetworkAddress is a value type.  It needs to be moved to its
+	//   own package with no deps (stdlib deps are ok).
 	netAddr := v2.NetworkAddress(config.ListenOn)
 	listener, err := net.Listen(netAddr.Network(), netAddr.Address())
 	if err != nil {
@@ -205,7 +211,7 @@ func (s *proxyServices) createTCPService(
 	}
 
 	connResources := s.connectorResources(config)
-	svcConnector := plugin.NewConnector(connResources)
+	svcConnector := pluginInst.NewConnector(connResources)
 	credsRetriever := s.credsRetriever(config.Credentials)
 
 	newSvc, err := tcpproxy.NewProxyService(
@@ -259,8 +265,10 @@ func NewProxyServices(
 }
 
 // GetSecrets returns the secret values for the requested credentials.
-// TODO: Move this up one level, pass it down as dep.  Also, reconsider the
-//   Resolver design so it's exactly what we need for the new code.
+// TODO: Move this up one level, pass it down as dep.  Danger: This has
+//   a hardcoded dependency on plugin and v1.
+// TODO: Reconsider the Resolver design so it's exactly what we need for the new code.
+// TODO: v1.Provider options should be an interface
 func GetSecrets(secrets []*v2.Credential) (map[string][]byte, error) {
 	providerFactories := make(map[string]func(v1.ProviderOptions) (v1.Provider, error))
 

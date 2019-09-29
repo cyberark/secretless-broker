@@ -55,8 +55,8 @@ func AllAvailablePlugins(
 	)
 }
 
-// AllAvailablePluginsWithOptions returns the full list of internal and external plugins
-// available to the broker using explicitly-defined lookup functions.
+// AllAvailablePluginsWithOptions returns the full list of internal and external
+// plugins available to the broker using explicitly-defined lookup functions.
 // TODO: Test this
 func AllAvailablePluginsWithOptions(
 	pluginDir string,

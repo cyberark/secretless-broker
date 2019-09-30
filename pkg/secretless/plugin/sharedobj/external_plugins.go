@@ -1,4 +1,4 @@
-package so
+package sharedobj
 
 import (
 	"errors"

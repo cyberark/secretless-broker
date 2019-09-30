@@ -13,7 +13,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/so"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj"
 )
 
 // SecretlessOptions holds the command line flag information that Service was started
@@ -38,7 +38,7 @@ func StartSecretless(params *SecretlessOptions) {
 	cfg := readConfig(params.ConfigFile)
 	logger := secretlessLog.New(params.DebugEnabled)
 	evtNotifier := eventnotifier.New(nil)
-	availPlugins, err := so.AllAvailablePlugins(
+	availPlugins, err := sharedobj.AllAvailablePlugins(
 		params.PluginDir,
 		params.PluginChecksumsFile,
 		logger,

@@ -17,7 +17,7 @@ import (
 	"time"
 
 	plugin2 "github.com/cyberark/secretless-broker/internal/plugin"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/so"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj"
 	"github.com/pkg/profile"
 	"gopkg.in/yaml.v2"
 
@@ -410,7 +410,7 @@ func (manager *Manager) LoadLibraryPlugins(path string, checksumsFile string) er
 		// We override file listing if we did a verification to prevent additions
 		// to plugins between verification and loading the plugins.
 		var err error
-		if files, err = so.VerifyPluginChecksums(path, checksumsFile); err != nil {
+		if files, err = sharedobj.VerifyPluginChecksums(path, checksumsFile); err != nil {
 			log.Fatalln(err)
 		}
 	} else if len(files) > 0 {

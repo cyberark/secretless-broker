@@ -15,7 +15,8 @@ To put this in context, the complete high-level flow is:
 	“subservices” associated with it.
 
 	4. Each of those subservices needs two things: a connector (which knows how
-	authenticate requests) and a way to get the current credentials at runtime.
+	to authenticate requests) and a way to get the current credentials at
+	runtime.
 
 	5. Now note the signature of the connector itself just looks like this:
 
@@ -187,6 +188,7 @@ func (s *proxyServices) createHTTPService(
 	proxyName := httpSvcCfg.Name()
 	svcLogger := s.loggerFor(proxyName)
 
+	// TODO: NewHTTPProxyFunc needs to be injected
 	newSvc, err := httpproxy.NewProxyService(subservices, listener, svcLogger)
 	if err != nil {
 		s.logger.Errorf("could not create http proxy service '%s'", proxyName)
@@ -214,6 +216,7 @@ func (s *proxyServices) createTCPService(
 	svcConnector := pluginInst.NewConnector(connResources)
 	credsRetriever := s.credsRetriever(config.Credentials)
 
+	// TODO: NewTCPProxyFunc needs to be injected
 	newSvc, err := tcpproxy.NewProxyService(
 		svcConnector,
 		listener,

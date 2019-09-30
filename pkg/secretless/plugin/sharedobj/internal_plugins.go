@@ -1,4 +1,4 @@
-package so
+package sharedobj
 
 import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"

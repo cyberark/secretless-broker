@@ -12,17 +12,6 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
-// Zeroizes the values of the fetched credentials. We don't want to
-// rely on garbage collection for this (it might be slow and/or only free them) so
-// we manually clear
-func zeroizeCredentials(backendCredentials map[string][]byte) {
-	for _, credentialBytes := range backendCredentials {
-		for i := range credentialBytes {
-			credentialBytes[i] = 0
-		}
-	}
-}
-
 func duplexStream(
 	source io.ReadWriter,
 	destination io.ReadWriter,
@@ -113,7 +102,7 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	}()
 
 	backendCredentials, err := proxy.retrieveCredentials()
-	defer zeroizeCredentials(backendCredentials)
+	defer internal.ZeroizeCredentials(backendCredentials)
 	if err != nil {
 		return fmt.Errorf("failed on retrieve credentials: %s", err)
 	}

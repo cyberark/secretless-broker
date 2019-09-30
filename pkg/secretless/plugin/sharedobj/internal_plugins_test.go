@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )

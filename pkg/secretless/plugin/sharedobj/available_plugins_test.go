@@ -35,7 +35,7 @@ func getMockPlugins() plugin.AvailablePlugins {
 
 func TestPlugins(t *testing.T) {
 	t.Run("HTTPPlugins", func(t *testing.T) {
-		httpPlugins := HTTPPlugins()
+		httpPlugins := getMockPlugins().HTTPPlugins()
 
 		assert.NotNil(t, httpPlugins)
 		if httpPlugins == nil {
@@ -46,7 +46,7 @@ func TestPlugins(t *testing.T) {
 	})
 
 	t.Run("TCPPlugins", func(t *testing.T) {
-		tcpPlugins := TCPPlugins()
+		tcpPlugins := getMockPlugins().TCPPlugins()
 
 		assert.NotNil(t, tcpPlugins)
 		if tcpPlugins == nil {

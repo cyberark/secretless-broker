@@ -193,15 +193,15 @@ func connectorID(
 type NetworkAddress string
 
 // Network returns the "network" part of a network address, eg, "tcp" or "unix".
-func (a *NetworkAddress) Network() string {
+func (a NetworkAddress) Network() string {
 	return a.split()[0]
 }
 
 // Address returns the "address" part of a network address, eg, "127.0.0.1".
-func (a *NetworkAddress) Address() string {
+func (a NetworkAddress) Address() string {
 	return a.split()[0]
 }
 
-func (a *NetworkAddress) split() []string {
-	return strings.Split(string(*a), "://")
+func (a NetworkAddress) split() []string {
+	return strings.Split(string(a), "://")
 }

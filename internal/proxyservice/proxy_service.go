@@ -155,7 +155,6 @@ func (s *proxyServices) createTCPService(
 	netAddr := v2.NetworkAddress(config.ListenOn)
 	listener, err := net.Listen(netAddr.Network(), netAddr.Address())
 	if err != nil {
-		s.logger.Errorf("could not create listener on: %s", config.ListenOn)
 		return nil, err
 	}
 

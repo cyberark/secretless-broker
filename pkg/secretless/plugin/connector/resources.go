@@ -40,3 +40,7 @@ func NewResources(
 		logger: logger,
 	}
 }
+
+// SecretsByID is a type mapping variable IDs to their values
+type SecretsByID map[string][]byte
+

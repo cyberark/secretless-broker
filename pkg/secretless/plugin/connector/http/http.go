@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
 
@@ -18,4 +17,4 @@ type Plugin interface {
 // Connector is the function that will be invoked when a matching
 // request comes in. It uses both the request object and the secrets
 // map to authenticate the client.
-type Connector func(request *http.Request, secrets plugin.SecretsByID) error
+type Connector func(request *http.Request, secrets connector.SecretsByID) error

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"net"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
@@ -21,7 +20,7 @@ type examplePlugin struct{}
 // the key "address"
 // 3. Inject credentials from a secret identified by the key "auth"
 // 4. Write the initial message from the client with some modification
-func connectorFunc(clientConn net.Conn, secrets plugin.SecretsByID) (net.Conn, error) {
+func connectorFunc(clientConn net.Conn, secrets connector.SecretsByID) (net.Conn, error) {
 	clientInitMsg, _, err := bufio.NewReader(clientConn).ReadLine()
 	if err != nil {
 		return nil, err

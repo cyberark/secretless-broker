@@ -1,4 +1,4 @@
-package plugin
+package manager
 
 import (
 	"encoding/json"
@@ -16,6 +16,8 @@ import (
 	"syscall"
 	"time"
 
+	plugin2 "github.com/cyberark/secretless-broker/internal/plugin"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj"
 	"github.com/pkg/profile"
 	"gopkg.in/yaml.v2"
 
@@ -338,7 +340,7 @@ func (manager *Manager) Run(configManagerID string, configManagerSpec string) er
 	log.Println("Initialization of plugins done.")
 
 	log.Println("Initializing the proxy...")
-	resolver := NewResolver(manager.ProviderFactories, manager, nil)
+	resolver := plugin2.NewResolver(manager.ProviderFactories, manager, nil)
 
 	manager.Proxy = secretless.Proxy{
 		Config:          configuration,
@@ -408,7 +410,7 @@ func (manager *Manager) LoadLibraryPlugins(path string, checksumsFile string) er
 		// We override file listing if we did a verification to prevent additions
 		// to plugins between verification and loading the plugins.
 		var err error
-		if files, err = VerifyPluginChecksums(path, checksumsFile); err != nil {
+		if files, err = sharedobj.VerifyPluginChecksums(path, checksumsFile); err != nil {
 			log.Fatalln(err)
 		}
 	} else if len(files) > 0 {

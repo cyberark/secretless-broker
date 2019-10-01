@@ -1,4 +1,4 @@
-package plugin
+package sharedobj
 
 import (
 	"errors"
@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
+	plugin2 "github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
@@ -119,7 +120,7 @@ func ExternalPlugins(
 	getRawPlugins ExternalPluginLookupFunc,
 	logger log.Logger,
 	checksumsFile string,
-) (AvailablePlugins, error) {
+) (plugin2.AvailablePlugins, error) {
 
 	rawPlugins, err := getRawPlugins(pluginDir, checksumsFile, logger)
 	if err != nil {

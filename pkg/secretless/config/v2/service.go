@@ -3,18 +3,18 @@ package v2
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
 
 type serviceYAML struct {
-	// Protocol specifies the service connector by protocol.
-	// It is an internal detail.
+	// Protocol specifies the service connector by protocol. It is an internal
+	// detail.
 	//
-	// Deprecated: Protocol exists for historical compatibility
-	// and should not be used. To specify the service connector,
-	// use the Connector field.
+	// Deprecated: Protocol exists for historical compatibility and should not
+	// be used. To specify the service connector, use the Connector field.
 	Protocol    string          `yaml:"protocol" json:"protocol"`
 	Connector   string          `yaml:"connector" json:"connector"`
 	ListenOn    string          `yaml:"listenOn" json:"listenOn"`
@@ -30,9 +30,8 @@ func (s serviceYAML) Validate() error {
 	)
 }
 
-// connectorConfig is a wrapper around byte slice
-// that allows the connector configuration
-// to be Marshalled to YAML.
+// connectorConfig is a wrapper around byte slice that allows the connector
+// configuration to be Marshalled to YAML.
 type connectorConfig []byte
 
 func (c connectorConfig) MarshalYAML() (interface{}, error) {
@@ -107,54 +106,22 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	connectorConfigBytes, err := yaml.Marshal(svcYAML.Config)
 	if err != nil {
-		errors["config"] = fmt.Errorf("failed to parse 'config' key for service '%s': %s", svcName, err)
+		errors["config"] = fmt.Errorf(
+			"failed to parse 'config' key for service '%s': %s",
+			svcName,
+			err,
+		)
 	}
 
-	hasConnector := svcYAML.Connector != ""
-	hasProtocol := svcYAML.Protocol != ""
-
-	// Protocol given
-	if hasProtocol {
-		log.Printf("WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
-		"deprecated and will be removed in a future release.", svcName)
-	}
-
-	// Both connector and protocol given
-	if hasConnector && hasProtocol {
-		log.Printf("WARN: 'connector' and 'protocol' keys found on "+
-			"service '%s'. 'connector' key takes precendence, 'protocol' is "+
-			"deprecated.", svcName)
-	}
-
-	var connector string
-
-	// Connector given, always takes precedence
-	if hasConnector {
-		connector = svcYAML.Connector
-
-		// Only use protocol when connector not given
-	} else if hasProtocol {
-		connector = svcYAML.Protocol
-
-		// Neither given
-	} else {
-		errors["connector"] = fmt.Errorf("missing 'connector' key on service '%s'", svcName)
+	connector, err := connectorID(svcName, svcYAML, connectorConfigBytes)
+	if err != nil {
+		errors["connector"] = err
 	}
 
 	// Accumulate errors from top-level keys on serviceYAML
 	err = errors.Filter()
 	if err != nil {
 		return nil, err
-	}
-
-	// When only the deprecated 'protocol' field
-	// is given and it equals 'http' the connector name
-	// must be extracted from the http config
-	if !hasConnector && hasProtocol && connector == "http" {
-		connector, err = connectorFromLegacyHTTPConfig(connectorConfigBytes)
-		if err != nil {
-			return nil, fmt.Errorf("error on http config for service '%s': %s", svcName, err)
-		}
 	}
 
 	return &Service{
@@ -164,4 +131,77 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 		Connector:       connector,
 		ConnectorConfig: connectorConfigBytes,
 	}, nil
+}
+
+// connectorID determines the connectorID or errors.  It handles identification
+// of the deprecated 'protocol' field, and issues appropriate warnings.
+func connectorID(
+	svcName string,
+	svcYAML *serviceYAML,
+	connectorConfigBytes []byte,
+) (string, error) {
+	var err error
+	hasConnector := svcYAML.Connector != ""
+	hasProtocol := svcYAML.Protocol != ""
+
+	// Protocol given
+	if hasProtocol {
+		log.Printf(
+			"WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
+				"deprecated and will be removed in a future release.",
+			svcName,
+		)
+	}
+
+	// Both connector and protocol given
+	if hasConnector && hasProtocol {
+		log.Printf("WARN: 'connector' and 'protocol' keys found on "+
+			"service '%s'. 'connector' key takes precendence, 'protocol' is "+
+			"deprecated.", svcName)
+	}
+
+	var connectorID string
+	switch {
+	case hasConnector: // Connector given, always takes precedence
+		connectorID = svcYAML.Connector
+	case hasProtocol:  // Only use protocol when connector not given
+		connectorID = svcYAML.Protocol
+	default:
+		return "", fmt.Errorf("missing 'connector' key on service '%s'", svcName)
+	}
+
+	// When only the deprecated 'protocol' field is given and it equals 'http'
+	// the connector name must be extracted from the http config
+	if !hasConnector && hasProtocol && connectorID == "http" {
+		connectorID, err = connectorFromLegacyHTTPConfig(connectorConfigBytes)
+		if err != nil {
+			return "", fmt.Errorf(
+				"error on http config for service '%s': %s",
+				svcName,
+				err,
+			)
+		}
+	}
+
+	return connectorID, nil
+}
+
+// NetworkAddress is a utility type for handling string manipulation /
+// destructuring for listenOn addresses that include a network. Currently only
+// used outside this package.
+// TODO: Update all instances of listenOn to use this type
+type NetworkAddress string
+
+// Network returns the "network" part of a network address, eg, "tcp" or "unix".
+func (a NetworkAddress) Network() string {
+	return a.split()[0]
+}
+
+// Address returns the "address" part of a network address, eg, "127.0.0.1".
+func (a NetworkAddress) Address() string {
+	return a.split()[0]
+}
+
+func (a NetworkAddress) split() []string {
+	return strings.Split(string(a), "://")
 }

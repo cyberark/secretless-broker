@@ -1,7 +1,8 @@
-package plugin
+package sharedobj
 
 import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
@@ -10,11 +11,15 @@ import (
 // must have so that we are capable of loading it.
 var CompatiblePluginAPIVersion = "0.1.0"
 
-// AvailablePlugins is an interface that provides a list of all the available
-// plugins for each type that the broker supports.
-type AvailablePlugins interface {
-	HTTPPlugins() map[string]http.Plugin
-	TCPPlugins() map[string]tcp.Plugin
+// IsHTTPPlugin uses AvailablePlugins to determine if a pluginId is an HTTP
+// plugin.
+func IsHTTPPlugin(availPlugins plugin.AvailablePlugins, pluginID string) bool {
+	for id := range availPlugins.HTTPPlugins() {
+		if pluginID == id {
+			return true
+		}
+	}
+	return false
 }
 
 // Plugins represent a holding object for a bundle of plugins of different types.
@@ -39,7 +44,7 @@ func AllAvailablePlugins(
 	pluginDir string,
 	checksumsFile string,
 	logger log.Logger,
-) (AvailablePlugins, error) {
+) (plugin.AvailablePlugins, error) {
 
 	return AllAvailablePluginsWithOptions(
 		pluginDir,
@@ -50,8 +55,8 @@ func AllAvailablePlugins(
 	)
 }
 
-// AllAvailablePluginsWithOptions returns the full list of internal and external plugins
-// available to the broker using explicitly-defined lookup functions.
+// AllAvailablePluginsWithOptions returns the full list of internal and external
+// plugins available to the broker using explicitly-defined lookup functions.
 // TODO: Test this
 func AllAvailablePluginsWithOptions(
 	pluginDir string,
@@ -59,7 +64,7 @@ func AllAvailablePluginsWithOptions(
 	internalLookupFunc InternalPluginLookupFunc,
 	externalLookupfunc ExternalPluginLookupFunc,
 	logger log.Logger,
-) (AvailablePlugins, error) {
+) (plugin.AvailablePlugins, error) {
 
 	internalPlugins, err := InternalPlugins(internalLookupFunc)
 	if err != nil {

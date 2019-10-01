@@ -3,7 +3,6 @@ package tcp
 import (
 	"net"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
 
@@ -21,5 +20,5 @@ type Plugin interface {
 // network connection.
 type Connector func(
 	clientConn net.Conn,
-	secrets plugin.SecretsByID,
+	secrets connector.SecretsByID,
 ) (backendConn net.Conn, err error)

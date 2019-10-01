@@ -1,4 +1,4 @@
-package plugin
+package sharedobj
 
 import (
 	"errors"
@@ -6,11 +6,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
-func getMockHTTPPlugins() AvailablePlugins {
+func getMockHTTPPlugins() plugin.AvailablePlugins {
 	var mockInternalHTTPPlugins = map[string]http.Plugin{
 		"one": mockHTTPPlugin{},
 		"two": mockHTTPPlugin{},
@@ -30,7 +31,7 @@ func getMockHTTPPlugins() AvailablePlugins {
 
 func TestInternalPlugins(t *testing.T) {
 	t.Run("InternalPluginFunc plugins are passed through", func(t *testing.T) {
-		plugins, _ := InternalPlugins(func() (AvailablePlugins, error) {
+		plugins, _ := InternalPlugins(func() (plugin.AvailablePlugins, error) {
 			return getMockHTTPPlugins(), nil
 		})
 
@@ -44,7 +45,7 @@ func TestInternalPlugins(t *testing.T) {
 	})
 
 	t.Run("InternalPluginFunc does not pass nil plugins", func(t *testing.T) {
-		plugins, _ := InternalPlugins(func() (AvailablePlugins, error) {
+		plugins, _ := InternalPlugins(func() (plugin.AvailablePlugins, error) {
 			return nil, nil
 		})
 
@@ -59,7 +60,7 @@ func TestInternalPlugins(t *testing.T) {
 
 	t.Run("InternalPluginFunc errors are passed through", func(t *testing.T) {
 		mockError := errors.New("Some error")
-		plugins, err := InternalPlugins(func() (AvailablePlugins, error) {
+		plugins, err := InternalPlugins(func() (plugin.AvailablePlugins, error) {
 			return nil, mockError
 		})
 

@@ -1,8 +1,9 @@
-package plugin
+package sharedobj
 
 import (
 	"testing"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
@@ -25,7 +26,7 @@ var mockTCPPlugins = map[string]tcp.Plugin{
 	"three": mockTCPPlugin{},
 }
 
-func getMockPlugins() AvailablePlugins {
+func getMockPlugins() plugin.AvailablePlugins {
 	return &Plugins{
 		HTTPPluginsByID: mockHTTPPlugins,
 		TCPPluginsByID:  mockTCPPlugins,

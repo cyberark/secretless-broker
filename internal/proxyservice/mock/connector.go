@@ -3,9 +3,8 @@ package mock
 import (
 	"net"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/stretchr/testify/mock"
-
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 )
 
 // ConnectorMock has a `Connect` method that matches the signature of the
@@ -15,7 +14,7 @@ type ConnectorMock struct {
 }
 
 // Connect mocks the Connector func type
-func (c *ConnectorMock) Connect(clientConn net.Conn, secrets plugin.SecretsByID) (backendConn net.Conn, err error) {
+func (c *ConnectorMock) Connect(clientConn net.Conn, secrets connector.SecretsByID) (backendConn net.Conn, err error) {
 	args := c.Called()
 
 	// check for nil because the mock package is unable type assert nil

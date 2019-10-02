@@ -37,7 +37,7 @@ func ByteBoundString(b []byte) string {
 	return *(*string)(unsafe.Pointer(bytesHeader))
 }
 
-// NewCredential create a Credential from the given C struct.
+// NewCredential creates a Credential from the given C struct.
 func NewCredential(ref C.struct_CredentialSpec) *configv2.Credential {
 	return &configv2.Credential{
 		Name:     C.GoString(ref.Name),
@@ -46,9 +46,9 @@ func NewCredential(ref C.struct_CredentialSpec) *configv2.Credential {
 	}
 }
 
-// GetCredentials returns credential values.  Specifically, a map whose keys are the
+// GetCredentialValues returns credential values.  Specifically, a map whose keys are the
 // credential IDs requested, and whose values are the values of those credentials.
-func GetCredentials(credentials []*configv2.Credential) (map[string][]byte, error)  {
+func GetCredentialValues(credentialSpecs []*configv2.Credential) (map[string][]byte, error)  {
 	// Load all internal Providers
 	providerFactories := make(map[string]func(pluginv1.ProviderOptions) (pluginv1.Provider, error))
 	for providerID, providerFactory := range secretless.InternalProviders {
@@ -57,19 +57,19 @@ func GetCredentials(credentials []*configv2.Credential) (map[string][]byte, erro
 
 	resolver := plugin.NewResolver(providerFactories, nil, nil)
 
-	return resolver.Resolve(credentials)
+	return resolver.Resolve(credentialSpecs)
 }
 
-// GetCredential returns a C *char with the given credential's value
-// export GetCredential
-func GetCredential(cRef C.struct_CredentialSpec) *C.char {
-	return C.CString(GetCredentialByteString(cRef))
+// GetCredentialValue returns a C *char with the given credential's value
+// export GetCredentialValue
+func GetCredentialValue(cRef C.struct_CredentialSpec) *C.char {
+	return C.CString(GetCredentialValueByteString(cRef))
 }
 
-// GetCredentialByteString return the credential value for the given CredentialSpec ref.
-func GetCredentialByteString(cRef C.struct_CredentialSpec) string {
+// GetCredentialValueByteString return the credential value for the given CredentialSpec ref.
+func GetCredentialValueByteString(cRef C.struct_CredentialSpec) string {
 	ref := NewCredential(cRef)
-	credentials, err := GetCredentials([]*configv2.Credential{ref})
+	credentials, err := GetCredentialValues([]*configv2.Credential{ref})
 	if err != nil {
 		fmt.Println("Error fetching credential")
 		return ByteBoundString(nil)
@@ -80,7 +80,7 @@ func GetCredentialByteString(cRef C.struct_CredentialSpec) string {
 // NativePassword returns the given CredentialSpec value as C *char.
 // export NativePassword
 func NativePassword(cRef C.struct_CredentialSpec, salt *C.char) *C.char {
-	passwordBytes := []byte(GetCredentialByteString(cRef))
+	passwordBytes := []byte(GetCredentialValueByteString(cRef))
 	defer ZeroizeByteSlice(passwordBytes)
 	saltBytes := C.GoBytes(unsafe.Pointer(salt), C.int(8))
 	defer ZeroizeByteSlice(saltBytes)

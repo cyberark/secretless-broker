@@ -14,10 +14,10 @@ import (
 	"unsafe"
 
 	secretless "github.com/cyberark/secretless-broker/internal"
-	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
 	"github.com/cyberark/secretless-broker/internal/plugin"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	pluginv1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql/protocol"
+	configv2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // ZeroizeByteSlice sets every byte to zero.
@@ -37,20 +37,20 @@ func ByteBoundString(b []byte) string {
 	return *(*string)(unsafe.Pointer(bytesHeader))
 }
 
-// NewStoredSecret create a StoredSecret from the given C struct.
-func NewStoredSecret(ref C.struct_StoredSecret) config_v1.StoredSecret {
-	return config_v1.StoredSecret{
+// NewCredential create a Credential from the given C struct.
+func NewCredential(ref C.struct_StoredSecret) *configv2.Credential {
+	return &configv2.Credential{
 		Name:     C.GoString(ref.Name),
-		ID:       C.GoString(ref.ID),
-		Provider: C.GoString(ref.Provider),
+		Get:       C.GoString(ref.ID),
+		From: C.GoString(ref.Provider),
 	}
 }
 
 // GetSecrets returns secret values.  Specifically, a map whose keys are the
 // secret names requested, and whose values are the values of those secrets.
-func GetSecrets(secrets []config_v1.StoredSecret) (map[string][]byte, error)  {
+func GetSecrets(secrets []*configv2.Credential) (map[string][]byte, error)  {
 	// Load all internal Providers
-	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error))
+	providerFactories := make(map[string]func(pluginv1.ProviderOptions) (pluginv1.Provider, error))
 	for providerID, providerFactory := range secretless.InternalProviders {
 		providerFactories[providerID] = providerFactory
 	}
@@ -68,8 +68,8 @@ func GetSecret(cRef C.struct_StoredSecret) (*C.char) {
 
 // GetSecretByteString return the secret value for the given StoredSecret ref.
 func GetSecretByteString(cRef C.struct_StoredSecret) (string) {
-	ref := NewStoredSecret(cRef)
-	secrets, err := GetSecrets([]config_v1.StoredSecret{ref})
+	ref := NewCredential(cRef)
+	secrets, err := GetSecrets([]*configv2.Credential{ref})
 	if err != nil {
 		fmt.Println("Error fetching secret")
 		return ByteBoundString(nil)

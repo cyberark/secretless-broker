@@ -3,7 +3,7 @@ package mysql
 import (
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql/protocol"
 )
 
 // Connection represents the entire process of sending bytes back and forth

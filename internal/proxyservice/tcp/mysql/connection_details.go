@@ -3,7 +3,7 @@ package mysql
 import "strconv"
 
 // ConnectionDetails stores the connection info to the real backend database.
-// These values are pulled from the handler credentials config
+// These values are pulled from the Connector credentials config
 type ConnectionDetails struct {
 	Host     string
 	Port     uint

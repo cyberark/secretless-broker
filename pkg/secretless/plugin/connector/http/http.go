@@ -15,6 +15,9 @@ type Plugin interface {
 }
 
 // Connector is the function that will be invoked when a matching
-// request comes in. It uses both the request object and the secrets
+// request comes in. It uses both the request object and the credentials
 // map to authenticate the client.
-type Connector func(request *http.Request, secrets connector.SecretsByID) error
+type Connector func(
+	request *http.Request,
+	credentialValuesByID connector.CredentialValuesByID,
+) error

@@ -8,12 +8,12 @@ char* to_c_string(std::string str) {
 }
 
 int main() {
-  StoredSecret password = {
-    .ID=to_c_string("db_password"),
-    .Provider=to_c_string("env"),
+  CredentialSpec passwordSpec = {
     .Name=to_c_string("db-password")
+    .Get=to_c_string("db_password"),
+    .From=to_c_string("env"),
   };
 
-  std::string passwordValue = GetSecret(password);
-  std::cout << "Secret:" << passwordValue;
+  std::string passwordValue = GetCredential(passwordSpec);
+  std::cout << "Credential:" << passwordValue;
 }

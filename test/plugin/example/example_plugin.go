@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"net"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
@@ -11,31 +12,44 @@ import (
 type examplePlugin struct{}
 
 // connectorFunc is the function that implements the tcp.Connector func signature in this
-// example plugin. It has access to the client connection and the secrets (as a map),
+// example plugin. It has access to the client connection and the credentials (as a map),
 // and is expected to return the target service connection.
 //
 // This example connector works as follows:
 // 1. Waits for the initial message from the client
-// 2. Connect to a target service whose address is the value of the secret identified by
-// the key "address"
-// 3. Inject credentials from a secret identified by the key "auth"
+// 2. Connect to a target service whose address is the value of the credential identified
+// by the key "address"
+// 3. Inject credentials from a credential identified by the key "auth"
 // 4. Write the initial message from the client with some modification
-func connectorFunc(clientConn net.Conn, secrets connector.SecretsByID) (net.Conn, error) {
+func connectorFunc(clientConn net.Conn, credentialValuesByID connector.CredentialValuesByID) (net.Conn, error) {
 	clientInitMsg, _, err := bufio.NewReader(clientConn).ReadLine()
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := net.Dial("tcp", string(secrets["address"]))
+	conn, err := net.Dial("tcp", string(credentialValuesByID["address"]))
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = conn.Write([]byte("credential injection: " + string(secrets["auth"]) + "\n"))
+	credInjectionPacket := []byte(
+		fmt.Sprintf(
+			"credential injection: %s\n",
+			string(credentialValuesByID["auth"]),
+		),
+	)
+	_, err = conn.Write(credInjectionPacket)
 	if err != nil {
 		return nil, err
 	}
-	_, err = conn.Write([]byte("initial message from client: " + string(clientInitMsg) + "\n"))
+
+	initMsgPacket := []byte(
+		fmt.Sprintf(
+			"initial message from client: %s\n",
+			string(clientInitMsg),
+		),
+	)
+	_, err = conn.Write(initMsgPacket)
 	if err != nil {
 		return nil, err
 	}

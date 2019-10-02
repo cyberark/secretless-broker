@@ -30,7 +30,7 @@ func PluginInfo() map[string]string {
 		"pluginAPIVersion": "0.1.0",
 		"type":             "connector.tcp",
 		"id":               "mysql",
-		"description":      "processes connection requests to a MySQL database",
+		"description":      "returns an authenticated connection to a MySQL database",
 	}
 }
 

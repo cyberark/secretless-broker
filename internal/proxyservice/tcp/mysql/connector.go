@@ -40,8 +40,8 @@ func (connector *Connector) sendErrorToClient(err error) {
 // Connect implements the tcp.Connector interface
 //
 // It is the main method of the Connector. It:
-//   1. Constructs connection details from the provided secrets map.
-//   1. Dials the backend using secrets.
+//   1. Constructs connection details from the provided credentials map.
+//   1. Dials the backend using credentials.
 //   3. Runs through the connection phase steps to authenticate.
 //   4. Pipes all future bytes unaltered between client and server.
 //
@@ -49,7 +49,7 @@ func (connector *Connector) sendErrorToClient(err error) {
 //
 func (connector *Connector) Connect(
 	clientConn net.Conn,
-	secrets plugin.SecretsByID,
+	credentialValuesByID plugin.CredentialValuesByID,
 ) (net.Conn, error) {
 
 	// Upgrade to a decorated connection that handles protocol details for us
@@ -57,9 +57,9 @@ func (connector *Connector) Connect(
 	//
 	connector.mySQLClientConn = NewClientConnection(clientConn)
 
-	// 1. Construct connection details from the provided secrets map.
+	// 1. Construct connection details from the provided credentialValuesByID map.
 	//
-	connDetails, err := NewConnectionDetails(secrets)
+	connDetails, err := NewConnectionDetails(credentialValuesByID)
 	if err != nil {
 		connector.sendErrorToClient(err)
 		return nil, err

@@ -16,9 +16,9 @@ type Plugin interface {
 
 // Connector is the function that will be invoked when a matching
 // TCP request comes in. It uses both the initiating connection and the
-// secrets map to authenticate the client, returning the backend
+// credentials map to authenticate the client, returning the backend
 // network connection.
 type Connector func(
 	clientConn net.Conn,
-	secrets connector.SecretsByID,
+	credentialValuesByID connector.CredentialValuesByID,
 ) (backendConn net.Conn, err error)

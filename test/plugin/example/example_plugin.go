@@ -89,8 +89,8 @@ func (pw pluginWrapper) NewConnector(cr connector.Resources) tcp.Connector {
 	return pw(cr)
 }
 
-// PluginInfo is required as part of the Secretless pluginWrapper spec. It provides
-// important metadata about the pluginWrapper.
+// PluginInfo is required as part of the Secretless plugin spec. It provides
+// important metadata about the plugin.
 func PluginInfo() map[string]string {
 	return map[string]string{
 		"pluginAPIVersion": "0.1.0",
@@ -100,8 +100,8 @@ func PluginInfo() map[string]string {
 	}
 }
 
-// GetTCPPlugin is required as part of the Secretless pluginWrapper spec for TCP connector
-// plugins. It returns the TCP pluginWrapper.
+// GetTCPPlugin is required as part of the Secretless plugin spec for TCP connector
+// plugins. It returns the TCP plugin.
 func GetTCPPlugin() tcp.Plugin {
 	return pluginWrapper(NewConnector)
 }

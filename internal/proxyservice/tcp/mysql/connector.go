@@ -77,7 +77,11 @@ func (connector *Connector) Connect(
 
 	// 3. Runs through the connection phase steps to authenticate.
 	//
-	connPhase := NewAuthenticationHandshake(connector.mySQLClientConn, connector.mySQLBackendConn, connDetails)
+	connPhase := NewAuthenticationHandshake(
+		connector.mySQLClientConn,
+		connector.mySQLBackendConn,
+		connDetails,
+		)
 
 	if err = connPhase.Run(); err != nil {
 		connector.sendErrorToClient(err)

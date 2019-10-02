@@ -15,7 +15,10 @@ type ConnectorMock struct {
 }
 
 // Connect mocks the Connector func type
-func (c *ConnectorMock) Connect(clientConn net.Conn, secrets connector.CredentialValuesByID) (backendConn net.Conn, err error) {
+func (c *ConnectorMock) Connect(
+	clientConn net.Conn,
+	secrets connector.CredentialValuesByID,
+) (backendConn net.Conn, err error) {
 	args := c.Called()
 
 	// check for nil because the mock package is unable type assert nil

@@ -123,9 +123,17 @@ func (s *proxyServices) createHTTPService(
 		curConnector := curPlugin.NewConnector(connResources)
 		credsRetriever := s.credsRetriever(subCfg.Credentials)
 
+		// Get the http traffic patterns to match from the connector config.
+		httpCfg, err := v2.NewHTTPConfig(subCfg.ConnectorConfig)
+		if err != nil {
+			return nil, err
+		}
+
 		subservices = append(subservices, httpproxy.Subservice{
-			Connector:           curConnector,
-			RetrieveCredentials: credsRetriever,
+			ConnectorID:              subCfg.Connector, // TODO: Rename connectorID
+			Authenticate:             curConnector,
+			RetrieveCredentials:      credsRetriever,
+			AuthenticateURLsMatching: httpCfg.AuthenticateURLsMatching,
 		})
 	}
 

@@ -5,7 +5,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
-// NewConnector is required method on the tcp.Plugin interface. It returns a
+// NewConnector is a required method on the tcp.Plugin interface. It returns a
 // tcp.Connector.
 //
 // The single argument passed in is of type connector.Resources. It contains

@@ -72,6 +72,7 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 		tcpSvc, err := s.createTCPService(cfg, tcpPlugins[cfg.Connector])
 		if err != nil {
 			// TODO: Add Fatalf to our logger and use that
+			s.logger.Error(err)
 			s.logger.Panicf("unable to create TCP service '%s': %s", cfg.Name, err)
 		}
 		servicesToStart = append(servicesToStart, tcpSvc)

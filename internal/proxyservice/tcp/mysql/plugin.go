@@ -16,13 +16,6 @@ func NewConnector(conRes connector.Resources) tcp.Connector {
 	}).Connect
 }
 
-// pluginWrapper is a wrapper type that makes it possible for the NewConnector func
-// to stand alone as a tcp.Plugin
-type pluginWrapper func (connector.Resources) tcp.Connector
-func (pw pluginWrapper) NewConnector(cr connector.Resources) tcp.Connector {
-	return pw(cr)
-}
-
 // PluginInfo is required as part of the Secretless plugin spec. It provides
 // important metadata about the plugin.
 func PluginInfo() map[string]string {
@@ -37,5 +30,5 @@ func PluginInfo() map[string]string {
 // GetTCPPlugin is required as part of the Secretless plugin spec for TCP connector
 // plugins. It returns the TCP plugin.
 func GetTCPPlugin() tcp.Plugin {
-	return pluginWrapper(NewConnector)
+	return tcp.ConnectorConstructor(NewConnector)
 }

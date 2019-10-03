@@ -22,3 +22,13 @@ type Connector func(
 	clientConn net.Conn,
 	credentialValuesByID connector.CredentialValuesByID,
 ) (backendConn net.Conn, err error)
+
+// ConnectorConstructor, through type-conversion e.g. ConnectorConstructor(NewConnector),
+// allows a free-standing NewConnector func to conform to the tcp.Plugin interface without
+// the need for additional boilerplate. It does this by giving any function of the type
+// ConnectorConstructor a constructor method called NewConnector that simply calls the function
+// itself
+type ConnectorConstructor func (connector.Resources) Connector
+func (cc ConnectorConstructor) NewConnector(cr connector.Resources) Connector {
+	return cc(cr)
+}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql/protocol"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
 
 // Connector creates an authenticated connection to a MySQL target service.
@@ -49,7 +49,7 @@ func (connector *Connector) sendErrorToClient(err error) {
 //
 func (connector *Connector) Connect(
 	clientConn net.Conn,
-	credentialValuesByID plugin.CredentialValuesByID,
+	credentialValuesByID connector.CredentialValuesByID,
 ) (net.Conn, error) {
 
 	// Upgrade to a decorated connection that handles protocol details for us

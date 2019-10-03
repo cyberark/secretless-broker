@@ -77,9 +77,17 @@ func (c *Connector) Connect(
 // The single argument passed in is of type connector.Resources. It contains
 // connector-specific config and a logger.
 func NewConnector(conRes connector.Resources) tcp.Connector {
-	return (&Connector{
-		logger:   conRes.Logger(),
-	}).Connect
+	return func(
+		clientConn net.Conn,
+		credentialValuesByID connector.CredentialValuesByID,
+	) (backendConn net.Conn, err error) {
+		// create a connector on a per connection basis
+		connConnector := &Connector{
+			logger:   conRes.Logger(),
+		}
+
+		return connConnector.Connect(clientConn, credentialValuesByID)
+	}
 }
 
 // PluginInfo is required as part of the Secretless plugin spec. It provides

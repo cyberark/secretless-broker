@@ -8,9 +8,9 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
 
-// Connector creates an authenticated connection to a MySQL target service.
-//
-type Connector struct {
+// SingleUseConnector is used to create an authenticated connection to a MySQL target
+// service using a client connection and connection details.
+type SingleUseConnector struct {
 	// The connections are decorated versions of net.Conn that allow us
 	// to do read/writes according to the MySQL protocol.  Protocol level
 	// details are thus encapsulated.  Within the MySQL code, we _only_
@@ -24,8 +24,7 @@ type Connector struct {
 
 // If the error is not already a MySQL protocol error, then wrap it in an
 // "Unknown" MySQL protocol error, because the client understands only those.
-//
-func (connector *Connector) sendErrorToClient(err error) {
+func (connector *SingleUseConnector) sendErrorToClient(err error) {
 	mysqlErrorContainer, isProtocolErr := err.(protocol.ErrorContainer)
 	if !isProtocolErr {
 		mysqlErrorContainer = protocol.NewGenericError(err)
@@ -37,28 +36,26 @@ func (connector *Connector) sendErrorToClient(err error) {
 	}
 }
 
-// Connect implements the tcp.Connector interface
+// Connect implements the tcp.SingleUseConnector interface
 //
-// It is the main method of the Connector. It:
+// It is the main method of the SingleUseConnector. It:
 //   1. Constructs connection details from the provided credentials map.
 //   1. Dials the backend using credentials.
 //   3. Runs through the connection phase steps to authenticate.
 //   4. Pipes all future bytes unaltered between client and server.
 //
 // Connect requires "host", "port", "username" and "password" credentials.
-//
-func (connector *Connector) Connect(
+func (connector *SingleUseConnector) Connect(
 	clientConn net.Conn,
 	credentialValuesByID connector.CredentialValuesByID,
 ) (net.Conn, error) {
 
 	// Upgrade to a decorated connection that handles protocol details for us
 	// We need to do this first because sendErrorToClient uses this to send error messages.
-	//
 	connector.mySQLClientConn = NewClientConnection(clientConn)
 
 	// 1. Construct connection details from the provided credentialValuesByID map.
-	//
+
 	connDetails, err := NewConnectionDetails(credentialValuesByID)
 	if err != nil {
 		connector.sendErrorToClient(err)
@@ -66,7 +63,7 @@ func (connector *Connector) Connect(
 	}
 
 	// 2. Dials the backend.
-	//
+
 	rawBackendConn, err := net.Dial("tcp", connDetails.Address())
 	if err != nil {
 		connector.sendErrorToClient(err)
@@ -76,7 +73,7 @@ func (connector *Connector) Connect(
 	connector.mySQLBackendConn = NewBackendConnection(rawBackendConn)
 
 	// 3. Runs through the connection phase steps to authenticate.
-	//
+
 	connPhase := NewAuthenticationHandshake(
 		connector.mySQLClientConn,
 		connector.mySQLBackendConn,

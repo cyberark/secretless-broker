@@ -40,7 +40,6 @@ type Error struct {
 // can, so that client error messages will be more meaningful.
 //
 // TODO: Replace instances of generic error with specific MySQL error codes.
-//
 func NewGenericError(goErr error) Error {
 	return Error{
 		Code:     CRUnknownError,

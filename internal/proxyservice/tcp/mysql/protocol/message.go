@@ -82,7 +82,6 @@ func (message *MessageBuffer) WriteString(value string) (int, error) {
 }
 
 // ResetLength will reset the message length for the message.
-//
 func (message *MessageBuffer) ResetLength(offset int) {
 	/* Get the contents of the buffer. */
 	b := message.buffer.Bytes()

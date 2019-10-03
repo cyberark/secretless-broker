@@ -7,9 +7,9 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
-// NewConnector is a required method on the tcp.Plugin interface. It returns a
-// tcp.Connector.
-//
+// NewConnector returns a tcp.Connector which returns an authenticate connection to a target service
+// for each incoming client connection.
+// It is a required method on the tcp.Plugin interface.
 // The single argument passed in is of type connector.Resources. It contains
 // connector-specific config and a logger.
 func NewConnector(conRes connector.Resources) tcp.Connector {
@@ -17,12 +17,13 @@ func NewConnector(conRes connector.Resources) tcp.Connector {
 		clientConn net.Conn,
 		credentialValuesByID connector.CredentialValuesByID,
 	) (backendConn net.Conn, err error) {
-		// create a connector on a per connection basis
-		connConnector := &Connector{
+		// singleUseConnector is responsible for generating the authenticated connection
+		// to the target service for each incoming client connection
+		singleUseConnector := &SingleUseConnector{
 			logger:   conRes.Logger(),
 		}
 
-		return connConnector.Connect(clientConn, credentialValuesByID)
+		return singleUseConnector.Connect(clientConn, credentialValuesByID)
 	}
 }
 

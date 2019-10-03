@@ -55,11 +55,6 @@ func checkedPlugins(
 ) ([]string, error) {
 
 	files, err := ioutil.ReadDir(pluginDir)
-	if os.IsNotExist(err) {
-		logger.Warnln("Plugin folder does not exist!")
-		return nil, nil
-	}
-
 	if err != nil {
 		return nil, err
 	}

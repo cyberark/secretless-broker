@@ -1,6 +1,7 @@
 package sharedobj
 
 import (
+	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
@@ -14,7 +15,9 @@ type InternalPluginLookupFunc func() (plugin.AvailablePlugins, error)
 func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
 	return &Plugins{
 		HTTPPluginsByID: map[string]http.Plugin{},
-		TCPPluginsByID:  map[string]tcp.Plugin{},
+		TCPPluginsByID:  map[string]tcp.Plugin{
+			"mysql": mysql.GetTCPPlugin(),
+		},
 	}, nil
 }
 

@@ -3,8 +3,8 @@ package mysql
 import (
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
 	"github.com/cyberark/secretless-broker/internal/handlers/ssl"
+	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql/protocol"
 )
 
 /*
@@ -77,7 +77,6 @@ type AuthenticationHandshake struct {
 
 // NewAuthenticationHandshake creates a new AuthenticationHandshake command object,
 // intended to be Run().
-//
 func NewAuthenticationHandshake(
 	clientConn *Connection,
 	backendConn *Connection,
@@ -93,7 +92,6 @@ func NewAuthenticationHandshake(
 // Run executes all the logic needed to complete authentication between a
 // MySQL server and client.  When it completes successfully,
 // AuthenticatedBackendConn will return the raw, authenticated network conn.
-//
 func (h *AuthenticationHandshake) Run() error {
 	h.readServerHandshake()
 	h.writeHandshakeToClient()
@@ -109,7 +107,6 @@ func (h *AuthenticationHandshake) Run() error {
 
 // AuthenticatedBackendConn returns an already authenticated connection
 // to the MySQL server.  Intended to be called after Run() has completed.
-//
 func (h *AuthenticationHandshake) AuthenticatedBackendConn() net.Conn {
 	return h.backendConn.RawConnection()
 }
@@ -134,7 +131,6 @@ func (h *AuthenticationHandshake) writeHandshakeToClient() {
 	// Remove Client SSL Capability from Server Handshake Packet
 	// to force client to connect to Secretless without SSL
 	// TODO: update this after kumbi's work
-	//
 	packetWithNoSSL, err := protocol.RemoveSSLFromHandshakeV10(h.rawServerHandshake)
 	if err != nil {
 		h.err = err
@@ -235,10 +231,8 @@ func (h *AuthenticationHandshake) handleClientSSLRequest() {
 	//  +4 in (4+4+1+23)+4 accounts for the header section before the
 	//  payload, ie, the payload_length and the sequence_id, as described
 	//  in the comment above this one.
-	//
 
 	// TODO: Note currently just repeating this logic. Will change after kumbi integration
-	//
 	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(h.clientHandshakeResponse)
 	if err != nil {
 		h.err = err
@@ -350,7 +344,6 @@ func (h *AuthenticationHandshake) serverSupportsSSL() bool {
 // NOTE: These lower level packet reading helper methods don't need the
 //       h.err guards, becuase they'll always be called _by_ a higher
 //       level method that has one.
-//
 
 func (h *AuthenticationHandshake) readClientPacket() Packet {
 	return h.readPacket(h.clientConn)
@@ -369,7 +362,6 @@ func (h *AuthenticationHandshake) writeBackendPacket(pkt Packet) {
 }
 
 // Just a helper method to DRY up the client/backend reads above
-//
 func (h *AuthenticationHandshake) readPacket(conn *Connection) Packet {
 	pkt, err := conn.read()
 

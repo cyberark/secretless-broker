@@ -1,10 +1,10 @@
 package main
 
 /*
-struct StoredSecret{
+struct CredentialSpec{
     char *Name;
-    char *ID;
-    char *Provider;
+    char *Get;
+    char *From;
 };
 */
 import "C"
@@ -14,10 +14,10 @@ import (
 	"unsafe"
 
 	secretless "github.com/cyberark/secretless-broker/internal"
-	"github.com/cyberark/secretless-broker/internal/handlers/mysql/protocol"
 	"github.com/cyberark/secretless-broker/internal/plugin"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	pluginv1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql/protocol"
+	configv2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // ZeroizeByteSlice sets every byte to zero.
@@ -37,50 +37,50 @@ func ByteBoundString(b []byte) string {
 	return *(*string)(unsafe.Pointer(bytesHeader))
 }
 
-// NewStoredSecret create a StoredSecret from the given C struct.
-func NewStoredSecret(ref C.struct_StoredSecret) config_v1.StoredSecret {
-	return config_v1.StoredSecret{
+// NewCredential creates a Credential from the given C struct.
+func NewCredential(ref C.struct_CredentialSpec) *configv2.Credential {
+	return &configv2.Credential{
 		Name:     C.GoString(ref.Name),
-		ID:       C.GoString(ref.ID),
-		Provider: C.GoString(ref.Provider),
+		Get:       C.GoString(ref.ID),
+		From: C.GoString(ref.Provider),
 	}
 }
 
-// GetSecrets returns secret values.  Specifically, a map whose keys are the
-// secret names requested, and whose values are the values of those secrets.
-func GetSecrets(secrets []config_v1.StoredSecret) (map[string][]byte, error)  {
+// GetCredentialValues returns credential values.  Specifically, a map whose keys are the
+// credential IDs requested, and whose values are the values of those credentials.
+func GetCredentialValues(credentialSpecs []*configv2.Credential) (map[string][]byte, error)  {
 	// Load all internal Providers
-	providerFactories := make(map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error))
+	providerFactories := make(map[string]func(pluginv1.ProviderOptions) (pluginv1.Provider, error))
 	for providerID, providerFactory := range secretless.InternalProviders {
 		providerFactories[providerID] = providerFactory
 	}
 
 	resolver := plugin.NewResolver(providerFactories, nil, nil)
 
-	return resolver.Resolve(secrets)
+	return resolver.Resolve(credentialSpecs)
 }
 
-// GetSecret returns a C *char with the given secret's value
-// export GetSecret
-func GetSecret(cRef C.struct_StoredSecret) (*C.char) {
-	return C.CString(GetSecretByteString(cRef))
+// GetCredentialValue returns a C *char with the given credential's value
+// export GetCredentialValue
+func GetCredentialValue(cRef C.struct_CredentialSpec) *C.char {
+	return C.CString(GetCredentialValueByteString(cRef))
 }
 
-// GetSecretByteString return the secret value for the given StoredSecret ref.
-func GetSecretByteString(cRef C.struct_StoredSecret) (string) {
-	ref := NewStoredSecret(cRef)
-	secrets, err := GetSecrets([]config_v1.StoredSecret{ref})
+// GetCredentialValueByteString return the credential value for the given CredentialSpec ref.
+func GetCredentialValueByteString(cRef C.struct_CredentialSpec) string {
+	ref := NewCredential(cRef)
+	credentials, err := GetCredentialValues([]*configv2.Credential{ref})
 	if err != nil {
-		fmt.Println("Error fetching secret")
+		fmt.Println("Error fetching credential")
 		return ByteBoundString(nil)
 	}
-	return ByteBoundString(secrets[ref.Name])
+	return ByteBoundString(credentials[ref.Name])
 }
 
-// NativePassword returns the given StoredSecret value as C *char.
+// NativePassword returns the given CredentialSpec value as C *char.
 // export NativePassword
-func NativePassword(cRef C.struct_StoredSecret, salt *C.char) (*C.char) {
-	passwordBytes := []byte(GetSecretByteString(cRef))
+func NativePassword(cRef C.struct_CredentialSpec, salt *C.char) *C.char {
+	passwordBytes := []byte(GetCredentialValueByteString(cRef))
 	defer ZeroizeByteSlice(passwordBytes)
 	saltBytes := C.GoBytes(unsafe.Pointer(salt), C.int(8))
 	defer ZeroizeByteSlice(saltBytes)

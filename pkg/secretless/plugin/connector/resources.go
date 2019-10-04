@@ -41,6 +41,6 @@ func NewResources(
 	}
 }
 
-// SecretsByID is a type mapping variable IDs to their values
-type SecretsByID map[string][]byte
+// CredentialValuesByID is a type mapping credential IDs to their values
+type CredentialValuesByID map[string][]byte
 

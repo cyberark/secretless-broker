@@ -341,7 +341,6 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 // communicate with Secretless without using SSL.  That half of the connection
 // is insecure by design.  Secretless then (usually) adds SSL for the other
 // half of the communication -- between Secretless and the MySQL server.
-//
 func RemoveSSLFromHandshakeV10(packet []byte) ([]byte, error) {
 	r := bytes.NewReader(packet)
 	initialLen := r.Len()
@@ -439,7 +438,6 @@ func writeUint16(data []byte, pos int, value uint16) {
 //  | int<1>      | sequence_id    | Sequence ID                                 |
 //  | string<var> | payload        | [len=payload_length] payload of the packet  |
 //  +-------------+----------------+---------------------------------------------+
-//
 type HandshakeResponse41 struct {
 	Header          []byte
 	CapabilityFlags uint32

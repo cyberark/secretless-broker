@@ -10,7 +10,6 @@ import (
 
 // HandlerFactories contains the list of built-in handler factories
 var HandlerFactories = map[string]func(plugin_v1.HandlerOptions) plugin_v1.Handler{
-	"http/aws":        http.AWSHandlerFactory,
 	"http/basic_auth": http.BasicAuthHandlerFactory,
 	"http/conjur":     http.ConjurHandlerFactory,
 	"pg":              pg.HandlerFactory,

@@ -7,8 +7,8 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
-// NewConnector returns a tcp.Connector which returns an authenticate connection to a target service
-// for each incoming client connection.
+// NewConnector returns a tcp.Connector which returns an authenticated connection
+// to a target service for each incoming client connection.
 // It is a required method on the tcp.Plugin interface.
 // The single argument passed in is of type connector.Resources. It contains
 // connector-specific config and a logger.

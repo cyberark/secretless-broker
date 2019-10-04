@@ -199,7 +199,7 @@ func (a NetworkAddress) Network() string {
 
 // Address returns the "address" part of a network address, eg, "127.0.0.1".
 func (a NetworkAddress) Address() string {
-	return a.split()[0]
+	return a.split()[1]
 }
 
 func (a NetworkAddress) split() []string {

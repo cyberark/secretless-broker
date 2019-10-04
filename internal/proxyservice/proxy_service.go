@@ -66,6 +66,10 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	httpPlugins := s.availPlugins.HTTPPlugins()
 	tcpPlugins := s.availPlugins.TCPPlugins()
 
+// TODO: bug
+// 1. We don't preemptively check if all plugins exist. This results in the implicit assumptios that
+// the plugin we can't find is a TCP one. Because of the way we categorise services
+
 	// TCP Plugins
 	for _, cfg := range configsByType.TCP {
 		// Validation will have already happened

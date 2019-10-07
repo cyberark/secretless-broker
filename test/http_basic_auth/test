@@ -60,7 +60,7 @@ echo "Waiting for Secretless to start"
 docker-compose run --rm --no-deps test sh -ec '
 counter=0
 while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/null 2>&1; do
-    if expr $counter = 5; then
+    if expr $counter = 5 > /dev/null; then
       echo ""
       echo "Timed out waiting for Secretless"
       exit 1

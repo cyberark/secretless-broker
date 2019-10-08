@@ -121,7 +121,7 @@ func (proxy *proxyService) selectSubservice(r *gohttp.Request) *Subservice {
 	// No match: Warn!
 	if len(matchingSubs) == 0 {
 		msg := "No subservices matched request '%s'"
-		proxy.logger.Warnf(msg, r.URL.String(), matchingSubs)
+		proxy.logger.Warnf(msg, r.URL.String())
 		return nil
 	}
 

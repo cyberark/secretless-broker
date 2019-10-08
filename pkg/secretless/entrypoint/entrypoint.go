@@ -10,14 +10,15 @@ import (
 	"github.com/cyberark/secretless-broker/internal/profile"
 	"github.com/cyberark/secretless-broker/internal/proxyservice"
 	"github.com/cyberark/secretless-broker/internal/signal"
+	"github.com/cyberark/secretless-broker/internal/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj"
 )
 
-// SecretlessOptions holds the command line flag information that Service was started
-// with.
+// SecretlessOptions holds the command line flag information that Service was
+// started with.
 type SecretlessOptions struct {
 	ConfigFile          string
 	ConfigManagerSpec   string
@@ -35,6 +36,7 @@ func StartSecretless(params *SecretlessOptions) {
 	showVersion(params.ShowVersion)
 
 	// Construct the deps of Service
+
 	cfg := readConfig(params.ConfigFile)
 	logger := secretlessLog.New(params.DebugEnabled)
 	evtNotifier := eventnotifier.New(nil)
@@ -48,13 +50,17 @@ func StartSecretless(params *SecretlessOptions) {
 		log.Fatalln(err)
 	}
 
-	// Create a single exit signal publisher for so we can coordinate all the
-	// process interested in responding to those signals.
+	// Exit signal listener
+
+	// Coordinates processes interested in exit signals
 	exitListener := signal.NewExitListener()
+
+	// Optional Performance Profiling
 
 	handlePerformanceProfiling(params.ProfilingMode, exitListener)
 
 	// Start Services
+
 	allServices := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
 	exitListener.AddHandler(func() {
 		fmt.Println("wait for all services signal")
@@ -65,10 +71,17 @@ func StartSecretless(params *SecretlessOptions) {
 		}
 	})
 
+	// Health check: Initialized
+	util.SetAppInitializedFlag()
+	util.SetAppIsLive(false)
+
 	err = allServices.Start()
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	// Health check: Live
+	util.SetAppIsLive(true)
 
 	exitListener.Wait()
 }

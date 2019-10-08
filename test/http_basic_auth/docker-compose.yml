@@ -19,6 +19,7 @@ services:
     environment:
       HTTP_HOST: nginx
       HTTP_PORT: 8080
+    entrypoint: "/usr/local/bin/secretless-broker -debug"
     volumes:
       - ./secretless.yml:/secretless.yml
       - ../..:/secretless
@@ -27,8 +28,6 @@ services:
 
   test:
     image: alpine:latest
-    environment:
-      http_proxy: http://secretless:8080
     command: wget -q -O- nginx:8080/
     depends_on:
       - secretless

@@ -22,7 +22,7 @@ const timeFormat = "20060102T150405Z"
 
 // reForCredentialComponent matches headers strings like:
 //
-//     AWS4-HMAC-SHA256 Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
+//     Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
 //
 // See https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
 var reForCredentialComponent = regexp.MustCompile(

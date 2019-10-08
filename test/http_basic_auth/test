@@ -26,10 +26,15 @@ assert_contains() {
       return
   fi
 
-  echo "expected string"
+  echo "FAIL:"
+  echo "The string:"
+  echo ""
   echo "${string}"
-  echo "to contain substring"
+  echo ""
+  echo "Did not contain expected substring:"
+  echo ""
   echo "${substring}"
+  echo ""
 
   exit 1
 }

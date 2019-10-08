@@ -20,9 +20,14 @@ import (
 // From https://github.com/aws/aws-sdk-go/blob/master/aws/signer/v4/v4.go#L77
 const timeFormat = "20060102T150405Z"
 
-// AWS4-HMAC-SHA256 Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
+// reForCredentialComponent matches headers strings like:
+//
+//     Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
+//
 // See https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
-var reForCredentialComponent = regexp.MustCompile(`^Credential=\w+\/\d+\/([\w-_]+)\/(\w+)\/aws4_request$`)
+var reForCredentialComponent = regexp.MustCompile(
+	`^Credential=\w+\/\d+\/([\w-_]+)\/(\w+)\/aws4_request$`,
+)
 
 // newAmzDate parses a date string using the AWS signer time format
 func newAmzDate(amzDateStr string) (time.Time, error) {

@@ -26,10 +26,15 @@ assert_contains() {
       return
   fi
 
-  echo "expected string"
+  echo "FAIL:"
+  echo "The string:"
+  echo ""
   echo "${string}"
-  echo "to contain substring"
+  echo ""
+  echo "Did not contain expected substring:"
+  echo ""
   echo "${substring}"
+  echo ""
 
   exit 1
 }
@@ -60,7 +65,7 @@ echo "Waiting for Secretless to start"
 docker-compose run --rm --no-deps test sh -ec '
 counter=0
 while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/null 2>&1; do
-    if expr $counter = 5; then
+    if expr $counter = 5 > /dev/null; then
       echo ""
       echo "Timed out waiting for Secretless"
       exit 1

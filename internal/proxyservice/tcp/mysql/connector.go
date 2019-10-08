@@ -36,11 +36,11 @@ func (connector *SingleUseConnector) sendErrorToClient(err error) {
 	}
 }
 
-// Connect implements the tcp.SingleUseConnector interface
+// Connect implements the tcp.Connector func signature
 //
 // It is the main method of the SingleUseConnector. It:
 //   1. Constructs connection details from the provided credentials map.
-//   1. Dials the backend using credentials.
+//   2. Dials the backend using credentials.
 //   3. Runs through the connection phase steps to authenticate.
 //   4. Pipes all future bytes unaltered between client and server.
 //

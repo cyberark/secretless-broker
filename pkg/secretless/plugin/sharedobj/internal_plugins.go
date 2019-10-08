@@ -4,6 +4,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/proxyservice/http/aws"
 	"github.com/cyberark/secretless-broker/internal/proxyservice/http/basicauth"
 	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql"
+	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/pg"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
@@ -21,6 +22,7 @@ func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
 			"basic_auth": basicauth.GetHTTPPlugin(),
 		},
 		TCPPluginsByID:  map[string]tcp.Plugin{
+			"pg": pg.GetTCPPlugin(),
 			"mysql": mysql.GetTCPPlugin(),
 		},
 	}, nil

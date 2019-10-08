@@ -20,10 +20,7 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 			{
 				Debug:    true,
 				Name:     "pg-bench",
-				// TODO(kumbi): switch back to protocol pg
-				// This was changed from pg to avoid failing mysql tests while the
-				// pg tpc.Connector has yet to be implemented
-				Protocol: "mysql",
+				Protocol: "pg",
 				Address:  "0.0.0.0:5432",
 			},
 		},

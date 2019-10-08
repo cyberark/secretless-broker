@@ -1,9 +1,6 @@
 package listeners
 
 import (
-	"github.com/cyberark/secretless-broker/internal/listeners/http"
-	"github.com/cyberark/secretless-broker/internal/listeners/mysql"
-	"github.com/cyberark/secretless-broker/internal/listeners/pg"
 	"github.com/cyberark/secretless-broker/internal/listeners/ssh"
 	"github.com/cyberark/secretless-broker/internal/listeners/sshagent"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
@@ -11,9 +8,6 @@ import (
 
 // ListenerFactories contains the list of built-in listener factories
 var ListenerFactories = map[string]func(plugin_v1.ListenerOptions) plugin_v1.Listener{
-	"http":      http.ListenerFactory,
-	"mysql":     mysql.ListenerFactory,
-	"pg":        pg.ListenerFactory,
 	"ssh":       ssh.ListenerFactory,
 	"ssh-agent": sshagent.ListenerFactory,
 }

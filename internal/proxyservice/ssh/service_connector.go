@@ -1,15 +1,17 @@
 package ssh
 
 import (
+	"fmt"
 	"io"
-	"log"
 	"reflect"
 	"strings"
 	"time"
 
+	validation "github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/ssh"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/pkg/secretless/log"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
 
 // ServerConfig is the configuration info for the target server
@@ -19,28 +21,15 @@ type ServerConfig struct {
 	ClientConfig ssh.ClientConfig
 }
 
-// Handler contains the configuration and channels
-type Handler struct {
-	plugin_v1.BaseHandler
-	Channels <-chan ssh.NewChannel
+// ServiceConnector contains the configuration and channels
+type ServiceConnector struct {
+	channels <-chan ssh.NewChannel
+	logger log.Logger
 }
 
-func (h *Handler) serverConfig() (config ServerConfig, err error) {
-	var values map[string][]byte
-
-	// TODO: Ensure that we don't print credentials here before uncommenting
-	// Issue: https://github.com/cyberark/secretless-broker/issues/593
-	//
-	// log.Printf("%s", h.GetConfig().Credentials)
-
-	if values, err = h.Resolver.Resolve(h.GetConfig().Credentials); err != nil {
-		return
-	}
-
-	if h.GetConfig().Debug {
-		keys := reflect.ValueOf(values).MapKeys()
-		log.Printf("SSH backend connection parameters: %s", keys)
-	}
+func (h *ServiceConnector) serverConfig(values map[string][]byte) (config ServerConfig, err error) {
+	keys := reflect.ValueOf(values).MapKeys()
+	h.logger.Debugf("SSH backend connection parameters: %s", keys)
 
 	config.Network = "tcp"
 	if address, ok := values["address"]; ok {
@@ -57,26 +46,24 @@ func (h *Handler) serverConfig() (config ServerConfig, err error) {
 
 	}
 
-	if h.HandlerConfig.Debug {
-		log.Printf("Trying to connect with user: %s", config.ClientConfig.User)
-	}
+	h.logger.Debugf("Trying to connect with user: %s", config.ClientConfig.User)
 
 	if hostKeyStr, ok := values["hostKey"]; ok {
 		var hostKey ssh.PublicKey
 		if hostKey, err = ssh.ParsePublicKey([]byte(hostKeyStr)); err != nil {
-			log.Printf("Unable to parse public key: %v", err)
+			h.logger.Debugf("Unable to parse public key: %v", err)
 			return
 		}
 		config.ClientConfig.HostKeyCallback = ssh.FixedHostKey(hostKey)
 	} else {
-		log.Printf("WARN: No SSH hostKey specified. Secretless will accept any backend host key!")
+		h.logger.Warnf("No SSH hostKey specified. Secretless will accept any backend host key!")
 		config.ClientConfig.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 	}
 
 	if privateKeyStr, ok := values["privateKey"]; ok {
 		var signer ssh.Signer
 		if signer, err = ssh.ParsePrivateKey([]byte(privateKeyStr)); err != nil {
-			log.Printf("Unable to parse private key: %v", err)
+			h.logger.Debugf("Unable to parse private key: %v", err)
 			return
 		}
 		config.ClientConfig.Auth = []ssh.AuthMethod{
@@ -88,67 +75,72 @@ func (h *Handler) serverConfig() (config ServerConfig, err error) {
 }
 
 // Run opens the connection to the target server and proxies requests
-func (h *Handler) Run() {
+func (h *ServiceConnector) Connect(
+	credentialValuesByID connector.CredentialValuesByID,
+) error {
 	var err error
 	var serverConfig ServerConfig
 	var server ssh.Conn
 
-	if serverConfig, err = h.serverConfig(); err != nil {
-		log.Fatalf("ERROR: Could not resolve server config: %s\n", err)
+	errors := validation.Errors{}
+	for _, credential := range [...]string{"address", "privateKey"} {
+		if _, hasCredential := credentialValuesByID[credential]; !hasCredential {
+			errors[credential] = fmt.Errorf("must have credential '%s'", credential)
+		}
 	}
 
-	// TODO: Ensure that we don't print credentials here before uncommenting
-	// Issue: https://github.com/cyberark/secretless-broker/issues/593
-	//
-	// if h.HandlerConfig.Debug {
-	// 	log.Printf("Using config\n%v", serverConfig.ClientConfig)
-	// }
+	if err := errors.Filter(); err != nil {
+		return err
+	}
+
+	if serverConfig, err = h.serverConfig(credentialValuesByID); err != nil {
+		return fmt.Errorf("ERROR: Could not resolve server config: %s\n", err)
+	}
 
 	if server, err = ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {
-		log.Printf("Failed to dial SSH backend '%s': %s", serverConfig.Address, err)
-		return
+		return fmt.Errorf("Failed to dial SSH backend '%s': %s", serverConfig.Address, err)
 	}
 
 	// Service the incoming Channel channel.
-	for newChannel := range h.Channels {
+	for newChannel := range h.channels {
 		serverChannel, serverRequests, err := server.OpenChannel(newChannel.ChannelType(), newChannel.ExtraData())
 		if err != nil {
 			sshError := err.(*ssh.OpenChannelError)
 			if err := newChannel.Reject(sshError.Reason, sshError.Message); err != nil {
-				log.Printf("Failed to send new channel rejection : %s", err)
+				h.logger.Errorf("Failed to send new channel rejection : %s", err)
 			}
-			return
+			return err
 		}
 
 		clientChannel, clientRequests, err := newChannel.Accept()
 		if err != nil {
-			log.Printf("Failed to accept client channel : %s", err)
+			h.logger.Errorf("Failed to accept client channel : %s", err)
 			serverChannel.Close()
-			return
+			return err
 		}
 
 		go func() {
 			for clientRequest := range clientRequests {
-				log.Printf("Client request : %s", clientRequest.Type)
+				h.logger.Debugf("Client request : %s", clientRequest.Type)
 				ok, err := serverChannel.SendRequest(clientRequest.Type, clientRequest.WantReply, clientRequest.Payload)
 				if err != nil {
-					log.Printf("WARN: Failed to send client request to server channel : %s", err)
+					h.logger.Warnf("Failed to send client request to server channel : %s", err)
 				}
 				if clientRequest.WantReply {
-					log.Printf("Server reply is %v", ok)
+					h.logger.Debugf("Server reply is %v", ok)
 				}
 			}
 		}()
 
 		go func() {
 			for serverRequest := range serverRequests {
-				log.Printf("Server request : %s", serverRequest.Type)
+				h.logger.Debugf("Server request : %s", serverRequest.Type)
 				ok, err := clientChannel.SendRequest(serverRequest.Type, serverRequest.WantReply, serverRequest.Payload)
 				if err != nil {
-					log.Printf("WARN: Failed to send server request to client channel : %s", err)
+					h.logger.Debugf("WARN: Failed to send server request to client channel : %s", err)
 				}
 				if serverRequest.WantReply {
-					log.Printf("Client reply is %v", ok)
+					h.logger.Debugf("Client reply is %v", ok)
 				}
 			}
 		}()
@@ -164,14 +156,14 @@ func (h *Handler) Run() {
 				data := make([]byte, 1024)
 				len, err := clientChannel.Read(data)
 				if err == io.EOF {
-					log.Printf("Client channel is closed")
+					h.logger.Debugf("Client channel is closed")
 					time.Sleep(softDelay)
 					serverChannel.Close()
 					return
 				}
 				_, err = serverChannel.Write(data[0:len])
 				if err != nil {
-					log.Printf("Error writing %d bytes to server channel : %s", len, err)
+					h.logger.Debugf("Error writing %d bytes to server channel : %s", len, err)
 				}
 			}
 		}()
@@ -181,28 +173,18 @@ func (h *Handler) Run() {
 				data := make([]byte, 1024)
 				len, err := serverChannel.Read(data)
 				if err == io.EOF {
-					log.Printf("Server channel is closed")
+					h.logger.Debugf("Server channel is closed")
 					time.Sleep(softDelay)
 					clientChannel.Close()
 					return
 				}
 				_, err = clientChannel.Write(data[0:len])
 				if err != nil {
-					log.Printf("Error writing %d bytes to client channel : %s", len, err)
+					h.logger.Debugf("Error writing %d bytes to client channel : %s", len, err)
 				}
 			}
 		}()
 	}
-}
 
-// HandlerFactory instantiates a handler given HandlerOptions
-func HandlerFactory(options plugin_v1.HandlerOptions) plugin_v1.Handler {
-	handler := &Handler{
-		BaseHandler: plugin_v1.NewBaseHandler(options),
-		Channels:    options.Channels,
-	}
-
-	handler.Run()
-
-	return handler
+	return nil
 }

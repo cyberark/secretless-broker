@@ -78,7 +78,21 @@ func NewConfigsByType(
 		rawConfigs = append(rawConfigs, *cfg)
 	}
 
-	httpConfigs, tcpConfigs := separatedHTTPAndTCPConfigs(rawConfigs, availPlugins)
+	var httpConfigs ,tcpConfigs, sshConfigs []Service
+
+	for _, cfg := range rawConfigs {
+		switch {
+		case sharedobj.IsHTTPPlugin(availPlugins, cfg.Connector):
+			httpConfigs = append(httpConfigs, cfg)
+			continue
+		case cfg.Connector == "ssh":
+			sshConfigs = append(sshConfigs, cfg)
+			continue
+		default:
+			tcpConfigs = append(tcpConfigs, cfg)
+		}
+	}
+
 	httpByListenOn := groupedByListenOn(httpConfigs)
 
 	// Now create proper HTTPServiceConfig objects from our map
@@ -92,8 +106,9 @@ func NewConfigsByType(
 	}
 
 	return ConfigsByType{
-		TCP:  tcpConfigs,
 		HTTP: httpServiceConfigs,
+		SSH: sshConfigs,
+		TCP:  tcpConfigs,
 	}
 }
 
@@ -115,8 +130,9 @@ func (cfg *HTTPServiceConfig) Name() string {
 // corresponds to the ProxyService objects we want to create.  One ProxyService
 // will be created for each entry in http, and one for each entry in tcp.
 type ConfigsByType struct {
-	TCP  []Service
 	HTTP []HTTPServiceConfig
+	SSH  []Service
+	TCP  []Service
 }
 
 // separatedHTTPAndTCPConfigs takes a slices of configs and returns two slices,

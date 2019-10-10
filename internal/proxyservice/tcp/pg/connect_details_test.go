@@ -14,7 +14,7 @@ func TestExpectedFields(t *testing.T) {
 		"password": []byte("mypassword"),
 	}
 
-	expectedBackendConfig := BackendConfig{
+	expectedConnectionDetails := ConnectionDetails{
 		Host:       "myhost",
 		Port:       "1234",
 		Username:   "myusername",
@@ -23,11 +23,11 @@ func TestExpectedFields(t *testing.T) {
 		SSLOptions: map[string]string{},
 	}
 
-	actualBackendConfig, err := NewBackendConfig(options)
+	actualConnectionDetails, err := NewConnectionDetails(options)
 	assert.Nil(t, err)
 
 	if err == nil {
-		assert.EqualValues(t, expectedBackendConfig, *actualBackendConfig)
+		assert.EqualValues(t, expectedConnectionDetails, *actualConnectionDetails)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestSSLOptions(t *testing.T) {
 		"sslcert":     []byte("mysslcert"),
 	}
 
-	expectedBackendConfig := BackendConfig{
+	expectedConnectionDetails := ConnectionDetails{
 		Host:     "myhost",
 		Port:     "1234",
 		Username: "myusername",
@@ -58,11 +58,11 @@ func TestSSLOptions(t *testing.T) {
 		},
 	}
 
-	actualBackendConfig, err := NewBackendConfig(options)
+	actualConnectionDetails, err := NewConnectionDetails(options)
 	assert.Nil(t, err)
 
 	if err == nil {
-		assert.EqualValues(t, expectedBackendConfig, *actualBackendConfig)
+		assert.EqualValues(t, expectedConnectionDetails, *actualConnectionDetails)
 	}
 }
 
@@ -73,7 +73,7 @@ func TestDefaultPort(t *testing.T) {
 		"password": []byte("mypassword"),
 	}
 
-	expectedBackendConfig := BackendConfig{
+	expectedConnectionDetails := ConnectionDetails{
 		Host:       "myhost",
 		Port:       DefaultPostgresPort,
 		Username:   "myusername",
@@ -82,11 +82,11 @@ func TestDefaultPort(t *testing.T) {
 		SSLOptions: map[string]string{},
 	}
 
-	actualBackendConfig, err := NewBackendConfig(options)
+	actualConnectionDetails, err := NewConnectionDetails(options)
 	assert.Nil(t, err)
 
 	if err == nil {
-		assert.EqualValues(t, expectedBackendConfig, *actualBackendConfig)
+		assert.EqualValues(t, expectedConnectionDetails, *actualConnectionDetails)
 	}
 }
 
@@ -105,11 +105,11 @@ func TestUnexpectedFieldsAreSavedAsOptions(t *testing.T) {
 		"bar": "data",
 	}
 
-	actualBackendConfig, err := NewBackendConfig(options)
+	actualConnectionDetails, err := NewConnectionDetails(options)
 	assert.Nil(t, err)
 
 	if err == nil {
-		assert.EqualValues(t, expectedOptions, (*actualBackendConfig).Options)
+		assert.EqualValues(t, expectedOptions, (*actualConnectionDetails).Options)
 	}
 }
 
@@ -118,12 +118,12 @@ func TestAddressCanBeUsedInsteadOfHostAndPort(t *testing.T) {
 		"address": []byte("myhost2:12345"),
 	}
 
-	actualBackendConfig, err := NewBackendConfig(options)
+	actualConnectionDetails, err := NewConnectionDetails(options)
 	assert.Nil(t, err)
 
 	if err == nil {
-		assert.EqualValues(t, "myhost2", (*actualBackendConfig).Host)
-		assert.EqualValues(t, "12345", (*actualBackendConfig).Port)
+		assert.EqualValues(t, "myhost2", (*actualConnectionDetails).Host)
+		assert.EqualValues(t, "12345", (*actualConnectionDetails).Port)
 	}
 }
 
@@ -132,12 +132,12 @@ func TestAddressWithoutPortCanBeUsedInsteadOfHostAndPort(t *testing.T) {
 		"address": []byte("myhost2"),
 	}
 
-	actualBackendConfig, err := NewBackendConfig(options)
+	actualConnectionDetails, err := NewConnectionDetails(options)
 	assert.Nil(t, err)
 
 	if err == nil {
-		assert.EqualValues(t, "myhost2", (*actualBackendConfig).Host)
-		assert.EqualValues(t, "5432", (*actualBackendConfig).Port)
+		assert.EqualValues(t, "myhost2", (*actualConnectionDetails).Host)
+		assert.EqualValues(t, "5432", (*actualConnectionDetails).Port)
 	}
 }
 
@@ -147,10 +147,10 @@ func TestAddress(t *testing.T) {
 		"port": []byte("12345"),
 	}
 
-	actualBackendConfig, err := NewBackendConfig(options)
+	actualConnectionDetails, err := NewConnectionDetails(options)
 	assert.Nil(t, err)
 
 	if err == nil {
-		assert.EqualValues(t, "myhost2:12345", (*actualBackendConfig).Address())
+		assert.EqualValues(t, "myhost2:12345", (*actualConnectionDetails).Address())
 	}
 }

@@ -1,7 +1,6 @@
 package pg
 
 import (
-	"log"
 	"net"
 )
 
@@ -16,8 +15,8 @@ var sslOptions = []string{
 	"sslcert",
 }
 
-// BackendConfig stores the connection info to the real backend database.
-type BackendConfig struct {
+// ConnectionDetails stores the connection info to the target database.
+type ConnectionDetails struct {
 	Host       string
 	Port       string
 	Username   string
@@ -28,33 +27,30 @@ type BackendConfig struct {
 
 // Address provides an aggregation of Host and Port fields into a format
 // acceptable by consumers of this class (`net.Dial`).
-func (backendConfig *BackendConfig) Address() string {
-	return net.JoinHostPort(backendConfig.Host, backendConfig.Port)
+func (cd *ConnectionDetails) Address() string {
+	return net.JoinHostPort(cd.Host, cd.Port)
 }
 
-// NewBackendConfig constructs a Backendconfig object based on the options passed
+// NewConnectionDetails constructs a ConnectionDetails object based on the options passed
 // in that are based on resolved configuration fields.
-func NewBackendConfig(options map[string][]byte) (*BackendConfig, error) {
-	backendConfig := BackendConfig{
+func NewConnectionDetails(options map[string][]byte) (*ConnectionDetails, error) {
+	connectionDetails := ConnectionDetails{
 		Options:    make(map[string]string),
 		SSLOptions: make(map[string]string),
 	}
 
-	if options["host"] != nil {
-		backendConfig.Host = string(options["host"])
+	if len(options["host"]) > 0 {
+		connectionDetails.Host = string(options["host"])
 	}
 
-	backendConfig.Port = DefaultPostgresPort
-	if options["port"] != nil {
-		backendConfig.Port = string(options["port"])
+	connectionDetails.Port = DefaultPostgresPort
+	if len(options["port"]) > 0 {
+		connectionDetails.Port = string(options["port"])
 	}
 
 	// Deprecated. To be removed at a later date and only provided for
 	// temporary backwards compatibility.
-	if options["address"] != nil {
-		log.Printf("WARN: 'address' has been deprecated for PG connector. " +
-			"Please use 'host' and 'port' instead.'")
-
+	if len(options["address"]) > 0 {
 		host, port, err := net.SplitHostPort(string(options["address"]))
 		if err != nil {
 			// Try one more time but this time assume it's just a hostname
@@ -65,23 +61,23 @@ func NewBackendConfig(options map[string][]byte) (*BackendConfig, error) {
 			port = DefaultPostgresPort
 		}
 
-		backendConfig.Host = host
-		backendConfig.Port = port
+		connectionDetails.Host = host
+		connectionDetails.Port = port
 	}
 
-	if options["username"] != nil {
-		backendConfig.Username = string(options["username"])
+	if len(options["username"]) > 0 {
+		connectionDetails.Username = string(options["username"])
 	}
 
-	if options["password"] != nil {
-		backendConfig.Password = string(options["password"])
+	if len(options["password"]) > 0 {
+		connectionDetails.Password = string(options["password"])
 	}
 
 	for _, sslOption := range sslOptions {
-		if options[sslOption] != nil {
+		if len(options[sslOption]) > 0 {
 			value := string(options[sslOption])
 			if value != "" {
-				backendConfig.SSLOptions[sslOption] = value
+				connectionDetails.SSLOptions[sslOption] = value
 			}
 		}
 		delete(options, sslOption)
@@ -94,8 +90,8 @@ func NewBackendConfig(options map[string][]byte) (*BackendConfig, error) {
 	delete(options, "password")
 
 	for k, v := range options {
-		backendConfig.Options[k] = string(v)
+		connectionDetails.Options[k] = string(v)
 	}
 
-	return &backendConfig, nil
+	return &connectionDetails, nil
 }

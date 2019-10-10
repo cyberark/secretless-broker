@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// AbstractConfiguration represents a simultanous configuration of Secretless
+// AbstractConfiguration represents a simultaneous configuration of Secretless
 // and a Database Server.  This defines a purely logical configuration, as
 // opposed to a "live" one which is actually running and listening on a port or
 // socket

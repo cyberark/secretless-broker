@@ -109,7 +109,7 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 
 	logger.Infof("New connection on %v.\n", clientConn.LocalAddr())
 
-	targetConn, err = proxy.connector(clientConn, backendCredentials)
+	targetConn, err = proxy.connector.Connect(clientConn, backendCredentials)
 	if err != nil {
 		return fmt.Errorf("failed on connect: %s", err)
 	}

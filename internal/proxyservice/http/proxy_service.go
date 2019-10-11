@@ -9,11 +9,11 @@ import (
 	gohttp "net/http"
 	"regexp"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	validation "github.com/go-ozzo/ozzo-validation"
 
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 )
 
 // Subservice handles specific traffic within an HTTP proxy service, using
@@ -27,8 +27,8 @@ type Subservice struct {
 	// having it are minimal so far. This is something we should keep an eye on
 	// and refactor if it comes up again.
 
+	Connector                http.Connector
 	ConnectorID              string
-	Authenticate             http.Connector
 	RetrieveCredentials      internal.CredentialsRetriever
 	AuthenticateURLsMatching []*regexp.Regexp
 }
@@ -182,7 +182,7 @@ func (proxy *proxyService) ServeHTTP(w gohttp.ResponseWriter, r *gohttp.Request)
 
 	// Authenticate request
 
-	err = subservice.Authenticate(r, creds)
+	err = subservice.Connector.Connect(r, creds)
 	if err != nil {
 		gohttp.Error(w, err.Error(), 500)
 		return

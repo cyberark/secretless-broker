@@ -11,7 +11,7 @@ import (
 // connection to a target service for each incoming client connection. It is a
 // required method on the tcp.Plugin interface.
 func NewConnector(conRes connector.Resources) tcp.Connector {
-	return func(
+	newConnectorFunc := func(
 		clientConn net.Conn,
 		credentialValuesByID connector.CredentialValuesByID,
 	) (backendConn net.Conn, err error) {
@@ -23,6 +23,8 @@ func NewConnector(conRes connector.Resources) tcp.Connector {
 
 		return singleUseConnector.Connect(clientConn, credentialValuesByID)
 	}
+
+	return tcp.ConnectorFunc(newConnectorFunc)
 }
 
 // PluginInfo is required as part of the Secretless plugin spec. It provides

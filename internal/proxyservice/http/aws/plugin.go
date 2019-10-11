@@ -18,14 +18,10 @@ func PluginInfo() map[string]string {
 
 // NewConnector returns an http.Connector that decorates each incoming http
 // request with authorization data.
-//
-// It is a required method on the http.Plugin interface. The single argument
-// passed in is of type connector.Resources. It contains connector-specific
-// config and a logger.
 func NewConnector(conRes connector.Resources) http.Connector {
-	return (&Connector{
+	return &Connector{
 		logger:   conRes.Logger(),
-	}).Connect
+	}
 }
 
 // GetHTTPPlugin is required as part of the Secretless plugin spec for HTTP

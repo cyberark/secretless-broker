@@ -135,7 +135,7 @@ func (s *proxyServices) createHTTPService(
 
 		subservices = append(subservices, httpproxy.Subservice{
 			ConnectorID:              subCfg.Connector, // TODO: Rename connectorID
-			Authenticate:             curConnector,
+			Connector:                curConnector,
 			RetrieveCredentials:      credsRetriever,
 			AuthenticateURLsMatching: httpCfg.AuthenticateURLsMatching,
 		})

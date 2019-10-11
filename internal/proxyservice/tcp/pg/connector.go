@@ -35,7 +35,7 @@ func (s *SingleUseConnector) abort(err error) {
 	}
 }
 
-// Connect implements the tcp.Connector func signature
+// Connect implements the tcp.Connector func signature.
 //
 // It is the main method of the SingleUseConnector. It:
 //   1. Constructs connection details from the provided credentials map.

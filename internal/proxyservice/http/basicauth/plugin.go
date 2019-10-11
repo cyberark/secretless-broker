@@ -19,9 +19,9 @@ func PluginInfo() map[string]string {
 // NewConnector returns an http.Connector that decorates each incoming http
 // request with a basic auth header.
 func NewConnector(conRes connector.Resources) http.Connector {
-	return (&Connector{
+	return &Connector{
 		logger:   conRes.Logger(),
-	}).Connect
+	}
 }
 
 // GetHTTPPlugin is required as part of the Secretless plugin spec for HTTP

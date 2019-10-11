@@ -88,11 +88,11 @@ func TestGetInternalPlugins(t *testing.T) {
 		assert.NotNil(t, internalPlugins.TCPPlugins())
 
 		if internalPlugins.HTTPPlugins() != nil {
-			assert.Equal(t, 0, len(internalPlugins.HTTPPlugins()))
+			assert.Equal(t, 2, len(internalPlugins.HTTPPlugins()))
 		}
 
 		if internalPlugins.TCPPlugins() != nil {
-			assert.Equal(t, 0, len(internalPlugins.TCPPlugins()))
+			assert.Equal(t, 2, len(internalPlugins.TCPPlugins()))
 		}
 	})
 }

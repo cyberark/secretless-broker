@@ -32,7 +32,7 @@ func TestNewProxyService(t *testing.T) {
 
 	t.Run("non-empty constructor arguments result in no error", func(t *testing.T) {
 		_, err := NewProxyService(
-			mock.NewConnector().Connect,
+			mock.NewConnector(),
 			mock.NewListener(),
 			loggerMock.NewLogger(),
 			mock.NewCredentialRetriever().RetrieveCredentials,
@@ -59,7 +59,7 @@ func TestNewProxyService(t *testing.T) {
 
 		// exercise
 		ps := proxyService{
-			connector:           connector.Connect,
+			connector:           connector,
 			retrieveCredentials: credentialRetriever.RetrieveCredentials,
 			listener:            listener,
 		}
@@ -87,7 +87,7 @@ func TestProxyService_Start(t *testing.T) {
 		logger := loggerMock.NewLogger()
 
 		ps, _ := NewProxyService(
-			connector.Connect,
+			connector,
 			listener,
 			logger,
 			credentialRetriever.RetrieveCredentials,
@@ -122,7 +122,7 @@ func TestProxyService_Start(t *testing.T) {
 		// exercise
 
 		ps, err := NewProxyService(
-			connector.Connect,
+			connector,
 			listener,
 			logger,
 			credentialRetriever.RetrieveCredentials)
@@ -160,7 +160,7 @@ func TestProxyService_Start(t *testing.T) {
 		// exercise
 
 		ps, err := NewProxyService(
-			connector.Connect,
+			connector,
 			listener,
 			logger,
 			credentialRetriever.RetrieveCredentials)
@@ -199,7 +199,7 @@ func TestProxyService_Start(t *testing.T) {
 		// exercise
 
 		ps, err := NewProxyService(
-			connector.Connect,
+			connector,
 			listener,
 			logger,
 			credentialRetriever.RetrieveCredentials)
@@ -212,7 +212,7 @@ func TestProxyService_Start(t *testing.T) {
 		}
 
 		// assert
-		<- logger.ReceivedCall
+		<-logger.ReceivedCall
 		logger.AssertCalled(t, "Errorf")
 	})
 
@@ -239,7 +239,7 @@ func TestProxyService_Start(t *testing.T) {
 
 		// exercise
 		ps, err := NewProxyService(
-			connector.Connect,
+			connector,
 			listener,
 			logger,
 			credentialRetriever.RetrieveCredentials)
@@ -303,7 +303,7 @@ func TestProxyService_Start(t *testing.T) {
 
 		// exercise
 		ps, err := NewProxyService(
-			connector.Connect,
+			connector,
 			listener,
 			logger,
 			credentialRetriever.RetrieveCredentials)

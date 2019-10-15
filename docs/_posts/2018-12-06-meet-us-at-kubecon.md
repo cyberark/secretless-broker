@@ -26,7 +26,7 @@ will be speaking.
 
 Please stop by to chat with our engineers and representatives
 at any of these events and learn more about the Secretless Broker project. Feel free to reach
-out to us on our [mailing list](https://groups.google.com/forum/#!forum/secretless)
+out to us on our [Discourse](https://discuss.cyberarkcommons.org/c/secretless-broker)
 if you have any questions.
 
 You can find someone from the Secretless Broker engineering team at the CyberArk

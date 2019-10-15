@@ -174,6 +174,5 @@ The application is connecting to a password-protected Postgres database
 
 Please let us know what you think of Secretless! You can submit [Github
 issues](https://github.com/cyberark/secretless-broker/issues) for features
-you'd like to see, or send a message to our [mailing
-list](https://groups.google.com/forum/#!forum/secretless) with comments or
+you'd like to see, or send a message to our [Discourse](https://discuss.cyberarkcommons.org/c/secretless-broker) with comments or
 questions.

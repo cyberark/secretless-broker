@@ -173,7 +173,7 @@ In addition, the following must be true for any stable release:
 
 # Community
 
-Our primary channel for support is through our [Secretless Broker mailing list](https://groups.google.com/forum/#!forum/secretless). More info here: [community support](https://secretless.io/community)
+Our primary channel for support is through our [Secretless Broker Discourse](https://discuss.cyberarkcommons.org/c/secretless-broker). More info here: [community support](https://secretless.io/community)
 
 # Performance
 

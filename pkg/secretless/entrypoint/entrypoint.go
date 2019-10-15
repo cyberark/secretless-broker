@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/cyberark/secretless-broker/internal/configurationmanagers/configfile"
 	secretlessLog "github.com/cyberark/secretless-broker/internal/log"
 	"github.com/cyberark/secretless-broker/internal/plugin/v1/eventnotifier"
 	"github.com/cyberark/secretless-broker/internal/profile"
@@ -12,7 +13,6 @@ import (
 	"github.com/cyberark/secretless-broker/internal/signal"
 	"github.com/cyberark/secretless-broker/internal/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless"
-	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj"
 )
@@ -37,7 +37,9 @@ func StartSecretless(params *SecretlessOptions) {
 
 	// Construct the deps of Service
 
-	cfg := readConfig(params.ConfigFile)
+	// Coordinates processes interested in exit signals
+	exitListener := signal.NewExitListener()
+
 	logger := secretlessLog.New(params.DebugEnabled)
 	evtNotifier := eventnotifier.New(nil)
 	availPlugins, err := sharedobj.AllAvailablePlugins(
@@ -50,49 +52,67 @@ func StartSecretless(params *SecretlessOptions) {
 		log.Fatalln(err)
 	}
 
-	// Exit signal listener
-
-	// Coordinates processes interested in exit signals
-	exitListener := signal.NewExitListener()
-
 	// Optional Performance Profiling
-
 	handlePerformanceProfiling(params.ProfilingMode, exitListener)
 
-	// Start Services
-
-	allServices := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
-	exitListener.AddHandler(func() {
-		fmt.Println("wait for all services signal")
-		err := allServices.Stop()
-		if err != nil {
-			// Log but but allow cleanup of other subscribers to continue.
-			log.Println(err)
-		}
-	})
+	configChangedChan, err := newConfigChangeChan(
+		params.ConfigFile,
+		params.ConfigManagerSpec,
+		params.FsWatchEnabled,
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// Health check: Initialized
 	util.SetAppInitializedFlag()
 	util.SetAppIsLive(false)
 
-	err = allServices.Start()
-	if err != nil {
-		log.Fatalln(err)
+	configChangedFunc := func(cfg v2.Config) {
+		util.SetAppIsLive(false)
+		// Start Services
+		allServices := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
+		exitListener.AddHandler(func() {
+			fmt.Println("Received a stop signal")
+			err := allServices.Stop()
+			if err != nil {
+				// Log but but allow cleanup of other subscribers to continue.
+				log.Println(err)
+			}
+
+			os.Exit(0)
+		})
+
+		err = allServices.Start()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		// Health check: Live
+		util.SetAppIsLive(true)
+		exitListener.Wait()
 	}
 
-	// Health check: Live
-	util.SetAppIsLive(true)
+	logger.Info("Waiting for configuration...")
+	cfg := <-configChangedChan
 
-	exitListener.Wait()
+	logger.Debug("Got new configuration")
+	configChangedFunc(cfg)
+
+	logger.Info("Exiting...")
 }
 
-func readConfig(cfgFile string) v2.Config {
-	// TODO: Add back in CRD / generalized config option
-	cfg, err := config.LoadFromFile(cfgFile)
-	if err != nil {
-		log.Fatalln(err)
+func newConfigChangeChan(
+	cfgFile string,
+	cfgManagerSpec string,
+	fsWatchEnabled bool,
+) (<-chan v2.Config, error) {
+
+	if cfgManagerSpec != "configfile" {
+		return nil, fmt.Errorf("only 'configfile' configuration manager is supported")
 	}
-	return cfg
+
+	return configfile.NewManager(cfgFile, fsWatchEnabled)
 }
 
 func showVersion(showAndExit bool) {

@@ -22,22 +22,6 @@ func IsHTTPPlugin(availPlugins plugin.AvailablePlugins, pluginID string) bool {
 	return false
 }
 
-// Plugins represent a holding object for a bundle of plugins of different types.
-type Plugins struct {
-	HTTPPluginsByID map[string]http.Plugin
-	TCPPluginsByID  map[string]tcp.Plugin
-}
-
-// HTTPPlugins returns only the HTTP plugins in the Plugins struct.
-func (plugins *Plugins) HTTPPlugins() map[string]http.Plugin {
-	return plugins.HTTPPluginsByID
-}
-
-// TCPPlugins returns only the TCP plugins in the Plugins struct.
-func (plugins *Plugins) TCPPlugins() map[string]tcp.Plugin {
-	return plugins.TCPPluginsByID
-}
-
 // AllAvailablePlugins returns the full list of internal and external plugins
 // available to the broker.
 func AllAvailablePlugins(
@@ -121,4 +105,20 @@ func AllAvailablePluginsWithOptions(
 		HTTPPluginsByID: httpPlugins,
 		TCPPluginsByID:  tcpPlugins,
 	}, nil
+}
+
+// Plugins represent a holding object for a bundle of plugins of different types.
+type Plugins struct {
+	HTTPPluginsByID map[string]http.Plugin
+	TCPPluginsByID  map[string]tcp.Plugin
+}
+
+// HTTPPlugins returns only the HTTP plugins in the Plugins struct.
+func (plugins *Plugins) HTTPPlugins() map[string]http.Plugin {
+	return plugins.HTTPPluginsByID
+}
+
+// TCPPlugins returns only the TCP plugins in the Plugins struct.
+func (plugins *Plugins) TCPPlugins() map[string]tcp.Plugin {
+	return plugins.TCPPluginsByID
 }

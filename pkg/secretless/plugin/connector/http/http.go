@@ -7,8 +7,8 @@ import (
 )
 
 // Plugin is the interface that HTTP plugins need to implement.  Conceptually, a
-// Plugin is is something that can create a Connector, and a Connector is
-// something that knows how to "Connect", i.e., how to authenticate HTTP requests.
+// Plugin is something that can create a Connector, and a Connector is something
+// that knows how to "Connect", i.e., how to authenticate HTTP requests.
 type Plugin interface {
 	// NewConnector creates a new Connector based on the ConnectorResources
 	// passed into it.

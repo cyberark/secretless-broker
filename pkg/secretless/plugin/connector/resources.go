@@ -12,20 +12,20 @@ a closure, inside the Connector function returned by your constructor.
 */
 type Resources interface {
 	/*
-		Config() provides your connector with resources specified in your secretless.yml
-		file.
+		Config() provides your connector with resources specified in your
+		secretless.yml file.
 
-		Anything specified in your connector's `config` section of the secretless.yml
-		is passed back via this method as a raw []byte. Not all connectors require
-		data to be passed back in this field. Your code is responsible
-		for casting the raw config bytes back into a meaningful `struct` that your code can
-		work with.
+		Anything specified in your connector's `config` section of the
+		secretless.yml is passed back via this method as a raw []byte. Not all
+		connectors require data to be passed back in this field. Your code is
+		responsible for casting the raw config bytes back into a meaningful
+		`struct` that your code can work with.
 	*/
 	Config() []byte
 
 	/*
-		Logger() provides a basic logger you can use for debugging and informational
-		logging.
+		Logger() provides a basic logger you can use for debugging and
+		informational logging.
 
 		This method returns an object similar to the standard library's
 		`log.Logger` to let you log events to stdout and stderr.  It respects

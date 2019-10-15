@@ -11,4 +11,3 @@ type AvailablePlugins interface {
 	HTTPPlugins() map[string]http.Plugin
 	TCPPlugins() map[string]tcp.Plugin
 }
-

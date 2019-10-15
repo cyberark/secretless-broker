@@ -9,18 +9,19 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj/mock"
 )
 
 func getMockHTTPPlugins() plugin.AvailablePlugins {
 	var mockInternalHTTPPlugins = map[string]http.Plugin{
-		"one": mockHTTPPlugin{},
-		"two": mockHTTPPlugin{},
+		"one": mock.HTTPPlugin{},
+		"two": mock.HTTPPlugin{},
 	}
 
 	var mockInternalTCPPlugins = map[string]tcp.Plugin{
-		"one":   mockTCPPlugin{},
-		"two":   mockTCPPlugin{},
-		"three": mockTCPPlugin{},
+		"one":   mock.TCPPlugin{},
+		"two":   mock.TCPPlugin{},
+		"three": mock.TCPPlugin{},
 	}
 
 	return &Plugins{

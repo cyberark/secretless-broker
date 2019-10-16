@@ -10,6 +10,7 @@ import (
 	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	httpproxy "github.com/cyberark/secretless-broker/internal/proxyservice/http"
 	tcpproxy "github.com/cyberark/secretless-broker/internal/proxyservice/tcp"
+	sshproxy "github.com/cyberark/secretless-broker/internal/proxyservice/ssh"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
 	plugin2 "github.com/cyberark/secretless-broker/pkg/secretless/plugin"
@@ -88,11 +89,23 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 		if err != nil {
 			// TODO: Add Fatalf to our logger and use that
 			s.logger.Panicf(
-				"unable to create HTTP proxy service on: '%s'",
+				"unable to create HTTP proxy service on '%s': %s",
 				httpSvcConfig.SharedListenOn,
+				err,
 			)
 		}
 		servicesToStart = append(servicesToStart, httpSvc)
+	}
+
+	// SSH Plugins
+	for _, cfg := range configsByType.SSH {
+		// Validation will have already happened
+		tcpSvc, err := s.createSSHService(cfg, tcpPlugins[cfg.Connector])
+		if err != nil {
+			// TODO: Add Fatalf to our logger and use that
+			s.logger.Panicf("unable to create SSH service '%s': %s", cfg.Name, err)
+		}
+		servicesToStart = append(servicesToStart, tcpSvc)
 	}
 
 	// TODO: Deal with SSH in a hardcoded way
@@ -153,6 +166,38 @@ func (s *proxyServices) createHTTPService(
 		s.logger.Errorf("could not create http proxy service '%s'", proxyName)
 		return nil, err
 	}
+	return newSvc, nil
+}
+
+func (s *proxyServices) createSSHService(
+	config v2.Service,
+	pluginInst tcp.Plugin,
+) (internal.Service, error) {
+
+	// TODO: Add validation somewhere about overlapping listenOns
+	// TODO: v2.NetworkAddress is a value type.  It needs to be moved to its
+	//   own package with no deps (stdlib deps are ok).
+	netAddr := v2.NetworkAddress(config.ListenOn)
+	listener, err := net.Listen(netAddr.Network(), netAddr.Address())
+	if err != nil {
+		return nil, err
+	}
+
+	connResources := s.connectorResources(config)
+	credsRetriever := s.credsRetriever(config.Credentials)
+
+	// TODO: NewProxyService needs to be injected
+	newSvc, err := sshproxy.NewProxyService(
+		listener,
+		connResources.Logger(),
+		credsRetriever,
+	)
+
+	if err != nil {
+		s.logger.Errorf("could not create proxy service '%s'", config.Name)
+		return nil, err
+	}
+
 	return newSvc, nil
 }
 

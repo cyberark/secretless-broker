@@ -25,6 +25,10 @@ github.com/cyberark/summon v0.7.0/go.mod h1:S7grcxHeUxfL1vRTQUyq9jGK8yG6V/tSlLPQ
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/doodlesbykumbi/sshr.crypto v0.0.0-20191016132516-629195587fad h1:dqregO1InniAGdH6O8tVPGPYGlL9kj2Tvkie9UYmlUs=
+github.com/doodlesbykumbi/sshr.crypto v0.0.0-20191016132516-629195587fad/go.mod h1:WFFai1msRO1wXaEeE5yQxYXgSfI8pQAWXbQop6sCtWE=
+github.com/doodlesbykumbi/sshr.crypto v0.0.0-20191016154246-b1c2b8ffdb9c h1:dTPA7kSjboC+CYBH0z7cwFKX2GwOb78yyLSqbVRb4qQ=
+github.com/doodlesbykumbi/sshr.crypto v0.0.0-20191016154246-b1c2b8ffdb9c/go.mod h1:WFFai1msRO1wXaEeE5yQxYXgSfI8pQAWXbQop6sCtWE=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=

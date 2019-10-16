@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"golang.org/x/crypto/ssh"
@@ -57,21 +58,6 @@ func NewProxyService(
 		logger:              logger,
 		done:                false,
 	}, nil
-}
-
-func (proxy *proxyService) handleConnections(channels <-chan ssh.NewChannel) error {
-	var connector = ServiceConnector{
-		channels: channels,
-		logger:   proxy.logger,
-	}
-
-	backendCredentials, err := proxy.retrieveCredentials()
-	defer internal.ZeroizeCredentials(backendCredentials)
-	if err != nil {
-		return fmt.Errorf("failed on retrieve credentials: %s", err)
-	}
-
-	return connector.Connect(backendCredentials)
 }
 
 // Start initiates the net.Listener to listen for incoming connections
@@ -128,32 +114,72 @@ func (proxy *proxyService) Start() error {
 				return
 			}
 
-			// https://godoc.org/golang.org/x/crypto/ssh#NewServerConn
-			conn, chans, reqs, err := ssh.NewServerConn(nConn, serverConfig)
-			if err != nil {
-				logger.Debugf("Failed to handshake: %s", err)
-				continue
-			}
-			logger.Debugf(
-				"New connection accepted for user %s from %s",
-				conn.User(),
-				conn.RemoteAddr(),
-			)
+			tcpConn := nConn.(*net.TCPConn)
+			logger.Debugf("SSH Client connected. ClientIP=%v", tcpConn.RemoteAddr())
 
-			// The incoming Request channel must be serviced.
-			go func() {
-				for req := range reqs {
-					logger.Debugf("Global SSH request : %v", req)
-				}
-			}()
 
 			go func() {
-				if err := proxy.handleConnections(chans); err != nil {
-					logger.Errorf("Failed on handle connection: %s", err)
+				backendCredentials, err := proxy.retrieveCredentials()
+				defer internal.ZeroizeCredentials(backendCredentials)
+				if err != nil {
+					logger.Errorf("Failed on retrieve credentials: %s", err)
 					return
 				}
 
-				logger.Infof("Connection closed on %v", conn.LocalAddr())
+				clientConfig := &ssh.ClientConfig{}
+				var address string
+				if addressBytes, ok := backendCredentials["address"]; ok {
+					address = string(addressBytes)
+					if !strings.Contains(address, ":") {
+						address = address + ":22"
+					}
+				}
+
+				if user, ok := backendCredentials["user"]; ok {
+					clientConfig.User = string(user)
+				}
+
+				logger.Debugf("Trying to connect with user: %s", clientConfig.User)
+
+				if hostKeyStr, ok := backendCredentials["hostKey"]; ok {
+					var hostKey ssh.PublicKey
+					if hostKey, err = ssh.ParsePublicKey([]byte(hostKeyStr)); err != nil {
+						logger.Errorf("Unable to parse public key: %v", err)
+						return
+					}
+					clientConfig.HostKeyCallback = ssh.FixedHostKey(hostKey)
+				} else {
+					clientConfig.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+				}
+
+				if password, ok := backendCredentials["password"]; ok {
+					clientConfig.Auth = append(clientConfig.Auth, ssh.Password(string(password)))
+				}
+
+				if privateKeyBytes, ok := backendCredentials["privateKey"]; ok {
+					var signer ssh.Signer
+					if signer, err = ssh.ParsePrivateKey([]byte(privateKeyBytes)); err != nil {
+						logger.Debugf("Unable to parse private key: %v", err)
+						return
+					}
+
+					clientConfig.Auth = append(clientConfig.Auth, ssh.PublicKeys(signer))
+				}
+
+				p, err := newSSHProxyConn(
+					tcpConn,
+					serverConfig,
+					clientConfig,
+					address,
+					)
+				if err != nil {
+					logger.Errorln("Connection from %v closed. %v", tcpConn.RemoteAddr(), err)
+					return
+				}
+				logger.Infof("Establish a proxy connection between %v and %v", tcpConn.RemoteAddr(), p.DestinationHost)
+
+				err = p.Wait()
+				logger.Debugf("Connection from %v closed. %v", tcpConn.RemoteAddr(), err)
 			}()
 		}
 	}()
@@ -166,4 +192,56 @@ func (proxy *proxyService) Stop() error {
 	proxy.logger.Infof("Stopping service")
 	proxy.done = true
 	return proxy.listener.Close()
+}
+
+func newSSHProxyConn(
+	conn net.Conn,
+	serverConfig *ssh.ServerConfig,
+	clientConfig *ssh.ClientConfig,
+	upstreamHostAndPort string,
+) (proxyConn *ssh.ProxyConn, err error) {
+	d, err := ssh.NewDownstreamConn(conn, serverConfig)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if proxyConn == nil {
+			d.Close()
+		}
+	}()
+
+	authRequestMsg, err := d.GetAuthRequestMsg()
+	if err != nil {
+		return nil, err
+	}
+
+	// use client provided user if client config is empty
+	if clientConfig.User == "" {
+		clientConfig.User = authRequestMsg.User
+	}
+
+	upConn, err := net.Dial("tcp", upstreamHostAndPort)
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := ssh.NewUpstreamConn(upConn, clientConfig)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if proxyConn == nil {
+			u.Close()
+		}
+	}()
+	p := &ssh.ProxyConn{
+		Upstream:   u,
+		Downstream: d,
+	}
+
+	if err = p.AuthenticateProxyConn(clientConfig); err != nil {
+		return nil, err
+	}
+
+	return p, nil
 }

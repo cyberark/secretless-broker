@@ -3,6 +3,8 @@ package proxyservice
 import (
 	"fmt"
 	"net"
+	"net/url"
+	"os"
 	"strings"
 
 	"github.com/cyberark/secretless-broker/internal"
@@ -24,6 +26,7 @@ import (
 type proxyServices struct {
 	availPlugins    plugin2.AvailablePlugins
 	config          v2.Config
+	configsByType   v2.ConfigsByType
 	eventNotifier   v1.EventNotifier
 	logger          logapi.Logger
 	runningServices []internal.Service
@@ -31,6 +34,14 @@ type proxyServices struct {
 
 // Start starts all proxy services
 func (s *proxyServices) Start() error {
+	for _, service := range s.config.Services {
+		err := s.ensureSocketIsDeleted(service.ListenOn)
+		if err != nil {
+			// TODO: Add Fatalf to our logger and use that
+			s.logger.Panic(err)
+		}
+	}
+
 	for _, svc := range s.servicesToStart() {
 		err := svc.Start()
 		if err != nil {
@@ -45,6 +56,8 @@ func (s *proxyServices) Start() error {
 // Stop stops all proxy services
 func (s *proxyServices) Stop() error {
 	var stopFailures []string
+
+	s.logger.Infoln("Stopping services...")
 	for _, svc := range s.runningServices {
 		err := svc.Stop()
 		if err != nil {
@@ -62,18 +75,15 @@ func (s *proxyServices) Stop() error {
 }
 
 func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
-	// TODO: v2.NewConfigsByType should be an interface, so we can remove this
-	//   hardcoded dep on an impl type of v2.  All deps need to be injected.
-	configsByType := v2.NewConfigsByType(s.config.Services, s.availPlugins)
 	httpPlugins := s.availPlugins.HTTPPlugins()
 	tcpPlugins := s.availPlugins.TCPPlugins()
 
-// TODO: bug
-// 1. We don't preemptively check if all plugins exist. This results in the implicit assumptios that
-// the plugin we can't find is a TCP one. Because of the way we categorise services
+	// TODO: bug
+	// 1. We don't preemptively check if all plugins exist. This results in the implicit assumptios that
+	// the plugin we can't find is a TCP one. Because of the way we categorise services
 
 	// TCP Plugins
-	for _, cfg := range configsByType.TCP {
+	for _, cfg := range s.configsByType.TCP {
 		// Validation will have already happened
 		tcpSvc, err := s.createTCPService(cfg, tcpPlugins[cfg.Connector])
 		if err != nil {
@@ -84,7 +94,7 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	}
 
 	// HTTP Plugins
-	for _, httpSvcConfig := range configsByType.HTTP {
+	for _, httpSvcConfig := range s.configsByType.HTTP {
 		// Validation will have already happened
 		httpSvc, err := s.createHTTPService(httpSvcConfig, httpPlugins)
 		if err != nil {
@@ -99,7 +109,7 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	}
 
 	// SSH Plugins
-	for _, cfg := range configsByType.SSH {
+	for _, cfg := range s.configsByType.SSH {
 		// Validation will have already happened
 		sshSvc, err := s.createSSHService(cfg)
 		if err != nil {
@@ -110,7 +120,7 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	}
 
 	// SSH Agent Plugins
-	for _, cfg := range configsByType.SSHAgent {
+	for _, cfg := range s.configsByType.SSHAgent {
 		// Validation will have already happened
 		sshAgentSvc, err := s.createSSHAgentService(cfg)
 		if err != nil {
@@ -123,6 +133,39 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	// TODO: Deal with SSH in a hardcoded way
 
 	return servicesToStart
+}
+
+// If we are a socket listener and there is a socket file already
+// we need to ensure that the socket file is remoed before starting
+// the service.
+func (s *proxyServices) ensureSocketIsDeleted(address string) error {
+	parsedURL, err := url.Parse(address)
+	if err != nil {
+		return fmt.Errorf("unable to parse ListenOn location '%s'", address)
+	}
+
+	// If we're not a unix socket address, we don't need to worry about pre-emptive cleanup
+	if parsedURL.Scheme != "unix" {
+		return nil
+	}
+
+	socketFile := parsedURL.Path
+	s.logger.Debugf("Ensuring that the socketfile '%s' is not present...", socketFile)
+
+	// If file is not present, then we are ok to continue
+	if _, err := os.Stat(socketFile); os.IsNotExist(err) {
+		s.logger.Debugf("Socket file '%s' not present. Skipping deletion.", socketFile)
+		return nil
+	}
+
+	// Otherwise delete the file first
+	s.logger.Warnf("Socket file '%s' already present. Deleting...", socketFile)
+	err = os.Remove(socketFile)
+	if err != nil {
+		return fmt.Errorf("unable to delete stale ocket file '%s'", socketFile)
+	}
+
+	return nil
 }
 
 // TODO: v2.HTTPServiceConfig is a value type.  It needs to be moved to a
@@ -302,14 +345,18 @@ func NewProxyServices(
 	evtNotifier v1.EventNotifier,
 ) internal.Service {
 
-	secretlessObj := proxyServices{
+	services := proxyServices{
 		config:        cfg,
 		logger:        logger,
 		eventNotifier: evtNotifier,
 		availPlugins:  availPlugins,
 	}
 
-	return &secretlessObj
+	// TODO: v2.NewConfigsByType should be an interface, so we can remove this
+	//   hardcoded dep on an impl type of v2.  All deps need to be injected.
+	services.configsByType = v2.NewConfigsByType(cfg.Services, availPlugins)
+
+	return &services
 }
 
 // GetSecrets returns the secret values for the requested credentials.

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/configurationmanagers/configfile"
 	secretlessLog "github.com/cyberark/secretless-broker/internal/log"
 	"github.com/cyberark/secretless-broker/internal/plugin/v1/eventnotifier"
@@ -35,6 +36,11 @@ type SecretlessOptions struct {
 func StartSecretless(params *SecretlessOptions) {
 	showVersion(params.ShowVersion)
 
+	// Health check
+
+	util.SetAppInitializedFlag()
+	util.SetAppIsLive(false)
+
 	// Construct the deps of Service
 
 	// Coordinates processes interested in exit signals
@@ -55,6 +61,7 @@ func StartSecretless(params *SecretlessOptions) {
 	// Optional Performance Profiling
 	handlePerformanceProfiling(params.ProfilingMode, exitListener)
 
+	// Get a channel that notifies on configuration changes
 	configChangedChan, err := newConfigChangeChan(
 		params.ConfigFile,
 		params.ConfigManagerSpec,
@@ -64,25 +71,17 @@ func StartSecretless(params *SecretlessOptions) {
 		log.Fatalln(err)
 	}
 
-	// Health check: Initialized
-	util.SetAppInitializedFlag()
-	util.SetAppIsLive(false)
+	// Main event callbacks definitions
 
-	configChangedFunc := func(cfg v2.Config) {
+	var allServices internal.Service
+
+	// Main service reload callback
+	reloadConfig := func(cfg v2.Config) {
+		// Health check: Not live
 		util.SetAppIsLive(false)
+
 		// Start Services
-		allServices := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
-		exitListener.AddHandler(func() {
-			fmt.Println("Received a stop signal")
-			err := allServices.Stop()
-			if err != nil {
-				// Log but but allow cleanup of other subscribers to continue.
-				log.Println(err)
-			}
-
-			os.Exit(0)
-		})
-
+		allServices = proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
 		err = allServices.Start()
 		if err != nil {
 			log.Fatalln(err)
@@ -90,15 +89,51 @@ func StartSecretless(params *SecretlessOptions) {
 
 		// Health check: Live
 		util.SetAppIsLive(true)
-		exitListener.Wait()
 	}
 
-	logger.Info("Waiting for configuration...")
-	cfg := <-configChangedChan
+	// Main listener for exit signals
+	exitListener.AddHandler(func() {
+		fmt.Println("Received a stop signal")
 
-	logger.Debug("Got new configuration")
-	configChangedFunc(cfg)
+		if allServices == nil {
+			os.Exit(0)
+		}
 
+		err := allServices.Stop()
+		if err != nil {
+			// Log but but allow cleanup of other subscribers to continue.
+			log.Println(err)
+		}
+
+		// TODO: Ideally we would soft-close all goroutines rather than rely on the
+		//       heavy-handed os.Exit to exit the broker when we want to.
+		os.Exit(0)
+	})
+
+	// Main processing loop
+
+	// Listen for and restart on config changes
+	go func() {
+		// TODO: This loop should probably be cleaned up rather than
+		//       rely on os.Exit() to end it.
+		for {
+			logger.Info("Waiting for configuration...")
+			cfg := <-configChangedChan
+
+			if allServices != nil {
+				err := allServices.Stop()
+				if err != nil {
+					// We don't expect problems with stopping services to be fatal
+					logger.Warnf("Problem stopping all services: %s", err)
+				}
+			}
+
+			logger.Debug("Got new configuration")
+			reloadConfig(cfg)
+		}
+	}()
+
+	exitListener.Wait()
 	logger.Info("Exiting...")
 }
 
@@ -112,7 +147,7 @@ func newConfigChangeChan(
 		return nil, fmt.Errorf("only 'configfile' configuration manager is supported")
 	}
 
-	return configfile.NewManager(cfgFile, fsWatchEnabled)
+	return configfile.NewConfigChannel(cfgFile, fsWatchEnabled)
 }
 
 func showVersion(showAndExit bool) {

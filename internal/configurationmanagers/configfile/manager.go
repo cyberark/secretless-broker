@@ -171,8 +171,8 @@ func ConfigurationManagerFactory(options plugin_v1.ConfigurationManagerOptions) 
 	}
 }
 
-// NewManager returns a file-based ConfigurationManager channel object
-func NewManager(configfile string, fsWatchEnabled bool) (<-chan config_v2.Config, error) {
+// NewConfigChannel returns a file-based ConfigurationManager channel object
+func NewConfigChannel(configfile string, fsWatchEnabled bool) (<-chan config_v2.Config, error) {
 	configChangedChan := make(chan config_v2.Config)
 
 	manager := &configurationManager{}

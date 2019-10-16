@@ -78,7 +78,7 @@ func NewConfigsByType(
 		rawConfigs = append(rawConfigs, *cfg)
 	}
 
-	var httpConfigs ,tcpConfigs, sshConfigs []Service
+	var httpConfigs ,tcpConfigs, sshConfigs, sshAgentConfigs []Service
 
 	for _, cfg := range rawConfigs {
 		switch {
@@ -87,6 +87,9 @@ func NewConfigsByType(
 			continue
 		case cfg.Connector == "ssh":
 			sshConfigs = append(sshConfigs, cfg)
+			continue
+		case cfg.Connector == "ssh-agent":
+			sshAgentConfigs = append(sshAgentConfigs, cfg)
 			continue
 		default:
 			tcpConfigs = append(tcpConfigs, cfg)
@@ -106,9 +109,10 @@ func NewConfigsByType(
 	}
 
 	return ConfigsByType{
-		HTTP: httpServiceConfigs,
-		SSH: sshConfigs,
-		TCP:  tcpConfigs,
+		HTTP:     httpServiceConfigs,
+		SSH:      sshConfigs,
+		SSHAgent: sshAgentConfigs,
+		TCP:      tcpConfigs,
 	}
 }
 
@@ -130,9 +134,10 @@ func (cfg *HTTPServiceConfig) Name() string {
 // corresponds to the ProxyService objects we want to create.  One ProxyService
 // will be created for each entry in http, and one for each entry in tcp.
 type ConfigsByType struct {
-	HTTP []HTTPServiceConfig
-	SSH  []Service
-	TCP  []Service
+	HTTP      []HTTPServiceConfig
+	SSH  	  []Service
+	SSHAgent  []Service
+	TCP       []Service
 }
 
 // separatedHTTPAndTCPConfigs takes a slices of configs and returns two slices,

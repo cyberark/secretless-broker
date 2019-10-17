@@ -3,6 +3,7 @@ package sharedobj
 import (
 	"github.com/cyberark/secretless-broker/internal/proxyservice/http/aws"
 	"github.com/cyberark/secretless-broker/internal/proxyservice/http/basicauth"
+	"github.com/cyberark/secretless-broker/internal/proxyservice/http/conjur"
 	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql"
 	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/pg"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
@@ -18,11 +19,12 @@ type InternalPluginLookupFunc func() (plugin.AvailablePlugins, error)
 func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
 	return &Plugins{
 		HTTPPluginsByID: map[string]http.Plugin{
-			"aws": aws.GetHTTPPlugin(),
+			"aws":        aws.GetHTTPPlugin(),
 			"basic_auth": basicauth.GetHTTPPlugin(),
+			"conjur":     conjur.GetHTTPPlugin(),
 		},
-		TCPPluginsByID:  map[string]tcp.Plugin{
-			"pg": pg.GetTCPPlugin(),
+		TCPPluginsByID: map[string]tcp.Plugin{
+			"pg":    pg.GetTCPPlugin(),
 			"mysql": mysql.GetTCPPlugin(),
 		},
 	}, nil

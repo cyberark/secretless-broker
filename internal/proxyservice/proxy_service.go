@@ -9,8 +9,9 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin"
 	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	httpproxy "github.com/cyberark/secretless-broker/internal/proxyservice/http"
-	tcpproxy "github.com/cyberark/secretless-broker/internal/proxyservice/tcp"
 	sshproxy "github.com/cyberark/secretless-broker/internal/proxyservice/ssh"
+	sshagentproxy "github.com/cyberark/secretless-broker/internal/proxyservice/sshagent"
+	tcpproxy "github.com/cyberark/secretless-broker/internal/proxyservice/tcp"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
 	plugin2 "github.com/cyberark/secretless-broker/pkg/secretless/plugin"
@@ -100,12 +101,23 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	// SSH Plugins
 	for _, cfg := range configsByType.SSH {
 		// Validation will have already happened
-		tcpSvc, err := s.createSSHService(cfg, tcpPlugins[cfg.Connector])
+		sshSvc, err := s.createSSHService(cfg)
 		if err != nil {
 			// TODO: Add Fatalf to our logger and use that
 			s.logger.Panicf("unable to create SSH service '%s': %s", cfg.Name, err)
 		}
-		servicesToStart = append(servicesToStart, tcpSvc)
+		servicesToStart = append(servicesToStart, sshSvc)
+	}
+
+	// SSH Agent Plugins
+	for _, cfg := range configsByType.SSHAgent {
+		// Validation will have already happened
+		sshAgentSvc, err := s.createSSHAgentService(cfg)
+		if err != nil {
+			// TODO: Add Fatalf to our logger and use that
+			s.logger.Panicf("unable to create SSH Agent service '%s': %s", cfg.Name, err)
+		}
+		servicesToStart = append(servicesToStart, sshAgentSvc)
 	}
 
 	// TODO: Deal with SSH in a hardcoded way
@@ -171,7 +183,6 @@ func (s *proxyServices) createHTTPService(
 
 func (s *proxyServices) createSSHService(
 	config v2.Service,
-	pluginInst tcp.Plugin,
 ) (internal.Service, error) {
 
 	// TODO: Add validation somewhere about overlapping listenOns
@@ -188,6 +199,37 @@ func (s *proxyServices) createSSHService(
 
 	// TODO: NewProxyService needs to be injected
 	newSvc, err := sshproxy.NewProxyService(
+		listener,
+		connResources.Logger(),
+		credsRetriever,
+	)
+
+	if err != nil {
+		s.logger.Errorf("could not create proxy service '%s'", config.Name)
+		return nil, err
+	}
+
+	return newSvc, nil
+}
+
+func (s *proxyServices) createSSHAgentService(
+	config v2.Service,
+) (internal.Service, error) {
+
+	// TODO: Add validation somewhere about overlapping listenOns
+	// TODO: v2.NetworkAddress is a value type.  It needs to be moved to its
+	//   own package with no deps (stdlib deps are ok).
+	netAddr := v2.NetworkAddress(config.ListenOn)
+	listener, err := net.Listen(netAddr.Network(), netAddr.Address())
+	if err != nil {
+		return nil, err
+	}
+
+	connResources := s.connectorResources(config)
+	credsRetriever := s.credsRetriever(config.Credentials)
+
+	// TODO: NewProxyService needs to be injected
+	newSvc, err := sshagentproxy.NewProxyService(
 		listener,
 		connResources.Logger(),
 		credsRetriever,

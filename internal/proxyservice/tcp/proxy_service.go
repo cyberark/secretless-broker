@@ -65,7 +65,7 @@ func NewProxyService(
 	if listener == nil {
 		errors["logger"] = fmt.Errorf("logger cannot be nil")
 	}
-	if listener == nil {
+	if logger == nil {
 		errors["listener"] = fmt.Errorf("listener cannot be nil")
 	}
 

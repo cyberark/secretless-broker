@@ -40,7 +40,7 @@ func NewProxyService(
 	if retrieveCredentials == nil {
 		errors["retrieveCredentials"] = fmt.Errorf("retrieveCredentials cannot be nil")
 	}
-	if listener == nil {
+	if logger == nil {
 		errors["logger"] = fmt.Errorf("logger cannot be nil")
 	}
 	if listener == nil {

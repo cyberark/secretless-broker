@@ -11,11 +11,10 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
-// InternalPluginLookupFunc returns all available internal plugins.
+// InternalPluginLookupFunc returns all available buiilt-in plugins.
 type InternalPluginLookupFunc func() (plugin.AvailablePlugins, error)
 
-// GetInternalPluginsFunc returns currently available internal plugins
-// but for now, this list is empty since we have none implemented.
+// GetInternalPluginsFunc returns currently available built-in plugins.
 func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
 	return &Plugins{
 		HTTPPluginsByID: map[string]http.Plugin{
@@ -30,8 +29,7 @@ func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
 	}, nil
 }
 
-// InternalPlugins is used to enumerate internally-available plugins to the clients
-// of this method.
+// InternalPlugins is used to enumerate built-in plugins.
 func InternalPlugins(lookupFunc InternalPluginLookupFunc) (plugin.AvailablePlugins, error) {
 	plugins, err := lookupFunc()
 	if err != nil {

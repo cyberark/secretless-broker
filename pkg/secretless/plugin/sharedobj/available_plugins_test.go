@@ -13,6 +13,8 @@ import (
 type mockHTTPPlugin struct{ http.Plugin }
 type mockTCPPlugin struct{ tcp.Plugin }
 
+// TODO: Test AllAvailablePluginsWithOptions
+
 // These need to sit outside of the func since we are comparing them in the
 // tests
 var mockHTTPPlugins = map[string]http.Plugin{

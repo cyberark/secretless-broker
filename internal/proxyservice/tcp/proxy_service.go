@@ -174,5 +174,6 @@ func (proxy *proxyService) Start() error {
 func (proxy *proxyService) Stop() error {
 	proxy.logger.Infof("Stopping service")
 	proxy.done = true
+
 	return proxy.listener.Close()
 }

@@ -19,7 +19,7 @@ func CmdLineParams() *entrypoint.SecretlessOptions {
 
 	params := entrypoint.SecretlessOptions{}
 
-	flag.StringVar(&params.ConfigFile, "f", "secretless.yml", "Location of the configuration file.")
+	flag.StringVar(&params.ConfigFile, "f", "", "Location of the configuration file.")
 
 	// for CPU and Memory profiling
 	// Acceptable values to input: cpu or memory

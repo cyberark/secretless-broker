@@ -29,6 +29,17 @@ type configurationManager struct {
 	Name              string
 }
 
+// Local adapter struct that changes the ConfigurationChangedHandler events to
+// chan config_v2.Config messages
+type changeHandler struct {
+	ConfigChangeChan chan config_v2.Config
+}
+
+func (ch *changeHandler) ConfigurationChanged(_ string, config config_v2.Config) error {
+	ch.ConfigChangeChan <- config
+	return nil
+}
+
 func (configManager *configurationManager) getConfigFilePreferenceOrder() ([]string, error) {
 	configFileOrder := []string{
 		"./" + ConfigFileName,
@@ -158,4 +169,25 @@ func ConfigurationManagerFactory(options plugin_v1.ConfigurationManagerOptions) 
 	return &configurationManager{
 		Name: options.Name,
 	}
+}
+
+// NewConfigChannel returns a file-based ConfigurationManager channel object
+func NewConfigChannel(configfile string, fsWatchEnabled bool) (<-chan config_v2.Config, error) {
+	configChangedChan := make(chan config_v2.Config)
+
+	manager := &configurationManager{}
+
+	cfgChangeHandler := changeHandler{
+		ConfigChangeChan: configChangedChan,
+	}
+
+	// Managers expect parameters to be passed in as URL params
+	cfgSpec := fmt.Sprintf("%s?watch=%t", configfile, fsWatchEnabled)
+
+	err := manager.Initialize(&cfgChangeHandler, cfgSpec)
+	if err != nil {
+		return nil, err
+	}
+
+	return cfgChangeHandler.ConfigChangeChan, nil
 }

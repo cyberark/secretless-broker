@@ -14,10 +14,11 @@ done
 # ./ssl is REQUIRED during the build phase to make test ssl cert artifacts available to the docker context
 # The ssl certs are stored in ROOT/test/util/ssl and need to be copied because they are shared
 #
-rm -rf ssl
-cp -rf ../util/ssl ssl
+mkdir -p ssl
+rm -rf ssl/*
+cp -rf ../util/ssl/* ssl
+
 docker-compose build
-rm -rf ssl
 
 docker-compose up -d mysql mysql_no_tls
 

@@ -8,8 +8,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/cyberark/secretless-broker/pkg/secretless"
 )
 
 func runEntrypoint(params *SecretlessOptions) (stdoutOutput string, stderrOutput string) {

@@ -36,7 +36,12 @@ type SecretlessOptions struct {
 // StartSecretless method is the main entry point into the broker after the CLI
 // flags have been parsed
 func StartSecretless(params *SecretlessOptions) {
-	showVersion(params.ShowVersion)
+	if params.ShowVersion {
+		fmt.Printf("secretless-broker v%s\n", secretless.FullVersionName)
+		return
+	}
+
+	log.Printf("Secretless v%s starting up...", secretless.FullVersionName)
 
 	// Health check
 
@@ -169,14 +174,6 @@ func newConfigChangeChan(
 	}
 
 	return nil, fmt.Errorf("'%s' configuration manager not supported", cfgManagerSpec)
-}
-
-func showVersion(showAndExit bool) {
-	if showAndExit {
-		fmt.Printf("secretless-broker v%s\n", secretless.FullVersionName)
-		os.Exit(0)
-	}
-	log.Printf("Secretless v%s starting up...", secretless.FullVersionName)
 }
 
 // handlePerformanceProfiling starts a performance profiling, and sets up an

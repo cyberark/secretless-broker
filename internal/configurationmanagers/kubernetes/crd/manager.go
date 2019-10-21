@@ -5,33 +5,38 @@ import (
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 	"github.com/cyberark/secretless-broker/pkg/secretless/config"
 	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 type configurationManager struct {
-	ConfigChangedFunc func(string, config_v2.Config) error
+	ConfigChangedChan chan config_v2.Config
 	FilterSpec        string
 	Name              string
 }
 
-// Initialize implements plugin_v1.ConfigurationManager
-func (configManager *configurationManager) Initialize(changeHandler plugin_v1.ConfigurationChangedHandler,
-	configSpec string) error {
-
-	configManager.ConfigChangedFunc = changeHandler.ConfigurationChanged
+// NewConfigChannel returns a CRD-based ConfigurationManager channel object
+// TODO: Also return the name of configuration provider module
+func NewConfigChannel(configSpec string) (<-chan config_v2.Config, error) {
+	configManager := &configurationManager{
+		ConfigChangedChan: make(chan config_v2.Config),
+	}
 
 	// Inject CRD just in case we don't have it in the cluster yet
 	if err := InjectCRD(); err != nil {
-		return err
+		return nil, err
 	}
 
 	// TODO: Wait for CRD to be online
 
 	// Watch for changes
-	return RegisterCRDListener(meta_v1.NamespaceAll, configSpec, configManager)
+	err := RegisterCRDListener(meta_v1.NamespaceAll, configSpec, configManager)
+	if err != nil {
+		return nil, err
+	}
+
+	return configManager.ConfigChangedChan, nil
 }
 
 // CRDAdded implements crd.ResourceEventHandler
@@ -42,7 +47,7 @@ func (configManager *configurationManager) CRDAdded(crdConfiguration *api_v1.Con
 		return
 	}
 
-	configManager.ConfigChangedFunc(configManager.Name, newConfig)
+	configManager.ConfigChangedChan <- newConfig
 }
 
 // CRDDeleted implements crd.ResourceEventHandler
@@ -51,7 +56,8 @@ func (configManager *configurationManager) CRDDeleted(crdConfiguration *api_v1.C
 
 	// TODO: Do something of value here
 	newConfig := config_v2.Config{}
-	configManager.ConfigChangedFunc(configManager.Name, newConfig)
+
+	configManager.ConfigChangedChan <- newConfig
 }
 
 // CRDUpdated implements crd.ResourceEventHandler
@@ -78,17 +84,5 @@ func (configManager *configurationManager) CRDUpdated(oldCRDConfiguration *api_v
 		return
 	}
 
-	configManager.ConfigChangedFunc(configManager.Name, newConfig)
-}
-
-// GetName implements plugin_v1.ConfigurationManager
-func (configManager *configurationManager) GetName() string {
-	return configManager.Name
-}
-
-// ConfigurationManagerFactory returns a CRD ConfigurationManager instance
-func ConfigurationManagerFactory(options plugin_v1.ConfigurationManagerOptions) plugin_v1.ConfigurationManager {
-	return &configurationManager{
-		Name: options.Name,
-	}
+	configManager.ConfigChangedChan <- newConfig
 }

@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/configurationmanagers/configfile"
+	"github.com/cyberark/secretless-broker/internal/configurationmanagers/kubernetes/crd"
 	secretlessLog "github.com/cyberark/secretless-broker/internal/log"
 	"github.com/cyberark/secretless-broker/internal/plugin/v1/eventnotifier"
 	"github.com/cyberark/secretless-broker/internal/profile"
@@ -117,7 +119,7 @@ func StartSecretless(params *SecretlessOptions) {
 		// TODO: This loop should probably be cleaned up rather than
 		//       rely on os.Exit() to end it.
 		for {
-			logger.Info("Waiting for configuration...")
+			logger.Info("Waiting for new configuration...")
 			cfg := <-configChangedChan
 
 			if allServices != nil {
@@ -143,11 +145,30 @@ func newConfigChangeChan(
 	fsWatchEnabled bool,
 ) (<-chan v2.Config, error) {
 
-	if cfgManagerSpec != "configfile" {
-		return nil, fmt.Errorf("only 'configfile' configuration manager is supported")
+	// Split the configuration spec string into the manager
+	// manager's configuration spec string
+	splitCfgSpec := strings.SplitN(cfgManagerSpec, "#", 2)
+	cfgManager := splitCfgSpec[0]
+
+	// Only try to extract the spec if it's set
+	cfgSpec := ""
+	if len(splitCfgSpec) > 1 {
+		cfgSpec = splitCfgSpec[1]
 	}
 
-	return configfile.NewConfigChannel(cfgFile, fsWatchEnabled)
+	switch cfgManager {
+	case "configfile":
+		// If the spec is not provided, we depend on configfile argument from CLI
+		if cfgSpec == "" {
+			cfgSpec = cfgFile
+		}
+
+		return configfile.NewConfigChannel(cfgSpec, fsWatchEnabled)
+	case "k8s/crd":
+		return crd.NewConfigChannel(cfgSpec)
+	}
+
+	return nil, fmt.Errorf("'%s' configuration manager not supported", cfgManagerSpec)
 }
 
 func showVersion(showAndExit bool) {

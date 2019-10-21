@@ -14,8 +14,7 @@ services:
       - ./basic_auth.htpasswd:/etc/nginx/.htpasswd:ro
 
   secretless:
-    build:
-      context: ../..
+    image: secretless-broker
     environment:
       HTTP_HOST: nginx
       HTTP_PORT: 8080

@@ -12,8 +12,7 @@ services:
       - ./basic_auth.htpasswd:/etc/nginx/.htpasswd:ro
 
   secretless:
-    build:
-      context: ../..
+    image: secretless-broker
     ports:
       - 2222
     volumes:

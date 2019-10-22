@@ -1,12 +1,14 @@
 package mssql
 
 import (
+	"context"
 	"fmt"
-	mssql "github.com/denisenkom/go-mssqldb"
 	"net"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
+
+	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 type SingleUseConnector struct {

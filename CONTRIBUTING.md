@@ -141,12 +141,12 @@ which will be run in order:
    test output on stdout.
 - `./stop` (optional) - Performs cleanup work.
 
-Hence, adding a new integration test requires two steps:
+To add a new integration test, complete the following two steps:
 
-1. Creating a folder with test scripts as described above. 
-1. Adding a new entry to the `Jenkinsfile` to exercise those test scripts using
+1. Create a folder with test scripts as described above.
+1. Add a new entry to the `Jenkinsfile` to exercise those test scripts using
    the `run_integration` script. In most cases, you will also call `junit` on
-   the xml file that `run_integration` outputs in your test's subdirectory. 
+   the xml file that `run_integration` outputs in your test's subdirectory.
 
 Here's an example `Jenkinsfile` entry:
 
@@ -314,17 +314,9 @@ replace `<GOOS>/<GOARCH>` with your particular operating system and compilation 
 
 ## Plugins
 
-Plugins can be used to extend the functionality of the Secretless Broker via a shared library in `/usr/local/lib/secretless` by providing a way to add additional:
-
-- Listener plugins
-- Handler plugins
-- Connection management plugins
-
-Currently, these API definitions reside [here](internal/plugin/v1) and an example plugin can be found in the [`test/plugin`](test/plugin) directory.
-
-You can read more about how to make plugins and the underlying architecture in the [API directory](internal/plugin).
-
-_Please note: Plugin API interface signatures and supported plugin API version(s) are currently under heavy development so they will be likely to change in the near future._
+Secretless supports using [Go plugins](https://golang.org/pkg/plugin/) to extend
+its functionality. To learn about writing new Secretless plugins and for more
+information on the types of plugins we currently support, visit the [plugin API directory](pkg/secretless/plugin).
 
 ## Releasing
 

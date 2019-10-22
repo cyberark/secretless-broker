@@ -1,8 +1,8 @@
-# DANGER: API OVERHAUL IN PROGRESS
+# IMPORTANT: API OVERHAUL IN PROGRESS
 
-**The plugin API is changing, and is now private.  When the new public API is
-ready it will be moved back into pkg and documented.  The old documentation is
-below.  However, no new plugins should be built on this framework.**
+**The plugin API is changing, and this version is now private.  The new public API is
+available in `pkg/plugin`. For convenience, the old documentation is provided below.
+However, no new plugins should be built on this framework.**
 
 # OLD README CONTENT
 
@@ -44,10 +44,10 @@ is not supported at this time.
  - Managers are added to manager factory map.
  - Managers are instantiated.
  - Listeners and handlers are instantiated by id whenever a configuration references them.
-  
- ### PluginAPIVersion 
+
+ ### PluginAPIVersion
  (returns `string`)
-  
+
 `PluginAPIVersion` string indicates the target API version of the Secretless Broker and must match the
 [supported version](https://github.com/cyberark/secretless-broker/blob/master/internal/plugin/manager.go#L108) list in the
 main daemon.
@@ -144,7 +144,7 @@ removed/changed in future versions of the Secretless Broker_
 ## Connection Managers
 
 Connection managers are plugins that can be used to both monitor and control the Secretless Broker. They provide callbacks
-for various events that are happening and can manage that information and act on it. 
+for various events that are happening and can manage that information and act on it.
 
 _Note: While the API interface is currently expressive enough to provide basic functionality for the intended
 purpose, the eventing is still being worked on heavily and the APIs/eventing triggers are extremely likely to
@@ -155,7 +155,7 @@ change in the near future_
 ## EventNotifier
 
 `EventNotifier` is used as a target object of events for handlers and listeners that notifies the plugin manager
-in an abstract way without needing to pass down the full connection manager as a parameter. 
+in an abstract way without needing to pass down the full connection manager as a parameter.
 
 _Note: Currently not all included listeners and handlers use this eventing but full support for that is planned
 in the future releases_

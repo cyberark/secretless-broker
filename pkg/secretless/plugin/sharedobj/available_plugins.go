@@ -8,7 +8,7 @@ import (
 )
 
 // CompatiblePluginAPIVersion indicates what matching API version an external plugin
-// must have so that we are capable of loading it.
+// must have so that Secretless is capable of loading it.
 var CompatiblePluginAPIVersion = "0.1.0"
 
 // IsHTTPPlugin uses AvailablePlugins to determine if a pluginId is an HTTP
@@ -57,7 +57,6 @@ func AllAvailablePlugins(
 
 // AllAvailablePluginsWithOptions returns the full list of internal and external
 // plugins available to the broker using explicitly-defined lookup functions.
-// TODO: Test this
 func AllAvailablePluginsWithOptions(
 	pluginDir string,
 	checksumsFile string,

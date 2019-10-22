@@ -22,8 +22,8 @@ type ExternalPluginLookupFunc func(
 	logger log.Logger,
 ) (map[string]*go_plugin.Plugin, error)
 
-// LoadPluginsFromDir loads all plugins from a specified directory and returns
-// Plugins struct with tcp and http connectors.
+// LoadPluginsFromDir loads all plugins from a given directory and returns
+// a map of TCP and HTTP connector Plugin structs.
 func LoadPluginsFromDir(
 	pluginDir string,
 	checksumsFile string,
@@ -112,15 +112,16 @@ func loadPluginFiles(
 	return goPlugins, nil
 }
 
-// ExternalPlugins is used to enumerate all externally-available plugins in a sepcified
-// directory to the clients of this method.
-//TODO: Test this
+// ExternalPlugins is used to enumerate all externally-available plugins in a given
+// directory.
 func ExternalPlugins(
 	pluginDir string,
 	getRawPlugins ExternalPluginLookupFunc,
 	logger log.Logger,
 	checksumsFile string,
 ) (plugin2.AvailablePlugins, error) {
+
+	//TODO: Test this
 
 	rawPlugins, err := getRawPlugins(pluginDir, checksumsFile, logger)
 	if err != nil {

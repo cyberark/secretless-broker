@@ -13,10 +13,10 @@ import (
 	"reflect"
 	"unsafe"
 
-	secretless "github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/plugin"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql/protocol"
 	pluginv1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/providers"
 	configv2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
@@ -51,7 +51,7 @@ func NewCredential(ref C.struct_CredentialSpec) *configv2.Credential {
 func GetCredentialValues(credentialSpecs []*configv2.Credential) (map[string][]byte, error) {
 	// Load all internal Providers
 	providerFactories := make(map[string]func(pluginv1.ProviderOptions) (pluginv1.Provider, error))
-	for providerID, providerFactory := range secretless.InternalProviders {
+	for providerID, providerFactory := range providers.ProviderFactories {
 		providerFactories[providerID] = providerFactory
 	}
 

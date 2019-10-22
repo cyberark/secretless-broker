@@ -14,6 +14,7 @@ import (
 	sshagentproxy "github.com/cyberark/secretless-broker/internal/plugin/connectors/sshagent"
 	tcpproxy "github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp"
 	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/providers"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
 	plugin2 "github.com/cyberark/secretless-broker/pkg/secretless/plugin"
@@ -367,7 +368,7 @@ func NewProxyServices(
 func GetSecrets(secrets []*v2.Credential) (map[string][]byte, error) {
 	providerFactories := make(map[string]func(v1.ProviderOptions) (v1.Provider, error))
 
-	for providerID, providerFactory := range internal.InternalProviders {
+	for providerID, providerFactory := range providers.ProviderFactories {
 		providerFactories[providerID] = providerFactory
 	}
 

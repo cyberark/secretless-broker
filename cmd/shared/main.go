@@ -32,7 +32,7 @@ func ByteBoundString(b []byte) string {
 	header := (*reflect.SliceHeader)(unsafe.Pointer(&b))
 	bytesHeader := &reflect.StringHeader{
 		Data: header.Data,
-		Len: header.Len,
+		Len:  header.Len,
 	}
 	return *(*string)(unsafe.Pointer(bytesHeader))
 }
@@ -40,15 +40,15 @@ func ByteBoundString(b []byte) string {
 // NewCredential creates a Credential from the given C struct.
 func NewCredential(ref C.struct_CredentialSpec) *configv2.Credential {
 	return &configv2.Credential{
-		Name:     C.GoString(ref.Name),
-		Get:       C.GoString(ref.ID),
+		Name: C.GoString(ref.Name),
+		Get:  C.GoString(ref.ID),
 		From: C.GoString(ref.Provider),
 	}
 }
 
 // GetCredentialValues returns credential values.  Specifically, a map whose keys are the
 // credential IDs requested, and whose values are the values of those credentials.
-func GetCredentialValues(credentialSpecs []*configv2.Credential) (map[string][]byte, error)  {
+func GetCredentialValues(credentialSpecs []*configv2.Credential) (map[string][]byte, error) {
 	// Load all internal Providers
 	providerFactories := make(map[string]func(pluginv1.ProviderOptions) (pluginv1.Provider, error))
 	for providerID, providerFactory := range secretless.InternalProviders {

@@ -72,7 +72,7 @@ type AuthenticationHandshake struct {
 	serverHandshake         *protocol.HandshakeV10
 	clientHandshakeResponse *protocol.HandshakeResponse41
 
-	err               error
+	err error
 }
 
 // NewAuthenticationHandshake creates a new AuthenticationHandshake command object,

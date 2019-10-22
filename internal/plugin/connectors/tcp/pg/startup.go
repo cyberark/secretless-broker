@@ -16,8 +16,8 @@ func (s *SingleUseConnector) Startup() error {
 		return err
 	}
 
-	version, options, err := protocol.ParseStartupMessage(messageBytes);
-	if  err != nil {
+	version, options, err := protocol.ParseStartupMessage(messageBytes)
+	if err != nil {
 		return err
 	}
 

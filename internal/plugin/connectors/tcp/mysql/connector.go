@@ -78,7 +78,7 @@ func (connector *SingleUseConnector) Connect(
 		connector.mySQLClientConn,
 		connector.mySQLBackendConn,
 		connDetails,
-		)
+	)
 
 	if err = connPhase.Run(); err != nil {
 		connector.sendErrorToClient(err)

@@ -263,5 +263,5 @@ then the `Logger` prepends `sample-service` to all messages.
 
 To see an example external connector, please take a look at our [test plugin](../../../../test/plugin).
 You can also look at our internal plugins that also implement this interface:
-- [http connector plugins](../../../../internal/proxyservice/http)
-- [tcp connector plugins](../../../../internal/proxyservice/tcp)
+- [http connector plugins](../../../../internal/plugin/connectors/http)
+- [tcp connector plugins](../../../../internal/plugin/connectors/tcp)

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/handlers/ssl"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/ssl"
 )
 
 // handleSSL conditionally upgrades the backend connection to SSL depending on the

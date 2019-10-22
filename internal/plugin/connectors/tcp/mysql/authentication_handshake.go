@@ -3,8 +3,8 @@ package mysql
 import (
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/handlers/ssl"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/ssl"
 )
 
 /*

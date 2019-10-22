@@ -18,26 +18,7 @@ func New(cxnManagers []v1.ConnectionManager) v1.EventNotifier {
 	}
 }
 
-func (dn *defaultNotifier) CreateListener(l v1.Listener) {
-	for _, connectionManager := range dn.connectionManagers {
-		connectionManager.CreateListener(l)
-	}
-}
-
 // NewConnection loops through the connection managers and adds a connection to the listener l
-func (dn *defaultNotifier) NewConnection(l v1.Listener, c net.Conn) {
-	for _, connectionManager := range dn.connectionManagers {
-		connectionManager.NewConnection(l, c)
-	}
-}
-
-// CreateHandler loops through the connection managers to create the handler h
-func (dn *defaultNotifier) CreateHandler(h v1.Handler, c net.Conn) {
-	for _, connectionManager := range dn.connectionManagers {
-		connectionManager.CreateHandler(h, c)
-	}
-}
-
 // ResolveCredential loops through the connection managers to resolve the secret specified
 func (dn *defaultNotifier) ResolveCredential(provider v1.Provider, id string, value []byte) {
 	for _, connectionManager := range dn.connectionManagers {
@@ -59,17 +40,9 @@ func (dn *defaultNotifier) ServerData(c net.Conn, buf []byte) {
 	}
 }
 
-// TODO: The three methods below are currently NOT on the EventNotifier
+// TODO: The two methods below are currently NOT on the EventNotifier
 //   interface, but are on the ConnectionManager interface -- should they
 //   be on EventNotifier?
-
-// DestroyHandler loops through the connection managers to destroy the handler h
-// TODO: This name would need to change if we keep this
-func (dn *defaultNotifier) DestroyHandler(h v1.Handler) {
-	for _, connectionManager := range dn.connectionManagers {
-		connectionManager.DestroyHandler(h)
-	}
-}
 
 // Shutdown calls Shutdown on the Proxy and all the connection managers, concurrently
 func (dn *defaultNotifier) Shutdown() {

@@ -12,21 +12,8 @@ type ConnectionManager interface {
 	// Initialize is called before proxy initialization
 	Initialize(config_v2.Config, func(config_v2.Config) error) error
 
-	// CreateListener is called for every listener created by Proxy
-	CreateListener(Listener)
-
-	// NewConnection is called for each new client connection before being
-	// passed to a handler
-	NewConnection(Listener, net.Conn)
-
 	// CloseConnect is called when a client connection is closed
 	CloseConnection(net.Conn)
-
-	// CreateHandler is called after listener creates a new handler
-	CreateHandler(Handler, net.Conn)
-
-	// DestroyHandler is called before a handler is removed
-	DestroyHandler(Handler)
 
 	// ResolveCredential is called when a provider resolves a variable
 	ResolveCredential(provider Provider, id string, value []byte)

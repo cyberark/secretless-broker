@@ -4,10 +4,12 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
 	github.com/aws/aws-sdk-go v1.15.79
 	github.com/cenkalti/backoff v2.0.0+incompatible
+	github.com/cespare/reflex v0.2.0 // indirect
 	github.com/codegangsta/cli v1.20.0
 	github.com/cyberark/conjur-api-go v0.5.2
 	github.com/cyberark/conjur-authn-k8s-client v0.13.0
 	github.com/cyberark/summon v0.7.0
+	github.com/denisenkom/go-mssqldb v0.0.0-00010101000000-000000000000
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
@@ -22,9 +24,11 @@ require (
 	github.com/imdario/mergo v0.3.6 // indirect
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v0.0.0-20180806060727-1624edc4454b // indirect
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180718012357-94122c33edd3 // indirect
+	github.com/ogier/pflag v0.0.1 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect
 	github.com/onsi/gomega v1.4.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
@@ -34,7 +38,7 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	github.com/spf13/pflag v1.0.2 // indirect
 	github.com/stretchr/testify v1.3.0
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
@@ -48,3 +52,5 @@ require (
 	k8s.io/client-go v0.0.0-20180806134042-1f13a808da65
 	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
 )
+
+replace github.com/denisenkom/go-mssqldb => ../go-mssqldb

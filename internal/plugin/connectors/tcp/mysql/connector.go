@@ -3,7 +3,7 @@ package mysql
 import (
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql/protocol"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql/protocol"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
@@ -78,7 +78,7 @@ func (connector *SingleUseConnector) Connect(
 		connector.mySQLClientConn,
 		connector.mySQLBackendConn,
 		connDetails,
-		)
+	)
 
 	if err = connPhase.Run(); err != nil {
 		connector.sendErrorToClient(err)

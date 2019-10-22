@@ -1,11 +1,11 @@
 package sharedobj
 
 import (
-	"github.com/cyberark/secretless-broker/internal/proxyservice/http/aws"
-	"github.com/cyberark/secretless-broker/internal/proxyservice/http/basicauth"
-	"github.com/cyberark/secretless-broker/internal/proxyservice/http/conjur"
-	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql"
-	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/pg"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/aws"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/basicauth"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/conjur"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"

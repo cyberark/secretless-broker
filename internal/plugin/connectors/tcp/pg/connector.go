@@ -3,7 +3,7 @@ package pg
 import (
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg/protocol"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )

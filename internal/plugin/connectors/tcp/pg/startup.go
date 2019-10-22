@@ -3,7 +3,7 @@ package pg
 import (
 	"fmt"
 
-	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/pg/protocol"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg/protocol"
 )
 
 // Startup performs the startup handshake with the client and parses the client

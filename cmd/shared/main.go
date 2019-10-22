@@ -15,8 +15,8 @@ import (
 
 	secretless "github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/plugin"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql/protocol"
 	pluginv1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
-	"github.com/cyberark/secretless-broker/internal/proxyservice/tcp/mysql/protocol"
 	configv2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 

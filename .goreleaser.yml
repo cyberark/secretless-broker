@@ -81,7 +81,7 @@ archives:
     files:
       - CHANGELOG.md
       - NOTICES.txt
-      - LICENSE.md
+      - LICENSE
       - README.md
     format_overrides:
       - goos: windows

@@ -30,6 +30,7 @@ type proxyServices struct {
 	configsByType   v2.ConfigsByType
 	eventNotifier   v1.EventNotifier
 	logger          logapi.Logger
+	resolver        v1.Resolver
 	runningServices []internal.Service
 }
 
@@ -334,11 +335,20 @@ func (s *proxyServices) credsRetriever(
 	creds []*v2.Credential,
 ) internal.CredentialsRetriever {
 	return func() (map[string][]byte, error) {
-		return GetSecrets(creds)
+		return s.getSecrets(creds)
 	}
 }
 
+// getSecrets returns the secret values for the requested credentials.
+// TODO: Move this up one level, pass it down as dep.  Danger: This has
+//   a hardcoded dependency on plugin and v1.
+func (s *proxyServices) getSecrets(secrets []*v2.Credential) (map[string][]byte, error) {
+	return s.resolver.Resolve(secrets)
+}
+
 // NewProxyServices returns a new ProxyServices instance.
+// TODO: Reconsider the Resolver design so it's exactly what we need for the new code.
+// TODO: v1.Provider options should be an interface
 func NewProxyServices(
 	cfg v2.Config,
 	availPlugins plugin2.AvailablePlugins,
@@ -346,26 +356,7 @@ func NewProxyServices(
 	evtNotifier v1.EventNotifier,
 ) internal.Service {
 
-	services := proxyServices{
-		config:        cfg,
-		logger:        logger,
-		eventNotifier: evtNotifier,
-		availPlugins:  availPlugins,
-	}
-
-	// TODO: v2.NewConfigsByType should be an interface, so we can remove this
-	//   hardcoded dep on an impl type of v2.  All deps need to be injected.
-	services.configsByType = v2.NewConfigsByType(cfg.Services, availPlugins)
-
-	return &services
-}
-
-// GetSecrets returns the secret values for the requested credentials.
-// TODO: Move this up one level, pass it down as dep.  Danger: This has
-//   a hardcoded dependency on plugin and v1.
-// TODO: Reconsider the Resolver design so it's exactly what we need for the new code.
-// TODO: v1.Provider options should be an interface
-func GetSecrets(secrets []*v2.Credential) (map[string][]byte, error) {
+	// Setup our resolver
 	providerFactories := make(map[string]func(v1.ProviderOptions) (v1.Provider, error))
 
 	for providerID, providerFactory := range providers.ProviderFactories {
@@ -374,5 +365,18 @@ func GetSecrets(secrets []*v2.Credential) (map[string][]byte, error) {
 
 	resolver := plugin.NewResolver(providerFactories, nil, nil)
 
-	return resolver.Resolve(secrets)
+	// Create the proxyServices object
+	services := proxyServices{
+		availPlugins:  availPlugins,
+		config:        cfg,
+		eventNotifier: evtNotifier,
+		logger:        logger,
+		resolver:      resolver,
+	}
+
+	// TODO: v2.NewConfigsByType should be an interface, so we can remove this
+	//   hardcoded dep on an impl type of v2.  All deps need to be injected.
+	services.configsByType = v2.NewConfigsByType(cfg.Services, availPlugins)
+
+	return &services
 }

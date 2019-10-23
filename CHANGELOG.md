@@ -6,6 +6,40 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.0] 2019-10-21
+
+### Added
+
+- Added a new public [plugin interface](pkg/secretless/plugin) for building connector plugins
+- Added a new public [log interface](pkg/secretless/log) for standardizing logging
+- Added code coverage reporting to unit test output
+- Added ability to run k8s-demo test on GKE
+
+### Changed
+
+- Refactored existing connectors to use new public connector plugin interface
+- Changed the core proxy and plugin manager to support the new public connector
+  plugin interface
+- Edited website Google Group links to link to Discourse
+- Updated the [example plugin](test/plugin) to implement the new plugin interface
+- Minor format changes to Apache 2.0 license
+- Project structure reorganized
+- Internal code updated to use v2 config instead of v1 config
+- Goreleaser build updated to cross-compile linux and darwin
+- Updated Conjur tests to use official CLI image
+
+### Fixed
+
+- Improve namespace cleanup in k8s-ci/test
+- Add COMPOSE_PROJECT_NAME to tests to fix namespace collision errors
+- Updated k8s-demo to use LoadBalancer on Services to avoid NodePort conflicts
+- Clarified quick demo directions
+- Improved error-handling / retry logic in k8s-ci
+
+### Deprecated
+
+- `Protocol` key in v2 config is replaced with `connector` key
+
 ## [1.1.0] 2019-08-09
 
 ### Added
@@ -318,7 +352,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -335,3 +369,4 @@ The first tagged version.
 [0.8.0]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...v0.8.0 
 [1.0.0]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...v1.0.0 
 [1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0 
+[1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0 

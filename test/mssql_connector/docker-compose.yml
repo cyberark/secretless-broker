@@ -1,0 +1,23 @@
+version: '3.0'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    ports:
+      - 1433:1433
+    environment:
+      SA_PASSWORD: "yourStrong()Password"
+      ACCEPT_EULA: Y
+
+  secretless:
+    image: secretless-broker
+    ports:
+      - 2223:2223
+    volumes:
+      - ./secretless.yml:/secretless.yml
+    depends_on:
+      - mssql
+
+  test:
+    image: secretless-dev
+    command: go test -v ./test/mssql_connector

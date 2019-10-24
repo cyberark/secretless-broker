@@ -1,0 +1,11 @@
+#!/bin/bash -ex
+
+./stop
+
+# the order of the services is important. mssql must be up before we start secretless
+docker-compose up -d mssql
+
+# TODO: wait properly for mssql service to be up
+sleep 15
+
+docker-compose up -d secretless

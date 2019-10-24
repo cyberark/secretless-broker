@@ -8,6 +8,7 @@ require (
 	github.com/cyberark/conjur-api-go v0.5.2
 	github.com/cyberark/conjur-authn-k8s-client v0.13.0
 	github.com/cyberark/summon v0.7.0
+	github.com/denisenkom/go-mssqldb v0.0.0-00010101000000-000000000000
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
@@ -34,7 +35,7 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	github.com/spf13/pflag v1.0.2 // indirect
 	github.com/stretchr/testify v1.3.0
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
@@ -48,3 +49,5 @@ require (
 	k8s.io/client-go v0.0.0-20180806134042-1f13a808da65
 	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
 )
+
+replace github.com/denisenkom/go-mssqldb => github.com/orenbm/go-mssqldb v0.0.0-20191023140747-b0d280c79777

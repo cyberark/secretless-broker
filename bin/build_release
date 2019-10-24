@@ -18,7 +18,7 @@ echo "Current dir: $CURRENT_DIR"
 # NOTE: Piping the Dockerfile sends an empty context to docker build
 docker build -t "${GORELEASER_IMAGE}" - < "$CURRENT_DIR/Dockerfile.releaser"
 
-docker run --rm -it \
+docker run --rm -t \
   --volume "$CURRENT_DIR/..:/secretless-broker" \
   --workdir /secretless-broker \
   "${GORELEASER_IMAGE}" "${GORELEASER_ARGS[@]}"

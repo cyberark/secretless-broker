@@ -20,6 +20,7 @@ github.com/cyberark/conjur-api-go v0.5.2 h1:8ntk07YNRz5bBwjNXkDEAPR70Yr+J2MN8NGl
 github.com/cyberark/conjur-api-go v0.5.2/go.mod h1:hwaReWirzgKor+JtH6vbwZaASDXulvd0SzGCloC5uOc=
 github.com/cyberark/conjur-authn-k8s-client v0.13.0 h1:sKh0yS6lSHT34FnMRR738+Q0dP+ebC6N/h4Bm9rhq0A=
 github.com/cyberark/conjur-authn-k8s-client v0.13.0/go.mod h1:JTeGIeRO59J7mMEc5yF6FPtk1QnaAzs4GyZa4WldqZc=
+github.com/cyberark/go-mssqldb v0.0.0-20191024165641-e98f6bd22f0e/go.mod h1:xbL0rPBG9cCiLr28tMa8zpbdarY27NDyej4t/EjAShU=
 github.com/cyberark/summon v0.7.0 h1:eBjyNzpJEeFb7BFcOgidM6S/UbEsN7LGSFeQE7szPsk=
 github.com/cyberark/summon v0.7.0/go.mod h1:S7grcxHeUxfL1vRTQUyq9jGK8yG6V/tSlLPQ6tHRO4k=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -50,4 +50,4 @@ require (
 	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
 )
 
-replace github.com/denisenkom/go-mssqldb => github.com/orenbm/go-mssqldb v0.0.0-20191023140747-b0d280c79777
+replace github.com/denisenkom/go-mssqldb => github.com/cyberark/go-mssqldb v0.0.0-20191024165641-e98f6bd22f0e

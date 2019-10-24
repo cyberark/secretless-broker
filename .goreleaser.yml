@@ -97,7 +97,7 @@ dist: ./dist/goreleaser
 brews:
   - description: Secures your apps by making them Secretless
     homepage: https://secretless.io
-    url_template: https://github.com/cyberark/secretless-broker/releases/download/v{{.Version}}/secretless-broker_{{.Version}}_darwin_amd64.tar.gz
+    url_template: https://github.com/cyberark/secretless-broker/releases/download/v{{.Version}}/secretless-broker_{{.Version}}_{{.Os}}_{{.Arch}}.tar.gz
     install: |
       bin.install "secretless-broker"
     test: |

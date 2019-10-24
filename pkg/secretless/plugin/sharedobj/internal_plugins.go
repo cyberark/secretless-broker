@@ -17,6 +17,7 @@ type InternalPluginLookupFunc func() (plugin.AvailablePlugins, error)
 
 // GetInternalPluginsFunc returns currently available built-in plugins.
 func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
+	// New connectors should have an entry in the map below, according to their type (http/tcp)
 	return &Plugins{
 		HTTPPluginsByID: map[string]http.Plugin{
 			"aws":        aws.GetHTTPPlugin(),

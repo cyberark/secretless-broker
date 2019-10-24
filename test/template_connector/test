@@ -1,0 +1,6 @@
+#!/bin/bash -e
+
+docker-compose run \
+  --rm \
+  --no-deps \
+  test

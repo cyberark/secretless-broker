@@ -109,6 +109,13 @@ pipeline {
           }
         }
 
+        stage('Integration: Template Connector') {
+          steps {
+            sh './bin/run_integration template_connector'
+            junit 'test/template_connector/junit.xml'
+          }
+        }
+
         stage('Quick start') {
           steps {
             sh './bin/test_demo'

@@ -5,7 +5,7 @@ comparison:
   baselineBackend: mysql_direct
 #  recreateConnections: true
   rounds: 10000
-  threads: 10
+  threads: 1
   silent: false
 
 formatters:
@@ -24,8 +24,8 @@ backends:
   mysql_secretless_tcp:
     host: localhost
     port: 13306
-    database: secretless_xa
+    database: secretless
 
   mysql_secretless_socket:
     host: /sock/mysql
-    database: secretless_xa
+    database: secretless

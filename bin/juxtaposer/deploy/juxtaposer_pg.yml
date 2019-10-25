@@ -6,7 +6,7 @@ comparison:
 #  recreateConnections: true
   rounds: 10000
   silent: false
-  threads: 10
+  threads: 1
 
 formatters:
   json:
@@ -24,14 +24,14 @@ backends:
   pg_secretless_tcp:
     host: localhost
     port: 15432
-    database: secretless_xa
+    database: secretless
     username: foo
     password: foo
     sslmode: disable
 
   pg_secretless_socket:
     host: /sock
-    database: secretless_xa
+    database: secretless
     username: foo
     password: foo
     sslmode: disable

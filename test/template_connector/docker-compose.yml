@@ -1,13 +1,13 @@
 version: '3.0'
 
 services:
-  # TODO: add a service for the platform you want to connect with secretless
+  # TODO: add a service for the platform you want secretless to connect with
 
   secretless:
-    image: secretless-broker # this image is built in bin/build
+    image: secretless-broker # this image is built by bin/build
     volumes:
       - ./secretless.yml:/secretless.yml
 
   test:
-    image: secretless-dev # this image is built in bin/build
-    command: go test -v ./test/template_connector
+    image: secretless-dev # this image is built by bin/build
+    command: sleep 999d

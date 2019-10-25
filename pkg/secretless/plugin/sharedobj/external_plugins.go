@@ -136,9 +136,17 @@ func ExternalPlugins(
 	for rawPluginName, rawPlugin := range rawPlugins {
 		logger.Infof("Loading plugin '%s'...", rawPluginName)
 
+		logPluginLoadError := func(err error) {
+			logger.Errorf(
+				"failed to load plugin '%s': %s",
+				rawPluginName,
+				err,
+			)
+		}
+
 		pluginType, pluginID, err := parsePluginMetadata(rawPlugin, rawPluginName)
 		if err != nil {
-			logger.Errorln(err)
+			logPluginLoadError(err)
 			continue
 		}
 
@@ -146,13 +154,14 @@ func ExternalPlugins(
 		case "connector.http":
 			httpPluginSym, err := symbolFromName(rawPlugin, "GetHTTPPlugin")
 			if err != nil {
-				logger.Errorln(err)
+				logPluginLoadError(err)
 				continue
 			}
 
 			httpPluginFunc, ok := httpPluginSym.(func() http.Plugin)
 			if !ok {
-				logger.Errorln(errors.New("GetHTTPPlugin could not be cast to the expected type"))
+				err := errors.New("GetHTTPPlugin could not be cast to the expected type")
+				logPluginLoadError(err)
 				continue
 			}
 
@@ -160,19 +169,26 @@ func ExternalPlugins(
 		case "connector.tcp":
 			tcpPluginSym, err := symbolFromName(rawPlugin, "GetTCPPlugin")
 			if err != nil {
-				logger.Errorln(err)
+				logPluginLoadError(err)
 				continue
 			}
 
 			tcpPluginFunc, ok := tcpPluginSym.(func() tcp.Plugin)
 			if !ok {
-				logger.Errorln(errors.New("GetTCPPlugin could not be cast to the expected type"))
+				err = errors.New(
+					"GetTCPPlugin could not be cast to the expected type",
+				)
+				logPluginLoadError(err)
 				continue
 			}
 
 			plugins.TCPPluginsByID[pluginID] = tcpPluginFunc()
 		default:
-			logger.Errorln(fmt.Errorf("PluginInfo['type'] of '%s' is not supported", pluginType))
+			err = fmt.Errorf(
+				"PluginInfo['type'] of '%s' is not supported",
+				pluginType,
+			)
+			logPluginLoadError(err)
 			continue
 		}
 

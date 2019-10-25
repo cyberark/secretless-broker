@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/go-ozzo/ozzo-validation"
+
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/plugin"
 	httpproxy "github.com/cyberark/secretless-broker/internal/plugin/connectors/http"
@@ -34,8 +36,55 @@ type proxyServices struct {
 	runningServices []internal.Service
 }
 
+func (s *proxyServices) validateRequestedPluginsExist() error {
+	allPlugins := []string{"ssh", "ssh-agent"}
+	for pluginName := range s.availPlugins.TCPPlugins() {
+		allPlugins = append(allPlugins, pluginName)
+	}
+	for pluginName := range s.availPlugins.HTTPPlugins() {
+		allPlugins = append(allPlugins, pluginName)
+	}
+
+	s.logger.Infof(
+		"Validating services against available plugins: %s",
+		strings.Join(allPlugins, ","),
+	)
+
+	// Convert available plugins to a map, so that we can check for their
+	// existence in the loop below using a map lookup rather than a nested
+	// loop, which would be required otherwise.
+	allPluginsMap := map[string]bool{}
+	for _, p := range allPlugins  {
+		allPluginsMap[p] = true
+	}
+
+	errors := validation.Errors{}
+	for _, service := range s.config.Services {
+		connectorExists := allPluginsMap[service.Connector]
+		if !connectorExists {
+			errors[service.Name] = fmt.Errorf(
+				`missing service connector "%s"`,
+				service.Connector,
+			)
+			continue
+		}
+	}
+
+	err := errors.Filter()
+	if err != nil {
+		err = fmt.Errorf("services validation failed: %s", err)
+	}
+
+	return err
+}
+
 // Start starts all proxy services
 func (s *proxyServices) Start() error {
+	err := s.validateRequestedPluginsExist()
+	if err != nil {
+		return err
+	}
+
 	for _, service := range s.config.Services {
 		err := s.ensureSocketIsDeleted(service.ListenOn)
 		if err != nil {
@@ -80,9 +129,7 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	httpPlugins := s.availPlugins.HTTPPlugins()
 	tcpPlugins := s.availPlugins.TCPPlugins()
 
-	// TODO: bug
-	// 1. We don't preemptively check if all plugins exist. This results in the implicit assumptios that
-	// the plugin we can't find is a TCP one. Because of the way we categorise services
+	errors := validation.Errors{}
 
 	// TCP Plugins
 	for _, cfg := range s.configsByType.TCP {
@@ -90,7 +137,11 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 		tcpSvc, err := s.createTCPService(cfg, tcpPlugins[cfg.Connector])
 		if err != nil {
 			// TODO: Add Fatalf to our logger and use that
-			s.logger.Panicf("unable to create TCP service '%s': %s", cfg.Name, err)
+			errors[cfg.Name] = fmt.Errorf(
+				"unable to create TCP service: %s",
+				err,
+			)
+			continue
 		}
 		servicesToStart = append(servicesToStart, tcpSvc)
 	}
@@ -101,11 +152,12 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 		httpSvc, err := s.createHTTPService(httpSvcConfig, httpPlugins)
 		if err != nil {
 			// TODO: Add Fatalf to our logger and use that
-			s.logger.Panicf(
+			errors[httpSvcConfig.Name()] = fmt.Errorf(
 				"unable to create HTTP proxy service on '%s': %s",
 				httpSvcConfig.SharedListenOn,
 				err,
 			)
+			continue
 		}
 		servicesToStart = append(servicesToStart, httpSvc)
 	}
@@ -115,8 +167,11 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 		// Validation will have already happened
 		sshSvc, err := s.createSSHService(cfg)
 		if err != nil {
-			// TODO: Add Fatalf to our logger and use that
-			s.logger.Panicf("unable to create SSH service '%s': %s", cfg.Name, err)
+			errors[cfg.Name] = fmt.Errorf(
+				"unable to create SSH service: %s",
+				err,
+			)
+			continue
 		}
 		servicesToStart = append(servicesToStart, sshSvc)
 	}
@@ -126,13 +181,14 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 		// Validation will have already happened
 		sshAgentSvc, err := s.createSSHAgentService(cfg)
 		if err != nil {
-			// TODO: Add Fatalf to our logger and use that
-			s.logger.Panicf("unable to create SSH Agent service '%s': %s", cfg.Name, err)
+			errors[cfg.Name] = fmt.Errorf(
+				"unable to create SSH Agent service: %s",
+				err,
+			)
+			continue
 		}
 		servicesToStart = append(servicesToStart, sshAgentSvc)
 	}
-
-	// TODO: Deal with SSH in a hardcoded way
 
 	return servicesToStart
 }

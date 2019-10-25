@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Ensure we are on Python3
+import sys
+assert sys.version_info >= (3, 0), "Python3 should be used to run this program"
+
 import argparse
 import re
 

@@ -91,7 +91,7 @@ func StartSecretless(params *SecretlessOptions) {
 		allServices = proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
 		err = allServices.Start()
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalf("Failed to start services: %s", err)
 		}
 
 		// Health check: Live

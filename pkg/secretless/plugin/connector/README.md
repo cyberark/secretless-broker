@@ -12,6 +12,9 @@ any target service.
 If you know Go and understand your target service's authentication protocol, you
 can write a connector for it. This guide provides all of the information you'll need.
 
+You can also use our [connector templates](../../../../examples/connector_templates) to add
+your new connector plugin.
+
 The Secretless team is continually adding support for new databases and services, but we encourage outside
 contributions as well. If you write a connector plugin that you'd like to share with the community, please
 [let us know](https://secretless.io/community.html) or consider sending us a PR!
@@ -74,9 +77,10 @@ To get that job done, Secretless provides you with `connector.Resources`
 (detailed below) as well as the current credential values --  the secrets
 you'll need to authenticate.  Your plugin users specify the location of those
 secrets in `secretless.yml`, as described
-[here](https://docs.secretless.io/Latest/en/Content/References/connectors/overview.htm#ConfigureSecretlesstolistenfornewconnections).
+[here](https://docs.secretless.io/Latest/en/Content/References/connectors/overview.htm#ConfigureSecretlesstolistenfornewconnections)
+and [here](https://docs.secretless.io/Latest/en/Content/Get%20Started/configuration.htm).
 At runtime, Secretless fetches the values of those secrets and passes
-the into your `Connector` function.
+them into your `Connector` function.
 
 ![Plugin Diagram](../../../../assets/connector_plugin_diagram.png)
 
@@ -121,7 +125,7 @@ returned `Connector`.  That `Connector` (remember: it's just a a single method)
 is then called each time a new client connection requires authentication.
 
 Both `NewConnector` methods take only one argument -- `connector.Resources` --
-described below.
+described [below](#connectorresources---argument-passed-to-your-constructor).
 
 The real work is done by the `Connector` functions they return.
 
@@ -265,3 +269,6 @@ To see an example external connector, please take a look at our [test plugin](..
 You can also look at our internal plugins that also implement this interface:
 - [http connector plugins](../../../../internal/plugin/connectors/http)
 - [tcp connector plugins](../../../../internal/plugin/connectors/tcp)
+
+To get started with adding your new connector plugin, please take a look at our 
+[connector templates](../../../../examples/connector_templates).

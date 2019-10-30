@@ -32,6 +32,11 @@ func HandleAuthenticationRequest(username string, password string, connection ne
 		return
 	}
 
+	if messageType == ErrorMessageType {
+		err = NewError(message)
+		return
+	}
+
 	if messageType != AuthenticationMessageType {
 		err = fmt.Errorf("Expected %d message type, got %d", AuthenticationMessageType, messageType)
 		return
@@ -104,6 +109,11 @@ func verifyAuthentication(connection net.Conn) (err error) {
 	var messageType byte
 	var message []byte
 	if messageType, message, err = ReadMessage(connection); err != nil {
+		return
+	}
+
+	if messageType == ErrorMessageType {
+		err = NewError(message)
 		return
 	}
 

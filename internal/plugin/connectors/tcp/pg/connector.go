@@ -25,14 +25,22 @@ type SingleUseConnector struct {
 }
 
 func (s *SingleUseConnector) abort(err error) {
-	if s.clientConn != nil {
-		pgError := protocol.Error{
+	if s.clientConn == nil {
+		return
+	}
+
+	pgError, ok := err.(*protocol.Error)
+	// Not an expected protocol error, so we wrap it in a protocol error, so
+	// the client can see what went wrong.
+	if !ok {
+		pgError = &protocol.Error{
 			Severity: protocol.ErrorSeverityFatal,
 			Code:     protocol.ErrorCodeInternalError,
 			Message:  err.Error(),
 		}
-		s.clientConn.Write(pgError.GetPacket())
 	}
+
+	s.clientConn.Write(pgError.GetPacket())
 }
 
 // Connect implements the tcp.Connector func signature.

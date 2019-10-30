@@ -55,15 +55,22 @@ func (p *exitListener) Wait() {
 		p.doneChannel <- struct{}{}
 	}()
 
-	<- p.doneChannel
+	<-p.doneChannel
 }
 
 // NewExitListener creates a new instance of ExitListener.  Clients are
 // responsible for adding handlers and calling Wait() to kick it off.
 func NewExitListener() ExitListener {
+	return NewExitListenerWithOptions(exitSignals...)
+}
+
+// NewExitListenerWithOptions creates a new instance of ExitListener with configurable
+// options. Clients are responsible for adding handlers to the listener which can then
+// be waited on by `Wait()`ing.
+func NewExitListenerWithOptions(signals ...os.Signal) ExitListener {
 	doneChannel := make(chan struct{})
 	exitSignalChannel := make(chan os.Signal)
-	signal.Notify(exitSignalChannel, exitSignals...)
+	signal.Notify(exitSignalChannel, signals...)
 
 	return &exitListener{
 		handlers:          []Handler{},

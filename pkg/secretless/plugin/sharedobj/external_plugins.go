@@ -135,10 +135,10 @@ func ExternalPlugins(
 	)
 }
 
-// ExternalPluginsWithOptions is used to enumerate all externally-available plugins
-// in a sepcified directory to the clients of this method with the additional option
-// of being able to specify the lookup function.
-//TODO: Test this
+// ExternalPluginsWithOptions is used to enumerate all externally-available
+// plugins in a sepcified directory to the clients of this method with the
+// additional option of being able to specify the lookup function.
+// TODO: Test this
 func ExternalPluginsWithOptions(
 	pluginDir string,
 	checksumsFile string,
@@ -146,27 +146,18 @@ func ExternalPluginsWithOptions(
 	logger log.Logger,
 ) (plugin2.AvailablePlugins, error) {
 
-	//TODO: Test this
-
 	rawPlugins, err := getRawPlugins(pluginDir, checksumsFile, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	plugins := Plugins{
-		HTTPPluginsByID: map[string]http.Plugin{},
-		TCPPluginsByID:  map[string]tcp.Plugin{},
-	}
+	plugins := NewPlugins()
 
 	for rawPluginName, rawPlugin := range rawPlugins {
 		logger.Infof("Loading plugin '%s'...", rawPluginName)
 
 		logPluginLoadError := func(err error) {
-			logger.Errorf(
-				"failed to load plugin '%s': %s",
-				rawPluginName,
-				err,
-			)
+			logger.Errorf("failed to load plugin '%s': %s", rawPluginName, err)
 		}
 
 		pluginType, pluginID, err := parsePluginMetadata(rawPlugin, rawPluginName)
@@ -185,7 +176,7 @@ func ExternalPluginsWithOptions(
 
 			httpPluginFunc, ok := httpPluginSym.(func() http.Plugin)
 			if !ok {
-				err := errors.New("GetHTTPPlugin could not be cast to the expected type")
+				err := errors.New("GetHTTPPlugin couldn't be cast to expected type")
 				logPluginLoadError(err)
 				continue
 			}
@@ -200,26 +191,19 @@ func ExternalPluginsWithOptions(
 
 			tcpPluginFunc, ok := tcpPluginSym.(func() tcp.Plugin)
 			if !ok {
-				err = errors.New(
-					"GetTCPPlugin could not be cast to the expected type",
-				)
+				err = errors.New("GetTCPPlugin couldn't be cast to expected type")
 				logPluginLoadError(err)
 				continue
 			}
 
 			plugins.TCPPluginsByID[pluginID] = tcpPluginFunc()
 		default:
-			err = fmt.Errorf(
-				"PluginInfo['type'] of '%s' is not supported",
-				pluginType,
-			)
+			err = fmt.Errorf("PluginInfo['type'] of '%s' not supported", pluginType)
 			logPluginLoadError(err)
 			continue
 		}
-
 		logger.Warnf("Plugin %s/%s loaded", pluginType, pluginID)
 	}
-
 	return &plugins, nil
 }
 

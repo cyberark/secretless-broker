@@ -54,11 +54,7 @@ func AllAvailablePluginsWithOptions(
 		return nil, err
 	}
 
-	externalPlugins, err := externalLookupfunc(
-		pluginDir,
-		checksumsFile,
-		logger,
-	)
+	externalPlugins, err := externalLookupfunc(pluginDir, checksumsFile, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -67,18 +63,16 @@ func AllAvailablePluginsWithOptions(
 
 	for name, httpPlugin := range internalPlugins.HTTPPlugins() {
 		if _, ok := httpPlugins[name]; ok {
-			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
-				name)
+			// TODO: Should this ever happen?  Do we need this check?  Should it panic?
+			logger.Warnf("Internal plugin '%s' replaced by internal plugin", name)
 		}
-
 		httpPlugins[name] = httpPlugin
 	}
+
 	for name, httpPlugin := range externalPlugins.HTTPPlugins() {
 		if _, ok := httpPlugins[name]; ok {
-			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
-				name)
+			logger.Warnf("Internal plugin '%s' replaced by external plugin", name)
 		}
-
 		httpPlugins[name] = httpPlugin
 	}
 
@@ -86,18 +80,15 @@ func AllAvailablePluginsWithOptions(
 
 	for name, tcpPlugin := range internalPlugins.TCPPlugins() {
 		if _, ok := tcpPlugins[name]; ok {
-			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
-				name)
+			logger.Warnf("Internal plugin '%s' replaced by internal plugin", name)
 		}
-
 		tcpPlugins[name] = tcpPlugin
 	}
+
 	for name, tcpPlugin := range externalPlugins.TCPPlugins() {
 		if _, ok := tcpPlugins[name]; ok {
-			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
-				name)
+			logger.Warnf("Internal plugin '%s' replaced by external plugin", name)
 		}
-
 		tcpPlugins[name] = tcpPlugin
 	}
 
@@ -107,6 +98,14 @@ func AllAvailablePluginsWithOptions(
 	}, nil
 }
 
+// NewPlugins plugins creates a new instance of Plugins with both maps
+// initialized but empty.
+func NewPlugins() Plugins {
+	return Plugins{
+		HTTPPluginsByID: map[string]http.Plugin{},
+		TCPPluginsByID:  map[string]tcp.Plugin{},
+	}
+}
 // Plugins represent a holding object for a bundle of plugins of different types.
 type Plugins struct {
 	HTTPPluginsByID map[string]http.Plugin

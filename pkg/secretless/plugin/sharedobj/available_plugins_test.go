@@ -4,54 +4,55 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	log_api "github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj/mock"
 )
 
-func TestCompatiblePluginVersion(t *testing.T) {
-	assert.Equal(t, "0.1.0", CompatiblePluginAPIVersion)
+func TestPluginAPIVersionIsSemverString(t *testing.T) {
+	semVerRe := `\d+\.\d+\.\d+`
+	assert.Regexp(t, semVerRe, CompatiblePluginAPIVersion)
 }
 
 // TestPlugins uses the actual implementation of "Plugins" -- because that's
 // what we're testing.  We populate "Plugins" with mocks of the plugin instances
 // themselves, because those don't matter: we only care that we get back what we
-// put in. That is, this is simply a test that the method HTTPPlugins() returns
-// what we give it.
+// put in. That is, this is simply a test that the methods HTTPPlugins() and
+// TCPPlugins() return what we give them.
 func TestPlugins(t *testing.T) {
-	t.Run("HTTPPlugins() returns expected plugins", func(t *testing.T) {
+	t.Run("HTTPPlugins() and TCPPlugins() return expected plugins", func(t *testing.T) {
+
+		expectedHTTP := mock.HTTPInternalPluginsByID()
+		expectedTCP := mock.TCPInternalPluginsByID()
 
 		plugins := &Plugins{
-			HTTPPluginsByID: mock.HTTPPluginsById,
-			TCPPluginsByID:  mock.TCPPluginsById,
+			HTTPPluginsByID: expectedHTTP,
+			TCPPluginsByID:  expectedTCP,
 		}
 
-		httpPlugins := plugins.HTTPPlugins()
+		// Test HTTPPlugins()
 
-		assert.NotNil(t, httpPlugins)
-		if httpPlugins == nil {
-			t.Fail()
+		actualHTTP := plugins.HTTPPlugins()
+
+		assert.NotNil(t, actualHTTP)
+		if actualHTTP == nil {
+			return
 		}
 
-		assert.Equal(t, httpPlugins, mock.HTTPPluginsById)
-	})
+		assert.Equal(t, expectedHTTP, actualHTTP)
 
-	t.Run("TCPPlugins() returns expected plugins", func(t *testing.T) {
-		plugins := &Plugins{
-			HTTPPluginsByID: mock.HTTPPluginsById,
-			TCPPluginsByID:  mock.TCPPluginsById,
+		// Test TCPPlugins()
+
+		actualTCP := plugins.TCPPlugins()
+
+		assert.NotNil(t, actualTCP)
+		if actualTCP == nil {
+			return
 		}
 
-		tcpPlugins := plugins.TCPPlugins()
-
-		assert.NotNil(t, tcpPlugins)
-		if tcpPlugins == nil {
-			t.Fail()
-		}
-
-		assert.Equal(t, tcpPlugins, mock.TCPPluginsById)
+		assert.Equal(t, expectedTCP, actualTCP)
 	})
 }
 
@@ -66,7 +67,7 @@ func TestAllAvailablePlugins(t *testing.T) {
 		)
 		assert.Nil(t, err)
 		if err != nil {
-			t.Fail()
+			return
 		}
 
 		assert.EqualValues(t, mock.AllHTTPPlugins(), allPlugins.HTTPPlugins())
@@ -74,14 +75,14 @@ func TestAllAvailablePlugins(t *testing.T) {
 	})
 
 	t.Run("External plugins override same-named internal plugins", func(t *testing.T) {
-
 		// Setup our mocks
-
+		httpOverride := mock.NewHTTPPlugin("HTTP Override")
 		extHTTPPlugins := mock.ExternalPlugins().HTTPPlugins()
-		extHTTPPlugins["intHTTP2"] = mock.HTTPPlugin{}
+		extHTTPPlugins["intHTTP2"] = httpOverride // Override key "intHTTP2"
 
+		tcpOverride := mock.NewTCPPlugin("TCP Override")
 		extTCPPlugins := mock.ExternalPlugins().TCPPlugins()
-		extTCPPlugins["intTCP1"] = mock.TCPPlugin{}
+		extTCPPlugins["intTCP1"] = tcpOverride // Override key "intTCP1"
 
 		allExternalPlugins := Plugins{
 			HTTPPluginsByID: extHTTPPlugins,
@@ -110,13 +111,25 @@ func TestAllAvailablePlugins(t *testing.T) {
 
 		assert.Nil(t, err)
 		if err != nil {
-			t.Fail()
+			return
 		}
 
-		// Ensure the override occurred
-		assert.Equal(t, extHTTPPlugins["intHTTP2"], allPlugins.HTTPPlugins()["intHTTP2"])
-		assert.Equal(t, extTCPPlugins["intTCP1"], allPlugins.TCPPlugins()["intTCP1"])
 
+		// Define our expected results (without override)
+		expectedHTTP := mock.AllHTTPPlugins()
+		expectedTCP := mock.AllTCPPlugins()
+
+		// Sanity check: Not equal without the override
+		assert.NotEqual(t, expectedHTTP, allPlugins.HTTPPlugins())
+		assert.NotEqual(t, expectedTCP, allPlugins.TCPPlugins())
+
+		// Now do the override
+		expectedHTTP["intHTTP2"] = httpOverride
+		expectedTCP["intTCP1"] = tcpOverride
+
+		// Now it should be equal
+		assert.Equal(t, expectedHTTP, allPlugins.HTTPPlugins(), "HTTP override failed")
+		assert.Equal(t, expectedTCP, allPlugins.TCPPlugins(), "TCP override failed")
 	})
 
 	t.Run("GetExternalPlugins receives arguments and propagates errors", func(t *testing.T) {
@@ -143,6 +156,8 @@ func TestAllAvailablePlugins(t *testing.T) {
 			getExternalPlugins,
 			expectedLogger,
 		)
+
+		// NOTE: This assertion is needed to ensure the other assertions were run
 		assert.Equal(t, expectedErr, actualErr)
 	})
 

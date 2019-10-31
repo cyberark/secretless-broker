@@ -16,6 +16,7 @@ package protocol
 
 import (
 	"fmt"
+	"io"
 )
 
 /* PG Error Severity Levels */
@@ -43,6 +44,8 @@ const (
 	ErrorCodeInternalError = "XX000"
 )
 
+const unparseableErr = "unparseable error from postgres server"
+
 // Error is a Postgresql processing error.
 type Error struct {
 	Severity string
@@ -54,6 +57,66 @@ type Error struct {
 
 func (e *Error) Error() string {
 	return fmt.Sprintf("pg: %s: %s", e.Severity, e.Message)
+}
+
+// NewError constructs a protocol error from an error packet. This is done,
+// instead of passing the error through to the client as is, to give Secretless
+// the ability to modify the error contents.
+//
+// NewError parses the error packet and populates the protocol error with the
+// field types as detailed in the protocol documentation:
+// https://www.postgresql.org/docs/9.1/protocol-error-fields.html. If parsing
+// fails NewError returns an "unparseable error from postgres server" error.
+//
+// NOTE: We have made a conscious choice to propagate a subset of the error
+// field types. We focus on those that are always present and, by our
+// assessment, hold the most salient information.
+func NewError(data []byte) error {
+	constructedErr := &Error{}
+	b := NewMessageBuffer(data)
+
+	var (
+		readErr       error
+		fieldType     byte
+		fieldContents string
+	)
+
+	for {
+		fieldType, readErr = b.ReadByte()
+		// We're done reading
+		if readErr == io.EOF {
+			break
+		}
+		// Unexpected error
+		if readErr != nil {
+			return fmt.Errorf(unparseableErr)
+		}
+
+		fieldContents, readErr = b.ReadString()
+		// We're done reading
+		if readErr == io.EOF {
+			break
+		}
+		// Unexpected error
+		if readErr != nil {
+			return fmt.Errorf(unparseableErr)
+		}
+
+		switch fieldType {
+		case 'S':
+			constructedErr.Severity = fieldContents
+		case 'C':
+			constructedErr.Code = fieldContents
+		case 'M':
+			constructedErr.Message = fieldContents
+		case 'D':
+			constructedErr.Detail = fieldContents
+		case 'H':
+			constructedErr.Hint = fieldContents
+		}
+	}
+
+	return constructedErr
 }
 
 // GetPacket formats an Error into a protocol message.

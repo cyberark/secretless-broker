@@ -22,22 +22,6 @@ func IsHTTPPlugin(availPlugins plugin.AvailablePlugins, pluginID string) bool {
 	return false
 }
 
-// Plugins represent a holding object for a bundle of plugins of different types.
-type Plugins struct {
-	HTTPPluginsByID map[string]http.Plugin
-	TCPPluginsByID  map[string]tcp.Plugin
-}
-
-// HTTPPlugins returns only the HTTP plugins in the Plugins struct.
-func (plugins *Plugins) HTTPPlugins() map[string]http.Plugin {
-	return plugins.HTTPPluginsByID
-}
-
-// TCPPlugins returns only the TCP plugins in the Plugins struct.
-func (plugins *Plugins) TCPPlugins() map[string]tcp.Plugin {
-	return plugins.TCPPluginsByID
-}
-
 // AllAvailablePlugins returns the full list of internal and external plugins
 // available to the broker.
 func AllAvailablePlugins(
@@ -50,7 +34,7 @@ func AllAvailablePlugins(
 		pluginDir,
 		checksumsFile,
 		GetInternalPluginsFunc,
-		LoadPluginsFromDir,
+		ExternalPlugins,
 		logger,
 	)
 }
@@ -70,33 +54,41 @@ func AllAvailablePluginsWithOptions(
 		return nil, err
 	}
 
-	externalPlugins, err := ExternalPlugins(
-		pluginDir,
-		externalLookupfunc,
-		logger,
-		checksumsFile,
-	)
+	externalPlugins, err := externalLookupfunc(pluginDir, checksumsFile, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	httpPlugins := internalPlugins.HTTPPlugins()
-	for name, httpPlugin := range externalPlugins.HTTPPlugins() {
-		if _, ok := httpPlugins[name]; ok {
-			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
-				name)
-		}
+	httpPlugins := map[string]http.Plugin{}
 
+	for name, httpPlugin := range internalPlugins.HTTPPlugins() {
+		if _, ok := httpPlugins[name]; ok {
+			// TODO: Should this ever happen?  Do we need this check?  Should it panic?
+			logger.Warnf("Internal plugin '%s' replaced by internal plugin", name)
+		}
 		httpPlugins[name] = httpPlugin
 	}
 
-	tcpPlugins := internalPlugins.TCPPlugins()
+	for name, httpPlugin := range externalPlugins.HTTPPlugins() {
+		if _, ok := httpPlugins[name]; ok {
+			logger.Warnf("Internal plugin '%s' replaced by external plugin", name)
+		}
+		httpPlugins[name] = httpPlugin
+	}
+
+	tcpPlugins := map[string]tcp.Plugin{}
+
+	for name, tcpPlugin := range internalPlugins.TCPPlugins() {
+		if _, ok := tcpPlugins[name]; ok {
+			logger.Warnf("Internal plugin '%s' replaced by internal plugin", name)
+		}
+		tcpPlugins[name] = tcpPlugin
+	}
+
 	for name, tcpPlugin := range externalPlugins.TCPPlugins() {
 		if _, ok := tcpPlugins[name]; ok {
-			logger.Warnf("Internal plugin '%s' is replaced by an externally-provided plugin",
-				name)
+			logger.Warnf("Internal plugin '%s' replaced by external plugin", name)
 		}
-
 		tcpPlugins[name] = tcpPlugin
 	}
 
@@ -104,4 +96,28 @@ func AllAvailablePluginsWithOptions(
 		HTTPPluginsByID: httpPlugins,
 		TCPPluginsByID:  tcpPlugins,
 	}, nil
+}
+
+// NewPlugins plugins creates a new instance of Plugins with both maps
+// initialized but empty.
+func NewPlugins() Plugins {
+	return Plugins{
+		HTTPPluginsByID: map[string]http.Plugin{},
+		TCPPluginsByID:  map[string]tcp.Plugin{},
+	}
+}
+// Plugins represent a holding object for a bundle of plugins of different types.
+type Plugins struct {
+	HTTPPluginsByID map[string]http.Plugin
+	TCPPluginsByID  map[string]tcp.Plugin
+}
+
+// HTTPPlugins returns only the HTTP plugins in the Plugins struct.
+func (plugins *Plugins) HTTPPlugins() map[string]http.Plugin {
+	return plugins.HTTPPluginsByID
+}
+
+// TCPPlugins returns only the TCP plugins in the Plugins struct.
+func (plugins *Plugins) TCPPlugins() map[string]tcp.Plugin {
+	return plugins.TCPPluginsByID
 }

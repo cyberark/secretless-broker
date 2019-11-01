@@ -1,8 +1,6 @@
 package signal_test
 
 import (
-	"os"
-	ossignal "os/signal"
 	"syscall"
 	"testing"
 
@@ -12,104 +10,107 @@ import (
 )
 
 func TestSignal(t *testing.T) {
-	t.Run("Signals listeners are notified", func(t *testing.T) {
-		testSignals := []os.Signal{
-			syscall.SIGUSR1,
-			syscall.SIGUSR2,
-		}
-		exitListener := signal.NewExitListenerWithOptions(testSignals...)
 
-		notifications := []string{}
+	t.Run("Signals listeners are notified on expected signals", func(t *testing.T) {
+		// SIGUSR1 won't interfere with the process, so it's a good signal to
+		// test with.
+		expectedSignal := syscall.SIGUSR1
+		exitListener := signal.NewExitListenerWithOptions(expectedSignal)
+
+		// Create a channel for the handlers to communicate with.
+		handlerResultsCh := make(chan string, 2)
+
+		// Create and add the handlers
 		handler1 := func() {
-			notifications = append(notifications, "handler1")
+			handlerResultsCh <- "handler1"
 		}
 		handler2 := func() {
-			notifications = append(notifications, "handler2")
+			handlerResultsCh <- "handler2"
 		}
-		handler3 := func() {
-			notifications = append(notifications, "handler3")
-		}
-
-		exitListener.AddHandler(handler1)
-		exitListener.AddHandler(handler2)
-		exitListener.AddHandler(handler3)
-
-		// Sanity check
-		assert.Equal(t, 0, len(notifications))
-
-		go func() {
-			syscall.Kill(syscall.Getpid(), syscall.SIGUSR2)
-		}()
-
-		exitListener.Wait()
-
-		assert.Equal(t, []string{"handler1", "handler2", "handler3"}, notifications)
-	})
-
-	t.Run("Signals listeners are only notified on expected signals", func(t *testing.T) {
-		testSignals := []os.Signal{
-			syscall.SIGUSR1,
-		}
-		exitListener := signal.NewExitListenerWithOptions(testSignals...)
-
-		notifications := []string{}
-		handler1 := func() {
-			notifications = append(notifications, "handler1")
-		}
-		handler2 := func() {
-			notifications = append(notifications, "handler2")
-		}
-
 		exitListener.AddHandler(handler1)
 		exitListener.AddHandler(handler2)
 
 		// Start the ExitListener and create a channel it will notify when it's
 		// done listening.
-		waitIsFinished := make(chan struct{})
+		waitHasReturnedCh := make(chan struct{})
 		go func() {
 			exitListener.Wait()
-			waitIsFinished <- struct{}{}
+			waitHasReturnedCh <- struct{}{}
 		}()
 
-		// Sanity check
-		assert.Equal(t, 0, len(notifications))
+		// Ensure that Wait() has started
+		<-exitListener.IsWaitingCh()
 
-		// It responds to signals it's listening for
-		syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
+		// Fire the expected signal
+		syscall.Kill(syscall.Getpid(), expectedSignal)
 
 		// Wait for the ExitListener to respond
-		<-waitIsFinished
+		<-waitHasReturnedCh
 
-		// Expected notification was added
-		assert.Equal(t, 2, len(notifications))
+		// Get the results
+		var results []string
+		results = append(results, <-handlerResultsCh)
+		results = append(results, <-handlerResultsCh)
 
-		// Now the 2nd case, that it ignores signals it's not listening for
-		// NOTE: This will be moved to a separate test
+		// Confirm they're correct
+		assert.EqualValues(t, []string{"handler1", "handler2"}, results)
+	})
 
-		// Reset the notifications
-		notifications = []string{}
+	t.Run("Handlers handle expected signals and ignore others", func(t *testing.T) {
+		// SIGUSR1 won't interfere with the process, so it's a good signal to
+		// test with.
+		expectedSignal := syscall.SIGUSR1
+		unexpectedSignal := syscall.SIGUSR2
+		exitListener := signal.NewExitListenerWithOptions(expectedSignal)
 
-		// First we setup a channel so we'll know when the signal has been
-		// processed. signal package notifies in order of subscription, so if
-		// this is called, we know ExitListener will have already been called.
-		// Nit: It's _technically_ possible ExitListener was called but isn't
-		// processing yet, but this is very unlikely.
-		ignoredSignal := syscall.SIGUSR2
-		signalProcessedCh := make(chan os.Signal, 1)
-		ossignal.Notify(signalProcessedCh, ignoredSignal)
+		// Create a channel for the handlers to communicate with.
+		//
+		// NOTE: We give a buffer large enough to hold more results than we're
+		// expecting if the implementation is correct (2 results).  Because if
+		// the unexpected signal were handled (the bug we're testing for), we
+		// need space to catch both its results and the expected results.
+		handlerResultsCh := make(chan string, 4)
 
+		// Create and add the handlers
+		handler1 := func() {
+			handlerResultsCh <- "handler1"
+		}
+		handler2 := func() {
+			handlerResultsCh <- "handler2"
+		}
+		exitListener.AddHandler(handler1)
+		exitListener.AddHandler(handler2)
+
+		// Start the ExitListener and create a channel it will notify when it's
+		// done listening.
+		waitHasReturnedCh := make(chan struct{})
 		go func() {
 			exitListener.Wait()
-			waitIsFinished <- struct{}{}
+			waitHasReturnedCh <- struct{}{}
 		}()
 
-		// Send the ignored signal
-		syscall.Kill(syscall.Getpid(), ignoredSignal)
+		// Ensure that Wait() has started
+		<-exitListener.IsWaitingCh()
 
-		// Wait till we know it's been processed
-		<-signalProcessedCh
+		// Fire the unexpected signal first, then the expected one.  If there
+		// expected one is handled, we know for sure the unexpected would have
+		// been handled, _if_ such a bug existed.  That is, we can use it as
+		// a synchronization mechanism.
+		syscall.Kill(syscall.Getpid(), unexpectedSignal)
+		syscall.Kill(syscall.Getpid(), expectedSignal)
 
-		// Now assert that ExitListener did NOT handle it
-		assert.Equal(t, 0, len(notifications))
+		// Wait for the ExitListener to respond
+		<-waitHasReturnedCh
+
+		// Get the results
+		var results []string
+		results = append(results, <-handlerResultsCh)
+		results = append(results, <-handlerResultsCh)
+
+		// Confirm the expected results are correct
+		assert.EqualValues(t, []string{"handler1", "handler2"}, results)
+
+		// Confirm the channel is empty (no unexpected results)
+		assert.Equal(t, 0, len(handlerResultsCh))
 	})
 }

@@ -27,14 +27,14 @@ type Handler func()
 type ExitListener interface {
 	AddHandler(Handler)
 	Wait()
-	IsWaiting() bool
+	IsWaitingCh() chan struct{}
 }
 
 type exitListener struct {
 	handlers          []Handler
 	exitSignalChannel chan os.Signal
 	doneChannel       chan struct{}
-	isWaiting         bool
+	isWaitingCh       chan struct{}
 }
 
 // AddHandler adds a new handler that will be invoked when an exit signal is
@@ -46,8 +46,10 @@ func (p *exitListener) AddHandler(exitHandler Handler) {
 // Wait does two things: 1. It kicks off the "listening" process, so that
 // Handlers will be notified of an exit event. 2.  Blocks until an
 // exit signal is received.
+//
+// NOTE: Wait is not thread safe.  Wait should only be called once.  Create
+// a new listener if you need to call it again.
 func (p *exitListener) Wait() {
-	p.isWaiting = true
 	go func() {
 		<-p.exitSignalChannel
 
@@ -58,14 +60,12 @@ func (p *exitListener) Wait() {
 		p.doneChannel <- struct{}{}
 	}()
 
+	p.isWaitingCh <- struct{}{}
 	<-p.doneChannel
-	p.isWaiting = false
 }
 
-// IsWaiting tells if you if the exitListener is currently blocking, waiting for
-// exit signals.  Currently this is only used in tests.
-func (p *exitListener) IsWaiting() bool {
-	return p.isWaiting
+func (p *exitListener) IsWaitingCh() chan struct{} {
+	return p.isWaitingCh
 }
 
 // NewExitListener creates a new instance of ExitListener.  Clients are
@@ -79,6 +79,7 @@ func NewExitListener() ExitListener {
 // be waited on by `Wait()`ing.
 func NewExitListenerWithOptions(signals ...os.Signal) ExitListener {
 	doneChannel := make(chan struct{})
+	isWaitingCh := make(chan struct{}, 1)
 	exitSignalChannel := make(chan os.Signal, 1)
 	signal.Notify(exitSignalChannel, signals...)
 
@@ -86,5 +87,6 @@ func NewExitListenerWithOptions(signals ...os.Signal) ExitListener {
 		handlers:          []Handler{},
 		exitSignalChannel: exitSignalChannel,
 		doneChannel:       doneChannel,
+		isWaitingCh:       isWaitingCh,
 	}
 }

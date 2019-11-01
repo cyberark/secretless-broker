@@ -186,19 +186,15 @@ func handlePerformanceProfiling(profileType string, exitSignals signal.ExitListe
 		return
 	}
 
-	// Validate requested type
-	if err := profile.ValidateType(profileType); err != nil {
-		log.Fatalln(err)
-	}
-
 	// Start profiling
-	perfProfile := profile.New(profileType)
-	exitSignals.AddHandler(func() {
-		_ = perfProfile.Stop()
-	})
-
-	err := perfProfile.Start()
+	perfProfile, err := profile.New(profileType)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	exitSignals.AddHandler(func() {
+		perfProfile.Stop()
+	})
+
+	perfProfile.Start()
 }

@@ -18,8 +18,10 @@ func TestSignal(t *testing.T) {
 		expectedSignal := syscall.SIGUSR1
 		exitListener := signal.NewExitListenerWithOptions(expectedSignal)
 
-		// Create a channel for the handlers to communicate with.
-		handlerResultsCh := make(chan string, 2)
+		// Create a channel for the handlers to communicate with.  Make the
+		// channel size larger than expected result size, so if we get too many
+		// results, we'll know.
+		handlerResultsCh := make(chan string, 99)
 
 		// Create and add the handlers
 		handler1 := func() {
@@ -37,7 +39,7 @@ func TestSignal(t *testing.T) {
 		// Fire the signal
 		syscall.Kill(syscall.Getpid(), expectedSignal)
 
-		// Add timeout so test fails cleanly if expected signals isn't handled.
+		// Add timeout so test fails cleanly if expected signal isn't handled.
 		select {
 		case <-doneCh:
 		case <-time.After(200 * time.Millisecond):
@@ -69,7 +71,7 @@ func TestSignal(t *testing.T) {
 		// Fire the signal
 		syscall.Kill(syscall.Getpid(), unexpectedSignal)
 
-		// Add timeout so test fails cleanly if expected signals isn't handled.
+		// If incorrectly handling doesn't occur in 200ms, we're safe.
 		select {
 		case <-doneCh:
 			assert.FailNow(t, "exitListener incorrectly handled unexpected signal")

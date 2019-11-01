@@ -26,13 +26,12 @@ type Handler func()
 // the order they were added, and then stop listening.
 type ExitListener interface {
 	AddHandler(Handler)
-	Wait()
+	Listen() chan struct{}
 }
 
 type exitListener struct {
 	handlers          []Handler
 	exitSignalChannel chan os.Signal
-	doneChannel       chan struct{}
 }
 
 // AddHandler adds a new handler that will be invoked when an exit signal is
@@ -41,10 +40,14 @@ func (p *exitListener) AddHandler(exitHandler Handler) {
 	p.handlers = append(p.handlers, exitHandler)
 }
 
-// Wait does two things: 1. It kicks off the "listening" process, so that
-// Handlers will be notified of an exit event. 2.  Blocks until an
-// exit signal is received.
-func (p *exitListener) Wait() {
+// Listen does two things: 1. It kicks off the "listening" process, so that
+// Handlers will be notified of an exit event. 2.  Returns a channel that
+// will be notified only after those events have been handled.
+//
+// NOTE: Listen should only be called once.  Create a new listener if you need
+// to call it again.
+func (p *exitListener) Listen() chan struct{} {
+	doneChannel := make(chan struct{})
 	go func() {
 		<-p.exitSignalChannel
 
@@ -52,22 +55,26 @@ func (p *exitListener) Wait() {
 			h()
 		}
 
-		p.doneChannel <- struct{}{}
+		doneChannel <- struct{}{}
 	}()
-
-	<- p.doneChannel
+	return doneChannel
 }
 
 // NewExitListener creates a new instance of ExitListener.  Clients are
 // responsible for adding handlers and calling Wait() to kick it off.
 func NewExitListener() ExitListener {
-	doneChannel := make(chan struct{})
-	exitSignalChannel := make(chan os.Signal)
-	signal.Notify(exitSignalChannel, exitSignals...)
+	return NewExitListenerWithOptions(exitSignals...)
+}
+
+// NewExitListenerWithOptions creates a new instance of ExitListener with configurable
+// options. Clients are responsible for adding handlers to the listener which can then
+// be waited on by `Wait()`ing.
+func NewExitListenerWithOptions(signals ...os.Signal) ExitListener {
+	exitSignalChannel := make(chan os.Signal, 1)
+	signal.Notify(exitSignalChannel, signals...)
 
 	return &exitListener{
 		handlers:          []Handler{},
 		exitSignalChannel: exitSignalChannel,
-		doneChannel:       doneChannel,
 	}
 }

@@ -140,7 +140,8 @@ func StartSecretless(params *SecretlessOptions) {
 		}
 	}()
 
-	exitListener.Wait()
+	// Listen() returns a channel that will block until signals are handled.
+	<-exitListener.Listen()
 	logger.Info("Exiting...")
 }
 

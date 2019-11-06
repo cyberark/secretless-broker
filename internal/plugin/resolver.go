@@ -19,9 +19,11 @@ type Resolver struct {
 }
 
 // NewResolver instantiates providers based on the name and ProviderOptions
-func NewResolver(providerFactories map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error),
+func NewResolver(
+	providerFactories map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error),
 	eventNotifier plugin_v1.EventNotifier,
-	LogFatalFunc func(string, ...interface{})) plugin_v1.Resolver {
+	LogFatalFunc func(string, ...interface{}),
+) plugin_v1.Resolver {
 
 	if LogFatalFunc == nil {
 		LogFatalFunc = log.Fatalf

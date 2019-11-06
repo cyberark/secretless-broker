@@ -20,10 +20,12 @@ type Plugins struct {
 	TCPPluginsByID  map[string]tcp.Plugin
 }
 
+// HTTPPlugins returns the mock HTTP plugins.
 func (plugins *Plugins) HTTPPlugins() map[string]http.Plugin {
 	return plugins.HTTPPluginsByID
 }
 
+// TCPPlugins returns the mock TCP plugins.
 func (plugins *Plugins) TCPPlugins() map[string]tcp.Plugin {
 	return plugins.TCPPluginsByID
 }

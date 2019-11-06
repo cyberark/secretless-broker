@@ -1,0 +1,19 @@
+#!/bin/bash -ex
+
+SECRETLESS_HOST=secretless
+while getopts :d opt; do
+    case $opt in
+        d) SECRETLESS_HOST=secretless-dev;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+./stop
+
+# the order of the services is important. mssql must be up before we start secretless
+docker-compose up -d mssql
+
+./wait_for_mssql
+docker-compose logs mssql
+
+docker-compose up -d $SECRETLESS_HOST

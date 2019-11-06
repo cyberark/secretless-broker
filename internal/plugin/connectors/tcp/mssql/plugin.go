@@ -1,4 +1,4 @@
-package mysql
+package mssql
 
 import (
 	"net"
@@ -18,7 +18,7 @@ func NewConnector(conRes connector.Resources) tcp.Connector {
 		clientConn net.Conn,
 		credentialValuesByID connector.CredentialValuesByID,
 	) (backendConn net.Conn, err error) {
-		// singleUseConnector is responsible for generating the authenticated connection
+		// SingleUseConnector is responsible for generating the authenticated connection
 		// to the target service for each incoming client connection
 		singleUseConnector := &SingleUseConnector{
 			logger: conRes.Logger(),
@@ -36,8 +36,8 @@ func PluginInfo() map[string]string {
 	return map[string]string{
 		"pluginAPIVersion": "0.1.0",
 		"type":             "connector.tcp",
-		"id":               "mysql",
-		"description":      "returns an authenticated connection to a MySQL database",
+		"id":               "mssql",
+		"description":      "returns an authenticated connection to a MSSQL database",
 	}
 }
 

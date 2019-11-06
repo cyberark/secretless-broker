@@ -2,7 +2,7 @@
 
 For general info on Secretless plugins, please refer to the [plugin README](../README.md).
 
-Secretless has built-in support for PostgreSQL, MySQL, APIs that use basic
+Secretless has built-in support for PostgreSQL, MySQL, Microsoft SQL Server, APIs that use basic
 HTTP authentication, and many other target services.
 
 If you want to use Secretless with a target service that is not supported out of

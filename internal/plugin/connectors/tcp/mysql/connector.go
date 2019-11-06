@@ -42,7 +42,6 @@ func (connector *SingleUseConnector) sendErrorToClient(err error) {
 //   1. Constructs connection details from the provided credentials map.
 //   2. Dials the backend using credentials.
 //   3. Runs through the connection phase steps to authenticate.
-//   4. Pipes all future bytes unaltered between client and server.
 //
 // Connect requires "host", "port", "username" and "password" credentials.
 func (connector *SingleUseConnector) Connect(

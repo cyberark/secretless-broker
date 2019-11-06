@@ -8,23 +8,25 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
-// mockPlugins may appear on first glance to be duplication, but it's not. We
+// Plugins may appear on first glance to be duplication, but it's not. We
 // can't use the actual implementation sharedobj.Plugin without creating a
 // literal Go circular dependency.  It would be circular logically too: to use
 // the thing we're testing to create a mock to test it.  Also, note it's purely
 // coincidental that this implementation is the same as the actual
 // implementation in sharedobj. Either one could change.  We only care about
 // fulfilling the interface.
-type mockPlugins struct {
+type Plugins struct {
 	HTTPPluginsByID map[string]http.Plugin
 	TCPPluginsByID  map[string]tcp.Plugin
 }
 
-func (plugins *mockPlugins) HTTPPlugins() map[string]http.Plugin {
+// HTTPPlugins returns the mock HTTP plugins.
+func (plugins *Plugins) HTTPPlugins() map[string]http.Plugin {
 	return plugins.HTTPPluginsByID
 }
 
-func (plugins *mockPlugins) TCPPlugins() map[string]tcp.Plugin {
+// TCPPlugins returns the mock TCP plugins.
+func (plugins *Plugins) TCPPlugins() map[string]tcp.Plugin {
 	return plugins.TCPPluginsByID
 }
 
@@ -65,7 +67,7 @@ func TCPExternalPluginsByID() map[string]tcp.Plugin {
 
 // InternalPlugins creates a mock AvailablePlugins for internal plugins.
 func InternalPlugins() plugin.AvailablePlugins {
-	return &mockPlugins{
+	return &Plugins{
 		HTTPPluginsByID: HTTPInternalPluginsByID(),
 		TCPPluginsByID: TCPInternalPluginsByID(),
 	}
@@ -73,7 +75,7 @@ func InternalPlugins() plugin.AvailablePlugins {
 
 // ExternalPlugins creates a mock AvailablePlugins for external plugins.
 func ExternalPlugins() plugin.AvailablePlugins {
-	return &mockPlugins{
+	return &Plugins{
 		HTTPPluginsByID: HTTPExternalPluginsByID(),
 		TCPPluginsByID: TCPExternalPluginsByID(),
 	}

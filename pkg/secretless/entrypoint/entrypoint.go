@@ -83,9 +83,16 @@ func StartSecretless(params *SecretlessOptions) {
 	var allServices internal.Service
 
 	// Main service reload callback
+	configEnv := v2.NewConfigEnv(logger, availPlugins)
 	reloadConfig := func(cfg v2.Config) {
 		// Health check: Not live
 		util.SetAppIsLive(false)
+
+		// Ensure config's requested services can be created.
+		err := configEnv.Prepare(cfg)
+		if err != nil {
+			log.Fatalf("cannot create all requested services: %s", err)
+		}
 
 		// Start Services
 		allServices = proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)

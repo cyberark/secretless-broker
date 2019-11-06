@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	loggerMock "github.com/cyberark/secretless-broker/internal/log/mock"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/mock"
+	loggerMock "github.com/cyberark/secretless-broker/pkg/secretless/log/mock"
 )
 
 const testString1 = "good heavens"

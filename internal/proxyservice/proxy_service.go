@@ -36,55 +36,8 @@ type proxyServices struct {
 	runningServices []internal.Service
 }
 
-func (s *proxyServices) validateRequestedPluginsExist() error {
-	allPlugins := []string{"ssh", "ssh-agent"}
-	for pluginName := range s.availPlugins.TCPPlugins() {
-		allPlugins = append(allPlugins, pluginName)
-	}
-	for pluginName := range s.availPlugins.HTTPPlugins() {
-		allPlugins = append(allPlugins, pluginName)
-	}
-
-	s.logger.Infof(
-		"Validating services against available plugins: %s",
-		strings.Join(allPlugins, ","),
-	)
-
-	// Convert available plugins to a map, so that we can check for their
-	// existence in the loop below using a map lookup rather than a nested
-	// loop, which would be required otherwise.
-	allPluginsMap := map[string]bool{}
-	for _, p := range allPlugins  {
-		allPluginsMap[p] = true
-	}
-
-	errors := validation.Errors{}
-	for _, service := range s.config.Services {
-		connectorExists := allPluginsMap[service.Connector]
-		if !connectorExists {
-			errors[service.Name] = fmt.Errorf(
-				`missing service connector "%s"`,
-				service.Connector,
-			)
-			continue
-		}
-	}
-
-	err := errors.Filter()
-	if err != nil {
-		err = fmt.Errorf("services validation failed: %s", err)
-	}
-
-	return err
-}
-
 // Start starts all proxy services
 func (s *proxyServices) Start() error {
-	err := s.validateRequestedPluginsExist()
-	if err != nil {
-		return err
-	}
-
 	for _, service := range s.config.Services {
 		err := s.ensureSocketIsDeleted(service.ListenOn)
 		if err != nil {
@@ -226,8 +179,6 @@ func (s *proxyServices) ensureSocketIsDeleted(address string) error {
 	return nil
 }
 
-// TODO: v2.HTTPServiceConfig is a value type.  It needs to be moved to a
-//   separate package  All hardcoded deps that has no dependencies.
 func (s *proxyServices) createHTTPService(
 	httpSvcCfg v2.HTTPServiceConfig,
 	plugins map[string]http.Plugin,
@@ -391,15 +342,8 @@ func (s *proxyServices) credsRetriever(
 	creds []*v2.Credential,
 ) internal.CredentialsRetriever {
 	return func() (map[string][]byte, error) {
-		return s.getSecrets(creds)
+		return s.resolver.Resolve(creds)
 	}
-}
-
-// getSecrets returns the secret values for the requested credentials.
-// TODO: Move this up one level, pass it down as dep.  Danger: This has
-//   a hardcoded dependency on plugin and v1.
-func (s *proxyServices) getSecrets(secrets []*v2.Credential) (map[string][]byte, error) {
-	return s.resolver.Resolve(secrets)
 }
 
 // NewProxyServices returns a new ProxyServices instance.

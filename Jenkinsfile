@@ -67,6 +67,13 @@ pipeline {
           }
         }
 
+        stage('Integration: MSSQL Handler') {
+          steps {
+            sh './bin/run_integration mssql_connector'
+            junit 'test/mssql_connector/junit.xml'
+          }
+        }
+
         stage('Integration: PG Handler') {
           steps {
             sh './bin/run_integration pg_handler'

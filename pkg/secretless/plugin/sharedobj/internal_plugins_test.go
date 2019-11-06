@@ -93,7 +93,7 @@ func TestGetInternalPlugins(t *testing.T) {
 		}
 
 		if internalPlugins.TCPPlugins() != nil {
-			assert.Equal(t, 2, len(internalPlugins.TCPPlugins()))
+			assert.Equal(t, 3, len(internalPlugins.TCPPlugins()))
 		}
 	})
 }

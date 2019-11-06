@@ -4,6 +4,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/aws"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/basicauth"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/conjur"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
@@ -16,6 +17,7 @@ type InternalPluginLookupFunc func() (plugin.AvailablePlugins, error)
 
 // GetInternalPluginsFunc returns currently available built-in plugins.
 func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
+	// New connectors should have an entry in the map below, according to their type (HTTP/TCP)
 	return &Plugins{
 		HTTPPluginsByID: map[string]http.Plugin{
 			"aws":        aws.GetHTTPPlugin(),
@@ -25,6 +27,7 @@ func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
 		TCPPluginsByID: map[string]tcp.Plugin{
 			"pg":    pg.GetTCPPlugin(),
 			"mysql": mysql.GetTCPPlugin(),
+			"mssql": mssql.GetTCPPlugin(),
 		},
 	}, nil
 }

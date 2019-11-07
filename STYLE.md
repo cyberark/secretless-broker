@@ -63,7 +63,7 @@ Consider the guidelines in [The Ten-Factor CI Job][10factor].
 
 [cmos]: http://www.chicagomanualofstyle.org/home.html
 [names]: https://en.wikipedia.org/wiki/Alice_and_Bob#Cast_of_characters
-[10factor]: http://www.10factor.ci/
+[10factor]: http://tenfactorci-conjur.herokuapp.com
 [golint]: https://github.com/golang/lint
 
 ## Contributing

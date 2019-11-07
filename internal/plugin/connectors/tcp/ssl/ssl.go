@@ -12,9 +12,9 @@ type options map[string]string
 // DbSSLMode holds information about the DB's SSL options.
 type DbSSLMode struct {
 	tls.Config
-	UseTLS bool
+	UseTLS       bool
 	VerifyCaOnly bool
-	Options options
+	Options      options
 }
 
 // NewDbSSLMode configures and creates a DbSSLMode

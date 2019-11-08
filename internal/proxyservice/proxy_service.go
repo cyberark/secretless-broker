@@ -197,7 +197,7 @@ func (s *proxyServices) createSSHService(
 	// TODO: Add validation somewhere about overlapping listenOns
 	// TODO: v2.NetworkAddress is a value type.  It needs to be moved to its
 	//   own package with no deps (stdlib deps are ok).
-	netAddr := v2.NetworkAddress(config.ListenOn)
+	netAddr := config.ListenOn
 	listener, err := net.Listen(netAddr.Network(), netAddr.Address())
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (s *proxyServices) createSSHAgentService(
 	// TODO: Add validation somewhere about overlapping listenOns
 	// TODO: v2.NetworkAddress is a value type.  It needs to be moved to its
 	//   own package with no deps (stdlib deps are ok).
-	netAddr := v2.NetworkAddress(config.ListenOn)
+	netAddr := config.ListenOn
 	listener, err := net.Listen(netAddr.Network(), netAddr.Address())
 	if err != nil {
 		return nil, err
@@ -260,7 +260,7 @@ func (s *proxyServices) createTCPService(
 	// TODO: Add validation somewhere about overlapping listenOns
 	// TODO: v2.NetworkAddress is a value type.  It needs to be moved to its
 	//   own package with no deps (stdlib deps are ok).
-	netAddr := v2.NetworkAddress(config.ListenOn)
+	netAddr := config.ListenOn
 	listener, err := net.Listen(netAddr.Network(), netAddr.Address())
 	if err != nil {
 		return nil, err

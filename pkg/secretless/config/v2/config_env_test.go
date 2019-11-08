@@ -67,4 +67,6 @@ func TestConfigEnv(t *testing.T) {
 		assert.Regexp(t, "FAKE PLUGIN 1", err)
 		assert.Regexp(t, "FAKE PLUGIN 2", err)
 	})
+
+	// returns error when socket can't be delted
 }

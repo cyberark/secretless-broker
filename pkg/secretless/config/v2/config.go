@@ -13,7 +13,7 @@ import (
 // Config represents a full configuration of Secretless, which is just a list of
 // individual Service configurations.
 type Config struct {
-	Debug bool
+	Debug    bool
 	Services []*Service
 }
 
@@ -78,7 +78,7 @@ func NewConfigsByType(
 		rawConfigs = append(rawConfigs, *cfg)
 	}
 
-	var httpConfigs ,tcpConfigs, sshConfigs, sshAgentConfigs []Service
+	var httpConfigs, tcpConfigs, sshConfigs, sshAgentConfigs []Service
 
 	for _, cfg := range rawConfigs {
 		switch {
@@ -102,7 +102,7 @@ func NewConfigsByType(
 	var httpServiceConfigs []HTTPServiceConfig
 	for listenOn, configs := range httpByListenOn {
 		httpServiceConfig := HTTPServiceConfig{
-			SharedListenOn:    NetworkAddress(listenOn),
+			SharedListenOn:    listenOn,
 			SubserviceConfigs: configs,
 		}
 		httpServiceConfigs = append(httpServiceConfigs, httpServiceConfig)
@@ -134,39 +134,16 @@ func (cfg *HTTPServiceConfig) Name() string {
 // corresponds to the ProxyService objects we want to create.  One ProxyService
 // will be created for each entry in http, and one for each entry in tcp.
 type ConfigsByType struct {
-	HTTP      []HTTPServiceConfig
-	SSH  	  []Service
-	SSHAgent  []Service
-	TCP       []Service
-}
-
-// separatedHTTPAndTCPConfigs takes a slices of configs and returns two slices,
-// one containing only HTTP configs and the other containing only TCP configs.
-// Merely a helper function to reduce bloat in newConfigsByType.
-// TODO: There _might_ be something a little funny about the dependency here
-//   on AvailablePlugins, but I'm not sure.  There are also reason for it.
-//   Should consider this more fully.
-func separatedHTTPAndTCPConfigs(
-	configs []Service,
-	availPlugins plugin.AvailablePlugins,
-) (httpConfigs []Service, tcpConfigs []Service) {
-	// TODO: Add proper validation here of the type.  This should moved into
-	//   IsHTTPPlugin, whose API will likely change to returning a type or an
-	//   error
-	for _, cfg := range configs {
-		if sharedobj.IsHTTPPlugin(availPlugins, cfg.Connector) {
-			httpConfigs = append(httpConfigs, cfg)
-			continue
-		}
-		tcpConfigs = append(tcpConfigs, cfg)
-	}
-	return httpConfigs, tcpConfigs
+	HTTP     []HTTPServiceConfig
+	SSH      []Service
+	SSHAgent []Service
+	TCP      []Service
 }
 
 // groupedByListenOn returns a map grouping the configs provided by their ListenOn
 // property.  Merely a helper function to reduce bloat in newConfigsByType.
-func groupedByListenOn(httpConfigs []Service) map[string][]Service {
-	httpByListenOn := map[string][]Service{}
+func groupedByListenOn(httpConfigs []Service) map[NetworkAddress][]Service {
+	httpByListenOn := map[NetworkAddress][]Service{}
 	for _, httpConfig := range httpConfigs {
 		// default group for this ListenOn, in case we don't yet have one yet
 		var groupedConfigs []Service
@@ -183,4 +160,3 @@ func groupedByListenOn(httpConfigs []Service) map[string][]Service {
 	}
 	return httpByListenOn
 }
-

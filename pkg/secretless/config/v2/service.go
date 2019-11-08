@@ -3,12 +3,8 @@ package v2
 import (
 	"fmt"
 	"log"
-	"net/url"
-	"os"
 	"strings"
 
-	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
@@ -51,7 +47,7 @@ type Service struct {
 	Connector       string
 	ConnectorConfig connectorConfig
 	Credentials     []*Credential
-	ListenOn        string
+	ListenOn        NetworkAddress
 	Name            string
 }
 
@@ -130,7 +126,7 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	return &Service{
 		Credentials:     credentials,
-		ListenOn:        svcYAML.ListenOn,
+		ListenOn:        NetworkAddress(svcYAML.ListenOn),
 		Name:            svcName,
 		Connector:       connector,
 		ConnectorConfig: connectorConfigBytes,
@@ -151,7 +147,7 @@ func connectorID(
 	// Protocol given
 	if hasProtocol {
 		log.Printf(
-			"WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
+			"WARN: 'protocol' key found on service '%s'. 'protocol' is now "+
 				"deprecated and will be removed in a future release.",
 			svcName,
 		)
@@ -168,7 +164,7 @@ func connectorID(
 	switch {
 	case hasConnector: // Connector given, always takes precedence
 		connectorID = svcYAML.Connector
-	case hasProtocol:  // Only use protocol when connector not given
+	case hasProtocol: // Only use protocol when connector not given
 		connectorID = svcYAML.Protocol
 	default:
 		return "", fmt.Errorf("missing 'connector' key on service '%s'", svcName)
@@ -190,155 +186,9 @@ func connectorID(
 	return connectorID, nil
 }
 
-// ConfigEnv represents the runtime environment that will fulfill the services
-// requested by the Config.  It has a single public method, Prepare, that
-// ensures the runtime environment supports the requested services.
-type ConfigEnv struct {
-	logger logapi.Logger
-	availPlugins plugin.AvailablePlugins
-	getFileInfo func(name string) (os.FileInfo, error)
-	deleteFile func(name string) error
-}
-
-// NewConfigEnv creates a new instance of ConfigEnv.
-func NewConfigEnv(logger logapi.Logger, availPlugins plugin.AvailablePlugins) ConfigEnv {
-	// Return *PathError
-	// &PathError{"remove", name, e}
-	// os.Remove("blah")
-	return NewConfigEnvWithOptions(logger, availPlugins, os.Stat, os.Remove)
-}
-
-// NewConfigEnvWithOptions allows injecting all dependencies.  Used for unit
-// testing.
-func NewConfigEnvWithOptions(
-	logger logapi.Logger,
-	availPlugins plugin.AvailablePlugins,
-	getFileInfo func(name string) (os.FileInfo, error),
-	deleteFile func(name string) error,
-) ConfigEnv {
-	// Return *PathError
-	// &PathError{"remove", name, e}
-	os.Remove("blah")
-	return ConfigEnv{
-		logger:       logger,
-		availPlugins: availPlugins,
-		getFileInfo: getFileInfo,
-		deleteFile: deleteFile,
-	}
-}
-// This is just a pure type error, we can create our own using os.ErrNotExist
-//func IsNotExist(err error) bool {
-//func Stat(name string) (FileInfo, error) {
-//func Remove(name string) error {
-//type FileInfo interface {
-//	Name() string       // base name of the file
-//	Size() int64        // length in bytes for regular files; system-dependent for others
-//	Mode() FileMode     // file mode bits
-//	ModTime() time.Time // modification time
-//	IsDir() bool        // abbreviation for Mode().IsDir()
-//	Sys() interface{}   // underlying data source (can return nil)
-//}
-
-// Prepare ensures the runtime environment is prepared to handle the Config's
-// service requests. It checks both that the requested connectors exist, and
-// that the requested sockets are available, or can be deleted.  If any of these
-// checks fail, it will error.
-func (c *ConfigEnv) Prepare(cfg Config) error {
-	err := c.validateRequestedPlugins(cfg)
-	if err != nil {
-		return err
-	}
-
-	return c.ensureAllSocketsAreDeleted(cfg)
-}
-
-// validateRequestedPlugins ensures that the AvailablePlugins can fulfill the
-// services requested by the given Config, and return an error if not.
-func (c *ConfigEnv) validateRequestedPlugins(cfg Config) error {
-	pluginIDs := plugin.AvailableConnectorIDs(c.availPlugins)
-
-	c.logger.Infof(
-		"Validating config against available plugins: %s",
-		strings.Join(pluginIDs, ","),
-	)
-
-	// Convert available plugin IDs to a map, so that we can check if they exist
-	// in the loop below using a map lookup rather than a nested loop.
-	pluginIDsMap := map[string]bool{}
-	for _, p := range pluginIDs {
-		pluginIDsMap[p] = true
-	}
-
-	errors := validation.Errors{}
-	for _, service := range cfg.Services {
-		// A plugin ID and a connector name are equivalent.
-		pluginExists := pluginIDsMap[service.Connector]
-		if !pluginExists {
-			errors[service.Name] = fmt.Errorf(
-				`missing service connector "%s"`,
-				service.Connector,
-			)
-			continue
-		}
-	}
-
-	err := errors.Filter()
-	if err != nil {
-		err = fmt.Errorf("services validation failed: %s", err.Error())
-	}
-
-	return err
-}
-
-func (c *ConfigEnv) ensureAllSocketsAreDeleted(cfg Config) error {
-	errors := validation.Errors{}
-
-	for _, service := range cfg.Services {
-		err := c.ensureSocketIsDeleted(service.ListenOn)
-		if err != nil {
-			errors[service.Name] = fmt.Errorf(
-				"socket can't be deleted: %s", service.ListenOn,
-			)
-		}
-	}
-	return errors.Filter()
-}
-
-func (c *ConfigEnv) ensureSocketIsDeleted(address string) error {
-	parsedURL, err := url.Parse(address)
-	if err != nil {
-		return fmt.Errorf("unable to parse ListenOn location '%s'", address)
-	}
-
-	// If we're not a unix socket address, we don't need to worry about pre-emptive cleanup
-	if parsedURL.Scheme != "unix" {
-		return nil
-	}
-
-	socketFile := parsedURL.Path
-	c.logger.Debugf("Ensuring that the socketfile '%s' is not present...", socketFile)
-
-	// If file is not present, then we are ok to continue.
-	// NOTE: os.IsNotExist is a pure function, so does not need to be injected.
-	if _, err := c.getFileInfo(socketFile); os.IsNotExist(err) {
-		c.logger.Debugf("Socket file '%s' not present. Skipping deletion.", socketFile)
-		return nil
-	}
-
-	// Otherwise delete the file first
-	c.logger.Warnf("Socket file '%s' already present. Deleting...", socketFile)
-	err = c.deleteFile(socketFile)
-	if err != nil {
-		return fmt.Errorf("unable to delete stale socket file '%s'", socketFile)
-	}
-
-	return nil
-}
-
 // NetworkAddress is a utility type for handling string manipulation /
 // destructuring for listenOn addresses that include a network. Currently only
 // used outside this package.
-// TODO: Update all instances of listenOn to use this type
 type NetworkAddress string
 
 // Network returns the "network" part of a network address, eg, "tcp" or "unix".

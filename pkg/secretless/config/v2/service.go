@@ -5,8 +5,6 @@ import (
 	"log"
 	"strings"
 
-	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
@@ -49,7 +47,7 @@ type Service struct {
 	Connector       string
 	ConnectorConfig connectorConfig
 	Credentials     []*Credential
-	ListenOn        string
+	ListenOn        NetworkAddress
 	Name            string
 }
 
@@ -63,9 +61,9 @@ func (s Service) HasCredential(credentialName string) bool {
 	return false
 }
 
-// connectorFromLegacyHTTPConfig extracts authenticationStrategy.
-// This function is useful when the deprecated 'protocol' field equals 'http'
-// and you want to determine the connector name
+// connectorFromLegacyHTTPConfig extracts authenticationStrategy. This function
+// is useful when the deprecated 'protocol' field equals 'http' and you want to
+// determine the connector name
 func connectorFromLegacyHTTPConfig(connectorConfigBytes []byte) (string, error) {
 	tempCfg := &struct {
 		AuthenticationStrategy string `yaml:"authenticationStrategy"`
@@ -128,7 +126,7 @@ func NewService(svcName string, svcYAML *serviceYAML) (*Service, error) {
 
 	return &Service{
 		Credentials:     credentials,
-		ListenOn:        svcYAML.ListenOn,
+		ListenOn:        NetworkAddress(svcYAML.ListenOn),
 		Name:            svcName,
 		Connector:       connector,
 		ConnectorConfig: connectorConfigBytes,
@@ -149,7 +147,7 @@ func connectorID(
 	// Protocol given
 	if hasProtocol {
 		log.Printf(
-			"WARN: 'protocol' key found on service '%s'. 'protocol' is now " +
+			"WARN: 'protocol' key found on service '%s'. 'protocol' is now "+
 				"deprecated and will be removed in a future release.",
 			svcName,
 		)
@@ -166,7 +164,7 @@ func connectorID(
 	switch {
 	case hasConnector: // Connector given, always takes precedence
 		connectorID = svcYAML.Connector
-	case hasProtocol:  // Only use protocol when connector not given
+	case hasProtocol: // Only use protocol when connector not given
 		connectorID = svcYAML.Protocol
 	default:
 		return "", fmt.Errorf("missing 'connector' key on service '%s'", svcName)
@@ -188,66 +186,9 @@ func connectorID(
 	return connectorID, nil
 }
 
-// ConfigEnv represents the runtime environment that will fulfill the requested
-// connectors. Its static dependencies are a logger and the plugins available to
-// create connectors.
-// TODO: We'll move the logic from ensureSocketIsDeleted into here soon.
-type ConfigEnv struct {
-	logger logapi.Logger
-	availPlugins plugin.AvailablePlugins
-}
-
-// NewConfigEnv creates a new instance of ConfigEnv.
-func NewConfigEnv(l logapi.Logger, a plugin.AvailablePlugins) ConfigEnv {
-	return ConfigEnv{
-		logger:       l,
-		availPlugins: a,
-	}
-}
-
-// Prepare ensures the runtime environment is prepared to handle the Config's
-// service requests. Currently, this just means it checks that the requested
-// connectors exist, based on the AvailablePlugins.
-func (v *ConfigEnv) Prepare(cfg Config) error {
-	pluginIDs := plugin.AvailableConnectorIDs(v.availPlugins)
-
-	v.logger.Infof(
-		"Validating config against available plugins: %s",
-		strings.Join(pluginIDs, ","),
-	)
-
-	// Convert available plugin IDs to a map, so that we can check if they exist
-	// in the loop below using a map lookup rather than a nested loop.
-	pluginIDsMap := map[string]bool{}
-	for _, p := range pluginIDs {
-		pluginIDsMap[p] = true
-	}
-
-	errors := validation.Errors{}
-	for _, service := range cfg.Services {
-		// A plugin ID and a connector name are equivalent.
-		pluginExists := pluginIDsMap[service.Connector]
-		if !pluginExists {
-			errors[service.Name] = fmt.Errorf(
-				`missing service connector "%s"`,
-				service.Connector,
-			)
-			continue
-		}
-	}
-
-	err := errors.Filter()
-	if err != nil {
-		err = fmt.Errorf("services validation failed: %s", err.Error())
-	}
-
-	return err
-}
-
 // NetworkAddress is a utility type for handling string manipulation /
 // destructuring for listenOn addresses that include a network. Currently only
 // used outside this package.
-// TODO: Update all instances of listenOn to use this type
 type NetworkAddress string
 
 // Network returns the "network" part of a network address, eg, "tcp" or "unix".

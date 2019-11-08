@@ -59,7 +59,7 @@ func newV2ServiceFromListenerAndHandler(listener Listener, linkedHandler Handler
 		Connector:       connector,
 		ConnectorConfig: connectorConfig,
 		Credentials:     credentials,
-		ListenOn:        listenOn,
+		ListenOn:        config_v2.NetworkAddress(listenOn),
 		Name:            linkedHandler.Name,
 	}, nil
 }

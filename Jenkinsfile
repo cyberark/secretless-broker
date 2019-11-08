@@ -18,6 +18,12 @@ pipeline {
         sh './bin/build'
       }
     }
+    
+    stage('Scan Secretless Image') {
+      steps {
+        scanAndReport("secretless-broker:latest", "HIGH")
+      }
+    }
 
     stage('Run Tests') {
 

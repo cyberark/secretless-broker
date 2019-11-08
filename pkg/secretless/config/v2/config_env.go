@@ -30,9 +30,6 @@ type ConfigEnv struct {
 
 // NewConfigEnv creates a new instance of ConfigEnv.
 func NewConfigEnv(logger log.Logger, availPlugins plugin.AvailablePlugins) ConfigEnv {
-	// Return *PathError
-	// &PathError{"remove", name, e}
-	// os.Remove("blah")
 	return NewConfigEnvWithOptions(logger, availPlugins, os.Stat, os.Remove)
 }
 
@@ -44,9 +41,6 @@ func NewConfigEnvWithOptions(
 	getFileInfo func(name string) (os.FileInfo, error),
 	deleteFile func(name string) error,
 ) ConfigEnv {
-	// Return *PathError
-	// &PathError{"remove", name, e}
-	// os.Remove("blah")
 	return ConfigEnv{
 		logger:       logger,
 		availPlugins: availPlugins,

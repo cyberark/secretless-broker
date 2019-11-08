@@ -1,6 +1,8 @@
 package v2_test
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
@@ -15,11 +17,10 @@ import (
 
 func TestConfigEnv(t *testing.T) {
 
-	// A dummy to fulfill the dependency.  Asserting on the Infof call isn't
-	// really worthwhile.
+	// Shared mocks and doubles
+
 	logger := loggermock.NewLogger()
 
-	// Shared dependency for all the tests
 	availPlugins := &mock.Plugins{
 		HTTPPluginsByID: map[string]http.Plugin{
 			"HTTP1": mock.NewHTTPPlugin("HTTP1"),
@@ -31,7 +32,17 @@ func TestConfigEnv(t *testing.T) {
 		},
 	}
 
-	configEnv := v2.NewConfigEnv(logger, availPlugins)
+	// Mock to simulate file existing.
+	//
+	// NOTE: We're cheating a little bit by returning nil, since we're
+	// relying on knowing that our implementation doesn't actually use
+	// FileInfo.  That said, this should be ok since the test will likely
+	// break cleanly if the implementation is changed to use FileInfo.
+	getInfoForExistingFile :=  func(_ string) (os.FileInfo, error) {
+		return nil, nil
+	}
+
+	// Tests
 
 	t.Run("succeeds when all connectors are available", func(t *testing.T) {
 		cfg := v2.Config{
@@ -43,6 +54,7 @@ func TestConfigEnv(t *testing.T) {
 			},
 		}
 
+		configEnv := v2.NewConfigEnv(logger, availPlugins)
 		err := configEnv.Prepare(cfg)
 		assert.Nil(t, err)
 	})
@@ -57,6 +69,7 @@ func TestConfigEnv(t *testing.T) {
 			},
 		}
 
+		configEnv := v2.NewConfigEnv(logger, availPlugins)
 		err := configEnv.Prepare(cfg)
 		assert.NotNil(t, err)
 		if err == nil {
@@ -68,5 +81,96 @@ func TestConfigEnv(t *testing.T) {
 		assert.Regexp(t, "FAKE PLUGIN 2", err)
 	})
 
-	// returns error when socket can't be delted
+	// When a listenOn unix socket exists, it tries to delete it, and if the
+	// deletion succeeds, it does not return an error.
+	t.Run("can delete existing unix socket without error", func(t *testing.T) {
+
+		// Mock to simulate successful file deletion.
+		socketDeleted := ""
+		deleteFile := func(name string) error {
+			socketDeleted = name
+			return nil
+		}
+
+		configEnv := v2.NewConfigEnvWithOptions(
+			logger,
+			availPlugins,
+			getInfoForExistingFile,
+			deleteFile,
+		)
+
+		cfg := v2.Config{
+			Services: []*v2.Service{
+				{Name: "HTTP1 Service", Connector: "HTTP1", ListenOn: "unix://xxx"},
+			},
+		}
+
+		err := configEnv.Prepare(cfg)
+		assert.Nil(t, err)
+		if err != nil {
+			return
+		}
+
+		assert.Equal(t, "xxx", socketDeleted)
+	})
+
+	t.Run("returns error if socket deletion fails", func(t *testing.T) {
+
+		// Double to simulate failing file deletion.
+		deleteFile := func(name string) error {
+			return fmt.Errorf("failed to delete file")
+		}
+
+		configEnv := v2.NewConfigEnvWithOptions(
+			logger,
+			availPlugins,
+			getInfoForExistingFile,
+			deleteFile,
+		)
+
+		cfg := v2.Config{
+			Services: []*v2.Service{
+				{Name: "HTTP1 Service", Connector: "HTTP1", ListenOn: "unix://xxx"},
+			},
+		}
+
+		err := configEnv.Prepare(cfg)
+		assert.NotNil(t, err)
+		if err == nil {
+			return
+		}
+
+		assert.Regexp(t, "delete", err)
+	})
+
+	t.Run("doesn't delete non-unix sockets", func(t *testing.T) {
+
+		// Mock to simulate successful file deletion.
+		deleteFileCalled := false
+		deleteFile := func(name string) error {
+			deleteFileCalled = true
+			return nil
+		}
+
+		configEnv := v2.NewConfigEnvWithOptions(
+			logger,
+			availPlugins,
+			getInfoForExistingFile,
+			deleteFile,
+		)
+
+		cfg := v2.Config{
+			Services: []*v2.Service{
+				{Name: "HTTP1 Service", Connector: "HTTP1", ListenOn: "tcp://xxx"},
+			},
+		}
+
+		err := configEnv.Prepare(cfg)
+		assert.Nil(t, err)
+		if err != nil {
+			return
+		}
+
+		assert.False(t, deleteFileCalled, "deleteFile should not be called")
+	})
 }

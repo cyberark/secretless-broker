@@ -3,8 +3,6 @@ package proxyservice
 import (
 	"fmt"
 	"net"
-	"net/url"
-	"os"
 	"strings"
 
 	"github.com/go-ozzo/ozzo-validation"
@@ -38,14 +36,6 @@ type proxyServices struct {
 
 // Start starts all proxy services
 func (s *proxyServices) Start() error {
-	for _, service := range s.config.Services {
-		err := s.ensureSocketIsDeleted(service.ListenOn)
-		if err != nil {
-			// TODO: Add Fatalf to our logger and use that
-			s.logger.Panic(err)
-		}
-	}
-
 	for _, svc := range s.servicesToStart() {
 		err := svc.Start()
 		if err != nil {
@@ -144,39 +134,6 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 	}
 
 	return servicesToStart
-}
-
-// If we are a socket listener and there is a socket file already
-// we need to ensure that the socket file is remoed before starting
-// the service.
-func (s *proxyServices) ensureSocketIsDeleted(address string) error {
-	parsedURL, err := url.Parse(address)
-	if err != nil {
-		return fmt.Errorf("unable to parse ListenOn location '%s'", address)
-	}
-
-	// If we're not a unix socket address, we don't need to worry about pre-emptive cleanup
-	if parsedURL.Scheme != "unix" {
-		return nil
-	}
-
-	socketFile := parsedURL.Path
-	s.logger.Debugf("Ensuring that the socketfile '%s' is not present...", socketFile)
-
-	// If file is not present, then we are ok to continue
-	if _, err := os.Stat(socketFile); os.IsNotExist(err) {
-		s.logger.Debugf("Socket file '%s' not present. Skipping deletion.", socketFile)
-		return nil
-	}
-
-	// Otherwise delete the file first
-	s.logger.Warnf("Socket file '%s' already present. Deleting...", socketFile)
-	err = os.Remove(socketFile)
-	if err != nil {
-		return fmt.Errorf("unable to delete stale ocket file '%s'", socketFile)
-	}
-
-	return nil
 }
 
 func (s *proxyServices) createHTTPService(

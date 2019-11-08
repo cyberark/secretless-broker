@@ -3,6 +3,8 @@ package v2
 import (
 	"fmt"
 	"log"
+	"net/url"
+	"os"
 	"strings"
 
 	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
@@ -63,9 +65,9 @@ func (s Service) HasCredential(credentialName string) bool {
 	return false
 }
 
-// connectorFromLegacyHTTPConfig extracts authenticationStrategy.
-// This function is useful when the deprecated 'protocol' field equals 'http'
-// and you want to determine the connector name
+// connectorFromLegacyHTTPConfig extracts authenticationStrategy. This function
+// is useful when the deprecated 'protocol' field equals 'http' and you want to
+// determine the connector name
 func connectorFromLegacyHTTPConfig(connectorConfigBytes []byte) (string, error) {
 	tempCfg := &struct {
 		AuthenticationStrategy string `yaml:"authenticationStrategy"`
@@ -188,30 +190,74 @@ func connectorID(
 	return connectorID, nil
 }
 
-// ConfigEnv represents the runtime environment that will fulfill the requested
-// connectors. Its static dependencies are a logger and the plugins available to
-// create connectors.
-// TODO: We'll move the logic from ensureSocketIsDeleted into here soon.
+// ConfigEnv represents the runtime environment that will fulfill the services
+// requested by the Config.  It has a single public method, Prepare, that
+// ensures the runtime environment supports the requested services.
 type ConfigEnv struct {
 	logger logapi.Logger
 	availPlugins plugin.AvailablePlugins
+	getFileInfo func(name string) (os.FileInfo, error)
+	deleteFile func(name string) error
 }
 
 // NewConfigEnv creates a new instance of ConfigEnv.
-func NewConfigEnv(l logapi.Logger, a plugin.AvailablePlugins) ConfigEnv {
-	return ConfigEnv{
-		logger:       l,
-		availPlugins: a,
-	}
+func NewConfigEnv(logger logapi.Logger, availPlugins plugin.AvailablePlugins) ConfigEnv {
+	// Return *PathError
+	// &PathError{"remove", name, e}
+	// os.Remove("blah")
+	return NewConfigEnvWithOptions(logger, availPlugins, os.Stat, os.Remove)
 }
 
-// Prepare ensures the runtime environment is prepared to handle the Config's
-// service requests. Currently, this just means it checks that the requested
-// connectors exist, based on the AvailablePlugins.
-func (v *ConfigEnv) Prepare(cfg Config) error {
-	pluginIDs := plugin.AvailableConnectorIDs(v.availPlugins)
+// NewConfigEnvWithOptions allows injecting all dependencies.  Used for unit
+// testing.
+func NewConfigEnvWithOptions(
+	logger logapi.Logger,
+	availPlugins plugin.AvailablePlugins,
+	getFileInfo func(name string) (os.FileInfo, error),
+	deleteFile func(name string) error,
+) ConfigEnv {
+	// Return *PathError
+	// &PathError{"remove", name, e}
+	os.Remove("blah")
+	return ConfigEnv{
+		logger:       logger,
+		availPlugins: availPlugins,
+		getFileInfo: getFileInfo,
+		deleteFile: deleteFile,
+	}
+}
+// This is just a pure type error, we can create our own using os.ErrNotExist
+//func IsNotExist(err error) bool {
+//func Stat(name string) (FileInfo, error) {
+//func Remove(name string) error {
+//type FileInfo interface {
+//	Name() string       // base name of the file
+//	Size() int64        // length in bytes for regular files; system-dependent for others
+//	Mode() FileMode     // file mode bits
+//	ModTime() time.Time // modification time
+//	IsDir() bool        // abbreviation for Mode().IsDir()
+//	Sys() interface{}   // underlying data source (can return nil)
+//}
 
-	v.logger.Infof(
+// Prepare ensures the runtime environment is prepared to handle the Config's
+// service requests. It checks both that the requested connectors exist, and
+// that the requested sockets are available, or can be deleted.  If any of these
+// checks fail, it will error.
+func (c *ConfigEnv) Prepare(cfg Config) error {
+	err := c.validateRequestedPlugins(cfg)
+	if err != nil {
+		return err
+	}
+
+	return c.ensureAllSocketsAreDeleted(cfg)
+}
+
+// validateRequestedPlugins ensures that the AvailablePlugins can fulfill the
+// services requested by the given Config, and return an error if not.
+func (c *ConfigEnv) validateRequestedPlugins(cfg Config) error {
+	pluginIDs := plugin.AvailableConnectorIDs(c.availPlugins)
+
+	c.logger.Infof(
 		"Validating config against available plugins: %s",
 		strings.Join(pluginIDs, ","),
 	)
@@ -242,6 +288,51 @@ func (v *ConfigEnv) Prepare(cfg Config) error {
 	}
 
 	return err
+}
+
+func (c *ConfigEnv) ensureAllSocketsAreDeleted(cfg Config) error {
+	errors := validation.Errors{}
+
+	for _, service := range cfg.Services {
+		err := c.ensureSocketIsDeleted(service.ListenOn)
+		if err != nil {
+			errors[service.Name] = fmt.Errorf(
+				"socket can't be deleted: %s", service.ListenOn,
+			)
+		}
+	}
+	return errors.Filter()
+}
+
+func (c *ConfigEnv) ensureSocketIsDeleted(address string) error {
+	parsedURL, err := url.Parse(address)
+	if err != nil {
+		return fmt.Errorf("unable to parse ListenOn location '%s'", address)
+	}
+
+	// If we're not a unix socket address, we don't need to worry about pre-emptive cleanup
+	if parsedURL.Scheme != "unix" {
+		return nil
+	}
+
+	socketFile := parsedURL.Path
+	c.logger.Debugf("Ensuring that the socketfile '%s' is not present...", socketFile)
+
+	// If file is not present, then we are ok to continue.
+	// NOTE: os.IsNotExist is a pure function, so does not need to be injected.
+	if _, err := c.getFileInfo(socketFile); os.IsNotExist(err) {
+		c.logger.Debugf("Socket file '%s' not present. Skipping deletion.", socketFile)
+		return nil
+	}
+
+	// Otherwise delete the file first
+	c.logger.Warnf("Socket file '%s' already present. Deleting...", socketFile)
+	err = c.deleteFile(socketFile)
+	if err != nil {
+		return fmt.Errorf("unable to delete stale socket file '%s'", socketFile)
+	}
+
+	return nil
 }
 
 // NetworkAddress is a utility type for handling string manipulation /

@@ -1,0 +1,7 @@
+#!/bin/bash -ex
+
+./stop
+
+docker-compose build
+
+docker-compose up --detach secretless

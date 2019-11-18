@@ -59,6 +59,12 @@ pipeline {
           }
         }
 
+        stage('Integration: HTTP Generic') {
+          steps {
+            sh './bin/run_integration http_generic'
+          }
+        }
+
         stage('Integration: Kubernetes Provider') {
           steps {
             sh './bin/run_integration kubernetes_provider'

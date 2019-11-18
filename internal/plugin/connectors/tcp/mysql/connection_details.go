@@ -12,6 +12,8 @@ type ConnectionDetails struct {
 	Username string
 }
 
+// DefaultMySQLPort is the default port on which we connect to the MySQL service
+// If another port is found within the connectionDetails, we will use that.
 const DefaultMySQLPort = uint(3306)
 
 // NewConnectionDetails is a constructor of ConnectionDetails structure from a

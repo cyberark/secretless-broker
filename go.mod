@@ -11,7 +11,7 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/golang/groupcache v0.0.0-20180513044358-24b0969c4cb7 // indirect
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
@@ -51,3 +51,5 @@ require (
 )
 
 replace github.com/denisenkom/go-mssqldb => github.com/cyberark/go-mssqldb v0.0.0-20191030142036-b5a965a47dd3
+
+go 1.13

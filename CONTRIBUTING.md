@@ -322,23 +322,26 @@ information on the types of plugins we currently support, visit the [plugin API 
 
 ### Verify and update dependencies
 1. Check whether any dependencies have been changed since the last release by running
-   `./bin/check_dependencies`. The script will tell you what has changed.
-1. If any dependencies have changed, you'll need to update NOTICES.txt - which involves
-   updating the dependency files in `assets/` using the [LicenseFinder](https://github.com/Pivotal/LicenseFinder)
-   and updating the [spreadsheet](https://cyberark365.sharepoint.com/:x:/s/Conjur/Edko_eT7CfpEuPxnnbIEfmAB4j2ybNozY9B8QAIDOxKynQ?e=CfP6ym) before preparing the revised
-   NOTICES.txt.
+   `./bin/check_dependencies`. The script will tell you what has changed. Beware - the script at current DOES NOT appropriately handle `replace` directives - you will need to process these manually.
 
-   Note: to update the dependency file you run the following command:
-   ```
-   docker run --rm \
-     -v $PWD:/scan \
-     licensefinder/license_finder \
-     /bin/bash -lc "
-       cd /scan && \
-       license_finder approvals add \
-         --decisions-file=assets/dependency_decisions.yml \
-         [DEPENDENCY] --version=[VERSION]"
-   ```
+1. If any dependencies have changed, for each changed dependency in assets/license_finder.txt you'll need to do the following:
+
+   - if it is a new dependency, add an approval to the dependency decisions fileusing the [LicenseFinder](https://github.com/Pivotal/LicenseFinder):
+     ```
+     docker run --rm \
+       -v $PWD:/scan \
+       licensefinder/license_finder \
+       /bin/bash -lc "
+         cd /scan && \
+         license_finder approvals add \
+           --decisions-file=assets/dependency_decisions.yml \
+           [DEPENDENCY] --version=[VERSION]"
+     ```
+
+   - update the [spreadsheet](https://cyberark365.sharepoint.com/:x:/s/Conjur/Edko_eT7CfpEuPxnnbIEfmAB4j2ybNozY9B8QAIDOxKynQ?e=CfP6ym) with the updated dependency info (add / edit / remove a row), including a link to the relevant license file
+
+   - prepare the revised NOTICES.txt by adding / removing / editing dependency
+     information
 
    If no dependencies have changed, you can move on to the next step.
 

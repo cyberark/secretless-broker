@@ -51,5 +51,8 @@ require (
 )
 
 replace github.com/denisenkom/go-mssqldb => github.com/cyberark/go-mssqldb v0.0.0-20191030142036-b5a965a47dd3
+// 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
+// This is our fix:
+replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
 
 go 1.13

@@ -13,7 +13,7 @@ done
 # the order of the services is important. mssql must be up before we start secretless
 docker-compose up -d mssql
 
-./wait_for_mssql
+time ./wait_for_mssql
 docker-compose logs mssql
 
 docker-compose up -d $SECRETLESS_HOST

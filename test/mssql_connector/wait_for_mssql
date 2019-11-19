@@ -5,7 +5,7 @@ mssql_is_up() {
 }
 
 # TODO: Use bash-lib for this function once it is implemented there
-max_tries=30
+max_tries=300
 cnt=0
 until mssql_is_up || (( cnt == max_tries )); do
   (( cnt++ ))

@@ -24,7 +24,7 @@ type ServerConfig struct {
 // ServiceConnector contains the configuration and channels
 type ServiceConnector struct {
 	channels <-chan ssh.NewChannel
-	logger log.Logger
+	logger   log.Logger
 }
 
 func (h *ServiceConnector) serverConfig(values map[string][]byte) (config ServerConfig, err error) {
@@ -74,7 +74,7 @@ func (h *ServiceConnector) serverConfig(values map[string][]byte) (config Server
 	return
 }
 
-// Run opens the connection to the target server and proxies requests
+// Connect opens the connection to the target server and proxies requests
 func (h *ServiceConnector) Connect(
 	credentialValuesByID connector.CredentialValuesByID,
 ) error {
@@ -94,7 +94,7 @@ func (h *ServiceConnector) Connect(
 	}
 
 	if serverConfig, err = h.serverConfig(credentialValuesByID); err != nil {
-		return fmt.Errorf("ERROR: Could not resolve server config: %s\n", err)
+		return fmt.Errorf("Could not resolve server config: '%s'", err)
 	}
 
 	if server, err = ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {

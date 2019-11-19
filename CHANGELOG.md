@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.3.0] 2019-11-18
+
+### Added
+- Added trivy security scan to project pipeline (#986)
+- Added unit tests to ConfigEnv, profile and signal packages
+- Added alpha MSSQL connector (#964)
+- Added template skeleton for connector plugins (#967)
+
+### Changed
+- Extract config validation from ProxyServices and add unit tests
+- Improved available_plugins unit tests
+- Updated juxtaposer configs for perf tests (#969)
+
+### Fixed
+- Ensure MySQL uses appropriate default sslmode value (#928)
+- Improved pg error propagation (#974)
+
 ## [1.2.0] 2019-10-21
 
 ### Added
@@ -352,7 +369,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -370,3 +387,4 @@ The first tagged version.
 [1.0.0]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...v1.0.0 
 [1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0 
 [1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0 
+[1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0 

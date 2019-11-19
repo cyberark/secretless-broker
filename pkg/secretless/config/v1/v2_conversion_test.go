@@ -99,7 +99,7 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 		assert.Equal(t, "aws", v2Cfg.Services[0].Connector)
 	})
 
-	t.Run("Separate v2 Service created for every Handler associated to a Listener", func(t *testing.T) {
+	t.Run("Each Handler gets its own v2.Service", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		otherHandler := v1Cfg.Handlers[0]
 		otherHandler.Name = "test-http-handler-other"
@@ -121,8 +121,16 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 		assert.Equal(t, "test-http-handler-other", v2Cfg.Services[1].Name)
 
 		// ListenOn
-		assert.Equal(t, "tcp://0.0.0.0:2345", v2Cfg.Services[0].ListenOn)
-		assert.Equal(t, "tcp://0.0.0.0:2345", v2Cfg.Services[1].ListenOn)
+		assert.Equal(
+			t,
+			config_v2.NetworkAddress("tcp://0.0.0.0:2345"),
+			v2Cfg.Services[0].ListenOn,
+		)
+		assert.Equal(
+			t,
+			config_v2.NetworkAddress("tcp://0.0.0.0:2345"),
+			v2Cfg.Services[1].ListenOn,
+		)
 
 		// Credentials
 		assert.Equal(t, []*config_v2.Credential{
@@ -153,7 +161,7 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 }
 
 func TestV1ValidationConversion(t *testing.T) {
-	t.Run("V1 Config validation fails and reports no handler or listener errors", func(t *testing.T) {
+	t.Run("Errors on blank listeners/handlers", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		v1Cfg.Handlers = []Handler{}
 		v1Cfg.Listeners = []Listener{}
@@ -163,7 +171,7 @@ func TestV1ValidationConversion(t *testing.T) {
 		assert.Contains(t, err.Error(), "Handlers: cannot be blank")
 	})
 
-	t.Run("V1 Config validation fails and reports un-associated handler or listener errors", func(t *testing.T) {
+	t.Run("Errors on listeners without handlers, and vice-versa", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		v1Cfg.Handlers[0].ListenerName = "xyz"
 		_, err := NewV2Config(v1Cfg)
@@ -182,7 +190,12 @@ func TestV1AddressSocketConversion(t *testing.T) {
 			return
 		}
 
-		assert.Equal(t, "tcp://0.0.0.0:2345", v2.Services[0].ListenOn)
+		assert.Equal(
+			t,
+			config_v2.NetworkAddress("tcp://0.0.0.0:2345"),
+			v2.Services[0].ListenOn,
+		)
+
 	})
 
 	t.Run("Socket maps to Unix listenOn", func(t *testing.T) {
@@ -195,7 +208,11 @@ func TestV1AddressSocketConversion(t *testing.T) {
 			return
 		}
 
-		assert.Equal(t, "unix:///some/socket/path", v2Cfg.Services[0].ListenOn)
+		assert.Equal(
+			t,
+			config_v2.NetworkAddress("unix:///some/socket/path"),
+			v2Cfg.Services[0].ListenOn,
+		)
 	})
 
 	t.Run("Empty Socket and Address returns error", func(t *testing.T) {
@@ -240,7 +257,7 @@ func TestV1StoredSecretConversion(t *testing.T) {
 }
 
 func TestV1HandlersConversion(t *testing.T) {
-	t.Run("V2 Service assumes the name of the first Handler matching Listener", func(t *testing.T) {
+	t.Run("V2 Service uses name of first matching Handler", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		v2Cfg, err := NewV2Config(v1Cfg)
 		assert.NoError(t, err)

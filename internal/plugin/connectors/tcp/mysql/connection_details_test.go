@@ -12,14 +12,17 @@ func TestExpectedFields(t *testing.T) {
 		"port":     []byte("1234"),
 		"username": []byte("myusername"),
 		"password": []byte("mypassword"),
+		"sslmode":  []byte("disable"),
 	}
 
 	expectedConnDetails := ConnectionDetails{
-		Host:     "myhost",
+		Host: "myhost",
+		Options: map[string]string{
+			"sslmode": "disable",
+		},
+		Password: "mypassword",
 		Port:     1234,
 		Username: "myusername",
-		Password: "mypassword",
-		Options:  make(map[string]string),
 	}
 
 	actualConnDetails, err := NewConnectionDetails(credentials)
@@ -42,7 +45,9 @@ func TestDefaultPort(t *testing.T) {
 		Port:     DefaultMySQLPort,
 		Username: "myusername",
 		Password: "mypassword",
-		Options:  make(map[string]string),
+		Options: map[string]string{
+			"sslmode": "",
+		},
 	}
 
 	actualConnDetails, err := NewConnectionDetails(credentials)
@@ -64,8 +69,9 @@ func TestUnexpectedFieldsAreSavedAsOptions(t *testing.T) {
 	}
 
 	expectedOptions := map[string]string{
-		"foo": "5432",
-		"bar": "data",
+		"foo":     "5432",
+		"bar":     "data",
+		"sslmode": "",
 	}
 
 	actualConnDetails, err := NewConnectionDetails(credentials)

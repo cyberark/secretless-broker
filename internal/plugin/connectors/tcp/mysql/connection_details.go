@@ -6,12 +6,14 @@ import "strconv"
 // These values are pulled from the SingleUseConnector credentials config
 type ConnectionDetails struct {
 	Host     string
+	Options  map[string]string
+	Password string
 	Port     uint
 	Username string
-	Password string
-	Options  map[string]string
 }
 
+// DefaultMySQLPort is the default port on which we connect to the MySQL service
+// If another port is found within the connectionDetails, we will use that.
 const DefaultMySQLPort = uint(3306)
 
 // NewConnectionDetails is a constructor of ConnectionDetails structure from a
@@ -37,6 +39,12 @@ func NewConnectionDetails(credentials map[string][]byte) (
 
 	if credentials["password"] != nil {
 		connDetails.Password = string(credentials["password"])
+	}
+
+	// Make sure that we process the SSL mode arg even if it's not specified
+	// otherwise it will get ignored
+	if _, ok := credentials["sslmode"]; !ok {
+		credentials["sslmode"] = []byte("")
 	}
 
 	delete(credentials, "host")

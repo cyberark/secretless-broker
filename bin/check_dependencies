@@ -5,21 +5,17 @@ set -uo pipefail
 current_dir=$("$(dirname "$0")"/abspath)
 toplevel_dir=$current_dir/..
 
-function finish {
-  rm -f "$toplevel_dir/assets/updated_licenses.txt"
-}
-trap finish EXIT
-
 # get a new list of project licenses
 # this command syntax is wild but it's what the license_finder image requires
 docker run --rm \
   -v "$toplevel_dir":/scan \
   licensefinder/license_finder \
   /bin/bash -lc "cd /scan && license_finder" \
-  > "$toplevel_dir/assets/updated_licenses.txt"
+  > "$toplevel_dir/assets/license_finder.txt"
 
-# check if there are any differences; if not, exit
-diff=$(diff "$toplevel_dir/assets/updated_licenses.txt" "$toplevel_dir/assets/license_finder.txt")
+# check if there are any differences (assumes you are working from a git clone);
+# if not, exit
+diff=$(git diff "$toplevel_dir/assets/license_finder.txt")
 
 if [ -z "$diff" ]; then
   echo "No dependencies have changed."

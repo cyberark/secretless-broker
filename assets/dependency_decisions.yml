@@ -335,3 +335,17 @@
     :versions:
     - v0.0.0-20170717145745-c0da73ca9dde
     :when: 2019-07-15 16:35:02.626060100 Z
+- - :approve
+  - golang.org/x/crypto
+  - :who: 
+    :why: 
+    :versions:
+    - v0.0.0-20190325154230-a5d413f7728c
+    :when: 2019-11-19 14:35:20.471553200 Z
+- - :approve
+  - github.com/cyberark/go-mssqldb
+  - :who: 
+    :why: 
+    :versions:
+    - v0.0.0-20191030142036-b5a965a47dd3
+    :when: 2019-11-19 16:04:45.437019600 Z

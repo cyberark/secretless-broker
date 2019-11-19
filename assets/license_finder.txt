@@ -8,6 +8,7 @@ github.com/codegangsta/cli, v1.20.0, unknown
 github.com/cyberark/conjur-api-go, v0.5.2, unknown
 github.com/cyberark/conjur-authn-k8s-client, v0.13.0, unknown
 github.com/cyberark/summon, v0.7.0, unknown
+github.com/denisenkom/go-mssqldb, v0.0.0-20191001013358-cfbb681360f0, unknown
 github.com/fsnotify/fsnotify, v1.4.7, unknown
 github.com/ghodss/yaml, v1.0.0, unknown
 github.com/go-ozzo/ozzo-validation, v0.0.0-20170913164239-85dcd8368eba, unknown
@@ -34,7 +35,7 @@ github.com/sirupsen/logrus, v1.0.6, unknown
 github.com/smartystreets/goconvey, v0.0.0-20190330032615-68dc04aab96a, unknown
 github.com/spf13/pflag, v1.0.2, unknown
 github.com/stretchr/testify, v1.3.0, unknown
-golang.org/x/crypto, v0.0.0-20190308221718-c2843e01d9a2, unknown
+golang.org/x/crypto, v0.0.0-20190325154230-a5d413f7728c, unknown
 gopkg.in/DATA-DOG/go-sqlmock.v1, v1.3.0, unknown
 gopkg.in/airbrake/gobrake.v2, v2.0.9, unknown
 gopkg.in/fsnotify.v1, v1.4.7, unknown

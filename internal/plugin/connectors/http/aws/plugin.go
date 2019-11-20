@@ -27,5 +27,5 @@ func NewConnector(conRes connector.Resources) http.Connector {
 // GetHTTPPlugin is required as part of the Secretless plugin spec for HTTP
 // connector plugins. It returns the HTTP plugin.
 func GetHTTPPlugin() http.Plugin {
-	return http.ConnectorConstructor(NewConnector)
+	return http.NewConnectorFunc(NewConnector)
 }

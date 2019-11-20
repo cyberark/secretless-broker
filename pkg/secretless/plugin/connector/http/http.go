@@ -38,24 +38,24 @@ type Connector interface {
 }
 
 /*
-ConnectorConstructor makes it easy to define Secretless HTTP connector plugins.
+NewConnectorFunc makes it easy to define Secretless HTTP connector plugins.
 If your plugin definition includes a standalone constructor function that takes a
 connector.Resources as input and returns a Connector, you can cast your function
-as a ConnectorConstructor, which is a type that already fulfills the plugin interface.
+as a NewConnectorFunc, which is a type that already fulfills the plugin interface.
 
-This is possible because the ConnectorConstructor function type has a constructor
+This is possible because the NewConnectorFunc function type has a constructor
 method called  NewConnector that simply calls the function itself.
 
 For example, in your plugin definition you can define the NewConnector
 constructor for your plugin and call:
 
 	func GetHTTPPlugin() http.Plugin {
-		return http.ConnectorConstructor(NewConnector)
+		return http.NewConnectorFunc(NewConnector)
 	}
 
 to fulfill the Plugin interface.
 */
-type ConnectorConstructor func(connector.Resources) Connector
+type NewConnectorFunc func(connector.Resources) Connector
 
 /*
 NewConnector returns a Connector, which is a one method interface that performs the actual
@@ -65,6 +65,6 @@ When Secretless runs, it calls NewConnector once and then holds onto the
 returned Connector.  That Connector (remember: it's just a a single method)
 is then called each time a new client connection requires authentication.
 */
-func (cc ConnectorConstructor) NewConnector(cr connector.Resources) Connector {
+func (cc NewConnectorFunc) NewConnector(cr connector.Resources) Connector {
 	return cc(cr)
 }

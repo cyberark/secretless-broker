@@ -11,7 +11,7 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-ozzo/ozzo-validation v0.0.0-20170913164239-85dcd8368eba
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/golang/groupcache v0.0.0-20180513044358-24b0969c4cb7 // indirect
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
@@ -35,7 +35,7 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	github.com/spf13/pflag v1.0.2 // indirect
 	github.com/stretchr/testify v1.3.0
-	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
+	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
@@ -51,3 +51,9 @@ require (
 )
 
 replace github.com/denisenkom/go-mssqldb => github.com/cyberark/go-mssqldb v0.0.0-20191030142036-b5a965a47dd3
+
+// 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
+// This is our fix:
+replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
+
+go 1.13

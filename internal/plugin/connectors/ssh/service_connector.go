@@ -94,11 +94,11 @@ func (h *ServiceConnector) Connect(
 	}
 
 	if serverConfig, err = h.serverConfig(credentialValuesByID); err != nil {
-		return fmt.Errorf("Could not resolve server config: '%s'", err)
+		return fmt.Errorf("could not resolve server config: '%s'", err)
 	}
 
 	if server, err = ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {
-		return fmt.Errorf("Failed to dial SSH backend '%s': %s", serverConfig.Address, err)
+		return fmt.Errorf("failed to dial SSH backend '%s': %s", serverConfig.Address, err)
 	}
 
 	// Service the incoming Channel channel.

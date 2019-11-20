@@ -22,7 +22,12 @@ func sampleConfig() []byte {
 
 func Test_newConfig(t *testing.T) {
 	t.Run("creates expected headers", func(t *testing.T) {
-		cfg, err := newConfig(sampleConfig())
+		cfgYAML, err := NewConfigYAML(sampleConfig())
+		if err != nil {
+			assert.Fail(t, "sampleConfig should never fail")
+			return
+		}
+		cfg, err := newConfig(cfgYAML)
 
 		assert.NoError(t, err)
 		if err != nil {

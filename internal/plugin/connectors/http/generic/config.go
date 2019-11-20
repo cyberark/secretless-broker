@@ -9,14 +9,7 @@ import (
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	validation "github.com/go-ozzo/ozzo-validation"
-	"gopkg.in/yaml.v2"
 )
-
-type configYAML struct {
-	CredentialPatterns map[string]string `yaml:"credentialValidation"`
-	Headers map[string]string `yaml:"headers"`
-	ForceSSL bool `yaml:"forceSSL"`
-}
 
 type config struct {
 	CredentialPatterns map[string]*regexp.Regexp
@@ -24,7 +17,7 @@ type config struct {
 	ForceSSL bool
 }
 
-// validate validates that the given creds satisfy the CredentialPatterns of
+// validate validates that the given creds satisfy the CredentialValidations of
 // the config.
 func (c *config) validate(credsByID connector.CredentialValuesByID) error {
 	for requiredCred, pattern := range c.CredentialPatterns {
@@ -71,17 +64,10 @@ func (c *config) renderedHeaders(
 	return headers, nil
 }
 
-// newConfig takes the raw cfgBytes, unmarshals them into a temporary configYAML
-// struct, and then validates and converts that into a config -- which is what
-// our application wants to work with.
-func newConfig(cfgBytes []byte) (*config, error) {
+// newConfig takes a ConfigYAML, validates it, and converts it into a
+// generic.config struct -- which is what our application wants to work with.
+func newConfig(cfgYAML *ConfigYAML) (*config, error) {
 	errs := validation.Errors{}
-	cfgYAML := &configYAML{}
-
-	err := yaml.Unmarshal(cfgBytes, cfgYAML)
-	if err != nil {
-		return nil, err
-	}
 
 	cfg := &config{
 		CredentialPatterns: make(map[string]*regexp.Regexp),
@@ -90,7 +76,7 @@ func newConfig(cfgBytes []byte) (*config, error) {
 	}
 
 	// Validate and save regexps
-	for cred, reStr := range cfgYAML.CredentialPatterns {
+	for cred, reStr := range cfgYAML.CredentialValidations {
 		re, err := regexp.Compile(reStr)
 		if err != nil {
 			errs[cred] = fmt.Errorf("invalid regex: %q", err)

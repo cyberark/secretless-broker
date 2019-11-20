@@ -21,9 +21,14 @@ func PluginInfo() map[string]string {
 func NewConnector(conRes connector.Resources) http.Connector {
 	logger := conRes.Logger()
 
-	cfg, err := newConfig(conRes.Config())
+	cfgYAML, err := NewConfigYAML(conRes.Config())
 	if err != nil {
-		logger.Panicf("can't create connector: invalid config.")
+		logger.Panicf("can't create connector: can't unmarshal YAML.")
+	}
+
+	cfg, err := newConfig(cfgYAML)
+	if err != nil {
+		logger.Panicf("can't create connector: can't validate YAML.")
 	}
 
 	return &Connector{
@@ -35,5 +40,5 @@ func NewConnector(conRes connector.Resources) http.Connector {
 // GetHTTPPlugin is required as part of the Secretless plugin spec for HTTP
 // connector plugins. It returns the HTTP plugin.
 func GetHTTPPlugin() http.Plugin {
-	return http.ConnectorConstructor(NewConnector)
+	return http.NewConnectorFunc(NewConnector)
 }

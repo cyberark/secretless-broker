@@ -23,7 +23,6 @@ func (c *Connector) Connect(
 ) error {
 	// TODO: add logic according to
 	// https://github.com/cyberark/secretless-broker/blob/master/pkg/secretless/plugin/connector/README.md#http-connector
-	// http/basicauth/connector.go is a good example.
 
 	var err error
 	return err

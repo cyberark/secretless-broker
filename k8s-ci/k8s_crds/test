@@ -51,7 +51,7 @@ function wait_for_CRD() {
   echo "waiting for CRD to be ready"
 
   local attempt_count=0
-  local max_attempts=100
+  local max_attempts=50
   until kubectl get "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" &> ${log}; do
     attempt_count=$(( attempt_count + 1 ))
     if [[ "$attempt_count" -ge "$max_attempts" ]]; then

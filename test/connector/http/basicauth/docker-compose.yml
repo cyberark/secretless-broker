@@ -1,0 +1,38 @@
+version: '3.0'
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - 8080
+    healthcheck:
+      test: ["CMD-SHELL", "curl localhost:8080/test"]
+      interval: 1s
+      timeout: 30s
+    volumes:
+      - ./http-basic-auth.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./basic_auth.htpasswd:/etc/nginx/.htpasswd:ro
+
+  secretless:
+    build:
+      context: ../../../..
+    environment:
+      HTTP_HOST: nginx
+      HTTP_PORT: 8080
+    entrypoint: "/usr/local/bin/secretless-broker -debug"
+    volumes:
+      - ./secretless.yml:/secretless.yml
+      - ../../../../..:/secretless
+    depends_on:
+      - nginx
+
+  test:
+    image: alpine:latest
+    command: wget -q -O- nginx:8080/
+    depends_on:
+      - secretless
+
+  dev:
+    image: secretless-dev
+    volumes:
+      - ../../../..:/secretless

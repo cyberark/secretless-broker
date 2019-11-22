@@ -1,0 +1,38 @@
+version: '3.0'
+
+services:
+  ssh-host:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh_host
+    ports:
+      - 22
+    volumes:
+      - ./http-basic-auth.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./basic_auth.htpasswd:/etc/nginx/.htpasswd:ro
+
+  secretless:
+    build:
+      context: ../../..
+    ports:
+      - 2222
+    volumes:
+      - ./secretless.yml:/secretless.yml
+      - ./id_insecure:/id_insecure:ro
+    depends_on:
+      - ssh-host
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh_host
+    command: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 2222 secretless ls -la
+    depends_on:
+      - secretless
+    volumes:
+      - ./id_insecure:/root/id_insecure:ro
+
+  dev:
+    image: secretless-dev
+    volumes:
+      - ../../..:/secretless

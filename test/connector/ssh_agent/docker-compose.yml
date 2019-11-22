@@ -1,0 +1,46 @@
+version: '2'
+services:
+  ssh_host:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh_host
+    ports:
+      - 22
+
+  secretless:
+    image: secretless-broker
+    volumes:
+      - ./secretless.yml:/secretless.yml
+      - ssh-agent-socket:/sock
+      - ./id_insecure:/id_insecure:ro
+    depends_on:
+      - ssh_host
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    working_dir: /secretless/test/ssh_agent_handler
+    command: ssh -o StrictHostKeyChecking=no root@ssh_host cat /root/.ssh/authorized_keys
+    environment:
+      SSH_AUTH_SOCK: /sock/.agent
+    volumes:
+      - ssh-agent-socket:/sock
+    depends_on:
+      - secretless
+      - ssh_host
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: sleep 999d
+    volumes:
+      - ../../..:/secretless
+      - ./id_insecure:/id_insecure:ro
+      - ssh-agent-socket:/sock
+    depends_on:
+      - ssh_host
+
+volumes:
+  ssh-agent-socket:

@@ -9,7 +9,7 @@ while getopts :l opt; do
 done
 
 if $local_test; then
-  docker_args="-v $(cd ../../..; pwd):/secretless"
+  docker_args="-v $(cd ../../../..; pwd):/secretless"
 else
   docker_args="-v $(pwd)/.env:/secretless/test/connector/http/conjur/.env"
 fi

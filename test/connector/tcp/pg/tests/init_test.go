@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/cyberark/secretless-broker/test/pg_handler/pkg"
+	"github.com/cyberark/secretless-broker/test/connector/tcp/pg/pkg"
 	"github.com/cyberark/secretless-broker/test/util/testutil"
 )
 

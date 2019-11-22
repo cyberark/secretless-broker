@@ -1,0 +1,55 @@
+#!/bin/bash -ex
+
+function fail() {
+  print_status "FAIL"
+  exit 1
+}
+
+function pass() {
+  print_status "PASS"
+}
+
+function print_status() {
+  result="${1}"
+  set +x
+  echo "=== RUN TestSSHHandler"
+  echo "--- $result: TestSSHHandler ($(runtime).00s)"
+  echo "$result"
+
+  if [ "$result" = "FAIL" ]; then
+    echo "exit status 1"
+  fi
+
+  echo "$result    github.com/cyberark/secretless-broker/test/ssh_handler  $(runtime).000s"
+}
+
+function runtime() {
+  end=`date +%s`
+  runtime=$((end-start))
+
+  echo "$runtime"
+}
+
+local_test=false
+while getopts :l opt; do
+    case $opt in
+        l) local_test=true ;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+docker_args=""
+if $local_test; then
+  docker_args="-v $(cd ../../..; pwd):/secretless"
+fi
+
+start=`date +%s`
+# Test is temporarily turned off due to bug
+# See https://github.com/cyberark/secretless-broker/issues/658 for more info
+docker-compose run \
+  --rm \
+  --no-deps \
+  $docker_args \
+  test || fail
+
+pass

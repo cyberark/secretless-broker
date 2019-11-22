@@ -18,10 +18,39 @@ pipeline {
         sh './bin/build'
       }
     }
-    
+
     stage('Scan Secretless Image') {
       steps {
         scanAndReport("secretless-broker:latest", "HIGH")
+      }
+    }
+
+    stage('Integration Tests') {
+      steps { 
+        script {
+          def directories = sh (
+            returnStdout: true,
+            script: 
+            '''
+            find $(find ./test -name test) -name 'start' -exec dirname {} \\; | xargs -n1 basename
+            '''
+          ).trim().split()
+
+          def integrationSteps = [:]
+        
+          directories.each { name -> 
+            if (name == "keychain") return
+            
+            def stepName = "Integration: ${name}"
+
+            integrationSteps[stepName] = {
+              sh "./bin/run_integration ${name}"
+              junit "**/test/**/junit.xml"
+            }
+          } 
+
+          parallel integrationSteps
+        }
       }
     }
 
@@ -36,88 +65,6 @@ pipeline {
             junit 'test/unit-test-output/junit.xml'
             cobertura autoUpdateHealth: true, autoUpdateStability: true, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '30, 0, 0', failUnhealthy: true, failUnstable: false, lineCoverageTargets: '30, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '30, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
             ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
-          }
-        }
-
-        stage('Integration: AWS Secrets Provider') {
-          steps {
-            sh './bin/run_integration aws_secrets_provider'
-            junit 'test/aws_secrets_provider/junit.xml'
-          }
-        }
-
-        stage('Integration: Conjur') {
-          steps {
-            sh './bin/run_integration conjur'
-            junit 'test/conjur/junit.xml'
-          }
-        }
-
-        stage('Integration: HTTP Basic Auth') {
-          steps {
-            sh './bin/run_integration http_basic_auth'
-          }
-        }
-
-        stage('Integration: HTTP Generic') {
-          steps {
-            sh './bin/run_integration http_generic'
-          }
-        }
-
-        stage('Integration: Kubernetes Provider') {
-          steps {
-            sh './bin/run_integration kubernetes_provider'
-            junit 'test/kubernetes_provider/junit.xml'
-          }
-        }
-
-        stage('Integration: MySQL Handler') {
-          steps {
-            sh './bin/run_integration mysql_handler'
-            junit 'test/mysql_handler/junit.xml'
-          }
-        }
-
-        stage('Integration: MSSQL Handler') {
-          steps {
-            sh './bin/run_integration mssql_connector'
-            junit 'test/mssql_connector/junit.xml'
-          }
-        }
-
-        stage('Integration: PG Handler') {
-          steps {
-            sh './bin/run_integration pg_handler'
-            junit 'test/pg_handler/junit.xml'
-          }
-        }
-
-        stage('Integration: SSH Agent Handler') {
-          steps {
-            sh './bin/run_integration ssh_agent_handler'
-            junit 'test/ssh_agent_handler/junit.xml'
-          }
-        }
-
-        stage('Integration: SSH Handler') {
-          steps {
-            sh './bin/run_integration ssh_handler'
-            junit 'test/ssh_handler/junit.xml'
-          }
-        }
-
-        stage('Integration: Summon 2') {
-          steps {
-            sh './bin/run_integration summon2'
-            junit 'test/summon2/junit.xml'
-          }
-        }
-
-        stage('Integration: Vault Provider') {
-          steps {
-            sh './bin/run_integration vault_provider'
-            junit 'test/vault_provider/junit.xml'
           }
         }
 

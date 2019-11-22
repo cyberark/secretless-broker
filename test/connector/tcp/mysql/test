@@ -44,4 +44,4 @@ fi
 
 ${docker_compose_cmd} \
   -e SECRETLESS_HOST="$SECRETLESS_HOST" \
-  test bash -c "go test -v ./test/connector_tests/tcp_connectors/mysql_handler/tests"
+  test bash -c "go test -v ./test/connector/tcp/mysql/tests"

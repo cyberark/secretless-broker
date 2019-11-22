@@ -79,5 +79,5 @@ if $benchmark; then
 else
   ${docker_compose_cmd} \
     -e SECRETLESS_HOST="$SECRETLESS_HOST" \
-    test bash -c "go test -v ./test/pg_handler/tests"
+    test bash -c "go test -v ./test/connector/tcp/pg/tests"
 fi

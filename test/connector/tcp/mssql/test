@@ -9,7 +9,7 @@ docker-compose run \
   -e SECRETLESS_HOST="$SECRETLESS_HOST" \
   --rm \
   --no-deps \
-  test bash -c "go test -v ./test/connector_tests/tcp_connectors/mssql_connector"
+  test bash -c "go test -v ./test/connector/tcp/mssql"
 
 # print secretless logs after tests run
 ret=$?

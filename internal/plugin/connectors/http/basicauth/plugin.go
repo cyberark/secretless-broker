@@ -1,7 +1,9 @@
 package basicauth
 
 import (
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
+	"log"
+
+	generichttp "github.com/cyberark/secretless-broker/internal/plugin/connectors/http/generic"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 )
 
@@ -16,16 +18,25 @@ func PluginInfo() map[string]string {
 	}
 }
 
-// NewConnector returns an http.Connector that decorates each incoming http
-// request with a basic auth header.
-func NewConnector(conRes connector.Resources) http.Connector {
-	return &Connector{
-		logger:   conRes.Logger(),
-	}
-}
-
 // GetHTTPPlugin is required as part of the Secretless plugin spec for HTTP
 // connector plugins. It returns the HTTP plugin.
 func GetHTTPPlugin() http.Plugin {
-	return http.ConnectorConstructor(NewConnector)
+	newConnector, err := generichttp.NewConnectorConstructor(
+		&generichttp.ConfigYAML{
+			CredentialValidations: map[string]string{
+				"username": "[^:]+",
+			},
+			Headers: map[string]string{
+				"Authorization": "Basic {{ printf \"%s:%s\" .username .password | base64 }}",
+			},
+		},
+	)
+
+	// This should never occur at runtime.  The only way it could is if the
+	// ConfigYAML definition above was faulty.  And if this were the case, our
+	// tests would be broken.
+	if err != nil {
+		log.Panicf("Failed to create generic HTTP NewConnector: %s", err)
+	}
+	return newConnector
 }

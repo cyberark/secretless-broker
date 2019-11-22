@@ -56,7 +56,7 @@ services:
       dockerfile: Dockerfile.dev
     command: sleep 999d
     environment:
-      TEST_ROOT: /secretless/test/mysql_connector
+      TEST_ROOT: /secretless/test/connector/tcp/mysql
       DB_PROTOCOL: mysql
       DB_HOST_TLS: mysql
       DB_HOST_NO_TLS: mysql_no_tls

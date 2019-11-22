@@ -34,7 +34,7 @@ services:
     image: secretless-dev
     command: sleep 999d
     environment:
-      TEST_ROOT: /secretless/test/connector_tests/tcp_connectors/mssql_connector
+      TEST_ROOT: /secretless/test/connector/tcp/mssql
       DB_PROTOCOL: mssql
       DB_HOST_TLS: mssql
       DB_HOST_NO_TLS: mssql # TODO: configure a non-ssl container?

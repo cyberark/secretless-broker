@@ -48,7 +48,7 @@ services:
       dockerfile: Dockerfile.dev
     command: sleep 999d
     environment:
-      TEST_ROOT: /secretless/test/pg_connector
+      TEST_ROOT: /secretless/test/connector/tcp/pg
       DB_PROTOCOL: pg
       DB_HOST_TLS: pg
       DB_HOST_NO_TLS: pg_no_tls

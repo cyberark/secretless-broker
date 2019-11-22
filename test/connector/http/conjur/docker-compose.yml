@@ -41,7 +41,7 @@ services:
 
   test:
     image: secretless-dev
-    command: env http_proxy=http://secretless:8080 go test -v ./test/connector_tests/http_conjur_connector
+    command: env http_proxy=http://secretless:8080 go test -v ./test/connector/http/conjur
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev

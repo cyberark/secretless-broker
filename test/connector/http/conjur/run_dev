@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-platform=$(go run ../../print_platform.go)
+platform=$(go run ../../../print_platform.go)
 
 conjur_host_port=$(docker-compose port conjur 80)
 conjur_port="${conjur_host_port##*:}"

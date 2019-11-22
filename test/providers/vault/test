@@ -11,7 +11,7 @@ done
 if $local_test; then
   docker_args="-v $(cd ../../..; pwd):/secretless"
 else
-  docker_args="-v $(pwd)/.env:/secretless/test/provider_tests/vault_provider/.env"
+  docker_args="-v $(pwd)/.env:/secretless/test/providers/vault/.env"
 fi
 
 docker-compose run \

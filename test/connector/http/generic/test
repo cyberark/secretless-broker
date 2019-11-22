@@ -13,7 +13,7 @@ done
 # Relevant: https://github.com/koalaman/shellcheck/wiki/SC2089
 docker_volume_args=()
 if $local_test; then
-  docker_volume_args=(--volume "$(cd ../../..; pwd):/secretless")
+  docker_volume_args=(--volume "$(cd ../../../..; pwd):/secretless")
 fi
 
 assert_contains() {

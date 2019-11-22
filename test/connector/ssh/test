@@ -40,7 +40,7 @@ done
 
 docker_args=""
 if $local_test; then
-  docker_args="-v $(cd ../..; pwd):/secretless"
+  docker_args="-v $(cd ../../..; pwd):/secretless"
 fi
 
 start=`date +%s`

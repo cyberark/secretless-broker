@@ -13,7 +13,7 @@ done
 
 # ./ssl is REQUIRED during the build phase to make test ssl cert artifacts available to the docker context
 rm -rf ssl
-cp -rf ../../../../util/ssl ssl
+cp -rf ../../../util/ssl ssl
 docker-compose build
 rm -rf ssl
 

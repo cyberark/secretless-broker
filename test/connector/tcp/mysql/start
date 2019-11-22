@@ -16,7 +16,7 @@ done
 #
 mkdir -p ssl
 rm -rf ssl/*
-cp -rf ../../../../util/ssl/* ssl
+cp -rf ../../../util/ssl/* ssl
 
 docker-compose build
 

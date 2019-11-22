@@ -49,7 +49,7 @@ export COMPOSE_PROJECT_NAME
 # Validate the required scripts exists in the TEST_SUBDIR
 
 project_dir=$PWD
-test_dir="${project_dir}/test/${non_flag_args[0]}"
+test_dir=$(find ${project_dir}/test -type d -name ${non_flag_args[0]})
 
 if [[ ! -x "$test_dir/start" ]] || [[ ! -x "$test_dir/test" ]]; then
   echo "The TEST_SUBDIR must contain executable ./start and ./test scripts"

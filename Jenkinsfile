@@ -30,6 +30,8 @@ pipeline {
         script {
           def directories = sh (
             returnStdout: true,
+            // We run the 'find' directive first on all directories with test files, then run a 'find' directive
+            // to make sure they also contain start files. We then take the dirname, and basename respectively. 
             script: 
             '''
             find $(find ./test -name test) -name 'start' -exec dirname {} \\; | xargs -n1 basename
@@ -38,6 +40,8 @@ pipeline {
 
           def integrationSteps = [:]
         
+          // Create an integration test stage for each directory we collected previously.
+          // We want to be sure to skip any tests, such as keychain tests, that can only be ran manually.
           directories.each { name -> 
             if (name == "keychain") return
             

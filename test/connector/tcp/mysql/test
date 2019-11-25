@@ -1,0 +1,47 @@
+#!/bin/bash -e
+
+help_and_exit() {
+  local retval=${1:-1}
+  cat <<EOF
+This script detects if you're in "dev" mode by the existence of
+the secretless-dev container.  That container will exist only if
+the development process was started using the "./dev" command.
+
+If in dev mode, all tests will be run against the "secretless-dev"
+container, which will not be torn down.  If not, they will be run
+in a fresh test container which will be torn down afterward.
+
+Options:
+  -v verbose mode; provides more verbose output for test cases
+EOF
+  exit "$retval"
+}
+
+export SECRETLESS_HOST=secretless
+export VERBOSE=false
+docker_compose_cmd="docker-compose run --rm --no-deps"
+
+while getopts :v opt; do
+    case $opt in
+        v) VERBOSE=true;;
+       \?) echo "Unknown option -$OPTARG"; help_and_exit 1;;
+    esac
+done
+
+# Automatically detect if we're devmode based on the existence
+# of the secretless-dev container.  We assume that you started
+# your workflow using `./dev` if you are developing, and this
+# command will use the secretless-dev container.
+
+
+if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
+  export SECRETLESS_HOST=secretless-dev
+
+  # use exec because the container is already running
+  #TODO uncomment below when i figure out why reflex is failing...
+   docker_compose_cmd="docker-compose exec"
+fi
+
+${docker_compose_cmd} \
+  -e SECRETLESS_HOST="$SECRETLESS_HOST" \
+  test bash -c "go test -v ./test/connector/tcp/mysql/tests"

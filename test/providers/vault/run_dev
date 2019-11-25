@@ -1,0 +1,11 @@
+#!/bin/bash -ex
+
+platform=$(go run ../../print_platform.go)
+
+hcv_host_port=$(docker-compose port vault 8200)
+hcv_port="${hcv_host_port##*:}"
+
+# TODO: Fix this. We have no secretless.dev.yml in this folder.
+exec env VAULT_ADDR="localhost:$hcv_port" \
+  "../../dist/$platform/amd64/secretless-broker" \
+  -config secretless.dev.yml

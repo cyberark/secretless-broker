@@ -1,0 +1,48 @@
+#!/bin/bash -ex
+
+SECRETLESS_HOST=secretless
+devmode=false
+while getopts :d opt; do
+    case $opt in
+        d) SECRETLESS_HOST=secretless-dev; devmode=true;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+./stop
+
+# ./ssl is REQUIRED during the build phase to make test ssl cert artifacts available to the docker context
+rm -rf ssl
+cp -rf ../../../util/ssl ssl
+docker-compose build
+rm -rf ssl
+
+docker-compose up -d pg pg_no_tls
+
+./wait-for-pg pg_no_tls
+./wait-for-pg pg
+
+# generate fixtures, parents option prevents error if existing
+mkdir -p fixtures
+
+# NOTE: the tests depend on
+# + secretless.yml auto-generation (also depended on by the secretless container)
+# + fixture generation
+# so there needs to be coordination of this bash script and the go files
+#
+## secretless.yml
+
+docker-compose run --rm test \
+  bash -c "go run ./test/util/testutil/cmd/generate_secretless_yml.go"
+
+# start secretless once pg is running
+docker-compose up -d ${SECRETLESS_HOST}
+
+./wait-for-secretless ${SECRETLESS_HOST}
+
+# In dev mode, start the test container and leave it running
+#
+if [[ "$devmode" = true ]]; then
+  echo 'Starting test container in dev mode...'
+  docker-compose up -d test
+fi

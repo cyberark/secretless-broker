@@ -1,0 +1,58 @@
+version: '2'
+services:
+  pg:
+    image: postgres:9.4
+
+  conjur:
+    image: cyberark/conjur:latest
+    command: server -a dev -f /work/conjur.yml
+    environment:
+      DATABASE_URL: postgres://postgres@pg/postgres
+      CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
+      RAILS_ENV: development
+    ports:
+      - 80
+    volumes:
+      - .:/work
+    depends_on:
+      - pg
+
+  client:
+    image: cyberark/conjur-cli:5
+    depends_on:
+      - conjur
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY:
+
+  secretless:
+    image: secretless-broker
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY:
+    depends_on:
+      - conjur
+    volumes:
+      - ./secretless.yml:/secretless.yml
+
+  test:
+    image: secretless-dev
+    command: env http_proxy=http://secretless:8080 go test -v ./test/connector/http/conjur
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+    depends_on:
+      - conjur
+      - secretless
+
+  dev:
+    image: secretless-dev
+    environment:
+      CONJUR_APPLIANCE_URL: http://conjur
+      CONJUR_ACCOUNT: dev
+    volumes:
+      - ../../..:/secretless

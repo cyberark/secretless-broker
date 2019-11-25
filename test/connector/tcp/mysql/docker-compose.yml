@@ -1,0 +1,75 @@
+version: '3.0'
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: Dockerfile.mysql
+    ports:
+      - 3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin -psecurerootpass status"]
+      interval: 1s
+      timeout: 30s
+    environment:
+      NO_SSL: "false"
+      MYSQL_ROOT_PASSWORD: securerootpass
+
+  mysql_no_tls:
+    build:
+      context: .
+      dockerfile: Dockerfile.mysql
+    ports:
+      - 3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin -psecurerootpass status"]
+      interval: 1s
+      timeout: 30s
+    environment:
+      NO_SSL: "true"
+      MYSQL_ROOT_PASSWORD: securerootpass
+
+  secretless-dev:
+    image: secretless-dev
+    command: ./bin/reflex
+    environment:
+      DB_HOST_NO_TLS: mysql_no_tls
+      DB_HOST_TLS: mysql
+      DB_PORT: 3306
+      DB_USER: testuser
+      DB_PASSWORD: testpass
+    volumes:
+      - ../../../../:/secretless
+      - ./fixtures/secretless.yml:/secretless.yml
+      - mysql-socket:/sock
+
+  secretless:
+    image: secretless-broker
+    volumes:
+      - ../../../../test/util/ssl:/secretless/test/util/ssl
+      - ./fixtures/secretless.yml:/secretless.yml
+      - mysql-socket:/sock
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: sleep 999d
+    environment:
+      TEST_ROOT: /secretless/test/connector/tcp/mysql
+      DB_PROTOCOL: mysql
+      DB_HOST_TLS: mysql
+      DB_HOST_NO_TLS: mysql_no_tls
+      DB_PORT: 3306
+      DB_USER: testuser
+      DB_PASSWORD: testpass
+      SECRETLESS_HOST:
+      VERBOSE:
+    volumes:
+      - mysql-socket:/sock
+      # NOTE: fixtures are dynamically generated and don't exist in the secretless-dev snapshot
+      # NOTE: volume mount to get latest secretless source instead of relying on snapshot
+      - ../../../..:/secretless
+
+volumes:
+  mysql-socket:

@@ -1,0 +1,83 @@
+#!/bin/bash -e
+
+help_and_exit() {
+  local retval=${1:-1}
+  cat <<EOF
+This script detects if you're in "dev" mode by the existence of
+the secretless-dev container.  That container will exist only if
+the development process was started using the "./dev" command.
+
+If in dev mode, all tests will be run against the "secretless-dev"
+container, which will not be torn down.  If not, they will be run
+in a fresh test container which will be torn down afterward.
+
+Options:
+  -b runs benchmarks
+  -v verbose mode; provides more verbose output for test cases
+EOF
+  exit "$retval"
+}
+
+export SECRETLESS_HOST=secretless
+export VERBOSE=false
+benchmark=false
+docker_compose_cmd="docker-compose run --rm --no-deps"
+
+while getopts :bv opt; do
+    case $opt in
+        b) benchmark=true;;
+        v) VERBOSE=true;;
+       \?) echo "Unknown option -$OPTARG"; help_and_exit 1;;
+    esac
+done
+
+# Automatically detect if we're devmode based on the existence
+# of the secretless-dev container.  We assume that you started
+# your workflow using `./dev` if you are developing, and this
+# command will use the secretless-dev container.
+
+
+if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
+  export SECRETLESS_HOST=secretless-dev
+
+  # use exec because the container is already running
+  docker_compose_cmd="docker-compose exec"
+fi
+
+if $benchmark; then
+
+  # get the container ids and ip address
+  #
+  pg_cid=$(docker-compose ps -q pg)
+  secretless_cid=$(docker-compose ps -q $SECRETLESS_HOST)
+  pg_ip=$(docker inspect \
+    -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" "$pg_cid")
+  secretless_ip=$(docker inspect \
+    -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" "$secretless_cid")
+
+  export PG_ADDRESS=$pg_ip:5432
+  export SECRETLESS_ADDRESS=$secretless_ip:5432
+
+  echo "++++++++++++++++++++++++++++++++++++++"
+  echo ""
+  echo "Running PostgreSQL benchmarks ..."
+  echo ""
+  echo "++++++++++++++++++++++++++++++++++++++"
+  echo "working with $SECRETLESS_HOST"
+
+  docker-compose run --rm --no-deps \
+    test bash -c "
+      echo '--- QUERYING POSTGRES DIRECTLY ---' && \
+      BENCH_ADDRESS=$PG_ADDRESS go test -v -bench=. -test.benchtime=10s ./test/pg_handler/bench_test.go | tee bench.old && \
+
+      echo '--- QUERYING VIA SECRETLESS ---' && \
+      BENCH_ADDRESS=$SECRETLESS_ADDRESS go test -v -bench=. -test.benchtime=10s ./test/pg_handler/bench_test.go | tee bench.new && \
+
+      echo '--- COMPARING BENCHMARKS ---' && \
+      benchcmp bench.old bench.new
+    "
+else
+  ${docker_compose_cmd} \
+    -e SECRETLESS_HOST="$SECRETLESS_HOST" \
+    test bash -c "go test -v ./test/connector/tcp/pg/tests"
+fi

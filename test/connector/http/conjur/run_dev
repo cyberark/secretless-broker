@@ -1,0 +1,14 @@
+#!/bin/bash -ex
+
+platform=$(go run ../../../print_platform.go)
+
+conjur_host_port=$(docker-compose port conjur 80)
+conjur_port="${conjur_host_port##*:}"
+admin_api_key=$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
+
+exec env CONJUR_APPLIANCE_URL="http://localhost:$conjur_port" \
+  CONJUR_ACCOUNT=dev \
+  CONJUR_AUTHN_LOGIN=admin \
+  CONJUR_AUTHN_API_KEY="$admin_api_key" \
+  "../../dist/$platform/amd64/secretless-broker" \
+  -config secretless.dev.yml

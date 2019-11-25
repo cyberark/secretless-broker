@@ -1,0 +1,11 @@
+version: '2'
+services:
+  test:
+    image: secretless-dev
+    command: go test -v ./test/providers/kubernetessecrets
+    environment:
+      - KUBERNETES_SERVICE_HOST=0.0.0.0
+      - KUBERNETES_SERVICE_PORT=8080
+    volumes:
+      - ./etc/ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      - ./etc/token:/var/run/secrets/kubernetes.io/serviceaccount/token

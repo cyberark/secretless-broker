@@ -1,0 +1,21 @@
+#!/bin/bash -ex
+
+local_test=false
+while getopts :l opt; do
+    case $opt in
+        l) local_test=true ;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+if $local_test; then
+  docker_args="-v $(cd ../../..; pwd):/secretless"
+else
+  docker_args="-v $(pwd)/.env:/secretless/test/providers/vault/.env"
+fi
+
+docker-compose run \
+  --rm \
+  --no-deps \
+  $docker_args \
+  test

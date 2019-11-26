@@ -3,7 +3,7 @@ package basicauth
 import (
 	"log"
 
-	generichttp "github.com/cyberark/secretless-broker/internal/plugin/connectors/http/generic"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/generic"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 )
 
@@ -21,8 +21,8 @@ func PluginInfo() map[string]string {
 // GetHTTPPlugin is required as part of the Secretless plugin spec for HTTP
 // connector plugins. It returns the HTTP plugin.
 func GetHTTPPlugin() http.Plugin {
-	newConnector, err := generichttp.NewConnectorConstructor(
-		&generichttp.ConfigYAML{
+	newConnector, err := generic.NewConnectorConstructor(
+		&generic.ConfigYAML{
 			CredentialValidations: map[string]string{
 				"username": "[^:]+",
 			},

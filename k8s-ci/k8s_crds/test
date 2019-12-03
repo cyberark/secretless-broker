@@ -111,7 +111,7 @@ function assert_on_http_proxy_resp() {
   if printf "%s" "${resp}" | grep -q "${expected_header}"; then
     echo "test passed ✔"
   else
-    echo "expected to find '${expected_header}', in response:" > ${log}
+    echo "expected to find '${expected_header}', in response:" >> ${log}
     echo "${resp}"  >> ${log}
     exit_err "test failed ✗"
   fi

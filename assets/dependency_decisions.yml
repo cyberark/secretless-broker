@@ -349,3 +349,24 @@
     :versions:
     - v0.0.0-20191030142036-b5a965a47dd3
     :when: 2019-11-19 16:04:45.437019600 Z
+- - :approve
+  - github.com/go-ozzo/ozzo-validation
+  - :who: 
+    :why: 
+    :versions:
+    - v3.6.0+incompatible
+    :when: 2019-12-04 19:04:27.546105300 Z
+- - :approve
+  - github.com/pkg/errors
+  - :who: 
+    :why: 
+    :versions:
+    - v0.8.1
+    :when: 2019-12-04 19:04:49.791897800 Z
+- - :approve
+  - golang.org/x/crypto
+  - :who: 
+    :why: 
+    :versions:
+    - v0.0.0-20190510104115-cbcb75029529
+    :when: 2019-12-04 19:10:14.735186800 Z

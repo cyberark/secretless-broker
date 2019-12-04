@@ -165,7 +165,7 @@ stage('Integration: PG Handler') {
 
 If you are on a Mac, you may also test the OSX Keychain provider:
 ```sh-session
-cd test/manual/keychain_provider/
+cd test/providers/keychain/
 ./start
 ./test
 ```

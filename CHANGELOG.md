@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.0] 2019-12-04
+
+### Added
+- Added generic HTTP connector to enable writing new HTTP connectors via
+  config (#995)
+
+### Changed
+- Improved logs for k8s CRD test failure debugging (#1027)
+- Updated Ruby version in docs container (#1028)
+- Updated Conjur HTTP connector to leverage the generic HTTP connector (#1009)
+- Reorganized integration tests (#958)
+- Updated Basic Auth HTTP connector to leverage the generic HTTP connector
+  (#1007)
+- Replaced "honnef.co/go/tools" dependency in go.sum with a github link
+- Updated "ozzo-validation" dependency to latest version
+- Make forceSSL setting explicit in e2e tests
+
 ## [1.3.0] 2019-11-18
 
 ### Added
@@ -369,7 +386,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -388,3 +405,4 @@ The first tagged version.
 [1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0 
 [1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0 
 [1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0 
+[1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0 

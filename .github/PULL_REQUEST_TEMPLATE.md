@@ -7,7 +7,7 @@ Connected to #[relevant GitHub issues, eg 76]
 
 #### What is the status of the manual tests?
 Have you run the following manual tests to verify existing functionality continues to function as expected?
-- [ ] Manually tested [Keychain provider](https://github.com/cyberark/secretless-broker/tree/master/test/manual/keychain_provider)
+- [ ] Manually tested [Keychain provider](https://github.com/cyberark/secretless-broker/tree/master/test/providers/keychain)
 - [ ] Manually run [Kubernetes-Conjur demo](https://github.com/conjurdemos/kubernetes-conjur-demo) with a local Secretless Broker image build of your branch
 
 If this feature does not have any/sufficent automated tests, have you created/updated a folder in `test/manual` that includes:

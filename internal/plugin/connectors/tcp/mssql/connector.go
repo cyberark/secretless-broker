@@ -91,6 +91,7 @@ func (connector *SingleUseConnector) Connect(
 
 	// Blocks continuation until we've received the preLoginResponse from the driver
 	preloginResponse := <- ch
+	preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
 
 	// Write the prelogin packet back to the user
 	err = mssql.WritePreloginWithPacketType(clientBuffer, preloginResponse, mssql.PackReply)

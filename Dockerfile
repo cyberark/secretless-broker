@@ -10,6 +10,7 @@ ENV GOOS=linux \
     CGO_ENABLED=1
 
 COPY go.mod go.sum /secretless/
+COPY third_party/ /secretless/third_party
 
 RUN go mod download
 

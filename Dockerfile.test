@@ -12,6 +12,7 @@ RUN apk add -u curl \
                musl-dev
 
 COPY go.mod go.sum /secretless/
+COPY third_party/ /secretless/third_party
 
 RUN go mod download
 

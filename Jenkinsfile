@@ -13,6 +13,12 @@ pipeline {
   }
 
   stages {
+    stage('Update Submodules') {
+        steps {
+            sh 'git submodule update --init --recursive'
+        }
+    }
+
     stage('Image Build') {
       steps {
         sh './bin/build'

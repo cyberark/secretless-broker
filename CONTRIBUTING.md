@@ -65,13 +65,19 @@ Use [this guide][style] to maintain consistent style across the Secretless Broke
 
 ## Building
 
-First, clone `https://github.com/cyberark/secretless-broker`. If you're new to Go, be aware that Go can be very selective
+First, clone `https://github.com/cyberark/secretless-broker` with the `--recurse-submodules` flag. If you're new to Go, be aware that Go can be very selective
 about where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
 is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which
 require either that you clone this repository outside of your `GOPATH` or you set the `GO111MODULE` environment variable to
 `on`. We recommend cloning this repository outside of your `GOPATH`.
 
 Once you've cloned the repository, you can build the Secretless Broker.
+
+Note: On git submodules, taken from git documentation.
+> Luckily, you can tell Git (>=2.14) to always use the --recurse-submodules flag by setting the
+> configuration option submodule.recurse: git config submodule.recurse true. 
+> As noted above, this will also make Git recurse into submodules for every 
+> command that has a --recurse-submodules option (except git clone)
 
 ### Static long version tags
 
@@ -317,6 +323,14 @@ replace `<GOOS>/<GOARCH>` with your particular operating system and compilation 
 Secretless supports using [Go plugins](https://golang.org/pkg/plugin/) to extend
 its functionality. To learn about writing new Secretless plugins and for more
 information on the types of plugins we currently support, visit the [plugin API directory](pkg/secretless/plugin).
+
+### Submodules
+
+Secretless makes use of some plugins using [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules). 
+Development on submodules is similar to just working with a second repository, in that you can `cd` into it and 
+check out branches or make seperate commits. However, you also have the ability to commit and push recursively 
+from the parent repository. For help with this, it is recommended to review the "Publishing Submodule Changes" 
+section of the Git Submodules documentation.
 
 ## Releasing
 

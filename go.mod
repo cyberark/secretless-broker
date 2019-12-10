@@ -51,7 +51,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
 )
 
-replace github.com/denisenkom/go-mssqldb => github.com/cyberark/go-mssqldb v0.0.0-20191030142036-b5a965a47dd3
+replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 
 // 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
 // This is our fix:

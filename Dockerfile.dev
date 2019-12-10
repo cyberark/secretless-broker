@@ -40,6 +40,7 @@ RUN go get -u github.com/jstemmer/go-junit-report && \
 
 # go mod dependency management for the secretless project
 COPY go.mod go.sum /secretless/
+COPY third_party/ /secretless/third_party
 
 RUN go mod download
 

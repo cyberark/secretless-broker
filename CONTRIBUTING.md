@@ -74,10 +74,10 @@ require either that you clone this repository outside of your `GOPATH` or you se
 Once you've cloned the repository, you can build the Secretless Broker.
 
 Note: On git submodules, taken from git documentation.
-> Luckily, you can tell Git (>=2.14) to always use the --recurse-submodules flag by setting the configuration option 
-> submodule.recurse: git config submodule.recurse true. 
-> As noted above, this will also make Git recurse into submodules for every command that has a --recurse-submodules option 
-> (except git clone)
+> Luckily, you can tell Git (>=2.14) to always use the --recurse-submodules flag by setting the
+> configuration option submodule.recurse: git config submodule.recurse true. 
+> As noted above, this will also make Git recurse into submodules for every 
+> command that has a --recurse-submodules option (except git clone)
 
 ### Static long version tags
 
@@ -323,6 +323,14 @@ replace `<GOOS>/<GOARCH>` with your particular operating system and compilation 
 Secretless supports using [Go plugins](https://golang.org/pkg/plugin/) to extend
 its functionality. To learn about writing new Secretless plugins and for more
 information on the types of plugins we currently support, visit the [plugin API directory](pkg/secretless/plugin).
+
+### Submodules
+
+Secretless makes use of some plugins using [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules). 
+Development on submodules is similar to just working with a second repository, in that you can `cd` into it and 
+check out branches or make seperate commits. However, you also have the ability to commit and push recursively 
+from the parent repository. For help with this, it is recommended to review the "Publishing Submodule Changes" 
+section of the Git Submodules documentation.
 
 ## Releasing
 

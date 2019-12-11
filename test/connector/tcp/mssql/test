@@ -1,17 +1,125 @@
-#!/bin/bash
+#!/bin/bash -e
 
-export SECRETLESS_HOST=secretless
-if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
-  export SECRETLESS_HOST=secretless-dev
+readonly db_host_tls="mssql"
+readonly db_host_no_tls="mssql" # TODO: configure a non-ssl container?
+readonly db_port=1433
+readonly db_user="sa"
+readonly db_password="yourStrong()Password"
+readonly secretless_port=2223
+readonly db_success_resp="1 rows affected"
+readonly db_fail_resp="Login failed for user"
+test_failed=false
+secretless_host="secretless"
+# Automatically detect if we're devmode based on the existence
+# of the secretless-dev container.  We assume that you started
+# your workflow using `./dev` if you are developing, and this
+# command will use the secretless-dev container.
+if [[ -n $(docker-compose ps -q secretless-dev) ]]; then
+  secretless_host="secretless-dev"
 fi
 
-docker-compose run \
-  -e SECRETLESS_HOST="$SECRETLESS_HOST" \
-  --rm \
-  --no-deps \
-  test bash -c "go test -v ./test/connector/tcp/mssql"
+help_and_exit() {
+  local retval=${1:-1}
+  cat <<EOF
+This script tests access to an MSSQL server, first accessing the
+server directly (to establish a testing baseline), and then
+via a secretless broker.
 
-# print secretless logs after tests run
-ret=$?
-docker-compose logs $SECRETLESS_HOST
-exit $ret
+This script detects if you're in "dev" mode by the existence of
+the secretless-dev container. That container will exist only if
+the development process was started using the "./dev" command.
+
+Options:
+  -h Show this command usage
+EOF
+  exit "$retval"
+}
+
+while getopts "h" opt; do
+    case $opt in
+        h) help_and_exit 0;;
+        *) echo "Unknown option -$OPTARG"; help_and_exit 1;;
+    esac
+done
+
+assert_contains_substring() {
+  # assert_contains_substring <string> <substring>
+  local string=$1
+  local substring=$2
+
+  if [[ "${string}" =~ ${substring} ]]; then
+      echo "."
+      return
+  fi
+
+  echo ""
+  echo "FAIL:"
+  echo ""
+  echo "The string:"
+  echo ""
+  echo "    ${string}"
+  echo ""
+  echo "Did not contain expected substring:"
+  echo ""
+  echo "    ${substring}"
+  echo ""
+
+  test_failed=true
+}
+
+query_sql_service() {
+  # query_sql_service <server> <port> <user> <password>
+  server=$1
+  port=$2
+  user=$3
+  pw=$4
+
+  docker_cmd="docker-compose run --rm --no-deps"
+  sql_cmd=(sqlcmd -S "$server,$port" -U "$user" -P "$pw" -Q "SELECT 1+1")
+
+  # NOTE: We need to 2>&1 because we need to assert on sqlcmd's error messages
+  # and we need to "|| true" because we don't want the script to exit when this
+  # happens
+  $docker_cmd test "${sql_cmd[@]}" 2>&1 || true
+}
+
+echo "Waiting for '$secretless_host' service to start"
+
+# single quotes are intentional:
+# shellcheck disable=SC2016
+docker-compose run --rm --no-deps test bash -ec '
+counter=0
+while ! wget --quiet --output-document - http://'$secretless_host':5335/ready > /dev/null 2>&1; do
+    if expr $counter = 5 > /dev/null; then
+      echo ""
+      echo "Timed out waiting for Secretless"
+      exit 1
+    fi
+    let "counter=$counter+1"
+    >&2 printf ". "
+    sleep 1
+done
+'
+
+echo "'$secretless_host' service is up - continuing "
+echo ""
+echo "Running tests"
+echo ""
+
+echo "Test: Query mssql service directly with correct password succeeds"
+good_resp=$(query_sql_service $db_host_tls $db_port $db_user $db_password)
+assert_contains_substring "$good_resp" $db_success_resp
+
+echo "Test: Query mssql service directly with incorrect password fails"
+bad_resp=$(query_sql_service $db_host_tls $db_port "BAD_USER" "BAD_PASSWORD")
+assert_contains_substring "$bad_resp" $db_fail_resp
+
+echo "Test: Query mssql via secretless with incorrect password succeeds"
+good_resp=$(query_sql_service $secretless_host $secretless_port "NONEXISTENT_USER" "BOGUS_PASSWORD")
+assert_contains_substring "$good_resp" $db_success_resp
+
+if $test_failed; then
+  echo "FAIL"
+else
+  echo "PASS"
+fi

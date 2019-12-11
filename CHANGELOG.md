@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.1] 2019-12-11
+
+### Added
+- Added [README](https://github.com/cyberark/secretless-broker/blob/master/internal/plugin/connectors/tcp/mssql/README.md) for the MSSQL connector (#1003)
+
+### Changed
+- Added `go-mssqldb` dependency as a submodule (#1038)
+
+### Fixed
+- Updated Conjur provider to log and exit on repeated authentication failure
+  (#1035)
+
 ## [1.4.0] 2019-12-04
 
 ### Added
@@ -406,3 +418,4 @@ The first tagged version.
 [1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0 
 [1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0 
 [1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0 
+[1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1 

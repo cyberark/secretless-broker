@@ -108,10 +108,17 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		}
 
 		go func() {
-			// sleep until token needs refresh
+			// Sleep until token needs refresh
 			time.Sleep(provider.Authenticator.Config.TokenRefreshTimeout)
-			// authenticate in a loop
-			provider.fetchAccessTokenLoop()
+
+			// Authenticate in a loop
+			err := provider.fetchAccessTokenLoop()
+
+			// On repeated errors in getting the token, we need to exit the
+			// broker since the provider cannot be used.
+			if err != nil {
+				log.Fatal(err)
+			}
 		}()
 
 		// Once the token file has been loaded, create a new instance of the Conjur client

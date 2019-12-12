@@ -326,7 +326,7 @@ information on the types of plugins we currently support, visit the [plugin API 
 
 Secretless makes use of some third party libraries using Git Submodules. 
 Development on submodules is similar to just working with a second repository, in that
-you can `cd` into it and check out branches or make seperate commits. However, you also
+you can `cd` into it and check out branches or make separate commits. However, you also
 have the ability to commit and push recursively from the parent repository. For help
 with this, it is recommended to review the "Publishing Submodule Changes" section of
 the [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) documentation.

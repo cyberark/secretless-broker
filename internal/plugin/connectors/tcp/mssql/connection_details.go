@@ -2,6 +2,8 @@ package mssql
 
 import (
 	"strconv"
+
+	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 // ConnectionDetails stores the connection info to the real backend database.
@@ -11,13 +13,15 @@ type ConnectionDetails struct {
 	Port     uint
 	Username string
 	Password string
+	AppName string
+	Database string
 }
 
 const defaultMSSQLPort = uint(1433)
 
 // NewConnectionDetails is a constructor of ConnectionDetails structure from a
 // map of credentials.
-func NewConnectionDetails(credentials map[string][]byte) (*ConnectionDetails, error) {
+func NewConnectionDetails(credentials map[string][]byte, login *mssql.Login) (*ConnectionDetails, error) {
 
 	connDetails := &ConnectionDetails{}
 
@@ -37,6 +41,11 @@ func NewConnectionDetails(credentials map[string][]byte) (*ConnectionDetails, er
 
 	if credentials["password"] != nil {
 		connDetails.Password = string(credentials["password"])
+	}
+
+	if login != nil {
+		connDetails.AppName = login.AppName
+		connDetails.Database = login.Database
 	}
 
 	return connDetails, nil

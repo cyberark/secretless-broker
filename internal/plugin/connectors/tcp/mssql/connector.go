@@ -2,8 +2,8 @@ package mssql
 
 import (
 	"context"
-	"fmt"
 	"net"
+	"net/url"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
@@ -15,6 +15,7 @@ import (
 type SingleUseConnector struct {
 	backendConn net.Conn
 	clientConn  net.Conn
+	clientLogin  *mssql.Login
 	logger      log.Logger
 }
 
@@ -40,7 +41,7 @@ func (connector *SingleUseConnector) Connect(
 		return nil, err
 	}
 
-	connDetails, err := NewConnectionDetails(credentialValuesByID)
+	connDetails, err := NewConnectionDetails(credentialValuesByID, connector.clientLogin)
 	if err != nil {
 		connector.sendErrorToClient()
 		return nil, err
@@ -104,10 +105,16 @@ func (connector *SingleUseConnector) sendErrorToClient() {
 }
 
 func dataSourceName(connDetails *ConnectionDetails) string {
-	return fmt.Sprintf(
-		"sqlserver://%s:%s@%s",
-		connDetails.Username,
-		connDetails.Password,
-		connDetails.Address(),
-	)
+	query := url.Values{}
+	query.Add("app name", connDetails.AppName)
+	query.Add("database", connDetails.Database)
+
+	u := &url.URL{
+		Scheme:   "sqlserver",
+		User:     url.UserPassword(connDetails.Username, connDetails.Password),
+		Host:     connDetails.Address(),
+		RawQuery: query.Encode(),
+	}
+
+	return u.String()
 }

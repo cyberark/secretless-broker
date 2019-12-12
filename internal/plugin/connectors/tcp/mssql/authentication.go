@@ -24,7 +24,7 @@ func (connector *SingleUseConnector) performPreLoginHandshake() error {
 
 	// we actually don't need the client's handshake response.
 	// we just need for them to not be blocked
-	err = clientBuffer.ReadNextPacket()
+	connector.clientLogin, err = mssql.ReadLogin(clientBuffer)
 	if err != nil {
 		return fmt.Errorf("failed to read client login message: %s", err)
 	}

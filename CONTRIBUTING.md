@@ -16,6 +16,7 @@ to enforce its license terms. Please email a signed copy to
 - [Documentation](#documentation)
 - [Profiling](#profiling)
 - [Plugins](#plugins)
+- [Submodules](#submodules)
 - [Releasing](#releasing)
 
 ## Prerequisites
@@ -65,11 +66,15 @@ Use [this guide][style] to maintain consistent style across the Secretless Broke
 
 ## Building
 
-First, clone `https://github.com/cyberark/secretless-broker` with the `--recurse-submodules` flag. If you're new to Go, be aware that Go can be very selective
-about where the files are placed on the filesystem. There is an environment variable called `GOPATH`, whose default value
+First, clone `https://github.com/cyberark/secretless-broker` with the `--recurse 
+-submodules` flag. If you already have secretless-broker cloned locally, but are missing 
+submodules, perform `git fetch --recurse-submodules`. If you're new to Go, be aware 
+that Go can be very selective about where the files are placed on the filesystem. 
+There is an environment variable called `GOPATH`, whose default value
 is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which
-require either that you clone this repository outside of your `GOPATH` or you set the `GO111MODULE` environment variable to
-`on`. We recommend cloning this repository outside of your `GOPATH`.
+require either that you clone this repository outside of your `GOPATH` or you set the
+`GO111MODULE` environment variable to `on`. We recommend cloning this repository
+ outside of your `GOPATH`.
 
 Once you've cloned the repository, you can build the Secretless Broker.
 
@@ -150,20 +155,13 @@ which will be run in order:
 To add a new integration test, complete the following two steps:
 
 1. Create a folder with test scripts as described above.
-1. Add a new entry to the `Jenkinsfile` to exercise those test scripts using
-   the `run_integration` script. In most cases, you will also call `junit` on
-   the xml file that `run_integration` outputs in your test's subdirectory.
+2. Jenkins will automatically search the `test` directory for any sub-directories that
+meet the criteria of having both a `start` and `stop` script. It then runs the 
+`./bin/run_integration` script on that directory.
 
-Here's an example `Jenkinsfile` entry:
-
-```
-stage('Integration: PG Handler') {
-  steps {
-    sh './bin/run_integration pg_handler'
-    junit 'test/pg_handler/junit.xml'
-  }
-}
-```
+Note: You can test locally using the same format of `./bin/run_integration <test
+directory name>`. You can pass in the name of the directory itself, you don't need the
+full path.
 
 ### OSX Keychain provider Test
 
@@ -324,13 +322,74 @@ Secretless supports using [Go plugins](https://golang.org/pkg/plugin/) to extend
 its functionality. To learn about writing new Secretless plugins and for more
 information on the types of plugins we currently support, visit the [plugin API directory](pkg/secretless/plugin).
 
-### Submodules
+## Submodules
 
-Secretless makes use of some plugins using [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules). 
-Development on submodules is similar to just working with a second repository, in that you can `cd` into it and 
-check out branches or make seperate commits. However, you also have the ability to commit and push recursively 
-from the parent repository. For help with this, it is recommended to review the "Publishing Submodule Changes" 
-section of the Git Submodules documentation.
+Secretless makes use of some third party libraries using Git Submodules. 
+Development on submodules is similar to just working with a second repository, in that
+you can `cd` into it and check out branches or make separate commits. However, you also
+have the ability to commit and push recursively from the parent repository. For help
+with this, it is recommended to review the "Publishing Submodule Changes" section of
+the [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) documentation.
+
+`git submodule update --recursive` can be used to update the registered
+ submodules to match what the superproject expects by cloning missing submodules and
+ updating the working tree of the submodules. The "updating" can be done in several
+ ways depending on command line options and the value of submodule.<name>.update
+ configuration variable. The command line option takes precedence over the
+ configuration variable. If neither is given, a checkout is performed. The recursive
+ flag will handle any submodules nested within a submodule
+  
+### Updating Submodules
+When making a change to a submodule, it will not be committed automatically when the
+super repository is committed. As such, there are a few steps in place to make sure
+this happens.
+
+1. Enter the submodule directory and create a branch to store your changes, publishing
+this branch now or once you have completed your work.
+`cd third_party/<submodule>`
+`git checkout -b <branch name>`
+
+2. Commit any neccessary changes within the submodule repository to your new branch. If
+you haven't pushed the branch, and the changes within, be sure to do so now with
+`git push`. This is the same workflow, and end result, as if you were working on an
+individual repository.
+
+3. From the super directory, you'll notice that if you run `git status`, it will detect
+new commits to the repository.
+For example:
+```
+Changes not staged for commit:
+(use "git add <file>..." to update what will be committed)
+(use "git restore <file>..." to discard changes in working directory)
+    modified:   third_party/go-mssqldb (new commits)
+```
+
+4. From the super directory, stage the changes to the submodule. It should only require
+a single `git add <submodule_dir>` statement. This will update the remote that the
+super repository uses to reference the submodule to point to the new branch you
+created, and all the commits contained within.
+
+5. Push your changes from the super repository. Be sure you are recursively checking
+for changes to your submodule, so that you don't leave anything behind, with: 
+`git push --recurse-submodules=check`. Again, this check will be performed if you have
+modified your git config to always recurse into submodules. When you push, the
+working branch for the super repository will have the commit or branch for the
+submodule tied to it, but no changes will be made to it beyond what you did yourself
+in the submodule directory.
+
+6. When you create a Pull Review in Github, you will notice that, within the 'files
+changed' tab, there is a single reference to the changes made in the submodule, with
+links to the github pages for them as well.
+
+7. Create a seperate Pull Review for your submodule in its respective repository. This
+is an extra measure to make sure both repositories are reviewed before their changes
+are merged.
+
+There are a few benefits to this approach
+- When a pull request or branch is dependent on a specific commit in a submodule, we
+ can easily pull both at the same time and build without issues.
+- Reviewers can see the context for a change that may span more than one repository
+ when Github links the two pull requests.
 
 ## Releasing
 

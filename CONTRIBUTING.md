@@ -401,7 +401,6 @@ than master. Make sure your change to secretless considers this.
  3. Return to the secretless-broker directory, and create a new PR with the modified
     reference
  
- 
  ### Helpful Commands for working with submodules
  To check the current hash for a submodule:
  

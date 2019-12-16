@@ -22,6 +22,7 @@ github.com/cyberark/conjur-authn-k8s-client v0.13.0 h1:sKh0yS6lSHT34FnMRR738+Q0d
 github.com/cyberark/conjur-authn-k8s-client v0.13.0/go.mod h1:JTeGIeRO59J7mMEc5yF6FPtk1QnaAzs4GyZa4WldqZc=
 github.com/cyberark/go-mssqldb v0.0.0-20191030142036-b5a965a47dd3 h1:qOMkK2hnBmmX40z/MHcZ0eVGATFK6lz+2VnsZFKMhY0=
 github.com/cyberark/go-mssqldb v0.0.0-20191030142036-b5a965a47dd3/go.mod h1:xbL0rPBG9cCiLr28tMa8zpbdarY27NDyej4t/EjAShU=
+github.com/cyberark/secretless-broker v1.4.1-0.20191211191712-251c5ec034af/go.mod h1:+GueI3WCJL5gDYaYa38ZokAR8ceEyCVet7MkuZyjf80=
 github.com/cyberark/summon v0.7.0 h1:eBjyNzpJEeFb7BFcOgidM6S/UbEsN7LGSFeQE7szPsk=
 github.com/cyberark/summon v0.7.0/go.mod h1:S7grcxHeUxfL1vRTQUyq9jGK8yG6V/tSlLPQ6tHRO4k=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

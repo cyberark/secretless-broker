@@ -390,6 +390,13 @@ There are a few benefits to this approach
  can easily pull both at the same time and build without issues.
 - Reviewers can see the context for a change that may span more than one repository
  when Github links the two pull requests.
+ 
+We want secretless to point to specific commits within a submodule, rather
+than master. Make sure your change to secretless considers this.
+ 1. `cd` into the submodule
+ 2. Checkout the commit we want secretless to use from within the submodule
+ 3. Return to the secretless-broker directory, and create a new PR with the modified
+    reference
 
 ## Releasing
 

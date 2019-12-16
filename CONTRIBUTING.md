@@ -346,7 +346,9 @@ this happens.
 
 1. Enter the submodule directory and create a branch to store your changes, publishing
 this branch now or once you have completed your work.
+
 `cd third_party/<submodule>`
+
 `git checkout -b <branch name>`
 
 2. Commit any neccessary changes within the submodule repository to your new branch. If
@@ -365,7 +367,8 @@ Changes not staged for commit:
 ```
 
 4. From the super directory, stage the changes to the submodule. It should only require
-a single `git add <submodule_dir>` statement. This will update the remote that the
+a single `git submodule add <submodule_dir>` statement. This will update the remote that
+ the
 super repository uses to reference the submodule to point to the new branch you
 created, and all the commits contained within.
 
@@ -397,6 +400,14 @@ than master. Make sure your change to secretless considers this.
  2. Checkout the commit we want secretless to use from within the submodule
  3. Return to the secretless-broker directory, and create a new PR with the modified
     reference
+ 
+ ### Helpful Commands for working with submodules
+ To check the current hash for a submodule:
+ 
+ `git ls-tree <branch> third_party/<submodule-directory>`
+ 
+ To set (checkout) the SHA-1 of a submodule to the most recent commit:
+ `git submodule --update <optional directory path>`
 
 ## Releasing
 

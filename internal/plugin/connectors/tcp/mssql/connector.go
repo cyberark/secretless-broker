@@ -9,6 +9,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/cyberark/secretless-broker/third_party/ctxtypes"
+	"github.com/pkg/errors"
 
 	mssql "github.com/denisenkom/go-mssqldb"
 )
@@ -129,13 +130,17 @@ func (connector *SingleUseConnector) Connect(
 	clientBuffer := mssql.NewTdsBuffer(bufferSize, connector.clientConn)
 	_, err := mssql.ReadPreloginWithPacketType(clientBuffer, mssql.PackPrelogin)
 	if err != nil {
-		return connector.sendError("failed to read prelogin request: %s", err)
+		wrappedError := errors.Wrap(err, "failed to read prelogin request")
+		connector.sendError(wrappedError)
+		return nil, wrappedError
 	}
 
 	// Prepare connection details from the client, formatted for MsSQL
 	connDetails, err := NewConnectionDetails(credentialValuesByID)
 	if err != nil {
-		return connector.sendError("Unable to create new connection details: %s", err)
+		wrappedError := errors.Wrap(err, "unable to create new connection details")
+		connector.sendError(wrappedError)
+		return nil, wrappedError
 	}
 
 	// Create a new MsSQL connector
@@ -146,7 +151,9 @@ func (connector *SingleUseConnector) Connect(
 	// "connector", and its connectors also have a "Connect" method.
 	driverConnector, err := mssql.NewConnector(dataSourceName(connDetails))
 	if err != nil {
-		return connector.sendError("Failed to create a go-mssqldb connector: %s", err)
+		wrappedError := errors.Wrap(err, "failed to create a go-mssqldb connector")
+		connector.sendError(wrappedError)
+		return nil, wrappedError
 	}
 
 	// Create the context for our connection
@@ -155,24 +162,32 @@ func (connector *SingleUseConnector) Connect(
 	// Create a channel for receiving the prelogin response through the context
 	preLoginResponseChannel := make(chan map[uint8][]byte)
 
-	// Set a 'marker' for when the driver has finished connecting to the server
-	connectPhaseFinished := make(chan struct {})
+	// Create a channel for send the client login to the driver through the context
+	clientLoginChannel := make(chan mssql.Login)
 
-	// Add channels to the context, to retrive information from the driver
-	loginContext := context.WithValue(ctx, ctxtypes.PreLoginResponseKey,
+	// Set a 'marker' for when the driver has finished connecting to the server
+	connectPhaseFinished := make(chan struct{})
+
+	// Add channels to the context, to exchange information with the driver
+	loginContext := context.WithValue(
+		ctx,
+		ctxtypes.PreLoginResponseKey,
 		preLoginResponseChannel)
+	loginContext = context.WithValue(
+		loginContext,
+		ctxtypes.ClientLoginKey,
+		clientLoginChannel)
 
 	// Build a new driver connection
 	var driverConn driver.Conn
 
 	go func() {
 		// Kick off authentication through our third party connector
+		// TODO: this is generally dangerous
+		//  we're sharing state between the main routine and this, and have the channel
+		//  working as an implicit lock
 		driverConn, err = driverConnector.Connect(loginContext)
 		connectPhaseFinished <- struct{}{}
-
-		if err != nil {
-			_, err = connector.sendError("failed to connect to mssql server: %s", err)
-		}
 	} ()
 
 	// Blocks continuation until we've received the preLoginResponse from the driver
@@ -186,32 +201,40 @@ func (connector *SingleUseConnector) Connect(
 	// Write the prelogin packet back to the user
 	err = mssql.WritePreloginWithPacketType(clientBuffer, preloginResponse, mssql.PackReply)
 	if err != nil {
-		return connector.sendError("failed to write prelogin response: %s", err)
+		wrappedError := errors.Wrap(err, "failed to write prelogin response")
+		connector.sendError(wrappedError)
+		return nil, wrappedError
 	}
 
-	// Just like above, we don't need to concern ourselves with what the client would
-	// typically be sending to the server, since we are handling all communication with
-	// the server ourselves. We read the next packet so the client isn't blocked,
-	// while the driver handles the handshake.
-	err = clientBuffer.ReadNextPacket()
+	// We parse the client's Login packet so that we can pass on params to the server.
+	clientLogin, err := mssql.ReadLogin(clientBuffer)
 	if err != nil {
-		return connector.sendError("Failed to handle client prelogin request: %s", err)
+		wrappedError := errors.Wrap(err, "failed to handle client login")
+		connector.sendError(wrappedError)
+		return nil, wrappedError
+	}
+
+	// Send the client login so that secretless can send honest client params to the server
+	clientLoginChannel <- *clientLogin
+
+	// Block continuation until driver has completed connection
+	<- connectPhaseFinished
+	if err != nil {
+		wrappedError := errors.Wrap(err, "failed to connect to mssql server")
+		connector.sendError(wrappedError)
+		return nil, wrappedError
 	}
 
 	// TODO: 	Send the login response to the client 	 (#1016)
 	// TODO: 	Verify appropriate errors are passed to the client (#1013)
-
-	// TODO: 	Replace this with an actual 'ok' message from the server
-	//			once login completes within the driver
 	if _, err = clientConn.Write(connector.CreateAuthenticationOKMessage()); err != nil {
-		return connector.sendError("Failed to send a successful authentication"+
-			" response to the client"+
-			": %s", err)
+		wrappedError := errors.Wrap(
+			err,
+			"failed to send a successful authentication response to client",
+		)
+		connector.sendError(wrappedError)
+		return nil, wrappedError
 	}
-
-	// Block continuation until driver has completed connection
-	<- connectPhaseFinished
-
 	// Verify the driverConn is an mssql driverConn object and get its underlying transport
 	mssqlConn := driverConn.(*mssql.Conn)
 	connector.backendConn = mssqlConn.NetConn()
@@ -221,11 +244,11 @@ func (connector *SingleUseConnector) Connect(
 
 
 // TODO: Add ability to receive an MSSQL error and send it to the client (#1013)
-func (connector *SingleUseConnector) sendError(message string, err error) (net.Conn, 
-	error){
-	connector.logger.Errorf(message, err)
+func (connector *SingleUseConnector) sendError(err error) {
+	//NOTE: no need to log, Secretless already does this for every error sent back
+	//from the Connect method
+	//connector.logger.Error(err)
 	connector.sendErrorToClient()
-	return nil, err
 }
 
 // TODO: Add ability to receive an MSSQL error and send it to the client (#1013)

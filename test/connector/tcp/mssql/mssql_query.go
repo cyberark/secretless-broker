@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"text/tabwriter"
 
-	_ "github.com/denisenkom/go-mssqldb"
+	_ "github.com/denisenkom/go-mssqldb" // registers the "mssql" driver to database/sql
 
 	"github.com/cyberark/secretless-broker/test/util/testutil"
 )

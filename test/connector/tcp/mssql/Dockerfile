@@ -5,17 +5,28 @@ RUN apt-get update && apt-get install -y \
 	curl apt-transport-https debconf-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# adding custom MS repository
+# Add custom MS repository
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
-# install SQL Server drivers and tools
+# Install SQL Server drivers and tools
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql mssql-tools
 ENV PATH $PATH:/opt/mssql-tools/bin
 
+# Install and set locale to en_US.UTF-8
+#
+# sqlcmd expects the en_US.UTF-8 locale to be available otherwise it'll throw the following error:
+# terminate called after throwing an instance of 'std::runtime_error'
+#  what():  locale::facet::_S_create_c_locale name not valid
+#
+
+# Install locales package
 RUN apt-get -y install locales
+# Uncomment en_US.UTF-8 for inclusion in generation
 RUN sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen
+# Generate en_US.UTF-8 locale
 RUN locale-gen en_US.UTF-8
+# Set locale to en_US.UTF-8
 RUN update-locale LANG=en_US.UTF-8
 
 # Install wget.

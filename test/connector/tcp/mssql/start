@@ -10,6 +10,8 @@ done
 
 ./stop
 
+docker-compose build
+
 # the order of the services is important. mssql must be up before we start secretless
 docker-compose up -d mssql
 

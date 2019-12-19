@@ -47,7 +47,7 @@ file that implements two functions.
   }
 
   type Connector interface {
-    Connect(net.Conn, CredentialValuesByID) (net.Conn, error)
+    Connect(net.Conn, connector.CredentialValuesByID) (net.Conn, error)
   }
   ```
 

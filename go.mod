@@ -2,7 +2,7 @@ module github.com/cyberark/secretless-broker
 
 require (
 	github.com/aws/aws-sdk-go v1.15.79
-	github.com/cenkalti/backoff v2.0.0+incompatible
+	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/codegangsta/cli v1.20.0
 	github.com/containerd/containerd v1.3.2 // indirect
 	github.com/cyberark/conjur-api-go v0.5.2
@@ -29,7 +29,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/pkg/profile v1.2.1
 	github.com/prometheus/client_golang v1.2.1 // indirect
-	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
+	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529

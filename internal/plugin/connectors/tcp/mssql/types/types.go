@@ -2,7 +2,10 @@ package types
 
 import (
 	"context"
+	"io"
 	"net"
+
+	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 // NewMSSQLConnectorFunc represents the constructor of an mssqlConnector. It
@@ -35,3 +38,9 @@ func (fn MSSQLConnectorFunc) Connect(ctx context.Context) (NetConner, error) {
 	return fn(ctx)
 }
 
+
+// ReadPreloginFunc defines...
+type ReadPreloginFunc func(*mssql.TdsBuffer, mssql.PacketType) (map[uint8][]byte, error)
+type WritePreloginFunc func(*mssql.TdsBuffer, map[uint8][]byte, mssql.PacketType) error
+
+type NewTdsBufferFunc func(uint16, io.ReadWriteCloser) *mssql.TdsBuffer

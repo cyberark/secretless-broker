@@ -97,6 +97,8 @@ type SingleUseConnector struct {
 	clientConn        net.Conn
 	logger            log.Logger
 	newMSSQLConnector types.NewMSSQLConnectorFunc
+	readPrelogin      types.ReadPreloginFunc
+	writePrelogin     types.WritePreloginFunc
 }
 
 // NewMSSQLConnector is the production implementation of NewMSSQLConnectorFunc,
@@ -119,7 +121,12 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 
 // NewSingleUseConnector creates a new SingleUseConnector
 func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
-	return NewSingleUseConnectorWithOptions(logger, NewMSSQLConnector)
+	return NewSingleUseConnectorWithOptions(
+		logger,
+		NewMSSQLConnector,
+		mssql.ReadPreloginWithPacketType,
+		mssql.WritePreloginWithPacketType,
+	)
 }
 
 // NewSingleUseConnector creates a new SingleUseConnector, and allows you to
@@ -128,10 +135,14 @@ func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 func NewSingleUseConnectorWithOptions(
 	logger log.Logger,
 	newMSSQLConnector types.NewMSSQLConnectorFunc,
+	readPrelogin types.ReadPreloginFunc,
+	writePrelogin types.WritePreloginFunc,
 ) *SingleUseConnector {
 	return &SingleUseConnector{
 		logger:            logger,
 		newMSSQLConnector: newMSSQLConnector,
+		readPrelogin:      readPrelogin,
+		writePrelogin:     writePrelogin,
 	}
 }
 
@@ -158,13 +169,14 @@ func (connector *SingleUseConnector) Connect(
 
 	connector.clientConn = clientConn
 
-	// Secretless _is_ the client with respect to the server, and there is nothing in the
-	// pre-login handshake that needs to be passed along.  Secretless simply reads
-	// it from the client and throws it away, so that client can advance to the next
-	// stage of the process.  Otherwise the client would block forever waiting for its
-	// pre-login handshake to be read.
+	// Secretless _is_ the client with respect to the server, and there is
+	// nothing in the pre-login handshake that needs to be passed along.
+	// Secretless simply reads it from the client and throws it away, so that
+	// client can advance to the next stage of the process.  Otherwise the
+	// client would block forever waiting for its pre-login handshake to be
+	// read.
 	clientBuffer := mssql.NewTdsBuffer(bufferSize, connector.clientConn)
-	_, err := mssql.ReadPreloginWithPacketType(clientBuffer, mssql.PackPrelogin)
+	_, err := connector.readPrelogin(clientBuffer, mssql.PackPrelogin)
 	if err != nil {
 		return connector.sendError("failed to read prelogin request: %s", err)
 	}
@@ -181,7 +193,7 @@ func (connector *SingleUseConnector) Connect(
 	// NOTE: Secretless has some unfortunate naming collisions with the
 	// go-mssqldb driver package.  The driver package has its own concept of a
 	// "connector", and its connectors also have a "Connect" method.
-	driverConnector, err := NewMSSQLConnector(dataSourceName(connDetails))
+	driverConnector, err := connector.newMSSQLConnector(dataSourceName(connDetails))
 	if err != nil {
 		return connector.sendError("Failed to create a go-mssqldb connector: %s", err)
 	}
@@ -221,7 +233,7 @@ func (connector *SingleUseConnector) Connect(
 	preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
 
 	// Write the prelogin packet back to the user
-	err = mssql.WritePreloginWithPacketType(clientBuffer, preloginResponse, mssql.PackReply)
+	err = connector.writePrelogin(clientBuffer, preloginResponse, mssql.PackReply)
 	if err != nil {
 		return connector.sendError("failed to write prelogin response: %s", err)
 	}
@@ -240,6 +252,7 @@ func (connector *SingleUseConnector) Connect(
 
 	// TODO: 	Replace this with an actual 'ok' message from the server
 	//			once login completes within the driver
+	// TODO:    Rename this to "AuthenticationOKMessage"
 	if _, err = clientConn.Write(connector.CreateAuthenticationOKMessage()); err != nil {
 		return connector.sendError("Failed to send a successful authentication"+
 			" response to the client"+

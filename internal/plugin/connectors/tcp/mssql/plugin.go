@@ -18,12 +18,9 @@ func NewConnector(conRes connector.Resources) tcp.Connector {
 		clientConn net.Conn,
 		credentialValuesByID connector.CredentialValuesByID,
 	) (backendConn net.Conn, err error) {
-		// SingleUseConnector is responsible for generating the authenticated connection
-		// to the target service for each incoming client connection
-		singleUseConnector := &SingleUseConnector{
-			logger: conRes.Logger(),
-		}
-
+		// SingleUseConnector is responsible for generating the authenticated
+		// connection to the target service for each incoming client connection
+		singleUseConnector := NewSingleUseConnector(conRes.Logger())
 		return singleUseConnector.Connect(clientConn, credentialValuesByID)
 	}
 

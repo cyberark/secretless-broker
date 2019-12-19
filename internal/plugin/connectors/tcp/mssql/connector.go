@@ -2,10 +2,11 @@ package mssql
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
+	"io"
 	"net"
 
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/cyberark/secretless-broker/third_party/ctxtypes"
@@ -94,14 +95,96 @@ Overview of the connection process
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
 type SingleUseConnector struct {
-	backendConn net.Conn
-	clientConn  net.Conn
-	logger      log.Logger
+	backendConn       net.Conn
+	clientConn        net.Conn
+	logger            log.Logger
+	// Note: We're following standard ctor naming practices with this field.
+	newMSSQLConnector types.MSSQLConnectorCtor
+	readPrelogin      types.ReadPreloginFunc
+	writePrelogin     types.WritePreloginFunc
+	newTdsBuffer      types.TdsBufferCtor
+}
+
+// NewSingleUseConnector creates a new production SingleUseConnector
+func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
+	return NewSingleUseConnectorWithOptions(
+		logger,
+		NewMSSQLConnector,
+		ReadPreloginWithPacketType,
+		WritePreloginWithPacketType,
+		NewTdsBuffer,
+	)
+}
+
+// NewMSSQLConnector is the production implementation of MSSQLConnectorCtor,
+// used for creating mssql.Connector instances.  We need to wrap the raw
+// constructor provided by mssql (ie, mssql.NewConnector) in this function so
+// that it returns an interface, which enables us to mock it in unit tests.
+func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
+	connector, err := mssql.NewConnector(dsn)
+	fn := func(ctx context.Context) (types.NetConner, error) {
+		driverConn, err := connector.Connect(ctx)
+		if err != nil {
+			return nil, err
+		}
+		// This can never fail unless mssql package changes: panicking is fine
+		mssqlConn := driverConn.(types.NetConner)
+		return mssqlConn, nil
+	}
+	return types.MSSQLConnectorFunc(fn), err
+}
+
+// ReadPreloginWithPacketType is the production version of our readPrelogin
+// dependency, which delegates to the actual 3rd party driver.
+func ReadPreloginWithPacketType(
+	rawTdsBuffer interface{},
+	rawPktType interface{},
+) (map[uint8][]byte, error) {
+	// This can never fail unless mssql package changes: panicking is fine
+	tdsBuffer := rawTdsBuffer.(*mssql.TdsBuffer)
+	pktType := rawPktType.(mssql.PacketType)
+	return mssql.ReadPreloginWithPacketType(tdsBuffer, pktType)
+}
+
+// WritePreloginWithPacketType is the production version of our writePrelogin
+// dependency, which delegates to the actual 3rd party driver.
+func WritePreloginWithPacketType(
+	rawTdsBuffer interface{},
+	fields map[uint8][]byte,
+	rawPktType interface{},
+) error {
+	// This can never fail unless mssql package changes: panicking is fine
+	tdsBuffer := rawTdsBuffer.(*mssql.TdsBuffer)
+	pktType := rawPktType.(mssql.PacketType)
+	return mssql.WritePreloginWithPacketType(tdsBuffer, fields, pktType)
 }
 
 // https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/configure-the-network-packet-size-server-configuration-option
 // Default packet size remains at 4096 bytes
 const bufferSize uint16 = 4096
+
+func NewTdsBuffer(transport io.ReadWriteCloser) types.ReadNextPacketer {
+	return mssql.NewTdsBuffer(bufferSize, transport)
+}
+
+// NewSingleUseConnectorWithOptions creates a new SingleUseConnector, and allows
+// you to specify the newMSSQLConnector explicitly.  Intended to be used in unit
+// tests only.
+func NewSingleUseConnectorWithOptions(
+	logger log.Logger,
+	newMSSQLConnector types.MSSQLConnectorCtor,
+	readPrelogin types.ReadPreloginFunc,
+	writePrelogin types.WritePreloginFunc,
+	newTdsBuffer types.TdsBufferCtor,
+) *SingleUseConnector {
+	return &SingleUseConnector{
+		logger:            logger,
+		newMSSQLConnector: newMSSQLConnector,
+		readPrelogin:      readPrelogin,
+		writePrelogin:     writePrelogin,
+		newTdsBuffer:      newTdsBuffer,
+	}
+}
 
 // Connect implements the tcp.Connector func signature
 //
@@ -122,13 +205,14 @@ func (connector *SingleUseConnector) Connect(
 
 	connector.clientConn = clientConn
 
-	// Secretless _is_ the client with respect to the server, and there is nothing in the
-	// pre-login handshake that needs to be passed along.  Secretless simply reads
-	// it from the client and throws it away, so that client can advance to the next
-	// stage of the process.  Otherwise the client would block forever waiting for its
-	// pre-login handshake to be read.
-	clientBuffer := mssql.NewTdsBuffer(bufferSize, connector.clientConn)
-	_, err := mssql.ReadPreloginWithPacketType(clientBuffer, mssql.PackPrelogin)
+	// Secretless _is_ the client with respect to the server, and there is
+	// nothing in the pre-login handshake that needs to be passed along.
+	// Secretless simply reads it from the client and throws it away, so that
+	// client can advance to the next stage of the process.  Otherwise the
+	// client would block forever waiting for its pre-login handshake to be
+	// read.
+	clientBuffer := connector.newTdsBuffer(connector.clientConn)
+	_, err := connector.readPrelogin(clientBuffer, mssql.PackPrelogin)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to read prelogin request")
 		connector.sendError(wrappedError)
@@ -149,7 +233,7 @@ func (connector *SingleUseConnector) Connect(
 	// NOTE: Secretless has some unfortunate naming collisions with the
 	// go-mssqldb driver package.  The driver package has its own concept of a
 	// "connector", and its connectors also have a "Connect" method.
-	driverConnector, err := mssql.NewConnector(dataSourceName(connDetails))
+	driverConnector, err := connector.newMSSQLConnector(dataSourceName(connDetails))
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to create a go-mssqldb connector")
 		connector.sendError(wrappedError)
@@ -179,15 +263,16 @@ func (connector *SingleUseConnector) Connect(
 		clientLoginChannel)
 
 	// Build a new driver connection
-	var driverConn driver.Conn
+	var netConner types.NetConner
 
 	go func() {
 		// Kick off authentication through our third party connector
-		// TODO: this is generally dangerous
-		//  we're sharing state between the main routine and this, and have the channel
-		//  working as an implicit lock
-		driverConn, err = driverConnector.Connect(loginContext)
+		netConner, err = driverConnector.Connect(loginContext)
 		connectPhaseFinished <- struct{}{}
+
+		if err != nil {
+			connector.sendError(err)
+		}
 	}()
 
 	// Blocks continuation until we've received the preLoginResponse from the driver
@@ -199,7 +284,7 @@ func (connector *SingleUseConnector) Connect(
 	preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
 
 	// Write the prelogin packet back to the user
-	err = mssql.WritePreloginWithPacketType(clientBuffer, preloginResponse, mssql.PackReply)
+	err = connector.writePrelogin(clientBuffer, preloginResponse, mssql.PackReply)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to write prelogin response")
 		connector.sendError(wrappedError)
@@ -227,6 +312,9 @@ func (connector *SingleUseConnector) Connect(
 
 	// TODO: 	Send the login response to the client 	 (#1016)
 	// TODO: 	Verify appropriate errors are passed to the client (#1013)
+	// TODO: 	Replace this with an actual 'ok' message from the server
+	//			once login completes within the driver
+	// TODO:    Rename this to "AuthenticationOKMessage"
 	if _, err = clientConn.Write(connector.CreateAuthenticationOKMessage()); err != nil {
 		wrappedError := errors.Wrap(
 			err,
@@ -235,9 +323,11 @@ func (connector *SingleUseConnector) Connect(
 		connector.sendError(wrappedError)
 		return nil, wrappedError
 	}
-	// Verify the driverConn is an mssql driverConn object and get its underlying transport
-	mssqlConn := driverConn.(*mssql.Conn)
-	connector.backendConn = mssqlConn.NetConn()
+
+	// Block continuation until driver has completed connection
+	<-connectPhaseFinished
+
+	connector.backendConn = netConner.NetConn()
 
 	return connector.backendConn, nil
 }

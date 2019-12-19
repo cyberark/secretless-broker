@@ -89,13 +89,42 @@ Overview of the connection process
 	MsSQL->Driver: Login Response
 	Driver->Secretless: Login success or failure
 	Secretless->Client: Login Response (Premade)
- */
+*/
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
 type SingleUseConnector struct {
-	backendConn net.Conn
-	clientConn  net.Conn
-	logger      log.Logger
+	backendConn        net.Conn
+	clientConn         net.Conn
+	logger             log.Logger
+	newMSSQLConnector NewMSSQLConnectorFunc
+}
+
+type mssqlConnector interface {
+	Connect(context.Context) (driver.Conn, error)
+}
+
+// NewMssqlConnectorFunc represents the constructor of a mssql.Connector. It
+// exists so that its production implementation (mssql.NewConnector) can be
+// swapped out in unit tests.  Note we keep MSSQL in the name to prevent
+// confusion with the Secretless Connector.
+type NewMSSQLConnectorFunc func(dsn string) (*mssql.Connector, error)
+
+// NewSingleUseConnector creates a new SingleUseConnector
+func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
+	return NewSingleUseConnectorWithOptions(logger, mssql.NewConnector)
+}
+
+// NewSingleUseConnector creates a new SingleUseConnector, and allows you to
+// specify the newMSSQLConnector explicitly.  Intended to be used in unit tests
+// only.
+func NewSingleUseConnectorWithOptions(
+	logger log.Logger,
+	newMSSQLConnector NewMSSQLConnectorFunc,
+) *SingleUseConnector {
+	return &SingleUseConnector{
+		logger:            logger,
+		newMSSQLConnector: newMSSQLConnector,
+	}
 }
 
 // https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/configure-the-network-packet-size-server-configuration-option
@@ -156,7 +185,7 @@ func (connector *SingleUseConnector) Connect(
 	preLoginResponseChannel := make(chan map[uint8][]byte)
 
 	// Set a 'marker' for when the driver has finished connecting to the server
-	connectPhaseFinished := make(chan struct {})
+	connectPhaseFinished := make(chan struct{})
 
 	// Add channels to the context, to retrive information from the driver
 	loginContext := context.WithValue(ctx, ctxtypes.PreLoginResponseKey,
@@ -173,10 +202,10 @@ func (connector *SingleUseConnector) Connect(
 		if err != nil {
 			_, err = connector.sendError("failed to connect to mssql server: %s", err)
 		}
-	} ()
+	}()
 
 	// Blocks continuation until we've received the preLoginResponse from the driver
-	preloginResponse := <- preLoginResponseChannel
+	preloginResponse := <-preLoginResponseChannel
 
 	// Since the communication between the client and Secretless must be unencrypted,
 	// we fool the client into thinking that it's talking to a server that does not support
@@ -210,7 +239,7 @@ func (connector *SingleUseConnector) Connect(
 	}
 
 	// Block continuation until driver has completed connection
-	<- connectPhaseFinished
+	<-connectPhaseFinished
 
 	// Verify the driverConn is an mssql driverConn object and get its underlying transport
 	mssqlConn := driverConn.(*mssql.Conn)
@@ -219,10 +248,9 @@ func (connector *SingleUseConnector) Connect(
 	return connector.backendConn, nil
 }
 
-
 // TODO: Add ability to receive an MSSQL error and send it to the client (#1013)
-func (connector *SingleUseConnector) sendError(message string, err error) (net.Conn, 
-	error){
+func (connector *SingleUseConnector) sendError(message string, err error) (net.Conn,
+	error) {
 	connector.logger.Errorf(message, err)
 	connector.sendErrorToClient()
 	return nil, err

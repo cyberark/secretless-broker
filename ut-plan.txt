@@ -1,0 +1,47 @@
+Required doubles:
+
+- clientConn
+- NewMssqlConnectorFunc (type will need to defined in Secretless)
+
+Will need to create:
+
+- `NewSingleUseConnector(logger)`
+- `NewSingleUseConnectorWithOptions(logger, newConnectorFunc)`
+
+Basic Strategy:
+
+- `NewMssqlConnectorFunc` will return a driverConn with a `Connect()`
+- That connect method has this signature: `Connect(ctx context.Context) (driver.Conn, error)`
+- Much of what we want to test is our code's reaction to various return values
+  of `Connect()`.  Thus our test setup will involve some nesting of doubles.
+- The double we'll use for this purpose will need to unwrap the channel from
+  the context and add values (correct or incorrect), or fail to add values, to
+  that channel.
+
+UT Scope and logging:
+
+There are a _lot_ of code paths to test here.  I think we should test all the
+happy paths and error paths and that expected errors are passed where they
+should be, but we should keep tests about logged statements to a minimum.  I
+don't think they add much value and they will greatly increase the number of
+tests.
+
+The Test Cases
+
+Note: These cover every possible error scenario in our code (they will, when
+I'm done with the list), and we should have a test or assertion for each of
+them)
+
+- Expected error returned and sent to client if Prelogin packet can't be read
+  from client.
+  - General note: everything sent to client is is Generic now, but that's
+    changing with @kumbirai upcoming work, so we may want to coordinate these
+    efforts.
+- Expected error returned and sent to cleint if credentials are missing or
+  malformed
+- If `NewMssqlConnectorFunc` returns an error (which would happen in the real
+  world if the DSN was somehow wrong) that error is returned and sent to
+  client.
+- TO BE COMPLETED TOMORROW
+
+- Timeout error returned and sent to client if Prelogin response takes too long

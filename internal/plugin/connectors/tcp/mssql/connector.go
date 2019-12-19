@@ -103,15 +103,25 @@ type mssqlConnector interface {
 	Connect(context.Context) (driver.Conn, error)
 }
 
-// NewMssqlConnectorFunc represents the constructor of a mssql.Connector. It
+// NewMSSQLConnectorFunc represents the constructor of an mssqlConnector. It
 // exists so that its production implementation (mssql.NewConnector) can be
 // swapped out in unit tests.  Note we keep MSSQL in the name to prevent
 // confusion with the Secretless Connector.
-type NewMSSQLConnectorFunc func(dsn string) (*mssql.Connector, error)
+type NewMSSQLConnectorFunc func(dsn string) (mssqlConnector, error)
+
+// NewMSSQLConnector is the production implementation of NewMSSQLConnectorFunc,
+// used for creating mssql.Connector instances.  We need to wrap the raw
+// constructor provided by mssql (ie, mssql.NewConnector) in this function so
+// that it returns an interface (we only care about the "Connect" method for
+// unit testing.
+func NewMSSQLConnector(dsn string) (mssqlConnector, error) {
+	connector, err := mssql.NewConnector(dsn)
+	return connector, err
+}
 
 // NewSingleUseConnector creates a new SingleUseConnector
 func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
-	return NewSingleUseConnectorWithOptions(logger, mssql.NewConnector)
+	return NewSingleUseConnectorWithOptions(logger, NewMSSQLConnector)
 }
 
 // NewSingleUseConnector creates a new SingleUseConnector, and allows you to

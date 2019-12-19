@@ -2,10 +2,10 @@ package mssql
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"net"
 
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/cyberark/secretless-broker/third_party/ctxtypes"
@@ -93,30 +93,28 @@ Overview of the connection process
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
 type SingleUseConnector struct {
-	backendConn        net.Conn
-	clientConn         net.Conn
-	logger             log.Logger
-	newMSSQLConnector NewMSSQLConnectorFunc
+	backendConn       net.Conn
+	clientConn        net.Conn
+	logger            log.Logger
+	newMSSQLConnector types.NewMSSQLConnectorFunc
 }
-
-type mssqlConnector interface {
-	Connect(context.Context) (driver.Conn, error)
-}
-
-// NewMSSQLConnectorFunc represents the constructor of an mssqlConnector. It
-// exists so that its production implementation (mssql.NewConnector) can be
-// swapped out in unit tests.  Note we keep MSSQL in the name to prevent
-// confusion with the Secretless Connector.
-type NewMSSQLConnectorFunc func(dsn string) (mssqlConnector, error)
 
 // NewMSSQLConnector is the production implementation of NewMSSQLConnectorFunc,
 // used for creating mssql.Connector instances.  We need to wrap the raw
 // constructor provided by mssql (ie, mssql.NewConnector) in this function so
-// that it returns an interface (we only care about the "Connect" method for
-// unit testing.
-func NewMSSQLConnector(dsn string) (mssqlConnector, error) {
+// that it returns an interface, which enables us to mock it in unit tests.
+func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 	connector, err := mssql.NewConnector(dsn)
-	return connector, err
+	fn := func(ctx context.Context) (types.NetConner, error) {
+		driverConn, err := connector.Connect(ctx)
+		if err != nil {
+			return nil, err
+		}
+		// This can never fail unless mssql package changes: panicking is fine
+		mssqlConn := driverConn.(types.NetConner)
+		return mssqlConn, nil
+	}
+	return types.MSSQLConnectorFunc(fn), err
 }
 
 // NewSingleUseConnector creates a new SingleUseConnector
@@ -129,7 +127,7 @@ func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 // only.
 func NewSingleUseConnectorWithOptions(
 	logger log.Logger,
-	newMSSQLConnector NewMSSQLConnectorFunc,
+	newMSSQLConnector types.NewMSSQLConnectorFunc,
 ) *SingleUseConnector {
 	return &SingleUseConnector{
 		logger:            logger,
@@ -183,7 +181,7 @@ func (connector *SingleUseConnector) Connect(
 	// NOTE: Secretless has some unfortunate naming collisions with the
 	// go-mssqldb driver package.  The driver package has its own concept of a
 	// "connector", and its connectors also have a "Connect" method.
-	driverConnector, err := mssql.NewConnector(dataSourceName(connDetails))
+	driverConnector, err := NewMSSQLConnector(dataSourceName(connDetails))
 	if err != nil {
 		return connector.sendError("Failed to create a go-mssqldb connector: %s", err)
 	}
@@ -202,11 +200,11 @@ func (connector *SingleUseConnector) Connect(
 		preLoginResponseChannel)
 
 	// Build a new driver connection
-	var driverConn driver.Conn
+	var netConner types.NetConner
 
 	go func() {
 		// Kick off authentication through our third party connector
-		driverConn, err = driverConnector.Connect(loginContext)
+		netConner, err = driverConnector.Connect(loginContext)
 		connectPhaseFinished <- struct{}{}
 
 		if err != nil {
@@ -251,9 +249,7 @@ func (connector *SingleUseConnector) Connect(
 	// Block continuation until driver has completed connection
 	<-connectPhaseFinished
 
-	// Verify the driverConn is an mssql driverConn object and get its underlying transport
-	mssqlConn := driverConn.(*mssql.Conn)
-	connector.backendConn = mssqlConn.NetConn()
+	connector.backendConn = netConner.NetConn()
 
 	return connector.backendConn, nil
 }

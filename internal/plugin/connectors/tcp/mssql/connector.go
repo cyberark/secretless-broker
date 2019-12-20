@@ -3,6 +3,7 @@ package mssql
 import (
 	"context"
 	"fmt"
+	"io"
 	"net"
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
@@ -99,6 +100,18 @@ type SingleUseConnector struct {
 	newMSSQLConnector types.NewMSSQLConnectorFunc
 	readPrelogin      types.ReadPreloginFunc
 	writePrelogin     types.WritePreloginFunc
+	newTdsBuffer      types.NewTdsBufferFunc
+}
+
+// NewSingleUseConnector creates a new SingleUseConnector
+func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
+	return NewSingleUseConnectorWithOptions(
+		logger,
+		NewMSSQLConnector,
+		ReadPreloginWithPacketType,
+		WritePreloginWithPacketType,
+		NewTdsBuffer,
+	)
 }
 
 // NewMSSQLConnector is the production implementation of NewMSSQLConnectorFunc,
@@ -119,14 +132,37 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 	return types.MSSQLConnectorFunc(fn), err
 }
 
-// NewSingleUseConnector creates a new SingleUseConnector
-func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
-	return NewSingleUseConnectorWithOptions(
-		logger,
-		NewMSSQLConnector,
-		mssql.ReadPreloginWithPacketType,
-		mssql.WritePreloginWithPacketType,
-	)
+// ReadPreloginWithPacketType is the production version of our readPrelogin
+// dependency, which delegates to the actual 3rd party driver.
+func ReadPreloginWithPacketType(
+	rawTdsBuffer interface{},
+	rawPktType interface{},
+) (map[uint8][]byte, error) {
+	// This can never fail unless mssql package changes: panicking is fine
+	tdsBuffer := rawTdsBuffer.(*mssql.TdsBuffer)
+	pktType := rawPktType.(mssql.PacketType)
+	return mssql.ReadPreloginWithPacketType(tdsBuffer, pktType)
+}
+
+// WritePreloginWithPacketType is the production version of our writePrelogin
+// dependency, which delegates to the actual 3rd party driver.
+func WritePreloginWithPacketType(
+	rawTdsBuffer interface{},
+	fields map[uint8][]byte,
+	rawPktType interface{},
+) error {
+	// This can never fail unless mssql package changes: panicking is fine
+	tdsBuffer := rawTdsBuffer.(*mssql.TdsBuffer)
+	pktType := rawPktType.(mssql.PacketType)
+	return mssql.WritePreloginWithPacketType(tdsBuffer, fields, pktType)
+}
+
+// https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/configure-the-network-packet-size-server-configuration-option
+// Default packet size remains at 4096 bytes
+const bufferSize uint16 = 4096
+
+func NewTdsBuffer(transport io.ReadWriteCloser) types.ReadNextPacketer {
+	return mssql.NewTdsBuffer(bufferSize, transport)
 }
 
 // NewSingleUseConnector creates a new SingleUseConnector, and allows you to
@@ -137,18 +173,16 @@ func NewSingleUseConnectorWithOptions(
 	newMSSQLConnector types.NewMSSQLConnectorFunc,
 	readPrelogin types.ReadPreloginFunc,
 	writePrelogin types.WritePreloginFunc,
+	newTdsBuffer types.NewTdsBufferFunc,
 ) *SingleUseConnector {
 	return &SingleUseConnector{
 		logger:            logger,
 		newMSSQLConnector: newMSSQLConnector,
 		readPrelogin:      readPrelogin,
 		writePrelogin:     writePrelogin,
+		newTdsBuffer:      newTdsBuffer,
 	}
 }
-
-// https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/configure-the-network-packet-size-server-configuration-option
-// Default packet size remains at 4096 bytes
-const bufferSize uint16 = 4096
 
 // Connect implements the tcp.Connector func signature
 //
@@ -175,7 +209,7 @@ func (connector *SingleUseConnector) Connect(
 	// client can advance to the next stage of the process.  Otherwise the
 	// client would block forever waiting for its pre-login handshake to be
 	// read.
-	clientBuffer := mssql.NewTdsBuffer(bufferSize, connector.clientConn)
+	clientBuffer := connector.newTdsBuffer(connector.clientConn)
 	_, err := connector.readPrelogin(clientBuffer, mssql.PackPrelogin)
 	if err != nil {
 		return connector.sendError("failed to read prelogin request: %s", err)
@@ -208,8 +242,8 @@ func (connector *SingleUseConnector) Connect(
 	connectPhaseFinished := make(chan struct{})
 
 	// Add channels to the context, to retrive information from the driver
-	loginContext := context.WithValue(ctx, ctxtypes.PreLoginResponseKey,
-		preLoginResponseChannel)
+	loginContext := context.WithValue(
+		ctx, ctxtypes.PreLoginResponseKey, preLoginResponseChannel)
 
 	// Build a new driver connection
 	var netConner types.NetConner

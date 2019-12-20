@@ -4,8 +4,6 @@ import (
 	"context"
 	"io"
 	"net"
-
-	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 // NewMSSQLConnectorFunc represents the constructor of an mssqlConnector. It
@@ -21,6 +19,7 @@ type NewMSSQLConnectorFunc func(dsn string) (MSSQLConnector, error)
 type MSSQLConnector interface {
 	Connect(context.Context) (NetConner, error)
 }
+
 
 // NetConner is anything with a NetConn() method.  Ie, anything that can provide
 // a net.Conn.  Note this rather silly name conforms to Go standard conventions
@@ -38,9 +37,22 @@ func (fn MSSQLConnectorFunc) Connect(ctx context.Context) (NetConner, error) {
 	return fn(ctx)
 }
 
-
 // ReadPreloginFunc defines...
-type ReadPreloginFunc func(*mssql.TdsBuffer, mssql.PacketType) (map[uint8][]byte, error)
-type WritePreloginFunc func(*mssql.TdsBuffer, map[uint8][]byte, mssql.PacketType) error
+type ReadPreloginFunc func(
+	tdsBuffer interface{},
+	pktType interface{}) (map[uint8][]byte, error)
+type WritePreloginFunc func(
+	tdsBuffer  interface{},
+	fields map[uint8][]byte,
+	pktType interface{}) error
 
-type NewTdsBufferFunc func(uint16, io.ReadWriteCloser) *mssql.TdsBuffer
+// NewTdsBufferFunc represents the constructor of a TdsBuffer, in a form
+// suitable for unit tests.
+type NewTdsBufferFunc func(transport io.ReadWriteCloser) ReadNextPacketer
+
+// ReadNextPacketer is an interface that represents the one method on a
+// TdsBuffer that we use -- ReadNextPacket().  It allows us to create a mockable
+// type to represent a TdsBuffer, and is used together with NewTdsBufferFunc.
+type ReadNextPacketer interface {
+	ReadNextPacket() error
+}

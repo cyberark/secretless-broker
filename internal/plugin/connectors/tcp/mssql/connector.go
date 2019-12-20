@@ -165,9 +165,9 @@ func NewTdsBuffer(transport io.ReadWriteCloser) types.ReadNextPacketer {
 	return mssql.NewTdsBuffer(bufferSize, transport)
 }
 
-// NewSingleUseConnector creates a new SingleUseConnector, and allows you to
-// specify the newMSSQLConnector explicitly.  Intended to be used in unit tests
-// only.
+// NewSingleUseConnectorWithOptions creates a new SingleUseConnector, and allows
+// you to specify the newMSSQLConnector explicitly.  Intended to be used in unit
+// tests only.
 func NewSingleUseConnectorWithOptions(
 	logger log.Logger,
 	newMSSQLConnector types.NewMSSQLConnectorFunc,

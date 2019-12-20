@@ -37,7 +37,6 @@ func (fn MSSQLConnectorFunc) Connect(ctx context.Context) (NetConner, error) {
 	return fn(ctx)
 }
 
-// ReadPreloginFunc defines...
 type ReadPreloginFunc func(
 	tdsBuffer interface{},
 	pktType interface{}) (map[uint8][]byte, error)

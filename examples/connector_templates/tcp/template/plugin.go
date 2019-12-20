@@ -21,6 +21,7 @@ func NewConnector(conRes connector.Resources) tcp.Connector {
 		// to the target service for each incoming client connection
 		singleUseConnector := &SingleUseConnector{
 			logger: conRes.Logger(),
+			config: conRes.Config(), // Note: you may skip sending this if your plugin doesn't use any custom config
 		}
 
 		return singleUseConnector.Connect(clientConn, credentialValuesByID)

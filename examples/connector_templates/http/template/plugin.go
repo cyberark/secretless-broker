@@ -17,10 +17,12 @@ func PluginInfo() map[string]string {
 	}
 }
 
-// NewConnector returns an http.Connector that decorates each incoming HTTP request with a basic auth header.
+// NewConnector returns an http.Connector that decorates each incoming HTTP request
+// so that it contains the necessary authentication information (typically by adding appropriate headers)
 func NewConnector(conRes connector.Resources) http.Connector {
 	return &Connector{
 		logger: conRes.Logger(),
+		config: conRes.Config(), // Note: you may skip sending this if your plugin doesn't use any custom config
 	}
 }
 

@@ -90,7 +90,7 @@ Overview of the connection process
 	MsSQL->Driver: Login Response
 	Driver->Secretless: Login success or failure
 	Secretless->Client: Login Response (Premade)
- */
+*/
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
 type SingleUseConnector struct {
@@ -188,10 +188,10 @@ func (connector *SingleUseConnector) Connect(
 		//  working as an implicit lock
 		driverConn, err = driverConnector.Connect(loginContext)
 		connectPhaseFinished <- struct{}{}
-	} ()
+	}()
 
 	// Blocks continuation until we've received the preLoginResponse from the driver
-	preloginResponse := <- preLoginResponseChannel
+	preloginResponse := <-preLoginResponseChannel
 
 	// Since the communication between the client and Secretless must be unencrypted,
 	// we fool the client into thinking that it's talking to a server that does not support
@@ -218,7 +218,7 @@ func (connector *SingleUseConnector) Connect(
 	clientLoginChannel <- *clientLogin
 
 	// Block continuation until driver has completed connection
-	<- connectPhaseFinished
+	<-connectPhaseFinished
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to connect to mssql server")
 		connector.sendError(wrappedError)
@@ -241,7 +241,6 @@ func (connector *SingleUseConnector) Connect(
 
 	return connector.backendConn, nil
 }
-
 
 // TODO: Add ability to receive an MSSQL error and send it to the client (#1013)
 func (connector *SingleUseConnector) sendError(err error) {

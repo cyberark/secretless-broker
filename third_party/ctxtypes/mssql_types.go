@@ -6,5 +6,6 @@ type ContextKey string
 
 // PreLoginResponseKey is used to obtain PreLogin Response fields
 const PreLoginResponseKey ContextKey = "preLoginResponse"
+
 // ClientLoginKey is used to pass the client Login
 const ClientLoginKey ContextKey = "clientLogin"

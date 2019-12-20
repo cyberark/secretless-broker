@@ -18,7 +18,7 @@ import (
 
 var (
 	GroupName = "secretless" + os.Getenv("SECRETLESS_CRD_SUFFIX") + ".io"
-	CRDName = "configurations." + GroupName
+	CRDName   = "configurations." + GroupName
 )
 
 func getHomeDir() string {

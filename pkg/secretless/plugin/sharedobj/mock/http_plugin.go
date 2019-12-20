@@ -5,7 +5,7 @@ import (
 )
 
 // HTTPPlugin is a mock struct that implements http.Plugin interface
-type HTTPPlugin struct{
+type HTTPPlugin struct {
 	http.Plugin
 
 	id string
@@ -14,5 +14,5 @@ type HTTPPlugin struct{
 // NewHTTPPlugin creates a new HTTPPlugin mock with an id, so that it may
 // be distinguished from other mocks by DeepEqual.
 func NewHTTPPlugin(id string) HTTPPlugin {
-	return HTTPPlugin{ id: id }
+	return HTTPPlugin{id: id}
 }

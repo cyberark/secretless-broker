@@ -69,7 +69,7 @@ func TCPExternalPluginsByID() map[string]tcp.Plugin {
 func InternalPlugins() plugin.AvailablePlugins {
 	return &Plugins{
 		HTTPPluginsByID: HTTPInternalPluginsByID(),
-		TCPPluginsByID: TCPInternalPluginsByID(),
+		TCPPluginsByID:  TCPInternalPluginsByID(),
 	}
 }
 
@@ -77,7 +77,7 @@ func InternalPlugins() plugin.AvailablePlugins {
 func ExternalPlugins() plugin.AvailablePlugins {
 	return &Plugins{
 		HTTPPluginsByID: HTTPExternalPluginsByID(),
-		TCPPluginsByID: TCPExternalPluginsByID(),
+		TCPPluginsByID:  TCPExternalPluginsByID(),
 	}
 }
 

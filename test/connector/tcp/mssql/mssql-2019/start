@@ -1,0 +1,12 @@
+#!/bin/bash -ex
+
+mssql_host="mssql-2019"
+secretless_host="secretless-2019"
+while getopts ":d" opt; do
+    case $opt in
+        d) secretless_host=secretless-2019-dev;;
+        *) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+../start -m $mssql_host -s $secretless_host

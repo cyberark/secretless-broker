@@ -1,21 +1,29 @@
 #!/bin/bash -ex
 
-SECRETLESS_HOST=secretless
-while getopts :d opt; do
+mssql_host=mssql
+while getopts :dm:s: opt; do
     case $opt in
-        d) SECRETLESS_HOST=secretless-dev;;
+        d) dev_mode=true;;
+        m) mssql_host=${OPTARG};;
+        s) secretless_host=${OPTARG};;
        \?) echo "Unknown option -$OPTARG"; exit 1;;
     esac
 done
+if [[ -z $secretless_host ]]; then
+    secretless_host=secretless
+    if [[ "$dev_mode" = true ]]; then
+        secretless_host=secretless-dev
+    fi
+fi
 
 ./stop
 
 docker-compose build
 
 # the order of the services is important. mssql must be up before we start secretless
-docker-compose up -d mssql
+docker-compose up -d $secretless_host
 
-time ./wait_for_mssql
-docker-compose logs mssql
+time ./wait_for_mssql -m $mssql_host
+docker-compose logs $mssql_host
 
-docker-compose up -d $SECRETLESS_HOST
+docker-compose up -d $secretless_host

@@ -1,12 +1,22 @@
 #!/bin/bash -e
 
-# Automatically detect if we're devmode based on the existence
-# of the secretless-dev container.  We assume that you started
-# your workflow using `./dev` if you are developing, and this
-# command will use the secretless-dev container.
-export SECRETLESS_HOST=secretless
-if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
-  export SECRETLESS_HOST=secretless-dev
+while getopts :s: opt; do
+    case $opt in
+        s) SECRETLESS_HOST=${OPTARG};;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+# If the secretless host is not explicitly set on the command line,
+# then use the default names (either secretless or secretless-dev)
+# for the secretless host. Automatically detect if we're devmode
+# based on the existence of the secretless-dev container.  We assume
+# that you started your workflow using `./dev` if you are developing,
+# and this command will use the secretless-dev container.
+if [[ -z $SECRETLESS_HOST ]]; then
+  export SECRETLESS_HOST=secretless
+  if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
+    SECRETLESS_HOST=secretless-dev
+  fi
 fi
 
 echo "Waiting for '$SECRETLESS_HOST' service to start"
@@ -38,6 +48,11 @@ docker-compose run \
   --rm \
   --no-deps \
   test bash -c "go test -v ./test/connector/tcp/mssql"
+#docker-compose run \
+#  -e SECRETLESS_HOST="$SECRETLESS_HOST" \
+#  --rm \
+#  --no-deps \
+#  test bash -c "echo hello world"
 
 # print secretless logs after tests run
 ret=$?

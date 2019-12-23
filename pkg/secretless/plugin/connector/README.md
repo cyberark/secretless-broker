@@ -47,7 +47,7 @@ file that implements two functions.
   }
 
   type Connector interface {
-    Connect(net.Conn, CredentialValuesByID) (net.Conn, error)
+    Connect(net.Conn, connector.CredentialValuesByID) (net.Conn, error)
   }
   ```
 
@@ -129,18 +129,17 @@ described [below](#connectorresources---argument-passed-to-your-constructor).
 
 The real work is done by the `Connector` functions they return.
 
-### TCP `Connector`
+#### TCP `Connector`
 
 This is the one method interface returned by `tcp.Plugin`'s `NewConnector()`,
 and it's where your TCP authentication logic lives.  The method's signature is:
 
 ```go
-func(clientConn net.Conn, credVals plugin.CredentialValues)
-    (authdTargetServiceConn net.Conn, err error)
+func(net.Conn, connector.CredentialValuesByID) (net.Conn, error)
 ```
 
 That is, it's passed the client's `net.Conn` and the current
-`CredentialValues`, and returns an authenticated `net.Conn` to the target
+`CredentialValuesById`, and returns an authenticated `net.Conn` to the target
 service.  The authentication stage is complete after `Connector` is called.
 
 Secretless now has both the client connection and an authenticated
@@ -156,16 +155,16 @@ At this point, Secretless becomes an invisible proxy, streaming bytes back and
 forth between client and target service, as if they were directly
 connected.
 
-### HTTP `Connector`
+#### HTTP `Connector`
 
 This is the one method interface returned by `http.Plugin`'s `NewConnector()`,
 and it's where the http authentication logic lives.  The method's signature is:
 
 ```go
-func(*http.Request, credVals plugin.CredentialValues) error
+func(*http.Request, connector.CredentialValuesById) error
 ```
 
-Here we are passed a pointer to an `http.Request` and `CredentialValues`, and
+Here we are passed a pointer to an `http.Request` and `CredentialValuesById`, and
 are expected to alter that request so that it contains the necessary
 authentication information.  Typically, this means adding the appropriate
 headers to a request -- for example, an `Authorization` header containing a

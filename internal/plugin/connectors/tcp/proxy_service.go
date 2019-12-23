@@ -110,6 +110,9 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	logger.Infof("New connection on %v.\n", clientConn.LocalAddr())
 
 	targetConn, err = proxy.connector.Connect(clientConn, backendCredentials)
+	if err == io.EOF {
+		return err
+	}
 	if err != nil {
 		return fmt.Errorf("failed on connect: %s", err)
 	}
@@ -157,7 +160,7 @@ func (proxy *proxyService) Start() error {
 				return
 			}
 			go func() {
-				if err := proxy.handleConnection(conn); err != nil {
+				if err := proxy.handleConnection(conn); err != nil && err != io.EOF {
 					logger.Errorf("Failed on handle connection: %s", err)
 					return
 				}

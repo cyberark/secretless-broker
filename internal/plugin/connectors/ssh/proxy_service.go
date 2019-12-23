@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"os"
@@ -148,7 +149,7 @@ func (proxy *proxyService) Start() error {
 			}()
 
 			go func() {
-				if err := proxy.handleConnections(chans); err != nil {
+				if err := proxy.handleConnections(chans); err != nil && err != io.EOF {
 					logger.Errorf("Failed on handle connection: %s", err)
 					return
 				}

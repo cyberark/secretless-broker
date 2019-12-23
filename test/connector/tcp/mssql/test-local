@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# this is for local testing
+
+export TEST_ROOT="/secretless/test/connector/tcp/mssql"
+export DB_PROTOCOL="mssql"
+export DB_HOST_TLS="mssql"
+export DB_HOST_NO_TLS="mssql"
+export DB_PORT="1433"
+export DB_USER="sa"
+export DB_PASSWORD="yourStrong()Password"
+export SECRETLESS_HOST="127.0.0.1"
+
+go test -v

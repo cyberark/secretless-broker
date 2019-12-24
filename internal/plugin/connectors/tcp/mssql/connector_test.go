@@ -2,6 +2,7 @@ package mssql
 
 import (
 	"context"
+	mssql "github.com/denisenkom/go-mssqldb"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +11,6 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	logmock "github.com/cyberark/secretless-broker/pkg/secretless/log/mock"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
-	"github.com/cyberark/secretless-broker/third_party/ctxtypes"
 )
 
 func TestHappyPath(t *testing.T) {
@@ -23,8 +23,8 @@ func TestHappyPath(t *testing.T) {
 
 	ctor := mock.NewSuccessfulMSSQLConnectorCtor(
 		func(ctx context.Context) (types.NetConner, error) {
-			preLoginResponse := ctx.Value(ctxtypes.PreLoginResponseKey).(chan map[uint8][]byte)
-			preLoginResponse <- map[uint8][]byte{ 0: {0, 0} }
+			preLoginResponse := ctx.Value(mssql.ConnectInterceptorKey).(chan map[uint8][]byte)
+			preLoginResponse <- map[uint8][]byte{0: {0, 0}}
 			return expectedBackendConn, nil
 		},
 	)
@@ -45,6 +45,7 @@ func TestHappyPath(t *testing.T) {
 
 	assert.Equal(t, expectedBackendConn, actualBackendConn)
 }
+
 /*
 Test cases not to forget
 

@@ -107,7 +107,7 @@ func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 	return NewSingleUseConnectorWithOptions(
 		logger,
 		NewMSSQLConnector,
-		ReadPreloginWithPacketType,
+		mssql.ReadPreloginRequest,
 		WritePreloginWithPacketType,
 		NewTdsBuffer,
 	)
@@ -129,18 +129,6 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 		return mssqlConn, nil
 	}
 	return types.MSSQLConnectorFunc(fn), err
-}
-
-// ReadPreloginWithPacketType is the production version of our readPrelogin
-// dependency, which delegates to the actual 3rd party driver.
-func ReadPreloginWithPacketType(
-	rawTdsBuffer interface{},
-	rawPktType interface{},
-) (map[uint8][]byte, error) {
-	// This can never fail unless mssql package changes: panicking is fine
-	tdsBuffer := rawTdsBuffer.(*mssql.TdsBuffer)
-	pktType := rawPktType.(mssql.PacketType)
-	return mssql.ReadPreloginWithPacketType(tdsBuffer, pktType)
 }
 
 // WritePreloginWithPacketType is the production version of our writePrelogin

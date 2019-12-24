@@ -12,14 +12,12 @@ import (
 // confusion with the Secretless Connector.
 type NewMSSQLConnectorFunc func(dsn string) (MSSQLConnector, error)
 
-
 // MSSQLConnector captures the part of the 3rd party driver's mssql.Connector
 // type that we care about -- its "Connect" method -- in an interface.  This
 // allows us to mock that in our unit tests.
 type MSSQLConnector interface {
 	Connect(context.Context) (NetConner, error)
 }
-
 
 // NetConner is anything with a NetConn() method.  Ie, anything that can provide
 // a net.Conn.  Note this rather silly name conforms to Go standard conventions
@@ -38,10 +36,9 @@ func (fn MSSQLConnectorFunc) Connect(ctx context.Context) (NetConner, error) {
 }
 
 type ReadPreloginFunc func(
-	tdsBuffer interface{},
-	pktType interface{}) (map[uint8][]byte, error)
+	tdsBuffer interface{}) (map[uint8][]byte, error)
 type WritePreloginFunc func(
-	tdsBuffer  interface{},
+	tdsBuffer interface{},
 	fields map[uint8][]byte,
 	pktType interface{}) error
 

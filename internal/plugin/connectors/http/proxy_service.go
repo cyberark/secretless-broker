@@ -138,7 +138,6 @@ func (proxy *proxyService) selectSubservice(r *gohttp.Request) *Subservice {
 	return &subservice
 }
 
-
 // ServeHTTP exists to implement the go_http.Handler interface
 func (proxy *proxyService) ServeHTTP(w gohttp.ResponseWriter, r *gohttp.Request) {
 	logger := proxy.logger

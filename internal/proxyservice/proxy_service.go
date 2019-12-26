@@ -151,6 +151,8 @@ func (s *proxyServices) createHTTPService(
 		return nil, err
 	}
 
+	s.logger.Warnf("Starting HTTP listener on %s...", netAddr.Address())
+
 	// Create the subservices
 
 	var subservices []httpproxy.Subservice
@@ -164,8 +166,11 @@ func (s *proxyServices) createHTTPService(
 		// Get the http traffic patterns to match from the connector config.
 		httpCfg, err := v2.NewHTTPConfig(subCfg.ConnectorConfig)
 		if err != nil {
+			s.logger.Errorf("configuration parsing of '%s' failed: %s", subCfg.Connector, err)
 			return nil, err
 		}
+
+		s.logger.Warnf("Starting HTTP subservice %s...", subCfg.Connector)
 
 		subservices = append(subservices, httpproxy.Subservice{
 			ConnectorID:              subCfg.Connector, // TODO: Rename connectorID
@@ -203,6 +208,8 @@ func (s *proxyServices) createSSHService(
 		return nil, err
 	}
 
+	s.logger.Warnf("Starting SSH listener on %s...", netAddr.Address())
+
 	connResources := s.connectorResources(config)
 	credsRetriever := s.credsRetriever(config.Credentials)
 
@@ -233,6 +240,8 @@ func (s *proxyServices) createSSHAgentService(
 	if err != nil {
 		return nil, err
 	}
+
+	s.logger.Warnf("Starting SSH Agent listener on %s...", netAddr.Address())
 
 	connResources := s.connectorResources(config)
 	credsRetriever := s.credsRetriever(config.Credentials)
@@ -265,6 +274,8 @@ func (s *proxyServices) createTCPService(
 	if err != nil {
 		return nil, err
 	}
+
+	s.logger.Warnf("Starting TCP listener on %s...", netAddr.Address())
 
 	connResources := s.connectorResources(config)
 	svcConnector := pluginInst.NewConnector(connResources)

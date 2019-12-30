@@ -22,8 +22,8 @@ github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDk
 github.com/codegangsta/cli v1.20.0/go.mod h1:/qJNoX69yVSKu5o4jLyXAENLRyk1uhi7zkbQ3slBdOA=
 github.com/cyberark/conjur-api-go v0.5.2 h1:8ntk07YNRz5bBwjNXkDEAPR70Yr+J2MN8NGlkhaMC3k=
 github.com/cyberark/conjur-api-go v0.5.2/go.mod h1:hwaReWirzgKor+JtH6vbwZaASDXulvd0SzGCloC5uOc=
-github.com/cyberark/conjur-authn-k8s-client v0.13.0 h1:sKh0yS6lSHT34FnMRR738+Q0dP+ebC6N/h4Bm9rhq0A=
-github.com/cyberark/conjur-authn-k8s-client v0.13.0/go.mod h1:JTeGIeRO59J7mMEc5yF6FPtk1QnaAzs4GyZa4WldqZc=
+github.com/cyberark/conjur-authn-k8s-client v0.15.0 h1:HFSkyKtaWkxhOc+Whh2CV3x1HWsYWXu8yR4w6RS3umw=
+github.com/cyberark/conjur-authn-k8s-client v0.15.0/go.mod h1:qacUJXCppU1Rg/C+br9B1jBitTq4yG04oc4a+cfI200=
 github.com/cyberark/secretless-broker v1.4.1-0.20191211191712-251c5ec034af/go.mod h1:+GueI3WCJL5gDYaYa38ZokAR8ceEyCVet7MkuZyjf80=
 github.com/cyberark/summon v0.7.0/go.mod h1:S7grcxHeUxfL1vRTQUyq9jGK8yG6V/tSlLPQ6tHRO4k=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -5,7 +5,7 @@ require (
 	github.com/cenkalti/backoff v2.0.0+incompatible
 	github.com/codegangsta/cli v1.20.0
 	github.com/cyberark/conjur-api-go v0.5.2
-	github.com/cyberark/conjur-authn-k8s-client v0.13.0
+	github.com/cyberark/conjur-authn-k8s-client v0.15.0
 	github.com/cyberark/summon v0.7.0
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
 	github.com/fsnotify/fsnotify v1.4.7

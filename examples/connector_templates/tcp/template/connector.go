@@ -7,11 +7,14 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
 
+// SingleUseConnector is passed the client's net.Conn and the current CredentialValuesById,
+// and returns an authenticated net.Conn to the target service
 type SingleUseConnector struct {
 	logger log.Logger
+	config []byte // Note: this can be removed if your plugin does not use any custom config
 }
 
-// This function receives a connection to the client, and opens a connection to the target using the client's connection
+// Connect receives a connection to the client, and opens a connection to the target using the client's connection
 // and the credentials provided in credentialValuesByID
 func (connector *SingleUseConnector) Connect(
 	clientConn net.Conn,

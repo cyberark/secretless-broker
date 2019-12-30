@@ -7,15 +7,16 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 )
 
-// Connector injects an HTTP request with AWS authorization headers.
+// Connector modifies an HTTP request to include required authentication information
 type Connector struct {
 	logger log.Logger
+	config []byte // Note: this can be removed if your plugin does not use any custom config
 }
 
 /*
-	This function has access to the client http.Request and the credentials
-	(as a map), and is expected to modify the request so that it will authenticate.
-	This typically means adding required authorization headers.
+Connect has access to the client http.Request and the credentials
+(as a map), and is expected to modify the request so that it will authenticate.
+This typically means adding required authorization headers.
 */
 func (c *Connector) Connect(
 	r *gohttp.Request,

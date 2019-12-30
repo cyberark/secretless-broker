@@ -97,7 +97,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		log.Printf("Info: Conjur provider using Kubernetes authenticator-based authentication")
 
 		// Load the authenticator with the config from the environment, and log in to Conjur
-		if authenticator, err = loadAuthenticator(provider.AuthnURL, provider.Version, authenticatorTokenFile, provider.Config); err != nil {
+		if authenticator, err = loadAuthenticator(provider.AuthnURL, provider.Version, provider.Config); err != nil {
 			return nil, fmt.Errorf("ERROR: Conjur provider could not retrieve access token using the authenticator client: %s", err)
 		}
 		provider.Authenticator = authenticator
@@ -185,16 +185,13 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 // Currently the deployment manifest for Secretless must also specify
 // MY_POD_NAMESPACE and MY_POD_NAME from the pod metadata, but there is a GH
 // issue logged in the authenticator for doing this via the Kubernetes API
-func loadAuthenticator(authnURL string, version string, tokenFilePath string,
+func loadAuthenticator(authnURL string, version string,
 	providerConfig conjurapi.Config) (*authenticator.Authenticator, error) {
 
 	var err error
 
-	// Set the client cert / token paths
-	clientCertPath := "/etc/conjur/ssl/client.pem"
-
 	// Check that required environment variables are set
-	config, err := authnConfig.NewFromEnv(&clientCertPath, &tokenFilePath)
+	config, err := authnConfig.NewFromEnv()
 	if err != nil {
 		return nil, err
 	}

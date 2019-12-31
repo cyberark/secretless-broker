@@ -1,0 +1,21 @@
+#!/bin/bash -ex
+
+SECRETLESS_HOST=secretless
+while getopts :d opt; do
+    case $opt in
+        d) SECRETLESS_HOST=secretless-dev;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+./stop
+
+docker-compose build
+
+# Errors are expected here since it's the only thing we test for
+# right now
+docker-compose up -d secretless || true
+
+if [[ "$SECRETLESS_HOST" != "secretless" ]]; then
+  docker-compose up -d "$SECRETLESS_HOST"
+fi

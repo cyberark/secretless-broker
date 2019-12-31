@@ -152,7 +152,8 @@ func (configManager *configurationManager) Initialize(changeHandler plugin_v1.Co
 			return configManager.onGoodConfigLoad(configuration, changeHandler, configFilePath, watchFile)
 		}
 
-		log.Printf("WARN: Could not load %s. Skipping...", configFilePath)
+		log.Printf("WARN: Could not load %s: '%s'. Skipping...", configFilePath, err)
+
 		continue
 	}
 

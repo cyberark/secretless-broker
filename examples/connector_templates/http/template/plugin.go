@@ -1,4 +1,6 @@
-package template
+package main
+
+// TODO: change the package name to your plugin name if this will be an internal connector
 
 import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"

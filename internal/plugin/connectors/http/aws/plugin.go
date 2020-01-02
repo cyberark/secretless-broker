@@ -20,7 +20,7 @@ func PluginInfo() map[string]string {
 // request with authorization data.
 func NewConnector(conRes connector.Resources) http.Connector {
 	return &Connector{
-		logger:   conRes.Logger(),
+		logger: conRes.Logger(),
 	}
 }
 

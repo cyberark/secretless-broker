@@ -122,7 +122,6 @@ func (proxy *proxyService) populateKeyring(
 	return proxy.keyring.Add(key)
 }
 
-
 // Start initiates the net.Listener to listen for incoming connections
 func (proxy *proxyService) Start() error {
 	logger := proxy.logger

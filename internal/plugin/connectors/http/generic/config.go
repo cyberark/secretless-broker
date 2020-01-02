@@ -13,8 +13,8 @@ import (
 
 type config struct {
 	CredentialPatterns map[string]*regexp.Regexp
-	Headers map[string]*template.Template
-	ForceSSL bool
+	Headers            map[string]*template.Template
+	ForceSSL           bool
 }
 
 // validate validates that the given creds satisfy the CredentialValidations of
@@ -71,8 +71,8 @@ func newConfig(cfgYAML *ConfigYAML) (*config, error) {
 
 	cfg := &config{
 		CredentialPatterns: make(map[string]*regexp.Regexp),
-		Headers: make(map[string]*template.Template),
-		ForceSSL: cfgYAML.ForceSSL,
+		Headers:            make(map[string]*template.Template),
+		ForceSSL:           cfgYAML.ForceSSL,
 	}
 
 	// Validate and save regexps

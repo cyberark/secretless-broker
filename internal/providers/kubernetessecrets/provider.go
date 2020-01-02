@@ -26,7 +26,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 	}
 
 	provider := &Provider{
-		Name:   options.Name,
+		Name:          options.Name,
 		SecretsClient: SecretsClient,
 	}
 

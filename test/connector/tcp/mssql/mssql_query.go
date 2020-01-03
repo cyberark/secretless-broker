@@ -8,14 +8,12 @@ import (
 	"os/exec"
 	"text/tabwriter"
 
-	_ "github.com/denisenkom/go-mssqldb"
-
 	"github.com/cyberark/secretless-broker/test/util/testutil"
 )
 
 type dbConfig struct {
-	Host string
-	Port int
+	Host     string
+	Port     int
 	Username string
 	Password string
 	Database string
@@ -26,7 +24,7 @@ type dbQueryExecutor func(cfg dbConfig, query string) (string, error)
 func defaultSecretlessDbConfig() dbConfig {
 	return dbConfig{
 		Host:     testutil.SecretlessHost,
-		Port:     2223,
+		Port:     testutil.SecretlessPort,
 		Username: "dummy",
 		Password: "dummy",
 	}
@@ -50,7 +48,7 @@ func sqlcmdExec(
 
 	out, err := exec.Command(
 		"sqlcmd",
-		args...
+		args...,
 	).Output()
 
 	if err != nil {
@@ -98,7 +96,6 @@ func gomssqlExec(
 		return "", err
 	}
 	defer rows.Close()
-
 
 	// Execute the query
 	cols, err := rows.Columns()

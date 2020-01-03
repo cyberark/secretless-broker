@@ -25,9 +25,20 @@ pipeline {
       }
     }
 
-    stage('Scan Secretless Image') {
-      steps {
-        scanAndReport("secretless-broker:latest", "HIGH")
+    stage('Scan Secretless') {
+      parallel {
+        stage('Scan Secretless Image') {
+          steps {
+            scanAndReport("secretless-broker:latest", "HIGH")
+          }
+        }
+
+        stage('Scan For Security with Gosec') {
+          steps {
+            sh "./bin/check_golang_security -s High -c 'Medium' -b ${env.BRANCH_NAME}"
+            junit(allowEmptyResults: true, testResults: 'gosec.output')
+          }
+        }
       }
     }
 

@@ -2,6 +2,7 @@ package mssqltest
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,9 +38,14 @@ func RunTests(t *testing.T, queryExec dbQueryExecutor) {
 	})
 
 	t.Run("Cannot connect directly to MSSQL", func(t *testing.T) {
+		// Set Host and Port to $DB_HOST_TLS and $DB_PORT environment
+		// variables, respectively.
+		envCfg := testutil.NewDbConfigFromEnv()
 		cfg := defaultSecretlessDbConfig()
-		cfg.Port = 1433
-		cfg.Host = "mssql"
+		cfg.Host = envCfg.HostWithTLS
+		var err error
+		cfg.Port, err = strconv.Atoi(envCfg.Port)
+		assert.NoError(t, err)
 
 		// This is for local testing. Locally, Secretless and and the target service
 		// are exposed on 127.0.0.1 via port mappings
@@ -47,7 +53,7 @@ func RunTests(t *testing.T, queryExec dbQueryExecutor) {
 			cfg.Host = "127.0.0.1"
 		}
 
-		_, err := queryExec(
+		_, err = queryExec(
 			cfg,
 			"",
 		)

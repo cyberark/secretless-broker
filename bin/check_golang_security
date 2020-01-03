@@ -1,0 +1,35 @@
+#!/bin/bash
+ 
+# This script creates a docker container with 
+# secretless mounted as a volume, and runs the 
+# gosec security check script within this container
+
+set -eo pipefail
+
+current_dir=$("$(dirname "$0")/abspath")
+toplevel_dir="$current_dir/.."
+
+# Default values to pass to security_scan
+confidence='medium'
+severity='high'
+current_branch='master'
+
+while getopts 'b:c:s:' flag; do
+  case "${flag}" in
+    b) current_branch="${OPTARG}" ;;
+    c) confidence="${OPTARG}" ;;
+    s) severity="${OPTARG}" ;;
+  esac
+done
+
+# Exclude test files
+excluded_directories=${toplevel_dir}/test
+
+# gosec => Scans go packages and flags security vulnerabilities
+docker run --rm \
+    -v "$toplevel_dir/:/secretless/" \
+    secretless-dev \
+    bash -exc "
+      go get github.com/securego/gosec/cmd/gosec
+      ./bin/run_gosec -c ${confidence} -s ${severity} -b ${current_branch} -e ${excluded_directories}
+    "

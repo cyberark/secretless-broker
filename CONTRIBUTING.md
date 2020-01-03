@@ -367,8 +367,7 @@ Changes not staged for commit:
 ```
 
 4. From the super directory, stage the changes to the submodule. It should only require
-a single `git submodule add <submodule_dir>` statement. This will update the remote that
- the
+a single `git add <submodule_dir>` statement. This will update the remote that the
 super repository uses to reference the submodule to point to the new branch you
 created, and all the commits contained within.
 

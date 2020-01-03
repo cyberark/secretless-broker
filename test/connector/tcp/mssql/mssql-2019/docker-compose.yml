@@ -1,0 +1,48 @@
+version: '3.0'
+
+services:
+
+  mssql-2019:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - 1435:1433
+    environment:
+      # This hardcoded password must match the one in secretless.yml.
+      SA_PASSWORD: "yourStrong()Password"
+      ACCEPT_EULA: Y
+
+  secretless-2019:
+    image: secretless-broker
+    ports:
+      - 2225:2223
+    volumes:
+      - ./secretless.yml:/secretless.yml
+    depends_on:
+      - mssql-2019
+
+  secretless-2019-dev:
+    image: secretless-dev
+    command: ./bin/reflex
+    ports:
+      - 2225:2223
+    volumes:
+      - ../../../../..:/secretless
+      - ./secretless.yml:/secretless.yml
+    depends_on:
+      - mssql-2019
+
+  test:
+    build:
+      context: ..
+    command: sleep 999d
+    environment:
+      TEST_ROOT: /secretless/test/connector/tcp/mssql
+      DB_PROTOCOL: mssql
+      DB_HOST_TLS: mssql-2019
+      DB_HOST_NO_TLS: mssql-2019 # TODO: configure a non-ssl container?
+      DB_PORT: 1433
+      DB_USER: sa
+      DB_PASSWORD: yourStrong()Password
+      SECRETLESS_HOST:
+    volumes:
+      - ../../../../..:/secretless

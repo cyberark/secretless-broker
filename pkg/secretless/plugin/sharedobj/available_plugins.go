@@ -106,6 +106,7 @@ func NewPlugins() Plugins {
 		TCPPluginsByID:  map[string]tcp.Plugin{},
 	}
 }
+
 // Plugins represent a holding object for a bundle of plugins of different types.
 type Plugins struct {
 	HTTPPluginsByID map[string]http.Plugin

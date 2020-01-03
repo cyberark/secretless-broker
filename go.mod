@@ -4,10 +4,15 @@ require (
 	github.com/aws/aws-sdk-go v1.15.79
 	github.com/cenkalti/backoff v2.0.0+incompatible
 	github.com/codegangsta/cli v1.20.0
+	github.com/containerd/containerd v1.3.2 // indirect
 	github.com/cyberark/conjur-api-go v0.5.2
-	github.com/cyberark/conjur-authn-k8s-client v0.13.0
+	github.com/cyberark/conjur-authn-k8s-client v0.15.0
 	github.com/cyberark/summon v0.7.0
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
+	github.com/docker/distribution v2.7.1+incompatible // indirect
+	github.com/docker/docker v1.4.2-0.20191231165639-e6f6c35b7902
+	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/google/btree v1.0.0 // indirect
@@ -19,6 +24,8 @@ require (
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
+	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
+	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/pkg/profile v1.2.1
 	github.com/prometheus/client_golang v1.2.1 // indirect

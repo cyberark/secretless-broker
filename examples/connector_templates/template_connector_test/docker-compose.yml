@@ -3,6 +3,9 @@ version: '3.0'
 services:
   # TODO: add a service for the platform you want secretless to connect with
 
+  # TODO: make sure Secretless runs with your plugin
+  # which may mean adding the `.so` file as a volume
+  # and revising the command to pass in the `.so` using the `-p` flag
   secretless:
     image: secretless-broker # this image is built by bin/build
     volumes:

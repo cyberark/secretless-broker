@@ -12,7 +12,6 @@ type httpConfigYAML struct {
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
 }
 
-
 // HTTPConfig represents service-specific configuration for service connectors
 // built on top of the http protocol
 type HTTPConfig struct {
@@ -61,7 +60,7 @@ func NewHTTPConfig(cfgBytes []byte) (*HTTPConfig, error) {
 	}
 
 	AuthenticateURLsMatching := make([]*regexp.Regexp, len(cfg.AuthenticateURLsMatching))
-	for i, matchPattern := range cfg.AuthenticateURLsMatching{
+	for i, matchPattern := range cfg.AuthenticateURLsMatching {
 		pattern, err := regexp.Compile(matchPattern)
 		if err != nil {
 			panic(err.Error())
@@ -91,7 +90,7 @@ func (cfg *httpConfigYAML) UnmarshalYAML(bytes []byte) error {
 	// Populate actual http config from tempCfg
 	switch v := tempCfg.AuthenticateURLsMatching.(type) {
 	case string:
-		cfg.AuthenticateURLsMatching = []string{ v }
+		cfg.AuthenticateURLsMatching = []string{v}
 	case []interface{}:
 		urlMatchStrings := make([]string, len(v))
 		for i, urlMatch := range v {

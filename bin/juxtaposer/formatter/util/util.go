@@ -58,10 +58,10 @@ func GetStandardDeviation(mappedCounts *map[int]int) float64 {
 	mean := GetMean(mappedCounts)
 	var totalDeviation float64
 	for valueAmount, occurrences := range *mappedCounts {
-		deviation := math.Pow(float64(valueAmount) - mean, 2)
+		deviation := math.Pow(float64(valueAmount)-mean, 2)
 		totalDeviation += deviation * float64(occurrences)
 	}
-	standardDeviation := math.Pow(totalDeviation/float64(getMappedDataPointCount(mappedCounts) - 1), 0.5)
+	standardDeviation := math.Pow(totalDeviation/float64(getMappedDataPointCount(mappedCounts)-1), 0.5)
 
 	return standardDeviation
 }

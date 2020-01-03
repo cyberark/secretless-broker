@@ -73,7 +73,7 @@ func UnpackErrResponse(data []byte) error {
 	pos++
 
 	// Error Number [16 bit uint]
-	errno := binary.LittleEndian.Uint16(data[pos:pos + 2])
+	errno := binary.LittleEndian.Uint16(data[pos : pos+2])
 	pos = pos + 2
 
 	sqlstate := ""
@@ -81,7 +81,7 @@ func UnpackErrResponse(data []byte) error {
 	if data[pos] == '#' {
 		pos++
 
-		sqlstate = string(data[pos : pos + 5])
+		sqlstate = string(data[pos : pos+5])
 		pos = pos + 5
 	}
 
@@ -190,7 +190,6 @@ type HandshakeV10 struct {
 	AuthPlugin         string
 	Salt               []byte
 }
-
 
 // UnpackHandshakeV10 decodes initial handshake request from server.
 // Basic packet structure shown below.

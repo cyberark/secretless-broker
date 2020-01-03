@@ -119,7 +119,6 @@ func (proxy *proxyService) Start() error {
 
 		serverConfig.AddHostKey(private)
 
-
 		// TODO: is it possible to use the duplex func to stream ?
 		for !proxy.done {
 			nConn, err := proxy.listener.Accept()

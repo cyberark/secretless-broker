@@ -3,6 +3,7 @@ package testutil
 import (
 	"log"
 	"os"
+	"strconv"
 )
 
 // Verbose reads the VERBOSE environment variable to determine output mode.
@@ -18,12 +19,12 @@ var Verbose = func() bool {
 
 // DBConfig holds configuration information for a database
 type DBConfig struct {
-	HostWithTLS string
+	HostWithTLS    string
 	HostWithoutTLS string
-	Port string
-	User string
-	Password string
-	Protocol string
+	Port           string
+	User           string
+	Password       string
+	Protocol       string
 }
 
 // NewDbConfigFromEnv creates a new DbConfig from ENV variables.  The variables
@@ -49,19 +50,19 @@ func NewDbConfigFromEnv() DBConfig {
 
 	// Validate they exist
 	for _, field := range requiredEnvVars {
-		if _, found := os.LookupEnv(field); !found  {
+		if _, found := os.LookupEnv(field); !found {
 			log.Panicf("ERROR: $%v envvar wasn't found\n", field)
 		}
 	}
 
 	// Read them into the DBConfig
 	return DBConfig{
-		HostWithTLS: os.Getenv("DB_HOST_TLS"),
+		HostWithTLS:    os.Getenv("DB_HOST_TLS"),
 		HostWithoutTLS: os.Getenv("DB_HOST_NO_TLS"),
-		Port: os.Getenv("DB_PORT"),
-		User: os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Protocol: os.Getenv("DB_PROTOCOL"),
+		Port:           os.Getenv("DB_PORT"),
+		User:           os.Getenv("DB_USER"),
+		Password:       os.Getenv("DB_PASSWORD"),
+		Protocol:       os.Getenv("DB_PROTOCOL"),
 	}
 }
 
@@ -75,6 +76,21 @@ var SecretlessHost = func() string {
 		return host
 	}
 	return "secretless"
+}()
+
+// SecretlessPort gets its value from the SECRETLESS_PORT ENV variable, and
+// allows us to specify a different port to use for the secretlessy-proxy
+// host.
+var SecretlessPort = func() int {
+	port := 2223
+	if portEnv, ok := os.LookupEnv("SECRETLESS_PORT"); ok {
+		var err error
+		port, err = strconv.Atoi(portEnv)
+		if err != nil {
+			log.Panicf("ERROR: Invalid SECRETLESS_PORT envvar: $%v\n", portEnv)
+		}
+	}
+	return port
 }()
 
 func init() {

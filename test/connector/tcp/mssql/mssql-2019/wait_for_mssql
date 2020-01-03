@@ -1,0 +1,3 @@
+#!/bin/bash -ex
+
+../wait_for_mssql -m mssql-2019

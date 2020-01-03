@@ -18,4 +18,3 @@ func (pkt *Packet) SequenceID() byte {
 func (pkt *Packet) SetSequenceID(id byte) {
 	(*pkt)[3] = id
 }
-

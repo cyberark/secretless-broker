@@ -63,7 +63,7 @@ func (e Error) Error() string {
 // GetPacket formats an Error into a protocol message.
 // https://dev.mysql.com/doc/internals/en/packet-ERR_Packet.html
 func (e Error) GetPacket() []byte {
-	data := make([]byte, 4, 4 + 1 + 2 + 1 + 5 + len(e.Message))
+	data := make([]byte, 4, 4+1+2+1+5+len(e.Message))
 	data = append(data, 0xff)
 	data = append(data, byte(e.Code), byte(e.Code>>8))
 
@@ -83,4 +83,3 @@ func (e Error) GetPacket() []byte {
 
 	return data
 }
-

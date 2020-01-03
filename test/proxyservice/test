@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+export SECRETLESS_HOST=secretless
+
+local_test=false
+while getopts :l opt; do
+    case $opt in
+        l) local_test=true ;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
+docker_args=""
+if $local_test; then
+  echo "Using local test setup for $(dirname $0)"
+  docker_args="-v $(pwd)/../..:/secretless"
+fi
+
+docker-compose run \
+  --rm \
+  --no-deps \
+  $docker_args \
+  test

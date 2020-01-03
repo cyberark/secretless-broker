@@ -1,0 +1,21 @@
+version: '3.0'
+
+services:
+  secretless:
+    image: secretless-broker
+    volumes:
+      - ./secretless-with-errors.yml:/secretless.yml
+
+  secretless-dev:
+    image: secretless-dev
+    command: sleep 999d
+    volumes:
+      - ../..:/secretless
+      - ./secretless-with-errors.yml:/secretless.yml
+      -  /var/run/docker.sock:/var/run/docker.sock
+
+  test:
+    image: secretless-dev
+    command: go test -v ./test/proxyservice
+    volumes:
+       - /var/run/docker.sock:/var/run/docker.sock

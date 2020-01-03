@@ -3,6 +3,7 @@ package proxyservice
 import (
 	"fmt"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/go-ozzo/ozzo-validation"
@@ -133,7 +134,21 @@ func (s *proxyServices) servicesToStart() (servicesToStart []internal.Service) {
 		servicesToStart = append(servicesToStart, sshAgentSvc)
 	}
 
+	// If there are errors, we need to show them. This method exits the
+	// program if any errors are detected.
+	handleErrors(errors, s.logger)
+
 	return servicesToStart
+}
+
+func handleErrors(errors validation.Errors, logger logapi.Logger) {
+	if len(errors) > 0 {
+		for cfgName, err := range errors {
+			logger.Errorf("Fatal error in '%s': %s", cfgName, err)
+		}
+
+		os.Exit(1)
+	}
 }
 
 func (s *proxyServices) createHTTPService(

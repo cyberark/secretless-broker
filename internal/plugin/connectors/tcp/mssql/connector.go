@@ -9,12 +9,8 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
-	"github.com/cyberark/secretless-broker/third_party/ctxtypes"
-	"github.com/pkg/errors"
 	mssql "github.com/denisenkom/go-mssqldb"
-
-	"github.com/cyberark/secretless-broker/pkg/secretless/log"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
+	"github.com/pkg/errors"
 )
 
 /*
@@ -97,9 +93,9 @@ Overview of the connection process
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
 type SingleUseConnector struct {
-	backendConn       net.Conn
-	clientConn        net.Conn
-	logger            log.Logger
+	backendConn net.Conn
+	clientConn  net.Conn
+	logger      log.Logger
 	// Note: We're following standard ctor naming practices with this field.
 	newMSSQLConnector types.MSSQLConnectorCtor
 	readPrelogin      types.ReadPreloginFunc
@@ -165,6 +161,7 @@ func WritePreloginWithPacketType(
 // Default packet size remains at 4096 bytes
 const bufferSize uint16 = 4096
 
+// NewTdsBuffer returns an mssql.TdsBuffer.
 func NewTdsBuffer(transport io.ReadWriteCloser) types.ReadNextPacketer {
 	return mssql.NewTdsBuffer(bufferSize, transport)
 }
@@ -190,7 +187,7 @@ func NewSingleUseConnectorWithOptions(
 
 type connectResult struct {
 	conn *mssql.Conn
-	err error
+	err  error
 }
 
 // Connect implements the tcp.Connector func signature
@@ -219,13 +216,16 @@ func (connector *SingleUseConnector) Connect(
 	// client would block forever waiting for its pre-login handshake to be
 	// read.
 	clientBuffer := connector.newTdsBuffer(connector.clientConn)
-	_, err := connector.readPreloginRequest(clientBuffer)
+	// TODO: tdsBuffer is a temporary kluge. The code that uses this
+	// should be changed to accept clientBuffer instead.
+	tdsBuffer := clientBuffer.(*mssql.TdsBuffer)
+	_, err := connector.readPrelogin(clientBuffer, mssql.PackPrelogin)
 	if err == io.EOF {
 		return nil, err
 	}
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to read prelogin request")
-		connector.sendError(wrappedError)
+		connector.sendError(clientBuffer, wrappedError)
 		return nil, wrappedError
 	}
 
@@ -233,7 +233,7 @@ func (connector *SingleUseConnector) Connect(
 	connDetails, err := NewConnectionDetails(credentialValuesByID)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "unable to create new connection details")
-		connector.sendError(wrappedError)
+		connector.sendError(clientBuffer, wrappedError)
 		return nil, wrappedError
 	}
 
@@ -246,7 +246,7 @@ func (connector *SingleUseConnector) Connect(
 	driverConnector, err := connector.newMSSQLConnector(dataSourceName(connDetails))
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to create a go-mssqldb connector")
-		connector.sendError(wrappedError)
+		connector.sendError(clientBuffer, wrappedError)
 		return nil, wrappedError
 	}
 
@@ -277,36 +277,37 @@ func (connector *SingleUseConnector) Connect(
 		}
 	}()
 
-
 	var loginAck mssql.LoginAckStruct
 	// Block continuation until error or driver has completed connection
-responseLoop:	for {
+responseLoop:
+	for {
 		select {
-// transient states
-//
+		// transient states
+		//
 		// preLoginResponse is received from the server
-		case preloginResponse := <- connInterceptor.PreLoginResponse:
+		case preloginResponse := <-connInterceptor.PreLoginResponse:
 			// Since the communication between the client and Secretless must be unencrypted,
 			// we fool the client into thinking that it's talking to a server that does not support
 			// encryption.
 			preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
 
 			// Write the prelogin packet back to the user
-			err = mssql.WritePreloginResponse(connector.clientBuff, preloginResponse)
+			err = connector.writePrelogin(clientBuffer, preloginResponse, mssql.PackReply)
 			if err != nil {
 				wrappedError := errors.Wrap(err, "failed to write prelogin response")
-				connector.sendError(wrappedError)
+				connector.sendError(clientBuffer, wrappedError)
 				return nil, wrappedError
 			}
 
 			// We parse the client's Login packet so that we can pass on params to the server.
-			clientLogin, err := mssql.ReadLogin(connector.clientBuff)
+			// TODO: Use a mockable interface for ReadLogin, and pass clientBuffer directly.
+			clientLogin, err := mssql.ReadLogin(tdsBuffer)
 			if err == io.EOF {
 				return nil, err
 			}
 			if err != nil {
 				wrappedError := errors.Wrap(err, "failed to handle client login")
-				connector.sendError(wrappedError)
+				connector.sendError(clientBuffer, wrappedError)
 				return nil, wrappedError
 			}
 
@@ -318,13 +319,13 @@ responseLoop:	for {
 			break
 		// a loginAck is sent from the server, this will be followed by connectionResultChan
 		// unless there's an issue
-		case loginAck = <- connInterceptor.ServerLoginAck:
+		case loginAck = <-connInterceptor.ServerLoginAck:
 			break
 
-// terminating states
-//
+			// terminating states
+			//
 		// a protocol error is received from the server
-		case protocolErr := <- connInterceptor.ServerError:
+		case protocolErr := <-connInterceptor.ServerError:
 			err = protocolErr
 			break responseLoop
 		// connect is finished. this case is visited when there is non-protocol error or
@@ -343,16 +344,19 @@ responseLoop:	for {
 	}
 
 	if err != nil {
-		connector.sendError(err)
+		connector.sendError(clientBuffer, err)
 		return nil, err
 	}
 
-	if err = mssql.WriteLoginAck(connector.clientBuff, loginAck); err != nil {
+	// TODO: Add a mockable 'WriteLogin' method to the
+	// connector struct, and replace the following call
+	// with a call to connector.WriteLogin.
+	if err = mssql.WriteLoginAck(tdsBuffer, loginAck); err != nil {
 		wrappedError := errors.Wrap(
 			err,
 			"failed to send a successful authentication response to client",
 		)
-		connector.sendError(wrappedError)
+		connector.sendError(clientBuffer, wrappedError)
 		return nil, wrappedError
 	}
 
@@ -360,7 +364,7 @@ responseLoop:	for {
 }
 
 // TODO: Add ability to receive an MSSQL error and send it to the client (#1013)
-func (connector *SingleUseConnector) sendError(err error) {
+func (connector *SingleUseConnector) sendError(clientBuffer types.ReadNextPacketer, err error) {
 	var protocolErr mssql.Error
 	if _protocolErr, ok := err.(mssql.Error); ok {
 		protocolErr = _protocolErr
@@ -368,10 +372,10 @@ func (connector *SingleUseConnector) sendError(err error) {
 		protocolErr = mssql.Error{
 			// SQL Error Number - currently using 18456 (login failed for user)
 			// TODO: Find generic error number
-			Number:     18456,
+			Number: 18456,
 			// State -
 			// TODO: better understand this.
-			State:      0x01,
+			State: 0x01,
 			// Severity Class - 16 indicates a general error that can be corrected by the user.
 			Class:      16,
 			Message:    errors.Wrap(err, "secretless").Error(),
@@ -380,7 +384,9 @@ func (connector *SingleUseConnector) sendError(err error) {
 			LineNo:     0,
 		}
 	}
-	_ = mssql.WriteError72(connector.clientBuff, protocolErr)
+	tdsBuffer := clientBuffer.(*mssql.TdsBuffer)
+	// TODO: May have to have WriteError72 called through a mockable interface.
+	_ = mssql.WriteError72(tdsBuffer, protocolErr)
 }
 
 // TODO: Add ability to receive an MSSQL error and send it to the client (#1013)

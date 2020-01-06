@@ -8,7 +8,6 @@ set -eo pipefail
 # Performs a gosec scan with given parameters on 
 # the entire local repository (in the case of master branch)
 # or on just files modified, as detected in the git diff.
-
 print_usage() {
     echo "Security Scanner"
     echo 
@@ -25,6 +24,7 @@ print_usage() {
     echo "-c                        Specify the minimum confidence gosec needs to report an issue."
     echo "-s                        Specify the minimum severity gosec needs to report an issue"
     echo "-b                        Specify the github branch to compare against master"
+    echo "-e                        Directories to be excluded from the gosec scan"
     exit 0
 }
 
@@ -34,7 +34,7 @@ severity='high'
 current_branch=''
 excluded_directories=''
 
-while getopts 'b:c:e:s:h' flag; do
+while getopts 'b:e:c:s:h' flag; do
   case "${flag}" in
     b) current_branch="${OPTARG}" ;;
     e) excluded_directories="${OPTARG}" ;;
@@ -50,12 +50,15 @@ modified_directories="./..."
 
 # Get an array of directories containing modified files
 if [[ ${current_branch} != 'master' ]]; then 
+    echo 'Current branch is not master - running gosec on modified packages for this branch only'
     git fetch origin master:refs/remotes/origin/master
     modified_directories=($(git diff origin/master...origin/"${current_branch}" --name-only | xargs -L1 dirname | uniq))
 fi
 
 # Remove output file just in case it exists
 rm -f "gosec.output" 
+
+set +e && set +o pipefail
 
 # Run our scan, flagging only 'high' level issues with 'medium' or higher severity
 gosec -fmt=junit-xml \

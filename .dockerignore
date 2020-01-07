@@ -12,3 +12,6 @@ docker-compose.yml
 
 # We don't want Docker cache to break on Jenkinsfile changes
 Jenkinsfile
+
+# Ignore temp files directory (e.g. licenses)
+tmp/

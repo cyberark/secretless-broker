@@ -45,3 +45,6 @@ results.json
 # Ignore test coverage files
 c.out
 coverage.xml
+
+# Ignore temp files directory (e.g. licenses)
+tmp/

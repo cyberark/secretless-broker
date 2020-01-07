@@ -29,7 +29,7 @@ func NewFailingMSSQLConnectorCtor(err error) types.MSSQLConnectorCtor {
 // NewSuccessfulMSSQLConnector returns an MSSQLConnector double whose Connect
 // method always succeeds.
 func NewSuccessfulMSSQLConnector(
-	fn func(context.Context) (types.NetConner, error),
+	fn func(context.Context) (net.Conn, error),
 ) types.MSSQLConnector {
 	return types.MSSQLConnectorFunc(fn)
 }
@@ -37,7 +37,7 @@ func NewSuccessfulMSSQLConnector(
 // NewFailingMSSQLConnector returns an MSSQLConnector double whose Connect
 // method always fails.
 func NewFailingMSSQLConnector(err error) types.MSSQLConnector {
-	rawFunc := func(context.Context) (types.NetConner, error) {
+	rawFunc := func(context.Context) (net.Conn, error) {
 		return nil, err
 	}
 	return types.MSSQLConnectorFunc(rawFunc)
@@ -45,51 +45,19 @@ func NewFailingMSSQLConnector(err error) types.MSSQLConnector {
 
 // SuccessfulReadPrelogin is a double for a ReadPreloginFunc that always
 // succeeds.
-func SuccessfulReadPrelogin(interface{}, interface{}) (map[uint8][]byte, error) {
+func SuccessfulReadPrelogin(io.ReadWriteCloser, uint8) (map[uint8][]byte, error) {
 	return nil, nil
 }
 
 // SuccessfulWritePrelogin is a double for a WritePreloginFunc that always
 // succeeds.
-func SuccessfulWritePrelogin(interface{}, map[uint8][]byte, interface{}) error {
+func SuccessfulWritePrelogin(io.ReadWriteCloser, map[uint8][]byte, uint8) error {
 	return nil
 }
 
 // SuccessfulReadLogin is a double for a ReadLoginFunc that always succeeds.
-func SuccessfulReadLogin(r types.ReadNextPacketer) (interface{}, error) {
-	r.ReadNextPacket()
+func SuccessfulReadLogin(r io.ReadWriteCloser) (interface{}, error) {
 	return struct{}{}, nil
-}
-
-// SuccessfulTdsBufferCtor is a convenience func for creating a TdsBufferCtor that
-// succeeds.
-func SuccessfulTdsBufferCtor() types.TdsBufferCtor {
-	return func(transport io.ReadWriteCloser) types.ReadNextPacketer {
-		return NewTdsBuffer(nil)
-	}
-}
-
-// FailingTdsBufferCtor is a convenience func for creating a TdsBufferCtor that
-// fails.
-func FailingTdsBufferCtor(err error) types.TdsBufferCtor {
-	return func(transport io.ReadWriteCloser) types.ReadNextPacketer {
-		return NewTdsBuffer(err)
-	}
-}
-
-// NewTdsBuffer creates a TdsBuffer that returns the given error when called.
-func NewTdsBuffer(err error) types.ReadNextPacketer {
-	return &TdsBuffer{err: err}
-}
-
-// TdsBuffer is a mock of the mssql driver package's TdsBuffer.
-type TdsBuffer struct {
-	err error
-}
-
-// ReadNextPacket is the only method on the actual TdsBuffer that we care about.
-func (tb *TdsBuffer) ReadNextPacket() error {
-	return tb.err
 }
 
 // NewNetConn returns a net.Conn double whose behavior we can control.
@@ -111,7 +79,7 @@ func (n *NetConn) Write([]byte) (numBytes int, err error) {
 	return 1, n.errOnWrite
 }
 
-// NetConn returns a reference to its own receiver.
-func (n *NetConn) NetConn() net.Conn {
-	return n
+// FakeTdsBufferCtor returns the ReadWriteCloser passed in.
+func FakeTdsBufferCtor(r io.ReadWriteCloser) io.ReadWriteCloser {
+	return r
 }

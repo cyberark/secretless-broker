@@ -115,7 +115,9 @@ func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 		ReadPreloginWithPacketType,
 		WritePreloginWithPacketType,
 		ReadLogin,
-		NewTdsBuffer,
+		func(transport io.ReadWriteCloser) io.ReadWriteCloser {
+			return mssql.NewIdempotentDefaultTdsBuffer(transport)
+		},
 	)
 }
 
@@ -125,13 +127,13 @@ func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 // that it returns an interface, which enables us to mock it in unit tests.
 func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 	c, err := mssql.NewConnector(dsn)
-	fn := func(ctx context.Context) (types.NetConner, error) {
+	fn := func(ctx context.Context) (net.Conn, error) {
 		driverConn, err := c.Connect(ctx)
 		if err != nil {
 			return nil, err
 		}
 		// This can never fail unless mssql package changes: panicking is fine
-		mssqlConn := driverConn.(types.NetConner)
+		mssqlConn := driverConn.(*mssql.Conn).NetConn()
 		return mssqlConn, nil
 	}
 	return types.MSSQLConnectorFunc(fn), err
@@ -140,45 +142,28 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 // ReadPreloginWithPacketType is the production version of our readPrelogin
 // dependency, which delegates to the actual 3rd party driver.
 func ReadPreloginWithPacketType(
-	rawTdsBuffer interface{},
-	rawPktType interface{},
+	rawTdsBuffer io.ReadWriteCloser,
+	rawPktType uint8,
 ) (map[uint8][]byte, error) {
 	// This can never fail unless mssql package changes: panicking is fine
-	tdsBuffer := rawTdsBuffer.(*mssql.TdsBuffer)
-	pktTypeInt := rawPktType.(int)
-	pktType := mssql.PacketType(pktTypeInt)
-	return mssql.ReadPreloginWithPacketType(tdsBuffer, pktType)
+	return mssql.ReadPreloginWithPacketType(rawTdsBuffer, rawPktType)
 }
 
 // WritePreloginWithPacketType is the production version of our writePrelogin
 // dependency, which delegates to the actual 3rd party driver.
 func WritePreloginWithPacketType(
-	rawTdsBuffer interface{},
+	rawTdsBuffer io.ReadWriteCloser,
 	fields map[uint8][]byte,
-	rawPktType interface{},
+	rawPktType uint8,
 ) error {
 	// This can never fail unless mssql package changes: panicking is fine
-	tdsBuffer := rawTdsBuffer.(*mssql.TdsBuffer)
-	pktTypeInt := rawPktType.(int)
-	pktType := mssql.PacketType(pktTypeInt)
-	return mssql.WritePreloginWithPacketType(tdsBuffer, fields, pktType)
+	return mssql.WritePreloginWithPacketType(rawTdsBuffer, fields, rawPktType)
 }
 
 // ReadLogin is the production version of our readLogin dependency, which
 // delegates to the actual 3rd party driver.
-func ReadLogin(clientBufRaw types.ReadNextPacketer) (interface{}, error) {
-	clientBuf := clientBufRaw.(*mssql.TdsBuffer)
-	return mssql.ReadLogin(clientBuf)
-}
-
-// https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/configure-the-network-packet-size-server-configuration-option
-// Default packet size remains at 4096 bytes
-const bufferSize uint16 = 4096
-
-// NewTdsBuffer is the production version of types.TdsBufferCtor, which
-// delegates to the actual 3rd party driver.
-func NewTdsBuffer(transport io.ReadWriteCloser) types.ReadNextPacketer {
-	return mssql.NewTdsBuffer(bufferSize, transport)
+func ReadLogin(clientBufRaw io.ReadWriteCloser) (interface{}, error) {
+	return mssql.ReadLogin(clientBufRaw)
 }
 
 // NewSingleUseConnectorWithOptions creates a new SingleUseConnector, and allows
@@ -227,6 +212,8 @@ func (connector *SingleUseConnector) Connect(
 	// client can advance to the next stage of the process.  Otherwise the
 	// client would block forever waiting for its pre-login handshake to be
 	// read.
+
+	// TODO: add comment to explain why newTdsBuffer is used
 	clientBuffer := connector.newTdsBuffer(connector.clientConn)
 	_, err := connector.readPrelogin(clientBuffer, mssql.PackPrelogin)
 	if err != nil {
@@ -280,12 +267,11 @@ func (connector *SingleUseConnector) Connect(
 		ctxtypes.ClientLoginKey,
 		clientLoginChannel)
 
-	// Build a new driver connection
-	var netConner types.NetConner
+	var backendConn net.Conn
 
 	go func() {
 		// Kick off authentication through our third party connector
-		netConner, err = driverConnector.Connect(loginContext)
+		backendConn, err = driverConnector.Connect(loginContext)
 		connectPhaseFinished <- struct{}{}
 	}()
 
@@ -340,7 +326,7 @@ func (connector *SingleUseConnector) Connect(
 		return nil, wrappedError
 	}
 
-	connector.backendConn = netConner.NetConn()
+	connector.backendConn = backendConn
 	return connector.backendConn, nil
 }
 

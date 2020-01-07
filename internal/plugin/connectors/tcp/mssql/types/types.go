@@ -16,38 +16,31 @@ type MSSQLConnectorCtor func(dsn string) (MSSQLConnector, error)
 // type that we care about -- its "Connect" method -- in an interface.  This
 // allows us to mock that in our unit tests.
 type MSSQLConnector interface {
-	Connect(context.Context) (NetConner, error)
-}
-
-// NetConner is anything with a NetConn() method.  Ie, anything that can provide
-// a net.Conn.  Note this rather silly name conforms to Go standard conventions
-// for naming single method interfaces.
-type NetConner interface {
-	NetConn() net.Conn
+	Connect(context.Context) (net.Conn, error)
 }
 
 // MSSQLConnectorFunc lets us treat a function (that matches the "Connect"
 // signature) as an MSSQLConnector interface.
-type MSSQLConnectorFunc func(context.Context) (NetConner, error)
+type MSSQLConnectorFunc func(context.Context) (net.Conn, error)
 
 // Connect implements the MSSQLConnector interface.
-func (fn MSSQLConnectorFunc) Connect(ctx context.Context) (NetConner, error) {
+func (fn MSSQLConnectorFunc) Connect(ctx context.Context) (net.Conn, error) {
 	return fn(ctx)
 }
 
 // ReadPreloginFunc defines the type of the func that reads the prelogin packet.
 // The production version is implemented by mssql.ReadPreloginWithPacketType.
 type ReadPreloginFunc func(
-	tdsBuffer interface{},
-	pktType interface{}) (map[uint8][]byte, error)
+	tdsBuffer io.ReadWriteCloser,
+	pktType uint8) (map[uint8][]byte, error)
 
 // WritePreloginFunc defines the type of the func that writes the prelogin
 // packet. The production version is implemented by
 // mssql.WritePreloginWithPacketType.
 type WritePreloginFunc func(
-	tdsBuffer interface{},
+	tdsBuffer io.ReadWriteCloser,
 	fields map[uint8][]byte,
-	pktType interface{}) error
+	pktType uint8) error
 
 // ReadLoginFunc defins the type of the func that reads the client's login
 // packet.  The production version is implemented by:
@@ -56,15 +49,14 @@ type WritePreloginFunc func(
 // we must replace TdsBuffer with ReadNextPacketer and *Login with interface{}.
 // That interface{} will then be case back to a *Login by the receiving code
 // inside the driver package.
-type ReadLoginFunc func(r ReadNextPacketer) (interface{}, error)
+type ReadLoginFunc func(r io.ReadWriteCloser) (interface{}, error)
 
 // TdsBufferCtor represents the constructor of a TdsBuffer, in a form
 // suitable for unit tests.
-type TdsBufferCtor func(transport io.ReadWriteCloser) ReadNextPacketer
-
-// ReadNextPacketer is an interface that represents the one method on a
-// TdsBuffer that we use -- ReadNextPacket().  It allows us to create a mockable
-// type to represent a TdsBuffer, and is used together with TdsBufferCtor.
-type ReadNextPacketer interface {
-	ReadNextPacket() error
-}
+//
+// Note the signature does not mention TdsBuffers.  This is because our code is
+// only concerned with the ReadWriteCloser closer functionality, and our doubles
+// can be ReadWriteClosers.  The production implementation needs of course to
+// return a real TdsBuffer (which _is_ a ReadWriteCloser), and so we've chosen a
+// name that reflects the production purpose.
+type TdsBufferCtor func(transport io.ReadWriteCloser) io.ReadWriteCloser

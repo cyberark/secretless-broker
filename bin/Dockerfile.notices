@@ -1,0 +1,8 @@
+FROM golang:1.13
+
+WORKDIR /secretless
+
+RUN apt-get update && \
+    apt-get install -y mercurial
+
+RUN go get github.com/google/go-licenses

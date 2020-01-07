@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -euo pipefail
+
+current_dir=$("$(dirname "$0")"/abspath)
+toplevel_dir=$current_dir/..
+
+PROJECT_NAME="secretless"
+MAIN_PKG="$PROJECT_NAME/cmd/secretless-broker"
+OUTPUT_DIR="tmp/licenses"
+
+echo "Building the go-licenses image..."
+docker build -f $toplevel_dir/bin/Dockerfile.notices \
+             -t secretless-broker-notices-updater \
+             $toplevel_dir
+
+echo "Cleaning up the output folder..."
+rm -rf $OUTPUT_DIR
+
+echo "Running the license checker container..."
+docker run --rm \
+  -v "$toplevel_dir":"/$PROJECT_NAME" \
+  secretless-broker-notices-updater \
+  /bin/bash -ec "
+    echo \"Finding license files (this may take a while)...\"
+    go-licenses save \
+                --save_path=/$PROJECT_NAME/$OUTPUT_DIR \
+                /$MAIN_PKG
+
+    # We need to make sure this folder can be deleted on host
+    chmod -R 777 /$PROJECT_NAME/$OUTPUT_DIR
+
+    echo \"Finding license types (this may take a while)...\"
+    go-licenses csv /$MAIN_PKG > $OUTPUT_DIR/packages.txt
+
+    echo \"Generating new NOTICES file...\"
+    go run bin/combine_licenses.go $OUTPUT_DIR
+
+    echo \"Cleaning up...\"
+    rm -rf $OUTPUT_DIR
+
+    echo \"Completed generating NOTICES file!\"
+  "

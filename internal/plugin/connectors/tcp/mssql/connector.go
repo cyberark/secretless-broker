@@ -98,16 +98,16 @@ Overview of the connection process
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
 type SingleUseConnector struct {
-	clientConn  net.Conn
-	clientBuff  io.ReadWriteCloser
-	logger      log.Logger
+	clientConn net.Conn
+	clientBuff io.ReadWriteCloser
+	logger     log.Logger
 	// Note: We're following standard ctor naming practices with this field.
 	newMSSQLConnector     types.MSSQLConnectorCtor
 	readPreloginRequest   types.ReadPreloginRequestFunc
 	writePreloginResponse types.WritePreloginResponseFunc
 	readLoginRequest      types.ReadLoginRequestFunc
 	writeLoginResponse    types.WriteLoginResponseFunc
-	writeError    		  types.WriteErrorFunc
+	writeError            types.WriteErrorFunc
 	newTdsBuffer          types.TdsBufferCtor
 }
 
@@ -169,14 +169,14 @@ func NewSingleUseConnectorWithOptions(
 		writePreloginResponse: writePreloginResponse,
 		readLoginRequest:      readLoginRequest,
 		writeLoginResponse:    writeLoginRequest,
-		writeError:			   writeError,
+		writeError:            writeError,
 		newTdsBuffer:          newTdsBuffer,
 	}
 }
 
 type connectResult struct {
 	conn net.Conn
-	err error
+	err  error
 }
 
 // Connect implements the tcp.Connector func signature
@@ -247,11 +247,11 @@ func (connector *SingleUseConnector) Connect(
 		// Kick off authentication through our third party connector
 		driverConn, err := driverConnector.Connect(loginContext)
 
-		connectionResultChan <-connectResult{
+		connectionResultChan <- connectResult{
 			conn: driverConn,
 			err:  err,
 		}
-	} ()
+	}()
 
 	loginResp, backendConn, err := connector.waitForServerConnection(
 		connInterceptor,
@@ -282,10 +282,10 @@ func protocolError(err error) mssql.Error {
 	return mssql.Error{
 		// SQL Error Number - currently using 18456 (login failed for user)
 		// TODO: Find generic error number
-		Number:     18456,
+		Number: 18456,
 		// State -
 		// TODO: better understand this.
-		State:      0x01,
+		State: 0x01,
 		// Severity Class - 16 indicates a general error that can be corrected by the user.
 		Class:      16,
 		Message:    errors.Wrap(err, "secretless").Error(),
@@ -302,8 +302,8 @@ func (connector *SingleUseConnector) waitForServerConnection(
 	var loginResponse *mssql.LoginResponse
 	var err error
 
-// SECTION: wait for prelogin response
-//
+	// SECTION: wait for prelogin response
+	//
 	select {
 	// preloginResponse is received from the server
 	case preloginResponse := <-interceptor.ServerPreLoginResponse:
@@ -337,6 +337,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		// the mssql driver on construction.
 		interceptor.ClientLoginRequest <- clientLoginRequest
 		break
+
 	// error is received from connect
 	case res := <-connResChan:
 		if res.err == nil {
@@ -345,8 +346,8 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		return nil, nil, res.err
 	}
 
-// SECTION: wait for server login ack
-//
+	// SECTION: wait for server login ack
+	//
 	select {
 	// loginResponse is received from the server
 	case loginResponse = <-interceptor.ServerLoginResponse:
@@ -354,6 +355,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 			return nil, nil, errors.New("ServerLoginResponse is nil")
 		}
 		break
+
 	// error is received from connect
 	case res := <-connResChan:
 		if res.err == nil {
@@ -362,8 +364,8 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		return nil, nil, res.err
 	}
 
-// SECTION: wait for connection response
-//
+	// SECTION: wait for connection response
+	//
 	res := <-connResChan
 	if res.err != nil {
 		return nil, nil, res.err

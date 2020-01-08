@@ -131,9 +131,9 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 		return errors.Wrap(
 			err,
 			fmt.Sprintf(
-			`connection on %v failed while streaming from %s connection`,
-			clientConn.LocalAddr(),
-			closer,
+				`connection on %v failed while streaming from %s connection`,
+				clientConn.LocalAddr(),
+				closer,
 			),
 		)
 	}

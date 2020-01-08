@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.2] 2020-01-08
+
+### Added
+- Updated CONTRIBUTING.md with instructions for using `go-mssqldb` submodule (#1044)
+- Added gosec security scan to pipeline (#976)
+- Added integration tests for MSSQL against additional MSSQL versions (#1017)
+- Added `gofmt` to CodeClimate checks (#1055)
+- Added support for MSSQL client parameter propagation (#1012)
+
+### Changed
+- Bumped the `conjur-authn-k8s-client` version for the Conjur provider k8s
+  authenticator to `v0.15.0` (#1060)
+- Example plugin updated for clarity (#1061)
+- Plugin SDK templates updated for clarity (#1054)
+- Removed hardcoded PreloginResponse from MSSQL connector (#1014)
+- Bumped Go version in Dockerfile to 1.13
+
+### Fixed
+- Secretless doesn't exit when it can't start a configured connector (#1057)
+- Secretless has insufficient logs when the config file has trouble loading (#1062)
+
 ## [1.4.1] 2019-12-11
 
 ### Added
@@ -398,7 +419,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -419,3 +440,4 @@ The first tagged version.
 [1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0 
 [1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0 
 [1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1 
+[1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2 

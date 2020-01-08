@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net"
@@ -93,4 +94,19 @@ func (n *NetConn) Write([]byte) (numBytes int, err error) {
 // FakeTdsBufferCtor returns the ReadWriteCloser passed in.
 func FakeTdsBufferCtor(r io.ReadWriteCloser) io.ReadWriteCloser {
 	return r
+}
+
+// TdsBufferCtor returns a Buffer (with a fake transport) that can be written & read
+func TdsBufferCtor(r io.ReadWriteCloser) io.ReadWriteCloser {
+	return mssql.NewTdsBuffer(1024, new(Transport))
+}
+
+// Transport imitates a transport buffer
+type Transport struct {
+	bytes.Buffer
+}
+
+// Close imitates the Close method for the Transports structure used elsewhere
+func (t *Transport) Close() error {
+	return nil
 }

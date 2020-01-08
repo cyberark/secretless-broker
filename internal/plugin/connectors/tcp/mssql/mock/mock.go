@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
+	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 // NewSuccessfulMSSQLConnectorCtor returns an MSSQLConnectorCtor that always
@@ -43,21 +44,31 @@ func NewFailingMSSQLConnector(err error) types.MSSQLConnector {
 	return types.MSSQLConnectorFunc(rawFunc)
 }
 
-// SuccessfulReadPrelogin is a double for a ReadPreloginFunc that always
+// SuccessfulReadPreloginRequest is a double for a ReadPreloginRequestFunc that always
 // succeeds.
-func SuccessfulReadPrelogin(io.ReadWriteCloser, uint8) (map[uint8][]byte, error) {
+func SuccessfulReadPreloginRequest(io.ReadWriteCloser) (map[uint8][]byte, error) {
 	return nil, nil
 }
 
-// SuccessfulWritePrelogin is a double for a WritePreloginFunc that always
+// SuccessfulWritePreloginResponse is a double for a WritePreloginResponseFunc that always
 // succeeds.
-func SuccessfulWritePrelogin(io.ReadWriteCloser, map[uint8][]byte, uint8) error {
+func SuccessfulWritePreloginResponse(io.ReadWriteCloser, map[uint8][]byte) error {
 	return nil
 }
 
-// SuccessfulReadLogin is a double for a ReadLoginFunc that always succeeds.
-func SuccessfulReadLogin(r io.ReadWriteCloser) (interface{}, error) {
-	return struct{}{}, nil
+// SuccessfulReadLoginRequest is a double for a ReadLoginRequestFunc that always succeeds.
+func SuccessfulReadLoginRequest(io.ReadWriteCloser) (*mssql.LoginRequest, error) {
+	return &mssql.LoginRequest{}, nil
+}
+
+// SuccessfulWriteLoginResponse is a double for a WriteLoginResponseFunc that always succeeds.
+func SuccessfulWriteLoginResponse(io.ReadWriteCloser, mssql.LoginResponse) error {
+	return nil
+}
+
+// SuccessfulWriteError is a double for a WriteErrorFunc that always succeeds.
+func SuccessfulWriteError(io.ReadWriteCloser, mssql.Error) error {
+	return nil
 }
 
 // NewNetConn returns a net.Conn double whose behavior we can control.

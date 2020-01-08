@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"net"
+
+	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 // MSSQLConnectorCtor represents the constructor of an mssqlConnector. It
@@ -28,28 +30,36 @@ func (fn MSSQLConnectorFunc) Connect(ctx context.Context) (net.Conn, error) {
 	return fn(ctx)
 }
 
-// ReadPreloginFunc defines the type of the func that reads the prelogin packet.
-// The production version is implemented by mssql.ReadPreloginWithPacketType.
-type ReadPreloginFunc func(
-	tdsBuffer io.ReadWriteCloser,
-	pktType uint8) (map[uint8][]byte, error)
+// ReadPreloginRequestFunc defines the type of the func that reads the prelogin packet.
+// The production version is implemented by mssql.ReadPreloginRequest.
+type ReadPreloginRequestFunc func(
+	r io.ReadWriteCloser,
+) (map[uint8][]byte, error)
 
-// WritePreloginFunc defines the type of the func that writes the prelogin
-// packet. The production version is implemented by
-// mssql.WritePreloginWithPacketType.
-type WritePreloginFunc func(
-	tdsBuffer io.ReadWriteCloser,
+// WritePreloginResponseFunc defines the type of the func that writes the prelogin
+// response packet. The production version is implemented by mssql.WritePreloginResponse.
+type WritePreloginResponseFunc func(
+	w io.ReadWriteCloser,
 	fields map[uint8][]byte,
-	pktType uint8) error
+) error
 
-// ReadLoginFunc defins the type of the func that reads the client's login
-// packet.  The production version is implemented by:
-//     mssql.ReadLogin(r *TdsBuffer) (*Login, error)
-// Note that, in order to avoid a concrete dependency on mssql in this package,
-// we must replace TdsBuffer with ReadNextPacketer and *Login with interface{}.
-// That interface{} will then be case back to a *Login by the receiving code
-// inside the driver package.
-type ReadLoginFunc func(r io.ReadWriteCloser) (interface{}, error)
+// ReadLoginRequestFunc defines the type of the func that reads the client's login
+// packet.  The production version is implemented by mssql.ReadLoginRequest.
+type ReadLoginRequestFunc func(r io.ReadWriteCloser) (*mssql.LoginRequest, error)
+
+// WriteLoginResponseFunc defines the type of the func that writes the login response
+// packet.  The production version is implemented by mssql.WriteLoginResponse.
+type WriteLoginResponseFunc func(
+	w io.ReadWriteCloser,
+	loginRes mssql.LoginResponse,
+) error
+
+// WriteErrorFunc defines the type of the func that writes an error packet. The production
+// version is implemented by mssql.WriteError.
+type WriteErrorFunc func(
+	w io.ReadWriteCloser,
+	err mssql.Error,
+) error
 
 // TdsBufferCtor represents the constructor of a TdsBuffer, in a form
 // suitable for unit tests.

@@ -71,6 +71,13 @@ func SuccessfulWriteError(io.ReadWriteCloser, mssql.Error) error {
 	return nil
 }
 
+// WriteError is a mock for the WriteErrorFunc that writes a string representation
+// of an MSSQL Error to the client's net.Conn transport.
+func WriteError(r io.ReadWriteCloser, err mssql.Error) error {
+	_, writeErr := r.Write([]byte(err.Error()))
+	return writeErr
+}
+
 // NewNetConn returns a net.Conn double whose behavior we can control.
 func NewNetConn(errOnWrite error) *NetConn {
 	return &NetConn{errOnWrite: errOnWrite}
@@ -82,12 +89,14 @@ func NewNetConn(errOnWrite error) *NetConn {
 //   sending an error fails.  Etc.
 type NetConn struct {
 	net.Conn
-	errOnWrite error
+	WriteHistory [][]byte
+	errOnWrite   error
 }
 
 // Write "writes" bytes to our fake net.Conn.
-func (n *NetConn) Write([]byte) (numBytes int, err error) {
-	return 1, n.errOnWrite
+func (n *NetConn) Write(output []byte) (numBytes int, err error) {
+	n.WriteHistory = append(n.WriteHistory, output)
+	return len(output), n.errOnWrite
 }
 
 // FakeTdsBufferCtor returns the ReadWriteCloser passed in.

@@ -9,25 +9,28 @@ import (
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
 	logmock "github.com/cyberark/secretless-broker/pkg/secretless/log/mock"
-	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
-	"github.com/denisenkom/go-mssqldb/ctxtypes"
+	pluginconnector "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
+	"github.com/denisenkom/go-mssqldb"
 )
 
 func TestHappyPath(t *testing.T) {
 	logger := logmock.NewLogger()
 	clientConn := mock.NewNetConn(nil)
 	expectedBackendConn := mock.NewNetConn(nil)
-	creds := connector.CredentialValuesByID{
+	creds := pluginconnector.CredentialValuesByID{
 		"credName": []byte("secret"),
 	}
 
 	ctor := mock.NewSuccessfulMSSQLConnectorCtor(
 		func(ctx context.Context) (net.Conn, error) {
-			preLoginResponse := ctx.Value(ctxtypes.PreLoginResponseKey).(chan map[uint8][]byte)
-			preLoginResponse <- map[uint8][]byte{ 0: {0, 0} }
+			interceptor := mssql.ConnectInterceptorFromContext(ctx)
 
-			clientLoginChan := ctx.Value(ctxtypes.ClientLoginKey).(chan interface{})
-			<- clientLoginChan
+			interceptor.ServerPreLoginResponse <- map[uint8][]byte{ 0: {0, 0} }
+
+			<- interceptor.ClientLoginRequest
+
+			interceptor.ServerLoginResponse <- &mssql.LoginResponse{}
+
 			return expectedBackendConn, nil
 		},
 	)
@@ -35,9 +38,11 @@ func TestHappyPath(t *testing.T) {
 	connector := NewSingleUseConnectorWithOptions(
 		logger,
 		ctor,
-		mock.SuccessfulReadPrelogin,
-		mock.SuccessfulWritePrelogin,
-		mock.SuccessfulReadLogin,
+		mock.SuccessfulReadPreloginRequest,
+		mock.SuccessfulWritePreloginResponse,
+		mock.SuccessfulReadLoginRequest,
+		mock.SuccessfulWriteLoginResponse,
+		mock.SuccessfulWriteError,
 		mock.FakeTdsBufferCtor,
 	)
 	actualBackendConn, err := connector.Connect(clientConn, creds)

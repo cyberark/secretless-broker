@@ -6,6 +6,7 @@ import (
 	"net"
 
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/pkg/errors"
 
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
@@ -104,17 +105,17 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	backendCredentials, err := proxy.retrieveCredentials()
 	defer internal.ZeroizeCredentials(backendCredentials)
 	if err != nil {
-		return fmt.Errorf("failed on retrieve credentials: %s", err)
+		return errors.Wrap(err, "failed on retrieve credentials")
 	}
 
 	logger.Infof("New connection on %v.\n", clientConn.LocalAddr())
 
 	targetConn, err = proxy.connector.Connect(clientConn, backendCredentials)
 	if err != nil {
-		return fmt.Errorf("failed on connect: %s", err)
+		return errors.Wrap(err, "failed on connect")
 	}
 
-	logger.Infof("Connection opened from %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
+	logger.Infof("Connection opened on %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
 
 	clientErrChan, destErrChan := duplexStream(clientConn, targetConn)
 
@@ -127,11 +128,14 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf(
-			`connection on %v failed while streaming from %s connection: %s`,
-			clientConn.LocalAddr(),
-			closer,
-			err)
+		return errors.Wrap(
+			err,
+			fmt.Sprintf(
+				`connection on %v failed while streaming from %s connection`,
+				clientConn.LocalAddr(),
+				closer,
+			),
+		)
 	}
 
 	logger.Infof("Connection on %v closed by %s.\n", clientConn.LocalAddr(), closer)
@@ -157,12 +161,24 @@ func (proxy *proxyService) Start() error {
 				return
 			}
 			go func() {
-				if err := proxy.handleConnection(conn); err != nil {
-					logger.Errorf("Failed on handle connection: %s", err)
+				err := proxy.handleConnection(conn)
+
+				if err == nil {
 					return
 				}
 
-				logger.Infof("Connection closed on %v", conn.LocalAddr())
+				// io.EOF means connection was closed
+				if errors.Cause(err) == io.EOF {
+					err = errors.Wrap(
+						err,
+						fmt.Sprintf(
+							"connection closed early on %v\n",
+							conn.LocalAddr(),
+						),
+					)
+				}
+
+				logger.Errorf("Failed on handle connection: %s", err)
 			}()
 		}
 	}()

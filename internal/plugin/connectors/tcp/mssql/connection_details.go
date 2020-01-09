@@ -17,7 +17,7 @@ const defaultMSSQLPort = uint(1433)
 
 // NewConnectionDetails is a constructor of ConnectionDetails structure from a
 // map of credentials.
-func NewConnectionDetails(credentials map[string][]byte) (*ConnectionDetails, error) {
+func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 
 	connDetails := &ConnectionDetails{}
 
@@ -39,7 +39,7 @@ func NewConnectionDetails(credentials map[string][]byte) (*ConnectionDetails, er
 		connDetails.Password = string(credentials["password"])
 	}
 
-	return connDetails, nil
+	return connDetails
 }
 
 // Address returns a string representing the network location (host and port)

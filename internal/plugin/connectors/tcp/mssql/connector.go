@@ -11,8 +11,6 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
-	"github.com/denisenkom/go-mssqldb/ctxtypes"
-
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
@@ -26,7 +24,7 @@ or modification of the respective requests or responses.
 Overview of the connection process
 
 +---------+              +-------------+                      +---------+               +-------+
-| Client  |              | Secretless  |                      | Driver  |               | MsSQL |
+| Client  |              | Secretless  |                      | Driver  |               | MSSQL |
 +---------+              +-------------+                      +---------+               +-------+
      |                          |                                  |                        |
      | Prelogin Request         |                                  |                        |
@@ -67,54 +65,66 @@ Overview of the connection process
      |                          |                                  |         Login Response |
      |                          |                                  |<-----------------------|
      |                          |                                  |                        |
-     |                          |         Login success or failure |                        |
+     |                          |         Intercept Login Response |                        |
      |                          |<---------------------------------|                        |
      |                          |                                  |                        |
-     |    Login Response (Fake) |                                  |                        |
+     |                          |      Backend Connection or error |                        |
+     |                          |<---------------------------------|                        |
+     |                          |                                  |                        |
+     |  Login Response or error |                                  |                        |
      |<-------------------------|                                  |                        |
      |                          |                                  |                        |
 
 	Note: The above diagram was created using https://textart.io/sequence and the
 	following source:
 
-	object Client Secretless Driver MsSQL
+	object Client Secretless Driver MSSQL
 	Client->Secretless: Prelogin Request
 	Secretless->Driver: Connect(context)
 	note right of Secretless: Context contains channels \n for intercepting data
-	Driver->MsSQL: Prelogin Request
-	MsSQL->Driver: Prelogin Response
-	MsSQL->Secretless: Intercept Prelogin Response
+	Driver->MSSQL: Prelogin Request
+	MSSQL->Driver: Prelogin Response
+	MSSQL->Secretless: Intercept Prelogin Response
 	Secretless->Secretless: Modify Prelogin Response
 	Secretless->Client: Prelogin Response
-	Driver->MsSQL:Handshake Request
-	MsSQL->Driver: Handshake Response
-	Driver->MsSQL: Login Request
-	MsSQL->Driver: Login Response
-	Driver->Secretless: Login success or failure
-	Secretless->Client: Login Response (Premade)
+	Driver->MSSQL:Handshake Request
+	MSSQL->Driver: Handshake Response
+	Driver->MSSQL: Login Request
+	MSSQL->Driver: Login Response
+	Driver->Secretless: Intercept Login Response
+	Driver->Secretless: Backend Connection or error
+	Secretless->Client: Login Response or error
 */
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
 type SingleUseConnector struct {
-	backendConn net.Conn
-	clientConn  net.Conn
-	logger      log.Logger
+	clientConn net.Conn
+	clientBuff io.ReadWriteCloser
+	logger     log.Logger
 	// Note: We're following standard ctor naming practices with this field.
-	newMSSQLConnector types.MSSQLConnectorCtor
-	readPrelogin      types.ReadPreloginFunc
-	writePrelogin     types.WritePreloginFunc
-	readLogin         types.ReadLoginFunc
-	newTdsBuffer      types.TdsBufferCtor
+	newMSSQLConnector     types.MSSQLConnectorCtor
+	readPreloginRequest   types.ReadPreloginRequestFunc
+	writePreloginResponse types.WritePreloginResponseFunc
+	readLoginRequest      types.ReadLoginRequestFunc
+	writeLoginResponse    types.WriteLoginResponseFunc
+	writeError            types.WriteErrorFunc
+	newTdsBuffer          types.TdsBufferCtor
 }
 
-// NewSingleUseConnector creates a new production SingleUseConnector
+// NewSingleUseConnector creates a new production SingleUseConnector.
+// This uses the production version of the dependencies, which delegate to the actual 3rd
+// party driver.
 func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 	return NewSingleUseConnectorWithOptions(
 		logger,
 		NewMSSQLConnector,
-		ReadPreloginWithPacketType,
-		WritePreloginWithPacketType,
-		ReadLogin,
+		mssql.ReadPreloginRequest,
+		mssql.WritePreloginResponse,
+		mssql.ReadLoginRequest,
+		mssql.WriteLoginResponse,
+		mssql.WriteError72,
+		// NewIdempotentDefaultTdsBuffer is wrapped so that it conforms to the
+		// types.TdsBufferCtor func signature
 		func(transport io.ReadWriteCloser) io.ReadWriteCloser {
 			return mssql.NewIdempotentDefaultTdsBuffer(transport)
 		},
@@ -139,64 +149,52 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 	return types.MSSQLConnectorFunc(fn), err
 }
 
-// ReadPreloginWithPacketType is the production version of our readPrelogin
-// dependency, which delegates to the actual 3rd party driver.
-func ReadPreloginWithPacketType(
-	rawTdsBuffer io.ReadWriteCloser,
-	rawPktType uint8,
-) (map[uint8][]byte, error) {
-	// This can never fail unless mssql package changes: panicking is fine
-	return mssql.ReadPreloginWithPacketType(rawTdsBuffer, rawPktType)
-}
-
-// WritePreloginWithPacketType is the production version of our writePrelogin
-// dependency, which delegates to the actual 3rd party driver.
-func WritePreloginWithPacketType(
-	rawTdsBuffer io.ReadWriteCloser,
-	fields map[uint8][]byte,
-	rawPktType uint8,
-) error {
-	// This can never fail unless mssql package changes: panicking is fine
-	return mssql.WritePreloginWithPacketType(rawTdsBuffer, fields, rawPktType)
-}
-
-// ReadLogin is the production version of our readLogin dependency, which
-// delegates to the actual 3rd party driver.
-func ReadLogin(clientBufRaw io.ReadWriteCloser) (interface{}, error) {
-	return mssql.ReadLogin(clientBufRaw)
-}
-
 // NewSingleUseConnectorWithOptions creates a new SingleUseConnector, and allows
 // you to specify the newMSSQLConnector explicitly.  Intended to be used in unit
 // tests only.
 func NewSingleUseConnectorWithOptions(
 	logger log.Logger,
 	newMSSQLConnector types.MSSQLConnectorCtor,
-	readPrelogin types.ReadPreloginFunc,
-	writePrelogin types.WritePreloginFunc,
-	readLogin types.ReadLoginFunc,
+	readPreloginRequest types.ReadPreloginRequestFunc,
+	writePreloginResponse types.WritePreloginResponseFunc,
+	readLoginRequest types.ReadLoginRequestFunc,
+	writeLoginRequest types.WriteLoginResponseFunc,
+	writeError types.WriteErrorFunc,
 	newTdsBuffer types.TdsBufferCtor,
 ) *SingleUseConnector {
 	return &SingleUseConnector{
-		logger:            logger,
-		newMSSQLConnector: newMSSQLConnector,
-		readPrelogin:      readPrelogin,
-		writePrelogin:     writePrelogin,
-		readLogin:         readLogin,
-		newTdsBuffer:      newTdsBuffer,
+		logger:                logger,
+		newMSSQLConnector:     newMSSQLConnector,
+		readPreloginRequest:   readPreloginRequest,
+		writePreloginResponse: writePreloginResponse,
+		readLoginRequest:      readLoginRequest,
+		writeLoginResponse:    writeLoginRequest,
+		writeError:            writeError,
+		newTdsBuffer:          newTdsBuffer,
 	}
+}
+
+type connectResult struct {
+	conn net.Conn
+	err  error
 }
 
 // Connect implements the tcp.Connector func signature
 //
 // It is the main method of the SingleUseConnector. It:
-//   1. Constructs connection details from the provided credentials map.
-//   2. Reads the client PreLogin request
-//   3. Adds channels to the context that can intercept data from the driver
-//   4. Initiates authentication and connection to MsSQL through the third-party driver
-//   5. Intercepts PreLogin response from the driver
-//	 6. Customizes the PreLogin response to meet Secretless standards
-//		and sends it to the user
+//   1. Reads the client PreLogin request
+//   2. Constructs connection details from the provided credentials map
+//   3. Adds a ConnectInterceptor to the context to exchange data with the driver via
+//   	channels
+//   4. Initiates authentication and connection to MSSQL through the third-party driver
+//   5. Injects client's PreLogin request to the driver, which the driver incorporates
+//   	into its PreLogin request to server
+//   6. Intercepts PreLogin response or error from the driver
+//	 7. Customizes the PreLogin response to meet Secretless standards and sends it to
+//		client
+//   8. Intercepts Login response or error from the driver, and simultaneously extracts
+//   	net.Conn to server from the driver
+//   9. Sends Login response or error to client
 //
 // Connect requires "host", "port", "username" and "password" credentials.
 func (connector *SingleUseConnector) Connect(
@@ -212,25 +210,18 @@ func (connector *SingleUseConnector) Connect(
 	// client can advance to the next stage of the process.  Otherwise the
 	// client would block forever waiting for its pre-login handshake to be
 	// read.
-
-	// TODO: add comment to explain why newTdsBuffer is used
-	clientBuffer := connector.newTdsBuffer(connector.clientConn)
-	_, err := connector.readPrelogin(clientBuffer, mssql.PackPrelogin)
+	connector.clientBuff = connector.newTdsBuffer(connector.clientConn)
+	_, err := connector.readPreloginRequest(connector.clientBuff)
 	if err != nil {
-		wrappedError := errors.Wrap(err, "failed to read prelogin request")
-		connector.sendError(wrappedError)
+		wrappedError := errors.Wrap(err, "failed to read prelogin request from client")
+		connector.writeErrorToClient(wrappedError)
 		return nil, wrappedError
 	}
 
-	// Prepare connection details from the client, formatted for MsSQL
-	connDetails, err := NewConnectionDetails(credentialValuesByID)
-	if err != nil {
-		wrappedError := errors.Wrap(err, "unable to create new connection details")
-		connector.sendError(wrappedError)
-		return nil, wrappedError
-	}
+	// Prepare connection details from the client, formatted for MSSQL
+	connDetails := NewConnectionDetails(credentialValuesByID)
 
-	// Create a new MsSQL connector
+	// Create a new MSSQL connector
 	// Using DSN (Data Source Name) string because gomssql forces us to.
 	//
 	// NOTE: Secretless has some unfortunate naming collisions with the
@@ -239,111 +230,152 @@ func (connector *SingleUseConnector) Connect(
 	driverConnector, err := connector.newMSSQLConnector(dataSourceName(connDetails))
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to create a go-mssqldb connector")
-		connector.sendError(wrappedError)
+		connector.writeErrorToClient(wrappedError)
 		return nil, wrappedError
 	}
 
-	// Create a channel for receiving the prelogin response through the context
-	preLoginResponseChannel := make(chan map[uint8][]byte)
-
-	// Create a channel to send the client login to the driver through the
-	// context. See types.ReadLoginFunc for an explanation of why we need to use
-	// interface{} here, even though we're sending actually sending an
-	// mssql.Login.
-	clientLoginChannel := make(chan interface{})
-
 	// Set a 'marker' for when the driver has finished connecting to the server
-	connectPhaseFinished := make(chan struct{})
+	connectionResultChan := make(chan connectResult)
 
-	// Create the context for our connection
-	ctx := context.Background()
-	// Add channels to the context, to exchange information with the driver
-	loginContext := context.WithValue(
-		ctx,
-		ctxtypes.PreLoginResponseKey,
-		preLoginResponseChannel)
-	loginContext = context.WithValue(
-		loginContext,
-		ctxtypes.ClientLoginKey,
-		clientLoginChannel)
+	// Create a ConnectInterceptor for exchanging values with the driver via context
+	connInterceptor := mssql.NewConnectInterceptor()
 
-	var backendConn net.Conn
+	// Add connInterceptor to the context for exchanging values with the driver
+	loginContext := mssql.NewContextWithConnectInterceptor(context.Background(), connInterceptor)
 
 	go func() {
 		// Kick off authentication through our third party connector
-		backendConn, err = driverConnector.Connect(loginContext)
-		connectPhaseFinished <- struct{}{}
+		driverConn, err := driverConnector.Connect(loginContext)
+
+		connectionResultChan <- connectResult{
+			conn: driverConn,
+			err:  err,
+		}
 	}()
 
-	// Blocks continuation until we've received the preLoginResponse from the driver
-	preloginResponse := <-preLoginResponseChannel
-
-	// Since the communication between the client and Secretless must be unencrypted,
-	// we fool the client into thinking that it's talking to a server that does not support
-	// encryption.
-	preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
-
-	// Write the prelogin packet back to the user
-	err = connector.writePrelogin(clientBuffer, preloginResponse, mssql.PackReply)
-	if err != nil {
-		wrappedError := errors.Wrap(err, "failed to write prelogin response")
-		connector.sendError(wrappedError)
-		return nil, wrappedError
-	}
-
-	// We parse the client's Login packet to pass the params to the server.
-	clientLogin, err := connector.readLogin(clientBuffer)
-	if err != nil {
-		wrappedError := errors.Wrap(err, "failed to handle client login")
-		connector.sendError(wrappedError)
-		return nil, wrappedError
-	}
-
-	// Send the client login so that secretless can send honest client params to
-	// the server
-	clientLoginChannel <- clientLogin
-
-	// Block continuation until driver has completed connection
-	<-connectPhaseFinished
+	loginResp, backendConn, err := connector.waitForServerConnection(
+		connInterceptor,
+		connectionResultChan)
 
 	if err != nil {
-		wrappedError := errors.Wrap(err, "failed to connect to mssql server")
-		connector.sendError(wrappedError)
-		return nil, wrappedError
+		connector.writeErrorToClient(err)
+		return nil, err
 	}
 
-	// TODO: 	Send the login response to the client 	 (#1016)
-	// TODO: 	Verify appropriate errors are passed to the client (#1013)
-	// TODO: 	Replace this with an actual 'ok' message from the server
-	//			once login completes within the driver
-	// TODO:    Rename this to "AuthenticationOKMessage"
-	if _, err = clientConn.Write(connector.CreateAuthenticationOKMessage()); err != nil {
+	if err = connector.writeLoginResponse(connector.clientBuff, *loginResp); err != nil {
 		wrappedError := errors.Wrap(
 			err,
 			"failed to send a successful authentication response to client",
 		)
-		connector.sendError(wrappedError)
+		connector.writeErrorToClient(wrappedError)
 		return nil, wrappedError
 	}
 
-	connector.backendConn = backendConn
-	return connector.backendConn, nil
+	return backendConn, nil
 }
 
-// TODO: Add ability to receive an MSSQL error and send it to the client (#1013)
-func (connector *SingleUseConnector) sendError(err error) {
-	//NOTE: no need to log, Secretless already does this for every error sent back
-	//from the Connect method
-	//connector.logger.Error(err)
-	connector.sendErrorToClient()
-}
-
-// TODO: Add ability to receive an MSSQL error and send it to the client (#1013)
-func (connector *SingleUseConnector) sendErrorToClient() {
-	mssqlError := connector.CreateGenericErrorMessage()
-	if _, e := connector.clientConn.Write(mssqlError); e != nil {
-		connector.logger.Errorf("failed to write error %s to MSSQL client", e)
+func protocolError(err error) mssql.Error {
+	if _protocolErr, ok := errors.Cause(err).(mssql.Error); ok {
+		return _protocolErr
 	}
+
+	return mssql.Error{
+		// SQL Error Number - currently using 18456 (login failed for user)
+		// TODO: Find generic error number
+		Number: 18456,
+		// State -
+		// TODO: better understand this.
+		State: 0x01,
+		// Severity Class - 16 indicates a general error that can be corrected by the user.
+		Class:      16,
+		Message:    errors.Wrap(err, "secretless").Error(),
+		ServerName: "secretless",
+		ProcName:   "",
+		LineNo:     0,
+	}
+}
+
+func (connector *SingleUseConnector) waitForServerConnection(
+	interceptor *mssql.ConnectInterceptor,
+	connResChan chan connectResult,
+) (*mssql.LoginResponse, net.Conn, error) {
+	var loginResponse *mssql.LoginResponse
+	var err error
+
+	// SECTION: wait for prelogin response
+	//
+	select {
+	// preloginResponse is received from the server
+	case preloginResponse := <-interceptor.ServerPreLoginResponse:
+		if preloginResponse == nil {
+			return nil, nil, errors.New("ServerPreLoginResponse is nil")
+		}
+		// Since the communication between the client and Secretless must be unencrypted,
+		// we fool the client into thinking that it's talking to a server that does not
+		// support encryption.
+		preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
+
+		// Write the prelogin packet back to the user
+		err = connector.writePreloginResponse(connector.clientBuff, preloginResponse)
+		if err != nil {
+			wrappedError := errors.Wrap(
+				err,
+				"failed to write prelogin response to client")
+			return nil, nil, wrappedError
+		}
+
+		// We parse the client's LoginRequest packet so that we can pass on params to the
+		// server.
+		clientLoginRequest, err := connector.readLoginRequest(connector.clientBuff)
+		if err != nil {
+			wrappedError := errors.Wrap(err, "failed to handle login from client")
+			return nil, nil, wrappedError
+		}
+
+		// Send the client login to the mssql driver which it can use to pass client
+		// params to the server. This channel is set as a value on the context passed to
+		// the mssql driver on construction.
+		interceptor.ClientLoginRequest <- clientLoginRequest
+		break
+
+	// error is received from connect
+	case res := <-connResChan:
+		if res.err == nil {
+			panic("connect finished before preloginResponse without error")
+		}
+		return nil, nil, res.err
+	}
+
+	// SECTION: wait for server login ack
+	//
+	select {
+	// loginResponse is received from the server
+	case loginResponse = <-interceptor.ServerLoginResponse:
+		if loginResponse == nil {
+			return nil, nil, errors.New("ServerLoginResponse is nil")
+		}
+		break
+
+	// error is received from connect
+	case res := <-connResChan:
+		if res.err == nil {
+			panic("connect finished before loginResponse without error")
+		}
+		return nil, nil, res.err
+	}
+
+	// SECTION: wait for connection response
+	//
+	res := <-connResChan
+	if res.err != nil {
+		return nil, nil, res.err
+	}
+
+	return loginResponse, res.conn, nil
+}
+
+func (connector *SingleUseConnector) writeErrorToClient(err error) {
+	_ = connector.writeError(connector.clientBuff, protocolError(err))
 }
 
 func dataSourceName(connDetails *ConnectionDetails) string {

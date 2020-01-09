@@ -416,22 +416,17 @@ than master. Make sure your change to secretless considers this.
 
 1. If any dependencies have changed, for each changed dependency in assets/license_finder.txt you'll need to do the following:
 
-   - if it is a new dependency, add an approval to the dependency decisions fileusing the [LicenseFinder](https://github.com/Pivotal/LicenseFinder):
-     ```
-     docker run --rm \
-       -v $PWD:/scan \
-       licensefinder/license_finder \
-       /bin/bash -lc "
-         cd /scan && \
-         license_finder approvals add \
-           --decisions-file=assets/dependency_decisions.yml \
-           [DEPENDENCY] --version=[VERSION]"
-     ```
-
-   - update the [spreadsheet](https://cyberark365.sharepoint.com/:x:/s/Conjur/Edko_eT7CfpEuPxnnbIEfmAB4j2ybNozY9B8QAIDOxKynQ?e=CfP6ym) with the updated dependency info (add / edit / remove a row), including a link to the relevant license file
-
-   - prepare the revised NOTICES.txt by adding / removing / editing dependency
-     information
+   - Update the [dependency spreadsheet](https://cyberark365.sharepoint.com/:x:/s/Conjur/Edko_eT7CfpEuPxnnbIEfmAB4j2ybNozY9B8QAIDOxKynQ?e=CfP6ym).
+     Copy the most recent release's tab to a new tab for this new version. Use
+     the diff of `assets/license_finder.txt` to update the spreadsheet:
+     - For new dependencies, add a row to the spreadsheet. Make sure
+       a corresponding update is made to NOTICES.txt to add the dependency
+       and copyright.
+     - For dependencies whose version has changed, update the version and
+       license link in the spreadsheet. Be sure to also update the version and
+       copyright in NOTICES.txt.
+     - For dependencies that have been removed, delete the row from the
+       spreadsheet and remove the dependency / copyright from NOTICES.txt.
 
    If no dependencies have changed, you can move on to the next step.
 
@@ -442,7 +437,9 @@ than master. Make sure your change to secretless considers this.
 1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
    the changes included in the release.
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
-   for review.
+   for review. Your PR should include updates to `pkg/secretless/version.go`,
+   `CHANGELOG.md`, and if there are any license updates, to `NOTICES.txt` and
+   `assets/license_finder.txt`.
 
 ### Add a git tag
 1. Once your changes have been reviewed and merged into master, tag the version
@@ -462,7 +459,16 @@ should be officially marked as a `pre-release` (eg "non-production ready")
    to the GitHub release. The following artifacts should be uploaded to the release:
    - CHANGELOG.md
    - NOTICES.txt
+   - LICENSE
    - secretless-broker_{VERSION}_amd64.deb
    - secretless-broker_{VERSION}_amd64.rpm
+   - secretless-broker_{VERSION}_darwin_amd64.tar.gz
    - secretless-broker_{VERSION}_linux_amd64.tar.gz
    - SHA256SUMS.txt
+
+   You should also locally rename the `secretless-broker` binaries in the
+   `secretless-broker-{OS}_{GOOS}_{GOARCH}` dirs to `secretless-broker-{GOOS}`
+   and upload these to the release.
+1. Copy the `secretless-broker.rb` homebrew formula output by goreleaser
+   to the [homebrew formula for Secretless](https://github.com/cyberark/homebrew-tools/blob/master/secretless-broker.rb)
+   and submit a PR to update the version of Secretless available in brew.

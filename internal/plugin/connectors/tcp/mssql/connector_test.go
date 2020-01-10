@@ -2,6 +2,8 @@ package mssql
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net"
 	"testing"
 
@@ -9,7 +11,7 @@ import (
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
 	logmock "github.com/cyberark/secretless-broker/pkg/secretless/log/mock"
-	pluginconnector "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
+	pluginConnector "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/denisenkom/go-mssqldb"
 )
 
@@ -17,7 +19,7 @@ func TestHappyPath(t *testing.T) {
 	logger := logmock.NewLogger()
 	clientConn := mock.NewNetConn(nil)
 	expectedBackendConn := mock.NewNetConn(nil)
-	creds := pluginconnector.CredentialValuesByID{
+	creds := pluginConnector.CredentialValuesByID{
 		"credName": []byte("secret"),
 	}
 
@@ -53,6 +55,55 @@ func TestHappyPath(t *testing.T) {
 	}
 
 	assert.Equal(t, expectedBackendConn, actualBackendConn)
+}
+
+func TestWritePreloginFails(t *testing.T) {
+	logger := logmock.NewLogger()
+	clientConn := mock.NewNetConn(nil)
+	creds := pluginConnector.CredentialValuesByID{}
+
+	testError := "injected writePrelogin error"
+
+	failingWritePrelogin := func(
+		w io.ReadWriteCloser,
+		fields map[uint8][]byte,
+	) error {
+		return errors.New(testError)
+	}
+
+	ctor := mock.NewSuccessfulMSSQLConnectorCtor(
+		func(ctx context.Context) (net.Conn, error) {
+			interceptor := mssql.ConnectInterceptorFromContext(ctx)
+
+			interceptor.ServerPreLoginResponse <- map[uint8][]byte{ 0: {0, 0} }
+
+			<- interceptor.ClientLoginRequest
+
+			interceptor.ServerLoginResponse <- &mssql.LoginResponse{}
+
+			return nil, nil
+		},
+	)
+
+	connector := NewSingleUseConnectorWithOptions(
+		logger,
+		ctor,
+		mock.SuccessfulReadPreloginRequest,
+		failingWritePrelogin,
+		nil,
+		nil,
+		mock.WriteError,
+		mock.FakeTdsBufferCtor,
+	)
+
+	connector.readLoginRequest = mock.SuccessfulReadLoginRequest;
+	_, err := connector.Connect(clientConn, creds)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), testError)
+
+	output := clientConn.WriteHistory[0]
+	assert.Contains(t, string(output), testError)
 }
 /*
 Test cases not to forget

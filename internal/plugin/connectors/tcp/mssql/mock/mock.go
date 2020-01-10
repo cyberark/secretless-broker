@@ -50,7 +50,7 @@ func SuccessfulReadPreloginRequest(io.ReadWriteCloser) (map[uint8][]byte, error)
 	return nil, nil
 }
 
-// SuccessfulWritePreloginResponse is a double for a WritePreloginResponseFunc that always
+// SuccessfulWritePreloginResponse is a double for a WritePreloginFunc that always
 // succeeds.
 func SuccessfulWritePreloginResponse(io.ReadWriteCloser, map[uint8][]byte) error {
 	return nil
@@ -64,6 +64,13 @@ func SuccessfulReadLoginRequest(io.ReadWriteCloser) (*mssql.LoginRequest, error)
 // SuccessfulWriteLoginResponse is a double for a WriteLoginResponseFunc that always succeeds.
 func SuccessfulWriteLoginResponse(io.ReadWriteCloser, mssql.LoginResponse) error {
 	return nil
+}
+
+// WriteError is a mock for the WriteErrorFunc that writes a string representation
+// of an MSSQL Error to the client's net.Conn transport.
+func WriteError(r io.ReadWriteCloser, err mssql.Error) error {
+	_, writeErr := r.Write([]byte(err.Error()))
+	return writeErr
 }
 
 // SuccessfulWriteError is a double for a WriteErrorFunc that always succeeds.
@@ -82,12 +89,14 @@ func NewNetConn(errOnWrite error) *NetConn {
 //   sending an error fails.  Etc.
 type NetConn struct {
 	net.Conn
-	errOnWrite error
+	WriteHistory [][]byte
+	errOnWrite 	 error
 }
 
 // Write "writes" bytes to our fake net.Conn.
-func (n *NetConn) Write([]byte) (numBytes int, err error) {
-	return 1, n.errOnWrite
+func (n *NetConn) Write(output []byte) (numBytes int, err error) {
+		n.WriteHistory = append(n.WriteHistory, output)
+		return len(output), n.errOnWrite
 }
 
 // FakeTdsBufferCtor returns the ReadWriteCloser passed in.

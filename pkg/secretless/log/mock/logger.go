@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"fmt"
+
 	"github.com/stretchr/testify/mock"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
@@ -11,11 +13,13 @@ type LoggerMock struct {
 	mock.Mock
 	log.Logger
 	ReceivedCall chan struct{}
+	ErrorHistory []string
 }
 
 // Errorf mocks the method of the same name on the log.Logger interface
 func (l *LoggerMock) Errorf(format string, args ...interface{}) {
 	l.Called()
+	l.recordError(format, args)
 	l.ReceivedCall <- struct{}{}
 
 	return
@@ -73,6 +77,11 @@ func (l *LoggerMock) Panicf(string, ...interface{}) {}
 
 // Panicln mocks the method of the same name on the log.Logger interface
 func (l *LoggerMock) Panicln(...interface{}) {}
+
+func (l *LoggerMock) recordError(format string, args ...interface{}) {
+	err := fmt.Sprintf(format, args)
+	l.ErrorHistory = append(l.ErrorHistory, err)
+}
 
 // NewLogger creates a mock that conforms to the Secretless Logger interface
 func NewLogger() *LoggerMock {

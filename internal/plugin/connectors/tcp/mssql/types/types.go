@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
@@ -70,3 +71,18 @@ type WriteErrorFunc func(
 // return a real TdsBuffer (which _is_ a ReadWriteCloser), and so we've chosen a
 // name that reflects the production purpose.
 type TdsBufferCtor func(transport io.ReadWriteCloser) io.ReadWriteCloser
+
+// ConnectorOptions captures all the configuration options for a SingleUseConnector
+type ConnectorOptions struct {
+	Logger log.Logger
+	NewMSSQLConnector MSSQLConnectorCtor
+	ReadPreloginRequest ReadPreloginRequestFunc
+	WritePreloginResponse WritePreloginResponseFunc
+	ReadLoginRequest ReadLoginRequestFunc
+	WriteLoginRequest WriteLoginResponseFunc
+	WriteError WriteErrorFunc
+	NewTdsBuffer TdsBufferCtor
+}
+
+// ConnectorOption is the 'functional option' complement to ConnectorOptions
+type ConnectorOption func(*ConnectorOptions)

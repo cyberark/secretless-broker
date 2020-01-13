@@ -1,51 +1,43 @@
 package mssql
 
 import (
-	"context"
+	"errors"
+	"io"
 	"net"
 	"testing"
 
+	errorspkg "github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
-	logmock "github.com/cyberark/secretless-broker/pkg/secretless/log/mock"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	pluginconnector "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/denisenkom/go-mssqldb"
 )
 
-func TestHappyPath(t *testing.T) {
-	logger := logmock.NewLogger()
+func runDefaultTestConnect(
+	connector *SingleUseConnector,
+) (net.Conn, error) {
 	clientConn := mock.NewNetConn(nil)
-	expectedBackendConn := mock.NewNetConn(nil)
 	creds := pluginconnector.CredentialValuesByID{
 		"credName": []byte("secret"),
 	}
 
-	ctor := mock.NewSuccessfulMSSQLConnectorCtor(
-		func(ctx context.Context) (net.Conn, error) {
-			interceptor := mssql.ConnectInterceptorFromContext(ctx)
+	return connector.Connect(clientConn, creds)
+}
 
-			interceptor.ServerPreLoginResponse <- map[uint8][]byte{ 0: {0, 0} }
-
-			<- interceptor.ClientLoginRequest
-
-			interceptor.ServerLoginResponse <- &mssql.LoginResponse{}
-
-			return expectedBackendConn, nil
-		},
-	)
+func TestHappyPath(t *testing.T) {
+	expectedBackendConn := mock.NewNetConn(nil)
 
 	connector := NewSingleUseConnectorWithOptions(
-		logger,
-		ctor,
-		mock.SuccessfulReadPreloginRequest,
-		mock.SuccessfulWritePreloginResponse,
-		mock.SuccessfulReadLoginRequest,
-		mock.SuccessfulWriteLoginResponse,
-		mock.SuccessfulWriteError,
-		mock.FakeTdsBufferCtor,
+		mock.DefaultConnectorOptions(),
+		mock.MSSQLConnectorCtor(
+			func(options *mock.MSSQLConnectorCtorOptions) {
+				options.BackendConn = expectedBackendConn
+			},
+		),
 	)
-	actualBackendConn, err := connector.Connect(clientConn, creds)
+	actualBackendConn, err := runDefaultTestConnect(connector)
 
 	assert.Nil(t, err)
 	if err != nil {
@@ -54,6 +46,53 @@ func TestHappyPath(t *testing.T) {
 
 	assert.Equal(t, expectedBackendConn, actualBackendConn)
 }
+
+func TestReadLoginSucceeds(t *testing.T) {
+	// login request returned from ReadLogin
+	expectedLoginRequest := &mssql.LoginRequest{}
+	expectedLoginRequest.Database = "test-database"
+	expectedLoginRequest.AppName = "test-app-name"
+
+	// actual login request available to Connect via context
+	var actualLoginRequest *mssql.LoginRequest
+
+	connector := NewSingleUseConnectorWithOptions(
+		mock.DefaultConnectorOptions(),
+		func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.ReadLoginRequest = func(r io.ReadWriteCloser) (*mssql.LoginRequest, error) {
+				return expectedLoginRequest, nil
+			}
+		},
+		mock.MSSQLConnectorCtor(
+			func(opt *mock.MSSQLConnectorCtorOptions) {
+				opt.ClientLoginRequestPtr = &actualLoginRequest
+			},
+		),
+	)
+
+	_, _ = runDefaultTestConnect(connector)
+
+	assert.Equal(t, actualLoginRequest, expectedLoginRequest)
+}
+
+func TestReadLoginFails(t *testing.T) {
+	// error returned from ReadLogin
+	expectedErr := errors.New("test error")
+
+	connector := NewSingleUseConnectorWithOptions(
+		mock.DefaultConnectorOptions(),
+		mock.MSSQLConnectorCtor(
+			func(opt *mock.MSSQLConnectorCtorOptions) {
+				opt.Err = expectedErr
+			},
+		),
+	)
+
+	_, actualError := runDefaultTestConnect(connector)
+
+	assert.Equal(t, expectedErr, errorspkg.Cause(actualError))
+}
+
 /*
 Test cases not to forget
 

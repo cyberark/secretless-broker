@@ -46,18 +46,34 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 			}),
 		)
 	})
+
 	t.Run("singleUseConnector#WritePreloginResponse succeeds", func(t *testing.T) {
-		// expected prelogin response returned from server
-		expectedPreLoginResponse := map[uint8][]byte {
-			1: {2,3,4},
+
+		// The fields we should get back from inside the mssql.Connect method
+		fakePreLoginResponse := map[uint8][]byte{
+			mssql.PreloginVERSION:    {0, 0, 0, 0, 0, 0},
+			mssql.PreloginENCRYPTION: {mssql.EncryptOn},
+			mssql.PreloginINSTOPT:    {0},
+			mssql.PreloginTHREADID:   {0, 0, 0, 0},
+			mssql.PreloginMARS:       {0}, // MARS disabled
 		}
 
-		// actual prelogin response passed as args to WritePreloginResponse
+		// The fields we should be sending to the client
+		expectedPreLoginResponse := map[uint8][]byte{
+			mssql.PreloginVERSION:    {0, 0, 0, 0, 0, 0},
+			mssql.PreloginENCRYPTION: {mssql.EncryptNotSup},
+			mssql.PreloginINSTOPT:    {0},
+			mssql.PreloginTHREADID:   {0, 0, 0, 0},
+			mssql.PreloginMARS:       {0}, // MARS disabled
+		}
+
+		// The fields we actually receive after modifying them
 		var actualPreLoginResponse map[uint8][]byte
+
 		var actualClient io.ReadWriteCloser
 
-		connector := NewSingleUseConnectorWithOptions(
-			mock.DefaultConnectorOptions(),
+		connector := newSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions,
 			func(connectorOptions *types.ConnectorOptions) {
 				connectorOptions.WritePreloginResponse = func(
 					w io.ReadWriteCloser,
@@ -65,13 +81,12 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 				) error {
 					actualClient = w
 					actualPreLoginResponse = fields
-
 					return nil
 				}
 			},
 			mock.MSSQLConnectorCtor(
 				func(opt *mock.MSSQLConnectorCtorOptions) {
-					opt.ServerPreloginResponse = expectedPreLoginResponse
+					opt.ServerPreloginResponse = fakePreLoginResponse
 				},
 			),
 		)
@@ -85,10 +100,110 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 	})
 
 	t.Run("singleUseConnector#WritePreloginResponse fails", func(t *testing.T) {
-		methodFails(t, func(connectorOptions *types.ConnectorOptions) {
+		var methodFailsExpectedErr = errors.New("failed to write prelogin response to client")
+
+		methodFails(t, methodFailsExpectedErr, func(connectorOptions *types.ConnectorOptions) {
 			connectorOptions.WritePreloginResponse = func(
 				io.ReadWriteCloser,
 				map[uint8][]byte,
+			) error {
+				return methodFailsExpectedErr
+			}
+		})
+	})
+
+	t.Run("singleUseConnector#ReadLoginRequest succeeds", func(t *testing.T) {
+		// expected login request returned from ReadLoginRequest
+		expectedLoginRequest := &mssql.LoginRequest{}
+		expectedLoginRequest.Database = "test-database"
+		expectedLoginRequest.AppName = "test-app-name"
+
+		// actual login request sent to Connect via context
+		var actualLoginRequest *mssql.LoginRequest
+		var actualClient io.ReadWriteCloser
+
+		connector := newSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions,
+			func(connectorOptions *types.ConnectorOptions) {
+				connectorOptions.ReadLoginRequest = func(r io.ReadWriteCloser) (*mssql.LoginRequest, error) {
+					actualClient = r
+					return expectedLoginRequest, nil
+				}
+			},
+			mock.MSSQLConnectorCtor(
+				func(opt *mock.MSSQLConnectorCtorOptions) {
+					opt.ClientLoginRequestPtr = &actualLoginRequest
+				},
+			),
+		)
+
+		_, _ = runDefaultTestConnect(connector)
+		expectedClient := connector.clientConn
+
+		assert.Equal(t, actualLoginRequest, expectedLoginRequest)
+		// confirm that ReadLoginRequest is called with the client connection
+		assert.Equal(t, expectedClient, actualClient)
+	})
+
+	t.Run("singleUseConnector#ReadLoginRequest fail", func(t *testing.T) {
+		var methodFailsExpectedErr = errors.New("failed to handle login from client")
+
+		methodFails(t, methodFailsExpectedErr, func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.ReadLoginRequest = func(
+				r io.ReadWriteCloser,
+			) (request *mssql.LoginRequest, e error) {
+				return nil, methodFailsExpectedErr
+			}
+		})
+	})
+
+	t.Run("singleUseConnector#WriteLoginResponse succeeds", func(t *testing.T) {
+		// expected login response returned from server
+		expectedLoginResponse := &mssql.LoginResponse{}
+		expectedLoginResponse.Interface = 23
+		expectedLoginResponse.ProgName = "test-progname"
+		expectedLoginResponse.ProgVer = 01
+		expectedLoginResponse.TDSVersion = 12
+
+		// actual login response passed as args to WriteLoginResponse
+		var actualLoginResponse *mssql.LoginResponse
+		var actualClient io.ReadWriteCloser
+
+		connector := newSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions,
+			func(connectorOptions *types.ConnectorOptions) {
+				connectorOptions.WriteLoginResponse = func(
+					w io.ReadWriteCloser,
+					loginRes *mssql.LoginResponse,
+				) error {
+					actualClient = w
+					actualLoginResponse = loginRes
+					return nil
+				}
+			},
+			mock.MSSQLConnectorCtor(
+				func(opt *mock.MSSQLConnectorCtorOptions) {
+					opt.ServerLoginResponse = expectedLoginResponse
+				},
+			),
+		)
+
+		_, _ = runDefaultTestConnect(connector)
+		expectedClient := connector.clientConn
+
+		assert.Equal(t, actualLoginResponse, expectedLoginResponse)
+		// confirm that WriteLoginResponse is called with the client connection
+		assert.Equal(t, expectedClient, actualClient)
+	})
+
+	t.Run("singleUseConnector#WriteLoginResponse fails", func(t *testing.T) {
+		var methodFailsExpectedErr = errors.New("failed to send a successful" +
+			"authentication response to client")
+
+		methodFails(t, methodFailsExpectedErr, func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.WriteLoginResponse = func(
+				w io.ReadWriteCloser,
+				loginRes *mssql.LoginResponse,
 			) error {
 				return methodFailsExpectedErr
 			}

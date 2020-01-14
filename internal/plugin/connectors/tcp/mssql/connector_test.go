@@ -1,59 +1,108 @@
 package mssql
 
 import (
-	"context"
+	"errors"
+	"io"
 	"net"
 	"testing"
 
+	errorspkg "github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
-	logmock "github.com/cyberark/secretless-broker/pkg/secretless/log/mock"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	pluginconnector "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/denisenkom/go-mssqldb"
 )
 
-func TestHappyPath(t *testing.T) {
-	logger := logmock.NewLogger()
+func TestSingleUseConnector_Connect(t *testing.T) {
+	t.Run("singleUseConnector.driver#Connect success", func(t *testing.T) {
+		expectedBackendConn := mock.NewNetConn(nil)
+
+		connector := NewSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions(),
+			mock.MSSQLConnectorCtor(
+				func(options *mock.MSSQLConnectorCtorOptions) {
+					options.BackendConn = expectedBackendConn
+				},
+			),
+		)
+		actualBackendConn, err := runDefaultTestConnect(connector)
+
+		assert.Nil(t, err)
+		if err != nil {
+			return
+		}
+
+		assert.Equal(t, expectedBackendConn, actualBackendConn)
+	})
+
+	t.Run("singleUseConnector.driver#Connect fail", func(t *testing.T) {
+		methodFails(t, mock.MSSQLConnectorCtor(
+			func(ctorOptions *mock.MSSQLConnectorCtorOptions) {
+				ctorOptions.Err = methodFailsExpectedErr
+			}),
+		)
+	})
+}
+// Test helpers
+//
+
+// runDefaultTestConnect passes in default values to the Connect method of a connector.
+// This helps avoid boilerplate
+func runDefaultTestConnect(
+	connector *SingleUseConnector,
+) (net.Conn, error) {
 	clientConn := mock.NewNetConn(nil)
-	expectedBackendConn := mock.NewNetConn(nil)
 	creds := pluginconnector.CredentialValuesByID{
 		"credName": []byte("secret"),
 	}
 
-	ctor := mock.NewSuccessfulMSSQLConnectorCtor(
-		func(ctx context.Context) (net.Conn, error) {
-			interceptor := mssql.ConnectInterceptorFromContext(ctx)
+	return connector.Connect(clientConn, creds)
+}
 
-			interceptor.ServerPreLoginResponse <- map[uint8][]byte{ 0: {0, 0} }
+// methodFailsExpectedErr is the error value used inside methodFails
+var methodFailsExpectedErr = errors.New("failed for the test")
 
-			<- interceptor.ClientLoginRequest
+// methodFails checks that the expected error is present in:
+// 1. the error returned from the call to the Connect method
+// 2. the error propagated to the client
+func methodFails(
+	t *testing.T,
+	connectorOption types.ConnectorOption,
+) {
+	var actualClientErr error
+	var actualClient io.ReadWriteCloser
+	var actualErr error
 
-			interceptor.ServerLoginResponse <- &mssql.LoginResponse{}
-
-			return expectedBackendConn, nil
-		},
-	)
+	// expected error on method
+	expectedErr := methodFailsExpectedErr
 
 	connector := NewSingleUseConnectorWithOptions(
-		logger,
-		ctor,
-		mock.SuccessfulReadPreloginRequest,
-		mock.SuccessfulWritePreloginResponse,
-		mock.SuccessfulReadLoginRequest,
-		mock.SuccessfulWriteLoginResponse,
-		mock.SuccessfulWriteError,
-		mock.FakeTdsBufferCtor,
+		mock.DefaultConnectorOptions(),
+		func(connectorOptions *types.ConnectorOptions) {
+			// error should always be written to client
+			connectorOptions.WriteError = func(w io.ReadWriteCloser, err mssql.Error) error {
+				actualClient = w
+				actualClientErr = err
+				return nil
+			}
+		},
+		connectorOption,
 	)
-	actualBackendConn, err := connector.Connect(clientConn, creds)
 
-	assert.Nil(t, err)
-	if err != nil {
-		return
-	}
+	_, actualErr = runDefaultTestConnect(connector)
+	expectedClient := connector.clientConn
 
-	assert.Equal(t, expectedBackendConn, actualBackendConn)
+	// confirms error returned by #Connect contains expected error
+	assert.Equal(t, expectedErr, errorspkg.Cause(actualErr))
+	// confirms that errors are always written to the client and not something else
+	assert.Equal(t, expectedClient, actualClient)
+	// confirms error written to client contains expected error
+	// actualClientErr can be anything but it should contain the expected error
+	assert.Contains(t, actualClientErr.Error(), expectedErr.Error())
 }
+
 /*
 Test cases not to forget
 

@@ -219,6 +219,8 @@ func (connector *SingleUseConnector) Connect(
 	}
 
 	// Prepare connection details from the client, formatted for MSSQL
+	// TODO: find out if it is possible to send errors during prelogin-phase
+	// TODO: send error to client on failed credential validation
 	connDetails := NewConnectionDetails(credentialValuesByID)
 
 	// Create a new MSSQL connector

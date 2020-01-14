@@ -78,9 +78,9 @@ func MSSQLConnectorCtor(setters ...MSSQLConnectorCtorOption) types.ConnectorOpti
 // DefaultConnectorOptions returns a setter that will set ConnectorOptions to
 // mocks that result in success.
 func DefaultConnectorOptions() types.ConnectorOption {
-	return func(args *types.ConnectorOptions) {
-		args.Logger = logmock.NewLogger()
-		args.NewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
+	return func(connectOptions *types.ConnectorOptions) {
+		connectOptions.Logger = logmock.NewLogger()
+		connectOptions.NewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
 			func(ctx context.Context) (net.Conn, error) {
 				interceptor := mssql.ConnectInterceptorFromContext(ctx)
 
@@ -93,11 +93,11 @@ func DefaultConnectorOptions() types.ConnectorOption {
 				return NewNetConn(nil), nil
 			},
 		)
-		args.ReadPreloginRequest = SuccessfulReadPreloginRequest
-		args.WritePreloginResponse = SuccessfulWritePreloginResponse
-		args.ReadLoginRequest = SuccessfulReadLoginRequest
-		args.WriteLoginResponse = SuccessfulWriteLoginResponse
-		args.WriteError = SuccessfulWriteError
-		args.NewTdsBuffer = FakeTdsBufferCtor
+		connectOptions.ReadPreloginRequest = SuccessfulReadPreloginRequest
+		connectOptions.WritePreloginResponse = SuccessfulWritePreloginResponse
+		connectOptions.ReadLoginRequest = SuccessfulReadLoginRequest
+		connectOptions.WriteLoginResponse = SuccessfulWriteLoginResponse
+		connectOptions.WriteError = SuccessfulWriteError
+		connectOptions.NewTdsBuffer = FakeTdsBufferCtor
 	}
 }

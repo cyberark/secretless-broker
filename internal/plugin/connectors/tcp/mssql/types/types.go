@@ -52,7 +52,7 @@ type ReadLoginRequestFunc func(r io.ReadWriteCloser) (*mssql.LoginRequest, error
 // packet.  The production version is implemented by mssql.WriteLoginResponse.
 type WriteLoginResponseFunc func(
 	w io.ReadWriteCloser,
-	loginRes mssql.LoginResponse,
+	loginRes *mssql.LoginResponse,
 ) error
 
 // WriteErrorFunc defines the type of the func that writes an error packet. The production
@@ -74,14 +74,14 @@ type TdsBufferCtor func(transport io.ReadWriteCloser) io.ReadWriteCloser
 
 // ConnectorOptions captures all the configuration options for a SingleUseConnector
 type ConnectorOptions struct {
-	Logger log.Logger
-	NewMSSQLConnector MSSQLConnectorCtor
-	ReadPreloginRequest ReadPreloginRequestFunc
+	Logger                log.Logger
+	NewMSSQLConnector     MSSQLConnectorCtor
+	ReadPreloginRequest   ReadPreloginRequestFunc
 	WritePreloginResponse WritePreloginResponseFunc
-	ReadLoginRequest ReadLoginRequestFunc
-	WriteLoginRequest WriteLoginResponseFunc
-	WriteError WriteErrorFunc
-	NewTdsBuffer TdsBufferCtor
+	ReadLoginRequest      ReadLoginRequestFunc
+	WriteLoginResponse    WriteLoginResponseFunc
+	WriteError            WriteErrorFunc
+	NewTdsBuffer          TdsBufferCtor
 }
 
 // ConnectorOption is the 'functional option' complement to ConnectorOptions

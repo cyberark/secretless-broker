@@ -15,17 +15,6 @@ import (
 	"github.com/denisenkom/go-mssqldb"
 )
 
-func runDefaultTestConnect(
-	connector *SingleUseConnector,
-) (net.Conn, error) {
-	clientConn := mock.NewNetConn(nil)
-	creds := pluginconnector.CredentialValuesByID{
-		"credName": []byte("secret"),
-	}
-
-	return connector.Connect(clientConn, creds)
-}
-
 func TestHappyPath(t *testing.T) {
 	expectedBackendConn := mock.NewNetConn(nil)
 
@@ -47,19 +36,43 @@ func TestHappyPath(t *testing.T) {
 	assert.Equal(t, expectedBackendConn, actualBackendConn)
 }
 
-func TestReadLoginSucceeds(t *testing.T) {
+func TestProductionReadLoginRequest(t *testing.T) {
+	// production version of ReadLoginRequest
+	var readLogin types.ReadLoginRequestFunc = mssql.ReadLoginRequest
+
+	// expected login request available from net.Conn passed to ReadLogin
+	expectedLoginRequest := &mssql.LoginRequest{}
+	expectedLoginRequest.AppName = "test-app-name"
+	expectedLoginRequest.UserName = "test-user-name"
+	expectedLoginRequest.Database = "test-database"
+	expectedLoginRequest.SSPI = []uint8{}
+
+	r, w := net.Pipe()
+	go func() {
+		_ = mssql.WriteLoginRequest(w, expectedLoginRequest)
+	}()
+
 	// login request returned from ReadLogin
+	actualLoginRequest, _ := readLogin(r)
+
+	assert.Equal(t, actualLoginRequest, expectedLoginRequest)
+}
+
+func TestReadLoginRequestSucceeds(t *testing.T) {
+	// expected login request returned from ReadLogin
 	expectedLoginRequest := &mssql.LoginRequest{}
 	expectedLoginRequest.Database = "test-database"
 	expectedLoginRequest.AppName = "test-app-name"
 
-	// actual login request available to Connect via context
+	// actual login request sent to Connect via context
 	var actualLoginRequest *mssql.LoginRequest
+	var actualClient io.ReadWriteCloser
 
 	connector := NewSingleUseConnectorWithOptions(
 		mock.DefaultConnectorOptions(),
 		func(connectorOptions *types.ConnectorOptions) {
 			connectorOptions.ReadLoginRequest = func(r io.ReadWriteCloser) (*mssql.LoginRequest, error) {
+				actualClient = r
 				return expectedLoginRequest, nil
 			}
 		},
@@ -71,26 +84,191 @@ func TestReadLoginSucceeds(t *testing.T) {
 	)
 
 	_, _ = runDefaultTestConnect(connector)
+	expectedClient := connector.clientConn
 
 	assert.Equal(t, actualLoginRequest, expectedLoginRequest)
+	// confirm that ReadLoginRequest is called with the client connection
+	assert.Equal(t, expectedClient, actualClient)
 }
 
-func TestReadLoginFails(t *testing.T) {
-	// error returned from ReadLogin
-	expectedErr := errors.New("test error")
+func TestReadLoginRequestFails(t *testing.T) {
+	methodFails(t, func(connectorOptions *types.ConnectorOptions) {
+		connectorOptions.ReadLoginRequest = func(
+			r io.ReadWriteCloser,
+		) (request *mssql.LoginRequest, e error) {
+			return nil, methodFailsExpectedErr
+		}
+	})
+}
+
+func TestProductionWriteLoginResponse(t *testing.T) {
+	// production version of WriteLoginResponse
+	var writeLoginResponse types.WriteLoginResponseFunc = mssql.WriteLoginResponse
+
+	// expected login request available from net.Conn passed to ReadLogin
+	expectedLoginResponse := &mssql.LoginResponse{}
+	expectedLoginResponse.Interface = 23
+	expectedLoginResponse.ProgName = "test-progname"
+	expectedLoginResponse.ProgVer = 01
+	expectedLoginResponse.TDSVersion = 12
+
+	r, w := net.Pipe()
+	go func() {
+		writeLoginResponse(w, expectedLoginResponse)
+	}()
+
+	// login response returned from ReadLoginResponse
+	actualLoginResponse, err := mssql.ReadLoginResponse(r)
+	assert.Nil(t, err)
+	if err != nil {
+		return
+	}
+
+	assert.Equal(t, expectedLoginResponse, actualLoginResponse)
+}
+
+func TestWriteLoginResponseArgs(t *testing.T) {
+	// expected login response returned from server
+	expectedLoginResponse := &mssql.LoginResponse{}
+	expectedLoginResponse.Interface = 23
+	expectedLoginResponse.ProgName = "test-progname"
+	expectedLoginResponse.ProgVer = 01
+	expectedLoginResponse.TDSVersion = 12
+
+	// actual login response passed as args to WriteLoginResponse
+	var actualLoginResponse *mssql.LoginResponse
+	var actualClient io.ReadWriteCloser
 
 	connector := NewSingleUseConnectorWithOptions(
 		mock.DefaultConnectorOptions(),
+		func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.WriteLoginResponse = func(
+				w io.ReadWriteCloser,
+				loginRes *mssql.LoginResponse,
+			) error {
+				actualClient = w
+				actualLoginResponse = loginRes
+				return nil
+			}
+		},
 		mock.MSSQLConnectorCtor(
 			func(opt *mock.MSSQLConnectorCtorOptions) {
-				opt.Err = expectedErr
+				opt.ServerLoginResponse = expectedLoginResponse
 			},
 		),
 	)
 
-	_, actualError := runDefaultTestConnect(connector)
+	_, _ = runDefaultTestConnect(connector)
+	expectedClient := connector.clientConn
 
-	assert.Equal(t, expectedErr, errorspkg.Cause(actualError))
+	assert.Equal(t, actualLoginResponse, expectedLoginResponse)
+	// confirm that WriteLoginResponse is called with the client connection
+	assert.Equal(t, expectedClient, actualClient)
+}
+
+func TestWriteLoginResponseFails(t *testing.T) {
+	methodFails(t, func(connectorOptions *types.ConnectorOptions) {
+		connectorOptions.WriteLoginResponse = func(
+			w io.ReadWriteCloser,
+			loginRes *mssql.LoginResponse,
+		) error {
+			return methodFailsExpectedErr
+		}
+	})
+}
+
+func TestProductionWriteErr(t *testing.T) {
+	// production version of WriteError
+	var writeError types.WriteErrorFunc = mssql.WriteError72
+
+	// expected error
+	expectedErr := mssql.Error{
+		Number:     1,
+		State:      2,
+		Class:      3,
+		Message:    "test-message",
+		ServerName: "test-server-name",
+		ProcName:   "test-proc-name",
+		LineNo:     4,
+	}
+
+	// expected login request available from net.Conn passed to ReadLogin
+	expectedLoginResponse := &mssql.LoginResponse{}
+	expectedLoginResponse.Interface = 23
+	expectedLoginResponse.ProgName = "test-progname"
+	expectedLoginResponse.ProgVer = 01
+	expectedLoginResponse.TDSVersion = 12
+
+	r, w := net.Pipe()
+	go func() {
+		writeError(w, expectedErr)
+	}()
+
+	// production read error
+	actualErr, err := mssql.ReadError(r)
+	assert.Nil(t, err)
+	if err != nil {
+		return
+	}
+
+	assert.Contains(t, actualErr.Error(), expectedErr.Error())
+}
+
+// Test helpers
+//
+
+// runDefaultTestConnect passes in default values to the Connect method of a connector.
+// This helps avoid boilerplate
+func runDefaultTestConnect(
+	connector *SingleUseConnector,
+) (net.Conn, error) {
+	clientConn := mock.NewNetConn(nil)
+	creds := pluginconnector.CredentialValuesByID{
+		"credName": []byte("secret"),
+	}
+
+	return connector.Connect(clientConn, creds)
+}
+
+// methodFails checks that the expected error is present in:
+// 1. the error returned from the call to the Connect method
+// 2. the error propagated to the client
+var methodFailsExpectedErr = errors.New("failed for the test")
+
+func methodFails(
+	t *testing.T,
+	connectorOption types.ConnectorOption,
+) {
+	var actualClientErr error
+	var actualClient io.ReadWriteCloser
+	var actualErr error
+
+	// expected error on method
+	expectedErr := methodFailsExpectedErr
+
+	connector := NewSingleUseConnectorWithOptions(
+		mock.DefaultConnectorOptions(),
+		func(connectorOptions *types.ConnectorOptions) {
+			// error should always be written to client
+			connectorOptions.WriteError = func(w io.ReadWriteCloser, err mssql.Error) error {
+				actualClient = w
+				actualClientErr = err
+				return nil
+			}
+		},
+		connectorOption,
+	)
+
+	_, actualErr = runDefaultTestConnect(connector)
+	expectedClient := connector.clientConn
+
+	// confirms error returned by #Connect contains expected error
+	assert.Equal(t, expectedErr, errorspkg.Cause(actualErr))
+	// confirms that errors are always written to the client and not something else
+	assert.Equal(t, expectedClient, actualClient)
+	// confirms error written to client contains expected error
+	// actualClientErr can be anything but it should contain the expected error
+	assert.Contains(t, actualClientErr.Error(), expectedErr.Error())
 }
 
 /*

@@ -96,7 +96,7 @@ func DefaultConnectorOptions() types.ConnectorOption {
 		args.ReadPreloginRequest = SuccessfulReadPreloginRequest
 		args.WritePreloginResponse = SuccessfulWritePreloginResponse
 		args.ReadLoginRequest = SuccessfulReadLoginRequest
-		args.WriteLoginRequest = SuccessfulWriteLoginResponse
+		args.WriteLoginResponse = SuccessfulWriteLoginResponse
 		args.WriteError = SuccessfulWriteError
 		args.NewTdsBuffer = FakeTdsBufferCtor
 	}

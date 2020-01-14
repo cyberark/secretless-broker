@@ -121,7 +121,7 @@ func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 		opt.ReadPreloginRequest = mssql.ReadPreloginRequest
 		opt.WritePreloginResponse = mssql.WritePreloginResponse
 		opt.ReadLoginRequest = mssql.ReadLoginRequest
-		opt.WriteLoginRequest = mssql.WriteLoginResponse
+		opt.WriteLoginResponse = mssql.WriteLoginResponse
 		opt.WriteError = mssql.WriteError72
 		// NewIdempotentDefaultTdsBuffer is wrapped so that it conforms to the
 		// types.TdsBufferCtor func signature
@@ -153,13 +153,13 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 // you to specify the newMSSQLConnector explicitly.  Intended to be used in unit
 // tests only.
 func NewSingleUseConnectorWithOptions(
-	setters ...types.ConnectorOption,
+	options ...types.ConnectorOption,
 ) *SingleUseConnector {
 	// Default Options
 	args := &types.ConnectorOptions{}
 
-	for _, setter := range setters {
-		setter(args)
+	for _, option := range options {
+		option(args)
 	}
 
 	return &SingleUseConnector{
@@ -168,7 +168,7 @@ func NewSingleUseConnectorWithOptions(
 		readPreloginRequest:   args.ReadPreloginRequest,
 		writePreloginResponse: args.WritePreloginResponse,
 		readLoginRequest:      args.ReadLoginRequest,
-		writeLoginResponse:    args.WriteLoginRequest,
+		writeLoginResponse:    args.WriteLoginResponse,
 		writeError:            args.WriteError,
 		newTdsBuffer:          args.NewTdsBuffer,
 	}
@@ -262,7 +262,7 @@ func (connector *SingleUseConnector) Connect(
 		return nil, err
 	}
 
-	if err = connector.writeLoginResponse(connector.clientBuff, *loginResp); err != nil {
+	if err = connector.writeLoginResponse(connector.clientBuff, loginResp); err != nil {
 		wrappedError := errors.Wrap(
 			err,
 			"failed to send a successful authentication response to client",

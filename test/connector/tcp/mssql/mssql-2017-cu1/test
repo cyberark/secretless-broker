@@ -1,12 +1,3 @@
 #!/bin/bash -e
 
-# Automatically detect if we're devmode based on the existence
-# of the secretless-dev container.  We assume that you started
-# your workflow using `./dev` if you are developing, and this
-# command will use the secretless-dev container.
-secretless_host="secretless-2017-cu1"
-if [[ ! -z $(docker-compose ps -q secretless-2017-cu1-dev) ]]; then
-  secretless_host=secretless-2017-cu1-dev
-fi
-
-../test -s $secretless_host
+../test

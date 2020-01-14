@@ -9,6 +9,7 @@ services:
       # This hardcoded password must match the one in secretless.yml.
       SA_PASSWORD: "yourStrong()Password"
       ACCEPT_EULA: Y
+      MSSQL_PID:
 
   secretless:
     image: secretless-broker

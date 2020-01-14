@@ -1,55 +1,6 @@
 #!/bin/bash -e
 
-while getopts :s: opt; do
-    case $opt in
-        s) SECRETLESS_HOST=${OPTARG};;
-       \?) echo "Unknown option -$OPTARG"; exit 1;;
-    esac
-done
-# If the secretless host is not explicitly set on the command line,
-# then use the default names (either secretless or secretless-dev)
-# for the secretless host. Automatically detect if we're devmode
-# based on the existence of the secretless-dev container.  We assume
-# that you started your workflow using `./dev` if you are developing,
-# and this command will use the secretless-dev container.
-if [[ -z $SECRETLESS_HOST ]]; then
-  export SECRETLESS_HOST=secretless
-  if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
-    SECRETLESS_HOST=secretless-dev
-  fi
-fi
+echo -e "\nRunning tests\n"
 
-echo "Waiting for '$SECRETLESS_HOST' service to start"
-
-# single quotes are intentional:
-# shellcheck disable=SC2016
-docker-compose run --rm --no-deps test bash -ec '
-counter=0
-while ! wget --quiet --output-document - http://'$SECRETLESS_HOST':5335/ready > /dev/null 2>&1; do
-    if expr $counter = 5 > /dev/null; then
-      echo ""
-      echo "Timed out waiting for Secretless"
-      exit 1
-    fi
-    let "counter=$counter+1"
-    >&2 printf ". "
-    sleep 1
-done
-printf "\n"
-'
-
-echo "'$SECRETLESS_HOST' service is up - continuing "
-echo ""
-echo "Running tests"
-echo ""
-
-docker-compose run \
-  -e SECRETLESS_HOST="$SECRETLESS_HOST" \
-  --rm \
-  --no-deps \
+docker-compose exec -T \
   test bash -c "go test -v ./test/connector/tcp/mssql"
-
-# print secretless logs after tests run
-ret=$?
-docker-compose logs $SECRETLESS_HOST
-exit $ret

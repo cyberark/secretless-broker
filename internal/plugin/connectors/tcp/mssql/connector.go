@@ -115,20 +115,20 @@ type SingleUseConnector struct {
 // This uses the production version of the dependencies, which delegate to the actual 3rd
 // party driver.
 func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
-	return NewSingleUseConnectorWithOptions(
-		logger,
-		NewMSSQLConnector,
-		mssql.ReadPreloginRequest,
-		mssql.WritePreloginResponse,
-		mssql.ReadLoginRequest,
-		mssql.WriteLoginResponse,
-		mssql.WriteError72,
+	return NewSingleUseConnectorWithOptions(func(opt *types.ConnectorOptions) {
+		opt.Logger = logger
+		opt.NewMSSQLConnector = NewMSSQLConnector
+		opt.ReadPreloginRequest = mssql.ReadPreloginRequest
+		opt.WritePreloginResponse = mssql.WritePreloginResponse
+		opt.ReadLoginRequest = mssql.ReadLoginRequest
+		opt.WriteLoginResponse = mssql.WriteLoginResponse
+		opt.WriteError = mssql.WriteError72
 		// NewIdempotentDefaultTdsBuffer is wrapped so that it conforms to the
 		// types.TdsBufferCtor func signature
-		func(transport io.ReadWriteCloser) io.ReadWriteCloser {
+		opt.NewTdsBuffer = func(transport io.ReadWriteCloser) io.ReadWriteCloser {
 			return mssql.NewIdempotentDefaultTdsBuffer(transport)
-		},
-	)
+		}
+	})
 }
 
 // NewMSSQLConnector is the production implementation of MSSQLConnectorCtor,
@@ -153,24 +153,24 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 // you to specify the newMSSQLConnector explicitly.  Intended to be used in unit
 // tests only.
 func NewSingleUseConnectorWithOptions(
-	logger log.Logger,
-	newMSSQLConnector types.MSSQLConnectorCtor,
-	readPreloginRequest types.ReadPreloginRequestFunc,
-	writePreloginResponse types.WritePreloginResponseFunc,
-	readLoginRequest types.ReadLoginRequestFunc,
-	writeLoginRequest types.WriteLoginResponseFunc,
-	writeError types.WriteErrorFunc,
-	newTdsBuffer types.TdsBufferCtor,
+	options ...types.ConnectorOption,
 ) *SingleUseConnector {
+	// Default Options
+	args := &types.ConnectorOptions{}
+
+	for _, option := range options {
+		option(args)
+	}
+
 	return &SingleUseConnector{
-		logger:                logger,
-		newMSSQLConnector:     newMSSQLConnector,
-		readPreloginRequest:   readPreloginRequest,
-		writePreloginResponse: writePreloginResponse,
-		readLoginRequest:      readLoginRequest,
-		writeLoginResponse:    writeLoginRequest,
-		writeError:            writeError,
-		newTdsBuffer:          newTdsBuffer,
+		logger:                args.Logger,
+		newMSSQLConnector:     args.NewMSSQLConnector,
+		readPreloginRequest:   args.ReadPreloginRequest,
+		writePreloginResponse: args.WritePreloginResponse,
+		readLoginRequest:      args.ReadLoginRequest,
+		writeLoginResponse:    args.WriteLoginResponse,
+		writeError:            args.WriteError,
+		newTdsBuffer:          args.NewTdsBuffer,
 	}
 }
 
@@ -219,6 +219,8 @@ func (connector *SingleUseConnector) Connect(
 	}
 
 	// Prepare connection details from the client, formatted for MSSQL
+	// TODO: find out if it is possible to send errors during prelogin-phase
+	// TODO: send error to client on failed credential validation
 	connDetails := NewConnectionDetails(credentialValuesByID)
 
 	// Create a new MSSQL connector
@@ -262,7 +264,7 @@ func (connector *SingleUseConnector) Connect(
 		return nil, err
 	}
 
-	if err = connector.writeLoginResponse(connector.clientBuff, *loginResp); err != nil {
+	if err = connector.writeLoginResponse(connector.clientBuff, loginResp); err != nil {
 		wrappedError := errors.Wrap(
 			err,
 			"failed to send a successful authentication response to client",

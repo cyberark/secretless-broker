@@ -46,6 +46,54 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 			}),
 		)
 	})
+	t.Run("singleUseConnector#WritePreloginResponse succeeds", func(t *testing.T) {
+		// expected prelogin response returned from server
+		expectedPreLoginResponse := map[uint8][]byte {
+			1: {2,3,4},
+		}
+
+		// actual prelogin response passed as args to WritePreloginResponse
+		var actualPreLoginResponse map[uint8][]byte
+		var actualClient io.ReadWriteCloser
+
+		connector := NewSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions(),
+			func(connectorOptions *types.ConnectorOptions) {
+				connectorOptions.WritePreloginResponse = func(
+					w io.ReadWriteCloser,
+					fields map[uint8][]byte,
+				) error {
+					actualClient = w
+					actualPreLoginResponse = fields
+
+					return nil
+				}
+			},
+			mock.MSSQLConnectorCtor(
+				func(opt *mock.MSSQLConnectorCtorOptions) {
+					opt.ServerPreloginResponse = expectedPreLoginResponse
+				},
+			),
+		)
+
+		_, _ = runDefaultTestConnect(connector)
+		expectedClient := connector.clientConn
+
+		assert.Equal(t, actualPreLoginResponse, expectedPreLoginResponse)
+		// confirm that WritePreloginResponse is called with the client connection
+		assert.Equal(t, expectedClient, actualClient)
+	})
+
+	t.Run("singleUseConnector#WritePreloginResponse fails", func(t *testing.T) {
+		methodFails(t, func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.WritePreloginResponse = func(
+				io.ReadWriteCloser,
+				map[uint8][]byte,
+			) error {
+				return methodFailsExpectedErr
+			}
+		})
+	})
 }
 
 // Test helpers

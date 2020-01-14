@@ -15,7 +15,7 @@ import (
 	"github.com/denisenkom/go-mssqldb"
 )
 
-func TestHappyPath(t *testing.T) {
+func TestConnectSuccess(t *testing.T) {
 	expectedBackendConn := mock.NewNetConn(nil)
 
 	connector := NewSingleUseConnectorWithOptions(
@@ -36,9 +36,112 @@ func TestHappyPath(t *testing.T) {
 	assert.Equal(t, expectedBackendConn, actualBackendConn)
 }
 
+func TestProductionReadPreLoginRequest(t *testing.T) {
+	// production version of ReadPreLoginRequest
+	var readPreLoginRequest types.ReadPreloginRequestFunc = mssql.ReadPreloginRequest
+
+	// expected prelogin request available from net.Conn passed to ReadLogin
+	expectedPreLoginRequest := map[uint8][]byte{
+		1: {2,3,4},
+	}
+
+	r, w := net.Pipe()
+	go func() {
+		_ = mssql.WritePreloginRequest(w, expectedPreLoginRequest)
+	}()
+
+	// prelogin request returned from ReadPreLoginRequest
+	actualLoginRequest, _ := readPreLoginRequest(r)
+
+	assert.Equal(t, actualLoginRequest, expectedPreLoginRequest)
+}
+
+func TestReadPreLoginRequestFails(t *testing.T) {
+	methodFails(t, func(connectorOptions *types.ConnectorOptions) {
+		connectorOptions.ReadPreloginRequest = func(
+			io.ReadWriteCloser,
+		) (map[uint8][]byte, error) {
+			return nil, methodFailsExpectedErr
+		}
+	})
+}
+
+func TestProductionWritePreLoginResponse(t *testing.T) {
+	// production version of writePreLoginResponse
+	var writePreLoginResponse types.WritePreloginResponseFunc = mssql.WritePreloginResponse
+
+	// expected prelogin request available from net.Conn passed to writePreLoginResponse
+	expectedPreLoginResponse := map[uint8][]byte{
+		1: {2,3,4},
+	}
+
+	r, w := net.Pipe()
+	go func() {
+		writePreLoginResponse(w, expectedPreLoginResponse)
+	}()
+
+	// prelogin response returned from ReadPreloginResponse
+	actualPreLoginResponse, err := mssql.ReadPreloginResponse(r)
+	assert.Nil(t, err)
+	if err != nil {
+		return
+	}
+
+	assert.Equal(t, expectedPreLoginResponse, actualPreLoginResponse)
+}
+
+func TestWritePreLoginResponseArgs(t *testing.T) {
+	// expected prelogin response returned from server
+	expectedPreLoginResponse := map[uint8][]byte {
+		1: {2,3,4},
+	}
+
+	// actual prelogin response passed as args to WritePreloginResponse
+	var actualPreLoginResponse map[uint8][]byte
+	var actualClient io.ReadWriteCloser
+
+	connector := NewSingleUseConnectorWithOptions(
+		mock.DefaultConnectorOptions(),
+		func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.WritePreloginResponse = func(
+				w io.ReadWriteCloser,
+				fields map[uint8][]byte,
+			) error {
+				actualClient = w
+				actualPreLoginResponse = fields
+
+				return nil
+			}
+		},
+		mock.MSSQLConnectorCtor(
+			func(opt *mock.MSSQLConnectorCtorOptions) {
+				opt.ServerPreloginResponse = expectedPreLoginResponse
+			},
+		),
+	)
+
+	_, _ = runDefaultTestConnect(connector)
+	expectedClient := connector.clientConn
+
+	assert.Equal(t, actualPreLoginResponse, expectedPreLoginResponse)
+	// confirm that WritePreloginResponse is called with the client connection
+	assert.Equal(t, expectedClient, actualClient)
+}
+
+func TestWritePreLoginResponseFails(t *testing.T) {
+	methodFails(t, func(connectorOptions *types.ConnectorOptions) {
+		connectorOptions.WritePreloginResponse = func(
+			io.ReadWriteCloser,
+			map[uint8][]byte,
+		) error {
+			return methodFailsExpectedErr
+		}
+	})
+}
+
 func TestProductionReadLoginRequest(t *testing.T) {
 	// production version of ReadLoginRequest
-	var readLogin types.ReadLoginRequestFunc = mssql.ReadLoginRequest
+	var readLoginRequest types.ReadLoginRequestFunc = mssql.ReadLoginRequest
 
 	// expected login request available from net.Conn passed to ReadLogin
 	expectedLoginRequest := &mssql.LoginRequest{}
@@ -52,14 +155,14 @@ func TestProductionReadLoginRequest(t *testing.T) {
 		_ = mssql.WriteLoginRequest(w, expectedLoginRequest)
 	}()
 
-	// login request returned from ReadLogin
-	actualLoginRequest, _ := readLogin(r)
+	// login request returned from ReadLoginRequest
+	actualLoginRequest, _ := readLoginRequest(r)
 
 	assert.Equal(t, actualLoginRequest, expectedLoginRequest)
 }
 
 func TestReadLoginRequestSucceeds(t *testing.T) {
-	// expected login request returned from ReadLogin
+	// expected login request returned from ReadLoginRequest
 	expectedLoginRequest := &mssql.LoginRequest{}
 	expectedLoginRequest.Database = "test-database"
 	expectedLoginRequest.AppName = "test-app-name"
@@ -105,7 +208,7 @@ func TestProductionWriteLoginResponse(t *testing.T) {
 	// production version of WriteLoginResponse
 	var writeLoginResponse types.WriteLoginResponseFunc = mssql.WriteLoginResponse
 
-	// expected login request available from net.Conn passed to ReadLogin
+	// expected login request available from net.Conn passed to WriteLoginResponse
 	expectedLoginResponse := &mssql.LoginResponse{}
 	expectedLoginResponse.Interface = 23
 	expectedLoginResponse.ProgName = "test-progname"
@@ -191,13 +294,6 @@ func TestProductionWriteErr(t *testing.T) {
 		ProcName:   "test-proc-name",
 		LineNo:     4,
 	}
-
-	// expected login request available from net.Conn passed to ReadLogin
-	expectedLoginResponse := &mssql.LoginResponse{}
-	expectedLoginResponse.Interface = 23
-	expectedLoginResponse.ProgName = "test-progname"
-	expectedLoginResponse.ProgVer = 01
-	expectedLoginResponse.TDSVersion = 12
 
 	r, w := net.Pipe()
 	go func() {

@@ -62,7 +62,7 @@ func SuccessfulReadLoginRequest(io.ReadWriteCloser) (*mssql.LoginRequest, error)
 }
 
 // SuccessfulWriteLoginResponse is a double for a WriteLoginResponseFunc that always succeeds.
-func SuccessfulWriteLoginResponse(io.ReadWriteCloser, mssql.LoginResponse) error {
+func SuccessfulWriteLoginResponse(io.ReadWriteCloser, *mssql.LoginResponse) error {
 	return nil
 }
 

@@ -15,7 +15,7 @@ import (
 	"github.com/denisenkom/go-mssqldb"
 )
 
-func TestConnectSuccess(t *testing.T) {
+func TestThirdPartConnectSuccess(t *testing.T) {
 	expectedBackendConn := mock.NewNetConn(nil)
 
 	connector := NewSingleUseConnectorWithOptions(
@@ -34,6 +34,14 @@ func TestConnectSuccess(t *testing.T) {
 	}
 
 	assert.Equal(t, expectedBackendConn, actualBackendConn)
+}
+
+func TestThirdPartConnectFail(t *testing.T) {
+	methodFails(t, mock.MSSQLConnectorCtor(
+		func(ctorOptions *mock.MSSQLConnectorCtorOptions) {
+			ctorOptions.Err = methodFailsExpectedErr
+		}),
+	)
 }
 
 func TestProductionReadPreLoginRequest(t *testing.T) {
@@ -326,11 +334,12 @@ func runDefaultTestConnect(
 	return connector.Connect(clientConn, creds)
 }
 
+// methodFailsExpectedErr is the error value used inside methodFails
+var methodFailsExpectedErr = errors.New("failed for the test")
+
 // methodFails checks that the expected error is present in:
 // 1. the error returned from the call to the Connect method
 // 2. the error propagated to the client
-var methodFailsExpectedErr = errors.New("failed for the test")
-
 func methodFails(
 	t *testing.T,
 	connectorOption types.ConnectorOption,

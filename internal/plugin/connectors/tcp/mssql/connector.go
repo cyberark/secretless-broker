@@ -110,13 +110,13 @@ type SingleUseConnector struct {
 func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 	return &SingleUseConnector{
 		ConnectorOptions: types.ConnectorOptions{
-			Logger: logger,
-			NewMSSQLConnector: NewMSSQLConnector,
-			ReadPreloginRequest: mssql.ReadPreloginRequest,
+			Logger:                logger,
+			NewMSSQLConnector:     NewMSSQLConnector,
+			ReadPreloginRequest:   mssql.ReadPreloginRequest,
 			WritePreloginResponse: mssql.WritePreloginResponse,
-			ReadLoginRequest: mssql.ReadLoginRequest,
-			WriteLoginResponse: mssql.WriteLoginResponse,
-			WriteError: mssql.WriteError72,
+			ReadLoginRequest:      mssql.ReadLoginRequest,
+			WriteLoginResponse:    mssql.WriteLoginResponse,
+			WriteError:            mssql.WriteError72,
 			// NewIdempotentDefaultTdsBuffer is wrapped so that it conforms to the
 			// types.TdsBufferCtor func signature
 			NewTdsBuffer: func(transport io.ReadWriteCloser) io.ReadWriteCloser {

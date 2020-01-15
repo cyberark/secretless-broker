@@ -19,8 +19,8 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 	t.Run("singleUseConnector.driver#Connect success", func(t *testing.T) {
 		expectedBackendConn := mock.NewNetConn(nil)
 
-		connector := NewSingleUseConnectorWithOptions(
-			mock.DefaultConnectorOptions(),
+		connector := newSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions,
 			mock.MSSQLConnectorCtor(
 				func(options *mock.MSSQLConnectorCtorOptions) {
 					options.BackendConn = expectedBackendConn
@@ -38,15 +38,36 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 	})
 
 	t.Run("singleUseConnector.driver#Connect fail", func(t *testing.T) {
-		methodFails(t, mock.MSSQLConnectorCtor(
+		var methodFailsExpectedErr = errors.New("failed to complete connection")
+
+		methodFails(t, methodFailsExpectedErr, mock.MSSQLConnectorCtor(
 			func(ctorOptions *mock.MSSQLConnectorCtorOptions) {
 				ctorOptions.Err = methodFailsExpectedErr
 			}),
 		)
 	})
 }
+
 // Test helpers
 //
+
+// newSingleUseConnectorWithOptions creates a new SingleUseConnector, and allows
+// you to specify the newMSSQLConnector explicitly.  Intended to be used in unit
+// tests only.
+func newSingleUseConnectorWithOptions(
+	options ...types.ConnectorOption,
+) *SingleUseConnector {
+	// Default Options
+	args := &types.ConnectorOptions{}
+
+	for _, option := range options {
+		option(args)
+	}
+
+	return &SingleUseConnector{
+		ConnectorOptions: *args,
+	}
+}
 
 // runDefaultTestConnect passes in default values to the Connect method of a connector.
 // This helps avoid boilerplate
@@ -61,15 +82,13 @@ func runDefaultTestConnect(
 	return connector.Connect(clientConn, creds)
 }
 
-// methodFailsExpectedErr is the error value used inside methodFails
-var methodFailsExpectedErr = errors.New("failed for the test")
-
 // methodFails checks that the expected error is present in:
 // 1. the error returned from the call to the Connect method
 // 2. the error propagated to the client
 func methodFails(
 	t *testing.T,
-	connectorOption types.ConnectorOption,
+	methodFailsExpectedErr error,
+	connectorOptions types.ConnectorOption,
 ) {
 	var actualClientErr error
 	var actualClient io.ReadWriteCloser
@@ -78,8 +97,8 @@ func methodFails(
 	// expected error on method
 	expectedErr := methodFailsExpectedErr
 
-	connector := NewSingleUseConnectorWithOptions(
-		mock.DefaultConnectorOptions(),
+	connector := newSingleUseConnectorWithOptions(
+		mock.DefaultConnectorOptions,
 		func(connectorOptions *types.ConnectorOptions) {
 			// error should always be written to client
 			connectorOptions.WriteError = func(w io.ReadWriteCloser, err mssql.Error) error {
@@ -88,7 +107,7 @@ func methodFails(
 				return nil
 			}
 		},
-		connectorOption,
+		connectorOptions,
 	)
 
 	_, actualErr = runDefaultTestConnect(connector)

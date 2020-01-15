@@ -77,27 +77,25 @@ func MSSQLConnectorCtor(setters ...MSSQLConnectorCtorOption) types.ConnectorOpti
 
 // DefaultConnectorOptions returns a setter that will set ConnectorOptions to
 // mocks that result in success.
-func DefaultConnectorOptions() types.ConnectorOption {
-	return func(connectOptions *types.ConnectorOptions) {
-		connectOptions.Logger = logmock.NewLogger()
-		connectOptions.NewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
-			func(ctx context.Context) (net.Conn, error) {
-				interceptor := mssql.ConnectInterceptorFromContext(ctx)
+var DefaultConnectorOptions types.ConnectorOption = func(connectOptions *types.ConnectorOptions) {
+	connectOptions.Logger = logmock.NewLogger()
+	connectOptions.NewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
+		func(ctx context.Context) (net.Conn, error) {
+			interceptor := mssql.ConnectInterceptorFromContext(ctx)
 
-				interceptor.ServerPreLoginResponse <- map[uint8][]byte{}
+			interceptor.ServerPreLoginResponse <- map[uint8][]byte{}
 
-				<-interceptor.ClientLoginRequest
+			<-interceptor.ClientLoginRequest
 
-				interceptor.ServerLoginResponse <- &mssql.LoginResponse{}
+			interceptor.ServerLoginResponse <- &mssql.LoginResponse{}
 
-				return NewNetConn(nil), nil
-			},
-		)
-		connectOptions.ReadPreloginRequest = SuccessfulReadPreloginRequest
-		connectOptions.WritePreloginResponse = SuccessfulWritePreloginResponse
-		connectOptions.ReadLoginRequest = SuccessfulReadLoginRequest
-		connectOptions.WriteLoginResponse = SuccessfulWriteLoginResponse
-		connectOptions.WriteError = SuccessfulWriteError
-		connectOptions.NewTdsBuffer = FakeTdsBufferCtor
-	}
+			return NewNetConn(nil), nil
+		},
+	)
+	connectOptions.ReadPreloginRequest = SuccessfulReadPreloginRequest
+	connectOptions.WritePreloginResponse = SuccessfulWritePreloginResponse
+	connectOptions.ReadLoginRequest = SuccessfulReadLoginRequest
+	connectOptions.WriteLoginResponse = SuccessfulWriteLoginResponse
+	connectOptions.WriteError = SuccessfulWriteError
+	connectOptions.NewTdsBuffer = FakeTdsBufferCtor
 }

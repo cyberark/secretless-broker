@@ -10,6 +10,50 @@ import (
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
+func TestProductionWritePreLoginResponse(t *testing.T) {
+	// production version of writePreLoginResponse
+	var writePreLoginResponse types.WritePreloginResponseFunc = mssql.WritePreloginResponse
+
+	// expected prelogin request available from net.Conn passed to writePreLoginResponse
+	expectedPreLoginResponse := map[uint8][]byte{
+		1: {2, 3, 4},
+	}
+
+	r, w := net.Pipe()
+	go func() {
+		writePreLoginResponse(w, expectedPreLoginResponse)
+	}()
+
+	// prelogin response returned from ReadPreloginResponse
+	actualPreLoginResponse, err := mssql.ReadPreloginResponse(r)
+	assert.Nil(t, err)
+	if err != nil {
+		return
+	}
+
+	assert.Equal(t, expectedPreLoginResponse, actualPreLoginResponse)
+}
+
+func TestProductionReadPreLoginRequest(t *testing.T) {
+	// production version of ReadPreLoginRequest
+	var readPreLoginRequest types.ReadPreloginRequestFunc = mssql.ReadPreloginRequest
+
+	// expected prelogin request available from net.Conn passed to ReadLogin
+	expectedPreLoginRequest := map[uint8][]byte{
+		1: {2, 3, 4},
+	}
+
+	r, w := net.Pipe()
+	go func() {
+		_ = mssql.WritePreloginRequest(w, expectedPreLoginRequest)
+	}()
+
+	// prelogin request returned from ReadPreLoginRequest
+	actualLoginRequest, _ := readPreLoginRequest(r)
+
+	assert.Equal(t, actualLoginRequest, expectedPreLoginRequest)
+}
+
 func TestProductionReadLoginRequest(t *testing.T) {
 	// production version of ReadLoginRequest
 	var readLoginRequest types.ReadLoginRequestFunc = mssql.ReadLoginRequest
@@ -50,56 +94,12 @@ func TestProductionWriteLoginResponse(t *testing.T) {
 
 	// login response returned from ReadLoginResponse
 	actualLoginResponse, err := mssql.ReadLoginResponse(r)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	if err != nil {
 		return
 	}
 
 	assert.Equal(t, expectedLoginResponse, actualLoginResponse)
-}
-
-func TestProductionWritePreLoginResponse(t *testing.T) {
-	// production version of writePreLoginResponse
-	var writePreLoginResponse types.WritePreloginResponseFunc = mssql.WritePreloginResponse
-
-	// expected prelogin request available from net.Conn passed to writePreLoginResponse
-	expectedPreLoginResponse := map[uint8][]byte{
-		1: {2,3,4},
-	}
-
-	r, w := net.Pipe()
-	go func() {
-		writePreLoginResponse(w, expectedPreLoginResponse)
-	}()
-
-	// prelogin response returned from ReadPreloginResponse
-	actualPreLoginResponse, err := mssql.ReadPreloginResponse(r)
-	assert.Nil(t, err)
-	if err != nil {
-		return
-	}
-
-	assert.Equal(t, expectedPreLoginResponse, actualPreLoginResponse)
-}
-
-func TestProductionReadPreLoginRequest(t *testing.T) {
-	// production version of ReadPreLoginRequest
-	var readPreLoginRequest types.ReadPreloginRequestFunc = mssql.ReadPreloginRequest
-
-	// expected prelogin request available from net.Conn passed to ReadLogin
-	expectedPreLoginRequest := map[uint8][]byte{
-		1: {2,3,4},
-	}
-
-	r, w := net.Pipe()
-	go func() {
-		_ = mssql.WritePreloginRequest(w, expectedPreLoginRequest)
-	}()
-
-	// prelogin request returned from ReadPreLoginRequest
-	actualLoginRequest, _ := readPreLoginRequest(r)
-
-	assert.Equal(t, actualLoginRequest, expectedPreLoginRequest)
 }
 
 func TestProductionWriteErr(t *testing.T) {

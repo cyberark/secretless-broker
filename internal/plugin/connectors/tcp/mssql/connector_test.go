@@ -47,6 +47,18 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 		)
 	})
 
+	t.Run("singleUseConnector#ReadPreLoginRequest fail", func(t *testing.T) {
+		var methodFailsExpectedErr = errors.New("failed to read prelogin request from client")
+
+		methodFails(t, methodFailsExpectedErr, func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.ReadPreloginRequest = func(
+				io.ReadWriteCloser,
+			) (map[uint8][]byte, error) {
+				return nil, methodFailsExpectedErr
+			}
+		})
+	})
+
 	t.Run("singleUseConnector#ReadLoginRequest succeeds", func(t *testing.T) {
 		// expected login request returned from ReadLoginRequest
 		expectedLoginRequest := &mssql.LoginRequest{}
@@ -220,15 +232,3 @@ func methodFails(
 	assert.Contains(t, actualClientErr.Error(), expectedErr.Error())
 }
 
-/*
-Test cases not to forget
-
-	- This is not exhaustive.  Use the method of tracing all the code paths (for
-	each error condition, assuming the previous succeeded) and add a test for
-	each.  If that becomes too many, use judgment to eliminate less important
-	ones.
-
-	- While we shouldn't test the logger messages extensively, here is one that
-	we should test: sending an error message to the user fails.  We want to make
-	sure those are logged.
-*/

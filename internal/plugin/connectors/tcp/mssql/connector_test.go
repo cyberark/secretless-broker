@@ -111,7 +111,7 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 			}
 		})
 	})
-
+  
 	t.Run("singleUseConnector#ReadLoginRequest succeeds", func(t *testing.T) {
 		// expected login request returned from ReadLoginRequest
 		expectedLoginRequest := &mssql.LoginRequest{}

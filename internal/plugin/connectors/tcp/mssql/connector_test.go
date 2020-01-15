@@ -46,6 +46,84 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 			}),
 		)
 	})
+
+	t.Run("singleUseConnector#ReadPreLoginRequest fail", func(t *testing.T) {
+		var methodFailsExpectedErr = errors.New("failed to read prelogin request from client")
+
+		methodFails(t, methodFailsExpectedErr, func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.ReadPreloginRequest = func(
+				io.ReadWriteCloser,
+			) (map[uint8][]byte, error) {
+				return nil, methodFailsExpectedErr
+			}
+		})
+	})
+
+	t.Run("singleUseConnector#WritePreloginResponse succeeds", func(t *testing.T) {
+
+		// The fields we should get back from inside the mssql.Connect method
+		fakePreLoginResponse := map[uint8][]byte{
+			mssql.PreloginVERSION:    {0, 0, 0, 0, 0, 0},
+			mssql.PreloginENCRYPTION: {mssql.EncryptOn},
+			mssql.PreloginINSTOPT:    {0},
+			mssql.PreloginTHREADID:   {0, 0, 0, 0},
+			mssql.PreloginMARS:       {0}, // MARS disabled
+		}
+
+		// The fields we should be sending to the client
+		expectedPreLoginResponse := map[uint8][]byte{
+			mssql.PreloginVERSION:    {0, 0, 0, 0, 0, 0},
+			mssql.PreloginENCRYPTION: {mssql.EncryptNotSup},
+			mssql.PreloginINSTOPT:    {0},
+			mssql.PreloginTHREADID:   {0, 0, 0, 0},
+			mssql.PreloginMARS:       {0}, // MARS disabled
+		}
+
+		// The fields we actually receive after modifying them
+		var actualPreLoginResponse map[uint8][]byte
+
+		var actualClient io.ReadWriteCloser
+
+		connector := newSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions,
+			func(connectorOptions *types.ConnectorOptions) {
+				connectorOptions.WritePreloginResponse = func(
+					w io.ReadWriteCloser,
+					fields map[uint8][]byte,
+				) error {
+					actualClient = w
+					actualPreLoginResponse = fields
+					return nil
+				}
+			},
+			mock.MSSQLConnectorCtor(
+				func(opt *mock.MSSQLConnectorCtorOptions) {
+					opt.ServerPreloginResponse = fakePreLoginResponse
+				},
+			),
+		)
+
+		_, _ = runDefaultTestConnect(connector)
+		expectedClient := connector.clientConn
+
+		assert.Equal(t, actualPreLoginResponse, expectedPreLoginResponse)
+		// confirm that WritePreloginResponse is called with the client connection
+		assert.Equal(t, expectedClient, actualClient)
+	})
+
+	t.Run("singleUseConnector#WritePreloginResponse fails", func(t *testing.T) {
+		var methodFailsExpectedErr = errors.New("failed to write prelogin response to client")
+
+		methodFails(t, methodFailsExpectedErr, func(connectorOptions *types.ConnectorOptions) {
+			connectorOptions.WritePreloginResponse = func(
+				io.ReadWriteCloser,
+				map[uint8][]byte,
+			) error {
+				return methodFailsExpectedErr
+			}
+		})
+	})
+
 	t.Run("singleUseConnector#ReadLoginRequest succeeds", func(t *testing.T) {
 		// expected login request returned from ReadLoginRequest
 		expectedLoginRequest := &mssql.LoginRequest{}
@@ -219,15 +297,3 @@ func methodFails(
 	assert.Contains(t, actualClientErr.Error(), expectedErr.Error())
 }
 
-/*
-Test cases not to forget
-
-	- This is not exhaustive.  Use the method of tracing all the code paths (for
-	each error condition, assuming the previous succeeded) and add a test for
-	each.  If that becomes too many, use judgment to eliminate less important
-	ones.
-
-	- While we shouldn't test the logger messages extensively, here is one that
-	we should test: sending an error message to the user fails.  We want to make
-	sure those are logged.
-*/

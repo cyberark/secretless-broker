@@ -1,26 +1,32 @@
 #!/bin/bash -ex
 
 mssql_host=mssql
-while getopts :dm:s: opt; do
+secretless_host=secretless
+mssql_edition=Developer # can also be Express, Standard, Enterprise, EnterpriseCore
+while getopts :dm:s:e: opt; do
     case $opt in
         d) dev_mode=true;;
         m) mssql_host=${OPTARG};;
         s) secretless_host=${OPTARG};;
+        e) mssql_edition=${OPTARG};;
        \?) echo "Unknown option -$OPTARG"; exit 1;;
     esac
 done
-# If the secretless host is not explicitly set on the command line,
-# then use one of the default names (either secretless or
-# secretless-dev, depending on whether testing is being done in
-# development mode) for the secretless host.
-if [[ -z $secretless_host ]]; then
-    secretless_host=secretless
-    if [[ "$dev_mode" = true ]]; then
-        secretless_host=secretless-dev
-    fi
+
+# the secretless host pulls from either the default value or the command line
+# input, but if dev mode is on it will be overriden by that flag to use the
+# dev container
+export SECRETLESS_HOST=$secretless_host
+
+if [[ "$dev_mode" = true ]]; then
+  echo "Using secretless-dev container"
+  export SECRETLESS_HOST=secretless-dev
 fi
 
 ./stop
+
+echo -e "\nStarting containers for the $mssql_edition edition\n"
+export MSSQL_PID=$mssql_edition
 
 docker-compose build
 
@@ -30,4 +36,27 @@ docker-compose up -d $mssql_host
 time ./wait_for_mssql -m $mssql_host
 docker-compose logs $mssql_host
 
-docker-compose up -d $secretless_host
+docker-compose up -d $SECRETLESS_HOST test
+
+echo "Waiting for '$SECRETLESS_HOST' service to start"
+
+# single quotes are intentional:
+# shellcheck disable=SC2016
+# SECRETLESS_HOST has to be set on the container for this run, so that the test
+# container can be used to query the correct Secretless instance
+docker-compose exec -T test bash -ec '
+counter=0
+while ! wget --quiet --output-document - http://'$SECRETLESS_HOST':5335/ready > /dev/null 2>&1; do
+    if expr $counter = 5 > /dev/null; then
+      echo ""
+      echo "Timed out waiting for Secretless"
+      exit 1
+    fi
+    let "counter=$counter+1"
+    >&2 printf ". "
+    sleep 1
+done
+printf "\n"
+'
+
+echo -e "\n'$SECRETLESS_HOST' service is up\n"

@@ -9,4 +9,4 @@ while getopts ":d" opt; do
     esac
 done
 
-../start -m $mssql_host -s $secretless_host
+../start -m $mssql_host -s $secretless_host -e Developer

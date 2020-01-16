@@ -2,13 +2,14 @@ package sharedobj
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	log_api "github.com/cyberark/secretless-broker/pkg/secretless/log"
+	loggerMock "github.com/cyberark/secretless-broker/pkg/secretless/log/mock"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj/mock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPluginAPIVersionIsSemverString(t *testing.T) {
@@ -74,63 +75,107 @@ func TestAllAvailablePlugins(t *testing.T) {
 		assert.EqualValues(t, mock.AllTCPPlugins(), allPlugins.TCPPlugins())
 	})
 
-	t.Run("External plugins override same-named internal plugins", func(t *testing.T) {
-		// Setup our mocks
-		httpOverride := mock.NewHTTPPlugin("HTTP Override")
-		extHTTPPlugins := mock.ExternalPlugins().HTTPPlugins()
-		extHTTPPlugins["intHTTP2"] = httpOverride // Override key "intHTTP2"
+	// Test detection of external plugin IDs conflicting with internal plugins.
+	TestCases := []struct {
+		description   string
+		addPluginType string // "HTTP" or "TCP"
+		addPluginID   string
+		expectPanic   bool
+	}{
+		{
+			description: "There are no panics without duplicate plugin names",
+		},
+		{
+			description:   "Panic when an external HTTP plugin and internal HTTP plugin use the same ID",
+			addPluginType: "HTTP",
+			addPluginID:   "intHTTP1",
+			expectPanic:   true,
+		},
+		{
+			description:   "Panic when an external HTTP plugin and internal TCP plugin use the same ID",
+			addPluginType: "HTTP",
+			addPluginID:   "intTCP2",
+			expectPanic:   true,
+		},
+		{
+			description:   "Panic when an external TCP plugin and internal HTTP plugin use the same ID",
+			addPluginType: "TCP",
+			addPluginID:   "intHTTP2",
+			expectPanic:   true,
+		},
+		{
+			description:   "Panic when an external TCP plugin and an internal TCP plugin use the same ID",
+			addPluginType: "TCP",
+			addPluginID:   "intTCP1",
+			expectPanic:   true,
+		},
+	}
+	for _, tc := range TestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			// Set up baseline mock plugins
+			extHTTPPlugins := mock.ExternalPlugins().HTTPPlugins()
+			allHTTPPlugins := mock.AllHTTPPlugins()
+			extTCPPlugins := mock.ExternalPlugins().TCPPlugins()
+			allTCPPlugins := mock.AllTCPPlugins()
 
-		tcpOverride := mock.NewTCPPlugin("TCP Override")
-		extTCPPlugins := mock.ExternalPlugins().TCPPlugins()
-		extTCPPlugins["intTCP1"] = tcpOverride // Override key "intTCP1"
+			// Add an additional mock plugin for this test case
+			id := tc.addPluginID
+			switch tc.addPluginType {
+			case "HTTP":
+				plugin := mock.NewHTTPPlugin("conflicting name")
+				extHTTPPlugins[id] = plugin
+				allHTTPPlugins[id] = plugin
+			case "TCP":
+				plugin := mock.NewTCPPlugin("conflicting name")
+				extTCPPlugins[id] = plugin
+				allTCPPlugins[id] = plugin
+			}
 
-		allExternalPlugins := Plugins{
-			HTTPPluginsByID: extHTTPPlugins,
-			TCPPluginsByID:  extTCPPlugins,
-		}
+			// Create an external plugins lookup func
+			allExternalPlugins := Plugins{
+				HTTPPluginsByID: extHTTPPlugins,
+				TCPPluginsByID:  extTCPPlugins,
+			}
+			externalPlugins := func(
+				pluginDir string,
+				checksumfile string,
+				logger log_api.Logger,
+			) (plugin.AvailablePlugins, error) {
+				return &allExternalPlugins, nil
+			}
 
-		getExternalPlugins := func(
-			pluginDir string,
-			checksumfile string,
-			logger log_api.Logger,
-		) (plugin.AvailablePlugins, error) {
-			return &allExternalPlugins, nil
-		}
+			// Run the test subject
+			mockLogger := loggerMock.NewLogger()
+			allPlugins, err := AllAvailablePluginsWithOptions(
+				"",
+				"",
+				mock.GetInternalPlugins,
+				externalPlugins,
+				mockLogger,
+			)
 
-		// Create the test subject
+			// Check test results
+			if tc.expectPanic {
+				expectedPanic := fmt.Sprintf(
+					pluginConflictMessage,
+					tc.addPluginType,
+					tc.addPluginID)
+				panic := mockLogger.Panics[0]
+				assert.Contains(t, panic, expectedPanic)
+			} else {
+				assert.NoError(t, err)
+				if err != nil {
+					return
+				}
 
-		allPlugins, err := AllAvailablePluginsWithOptions(
-			"",
-			"",
-			mock.GetInternalPlugins,
-			getExternalPlugins,
-			mock.NewLogger(),
-		)
+				// Confirm expected HTTP plugins have been discovered
+				assert.Equal(t, allHTTPPlugins, allPlugins.HTTPPlugins())
 
-		// Test
-
-		assert.Nil(t, err)
-		if err != nil {
-			return
-		}
-
-
-		// Define our expected results (without override)
-		expectedHTTP := mock.AllHTTPPlugins()
-		expectedTCP := mock.AllTCPPlugins()
-
-		// Sanity check: Not equal without the override
-		assert.NotEqual(t, expectedHTTP, allPlugins.HTTPPlugins())
-		assert.NotEqual(t, expectedTCP, allPlugins.TCPPlugins())
-
-		// Now do the override
-		expectedHTTP["intHTTP2"] = httpOverride
-		expectedTCP["intTCP1"] = tcpOverride
-
-		// Now it should be equal
-		assert.Equal(t, expectedHTTP, allPlugins.HTTPPlugins(), "HTTP override failed")
-		assert.Equal(t, expectedTCP, allPlugins.TCPPlugins(), "TCP override failed")
-	})
+				// Confirm expected TCP plugins have been discovered
+				assert.Equal(t, allTCPPlugins, allPlugins.TCPPlugins())
+			}
+		})
+	}
 
 	t.Run("GetExternalPlugins receives arguments and propagates errors", func(t *testing.T) {
 		expectedDir := "fooDir"

@@ -15,6 +15,13 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
+// rawPlugin defines an interface that includes the only method of a Go plugin
+// that we care about. This provides an abstraction layer that we can use
+// to mock Go plugins.
+type rawPlugin interface {
+	Lookup(string) (go_plugin.Symbol, error)
+}
+
 // ExternalPluginLookupFunc returns all available external plugins.
 type ExternalPluginLookupFunc func(
 	pluginDir string,
@@ -27,15 +34,15 @@ type DirectoryPluginLookupFunc func(
 	pluginDir string,
 	checksumfile string,
 	logger log.Logger,
-) (map[string]*go_plugin.Plugin, error)
+) (map[string]rawPlugin, error)
 
-// LoadPluginsFromDir loads all plugins from a given directory and returns
+// loadPluginsFromDir loads all plugins from a given directory and returns
 // a map of TCP and HTTP connector Plugin structs.
-func LoadPluginsFromDir(
+func loadPluginsFromDir(
 	pluginDir string,
 	checksumsFile string,
 	logger log.Logger,
-) (map[string]*go_plugin.Plugin, error) {
+) (map[string]rawPlugin, error) {
 
 	// Missing external plugin folder is a warning not a fatal error
 	_, err := os.Stat(pluginDir)
@@ -93,9 +100,9 @@ func filePaths(pluginDir string, files []os.FileInfo) []string {
 func loadPluginFiles(
 	filePaths []string,
 	logger log.Logger,
-) (map[string]*go_plugin.Plugin, error) {
+) (map[string]rawPlugin, error) {
 
-	goPlugins := map[string]*go_plugin.Plugin{}
+	rawPlugins := map[string]rawPlugin{}
 	for _, filePath := range filePaths {
 		fileName := path.Base(filePath)
 		if !strings.HasSuffix(fileName, ".so") {
@@ -113,10 +120,10 @@ func loadPluginFiles(
 
 		logger.Infof("Adding '%s' as a plugin...", fileName)
 
-		goPlugins[fileName[:len(fileName)-3]] = pluginObj
+		rawPlugins[fileName[:len(fileName)-3]] = pluginObj
 	}
 
-	return goPlugins, nil
+	return rawPlugins, nil
 }
 
 // ExternalPlugins is used to enumerate all externally-available plugins in a given
@@ -130,15 +137,34 @@ func ExternalPlugins(
 	return ExternalPluginsWithOptions(
 		pluginDir,
 		checksumsFile,
-		LoadPluginsFromDir,
+		loadPluginsFromDir,
 		logger,
 	)
 }
 
+// checkExternalPluginIDConflicts asserts that a given plugin ID is not
+// already being used by an external plugin that has been loaded.
+func checkExternalPluginIDConflicts(
+	pluginID string,
+	pluginType string,
+	externalPlugins Plugins,
+	logger log.Logger,
+) {
+	conflictMessage := "%s plugin ID '%s' conflicts with external plugin"
+
+	// Check whether this ID is a duplicate of a loaded external HTTP plugin.
+	if _, ok := externalPlugins.HTTPPluginsByID[pluginID]; ok {
+		logger.Panicf(conflictMessage, pluginType, pluginID)
+	}
+	// Check whether this ID is a duplicate of a loaded external TCP plugin.
+	if _, ok := externalPlugins.TCPPluginsByID[pluginID]; ok {
+		logger.Panicf(conflictMessage, pluginType, pluginID)
+	}
+}
+
 // ExternalPluginsWithOptions is used to enumerate all externally-available
-// plugins in a sepcified directory to the clients of this method with the
+// plugins in a specified directory to the clients of this method with the
 // additional option of being able to specify the lookup function.
-// TODO: Test this
 func ExternalPluginsWithOptions(
 	pluginDir string,
 	checksumsFile string,
@@ -166,6 +192,8 @@ func ExternalPluginsWithOptions(
 			continue
 		}
 
+		checkExternalPluginIDConflicts(pluginID, pluginType, plugins, logger)
+
 		switch pluginType {
 		case "connector.http":
 			httpPluginSym, err := symbolFromName(rawPlugin, "GetHTTPPlugin")
@@ -176,8 +204,7 @@ func ExternalPluginsWithOptions(
 
 			httpPluginFunc, ok := httpPluginSym.(func() http.Plugin)
 			if !ok {
-				err := errors.New("GetHTTPPlugin couldn't be cast to expected type")
-				logPluginLoadError(err)
+				logPluginLoadError(errors.New("GetHTTPPlugin couldn't be cast to expected type"))
 				continue
 			}
 
@@ -191,8 +218,7 @@ func ExternalPluginsWithOptions(
 
 			tcpPluginFunc, ok := tcpPluginSym.(func() tcp.Plugin)
 			if !ok {
-				err = errors.New("GetTCPPlugin couldn't be cast to expected type")
-				logPluginLoadError(err)
+				logPluginLoadError(errors.New("GetTCPPlugin couldn't be cast to expected type"))
 				continue
 			}
 
@@ -208,11 +234,11 @@ func ExternalPluginsWithOptions(
 }
 
 func symbolFromName(
-	rawPlugin *go_plugin.Plugin,
+	rawPlugin rawPlugin,
 	symbolName string,
 ) (go_plugin.Symbol, error) {
 
-	symbol, err := (*rawPlugin).Lookup(symbolName)
+	symbol, err := rawPlugin.Lookup(symbolName)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +262,7 @@ func infoField(info map[string]string, fieldName string) (string, error) {
 }
 
 func parsePluginMetadata(
-	rawPlugin *go_plugin.Plugin,
+	rawPlugin rawPlugin,
 	rawPluginName string,
 ) (pluginType string, pluginID string, err error) {
 

@@ -24,8 +24,11 @@ func ParseStartupMessage(message []byte) (version int32, options map[string]stri
 	options = make(map[string]string)
 	for {
 		param, err := messageBuffer.ReadString()
-		value, err := messageBuffer.ReadString()
 		if err != nil || param == "\x00" {
+			break
+		}
+		value, err := messageBuffer.ReadString()
+		if err != nil || value == "\x00" {
 			break
 		}
 

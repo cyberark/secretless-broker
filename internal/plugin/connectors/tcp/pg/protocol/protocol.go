@@ -16,6 +16,7 @@ package protocol
 
 import (
 	"encoding/binary"
+	"errors"
 	"io"
 )
 
@@ -66,7 +67,7 @@ func ReadStartupMessage(client io.Reader) ([]byte, error) {
 // ReadMessage accepts an incoming message. The first byte is the message type, the second int32
 // is the message length, and the rest of the bytes are the message body.
 func ReadMessage(client io.Reader) (messageType byte, message []byte, err error) {
-	var messageTypeBytes = make([]byte, 1)
+	messageTypeBytes := make([]byte, 1)
 	if err = binary.Read(client, binary.BigEndian, &messageTypeBytes); err != nil {
 		return
 	}
@@ -84,6 +85,10 @@ func readMessage(client io.Reader) (message []byte, err error) {
 		return
 	}
 
+	if messageLength < 4 {
+		err = errors.New("invalid message length < 4")
+		return
+	}
 	// Build a buffer of the appropriate size and fill it
 	message = make([]byte, messageLength-4)
 	if _, err = io.ReadFull(client, message); err != nil {

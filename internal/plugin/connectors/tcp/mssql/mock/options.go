@@ -10,10 +10,10 @@ import (
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
-// MSSQLConnectorCtorOptions represents options when creating a MSSQLConnectorCtor. This
-// makes it possible to customize some key values in a Connect double:
-// func Connect(...) (net.Conn, error)
-type MSSQLConnectorCtorOptions struct {
+// MSSQLConnectorCtor is a mock which represents options when creating a
+// mssql.MSSQLConnectorCtor. This makes it possible to customize some
+// key values in a Connect double: func Connect(...) (net.Conn, error)
+type MSSQLConnectorCtor struct {
 	// Backend connection returned from the call to Connect
 	BackendConn net.Conn
 	// Error returned from the call to Connect
@@ -26,76 +26,62 @@ type MSSQLConnectorCtorOptions struct {
 	ServerLoginResponse *mssql.LoginResponse
 }
 
-// MSSQLConnectorCtorOption is the 'functional option' complement to
-// MSSQLConnectorCtorOptions.
-type MSSQLConnectorCtorOption func(*MSSQLConnectorCtorOptions)
-
-// MSSQLConnectorCtor is a 'functional option' of types.ConnectorOption. It generates
-// a customizable MSSQLConnectorCtor using MSSQLConnectorCtorOptions, then sets it on the
-// ConnectorOption passed to it.
-//
-// Empty values of MSSQLConnectorCtorOption result default:
-// ServerPreloginResponse => map[uint8][]byte{}
-// ServerLoginResponse => &mssql.LoginResponse{}
-// BackendConn => nil
-// BackendConn => nil
-// ClientLoginRequestPtr => nil (this means ClientLoginRequest is read from the channel to
-// a vacuum)
-func MSSQLConnectorCtor(setters ...MSSQLConnectorCtorOption) types.ConnectorOption {
-	args := &MSSQLConnectorCtorOptions{}
-
-	for _, setter := range setters {
-		setter(args)
-	}
-
-	return func(connectorArgs *types.ConnectorOptions) {
-		connectorArgs.NewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
-			func(ctx context.Context) (net.Conn, error) {
-				interceptor := mssql.ConnectInterceptorFromContext(ctx)
-
-				if args.ServerPreloginResponse == nil {
-					args.ServerPreloginResponse = map[uint8][]byte{}
-				}
-				interceptor.ServerPreLoginResponse <- args.ServerPreloginResponse
-
-				if args.ClientLoginRequestPtr != nil {
-					*args.ClientLoginRequestPtr = <-interceptor.ClientLoginRequest
-				} else {
-					<-interceptor.ClientLoginRequest
-				}
-
-				if args.ServerLoginResponse == nil {
-					args.ServerLoginResponse = &mssql.LoginResponse{}
-				}
-				interceptor.ServerLoginResponse <- args.ServerLoginResponse
-
-				return args.BackendConn, args.Err
-			},
-		)
-	}
+// DefaultMSSQLConnectorCtor is the default constructor for MSSQLConnectorCtor
+var DefaultMSSQLConnectorCtor = MSSQLConnectorCtor{
+	BackendConn:            NewNetConn(nil),
+	Err:                    nil,
+	ServerPreloginResponse: map[uint8][]byte{},
+	ClientLoginRequestPtr:  nil,
+	ServerLoginResponse:    &mssql.LoginResponse{},
 }
 
-// DefaultConnectorOptions returns a setter that will set ConnectorOptions to
-// mocks that result in success.
+// DefaultConnectorOptions is a 'functional option' containing the default successful
+// methods of each dependency
 var DefaultConnectorOptions types.ConnectorOption = func(connectOptions *types.ConnectorOptions) {
 	connectOptions.Logger = logmock.NewLogger()
-	connectOptions.NewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
-		func(ctx context.Context) (net.Conn, error) {
-			interceptor := mssql.ConnectInterceptorFromContext(ctx)
-
-			interceptor.ServerPreLoginResponse <- map[uint8][]byte{}
-
-			<-interceptor.ClientLoginRequest
-
-			interceptor.ServerLoginResponse <- &mssql.LoginResponse{}
-
-			return NewNetConn(nil), nil
-		},
-	)
 	connectOptions.ReadPreloginRequest = SuccessfulReadPreloginRequest
 	connectOptions.WritePreloginResponse = SuccessfulWritePreloginResponse
 	connectOptions.ReadLoginRequest = SuccessfulReadLoginRequest
 	connectOptions.WriteLoginResponse = SuccessfulWriteLoginResponse
 	connectOptions.WriteError = SuccessfulWriteError
 	connectOptions.NewTdsBuffer = FakeTdsBufferCtor
+	connectOptions.NewMSSQLConnector = DefaultNewMSSQLConnector
+}
+
+// DefaultNewMSSQLConnector returns an always successful MSSQLConnectorCtor
+var DefaultNewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
+	func(ctx context.Context) (net.Conn, error) {
+		interceptor := mssql.ConnectInterceptorFromContext(ctx)
+
+		interceptor.ServerPreLoginResponse <- DefaultMSSQLConnectorCtor.ServerPreloginResponse
+
+		<-interceptor.ClientLoginRequest
+
+		interceptor.ServerLoginResponse <- DefaultMSSQLConnectorCtor.ServerLoginResponse
+
+		return DefaultMSSQLConnectorCtor.BackendConn, DefaultMSSQLConnectorCtor.Err
+	},
+)
+
+// CustomNewMSSQLConnectorOption allows us to inject a custom MSSQLConnectorCtor
+// to control the output of the connect method
+func CustomNewMSSQLConnectorOption(ctor MSSQLConnectorCtor) types.ConnectorOption {
+	return func(options *types.ConnectorOptions) {
+		options.NewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
+			func(ctx context.Context) (net.Conn, error) {
+				interceptor := mssql.ConnectInterceptorFromContext(ctx)
+
+				interceptor.ServerPreLoginResponse <- ctor.ServerPreloginResponse
+
+				if ctor.ClientLoginRequestPtr != nil {
+					*ctor.ClientLoginRequestPtr = <-interceptor.ClientLoginRequest
+				} else {
+					<-interceptor.ClientLoginRequest
+				}
+
+				interceptor.ServerLoginResponse <- ctor.ServerLoginResponse
+
+				return ctor.BackendConn, ctor.Err
+			})
+	}
 }

@@ -1,6 +1,8 @@
 package mssql
 
 import (
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
+	"io"
 	"net"
 	"testing"
 
@@ -130,4 +132,24 @@ func TestProductionWriteErr(t *testing.T) {
 	}
 
 	assert.Contains(t, actualErr.Error(), expectedErr.Error())
+}
+
+func TestProductionNewSingleUseConnector(t *testing.T) {
+	singleUseConnector := NewSingleUseConnector(nil)
+
+	tdsBufferFunc := func(transport io.ReadWriteCloser) io.ReadWriteCloser {
+		return mssql.NewIdempotentDefaultTdsBuffer(transport)
+	}
+
+	assert.Nil(t, singleUseConnector.Logger)
+
+	assert.ObjectsAreEqual(singleUseConnector.NewMSSQLConnector, NewMSSQLConnector)
+	assert.ObjectsAreEqual(singleUseConnector.ReadPreloginRequest, mssql.ReadPreloginRequest)
+	assert.ObjectsAreEqual(singleUseConnector.WritePreloginResponse, mssql.WritePreloginResponse)
+	assert.ObjectsAreEqual(singleUseConnector.ReadLoginRequest, mssql.ReadLoginRequest)
+	assert.ObjectsAreEqual(singleUseConnector.WriteLoginResponse, mssql.WriteLoginResponse)
+	assert.ObjectsAreEqual(singleUseConnector.WriteError, mssql.WriteError72)
+	assert.ObjectsAreEqual(singleUseConnector.NewTdsBuffer, tdsBufferFunc)
+
+	assert.ObjectsAreEqual(tdsBufferFunc(mock.NewNetConn(nil)), mssql.NewIdempotentDefaultTdsBuffer)
 }

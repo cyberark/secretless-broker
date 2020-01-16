@@ -100,35 +100,30 @@ Overview of the connection process
 type SingleUseConnector struct {
 	clientConn net.Conn
 	clientBuff io.ReadWriteCloser
-	logger     log.Logger
-	// Note: We're following standard ctor naming practices with this field.
-	newMSSQLConnector     types.MSSQLConnectorCtor
-	readPreloginRequest   types.ReadPreloginRequestFunc
-	writePreloginResponse types.WritePreloginResponseFunc
-	readLoginRequest      types.ReadLoginRequestFunc
-	writeLoginResponse    types.WriteLoginResponseFunc
-	writeError            types.WriteErrorFunc
-	newTdsBuffer          types.TdsBufferCtor
+
+	types.ConnectorOptions
 }
 
 // NewSingleUseConnector creates a new production SingleUseConnector.
 // This uses the production version of the dependencies, which delegate to the actual 3rd
 // party driver.
 func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
-	return NewSingleUseConnectorWithOptions(
-		logger,
-		NewMSSQLConnector,
-		mssql.ReadPreloginRequest,
-		mssql.WritePreloginResponse,
-		mssql.ReadLoginRequest,
-		mssql.WriteLoginResponse,
-		mssql.WriteError72,
-		// NewIdempotentDefaultTdsBuffer is wrapped so that it conforms to the
-		// types.TdsBufferCtor func signature
-		func(transport io.ReadWriteCloser) io.ReadWriteCloser {
-			return mssql.NewIdempotentDefaultTdsBuffer(transport)
+	return &SingleUseConnector{
+		ConnectorOptions: types.ConnectorOptions{
+			Logger:                logger,
+			NewMSSQLConnector:     NewMSSQLConnector,
+			ReadPreloginRequest:   mssql.ReadPreloginRequest,
+			WritePreloginResponse: mssql.WritePreloginResponse,
+			ReadLoginRequest:      mssql.ReadLoginRequest,
+			WriteLoginResponse:    mssql.WriteLoginResponse,
+			WriteError:            mssql.WriteError72,
+			// NewIdempotentDefaultTdsBuffer is wrapped so that it conforms to the
+			// types.TdsBufferCtor func signature
+			NewTdsBuffer: func(transport io.ReadWriteCloser) io.ReadWriteCloser {
+				return mssql.NewIdempotentDefaultTdsBuffer(transport)
+			},
 		},
-	)
+	}
 }
 
 // NewMSSQLConnector is the production implementation of MSSQLConnectorCtor,
@@ -147,31 +142,6 @@ func NewMSSQLConnector(dsn string) (types.MSSQLConnector, error) {
 		return mssqlConn, nil
 	}
 	return types.MSSQLConnectorFunc(fn), err
-}
-
-// NewSingleUseConnectorWithOptions creates a new SingleUseConnector, and allows
-// you to specify the newMSSQLConnector explicitly.  Intended to be used in unit
-// tests only.
-func NewSingleUseConnectorWithOptions(
-	logger log.Logger,
-	newMSSQLConnector types.MSSQLConnectorCtor,
-	readPreloginRequest types.ReadPreloginRequestFunc,
-	writePreloginResponse types.WritePreloginResponseFunc,
-	readLoginRequest types.ReadLoginRequestFunc,
-	writeLoginRequest types.WriteLoginResponseFunc,
-	writeError types.WriteErrorFunc,
-	newTdsBuffer types.TdsBufferCtor,
-) *SingleUseConnector {
-	return &SingleUseConnector{
-		logger:                logger,
-		newMSSQLConnector:     newMSSQLConnector,
-		readPreloginRequest:   readPreloginRequest,
-		writePreloginResponse: writePreloginResponse,
-		readLoginRequest:      readLoginRequest,
-		writeLoginResponse:    writeLoginRequest,
-		writeError:            writeError,
-		newTdsBuffer:          newTdsBuffer,
-	}
 }
 
 type connectResult struct {
@@ -210,8 +180,8 @@ func (connector *SingleUseConnector) Connect(
 	// client can advance to the next stage of the process.  Otherwise the
 	// client would block forever waiting for its pre-login handshake to be
 	// read.
-	connector.clientBuff = connector.newTdsBuffer(connector.clientConn)
-	_, err := connector.readPreloginRequest(connector.clientBuff)
+	connector.clientBuff = connector.NewTdsBuffer(connector.clientConn)
+	_, err := connector.ReadPreloginRequest(connector.clientBuff)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to read prelogin request from client")
 		connector.writeErrorToClient(wrappedError)
@@ -219,6 +189,8 @@ func (connector *SingleUseConnector) Connect(
 	}
 
 	// Prepare connection details from the client, formatted for MSSQL
+	// TODO: find out if it is possible to send errors during prelogin-phase
+	// TODO: send error to client on failed credential validation
 	connDetails := NewConnectionDetails(credentialValuesByID)
 
 	// Create a new MSSQL connector
@@ -227,7 +199,7 @@ func (connector *SingleUseConnector) Connect(
 	// NOTE: Secretless has some unfortunate naming collisions with the
 	// go-mssqldb driver package.  The driver package has its own concept of a
 	// "connector", and its connectors also have a "Connect" method.
-	driverConnector, err := connector.newMSSQLConnector(dataSourceName(connDetails))
+	driverConnector, err := connector.NewMSSQLConnector(dataSourceName(connDetails))
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to create a go-mssqldb connector")
 		connector.writeErrorToClient(wrappedError)
@@ -262,7 +234,7 @@ func (connector *SingleUseConnector) Connect(
 		return nil, err
 	}
 
-	if err = connector.writeLoginResponse(connector.clientBuff, *loginResp); err != nil {
+	if err = connector.WriteLoginResponse(connector.clientBuff, loginResp); err != nil {
 		wrappedError := errors.Wrap(
 			err,
 			"failed to send a successful authentication response to client",
@@ -316,7 +288,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
 
 		// Write the prelogin packet back to the user
-		err = connector.writePreloginResponse(connector.clientBuff, preloginResponse)
+		err = connector.WritePreloginResponse(connector.clientBuff, preloginResponse)
 		if err != nil {
 			wrappedError := errors.Wrap(
 				err,
@@ -326,7 +298,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 
 		// We parse the client's LoginRequest packet so that we can pass on params to the
 		// server.
-		clientLoginRequest, err := connector.readLoginRequest(connector.clientBuff)
+		clientLoginRequest, err := connector.ReadLoginRequest(connector.clientBuff)
 		if err != nil {
 			wrappedError := errors.Wrap(err, "failed to handle login from client")
 			return nil, nil, wrappedError
@@ -375,7 +347,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 }
 
 func (connector *SingleUseConnector) writeErrorToClient(err error) {
-	_ = connector.writeError(connector.clientBuff, protocolError(err))
+	_ = connector.WriteError(connector.clientBuff, protocolError(err))
 }
 
 func dataSourceName(connDetails *ConnectionDetails) string {

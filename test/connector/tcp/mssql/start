@@ -3,9 +3,10 @@
 mssql_host=mssql
 secretless_host=secretless
 mssql_edition=Developer # can also be Express, Standard, Enterprise, EnterpriseCore
-while getopts :dm:s:e: opt; do
+while getopts :dDm:s:e: opt; do
     case $opt in
         d) dev_mode=true;;
+        D) secretless_host=secretless-debug;;
         m) mssql_host=${OPTARG};;
         s) secretless_host=${OPTARG};;
         e) mssql_edition=${OPTARG};;

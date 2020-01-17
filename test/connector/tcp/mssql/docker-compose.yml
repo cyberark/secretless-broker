@@ -31,6 +31,23 @@ services:
     depends_on:
       - mssql
 
+  secretless-debug:
+    build:
+      context: ../../../..
+      dockerfile: Dockerfile.debug
+    ports:
+      - 2223:2223
+      - 40000:40000
+    security_opt:
+      - apparmor:unconfined
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ./secretless.yml:/secretless.yml
+    depends_on:
+      - mssql
+
   test:
     build:
       context: .

@@ -1,0 +1,9 @@
+#!/bin/bash -ex
+
+# Start with a secretless image that allows remote debugging. Remote
+# debugging allows a Delve-enabled debugger (e.g. Intellij or Goland) to
+# attach to a running secretless container for debugging Secretless Broker
+# functionality, e.g. with breakpoints, single-step, etc. For details,
+# see the "Debugging Secretless Broker as it is Running in a Container"
+# section in the README.md file that is in the current directory.
+./start -D

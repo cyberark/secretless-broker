@@ -2,6 +2,7 @@ package mssqltest
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -17,6 +18,9 @@ type dbConfig struct {
 	Username string
 	Password string
 	Database string
+	// This is in relation to what is generally referred to as Application Intent.
+	// It can only take 2 values, ReadWrite or ReadOnly.
+	ReadOnly bool
 }
 
 type dbQueryExecutor func(cfg dbConfig, query string) (string, error)
@@ -40,6 +44,10 @@ func sqlcmdExec(
 		"-U", cfg.Username,
 		"-P", cfg.Password,
 		"-Q", query,
+	}
+
+	if cfg.ReadOnly == true {
+		args = append(args, "-K", "ReadOnly")
 	}
 
 	if db := cfg.Database; db != "" {
@@ -67,13 +75,19 @@ func gomssqlExec(
 	cfg dbConfig,
 	query string,
 ) (string, error) {
+	applicationIntent := "ReadWrite"
+	if cfg.ReadOnly {
+		applicationIntent = "ReadOnly"
+	}
+
 	dsnString := fmt.Sprintf(
-		"user id=%s;password=%s;server=%s;port=%d;encrypt=%s",
+		"user id=%s;password=%s;server=%s;port=%d;encrypt=%s;applicationintent=%s",
 		cfg.Username,
 		cfg.Password,
 		cfg.Host,
 		cfg.Port,
 		"disable",
+		applicationIntent,
 	)
 
 	if db := cfg.Database; db != "" {
@@ -89,6 +103,11 @@ func gomssqlExec(
 		return "", err
 	}
 	defer conn.Close()
+
+	if query == "" {
+		_, err := conn.Conn(context.Background())
+		return "", err
+	}
 
 	// Execute the query
 	rows, err := conn.Query(query)

@@ -17,15 +17,10 @@ import (
 
 func TestSingleUseConnector_Connect(t *testing.T) {
 	t.Run("singleUseConnector.driver#Connect success", func(t *testing.T) {
-		expectedBackendConn := mock.NewNetConn(nil)
+		expectedBackendConn := mock.DefaultMSSQLConnectorCtor.BackendConn
 
 		connector := newSingleUseConnectorWithOptions(
 			mock.DefaultConnectorOptions,
-			mock.MSSQLConnectorCtor(
-				func(options *mock.MSSQLConnectorCtorOptions) {
-					options.BackendConn = expectedBackendConn
-				},
-			),
 		)
 		actualBackendConn, err := runDefaultTestConnect(connector)
 
@@ -40,11 +35,10 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 	t.Run("singleUseConnector.driver#Connect fail", func(t *testing.T) {
 		var methodFailsExpectedErr = errors.New("failed to complete connection")
 
-		methodFails(t, methodFailsExpectedErr, mock.MSSQLConnectorCtor(
-			func(ctorOptions *mock.MSSQLConnectorCtorOptions) {
-				ctorOptions.Err = methodFailsExpectedErr
-			}),
-		)
+		customCtor := mock.DefaultMSSQLConnectorCtor
+		customCtor.Err = methodFailsExpectedErr
+
+		methodFails(t, methodFailsExpectedErr, mock.CustomNewMSSQLConnectorOption(customCtor))
 	})
 
 	t.Run("singleUseConnector#ReadPreLoginRequest fail", func(t *testing.T) {
@@ -84,8 +78,12 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 
 		var actualClient io.ReadWriteCloser
 
+		customCtor := mock.DefaultMSSQLConnectorCtor
+		customCtor.ServerPreloginResponse = fakePreLoginResponse
+
 		connector := newSingleUseConnectorWithOptions(
 			mock.DefaultConnectorOptions,
+			mock.CustomNewMSSQLConnectorOption(customCtor),
 			func(connectorOptions *types.ConnectorOptions) {
 				connectorOptions.WritePreloginResponse = func(
 					w io.ReadWriteCloser,
@@ -96,11 +94,6 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 					return nil
 				}
 			},
-			mock.MSSQLConnectorCtor(
-				func(opt *mock.MSSQLConnectorCtorOptions) {
-					opt.ServerPreloginResponse = fakePreLoginResponse
-				},
-			),
 		)
 
 		_, _ = runDefaultTestConnect(connector)
@@ -134,19 +127,18 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 		var actualLoginRequest *mssql.LoginRequest
 		var actualClient io.ReadWriteCloser
 
+		customCtor := mock.DefaultMSSQLConnectorCtor
+		customCtor.ClientLoginRequestPtr = &actualLoginRequest
+
 		connector := newSingleUseConnectorWithOptions(
 			mock.DefaultConnectorOptions,
+			mock.CustomNewMSSQLConnectorOption(customCtor),
 			func(connectorOptions *types.ConnectorOptions) {
 				connectorOptions.ReadLoginRequest = func(r io.ReadWriteCloser) (*mssql.LoginRequest, error) {
 					actualClient = r
 					return expectedLoginRequest, nil
 				}
 			},
-			mock.MSSQLConnectorCtor(
-				func(opt *mock.MSSQLConnectorCtorOptions) {
-					opt.ClientLoginRequestPtr = &actualLoginRequest
-				},
-			),
 		)
 
 		_, _ = runDefaultTestConnect(connector)
@@ -181,8 +173,12 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 		var actualLoginResponse *mssql.LoginResponse
 		var actualClient io.ReadWriteCloser
 
+		customCtor := mock.DefaultMSSQLConnectorCtor
+		customCtor.ServerLoginResponse = expectedLoginResponse
+
 		connector := newSingleUseConnectorWithOptions(
 			mock.DefaultConnectorOptions,
+			mock.CustomNewMSSQLConnectorOption(customCtor),
 			func(connectorOptions *types.ConnectorOptions) {
 				connectorOptions.WriteLoginResponse = func(
 					w io.ReadWriteCloser,
@@ -193,11 +189,6 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 					return nil
 				}
 			},
-			mock.MSSQLConnectorCtor(
-				func(opt *mock.MSSQLConnectorCtorOptions) {
-					opt.ServerLoginResponse = expectedLoginResponse
-				},
-			),
 		)
 
 		_, _ = runDefaultTestConnect(connector)
@@ -272,6 +263,10 @@ func methodFails(
 	// expected error on method
 	expectedErr := methodFailsExpectedErr
 
+	// We build our connector in three parts
+	// 1. Pass in our Mock connector with default methods
+	// 2. Pass in our error writer for this test case
+	// 3. Pass in our failing method for this test case
 	connector := newSingleUseConnectorWithOptions(
 		mock.DefaultConnectorOptions,
 		func(connectorOptions *types.ConnectorOptions) {

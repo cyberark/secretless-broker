@@ -100,6 +100,7 @@ Overview of the connection process
 type SingleUseConnector struct {
 	clientConn net.Conn
 	clientBuff io.ReadWriteCloser
+	preloginRequest map[uint8][]byte
 
 	types.ConnectorOptions
 }
@@ -171,6 +172,7 @@ func (connector *SingleUseConnector) Connect(
 	clientConn net.Conn,
 	credentialValuesByID connector.CredentialValuesByID,
 ) (net.Conn, error) {
+	var err error
 
 	connector.clientConn = clientConn
 
@@ -181,7 +183,8 @@ func (connector *SingleUseConnector) Connect(
 	// client would block forever waiting for its pre-login handshake to be
 	// read.
 	connector.clientBuff = connector.NewTdsBuffer(connector.clientConn)
-	_, err := connector.ReadPreloginRequest(connector.clientBuff)
+
+	connector.preloginRequest, err = connector.ReadPreloginRequest(connector.clientBuff)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to read prelogin request from client")
 		connector.writeErrorToClient(wrappedError)
@@ -229,6 +232,11 @@ func (connector *SingleUseConnector) Connect(
 		connInterceptor,
 		connectionResultChan)
 
+	// CALLOUT: this was one of the sources of the jdbc issues
+	// NOTE: this means that we pass on the client login request and call it a day
+	// the rest of the auth negotiation takes place within the duplex pipe
+	return backendConn, err
+
 	if err != nil {
 		connector.writeErrorToClient(err)
 		return nil, err
@@ -272,7 +280,11 @@ func (connector *SingleUseConnector) waitForServerConnection(
 	connResChan chan connectResult,
 ) (*mssql.LoginResponse, net.Conn, error) {
 	var loginResponse *mssql.LoginResponse
+	var res connectResult
 	var err error
+
+	// send preloginRequest
+	interceptor.ClientPreLoginRequest <- connector.preloginRequest
 
 	// SECTION: wait for prelogin response
 	//
@@ -285,7 +297,19 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		// Since the communication between the client and Secretless must be unencrypted,
 		// we fool the client into thinking that it's talking to a server that does not
 		// support encryption.
-		preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
+
+		// Conditionally carry out login encryption based on what the client says
+		encryptBytes, ok := connector.preloginRequest[mssql.PreloginENCRYPTION]
+		if !ok {
+			panic("prelogin request should always set the encryption field")
+		}
+		happyWithOnlyLoginEncryption := encryptBytes[0] == mssql.EncryptOff
+
+		if happyWithOnlyLoginEncryption {
+			preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptOff}
+		} else {
+			preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
+		}
 
 		// Write the prelogin packet back to the user
 		err = connector.WritePreloginResponse(connector.clientBuff, preloginResponse)
@@ -294,6 +318,16 @@ func (connector *SingleUseConnector) waitForServerConnection(
 				err,
 				"failed to write prelogin response to client")
 			return nil, nil, wrappedError
+		}
+
+		// NOTE: this means secure auth can take place :)
+		if happyWithOnlyLoginEncryption {
+			tlsBuff, tlsConn, err := mssql.ServerUpgradeToTLSForLogin(connector.clientConn)
+			if err != nil {
+				return nil, nil, err
+			}
+			connector.clientBuff = tlsBuff
+			connector.clientConn = tlsConn
 		}
 
 		// We parse the client's LoginRequest packet so that we can pass on params to the
@@ -318,8 +352,14 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		return nil, nil, res.err
 	}
 
-	// SECTION: wait for server login ack
-	//
+	// CALLOUT: this was one of the sources of the jdbc issues
+	// NOTE: this means that we pass on the client login request and call it a day
+	// the rest of the auth negotiation takes place within the duplex pipe
+	res = <-connResChan
+	return nil, res.conn, res.err
+
+	//SECTION: wait for server login ack
+
 	select {
 	// loginResponse is received from the server
 	case loginResponse = <-interceptor.ServerLoginResponse:
@@ -329,7 +369,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		break
 
 	// error is received from connect
-	case res := <-connResChan:
+	case res = <-connResChan:
 		if res.err == nil {
 			panic("connect finished before loginResponse without error")
 		}
@@ -338,7 +378,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 
 	// SECTION: wait for connection response
 	//
-	res := <-connResChan
+	res = <-connResChan
 	if res.err != nil {
 		return nil, nil, res.err
 	}

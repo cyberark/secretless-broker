@@ -53,16 +53,16 @@ Secretless supports several target services out of the box, and these include:
 - SSH / SSH-Agent (Beta)
 - HTTP with Basic auth, Conjur, and AWS authorization strategies (Beta)
 
-Support for these services is provided via internal plugins (also referred to as "Service Connectors") that are part of the
-Secretless binary distribution.
+Support for these services is provided via internal plugins (also referred to as "Service Connectors") that are part
+of the Secretless binary distribution.
 
 If you want to use Secretless with a target service that is not currently supported, you can use the [Secretless Plugin
-Interface](pkg/secretless/plugin) to create [Connector Plugins](pkg/secretless/plugin/connector) to extend Secretless to
-support virtually any target service. These external plugins can be integrated in environments using a standard Secretless
-Broker implementation.
+Interface](pkg/secretless/plugin) to create [Connector Plugins](pkg/secretless/plugin/connector) to extend Secretless
+to support virtually any target service. These external plugins can be integrated in environments using a standard
+Secretless Broker implementation.
 
-For more information on building a Secretless Connector Plugin please see our [documentation](https://docs.secretless.io/Latest/en/Content/References/Secretless%20Plugin%20Interface/Secretless_Plugin_Interface_Intro.htm), which will walk
-you through creating a new Connector Plugin using our templates.
+For more information on building a Secretless Connector Plugin please see our [documentation](https://docs.secretless.io/Latest/en/Content/References/Secretless%20Plugin%20Interface/Secretless_Plugin_Interface_Intro.htm),
+which will walk you through creating a new Connector Plugin using our templates.
 
 Are we missing an internal service connector that you think is important? Are you curious if anyone else has thought of
 building the service connector you're interested in? Please open a [GitHub issue](https://github.com/cyberark/secretless-broker/issues) with more information on the connector you'd like to create, and start the conversation.

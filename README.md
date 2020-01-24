@@ -65,7 +65,7 @@ For more information on building a Secretless Connector Plugin please see our [d
 which will walk you through creating a new Connector Plugin using our templates.
 
 Are we missing an internal service connector that you think is important? Are you curious if anyone else has thought of
-building the service connector you're interested in? Please open a [GitHub issue](https://github.com/cyberark/secretless-broker/issues) with more information on the connector you'd like to create, and start the conversation.
+building the service connector you're interested in? Please open a [GitHub issue](https://github.com/cyberark/secretless-broker/issues) with more information on the connector you'd like, and start the conversation.
 
 For specific guidelines about using a particular service, please see our [documentation](https://docs.secretless.io/Latest/en/Content/References/connectors/overview.htm).
 

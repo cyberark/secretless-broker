@@ -7,107 +7,244 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/cyberark/secretless-broker/test/util/testutil"
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
-func TestMSSQLConnector(t *testing.T) {
-	t.Run("go-mssql", func(t *testing.T) {
-		RunTests(t, gomssqlExec)
-	})
+var _ = Describe("MSSQL Connector Test", func() {
 
-	t.Run("sqlcmd", func(t *testing.T) {
-		RunTests(t, sqlcmdExec)
-	})
-}
+	TestClients := []struct {
+		appName string
+		queryExec  dbQueryExecutor
+		serverName func(server string, port int) string
+	}{
+		{
+			appName: "go-mssql",
+			queryExec: gomssqlExec,
+			serverName: func(server string, port int) string {
+				return fmt.Sprintf(
+					"%s,%d",
+					server,
+					port,
+				)
+			},
+		},
+		{
+			appName: "sqlcmd",
+			queryExec: sqlcmdExec,
+			serverName: func(server string, port int) string {
+				return server
+			},
+		},
+	}
 
-func RunTests(t *testing.T, queryExec dbQueryExecutor) {
-	t.Run("Can connect to MSSQL through Secretless", func(t *testing.T) {
-		testInt := "1+1"
-		testString := "abc"
+	for _, tc := range TestClients {
 
-		// Execute Query
-		out, err := queryExec(
-			defaultSecretlessDbConfig(),
-			fmt.Sprintf("select %s, '%s'", testInt, testString),
-		)
+		Describe(fmt.Sprintf("connectivity tests with %s", tc.appName), func() {
+			const (
+				selectNum    = "1+1"
+				selectString = "1+1"
+			)
+			var (
+				// These variables represent test configuration or state
+				cfg      dbConfig
+				query    string
+				queryOut string
+				queryErr error
+				err      error
+			)
 
-		// Test the returned values
-		assert.NoError(t, err)
+			BeforeEach(func() {
+				// Set defaults. May be overriden by test cases.
+				cfg = defaultSecretlessDbConfig()
+				query = fmt.Sprintf("select %s, '%s'", selectNum, selectString)
+			})
 
-		assert.Contains(t, out, "2")
-		assert.Contains(t, out, testString)
-	})
+			JustBeforeEach(func() {
+				// Run the query
+				queryOut, queryErr = tc.queryExec(cfg, query)
+			})
 
-	t.Run("Cannot connect directly to MSSQL", func(t *testing.T) {
-		// Set Host and Port to $DB_HOST_TLS and $DB_PORT environment
-		// variables, respectively.
-		envCfg := testutil.NewDbConfigFromEnv()
-		cfg := defaultSecretlessDbConfig()
-		cfg.Host = envCfg.HostWithTLS
-		var err error
-		cfg.Port, err = strconv.Atoi(envCfg.Port)
-		assert.NoError(t, err)
+			Describe("can connect to MSSQL through Secretless", func() {
 
-		// This is for local testing. Locally, Secretless and and the target service
-		// are exposed on 127.0.0.1 via port mappings
-		if testutil.SecretlessHost == "127.0.0.1" {
-			cfg.Host = "127.0.0.1"
-		}
+				// Query will have been run in JustBeforeEach block
 
-		// Execute Query
-		_, err = queryExec(
-			cfg,
+				It("should not error", func() {
+					Expect(queryErr).NotTo(HaveOccurred())
+				})
+
+				It("should return expected content", func() {
+					Expect(queryOut).To(ContainSubstring("2"))
+					Expect(queryOut).To(ContainSubstring(selectString))
+				})
+			})
+
+			Describe("cannot connect directly to MSSQL", func() {
+				BeforeEach(func() {
+					// Set Host and Port to $DB_HOST_TLS and $DB_PORT
+					// environment variables, respectively.
+					envCfg := testutil.NewDbConfigFromEnv()
+					cfg.Host = envCfg.HostWithTLS
+					cfg.Port, err = strconv.Atoi(envCfg.Port)
+					Expect(err).NotTo(HaveOccurred())
+
+					// This is for local testing. Locally, Secretless
+					// and and the target service are exposed on
+					// 127.0.0.1 via port mappings
+					if testutil.SecretlessHost == "127.0.0.1" {
+						cfg.Host = "127.0.0.1"
+					}
+				})
+
+				It("should get login failed error from MSSQL server", func() {
+					// Test the returned values
+					Expect(queryErr).To(HaveOccurred())
+					Expect(queryErr.Error()).To(ContainSubstring("Login failed"))
+				})
+			})
+
+			Describe("passes valid database name to MSSQL through Secretless", func() {
+				BeforeEach(func() {
+					// existing database name, see
+					// https://docs.microsoft.com/en-us/sql/relational-databases/databases/tempdb-database?view=sql-server-ver15
+					cfg.Database = "tempdb"
+					// Set query to return current database
+					query = "SELECT DB_NAME() AS [Current Database];"
+				})
+
+				It("should return a valid database name", func() {
+					// Test the returned values
+					Expect(queryErr).ToNot(HaveOccurred())
+					Expect(queryOut).To(ContainSubstring("tempdb"))
+				})
+			})
+
+			Describe("passes invalid database name to MSSQL through Secretless", func() {
+				BeforeEach(func() {
+					// non-existent database name
+					cfg.Database = "meow"
+				})
+
+				It("should receive a 'Cannot open database' error", func() {
+					Expect(queryErr).To(HaveOccurred())
+					Expect(queryErr.Error()).To(ContainSubstring("Cannot open database"))
+				})
+			})
+		})
+
+		description := fmt.Sprintf("parameter propagation tests with %s", tc.appName)
+		Describe(description, func () {
+			const (
+				// these are credential values injected by secretless
+				expUsername = "expected-user"
+				expPassword = "expected-password"
+
+				// this is the database name the client passes in
+				expDatabase = "expected-database"
+			)
+			var (
+				expAppname string
+				expServer string
+			)
+			BeforeEach(func() {
+				expAppname := tc.appName
+				expServer := tc.serverName(
+					testutil.SecretlessHost,
+					mockServerPort)
+			})
+
+			It("should set up a mock server listening on port 1434", func() {
+				// Setup mock-server listener
+				ln, err := net.Listen("tcp", ":1434")
+				defer func() {
+					_ = ln.Close()
+				}()
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			for _, readonly := range []bool{true, false} {
+
+				Context(fmt.Sprintf("test propagation with readonly=%v", readonly), func() {
+
+					By("making a connection to Secretless", func() {
+						go func() {
+							// we don't actually care about the response
+							_, _ = testClient.queryExec(
+								dbConfig{
+									Host:     testutil.SecretlessHost,
+									Port:     mockServerPort,
+									Username: "dummy",
+									Password: "dummy",
+									Database: expectedDatabase,
+									ReadOnly: readonly,
+								},
+								"",
+							)
+						}()
+					})
+
+					By("accepting connection from secretless
+						It("accept
+							It("
+							BeforeEach(
+						Before
+						go func() {
+		// we don't actually care about the response
+		_, _ = testClient.queryExec(
+			dbConfig{
+				Host:     testutil.SecretlessHost,
+				Port:     mockServerPort,
+				Username: "dummy",
+				Password: "dummy",
+				Database: expectedDatabase,
+				ReadOnly: readonly,
+			},
 			"",
 		)
+	}()
 
-		// Test the returned values
-		assert.Error(t, err, "direct db connection should error")
-		assert.Contains(t, err.Error(), "Login failed")
-	})
 
-	t.Run("Passes valid database name to MSSQL through Secretless", func(t *testing.T) {
-		cfg := defaultSecretlessDbConfig()
-		// existing database name, see
-		// https://docs.microsoft.com/en-us/sql/relational-databases/databases/tempdb-database?view=sql-server-ver15
-		cfg.Database = "tempdb"
 
-		// Execute Query
-		out, err := queryExec(
-			cfg,
-			"SELECT DB_NAME() AS [Current Database];", // returns current database
-		)
 
-		// Test the returned values
-		assert.NoError(t, err, "valid db should not error")
-		assert.Contains(t, out, "tempdb")
-	})
+				
+			func(readonly bool) {
 
-	t.Run("Passes invalid database name to MSSQL through Secretless", func(t *testing.T) {
-		cfg := defaultSecretlessDbConfig()
-		// non-existent database name
-		cfg.Database = "meow"
+			DescribeTable("k
+			var (
+				readonly bool
+			)
 
-		// Execute Query
-		_, err := queryExec(
-			cfg,
-			"",
-		)
+			propagateParameters := func() {
 
-		// Test the returned values
-		assert.Error(t, err, "invalid db should error")
-		assert.Contains(t, err.Error(), "Cannot open database")
-	})
+			Context("while running a mock SQL server on port 1434", func() {
+				It("should be able to listen on port 1434", func() {
+					// Setup mock-server listener
+					ln, err := net.Listen("tcp", ":1434")
+					defer func() {
+						_ = ln.Close()
+					}()
+					Expect(err).ToNot(HaveOccurred())
+				}
 
-}
+				Describe("client params are propagated to the server", func() {
+
+
+	if err != nil {
+		panic(err)
+	}
+
+})
 
 const mockServerPort = 2224
+
 type testClientParams struct {
-	queryExec dbQueryExecutor
+	queryExec       dbQueryExecutor
 	applicationName string
-	serverName func(server string, port int) string
+	serverName      func(server string, port int) string
 }
 
 func TestClientParams(t *testing.T) {
@@ -122,7 +259,7 @@ func TestClientParams(t *testing.T) {
 	}
 
 	sqlcmdParamsTestClient := testClientParams{
-		queryExec:        sqlcmdExec,
+		queryExec:       sqlcmdExec,
 		applicationName: "SQLCMD",
 		serverName: func(server string, port int) string {
 			return fmt.Sprintf(
@@ -133,7 +270,7 @@ func TestClientParams(t *testing.T) {
 		},
 	}
 	gomssqlParamsTestClient := testClientParams{
-		queryExec:        gomssqlExec,
+		queryExec:       gomssqlExec,
 		applicationName: "go-mssqldb",
 		serverName: func(server string, port int) string {
 			return server
@@ -285,8 +422,8 @@ func propagateParams(
 
 	// conditionally assert on application intent
 	if readonly {
-		assert.NotEqual(t, int(loginRequest.TypeFlags & 32), 0)
+		assert.NotEqual(t, int(loginRequest.TypeFlags&32), 0)
 	} else {
-		assert.Equal(t, int(loginRequest.TypeFlags & 32), 0)
+		assert.Equal(t, int(loginRequest.TypeFlags&32), 0)
 	}
 }

@@ -24,6 +24,8 @@ require (
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
+	github.com/onsi/ginkgo v1.11.0
+	github.com/onsi/gomega v1.8.1
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.8.1
@@ -33,7 +35,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.4
 	k8s.io/api v0.0.0-20180712090710-2d6f90ab1293
 	k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408
 	k8s.io/apimachinery v0.0.0-20180621070125-103fd098999d

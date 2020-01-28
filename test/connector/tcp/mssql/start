@@ -48,7 +48,7 @@ echo "Waiting for '$SECRETLESS_HOST' service to start"
 docker-compose exec -T test bash -ec '
 counter=0
 while ! wget --quiet --output-document - http://'$SECRETLESS_HOST':5335/ready > /dev/null 2>&1; do
-    if expr $counter = 5 > /dev/null; then
+    if expr $counter = 50 > /dev/null; then
       echo ""
       echo "Timed out waiting for Secretless"
       exit 1
@@ -61,3 +61,22 @@ printf "\n"
 '
 
 echo -e "\n'$SECRETLESS_HOST' service is up\n"
+
+docker-compose up -d app
+
+echo "Waiting for app"
+docker-compose exec -T test bash -ec '
+counter=0
+while ! curl -v app:8080 > /dev/null 2>&1; do
+     if expr $counter = 100 > /dev/null; then
+      echo ""
+      echo "Timed out waiting for JDBC App"
+      exit 1
+    fi
+    let "counter=$counter+1"
+    >&2 printf ". "
+    sleep 1
+done
+'
+
+echo "app is up - continuing"

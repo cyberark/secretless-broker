@@ -46,3 +46,13 @@ services:
       SECRETLESS_HOST:
     volumes:
       - ../../../../..:/secretless
+
+  app:
+    image: cyberark/demo-app:latest
+    environment:
+      DB_PLATFORM: mssql
+      DB_URL: sqlserver://${SECRETLESS_HOST}:2223;databaseName=tempdb
+      DB_USERNAME: x
+      DB_PASSWORD: x
+    depends_on:
+      - mssql-2017-cu1

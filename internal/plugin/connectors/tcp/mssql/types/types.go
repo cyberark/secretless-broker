@@ -48,13 +48,6 @@ type WritePreloginResponseFunc func(
 // packet.  The production version is implemented by mssql.ReadLoginRequest.
 type ReadLoginRequestFunc func(r io.ReadWriteCloser) (*mssql.LoginRequest, error)
 
-// WriteLoginResponseFunc defines the type of the func that writes the login response
-// packet.  The production version is implemented by mssql.WriteLoginResponse.
-type WriteLoginResponseFunc func(
-	w io.ReadWriteCloser,
-	loginRes *mssql.LoginResponse,
-) error
-
 // WriteErrorFunc defines the type of the func that writes an error packet. The production
 // version is implemented by mssql.WriteError.
 type WriteErrorFunc func(
@@ -79,7 +72,6 @@ type ConnectorOptions struct {
 	ReadPreloginRequest   ReadPreloginRequestFunc
 	WritePreloginResponse WritePreloginResponseFunc
 	ReadLoginRequest      ReadLoginRequestFunc
-	WriteLoginResponse    WriteLoginResponseFunc
 	WriteError            WriteErrorFunc
 	NewTdsBuffer          TdsBufferCtor
 }

@@ -82,20 +82,24 @@ func RunTests(t *testing.T, queryExec dbQueryExecutor) {
 		assert.Contains(t, out, "tempdb")
 	})
 
-	t.Run("Passes invalid database name to MSSQL through Secretless", func(t *testing.T) {
-		cfg := defaultSecretlessDbConfig()
-		// non-existent database name
-		cfg.Database = "meow"
+	// TODO: The following test depends upon the changes that will be
+	// implemented in PR #1111. For now, this is disabled.
+	//t.Run("Passes invalid database name to MSSQL through Secretless", func(t *testing.T) {
+	//	cfg := defaultSecretlessDbConfig()
+	//	// non-existent database name
+	//	cfg.Database = "meow"
 
-		// Execute Query
-		_, err := queryExec(
-			cfg,
-			"",
-		)
-
-		// Test the returned values
-		assert.Error(t, err, "invalid db should error")
-		assert.Contains(t, err.Error(), "Cannot open database")
-	})
+	//	// Execute Query
+	//	_, err := queryExec(
+	//		cfg,
+	//		"",
+	//	)
+	//	// Test the returned values
+	//	assert.Error(t, err, "invalid db should error")
+	//	if err == nil {
+	//		return
+	//	}
+	//	assert.Contains(t, err.Error(), "Cannot open database")
+	//})
 
 }

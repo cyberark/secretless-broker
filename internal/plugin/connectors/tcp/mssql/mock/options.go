@@ -22,8 +22,6 @@ type MSSQLConnectorCtor struct {
 	ServerPreloginResponse map[uint8][]byte
 	// Pointer to unload client login request to, taken from interceptor during Connect
 	ClientLoginRequestPtr **mssql.LoginRequest
-	// LoginResponse from the server passed to interceptor during Connect
-	ServerLoginResponse *mssql.LoginResponse
 }
 
 // DefaultMSSQLConnectorCtor is the default constructor for MSSQLConnectorCtor
@@ -32,7 +30,6 @@ var DefaultMSSQLConnectorCtor = MSSQLConnectorCtor{
 	Err:                    nil,
 	ServerPreloginResponse: map[uint8][]byte{},
 	ClientLoginRequestPtr:  nil,
-	ServerLoginResponse:    &mssql.LoginResponse{},
 }
 
 // DefaultConnectorOptions is a 'functional option' containing the default successful
@@ -42,7 +39,6 @@ var DefaultConnectorOptions types.ConnectorOption = func(connectOptions *types.C
 	connectOptions.ReadPreloginRequest = SuccessfulReadPreloginRequest
 	connectOptions.WritePreloginResponse = SuccessfulWritePreloginResponse
 	connectOptions.ReadLoginRequest = SuccessfulReadLoginRequest
-	connectOptions.WriteLoginResponse = SuccessfulWriteLoginResponse
 	connectOptions.WriteError = SuccessfulWriteError
 	connectOptions.NewTdsBuffer = FakeTdsBufferCtor
 	connectOptions.NewMSSQLConnector = DefaultNewMSSQLConnector
@@ -56,8 +52,6 @@ var DefaultNewMSSQLConnector = NewSuccessfulMSSQLConnectorCtor(
 		interceptor.ServerPreLoginResponse <- DefaultMSSQLConnectorCtor.ServerPreloginResponse
 
 		<-interceptor.ClientLoginRequest
-
-		interceptor.ServerLoginResponse <- DefaultMSSQLConnectorCtor.ServerLoginResponse
 
 		return DefaultMSSQLConnectorCtor.BackendConn, DefaultMSSQLConnectorCtor.Err
 	},
@@ -78,8 +72,6 @@ func CustomNewMSSQLConnectorOption(ctor MSSQLConnectorCtor) types.ConnectorOptio
 				} else {
 					<-interceptor.ClientLoginRequest
 				}
-
-				interceptor.ServerLoginResponse <- ctor.ServerLoginResponse
 
 				return ctor.BackendConn, ctor.Err
 			})

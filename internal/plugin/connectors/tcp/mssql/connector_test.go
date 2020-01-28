@@ -12,7 +12,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/types"
 	pluginconnector "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
-	"github.com/denisenkom/go-mssqldb"
+	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 func TestSingleUseConnector_Connect(t *testing.T) {
@@ -157,58 +157,6 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 				r io.ReadWriteCloser,
 			) (request *mssql.LoginRequest, e error) {
 				return nil, methodFailsExpectedErr
-			}
-		})
-	})
-
-	t.Run("singleUseConnector#WriteLoginResponse succeeds", func(t *testing.T) {
-		// expected login response returned from server
-		expectedLoginResponse := &mssql.LoginResponse{}
-		expectedLoginResponse.Interface = 23
-		expectedLoginResponse.ProgName = "test-progname"
-		expectedLoginResponse.ProgVer = 01
-		expectedLoginResponse.TDSVersion = 12
-
-		// actual login response passed as args to WriteLoginResponse
-		var actualLoginResponse *mssql.LoginResponse
-		var actualClient io.ReadWriteCloser
-
-		customCtor := mock.DefaultMSSQLConnectorCtor
-		customCtor.ServerLoginResponse = expectedLoginResponse
-
-		connector := newSingleUseConnectorWithOptions(
-			mock.DefaultConnectorOptions,
-			mock.CustomNewMSSQLConnectorOption(customCtor),
-			func(connectorOptions *types.ConnectorOptions) {
-				connectorOptions.WriteLoginResponse = func(
-					w io.ReadWriteCloser,
-					loginRes *mssql.LoginResponse,
-				) error {
-					actualClient = w
-					actualLoginResponse = loginRes
-					return nil
-				}
-			},
-		)
-
-		_, _ = runDefaultTestConnect(connector)
-		expectedClient := connector.clientConn
-
-		assert.Equal(t, actualLoginResponse, expectedLoginResponse)
-		// confirm that WriteLoginResponse is called with the client connection
-		assert.Equal(t, expectedClient, actualClient)
-	})
-
-	t.Run("singleUseConnector#WriteLoginResponse fails", func(t *testing.T) {
-		var methodFailsExpectedErr = errors.New("failed to send a successful" +
-			"authentication response to client")
-
-		methodFails(t, methodFailsExpectedErr, func(connectorOptions *types.ConnectorOptions) {
-			connectorOptions.WriteLoginResponse = func(
-				w io.ReadWriteCloser,
-				loginRes *mssql.LoginResponse,
-			) error {
-				return methodFailsExpectedErr
 			}
 		})
 	})

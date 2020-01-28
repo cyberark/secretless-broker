@@ -23,57 +23,57 @@ or modification of the respective requests or responses.
 
 Overview of the connection process
 
-+---------+              +-------------+                      +---------+               +-------+
-| Client  |              | Secretless  |                      | Driver  |               | MSSQL |
-+---------+              +-------------+                      +---------+               +-------+
-     |                          |                                  |                        |
-     | Prelogin Request         |                                  |                        |
-     |------------------------->|                                  |                        |
-     |                          |                                  |                        |
-     |                          | Connect(Context)                 |                        |
-     |                          |--------------------------------->|                        |
-     |                          | ----------------------------\    |                        |
-     |                          |-| Context contains channels |    |                        |
-     |                          | | for intercepting data     |    |                        |
-     |                          | |---------------------------|    |                        |
-     |                          |                                  | Prelogin Request       |
-     |                          |                                  |----------------------->|
-     |                          |                                  |                        |
-     |                          |                                  |      Prelogin Response |
-     |                          |                                  |<-----------------------|
-     |                          |                                  |                        |
-     |                          |      Intercept Prelogin Response |                        |
-     |                          |<---------------------------------|                        |
-     |                          |                                  |                        |
-     |                          | Modify Prelogin Response         |                        |
-     |                          |------------------------          |                        |
-     |                          |                       |          |                        |
-     |                          |<-----------------------          |                        |
-     |                          |                                  |                        |
-     |        Prelogin Response |                                  |                        |
-     |<-------------------------|                                  |                        |
-     |                          |                                  |                        |
-     |                          |                                  | Handshake Request      |
-     |                          |                                  |----------------------->|
-     |                          |                                  |                        |
-     |                          |                                  |     Handshake Response |
-     |                          |                                  |<-----------------------|
-     |                          |                                  |                        |
-     |                          |                                  | Login Request          |
-     |                          |                                  |----------------------->|
-     |                          |                                  |                        |
-     |                          |                                  |         Login Response |
-     |                          |                                  |<-----------------------|
-     |                          |                                  |                        |
-     |                          |         Intercept Login Response |                        |
-     |                          |<---------------------------------|                        |
-     |                          |                                  |                        |
-     |                          |      Backend Connection or error |                        |
-     |                          |<---------------------------------|                        |
-     |                          |                                  |                        |
-     |  Login Response or error |                                  |                        |
-     |<-------------------------|                                  |                        |
-     |                          |                                  |                        |
++---------+                    +-------------+                      +---------+               +-------+
+| Client  |                    | Secretless  |                      | Driver  |               | MSSQL |
++---------+                    +-------------+                      +---------+               +-------+
+     |                                |                                  |                        |
+     | Prelogin Request               |                                  |                        |
+     |------------------------------->|                                  |                        |
+     |                                |                                  |                        |
+     |                                | Connect(context)                 |                        |
+     |                                |--------------------------------->|                        |
+     |                                | ----------------------------\    |                        |
+     |                                |-| Context contains channels |    |                        |
+     |                                | | for intercepting data     |    |                        |
+     |                                | |---------------------------|    |                        |
+     |                                |                                  | Prelogin Request       |
+     |                                |                                  |----------------------->|
+     |                                |                                  |                        |
+     |                                |                                  |      Prelogin Response |
+     |                                |                                  |<-----------------------|
+     |                                |                                  |                        |
+     |                                |                               Intercept Prelogin Response |
+     |                                |<----------------------------------------------------------|
+     |                                |                                  |                        |
+     |                                | Modify Prelogin Response         |                        |
+     |                                |-------------------------         |                        |
+     |                                |                        |         |                        |
+     |                                |<------------------------         |                        |
+     |                                |                                  |                        |
+     |              Prelogin Response |                                  |                        |
+     |<-------------------------------|                                  |                        |
+     |                                |                                  |                        |
+     |                                |                                  | Handshake Request      |
+     |                                |                                  |----------------------->|
+     |                                |                                  |                        |
+     |                                |                                  |     Handshake Response |
+     |                                |                                  |<-----------------------|
+     |                                |                                  |                        |
+     |                                |                                  | Login Request          |
+     |                                |                                  |----------------------->|
+     |                                |                                  |                        |
+     |                                |      Backend Connection or error |                        |
+     |                                |<---------------------------------|                        |
+     |                                |                                  |                        |
+     |        error (if one occurred) |                                  |                        |
+     |<-------------------------------|                                  |                        |
+     |                                |                                  |                        |
+     |                                |                                  |         Login Response |
+     |                                |<----------------------------------------------------------|
+     |                                |                                  |                        |
+     |                 Login Response |                                  |                        |
+     |<-------------------------------|                                  |                        |
+     |                                |                                  |                        |
 
 	Note: The above diagram was created using https://textart.io/sequence and the
 	following source:
@@ -90,10 +90,11 @@ Overview of the connection process
 	Driver->MSSQL:Handshake Request
 	MSSQL->Driver: Handshake Response
 	Driver->MSSQL: Login Request
-	MSSQL->Driver: Login Response
-	Driver->Secretless: Intercept Login Response
 	Driver->Secretless: Backend Connection or error
-	Secretless->Client: Login Response or error
+	Secretless->Client: error (if one occurred)
+	MSSQL->Secretless: Login Response
+	Secretless->Client: Login Response
+
 */
 
 // SingleUseConnector is used to create an authenticated connection to an MSSQL target
@@ -115,7 +116,6 @@ func NewSingleUseConnector(logger log.Logger) *SingleUseConnector {
 			ReadPreloginRequest:   mssql.ReadPreloginRequest,
 			WritePreloginResponse: mssql.WritePreloginResponse,
 			ReadLoginRequest:      mssql.ReadLoginRequest,
-			WriteLoginResponse:    mssql.WriteLoginResponse,
 			WriteError:            mssql.WriteError72,
 			// NewIdempotentDefaultTdsBuffer is wrapped so that it conforms to the
 			// types.TdsBufferCtor func signature
@@ -225,22 +225,13 @@ func (connector *SingleUseConnector) Connect(
 		}
 	}()
 
-	loginResp, backendConn, err := connector.waitForServerConnection(
+	backendConn, err := connector.waitForServerConnection(
 		connInterceptor,
 		connectionResultChan)
 
 	if err != nil {
 		connector.writeErrorToClient(err)
 		return nil, err
-	}
-
-	if err = connector.WriteLoginResponse(connector.clientBuff, loginResp); err != nil {
-		wrappedError := errors.Wrap(
-			err,
-			"failed to send a successful authentication response to client",
-		)
-		connector.writeErrorToClient(wrappedError)
-		return nil, wrappedError
 	}
 
 	return backendConn, nil
@@ -270,9 +261,7 @@ func protocolError(err error) mssql.Error {
 func (connector *SingleUseConnector) waitForServerConnection(
 	interceptor *mssql.ConnectInterceptor,
 	connResChan chan connectResult,
-) (*mssql.LoginResponse, net.Conn, error) {
-	var loginResponse *mssql.LoginResponse
-	var err error
+) (net.Conn, error) {
 
 	// SECTION: wait for prelogin response
 	//
@@ -280,7 +269,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 	// preloginResponse is received from the server
 	case preloginResponse := <-interceptor.ServerPreLoginResponse:
 		if preloginResponse == nil {
-			return nil, nil, errors.New("ServerPreLoginResponse is nil")
+			return nil, errors.New("ServerPreLoginResponse is nil")
 		}
 		// Since the communication between the client and Secretless must be unencrypted,
 		// we fool the client into thinking that it's talking to a server that does not
@@ -288,12 +277,12 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
 
 		// Write the prelogin packet back to the user
-		err = connector.WritePreloginResponse(connector.clientBuff, preloginResponse)
+		err := connector.WritePreloginResponse(connector.clientBuff, preloginResponse)
 		if err != nil {
 			wrappedError := errors.Wrap(
 				err,
 				"failed to write prelogin response to client")
-			return nil, nil, wrappedError
+			return nil, wrappedError
 		}
 
 		// We parse the client's LoginRequest packet so that we can pass on params to the
@@ -301,7 +290,7 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		clientLoginRequest, err := connector.ReadLoginRequest(connector.clientBuff)
 		if err != nil {
 			wrappedError := errors.Wrap(err, "failed to handle login from client")
-			return nil, nil, wrappedError
+			return nil, wrappedError
 		}
 
 		// Send the client login to the mssql driver which it can use to pass client
@@ -315,35 +304,16 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		if res.err == nil {
 			panic("connect finished before preloginResponse without error")
 		}
-		return nil, nil, res.err
-	}
-
-	// SECTION: wait for server login ack
-	//
-	select {
-	// loginResponse is received from the server
-	case loginResponse = <-interceptor.ServerLoginResponse:
-		if loginResponse == nil {
-			return nil, nil, errors.New("ServerLoginResponse is nil")
-		}
-		break
-
-	// error is received from connect
-	case res := <-connResChan:
-		if res.err == nil {
-			panic("connect finished before loginResponse without error")
-		}
-		return nil, nil, res.err
+		return nil, res.err
 	}
 
 	// SECTION: wait for connection response
 	//
 	res := <-connResChan
 	if res.err != nil {
-		return nil, nil, res.err
+		return nil, res.err
 	}
-
-	return loginResponse, res.conn, nil
+	return res.conn, nil
 }
 
 func (connector *SingleUseConnector) writeErrorToClient(err error) {

@@ -1,10 +1,11 @@
 package mssql
 
 import (
-	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
 	"io"
 	"net"
 	"testing"
+
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql/mock"
 
 	"github.com/stretchr/testify/assert"
 
@@ -78,32 +79,6 @@ func TestProductionReadLoginRequest(t *testing.T) {
 	assert.Equal(t, actualLoginRequest, expectedLoginRequest)
 }
 
-func TestProductionWriteLoginResponse(t *testing.T) {
-	// production version of WriteLoginResponse
-	var writeLoginResponse types.WriteLoginResponseFunc = mssql.WriteLoginResponse
-
-	// expected login request available from net.Conn passed to WriteLoginResponse
-	expectedLoginResponse := &mssql.LoginResponse{}
-	expectedLoginResponse.Interface = 23
-	expectedLoginResponse.ProgName = "test-progname"
-	expectedLoginResponse.ProgVer = 01
-	expectedLoginResponse.TDSVersion = 12
-
-	r, w := net.Pipe()
-	go func() {
-		writeLoginResponse(w, expectedLoginResponse)
-	}()
-
-	// login response returned from ReadLoginResponse
-	actualLoginResponse, err := mssql.ReadLoginResponse(r)
-	assert.NoError(t, err)
-	if err != nil {
-		return
-	}
-
-	assert.Equal(t, expectedLoginResponse, actualLoginResponse)
-}
-
 func TestProductionWriteErr(t *testing.T) {
 	// production version of WriteError
 	var writeError types.WriteErrorFunc = mssql.WriteError72
@@ -147,7 +122,6 @@ func TestProductionNewSingleUseConnector(t *testing.T) {
 	assert.ObjectsAreEqual(singleUseConnector.ReadPreloginRequest, mssql.ReadPreloginRequest)
 	assert.ObjectsAreEqual(singleUseConnector.WritePreloginResponse, mssql.WritePreloginResponse)
 	assert.ObjectsAreEqual(singleUseConnector.ReadLoginRequest, mssql.ReadLoginRequest)
-	assert.ObjectsAreEqual(singleUseConnector.WriteLoginResponse, mssql.WriteLoginResponse)
 	assert.ObjectsAreEqual(singleUseConnector.WriteError, mssql.WriteError72)
 	assert.ObjectsAreEqual(singleUseConnector.NewTdsBuffer, tdsBufferFunc)
 

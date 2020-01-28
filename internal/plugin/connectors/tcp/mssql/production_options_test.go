@@ -66,7 +66,6 @@ func TestProductionReadLoginRequest(t *testing.T) {
 	expectedLoginRequest.AppName = "test-app-name"
 	expectedLoginRequest.UserName = "test-user-name"
 	expectedLoginRequest.Database = "test-database"
-	expectedLoginRequest.SSPI = []uint8{}
 
 	r, w := net.Pipe()
 	go func() {

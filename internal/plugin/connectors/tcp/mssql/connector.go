@@ -322,6 +322,10 @@ func (connector *SingleUseConnector) writeErrorToClient(err error) {
 
 func dataSourceName(connDetails *ConnectionDetails) string {
 	return fmt.Sprintf(
+		// NOTE: as things stand the resulting DSN here means that if TLS is available
+		// it'll be used between Secretless and the server.
+		// To disable TLS altogether we must change to
+		// "sqlserver://%s:%s@%s?encrypt=disable",
 		"sqlserver://%s:%s@%s",
 		connDetails.Username,
 		connDetails.Password,

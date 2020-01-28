@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"fmt"
+
 	"github.com/stretchr/testify/mock"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
@@ -11,12 +13,16 @@ type LoggerMock struct {
 	mock.Mock
 	log.Logger
 	ReceivedCall chan struct{}
+	Warns        []string
+	Errors       []string
+	Panics       []string
 }
 
 // Errorf mocks the method of the same name on the log.Logger interface
 func (l *LoggerMock) Errorf(format string, args ...interface{}) {
 	l.Called()
 	l.ReceivedCall <- struct{}{}
+	l.Errors = append(l.Errors, fmt.Sprintf(format, args...))
 
 	return
 }
@@ -51,28 +57,44 @@ func (l *LoggerMock) Infof(string, ...interface{}) {}
 func (l *LoggerMock) Infoln(...interface{}) {}
 
 // Warn mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Warn(...interface{}) {}
+func (l *LoggerMock) Warn(args ...interface{}) {
+	l.Warns = append(l.Warns, fmt.Sprint(args...))
+}
 
 // Warnf mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Warnf(string, ...interface{}) {}
+func (l *LoggerMock) Warnf(format string, args ...interface{}) {
+	l.Warns = append(l.Warns, fmt.Sprintf(format, args...))
+}
 
 // Warnln mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Warnln(...interface{}) {}
+func (l *LoggerMock) Warnln(args ...interface{}) {
+	l.Warns = append(l.Warns, fmt.Sprintln(args...))
+}
 
 // Error mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Error(...interface{}) {}
+func (l *LoggerMock) Error(args ...interface{}) {
+	l.Errors = append(l.Errors, fmt.Sprint(args...))
+}
 
 // Errorln mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Errorln(...interface{}) {}
+func (l *LoggerMock) Errorln(args ...interface{}) {
+	l.Errors = append(l.Errors, fmt.Sprintln(args...))
+}
 
 // Panic mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Panic(...interface{}) {}
+func (l *LoggerMock) Panic(args ...interface{}) {
+	l.Panics = append(l.Panics, fmt.Sprint(args...))
+}
 
 // Panicf mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Panicf(string, ...interface{}) {}
+func (l *LoggerMock) Panicf(format string, args ...interface{}) {
+	l.Panics = append(l.Panics, fmt.Sprintf(format, args...))
+}
 
 // Panicln mocks the method of the same name on the log.Logger interface
-func (l *LoggerMock) Panicln(...interface{}) {}
+func (l *LoggerMock) Panicln(args ...interface{}) {
+	l.Panics = append(l.Panics, fmt.Sprintln(args...))
+}
 
 // NewLogger creates a mock that conforms to the Secretless Logger interface
 func NewLogger() *LoggerMock {

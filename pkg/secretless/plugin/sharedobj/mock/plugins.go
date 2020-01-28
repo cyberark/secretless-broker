@@ -1,12 +1,17 @@
 package mock
 
 import (
+	"fmt"
+	go_plugin "plugin"
+
 	"github.com/cyberark/secretless-broker/internal/log"
 	log_api "github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
+
+const pluginAPIVersion = "0.1.0"
 
 // Plugins may appear on first glance to be duplication, but it's not. We
 // can't use the actual implementation sharedobj.Plugin without creating a
@@ -120,4 +125,73 @@ func GetExternalPlugins(
 // NewLogger returns a mock Logger.
 func NewLogger() log_api.Logger {
 	return log.New(true)
+}
+
+// RawPlugin implements the rawPlugin interface
+type RawPlugin struct {
+	PluginAPIVersion string
+	PluginType       string
+	PluginID         string
+}
+
+func (r RawPlugin) pluginInfo() map[string]string {
+	return map[string]string{
+		"pluginAPIVersion": r.PluginAPIVersion,
+		"type":             r.PluginType,
+		"id":               r.PluginID,
+	}
+}
+
+func (r RawPlugin) httpPlugin() http.Plugin {
+	return NewHTTPPlugin(r.PluginID)
+}
+
+func (r RawPlugin) tcpPlugin() tcp.Plugin {
+	return NewTCPPlugin(r.PluginID)
+}
+
+// Lookup returns a go_plugin.Symbol for a given symbol name string. A go_plugin.Symbol
+// is an empty interface, and can be instantiated with a function or a struct.
+// This method is intended to mimic the Lookup method for a standard Go plugin.
+func (r RawPlugin) Lookup(symbolName string) (go_plugin.Symbol, error) {
+	switch symbolName {
+	case "PluginInfo":
+		return r.pluginInfo, nil
+	case "GetHTTPPlugin":
+		return r.httpPlugin, nil
+	case "GetTCPPlugin":
+		return r.tcpPlugin, nil
+	}
+	return nil, fmt.Errorf("unknown symbolName %s", symbolName)
+}
+
+// RawPlugins instantiates a map of RawPlugins for testing. Values of entries
+// in this map should reflect values returned by HTTPExternalPluginsByID()
+// and TCPExternalPluginsByID() above.
+var RawPlugins = map[string]RawPlugin{
+	"http1": RawPlugin{
+		PluginAPIVersion: pluginAPIVersion,
+		PluginType:       "connector.http",
+		PluginID:         "extHTTP1",
+	},
+	"http2": RawPlugin{
+		PluginAPIVersion: pluginAPIVersion,
+		PluginType:       "connector.http",
+		PluginID:         "extHTTP2",
+	},
+	"tcp1": RawPlugin{
+		PluginAPIVersion: pluginAPIVersion,
+		PluginType:       "connector.tcp",
+		PluginID:         "extTCP1",
+	},
+	"tcp2": RawPlugin{
+		PluginAPIVersion: pluginAPIVersion,
+		PluginType:       "connector.tcp",
+		PluginID:         "extTCP2",
+	},
+	"tcp3": RawPlugin{
+		PluginAPIVersion: pluginAPIVersion,
+		PluginType:       "connector.tcp",
+		PluginID:         "extTCP3",
+	},
 }

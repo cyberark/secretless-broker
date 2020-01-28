@@ -11,6 +11,10 @@ import (
 )
 
 func TestMSSQLConnector(t *testing.T) {
+	t.Run("python-ODBC", func(t *testing.T) {
+		RunTests(t, pythonODBCExec)
+	})
+
 	t.Run("go-mssql", func(t *testing.T) {
 		RunTests(t, gomssqlExec)
 	})

@@ -10,7 +10,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
 # Install SQL Server drivers and tools
-RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql mssql-tools
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libodbc1 unixodbc msodbcsql mssql-tools unixodbc-dev
 ENV PATH $PATH:/opt/mssql-tools/bin
 
 # Install and set locale to en_US.UTF-8
@@ -44,3 +44,7 @@ RUN update-locale LANG=en_US.UTF-8
 # that we're agnostic to these transient checksum errors.
 RUN rm -rf /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update
+
+# Add python 3 and pyodbc
+RUN apt-get install -y python3 python3-pip
+RUN pip3 install pyodbc

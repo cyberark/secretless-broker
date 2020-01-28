@@ -62,6 +62,38 @@ func sqlcmdExec(
 	return string(out), nil
 }
 
+// runs queries using python-odbc
+func pythonODBCExec(
+	cfg dbConfig,
+	query string,
+) (string, error) {
+	args := []string{
+		"--server", fmt.Sprintf("%s,%d", cfg.Host, cfg.Port),
+		"--username", cfg.Username,
+		"--password", cfg.Password,
+		"--query", query,
+	}
+
+	if db := cfg.Database; db != "" {
+		args = append(args, "--database", db)
+	}
+
+	out, err := exec.Command(
+		"./odbc_client.py",
+		args...,
+	).Output()
+
+	if err != nil {
+		if exitErrr, ok := err.(*exec.ExitError); ok {
+			return "", errors.New(string(exitErrr.Stderr))
+		}
+
+		return "", err
+	}
+
+	return string(out), nil
+}
+
 // runs queries using go-mssqldb
 func gomssqlExec(
 	cfg dbConfig,

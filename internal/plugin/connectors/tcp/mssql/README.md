@@ -1,6 +1,6 @@
 # MSSQL Server Connector
 
-**NOTE: This connector is still in alpha and should not be used in production.**
+**NOTE: This connector is in beta.**
 
 The MSSQL Server Connector enables:
 
@@ -46,7 +46,7 @@ All credentials are required unless they're explicitly marked as "optional".
 
 ## Target Service SSL Support
 
-SSL is currently not supported in the alpha version, but will be coming soon.
+SSL is currently not supported in the beta version, but will be coming soon.
 
 ## Supported versions
 

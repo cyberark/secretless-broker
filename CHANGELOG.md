@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.0] 2020-01-29
+
+### Added
+- Added option to specify MSSQL edition in tests (#1093)
+- Added debug image that can be used with a debugger like delve (#1056)
+- Added template READMEs to connector templates (#1020)
+
+### Changed
+- Updated release instructions (#1080)
+- Improved MSSQL connector tests (#1107, #1089, #1098)
+- Improved handling of `io.EOF` errors on TCP `proxy_service`
+- Conjur authn-k8s client version bumped to v0.16.0
+- Added links to SDK docs in README (#1104)
+- Ensure external connector plugins will not override built-in connectors (#1085)
+- MSSQL connector moved to beta
+
+### Fixed
+- Updated pg connector to better validate packet length (#1095)
+- MSSQL connector faithfully propagates login response (#1106)
+- MSSQL connector faithfully propagates login request (#1107)
+
 ## [1.4.2] 2020-01-08
 
 ### Added
@@ -419,7 +440,7 @@ external plugins
 
 The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -441,3 +462,4 @@ The first tagged version.
 [1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0 
 [1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1 
 [1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2 
+[1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0 

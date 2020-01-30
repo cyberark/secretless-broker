@@ -30,7 +30,8 @@ for image_name in "${IMAGES[@]}"; do
   echo "Pushing $INTERNAL_REGISTRY/$image_name:${FULL_VERSION_TAG}"
   docker push "$INTERNAL_REGISTRY/$image_name:$FULL_VERSION_TAG"
 
-  # if the tag matches the VERSION, push VERSION and latest releases
+  # if it’s not a tagged commit, VERSION will have extra junk (i.e. -g666c4b2), so we won’t publish that commit
+  # only when tag matches the VERSION, push VERSION and latest releases
   # and x and x.y releases
   if [ "$git_description" = "v${VERSION}" ]; then
     echo "Revision $git_description matches version $VERSION exactly. Pushing to Dockerhub..."

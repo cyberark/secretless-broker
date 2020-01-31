@@ -5,9 +5,10 @@ import (
 	"log"
 	"sort"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj"
-	"gopkg.in/yaml.v2"
 )
 
 // Config represents a full configuration of Secretless, which is just a list of
@@ -24,6 +25,38 @@ func (c Config) String() string {
 		return ""
 	}
 	return string(out)
+}
+
+// MarshalYAML serializes Config to the secretless.yml format
+func (c Config) MarshalYAML() (interface{}, error) {
+	servicesAsYAML := map[string]*serviceYAML{}
+	for _, svc := range c.Services {
+		credentialYamls := credentialsYAML{}
+		for _, cred := range svc.Credentials {
+			credentialYamls[cred.Name] = struct {
+				From string `yaml:"from" json:"from"`
+				Get  string `yaml:"get" json:"get"`
+			}{
+				From: cred.From,
+				Get:  cred.Get,
+			}
+		}
+
+		servicesAsYAML[svc.Name] = &serviceYAML{
+			Connector:   svc.Connector,
+			ListenOn:    string(svc.ListenOn),
+			Credentials: credentialYamls,
+			Config:      svc.ConnectorConfig,
+		}
+	}
+
+	return struct {
+		Version  string                  `yaml:"version" json:"version"`
+		Services map[string]*serviceYAML `yaml:"services" json:"services"`
+	}{
+		Version:  "2",
+		Services: servicesAsYAML,
+	}, nil
 }
 
 // NewConfig creates a v2.Config from yaml bytes

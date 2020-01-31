@@ -12,7 +12,7 @@
 package testutil
 
 import (
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // SocketType is either TCP or UNIX Socket.
@@ -49,8 +49,8 @@ func AllTLSSettings() []TLSSetting {
 
 //TODO: Something is still quite wrong with the design here:
 //      Should pg/mysql logic live here?  It feels wrong...
-func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []config_v1.StoredSecret {
-	var secrets []config_v1.StoredSecret
+func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []*config_v2.Credential {
+	var secrets []*config_v2.Credential
 	var host string
 
 	switch tlsSetting {
@@ -64,26 +64,26 @@ func (tlsSetting TLSSetting) toSecrets(dbConfig DBConfig) []config_v1.StoredSecr
 
 	switch dbConfig.Protocol {
 	case "pg":
-		secrets = append(secrets, config_v1.StoredSecret{
-			Name:     "host",
-			Provider: "literal",
-			ID:       host,
+		secrets = append(secrets, &config_v2.Credential{
+			Name: "host",
+			From: "literal",
+			Get:  host,
 		})
-		secrets = append(secrets, config_v1.StoredSecret{
-			Name:     "port",
-			Provider: "literal",
-			ID:       dbConfig.Port,
+		secrets = append(secrets, &config_v2.Credential{
+			Name: "port",
+			From: "literal",
+			Get:  dbConfig.Port,
 		})
 	case "mysql":
-		secrets = append(secrets, config_v1.StoredSecret{
-			Name:     "host",
-			Provider: "literal",
-			ID:       host,
+		secrets = append(secrets, &config_v2.Credential{
+			Name: "host",
+			From: "literal",
+			Get:  host,
 		})
-		secrets = append(secrets, config_v1.StoredSecret{
-			Name:     "port",
-			Provider: "literal",
-			ID:       dbConfig.Port,
+		secrets = append(secrets, &config_v2.Credential{
+			Name: "port",
+			From: "literal",
+			Get:  dbConfig.Port,
 		})
 	default:
 		panic("Invalid DB_PROTOCOL provided")
@@ -115,11 +115,11 @@ func AllSSLModes() []SSLMode {
 
 // For Secretless, sslmode="" is equivalent to not setting sslmode at all.
 // Therefore, this will work for the "Default" case too.
-func (sslMode SSLMode) toSecret() config_v1.StoredSecret {
-	return config_v1.StoredSecret{
-		Name:     "sslmode",
-		Provider: "literal",
-		ID:       string(sslMode),
+func (sslMode SSLMode) toSecret() *config_v2.Credential {
+	return &config_v2.Credential{
+		Name: "sslmode",
+		From: "literal",
+		Get:  string(sslMode),
 	}
 }
 
@@ -133,22 +133,22 @@ func AllAuthCredentialsInvalidity() []AuthCredentialInvalidity {
 	return []AuthCredentialInvalidity{true, false}
 }
 
-func (authCredentialInvalidity AuthCredentialInvalidity) toSecrets() []config_v1.StoredSecret {
+func (authCredentialInvalidity AuthCredentialInvalidity) toSecrets() []*config_v2.Credential {
 	password := sampleDbConfig.Password
 	if authCredentialInvalidity {
 		password = "wrong-password"
 	}
 
-	return []config_v1.StoredSecret{
+	return []*config_v2.Credential{
 		{
-			Name:     "username",
-			Provider: "literal",
-			ID:       sampleDbConfig.User,
+			Name: "username",
+			From: "literal",
+			Get:  sampleDbConfig.User,
 		},
 		{
-			Name:     "password",
-			Provider: "literal",
-			ID:       password,
+			Name: "password",
+			From: "literal",
+			Get:  password,
 		},
 	}
 }
@@ -172,7 +172,7 @@ func AllRootCertStatuses() []RootCertStatus {
 	return []RootCertStatus{Undefined, Valid, Invalid, Malformed}
 }
 
-func (sslRootCertType RootCertStatus) toSecret() config_v1.StoredSecret {
+func (sslRootCertType RootCertStatus) toSecret() *config_v2.Credential {
 	provider := "literal"
 
 	switch sslRootCertType {
@@ -180,10 +180,10 @@ func (sslRootCertType RootCertStatus) toSecret() config_v1.StoredSecret {
 		provider = "file"
 	}
 
-	return config_v1.StoredSecret{
-		Name:     "sslrootcert",
-		Provider: provider,
-		ID:       string(sslRootCertType),
+	return &config_v2.Credential{
+		Name: "sslrootcert",
+		From: provider,
+		Get:  string(sslRootCertType),
 	}
 }
 
@@ -208,17 +208,17 @@ func AllPrivateKeyStatuses() []PrivateKeyStatus {
 	}
 }
 
-func (status PrivateKeyStatus) toSecret() config_v1.StoredSecret {
+func (status PrivateKeyStatus) toSecret() *config_v2.Credential {
 
 	provider := "literal"
 	if status == PrivateKeyValid || status == PrivateKeyNotSignedByCA {
 		provider = "file"
 	}
 
-	return config_v1.StoredSecret{
-		Name:     "sslkey",
-		Provider: provider,
-		ID:       string(status),
+	return &config_v2.Credential{
+		Name: "sslkey",
+		From: provider,
+		Get:  string(status),
 	}
 }
 
@@ -243,16 +243,16 @@ func AllPublicCertStatuses() []PublicCertStatus {
 	}
 }
 
-func (status PublicCertStatus) toSecret() config_v1.StoredSecret {
+func (status PublicCertStatus) toSecret() *config_v2.Credential {
 
 	provider := "literal"
 	if status == PublicCertValid || status == PublicCertNotSignedByCA {
 		provider = "file"
 	}
 
-	return config_v1.StoredSecret{
-		Name:     "sslcert",
-		Provider: provider,
-		ID:       string(status),
+	return &config_v2.Credential{
+		Name: "sslcert",
+		From: provider,
+		Get:  string(status),
 	}
 }

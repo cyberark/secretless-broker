@@ -58,7 +58,9 @@ spec:
         imagePullPolicy: Always
         args: ["-f", "/etc/secretless/secretless.yml"]
         ports:
-        - containerPort: 5432
+        - containerPort: 15432   # for PostgreSQL TCP
+        - containerPort: 13306   # for MySQL TCP
+        - containerPort: 11433   # for MSSQL TCP
         livenessProbe:
           httpGet:
             path: /live

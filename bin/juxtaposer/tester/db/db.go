@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
+	mssql "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/mssql"
 	mysql "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/mysql"
 	postgres "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/postgres"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
@@ -21,6 +22,7 @@ type DriverManager struct {
 }
 
 var DbTesterImplementatons = map[string]func() (api.DbTester, error){
+	"mssql":     mssql.NewTester,
 	"mysql-5.7": mysql.NewTester,
 	"postgres":  postgres.NewTester,
 }

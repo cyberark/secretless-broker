@@ -1,78 +1,68 @@
 package testutil
 
 import (
-	config_v1 "github.com/cyberark/secretless-broker/pkg/secretless/config/v1"
+	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
 // GenerateConfigurations returns a Secretless Config along with a comprehensive
 // list of LiveConfigurations for use in tests.
 // TODO: consider parametrising ConnectPort generator
-func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
+func GenerateConfigurations() (config_v2.Config, LiveConfigurations) {
 	// initialised with health-check listener and handler
-	secretlessConfig := config_v1.Config{
-		Listeners: []config_v1.Listener{
+	secretlessConfig := config_v2.Config{
+		Services: []*config_v2.Service{
 			{
-				Debug:    true,
+				Debug:           true,
+				Connector:       "mysql",
+				ConnectorConfig: nil,
+				Credentials: []*config_v2.Credential{
+					{
+						Name: "host",
+						From: "literal",
+						Get:  sampleDbConfig.HostWithTLS,
+					},
+					{
+						Name: "username",
+						From: "literal",
+						Get:  sampleDbConfig.User,
+					},
+					{
+						Name: "password",
+						From: "literal",
+						Get:  sampleDbConfig.Password,
+					},
+				},
+				ListenOn: "unix:///sock/mysql.sock",
 				Name:     "health-check",
-				Protocol: "mysql",
-				Socket:   "/sock/mysql.sock",
 			},
 			{
-				Debug:    true,
+				Debug:           true,
+				Connector:       "pg",
+				ConnectorConfig: nil,
+				Credentials: []*config_v2.Credential{
+					{
+						Name: "host",
+						From: "literal",
+						Get:  "health-check",
+					},
+					{
+						Name: "port",
+						From: "literal",
+						Get:  "3306",
+					},
+					{
+						Name: "username",
+						From: "literal",
+						Get:  "health-check",
+					},
+					{
+						Name: "password",
+						From: "literal",
+						Get:  "health-check",
+					},
+				},
+				ListenOn: "tcp://0.0.0.0:5432",
 				Name:     "pg-bench",
-				Protocol: "pg",
-				Address:  "0.0.0.0:5432",
-			},
-		},
-		Handlers: []config_v1.Handler{
-			{
-				Name:         "health-check",
-				ListenerName: "health-check",
-				Debug:        true,
-				Credentials: []config_v1.StoredSecret{
-					{
-						Name:     "host",
-						Provider: "literal",
-						ID:       "health-check",
-					},
-					{
-						Name:     "port",
-						Provider: "literal",
-						ID:       "3306",
-					},
-					{
-						Name:     "username",
-						Provider: "literal",
-						ID:       "health-check",
-					},
-					{
-						Name:     "password",
-						Provider: "literal",
-						ID:       "health-check",
-					},
-				},
-			},
-			{
-				Name:         "pg-bench",
-				ListenerName: "pg-bench",
-				Debug:        true,
-				Credentials: []config_v1.StoredSecret{
-					{
-						Name:     "host",
-						Provider: "literal",
-						ID:       sampleDbConfig.HostWithTLS,
-					},
-					{
-						Name:     "username",
-						Provider: "literal",
-						ID:       sampleDbConfig.User,
-					},
-					{
-						Name:     "password",
-						Provider: "literal",
-						ID:       sampleDbConfig.Password,
-					},
-				},
 			},
 		},
 	}
@@ -100,19 +90,9 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 									Port:       portNumber,
 								}
 
-								listener := config_v1.Listener{
-									Name: "listener_" + connectionPort.ToPortString(),
-									// TODO: grab value from envvar for flexibility
-									Protocol: sampleDbConfig.Protocol,
-									Debug:    true,
-								}
-								handler := config_v1.Handler{
-									Name:         "handler_" + connectionPort.ToPortString(),
-									Debug:        true,
-									ListenerName: "listener_" + connectionPort.ToPortString(),
-									// auth credentials
-									Credentials: areAuthCredentialsInvalid.toSecrets(),
-								}
+								name := "test_service_" + connectionPort.ToPortString()
+								credentials := areAuthCredentialsInvalid.toSecrets()
+
 								liveConfiguration := LiveConfiguration{
 									AbstractConfiguration: AbstractConfiguration{
 										SocketType:               socketType,
@@ -126,8 +106,8 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 									ConnectionPort: connectionPort,
 								}
 
-								handler.Credentials = append(
-									handler.Credentials,
+								credentials = append(
+									credentials,
 									// rootCertStatus
 									rootCertStatus.toSecret(),
 									//sslMode
@@ -138,22 +118,33 @@ func GenerateConfigurations() (config_v1.Config, LiveConfigurations) {
 									publicCertStatus.toSecret(),
 								)
 								// serverTLSSetting
-								handler.Credentials = append(
-									handler.Credentials,
+								credentials = append(
+									credentials,
 									serverTLSSetting.toSecrets(sampleDbConfig)...,
 								)
 
 								// socketType
+								address := ""
 								switch socketType {
 								case TCP:
-									listener.Address = "0.0.0.0:" + connectionPort.ToPortString()
+									address = "tcp://0.0.0.0:" + connectionPort.ToPortString()
 								case Socket:
-									listener.Socket = connectionPort.ToSocketPath()
+									address = "unix://" + connectionPort.ToSocketPath()
 								}
 
-								secretlessConfig.Listeners = append(secretlessConfig.Listeners, listener)
-								secretlessConfig.Handlers = append(secretlessConfig.Handlers, handler)
+								svc := &config_v2.Service{
+									Debug: true,
+									// TODO: grab value from envvar for flexibility
+									Connector:       sampleDbConfig.Protocol,
+									ConnectorConfig: nil,
+									Credentials:     credentials,
+									ListenOn:        config_v2.NetworkAddress(address),
+									Name:            name,
+								}
 
+								secretlessConfig.Services = append(
+									secretlessConfig.Services,
+									svc)
 								liveConfigurations = append(liveConfigurations, liveConfiguration)
 
 								portNumber++

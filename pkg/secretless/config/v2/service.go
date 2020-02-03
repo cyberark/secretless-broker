@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,7 +36,12 @@ func (s serviceYAML) Validate() error {
 type connectorConfig []byte
 
 func (c connectorConfig) MarshalYAML() (interface{}, error) {
-	return string(c), nil
+	var out interface{}
+	err := yaml.Unmarshal(c, &out)
+	if err != nil {
+		err = errors.Wrap(err, "failed to marshal connectorConfig to YAML")
+	}
+	return out, err
 }
 
 // Service represents the configuration of a Secretless proxy service. It

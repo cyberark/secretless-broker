@@ -8,7 +8,7 @@ import (
 )
 
 type configYAML struct {
-	Services map[string]*serviceYAML
+	Services map[string]*serviceYAML `yaml:"services" json:"services"`
 }
 
 // Validate verifies the completeness and correctness of the configYAML.

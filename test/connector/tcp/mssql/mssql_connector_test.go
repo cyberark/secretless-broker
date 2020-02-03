@@ -18,6 +18,10 @@ func TestMSSQLConnector(t *testing.T) {
 		RunConnectivityTests(t, pythonODBCExec)
 	})
 
+	t.Run("java-JDBC", func(t *testing.T) {
+		RunConnectivityTests(t, javaJDBCExec)
+	})
+
 	t.Run("go-mssql", func(t *testing.T) {
 		RunConnectivityTests(t, gomssqlExec)
 	})
@@ -35,7 +39,7 @@ func RunConnectivityTests(t *testing.T, queryExec dbQueryExecutor) {
 		// Execute Query
 		out, err := queryExec(
 			defaultSecretlessDbConfig(),
-			fmt.Sprintf("select %s, '%s'", testInt, testString),
+			fmt.Sprintf("SELECT %s AS sum, '%s' AS str", testInt, testString),
 		)
 
 		// Test the returned values

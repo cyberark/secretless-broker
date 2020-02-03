@@ -18,7 +18,7 @@ contribute support for a new Target Service.
 
 <img src="/img/secretless_internal_architecture.svg" alt="Secretless Broker Internal Architecture">
 
-In our [reference](/docs/overview/how_it_works.html), we break down how the
+In our [reference](https://docs.secretless.io/Latest/en/Content/Overview/scl_how_it_works.htm), we break down how the
 Secretless Broker internal architecture handles incoming requests. Every target
 service that Secretless Broker natively supports has its own Service Connector
 implemented in the Secretless internals.

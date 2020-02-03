@@ -214,4 +214,4 @@ That's it!
   <img src="/img/its_magic.jpg" class="k8s-img" alt="It's Magic"/>
 </div>
 
-For more info on configuring Secretless for your own use case, see the <a href="https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm">Secretless Documentation</a>
+For more info on configuring Secretless for your own use case, see the <a href="https://docs.secretless.io/Latest/en/Content/Overview/scl_how_it_works.htm">Secretless Documentation</a>

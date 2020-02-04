@@ -3,7 +3,7 @@ driver: postgres
 
 comparison:
   baselineBackend: pg_direct
-#  recreateConnections: true
+  recreateConnections: true
   rounds: 10000
   silent: false
   threads: 1
@@ -15,11 +15,11 @@ formatters:
 
 backends:
   pg_direct:
-    host: REPLACEME
+    host: *****REDACTED*****
     port: 5432
-    username: REPLACEME
-    password: REPLACEME
-    database: secretless_xa
+    username: *****REDACTED*****
+    password: *****REDACTED*****
+    database: *****REDACTED*****
 
   pg_secretless_tcp:
     host: localhost

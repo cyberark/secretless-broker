@@ -16,13 +16,13 @@ main:
 
 footer-docs:
   - title: Why Secretless?
-    url: https://docs.secretless.io/Latest/en/Content/Overview/overview.htm#WhySecretless
+    url: https://docs.secretless.io/Latest/en/Content/Overview/scl_secretless_overview.htm#WhySecretless
     target: target="_blank" rel="noopener noreferrer"
   - title: Key Terms
-    url: https://docs.secretless.io/Latest/en/Content/Overview/key_terms.htm
+    url: https://docs.secretless.io/Latest/en/Content/Overview/scl_key_terms.htm
     target: target="_blank" rel="noopener noreferrer"
   - title: Fundamentals
-    url: https://docs.secretless.io/Latest/en/Content/Overview/how_it_works.htm
+    url: https://docs.secretless.io/Latest/en/Content/Overview/scl_how_it_works.htm
     target: target="_blank" rel="noopener noreferrer"
   # - title: Plugin Reference
   #   url: https://secretless.io/generated/pkg_secretless_plugin_v1.html

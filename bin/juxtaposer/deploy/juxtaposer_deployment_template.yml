@@ -36,6 +36,8 @@ spec:
         - name: ${APP_NAME}-sockets
           emptyDir:
             medium: Memory
+        - name: persistent-log
+          emptyDir: {}
 
       containers:
       - name: ${APP_NAME}
@@ -43,7 +45,7 @@ spec:
         imagePullPolicy: Always
         # command: [ "/bin/sleep", "999d" ]
         args: ["-c", "-t", "${TEST_DURATION}", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
-        # command: ["sh", "-c", "juxtaposer -t ${TEST_DURATION} -f /etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml &> /tmp/output.txt && echo 'done' && ls -la /tmp/output.txt && sleep 999d"]
+        # command: ["sh", "-c", "juxtaposer -t ${TEST_DURATION} -f /etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml >>/persistent-log/output.txt 2>&1 && echo 'done' && ls -la /persistent-log/output.txt && sleep 999d"]
         # args: ["-c", "-f", "/etc/${APP_NAME}/${APP_NAME}_${CONFIG_TEMPLATE}.yml"]
 
         volumeMounts:
@@ -52,6 +54,9 @@ spec:
             readOnly: true
           - mountPath: /sock
             name: ${APP_NAME}-sockets
+            readOnly: false
+          - mountPath: /persistent-log
+            name: persistent-log
             readOnly: false
       - name: secretless
         image: ${SECRETELESS_IMAGE}
@@ -112,3 +117,11 @@ spec:
           - mountPath: /sock
             name: ${APP_NAME}-sockets
             readOnly: false
+      - name: backdoor
+        image: alpine:3.8
+        imagePullPolicy: Always
+        command: ["tail", "-f", "/dev/null"]
+        volumeMounts:
+          - mountPath: /persistent-log
+            name: persistent-log
+            readOnly: true

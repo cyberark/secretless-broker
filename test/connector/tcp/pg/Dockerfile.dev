@@ -6,3 +6,15 @@ RUN apt-get update && \
 
 RUN go get github.com/ajstarks/svgo/benchviz && \
     go get golang.org/x/tools/cmd/benchcmp
+
+# Add java8 and add to $PATH
+# Fix certificate issues
+RUN apt-get update && \
+    apt-get install -y ant \
+                       ca-certificates-java \
+                       openjdk-8-jdk && \
+    apt-get clean && \
+    update-ca-certificates -f
+
+# Setup JAVA_HOME -- useful for docker commandline
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/

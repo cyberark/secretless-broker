@@ -3,38 +3,40 @@ package tests
 import (
 	"fmt"
 	"testing"
-
-	. "github.com/cyberark/secretless-broker/test/util/testutil"
+	
 	. "github.com/smartystreets/goconvey/convey"
+
+	"github.com/cyberark/secretless-broker/test/connector/tcp/pg/pkg"
+	. "github.com/cyberark/secretless-broker/test/util/testutil"
 )
 
 func TestEssentials(t *testing.T) {
 	testCases := []Definition{
 		{
 			Description: "with username, wrong password",
-			ShouldPass: true,
+			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
 				Username: "testuser",
 				Password: "wrongpassword",
-				SSL: false,
+				SSL:      false,
 			},
 		},
 		{
 			Description: "with wrong username, wrong password",
-			ShouldPass: true,
+			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
 				Username: "wrongusername",
 				Password: "wrongpassword",
-				SSL: false,
+				SSL:      false,
 			},
 		},
 		{
 			Description: "with empty username, empty password",
-			ShouldPass: true,
+			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
 				Username: "",
 				Password: "",
-				SSL: false,
+				SSL:      false,
 			},
 		},
 	}
@@ -71,7 +73,7 @@ func TestEssentials(t *testing.T) {
 				ClientConfiguration: ClientConfiguration{
 					Username: "wrongusername",
 					Password: "wrongpassword",
-					SSL: true,
+					SSL:      true,
 				},
 			},
 		})
@@ -89,11 +91,30 @@ func TestEssentials(t *testing.T) {
 				ClientConfiguration: ClientConfiguration{
 					Username: "wrongusername",
 					Password: "wrongpassword",
-					SSL: true,
+					SSL:      true,
 				},
 				CmdOutput: StringPointer("SSL not supported"),
 			},
 		})
 	})
 
+	Convey("JDBC", t, func() {
+		RunJDBCTestCase := NewRunTestCase(pkg.RunJDBCQuery)
+
+		Convey(fmt.Sprintf("Connect over %s", TCP), func() {
+
+			for _, testCaseData := range testCases {
+				tc := TestCase{
+					AbstractConfiguration: AbstractConfiguration{
+						SocketType:     TCP,
+						TLSSetting:     TLS,
+						SSLMode:        Default,
+						RootCertStatus: Undefined,
+					},
+					Definition: testCaseData,
+				}
+				RunJDBCTestCase(tc)
+			}
+		})
+	})
 }

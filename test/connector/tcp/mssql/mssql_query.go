@@ -25,6 +25,8 @@ type dbConfig struct {
 
 type dbQueryExecutor func(cfg dbConfig, query string) (string, error)
 
+const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
+
 func defaultSecretlessDbConfig() dbConfig {
 	return dbConfig{
 		Host:     testutil.SecretlessHost,
@@ -94,6 +96,46 @@ func pythonODBCExec(
 
 	out, err := exec.Command(
 		"./odbc_client.py",
+		args...,
+	).Output()
+
+	if err != nil {
+		if exitErrr, ok := err.(*exec.ExitError); ok {
+			return "", errors.New(string(exitErrr.Stderr))
+		}
+
+		return "", err
+	}
+
+	return string(out), nil
+}
+
+// runs queries using Java JDBC
+// Jar modified from this source: http://jdbcsql.sourceforge.net/
+func javaJDBCExec(
+	cfg dbConfig,
+	query string,
+) (string, error) {
+
+	args := []string{
+		"-jar", jdbcJARPath,
+		"-m", "mssql",
+		"-h", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		"-U", cfg.Username,
+		"-P", cfg.Password,
+	}
+
+	// For JDBC, database is not optional. If empty, add the default MsSQL database
+	if db := cfg.Database; db == "" {
+		args = append(args, "-d", "tempdb")
+	} else {
+		args = append(args, "-d", db)
+	}
+
+	args = append(args, query)
+
+	out, err := exec.Command(
+		"java",
 		args...,
 	).Output()
 

@@ -11,10 +11,12 @@ alongside Secretless to compare the following scenarios:
 
 | Backend       | Baseline          | Compare With                       | Connection Type |
 | ---           |---                | ---                                |---              |
+| MSSQL         | Direct connection | Secretless (persistent connection) | TCP port        |
 | MySQL         | Direct connection | Secretless (persistent connection) | Unix socket     |
 | MySQL         | Direct connection | Secretless (persistent connection) | TCP port        |
 | Postgres      | Direct connection | Secretless (persistent connection) | Unix socket     |
 | Postgres      | Direct connection | Secretless (persistent connection) | TCP port        |
+| MSSQL         | Direct connection | Secretless (recreated connection)  | TCP port        |
 | MySQL         | Direct connection | Secretless (recreated connection)  | Unix socket     |
 | MySQL         | Direct connection | Secretless (recreated connection)  | TCP port        |
 | Postgres      | Direct connection | Secretless (recreated connection)  | Unix socket     |
@@ -80,6 +82,17 @@ docker run --name mysql-test-db \
            mysql:5
 ```
 
+#### MSSQL
+
+```
+docker run --name mssql-test-db \
+           -p 1434:1433 \
+           -e ACCEPT_EULA=Y \
+           -e SA_PASSWORD="MYp4ssword1" \
+           -d \
+           mcr.microsoft.com/mssql/server:2017-latest
+```
+
 ### Run Secretless Broker
 
 _Note: This step is optional but it is required for this specific example since it tests the broker's
@@ -113,6 +126,15 @@ services:
       host: 127.0.0.1
       port: 5433
       sslmode: disable
+
+  mssql-tcp:
+    connector: mssql
+    listenOn: tcp://0.0.0.0:1433
+    credentials:
+      username: sa
+      password: MYp4ssword1
+      host: 127.0.0.1
+      port: 1434
 ```
 
   </p>
@@ -137,12 +159,14 @@ database backend you want to test:
     
 ```yaml
 ---
+#driver: mssql
 #driver: mysql-5.7
 driver: postgres
 
 comparison:
   baselineBackend: pg_direct
 #  baselineBackend: mysql_direct
+#  baselineBackend: mssql_direct
 #  recreateConnections: true
 #  sqlStatementType: select
 #  rounds: 1000
@@ -179,6 +203,17 @@ backends:
     password: mypassword
     sslmode: disable
     debug: false
+    ignore: true
+
+  mssql_secretless:
+    host: 127.0.0.1
+    ignore: true
+
+  mssql_direct:
+    host: 127.0.0.1
+    port: 1434
+    username: sa
+    password: MYp4ssword1
     ignore: true
 ```
 
@@ -321,6 +356,7 @@ backends:
 
 ## Supported Drivers:
 
+- `mssql`
 - `mysql-5.7`
 - `postgres`
 

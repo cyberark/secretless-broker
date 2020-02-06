@@ -8,8 +8,8 @@ import (
 	"github.com/cyberark/secretless-broker/test/util/testutil"
 )
 
-
 var RunTestCase testutil.RunTestCaseType
+
 // If the SecretlessHost is unavailable, bail out...
 //
 func init() {

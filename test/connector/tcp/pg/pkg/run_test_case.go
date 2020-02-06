@@ -10,6 +10,8 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 )
 
+const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
+
 // RunQuery runs a simply test query for the given client configuration and port.
 func RunQuery(
 	clientConfig testutil.ClientConfiguration,
@@ -49,6 +51,47 @@ func RunQuery(
 	convey.Println(strings.Join(append([]string{"psql"}, args...), " "))
 
 	cmdOut, err := exec.Command("psql", args...).CombinedOutput()
+
+	// Post command logs
+	//TODO: deal with verbose
+	if testutil.Verbose {
+		if err != nil {
+			convey.Println("--->> RESULTS")
+			convey.Println("----- ERROR: ")
+			convey.Println(err.Error())
+		}
+		convey.Println("----- OUTPUT: ")
+		convey.Println(string(cmdOut))
+	}
+	convey.Println("---<< END")
+	convey.Println("")
+
+	return string(cmdOut), err
+}
+
+// RunQuery runs a simply test query for the given client configuration and port.
+func RunJDBCQuery(
+	clientConfig testutil.ClientConfiguration,
+	connectPort testutil.ConnectionPort,
+) (string, error) {
+
+	args := []string{
+		"-jar", jdbcJARPath,
+		"-d", "postgres",
+		"-m", "postgresql",
+		"-h", fmt.Sprintf("%s:%d", connectPort.Host(), connectPort.Port),
+		"-U", clientConfig.Username,
+		"-P", clientConfig.Password,
+		"select count(*) from test.test",
+	}
+
+	// Pre command logs
+	convey.Println("")
+	convey.Println("---->> ARGS")
+	fmt.Println(args)
+
+	convey.Println("---<< EXECUTED")
+	cmdOut, err := exec.Command("java", args...).CombinedOutput()
 
 	// Post command logs
 	//TODO: deal with verbose

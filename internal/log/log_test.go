@@ -223,6 +223,5 @@ func (name methodName) requiresFormatString() bool {
 // debugOnly identifies methods that produce output only when the Logger is in
 // debug mode.
 func (name methodName) debugOnly() bool {
-	return strings.HasPrefix(string(name), "Debug") ||
-		strings.HasPrefix(string(name), "Info")
+	return strings.HasPrefix(string(name), "Debug")
 }

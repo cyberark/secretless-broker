@@ -154,14 +154,14 @@ func (proxy *proxyService) Start() error {
 			}
 
 			go func() {
-				proxy.logger.Infof("Serving connection on %v", conn.LocalAddr())
+				proxy.logger.Debugf("Serving SSH Agent connection on %v", conn.LocalAddr())
 				err := agent.ServeAgent(proxy.keyring, conn)
 				if err != nil && err != io.EOF {
 					logger.Errorf("Failed on handle connection: %s", err)
 					return
 				}
 
-				logger.Infof("Connection closed on %v", conn.LocalAddr())
+				logger.Debugf("Connection closed on %v", conn.LocalAddr())
 			}()
 		}
 	}()

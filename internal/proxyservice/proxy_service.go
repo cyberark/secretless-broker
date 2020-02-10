@@ -52,7 +52,7 @@ func (s *proxyServices) Start() error {
 func (s *proxyServices) Stop() error {
 	var stopFailures []string
 
-	s.logger.Infoln("Stopping services...")
+	s.logger.Infoln("Stopping all services...")
 	for _, svc := range s.runningServices {
 		err := svc.Stop()
 		if err != nil {
@@ -166,7 +166,7 @@ func (s *proxyServices) createHTTPService(
 		return nil, err
 	}
 
-	s.logger.Warnf("Starting HTTP listener on %s...", netAddr.Address())
+	s.logger.Infof("Starting HTTP listener on %s...", netAddr.Address())
 
 	// Create the subservices
 
@@ -185,7 +185,7 @@ func (s *proxyServices) createHTTPService(
 			return nil, err
 		}
 
-		s.logger.Warnf("Starting HTTP subservice %s...", subCfg.Connector)
+		s.logger.Infof("Starting HTTP subservice %s...", subCfg.Connector)
 
 		subservices = append(subservices, httpproxy.Subservice{
 			ConnectorID:              subCfg.Connector, // TODO: Rename connectorID
@@ -223,7 +223,7 @@ func (s *proxyServices) createSSHService(
 		return nil, err
 	}
 
-	s.logger.Warnf("Starting SSH listener on %s...", netAddr.Address())
+	s.logger.Infof("Starting SSH listener on %s...", netAddr.Address())
 
 	connResources := s.connectorResources(config)
 	credsRetriever := s.credsRetriever(config.Credentials)
@@ -256,7 +256,7 @@ func (s *proxyServices) createSSHAgentService(
 		return nil, err
 	}
 
-	s.logger.Warnf("Starting SSH Agent listener on %s...", netAddr.Address())
+	s.logger.Infof("Starting SSH Agent listener on %s...", netAddr.Address())
 
 	connResources := s.connectorResources(config)
 	credsRetriever := s.credsRetriever(config.Credentials)
@@ -290,7 +290,7 @@ func (s *proxyServices) createTCPService(
 		return nil, err
 	}
 
-	s.logger.Warnf("Starting TCP listener on %s...", netAddr.Address())
+	s.logger.Infof("Starting TCP listener on %s...", netAddr.Address())
 
 	connResources := s.connectorResources(config)
 	svcConnector := pluginInst.NewConnector(connResources)

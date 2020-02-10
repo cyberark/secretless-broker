@@ -118,7 +118,7 @@ func loadPluginFiles(
 			continue
 		}
 
-		logger.Infof("Adding '%s' as a plugin...", fileName)
+		logger.Debugf("Adding '%s' as a plugin...", fileName)
 
 		rawPlugins[fileName[:len(fileName)-3]] = pluginObj
 	}
@@ -180,7 +180,7 @@ func ExternalPluginsWithOptions(
 	plugins := NewPlugins()
 
 	for rawPluginName, rawPlugin := range rawPlugins {
-		logger.Infof("Loading plugin '%s'...", rawPluginName)
+		logger.Debugf("Loading plugin '%s'...", rawPluginName)
 
 		logPluginLoadError := func(err error) {
 			logger.Errorf("failed to load plugin '%s': %s", rawPluginName, err)
@@ -228,7 +228,7 @@ func ExternalPluginsWithOptions(
 			logPluginLoadError(err)
 			continue
 		}
-		logger.Warnf("Plugin %s/%s loaded", pluginType, pluginID)
+		logger.Infof("Plugin %s/%s loaded", pluginType, pluginID)
 	}
 	return &plugins, nil
 }

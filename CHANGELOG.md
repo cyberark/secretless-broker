@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Default logging level changed from `Warn` to `Info`. Some logging message
+  levels were readjusted to retain the same UX. (#1127)
+
 ## [1.5.0] - 2020-01-29
 
 ### Added

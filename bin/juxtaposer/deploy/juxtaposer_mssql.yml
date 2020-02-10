@@ -1,0 +1,27 @@
+---
+driver: mysql-5.7
+
+comparison:
+  baselineBackend: mssql_direct
+#  recreateConnections: true
+  rounds: 10000
+  threads: 1
+  silent: false
+
+formatters:
+  json:
+    outputFile: ./results.json
+  stdout:
+
+backends:
+  mssql_direct:
+    host: REPLACEME
+    port: 1433
+    username: REPLACEME
+    password: REPLACEME
+    database: secretless_xa
+
+  mssql_secretless_tcp:
+    host: 127.0.0.1
+    port: 11433
+    database: secretless

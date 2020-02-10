@@ -8,6 +8,7 @@ CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")
 AUTHENTICATOR_ID_ENCODED="$(python3 -c "import urllib.parse; print(urllib.parse.quote(input(),safe=''))" <<< "$AUTHENTICATOR_ID")"
 echo "${AUTHENTICATOR_ID_ENCODED}"
 
+mkdir -p "$CURRENT_DIR/tmp"
 sed -e "s#\${APP_NAME}#$APP_NAME#g" \
     -e "s#\${APP_SERVICE_ACCOUNT}#$APP_SERVICE_ACCOUNT#g" \
     -e "s#\${APP_NAMESPACE}#$TEST_APP_NAMESPACE_NAME#g" \

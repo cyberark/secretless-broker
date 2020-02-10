@@ -1,10 +1,12 @@
 ---
 #driver: mysql-5.7
 driver: postgres
+#driver: mssql
 
 comparison:
   baselineBackend: pg_direct
 #  baselineBackend: mysql_direct
+#  baselineBackend: mssql_direct
 #  recreateConnections: true
 #  sqlStatementType: select
 #  rounds: 1000
@@ -40,5 +42,18 @@ backends:
     username: myuser
     password: mypassword
     sslmode: disable
+    debug: false
+    ignore: true
+
+  mssql_secretless:
+    host: 127.0.0.1
+    port: 2433
+    ignore: true
+
+  mssql_direct:
+    host: 127.0.0.1
+    port: 1433
+    username: sa
+    password: MYp4ssword1
     debug: false
     ignore: true

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/tester/api"
+	mssql "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/mssql"
 	mysql "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/mysql"
 	postgres "github.com/cyberark/secretless-broker/bin/juxtaposer/tester/db/postgres"
 	"github.com/cyberark/secretless-broker/bin/juxtaposer/timing"
@@ -21,6 +22,7 @@ type DriverManager struct {
 }
 
 var DbTesterImplementatons = map[string]func() (api.DbTester, error){
+	"mssql":     mssql.NewTester,
 	"mysql-5.7": mysql.NewTester,
 	"postgres":  postgres.NewTester,
 }
@@ -36,12 +38,12 @@ const CreateTableStatement = `
     id           INTEGER,
     birth_date   DATE,
     result       DECIMAL,
-    passed       BOOLEAN
+    passed       BIT
 `
 
 var QueryTypes = map[string]string{
 	"dropTable": fmt.Sprintf("DROP TABLE IF EXISTS %s;", DefaultTableName),
-	"createTable": fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);",
+	"createTable": fmt.Sprintf("CREATE TABLE %s (%s);",
 		DefaultTableName,
 		CreateTableStatement),
 	"insertItem": fmt.Sprintf(`INSERT INTO %s (name, id, birth_date, result, passed)
@@ -80,7 +82,8 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 			itemIndex,
 			time.Now().AddDate(0, 0, itemIndex),
 			float32(itemIndex)*10,
-			rand.Int31()&(1<<30) == 0)
+			rand.Int31()&0x1,
+		)
 
 		if err != nil {
 			log.Printf("ERROR! Could not insert canned values into DB!")

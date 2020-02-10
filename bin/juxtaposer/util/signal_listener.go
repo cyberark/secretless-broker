@@ -14,9 +14,10 @@ func RegisterShutdownSignalCallback(shutdownChannel chan<- bool) {
 		syscall.SIGABRT,
 		syscall.SIGHUP,
 		syscall.SIGINT,
-		syscall.SIGUSR1,
+		syscall.SIGPIPE,
 		syscall.SIGQUIT,
 		syscall.SIGTERM,
+		syscall.SIGUSR1,
 	)
 
 	go func() {

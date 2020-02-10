@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.5.0] 2020-01-29
+## [1.5.0] - 2020-01-29
 
 ### Added
 - Added option to specify MSSQL edition in tests (#1093)
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - MSSQL connector faithfully propagates login response (#1106)
 - MSSQL connector faithfully propagates login request (#1107)
 
-## [1.4.2] 2020-01-08
+## [1.4.2] - 2020-01-08
 
 ### Added
 - Updated CONTRIBUTING.md with instructions for using `go-mssqldb` submodule (#1044)
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Secretless doesn't exit when it can't start a configured connector (#1057)
 - Secretless has insufficient logs when the config file has trouble loading (#1062)
 
-## [1.4.1] 2019-12-11
+## [1.4.1] - 2019-12-11
 
 ### Added
 - Added [README](https://github.com/cyberark/secretless-broker/blob/master/internal/plugin/connectors/tcp/mssql/README.md) for the MSSQL connector (#1003)
@@ -60,7 +60,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated Conjur provider to log and exit on repeated authentication failure
   (#1035)
 
-## [1.4.0] 2019-12-04
+## [1.4.0] - 2019-12-04
 
 ### Added
 - Added generic HTTP connector to enable writing new HTTP connectors via
@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated "ozzo-validation" dependency to latest version
 - Make forceSSL setting explicit in e2e tests
 
-## [1.3.0] 2019-11-18
+## [1.3.0] - 2019-11-18
 
 ### Added
 - Added trivy security scan to project pipeline (#986)
@@ -94,17 +94,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Ensure MySQL uses appropriate default sslmode value (#928)
 - Improved pg error propagation (#974)
 
-## [1.2.0] 2019-10-21
+## [1.2.0] - 2019-10-21
 
 ### Added
-
 - Added a new public [plugin interface](pkg/secretless/plugin) for building connector plugins
 - Added a new public [log interface](pkg/secretless/log) for standardizing logging
 - Added code coverage reporting to unit test output
 - Added ability to run k8s-demo test on GKE
 
 ### Changed
-
 - Refactored existing connectors to use new public connector plugin interface
 - Changed the core proxy and plugin manager to support the new public connector
   plugin interface
@@ -117,7 +115,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated Conjur tests to use official CLI image
 
 ### Fixed
-
 - Improve namespace cleanup in k8s-ci/test
 - Add COMPOSE_PROJECT_NAME to tests to fix namespace collision errors
 - Updated k8s-demo to use LoadBalancer on Services to avoid NodePort conflicts
@@ -125,10 +122,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Improved error-handling / retry logic in k8s-ci
 
 ### Deprecated
-
 - `Protocol` key in v2 config is replaced with `connector` key
 
-## [1.1.0] 2019-08-09
+## [1.1.0] - 2019-08-09
 
 ### Added
 - Added version output to logs on startup
@@ -162,7 +158,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Standardized spacing in `testutil` package
 - Fixed changelog prefill script
 
-## [1.0.0] 2019-07-03
+## [1.0.0] - 2019-07-03
 
 ### Added
 - Added aggregation script to performance test code
@@ -184,7 +180,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Removed deprecated full-demo
 
-## [0.8.0] 2019-06-18
+## [0.8.0] - 2019-06-18
 
 ### Added
 - Added a performance testing tool to bin/juxtaposer
@@ -203,7 +199,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated goreleaser config to address deprecated `archive` tag
 - Revised PR template to remove unneeded manual tests
 
-## [0.7.1] 2019-05-16
+## [0.7.1] - 2019-05-16
 
 ### Added
 - Added several issue templates
@@ -219,10 +215,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Corrected tutorial issues with code snippets and spacing
 
-## [0.7.0] 2019-03-26
+## [0.7.0] - 2019-03-26
 
 ### Added
-
 - Add ability to verify plugin checksums
 - Add kubernetes secrets provider to README.md
 - Note styling in Kubernetes tutorial
@@ -235,7 +230,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add custom 404 page
 
 ### Changed
-
 - Update Kubernetes Tutorial for Simplicity and Clarity
 - Simplify fast k8s tutorial
 - Update CTA links
@@ -245,7 +239,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updating website build to gen godocs in go img
 
 ### Fixed
-
 - Fix kubernetes secrets example in README
 - Fix kubernetes-secrets-provider hash
 - Remove target=blank from footer links
@@ -258,7 +251,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix the vault test that broke due to vault CLI updates
 - Re-enable ssh-handler tests
 
-## [0.6.4] 2019-02-01
+## [0.6.4] - 2019-02-01
 
 ### Added
 - Added a design proposal for credential zeroization
@@ -273,7 +266,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated MySQL handler to handle authPluginName mismatch and to have consistent
   sequenceIds
 
-## [0.6.3] 2019-01-11
+## [0.6.3] - 2019-01-11
 
 ### Added
 - Database handlers support private-key pair as sslkey and sslcert
@@ -281,7 +274,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Permissions have been fixed for OpenShift non-root integration and use
 
-## [0.6.2] 2019-01-09
+## [0.6.2] - 2019-01-09
 
 ### Added
 - Added Kubernetes authenticator documentation for Conjur credential provider
@@ -290,7 +283,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Sanitized remaining listeners/handlers from dumping data on the CLI when debug mode is on
 - Removed developer-only debug mode from demos and examples
 
-## [0.6.1] 2019-01-08
+## [0.6.1] - 2019-01-08
 
 ### Changed
 - Updated conjur-api-go dependency
@@ -298,7 +291,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Added `/ready` and `/live` endpoints on port 5335 for checking if the broker is ready/live
 
-## [0.6.0] 2018-12-20
+## [0.6.0] - 2018-12-20
 
 ### Added
 - SSL support for MySQL and PostgreSQL handlers
@@ -310,14 +303,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Allow ./bin/test_integration to specify individual test_folders + local flag
 - Updated goreleaser process to use new image
 
-## [0.5.2] 2018-11-26
+## [0.5.2] - 2018-11-26
 
 ### Fixed
 - Updated Kubernetes secrets provider to retrieve secrets from current namespace
 - Fixed broken GitLab build referencing non-existent image
 - Fixed broken keychain provider tests, and made easier to run manually
 
-## [0.5.1] 2018-11-20
+## [0.5.1] - 2018-11-20
 
 ### Added
 - Tests for Kubernetes Secrets provider
@@ -334,10 +327,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Moved the sidecar injector functionality to its [own repo](https://github.com/cyberark/sidecar-injector)
 
-## [0.5.0] 2018-09-06
+## [0.5.0] - 2018-09-06
 
 ### Fixed
-
 - Fix for "no matching manifest for linux/amd64 in the manifest" error
 - Linter fixes
 - Fixed fast-restart http listener error
@@ -350,7 +342,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed panic when using server plugin with "match" config field
 
 ### Added
-
 - Added support for Conjur Kubernetes authenticator in Conjur provider
 - Added Kubernetes secrets provider
 - Added support for a K8s custom resource definition of Secretless Broker config
@@ -365,7 +356,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Publish quick start Docker image
 
 ### Changed
-
 - Repo moved to `cyberark`, images pushed to DockerHub
 - Updated K8s demo to use K8s secrets provider
 - Upgraded to Go1.11
@@ -374,14 +364,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update demos to use Dockerhub image
 - Name updated to Secretless Broker
 
-## [0.4.0] 2018-08-02
+## [0.4.0] - 2018-08-02
 
 ### Fixed
-
 - Update style checker to work with auto-generated plugin docs
 
 ### Added
-
 - Created plugin interface for providers
 - A demo of using Secretless in Kubernetes exists in `demos/k8s-demo`
 - The project uses the ASL 2.0 License
@@ -394,7 +382,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Project has a contributing and style guide
 
 ### Changed
-
 - Bumped the Golang version from 1.10.3 to Go1.11beta
 - Converted from using dep to using go modules
 - Updated test suite to split out unit and integration tests
@@ -408,10 +395,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The plugin package was renamed from `plugin_v1` to `plugin/v1`
 - Added support for soft-reloading of listeners
 
-## [0.3.0] 2018-06-28
+## [0.3.0] - 2018-06-28
 
 ### Added
-
 - Connection managers can be loaded with factories
 - Listeners, handlers and managers can all now run from external plugins
 - External plugin versioning now enforced
@@ -421,9 +407,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added helper for creating changelog entries
 
 ### Changed
-
-- Internal listeners and handlers use the same plugin architecture as
-external plugins
+- Internal listeners and handlers use the same plugin architecture as external plugins
 - Made Docker images have Secretless in the path for easier launching
 - Fixed CI test suite
 - Optimized many aspects of container builds
@@ -438,7 +422,8 @@ external plugins
 
 ## [0.1.0] - 2018-05-15
 
-The first tagged version.
+### Added
+- The first tagged version.
 
 [Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
@@ -452,14 +437,14 @@ The first tagged version.
 [0.6.2]: https://github.com/cyberark/secretless-broker/compare/v0.6.1...v0.6.2
 [0.6.3]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...v0.6.3
 [0.6.4]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...v0.6.4
-[0.7.0]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...v0.7.0 
-[0.7.1]: https://github.com/cyberark/secretless-broker/compare/v0.7.0...v0.7.1 
-[0.8.0]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...v0.8.0 
-[1.0.0]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...v1.0.0 
-[1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0 
-[1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0 
-[1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0 
-[1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0 
-[1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1 
-[1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2 
-[1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0 
+[0.7.0]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...v0.7.0
+[0.7.1]: https://github.com/cyberark/secretless-broker/compare/v0.7.0...v0.7.1
+[0.8.0]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...v0.8.0
+[1.0.0]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...v1.0.0
+[1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0
+[1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0
+[1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0
+[1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0
+[1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1
+[1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2
+[1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0

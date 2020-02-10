@@ -13,6 +13,14 @@ pipeline {
   }
 
   stages {
+    stage('Validate') {
+      parallel {
+        stage('Changelog') {
+          steps { sh './bin/parse-changelog' }
+        }
+      }
+    }
+
     stage('Update Submodules') {
         steps {
             sh 'git submodule update --init --recursive'
@@ -43,32 +51,32 @@ pipeline {
     }
 
     stage('Integration Tests') {
-      steps { 
+      steps {
         script {
           def directories = sh (
             returnStdout: true,
             // We run the 'find' directive first on all directories with test files, then run a 'find' directive
-            // to make sure they also contain start files. We then take the dirname, and basename respectively. 
-            script: 
+            // to make sure they also contain start files. We then take the dirname, and basename respectively.
+            script:
             '''
             find $(find ./test -name test) -name 'start' -exec dirname {} \\; | xargs -n1 basename
             '''
           ).trim().split()
 
           def integrationSteps = [:]
-        
+
           // Create an integration test stage for each directory we collected previously.
           // We want to be sure to skip any tests, such as keychain tests, that can only be ran manually.
-          directories.each { name -> 
+          directories.each { name ->
             if (name == "keychain") return
-            
+
             def stepName = "Integration: ${name}"
 
             integrationSteps[stepName] = {
               sh "./bin/run_integration ${name}"
               junit "**/test/**/junit.xml"
             }
-          } 
+          }
 
           parallel integrationSteps
         }

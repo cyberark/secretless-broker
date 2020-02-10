@@ -44,10 +44,10 @@ git_diff=$(git log --format="- %s" "${latest_version}..HEAD")
 change_date=$(date +%Y-%m-%d)
 
 changelog_snippet='\n'
-changelog_snippet+="## [%s] %s"'\n\n' # $desired_tag, $change_date (see below)
+changelog_snippet+="## [%s] - %s"'\n\n' # $desired_tag, $change_date (see below)
 changelog_snippet+="### TODO: Don't commit this without proofreading!!!"'\n\n'
 changelog_snippet+='### Added\n\n'
-changelog_snippet+='### Changed\n\n'
+changelog_snippet+='### Changed\n'
 changelog_snippet+='%s' # $git_diff (see below)
 
 echo "Adding snippet to tempfile..."
@@ -55,7 +55,7 @@ tmp_file=$(mktemp /tmp/changelog_snippet.XXXXXX)
 # Note: In this case, the format string is stored in a variable by design.
 #       Hence we are correctly ignoring shellcheck here.
 # shellcheck disable=SC2059
-printf "${changelog_snippet}" "${desired_tag}" "${change_date}" "${git_diff}" >> "${tmp_file}"
+printf "${changelog_snippet}\n" "${desired_tag}" "${change_date}" "${git_diff}" >> "${tmp_file}"
 echo "Tempfile: ${tmp_file}"
 
 echo "Adding snippet to CHANGELOG..."
@@ -64,11 +64,16 @@ sed "/^## \\[Unreleased\\]/r ${tmp_file}" CHANGELOG.md > CHANGELOG.md.tmp
 rm -f "${tmp_file}"
 
 echo "Appending link to diff..."
-echo "[${desired_tag}]: https://github.com/cyberark/secretless-broker/compare/${latest_version}...${desired_version}" $'\n' >> CHANGELOG.md.tmp
+printf "[%s]: https://github.com/cyberark/secretless-broker/compare/%s...%s\n\n" \
+ "${desired_tag}" "${latest_version}" "${desired_version}" \
+ >> CHANGELOG.md.tmp
+
+# delete newline at EOF
+sed -i '' '$ { /^$/ d;}' "CHANGELOG.md.tmp"
 
 # shellcheck disable=SC1117
 sed -i .bak \
-    "s/^\[Unreleased\]: .*/[Unreleased]: https:\/\/github.com\/cyberark\/secretless-broker\/compare\/${desired_version}...HEAD/" \
+  "s/^\[Unreleased\]: .*/[Unreleased]: https:\/\/github.com\/cyberark\/secretless-broker\/compare\/${desired_version}...HEAD/" \
     CHANGELOG.md.tmp
 
 if [[ "${dry_run}" == "true" ]]; then

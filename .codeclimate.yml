@@ -17,3 +17,5 @@ engines:
         enabled: false
   gofmt:
     enabled: true
+  dockerfilelint:
+    enabled: true

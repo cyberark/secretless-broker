@@ -1,5 +1,4 @@
 # Table of Contents
-
 - [Secretless Broker](#secretless-broker)
   - [Supported services](#currently-supported-services)
 - [Quick Start](#quick-start)

@@ -69,10 +69,7 @@ func NewWithOptions(outputBuffer io.Writer, prefix string, isDebug bool) log_api
 }
 
 func (logger *Logger) shouldPrint(severityLevel severity) bool {
-	debugOnlySeverity := severityLevel == DebugSeverity ||
-		severityLevel == InfoSeverity
-
-	return !debugOnlySeverity || logger.IsDebug
+	return logger.IsDebug || (severityLevel != DebugSeverity)
 }
 
 func prependString(prependString string, args ...interface{}) []interface{} {

@@ -145,7 +145,7 @@ func (proxy *proxyService) ServeHTTP(w gohttp.ResponseWriter, r *gohttp.Request)
 	// Log request
 
 	logMsg := "Got request %v %v %v %v"
-	logger.Infof(logMsg, r.URL.Path, r.Host, r.Method, r.URL.String())
+	logger.Debugf(logMsg, r.URL.Path, r.Host, r.Method, r.URL.String())
 
 	// Validate request
 

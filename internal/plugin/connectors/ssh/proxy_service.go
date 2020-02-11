@@ -152,7 +152,7 @@ func (proxy *proxyService) Start() error {
 					return
 				}
 
-				logger.Infof("Connection closed on %v", conn.LocalAddr())
+				logger.Debugf("Connection closed on %v", conn.LocalAddr())
 			}()
 		}
 	}()

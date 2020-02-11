@@ -131,7 +131,7 @@ func StartSecretless(params *SecretlessOptions) {
 		// TODO: This loop should probably be cleaned up rather than
 		//       rely on os.Exit() to end it.
 		for {
-			logger.Info("Waiting for new configuration...")
+			logger.Debug("Waiting for new configuration...")
 			cfg := <-configChangedChan
 
 			if allServices != nil {
@@ -142,7 +142,7 @@ func StartSecretless(params *SecretlessOptions) {
 				}
 			}
 
-			logger.Debug("Got new configuration")
+			logger.Info("Configuration found. Loading...")
 			reloadConfig(cfg)
 		}
 	}()

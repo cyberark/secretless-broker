@@ -32,7 +32,7 @@ func (connector *SingleUseConnector) sendErrorToClient(err error) {
 
 	if e := connector.mySQLClientConn.write(mysqlErrorContainer.GetPacket()); e != nil {
 		msg := "Attempted to write error %s to MySQL client but failed"
-		connector.logger.Infof(msg, e)
+		connector.logger.Warnf(msg, e)
 	}
 }
 

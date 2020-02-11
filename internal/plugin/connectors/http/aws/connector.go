@@ -38,7 +38,7 @@ func (c *Connector) Connect(
 	}
 
 	// Use metadata and credentials to sign request
-	c.logger.Infof(
+	c.logger.Debugf(
 		"Signing for service=%s region=%s",
 		reqMeta.serviceName,
 		reqMeta.region,

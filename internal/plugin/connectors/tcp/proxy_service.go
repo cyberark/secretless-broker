@@ -108,14 +108,14 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 		return errors.Wrap(err, "failed on retrieve credentials")
 	}
 
-	logger.Infof("New connection on %v.\n", clientConn.LocalAddr())
+	logger.Debugf("New connection on %v.\n", clientConn.LocalAddr())
 
 	targetConn, err = proxy.connector.Connect(clientConn, backendCredentials)
 	if err != nil {
 		return errors.Wrap(err, "failed on connect")
 	}
 
-	logger.Infof("Connection opened on %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
+	logger.Debugf("Connection opened on %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
 
 	clientErrChan, destErrChan := duplexStream(clientConn, targetConn)
 
@@ -138,7 +138,7 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 		)
 	}
 
-	logger.Infof("Connection on %v closed by %s.\n", clientConn.LocalAddr(), closer)
+	logger.Debugf("Connection on %v closed by %s.\n", clientConn.LocalAddr(), closer)
 	return nil
 }
 

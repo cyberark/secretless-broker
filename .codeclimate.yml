@@ -19,3 +19,5 @@ engines:
     enabled: true
   markdownlint:
     enabled: true
+    issue_override:
+      severity: blocker

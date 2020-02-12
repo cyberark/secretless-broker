@@ -6,9 +6,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.1] - 2020-02-12
+
+### Added
+- Added RedHat certified image build to pipeline (#1141)
+- Added pipeline step to validate changelog (#1138)
+- Added MSSQL support to juxtaposer perf testing tool (#1135)
+- Added SIGPIPE to signals handled by Secretless Juxtaposer (#1136)
+- Added JDBC Integration tests for Postgres (#1130)
+- Added JDBC Tests for MSSQL (#1124)
+- Added client params propagation to MSSQL integration tests (#1103)
+
 ### Changed
 - Default logging level changed from `Warn` to `Info`. Some logging message
   levels were readjusted to retain the same UX. (#1127)
+- Update `bin/prefill_changelog` to generate valid CHANGELOG / ensure current
+  CHANGELOG parses (#1138)
+- Converted integration tests to use configs.v2 (#1120)
+
+### Fixed
+- Fixed broken documentation links (#1122)
 
 ## [1.5.0] - 2020-01-29
 
@@ -429,7 +446,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.5.1...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -452,3 +469,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1
 [1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2
 [1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0
+[1.5.1]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...v1.5.1

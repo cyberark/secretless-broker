@@ -13,7 +13,7 @@ SECTION 1: Apache License 2.0
 >>> github.com/containerd/containerd-1.3.2
 >>> github.com/CrunchyData/crunchy-proxy-0.0.0-20170717145745-c0da73ca9dde
 >>> github.com/cyberark/conjur-api-go-0.5.2
->>> github.com/cyberark/conjur-authn-k8s-client-0.16.0
+>>> github.com/cyberark/conjur-authn-k8s-client-0.16.1
 >>> github.com/docker/distribution-2.7.1
 >>> github.com/docker/docker-1.4.2-0.20191231165639-e6f6c35b7902
 >>> github.com/docker/go-connections-0.4.0
@@ -162,7 +162,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/cyberark/conjur-authn-k8s-client-0.16.0
+>>> github.com/cyberark/conjur-authn-k8s-client-0.16.1
 
 Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 

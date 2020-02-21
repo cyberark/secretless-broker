@@ -5,6 +5,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 const pluginConflictMessage = "%s plugin ID '%s' conflicts with an existing internal plugin"
@@ -71,6 +72,7 @@ func AllAvailablePluginsWithOptions(
 
 	allHTTPPlugins := map[string]http.Plugin{}
 	allTCPPlugins := map[string]tcp.Plugin{}
+	allManagementPlugins := map[string]plugin_v1.ConnectionManager{}
 
 	// Assemble internal plugins. Plugin IDs for internal plugins are
 	// assumed to be unique because their definitions are hardcoded.
@@ -101,10 +103,14 @@ func AllAvailablePluginsWithOptions(
 		checkPluginIDConflicts("TCP", pluginID, internalPlugins, logger)
 		allTCPPlugins[pluginID] = tcpPlugin
 	}
+	for pluginID, mgmtPlugin := range externalPlugins.ManagementPlugins() {
+		allManagementPlugins[pluginID] = mgmtPlugin
+	}
 
 	return &Plugins{
-		HTTPPluginsByID: allHTTPPlugins,
-		TCPPluginsByID:  allTCPPlugins,
+		HTTPPluginsByID:       allHTTPPlugins,
+		TCPPluginsByID:        allTCPPlugins,
+		ManagementPluginsByID: allManagementPlugins,
 	}, nil
 }
 
@@ -112,15 +118,17 @@ func AllAvailablePluginsWithOptions(
 // initialized but empty.
 func NewPlugins() Plugins {
 	return Plugins{
-		HTTPPluginsByID: map[string]http.Plugin{},
-		TCPPluginsByID:  map[string]tcp.Plugin{},
+		HTTPPluginsByID:       map[string]http.Plugin{},
+		TCPPluginsByID:        map[string]tcp.Plugin{},
+		ManagementPluginsByID: map[string]plugin_v1.ConnectionManager{},
 	}
 }
 
 // Plugins represent a holding object for a bundle of plugins of different types.
 type Plugins struct {
-	HTTPPluginsByID map[string]http.Plugin
-	TCPPluginsByID  map[string]tcp.Plugin
+	HTTPPluginsByID       map[string]http.Plugin
+	TCPPluginsByID        map[string]tcp.Plugin
+	ManagementPluginsByID map[string]plugin_v1.ConnectionManager
 }
 
 // HTTPPlugins returns only the HTTP plugins in the Plugins struct.
@@ -131,4 +139,9 @@ func (plugins *Plugins) HTTPPlugins() map[string]http.Plugin {
 // TCPPlugins returns only the TCP plugins in the Plugins struct.
 func (plugins *Plugins) TCPPlugins() map[string]tcp.Plugin {
 	return plugins.TCPPluginsByID
+}
+
+// ManagementPlugins returns only the management plugins in the Plugins struct.
+func (plugins *Plugins) ManagementPlugins() map[string]plugin_v1.ConnectionManager {
+	return plugins.ManagementPluginsByID
 }

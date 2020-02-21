@@ -13,6 +13,7 @@ import (
 	plugin2 "github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // rawPlugin defines an interface that includes the only method of a Go plugin
@@ -195,6 +196,20 @@ func ExternalPluginsWithOptions(
 		checkExternalPluginIDConflicts(pluginID, pluginType, plugins, logger)
 
 		switch pluginType {
+		case "management":
+			mgmtPluginSym, err := symbolFromName(rawPlugin, "GetManagementPlugin")
+			if err != nil {
+				logPluginLoadError(err)
+				continue
+			}
+
+			mgmtPluginFunc, ok := mgmtPluginSym.(func() plugin_v1.ConnectionManager)
+			if !ok {
+				logPluginLoadError(errors.New("GetManagementPlugin couldn't be cast to expected type"))
+				continue
+			}
+
+			plugins.ManagementPluginsByID[pluginID] = mgmtPluginFunc()
 		case "connector.http":
 			httpPluginSym, err := symbolFromName(rawPlugin, "GetHTTPPlugin")
 			if err != nil {

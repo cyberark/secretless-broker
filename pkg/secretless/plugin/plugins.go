@@ -3,6 +3,7 @@ package plugin
 import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // builtinConnectorIDs is a list of connector IDs for "connectors" that don't
@@ -14,6 +15,7 @@ var builtinConnectorIDs = []string{"ssh", "ssh-agent"}
 // plugins for each type that the broker supports.
 type AvailablePlugins interface {
 	HTTPPlugins() map[string]http.Plugin
+	ManagementPlugins() map[string]plugin_v1.ConnectionManager
 	TCPPlugins() map[string]tcp.Plugin
 }
 

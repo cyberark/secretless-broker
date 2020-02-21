@@ -8,7 +8,7 @@ import (
 
 	"github.com/cyberark/summon/secretsyml"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Subcommand defines the input needed to run Summon.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // EnvironmentProvider provides data values from the process environment.

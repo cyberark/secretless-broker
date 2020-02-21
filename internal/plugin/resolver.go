@@ -6,24 +6,25 @@ import (
 	"strings"
 	"sync"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	int_plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
+	pkg_plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Resolver is used to instantiate providers and resolve credentials
 type Resolver struct {
-	EventNotifier     plugin_v1.EventNotifier
-	ProviderFactories map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error)
-	Providers         map[string]plugin_v1.Provider
+	EventNotifier     pkg_plugin_v1.EventNotifier
+	ProviderFactories map[string]func(pkg_plugin_v1.ProviderOptions) (pkg_plugin_v1.Provider, error)
+	Providers         map[string]pkg_plugin_v1.Provider
 	LogFatalf         func(string, ...interface{})
 }
 
 // NewResolver instantiates providers based on the name and ProviderOptions
 func NewResolver(
-	providerFactories map[string]func(plugin_v1.ProviderOptions) (plugin_v1.Provider, error),
-	eventNotifier plugin_v1.EventNotifier,
+	providerFactories map[string]func(pkg_plugin_v1.ProviderOptions) (pkg_plugin_v1.Provider, error),
+	eventNotifier pkg_plugin_v1.EventNotifier,
 	LogFatalFunc func(string, ...interface{}),
-) plugin_v1.Resolver {
+) int_plugin_v1.Resolver {
 
 	if LogFatalFunc == nil {
 		LogFatalFunc = log.Fatalf
@@ -33,12 +34,12 @@ func NewResolver(
 		EventNotifier:     eventNotifier,
 		LogFatalf:         LogFatalFunc,
 		ProviderFactories: providerFactories,
-		Providers:         make(map[string]plugin_v1.Provider),
+		Providers:         make(map[string]pkg_plugin_v1.Provider),
 	}
 }
 
 // Provider finds or creates a named provider.
-func (resolver *Resolver) Provider(name string) (provider plugin_v1.Provider, err error) {
+func (resolver *Resolver) Provider(name string) (provider pkg_plugin_v1.Provider, err error) {
 	mutex := &sync.Mutex{}
 
 	mutex.Lock()
@@ -53,7 +54,7 @@ func (resolver *Resolver) Provider(name string) (provider plugin_v1.Provider, er
 		resolver.LogFatalf("ERROR: Provider '%s' cannot be found", name)
 	}
 
-	providerOptions := plugin_v1.ProviderOptions{
+	providerOptions := pkg_plugin_v1.ProviderOptions{
 		Name: name,
 	}
 
@@ -82,7 +83,7 @@ func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[stri
 
 	var err error
 	for _, credential := range credentials {
-		var provider plugin_v1.Provider
+		var provider pkg_plugin_v1.Provider
 		var value []byte
 
 		if provider, err = resolver.Provider(credential.From); err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // Provider provides data values from AWS Secrets Manager.

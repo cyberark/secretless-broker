@@ -10,8 +10,8 @@ import (
 	"github.com/cyberark/summon/secretsyml"
 
 	"github.com/cyberark/secretless-broker/internal/plugin"
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/providers"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // The code in this file operates at the CLI level; it reads CLI arguments and will exit the process.

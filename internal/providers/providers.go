@@ -10,7 +10,7 @@ import (
 	literalProvider "github.com/cyberark/secretless-broker/internal/providers/literal"
 	vaultProvider "github.com/cyberark/secretless-broker/internal/providers/vault"
 
-	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // ProviderFactories contains the list of built-in provider factories

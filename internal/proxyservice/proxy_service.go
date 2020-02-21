@@ -14,7 +14,7 @@ import (
 	sshproxy "github.com/cyberark/secretless-broker/internal/plugin/connectors/ssh"
 	sshagentproxy "github.com/cyberark/secretless-broker/internal/plugin/connectors/sshagent"
 	tcpproxy "github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp"
-	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	int_plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/providers"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
@@ -22,6 +22,7 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
+	pkg_plugin_v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 // TODO: move to impl package
@@ -29,9 +30,9 @@ type proxyServices struct {
 	availPlugins    plugin2.AvailablePlugins
 	config          v2.Config
 	configsByType   v2.ConfigsByType
-	eventNotifier   v1.EventNotifier
+	eventNotifier   pkg_plugin_v1.EventNotifier
 	logger          logapi.Logger
-	resolver        v1.Resolver
+	resolver        int_plugin_v1.Resolver
 	runningServices []internal.Service
 }
 
@@ -331,16 +332,16 @@ func (s *proxyServices) credsRetriever(
 
 // NewProxyServices returns a new ProxyServices instance.
 // TODO: Reconsider the Resolver design so it's exactly what we need for the new code.
-// TODO: v1.Provider options should be an interface
+// TODO: pkg_plugin_v1.Provider options should be an interface
 func NewProxyServices(
 	cfg v2.Config,
 	availPlugins plugin2.AvailablePlugins,
 	logger logapi.Logger,
-	evtNotifier v1.EventNotifier,
+	evtNotifier pkg_plugin_v1.EventNotifier,
 ) internal.Service {
 
 	// Setup our resolver
-	providerFactories := make(map[string]func(v1.ProviderOptions) (v1.Provider, error))
+	providerFactories := make(map[string]func(pkg_plugin_v1.ProviderOptions) (pkg_plugin_v1.Provider, error))
 
 	for providerID, providerFactory := range providers.ProviderFactories {
 		providerFactories[providerID] = providerFactory

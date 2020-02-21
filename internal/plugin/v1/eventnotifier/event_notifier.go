@@ -3,7 +3,7 @@ package eventnotifier
 import (
 	"net"
 
-	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	v1 "github.com/cyberark/secretless-broker/pkg/secretless/plugin/v1"
 )
 
 type defaultNotifier struct {

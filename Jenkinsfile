@@ -123,7 +123,7 @@ pipeline {
       }
 
       steps {
-        sh 'summon ./bin/publish'
+        sh 'summon -e production ./bin/publish'
       }
     }
 

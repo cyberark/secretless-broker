@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.2] - 2020-02-24
+
+### Changed
+- Bump authn-k8s client to v0.16.1 (cyberark/conjur-authn-k8s-client#70)
+
+### Fixed
+- Updated RH image push to ensure we're logged into the RH container registry
+  appropriately before pushing (#1149)
+
 ## [1.5.1] - 2020-02-12
 
 ### Added
@@ -446,7 +455,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.5.2...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -470,3 +479,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2
 [1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0
 [1.5.1]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...v1.5.1
+[1.5.2]: https://github.com/cyberark/secretless-broker/compare/v1.5.1...v1.5.2

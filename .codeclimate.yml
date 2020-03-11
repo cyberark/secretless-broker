@@ -46,6 +46,12 @@ plugins:
     enabled: true
   golint:
     enabled: true
+    exclude_patterns:
+      - "**/"                # exclude all
+      - "!./cmd/"            # unexclude just the ones we want to lint
+      - "!./internal/"
+      - "!./pkg/"
+      - "!./test/"
   govet:
     enabled: true
 
@@ -65,6 +71,12 @@ plugins:
   # Shell scripts
   shellcheck:
    enabled: true
+   checks:
+    # Disable 'Not following' check - it doesn't handle ". ./script.sh" properly
+    SC1091:
+      enabled: false
+    SC2148:
+      enabled: false
 
 # ---------------
 # Other languages - will work with or without language files present. Again,

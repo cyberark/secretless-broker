@@ -28,6 +28,7 @@ Here's an simple example configuration for a fictional "Example Service" that
 requires an single API key credential in a header called `X-ApiKey`.
 
 ```yaml
+version: 2
 services:
   my_example_service:
     connector: generic_http
@@ -42,7 +43,7 @@ services:
       headers:                    # and digits only
         "X-ApiKey": "{{ .apikey }}"
       forceSSL: true
-      match:
+      authenticateURLsMatching:
         - ^http                   # apply this connector to all requests
 ```
 
@@ -54,6 +55,7 @@ powerful enough to provide the same functionality, and it's instructive to see
 how it _could_ be done:
 
 ```yaml
+version: 2
 services:
   service_requiring_basic_auth:
     connector: generic_http
@@ -71,7 +73,7 @@ services:
       headers:
         Authorization: "Basic {{ printf \"%s:%s\" .username .password | base64 }}"
       forceSSL: true
-      match:
+      authenticateURLsMatching:
         - ^http
 ```
 

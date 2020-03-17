@@ -474,3 +474,7 @@ should be officially marked as a `pre-release` (eg "non-production ready")
 1. Copy the `secretless-broker.rb` homebrew formula output by goreleaser
    to the [homebrew formula for Secretless](https://github.com/cyberark/homebrew-tools/blob/master/secretless-broker.rb)
    and submit a PR to update the version of Secretless available in brew.
+   
+### Publish the Red Hat image
+1. Visit the [Red Hat project page](https://connect.redhat.com/project/3100131/view) once the images have
+   been pushed and manually choose to publish the latest release.

@@ -75,14 +75,10 @@ Running the quick start demo requires [Docker][get-docker].
 
 [get-docker]: https://docs.docker.com/engine/installation
 
-To see the Secretless Broker in action, build the quick start image:
+To see the Secretless Broker in action, pull the quick start image:
 
 ```sh-session
-$ cd demos/quick-start/
-$ ./bin/build
-...
-Successfully built cbf747e7f548
-Successfully tagged secretless-broker-quickstart:latest
+docker pull cyberark/secretless-broker-quickstart
 ```
 
 The quick start image runs the Secretless Broker binary and a few sample target services. The Secretless Broker is configured to retrieve the credentials required to access the services from the process environment. **All services are configured to require authentication to access**, but we don't know what those credentials are. We can try to access the services, but since we don't know the password our access attempts will fail. _But when we try to connect via the Secretless Broker_, we will be granted access.

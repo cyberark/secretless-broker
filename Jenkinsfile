@@ -41,6 +41,21 @@ pipeline {
           }
         }
 
+        stage('Scan Secretless Quickstart') {
+          steps {
+            scanAndReport("secretless-broker-quickstart:latest", "CRITICAL")
+          }
+        }
+
+        stage('Scan Secretless RedHat') {
+          steps {
+            script {
+              TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
+            }
+            scanAndReport("secretless-broker-redhat:${TAG}", "NONE")
+          }
+        }
+
         stage('Scan For Security with Gosec') {
           steps {
             sh "./bin/check_golang_security -s High -c Medium -b ${env.BRANCH_NAME}"

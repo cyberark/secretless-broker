@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Introduce `SECRETLESS_HTTP_CA_BUNDLE` environment variable, which provides a
+  path to a bundle of CA certificates to append to the certificate pool used 
+  for verification by all http service connectors
+  [#1180](https://github.com/cyberark/secretless-broker/pull/1180)
+
 ## [1.5.2] - 2020-02-24
 
 ### Changed

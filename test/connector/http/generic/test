@@ -1,70 +1,10 @@
 #!/bin/bash -e
 
-local_test=false
-while getopts :l opt; do
-    case $opt in
-        l) local_test=true ;;
-       \?) echo "Unknown option -$OPTARG"; exit 1;;
-    esac
-done
-
-# NOTE: We need an array here so that the elements will be interpreted
-# as separate args, even when double quoted.
-# Relevant: https://github.com/koalaman/shellcheck/wiki/SC2089
-docker_volume_args=()
-if $local_test; then
-  docker_volume_args=(--volume "$(cd ../../../..; pwd):/secretless")
-fi
-
-assert_contains() {
-  # assert_contains <string> <substring>
-  local string=$1
-  local substring=$2
-
-  if [[ "${string}" =~ ${substring} ]]; then
-      echo "."
-      return
-  fi
-
-  echo ""
-  echo "FAIL:"
-  echo ""
-  echo "The string:"
-  echo ""
-  echo "    ${string}"
-  echo ""
-  echo "Did not contain expected substring:"
-  echo ""
-  echo "    ${substring}"
-  echo ""
-
-  exit 1
-}
-
-ping_target_service_thru_secretless() {
-  port=$1
-  docker_cmd="docker-compose run --rm --no-deps"
-
-  # NOTE: We must use an array here so that we can double quote it when we use
-  # it but still have it passed as individual args.  This keeps shellcheck
-  # happy and makes our intention clear.
-  wget_cmd=(env "http_proxy=http://secretless:$port" \
-    wget --quiet --output-document - nginx:8080/)
-
-  # NOTE: We need to 2>&1 because we need to assert on wget's error messages
-  # and we need to "|| true" because we don't want the script to exit when this
-  # happens
-  $docker_cmd "${docker_volume_args[@]}" test "${wget_cmd[@]}" 2>&1 || true
-}
-
 echo "Waiting for Secretless to start"
-
-# NOTE: We're using sh compatible script below because alpine doesn't support
-# bash.  We're looking for a better solution.
 
 # single quotes are intentional:
 # shellcheck disable=SC2016
-docker-compose run --rm --no-deps test sh -ec '
+docker-compose exec -T test bash -ec '
 counter=0
 while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/null 2>&1; do
     if expr $counter = 5 > /dev/null; then
@@ -83,16 +23,4 @@ echo ""
 echo "Running tests"
 echo ""
 
-echo "Test: Secretless configured with correct password succeeds"
-
-# port 8080 is configured with the correct pw
-good_resp=$(ping_target_service_thru_secretless 8080)
-assert_contains "$good_resp" "secured resource"
-
-echo "Test: Secretless configured with incorrect password fails"
-
-# port 8081 is configured with the incorrect pw
-bad_resp=$(ping_target_service_thru_secretless 8081)
-assert_contains "$bad_resp" "401 Unauthorized"
-
-echo "PASS"
+docker-compose exec -T test go test -v -count=1 ./test/connector/http/generic/...

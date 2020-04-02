@@ -4,4 +4,4 @@
 
 docker-compose build
 
-docker-compose up --detach secretless
+docker-compose up --detach secretless test

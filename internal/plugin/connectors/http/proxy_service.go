@@ -5,8 +5,10 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	gohttp "net/http"
+	"os"
 	"regexp"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
@@ -78,6 +80,19 @@ func NewProxyService(
 		msg := "Error '%s' loading system cert pool; using an empty cert pool"
 		logger.Warnf(msg, err)
 		caCertPool = x509.NewCertPool()
+	}
+
+	if caBundle, ok := os.LookupEnv("SECRETLESS_HTTP_CA_BUNDLE"); ok {
+		// Read in the cert file
+		certs, err := ioutil.ReadFile(caBundle)
+		if err != nil {
+			return nil, fmt.Errorf("failed to append SECRETLESS_HTTP_CA_BUNDLE to RootCAs: %v", err)
+		}
+
+		// Append our cert to the system pool
+		if ok := caCertPool.AppendCertsFromPEM(certs); !ok {
+			logger.Warnf("No certs appended, using system certs only")
+		}
 	}
 
 	transport := &gohttp.Transport{

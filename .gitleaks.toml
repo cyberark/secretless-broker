@@ -188,6 +188,7 @@ files = [
   "test/pg2_handler/etc/(.*)", # random pg test copy certs (since removed)
   "test/ssh_handler/id_(.*)", # test ssh handler certs
   "test/ssh_agent_handler/id_(.*)", # test ssh-agent handler certs
+  "test/connector/http/generic/certs/(.*)", # test http generic connector certs
   "test/connector/ssh/id_(.*)", # test ssh handler certs
   "test/connector/ssh_agent/id_(.*)", # test ssh-agent handler certs
   "test/ssh/id_(.*)", # since-removed ssh test certs

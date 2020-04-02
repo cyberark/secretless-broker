@@ -21,7 +21,7 @@ func ZeroizeCredentials(backendCredentials map[string][]byte) {
 // TODO: The wisdom of an abstraction for a service that can be stopped/started
 //   is something we want to revisit.  Standard functional command objects might
 //   a better alternative, among other things.  We should revisit where we're
-//   putting interfaces from a first pinciples/best practices perspective,
+//   putting interfaces from a first principles/best practices perspective,
 //   and create some policy around that.  For now, though, these aren't big
 //   problems.
 type Service interface {

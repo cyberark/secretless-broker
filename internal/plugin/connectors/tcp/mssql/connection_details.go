@@ -11,6 +11,7 @@ type ConnectionDetails struct {
 	Port     uint
 	Username string
 	Password string
+	SSLMode  string
 }
 
 const defaultMSSQLPort = uint(1433)
@@ -37,6 +38,12 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 
 	if credentials["password"] != nil {
 		connDetails.Password = string(credentials["password"])
+	}
+
+	if credentials["sslmode"] == nil {
+		connDetails.SSLMode = "disable"
+	} else {
+		connDetails.SSLMode = string(credentials["sslmode"])
 	}
 
 	return connDetails

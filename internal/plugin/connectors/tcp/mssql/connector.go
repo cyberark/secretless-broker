@@ -326,9 +326,10 @@ func dataSourceName(connDetails *ConnectionDetails) string {
 		// it'll be used between Secretless and the server.
 		// To disable TLS altogether we must change to
 		// "sqlserver://%s:%s@%s?encrypt=disable",
-		"sqlserver://%s:%s@%s",
+		"sqlserver://%s:%s@%s?encrypt=%s",
 		connDetails.Username,
 		connDetails.Password,
 		connDetails.Address(),
+		connDetails.SSLMode,
 	)
 }

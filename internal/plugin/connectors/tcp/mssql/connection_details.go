@@ -1,6 +1,7 @@
 package mssql
 
 import (
+	"bytes"
 	"strconv"
 )
 
@@ -40,10 +41,17 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 		connDetails.Password = string(credentials["password"])
 	}
 
-	if credentials["sslmode"] == nil {
-		connDetails.SSLMode = "disable"
-	} else {
+	// More supported cases to be added
+	sslMode := credentials["sslmode"]
+	switch {
+	case bytes.Equal(sslMode, []byte("disable")):
 		connDetails.SSLMode = string(credentials["sslmode"])
+	case bytes.Equal(sslMode, []byte("enable")):
+		fallthrough
+	case bytes.Equal(sslMode, []byte("verify-ca")):
+		fallthrough
+	default:
+		connDetails.SSLMode = "disable"
 	}
 
 	return connDetails

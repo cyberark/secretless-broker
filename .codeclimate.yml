@@ -9,6 +9,20 @@ plugins:
 # ---------------
 # Cross-language plugins. Should always be on.
 
+  method-lines:
+    enabled: true
+    config:
+      languages:
+        go:
+          threshold: 70
+
+  return-statements:
+    enabled: true
+    languages:
+      go:
+        config:
+          threshold: 7
+
   duplication: # Looks for similar and identical code blocks
     enabled: true
     config:

@@ -277,6 +277,8 @@ func propagateParams(
 	if !assert.NoError(t, err) {
 		return
 	}
+	assert.Equal(t, preloginRequest[mssql.PreloginENCRYPTION], []byte{mssql.EncryptNotSup})
+
 	// write prelogin response
 	// ensuring no TLS support
 	preloginResponse := preloginRequest

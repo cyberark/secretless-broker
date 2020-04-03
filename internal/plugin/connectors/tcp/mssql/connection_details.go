@@ -1,6 +1,7 @@
 package mssql
 
 import (
+	"bytes"
 	"strconv"
 )
 
@@ -11,6 +12,7 @@ type ConnectionDetails struct {
 	Port     uint
 	Username string
 	Password string
+	SSLMode  string
 }
 
 const defaultMSSQLPort = uint(1433)
@@ -37,6 +39,19 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 
 	if credentials["password"] != nil {
 		connDetails.Password = string(credentials["password"])
+	}
+
+	// More supported cases to be added
+	sslMode := credentials["sslmode"]
+	switch {
+	case bytes.Equal(sslMode, []byte("disable")):
+		connDetails.SSLMode = string(credentials["sslmode"])
+	case bytes.Equal(sslMode, []byte("enable")):
+		fallthrough
+	case bytes.Equal(sslMode, []byte("verify-ca")):
+		fallthrough
+	default:
+		connDetails.SSLMode = "disable"
 	}
 
 	return connDetails

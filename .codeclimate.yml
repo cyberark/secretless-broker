@@ -4,24 +4,22 @@
 
 version: "2"
 
+checks:
+
+  #----------------
+  # These maintainability checks are language independent and check against all languages
+
+  method-lines:
+    config:
+      threshold: 70
+  return-statements:
+    config:
+      threshold: 7
+
 plugins:
 
 # ---------------
 # Cross-language plugins. Should always be on.
-
-  method-lines:
-    enabled: true
-    config:
-      languages:
-        go:
-          threshold: 70
-
-  return-statements:
-    enabled: true
-    languages:
-      go:
-        config:
-          threshold: 7
 
   duplication: # Looks for similar and identical code blocks
     enabled: true

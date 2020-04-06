@@ -23,6 +23,13 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 
 	connDetails := &ConnectionDetails{}
 
+	// Zeroize credentials when finished
+	defer func() {
+		for key := range credentials {
+			delete(credentials, key)
+		}
+	}()
+
 	if host := credentials["host"]; host != nil {
 		connDetails.Host = string(credentials["host"])
 	}

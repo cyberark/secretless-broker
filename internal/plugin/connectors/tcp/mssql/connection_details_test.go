@@ -105,6 +105,11 @@ func TestNewConnectionDetails(t *testing.T) {
 			actualConnDetails := NewConnectionDetails(tt.args.credentials)
 
 			assert.Equal(t, tt.expected, actualConnDetails)
+
+			// Verify that credentials have been zeroed
+			for cred := range tt.args.credentials {
+				assert.Empty(t, cred)
+			}
 		})
 	}
 }

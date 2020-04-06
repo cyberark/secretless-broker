@@ -5,29 +5,39 @@ import (
 	"testing"
 )
 
+type args struct {
+	credentials map[string][]byte
+}
+
+var defaultConnectionDetails = &ConnectionDetails{
+	Username: "herp",
+	Password: "derp",
+	Host:     "0.0.0.0",
+	Port:     1234,
+	SSLMode:  "disable",
+	SSLOptions: map[string]string{
+		"sslrootcert": "foo",
+		"sslkey":      "bar",
+		"sslcert":     "foobar",
+	},
+}
+
+var emptyConnectionDetails = &ConnectionDetails{
+	Port:       defaultMSSQLPort,
+	SSLMode:    "disable",
+	SSLOptions: map[string]string{},
+}
+
 func TestConnectionDetails_Address(t *testing.T) {
-	type fields struct {
-		Host     string
-		Port     uint
-		Username string
-		Password string
-		SSLMode  string
-	}
 	tests := []struct {
 		description string
-		fields      fields
+		fields      *ConnectionDetails
 		expected    string
 	}{
 		{
 			description: "default address format",
-			fields: fields{
-				Host:     "hostname",
-				Port:     5555,
-				Username: "foo",
-				Password: "bar",
-				SSLMode:  "xyz",
-			},
-			expected: "hostname:5555",
+			fields:      defaultConnectionDetails,
+			expected:    "0.0.0.0:1234",
 		},
 	}
 	for _, tt := range tests {
@@ -46,14 +56,27 @@ func TestConnectionDetails_Address(t *testing.T) {
 }
 
 func TestNewConnectionDetails(t *testing.T) {
-	type args struct {
-		credentials map[string][]byte
-	}
 	tests := []struct {
 		description string
 		args        args
 		expected    *ConnectionDetails
 	}{
+		{
+			description: "standard case - all values filled",
+			args: args{
+				credentials: map[string][]byte{
+					"username":    []byte("herp"),
+					"password":    []byte("derp"),
+					"host":        []byte("0.0.0.0"),
+					"port":        []byte("1234"),
+					"sslmode":     []byte("require"),
+					"sslrootcert": []byte("foo"),
+					"sslkey":      []byte("bar"),
+					"sslcert":     []byte("foobar"),
+				},
+			},
+			expected: defaultConnectionDetails,
+		},
 		{
 			description: "ssl mode is empty - use default",
 			args: args{
@@ -61,13 +84,7 @@ func TestNewConnectionDetails(t *testing.T) {
 					"sslmode": nil,
 				},
 			},
-			expected: &ConnectionDetails{
-				Host:     "",
-				Port:     defaultMSSQLPort,
-				Username: "",
-				Password: "",
-				SSLMode:  "disable",
-			},
+			expected: emptyConnectionDetails,
 		},
 		{
 			description: "ssl mode is disable - use value",
@@ -76,13 +93,7 @@ func TestNewConnectionDetails(t *testing.T) {
 					"sslmode": []byte("enable"),
 				},
 			},
-			expected: &ConnectionDetails{
-				Host:     "",
-				Port:     defaultMSSQLPort,
-				Username: "",
-				Password: "",
-				SSLMode:  "disable",
-			},
+			expected: emptyConnectionDetails,
 		},
 		{
 			description: "ssl mode is unsupported - use default",
@@ -91,13 +102,7 @@ func TestNewConnectionDetails(t *testing.T) {
 					"sslmode": []byte("foobar"),
 				},
 			},
-			expected: &ConnectionDetails{
-				Host:     "",
-				Port:     defaultMSSQLPort,
-				Username: "",
-				Password: "",
-				SSLMode:  "disable",
-			},
+			expected: emptyConnectionDetails,
 		},
 	}
 	for _, tt := range tests {
@@ -105,6 +110,45 @@ func TestNewConnectionDetails(t *testing.T) {
 			actualConnDetails := NewConnectionDetails(tt.args.credentials)
 
 			assert.Equal(t, tt.expected, actualConnDetails)
+		})
+	}
+}
+
+func TestConnectionDetails_NewSSLOptions(t *testing.T) {
+	tests := []struct {
+		description string
+		args        args
+		expected    map[string]string
+	}{
+		{
+			description: "no values",
+			args: args{
+				credentials: map[string][]byte{},
+			},
+			expected: map[string]string{},
+		},
+		{
+			description: "standard values found",
+			args: args{
+				credentials: map[string][]byte{
+					"sslrootcert": []byte("foo"),
+					"sslkey":      []byte("bar"),
+					"sslcert":     []byte("foobar"),
+				},
+			},
+			expected: map[string]string{
+				"sslrootcert": "foo",
+				"sslkey":      "bar",
+				"sslcert":     "foobar",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			actualSSLOptions := newSSLOptions(tt.args.credentials)
+
+			assert.Equal(t, tt.expected, actualSSLOptions)
 		})
 	}
 }

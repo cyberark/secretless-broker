@@ -1,18 +1,24 @@
 package mssql
 
 import (
-	"bytes"
 	"strconv"
 )
 
 // ConnectionDetails stores the connection info to the real backend database.
 // These values are pulled from the SingleUseConnector credentials config
 type ConnectionDetails struct {
-	Host     string
-	Port     uint
-	Username string
-	Password string
-	SSLMode  string
+	Host       string
+	Port       uint
+	Username   string
+	Password   string
+	SSLMode    string
+	SSLOptions map[string]string
+}
+
+var sslOptions = []string{
+	"sslrootcert",
+	"sslkey",
+	"sslcert",
 }
 
 const defaultMSSQLPort = uint(1433)
@@ -23,36 +29,35 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 
 	connDetails := &ConnectionDetails{}
 
-	if host := credentials["host"]; host != nil {
+	if len(credentials["host"]) > 0 {
 		connDetails.Host = string(credentials["host"])
 	}
 
 	connDetails.Port = defaultMSSQLPort
-	if credentials["port"] != nil {
+	if len(credentials["port"]) > 0 {
 		port64, _ := strconv.ParseUint(string(credentials["port"]), 10, 64)
 		connDetails.Port = uint(port64)
 	}
 
-	if credentials["username"] != nil {
+	if len(credentials["username"]) > 0 {
 		connDetails.Username = string(credentials["username"])
 	}
 
-	if credentials["password"] != nil {
+	if len(credentials["password"]) > 0 {
 		connDetails.Password = string(credentials["password"])
 	}
 
-	// More supported cases to be added
-	sslMode := credentials["sslmode"]
-	switch {
-	case bytes.Equal(sslMode, []byte("disable")):
-		connDetails.SSLMode = string(credentials["sslmode"])
-	case bytes.Equal(sslMode, []byte("enable")):
-		fallthrough
-	case bytes.Equal(sslMode, []byte("verify-ca")):
-		fallthrough
-	default:
-		connDetails.SSLMode = "disable"
+	sslMode := string(credentials["sslmode"])
+	if sslMode != "disable" {
+		// Currently, we only support disable
+		sslMode = "disable"
+		// In the event that the user does not choose 'disable', i.e. when
+		// ssl is 'required', we want to parse the additional ssl credentials
+		// that are are needed
+		connDetails.SSLOptions = newSSLOptions(credentials)
 	}
+
+	connDetails.SSLMode = sslMode
 
 	return connDetails
 }
@@ -62,4 +67,17 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 // connect to the database -- eg, in cmd line tools.
 func (cd *ConnectionDetails) Address() string {
 	return cd.Host + ":" + strconv.FormatUint(uint64(cd.Port), 10)
+}
+
+func newSSLOptions(credentials map[string][]byte) map[string]string {
+	SSLOptions := make(map[string]string)
+
+	for _, sslOption := range sslOptions {
+		value := string(credentials[sslOption])
+		if len(value) > 0 {
+			SSLOptions[sslOption] = value
+		}
+	}
+
+	return SSLOptions
 }

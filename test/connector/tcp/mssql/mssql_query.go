@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"os/exec"
 	"text/tabwriter"
-
-	"github.com/cyberark/secretless-broker/test/util/testutil"
 )
 
 type dbConfig struct {
@@ -26,15 +24,6 @@ type dbConfig struct {
 type dbQueryExecutor func(cfg dbConfig, query string) (string, error)
 
 const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
-
-func defaultSecretlessDbConfig() dbConfig {
-	return dbConfig{
-		Host:     testutil.SecretlessHost,
-		Port:     testutil.SecretlessPort,
-		Username: "dummy",
-		Password: "dummy",
-	}
-}
 
 // runs queries using sqlcmd
 func sqlcmdExec(

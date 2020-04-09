@@ -114,6 +114,7 @@ func RunConnectivityTests(t *testing.T, queryExec dbQueryExecutor) {
 }
 
 const mockServerSecretlessPort = 2224
+const mockServerPort = 1434
 type testClientParams struct {
 	queryExec dbQueryExecutor
 	applicationName string
@@ -122,7 +123,7 @@ type testClientParams struct {
 
 func TestClientParams(t *testing.T) {
 	// Setup mock-server listener
-	_ln, err := net.Listen("tcp", ":1434")
+	_ln, err := net.Listen("tcp", fmt.Sprintf(":%d", mockServerPort))
 	ln := _ln.(*net.TCPListener)
 	defer func() {
 		_ = ln.Close()

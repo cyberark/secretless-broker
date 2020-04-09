@@ -28,6 +28,7 @@ github.com/containerd/containerd v1.3.2 h1:ForxmXkA6tPIvffbrDAcPUIB32QgXkt2XFj+F
 github.com/containerd/containerd v1.3.2/go.mod h1:bC6axHOhabU15QhwfG7w5PipXdVtMXFTttgp+kVtyUA=
 github.com/cyberark/conjur-api-go v0.5.2 h1:8ntk07YNRz5bBwjNXkDEAPR70Yr+J2MN8NGlkhaMC3k=
 github.com/cyberark/conjur-api-go v0.5.2/go.mod h1:hwaReWirzgKor+JtH6vbwZaASDXulvd0SzGCloC5uOc=
+github.com/cyberark/conjur-authn-k8s-client v0.13.0/go.mod h1:JTeGIeRO59J7mMEc5yF6FPtk1QnaAzs4GyZa4WldqZc=
 github.com/cyberark/conjur-authn-k8s-client v0.16.1 h1:tiYIUYuBr578BCYlx+mbPiE4dWi+NsCu6Dy9cSRv4/M=
 github.com/cyberark/conjur-authn-k8s-client v0.16.1/go.mod h1:qacUJXCppU1Rg/C+br9B1jBitTq4yG04oc4a+cfI200=
 github.com/cyberark/secretless-broker v1.4.1-0.20191211191712-251c5ec034af/go.mod h1:+GueI3WCJL5gDYaYa38ZokAR8ceEyCVet7MkuZyjf80=

@@ -2,7 +2,6 @@ package mssql
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net"
 
@@ -199,7 +198,7 @@ func (connector *SingleUseConnector) Connect(
 	// NOTE: Secretless has some unfortunate naming collisions with the
 	// go-mssqldb driver package.  The driver package has its own concept of a
 	// "connector", and its connectors also have a "Connect" method.
-	driverConnector, err := connector.NewMSSQLConnector(dataSourceName(connDetails))
+	driverConnector, err := connector.NewMSSQLConnector(connDetails.URL())
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to create a go-mssqldb connector")
 		connector.writeErrorToClient(wrappedError)
@@ -318,18 +317,4 @@ func (connector *SingleUseConnector) waitForServerConnection(
 
 func (connector *SingleUseConnector) writeErrorToClient(err error) {
 	_ = connector.WriteError(connector.clientBuff, protocolError(err))
-}
-
-func dataSourceName(connDetails *ConnectionDetails) string {
-	return fmt.Sprintf(
-		// NOTE: as things stand the resulting DSN here means that if TLS is available
-		// it'll be used between Secretless and the server.
-		// To disable TLS altogether we must change to
-		// "sqlserver://%s:%s@%s?encrypt=disable",
-		"sqlserver://%s:%s@%s?encrypt=%s",
-		connDetails.Username,
-		connDetails.Password,
-		connDetails.Address(),
-		connDetails.SSLMode,
-	)
 }

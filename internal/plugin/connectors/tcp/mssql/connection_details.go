@@ -1,25 +1,41 @@
 package mssql
 
 import (
+	"net/url"
 	"strconv"
 )
 
 // ConnectionDetails stores the connection info to the real backend database.
 // These values are pulled from the SingleUseConnector credentials config
 type ConnectionDetails struct {
-	Host       string
-	Port       uint
-	Username   string
-	Password   string
-	SSLMode    string
-	SSLOptions map[string]string
+	Host      string
+	Port      uint
+	Username  string
+	Password  string
+	SSLParams map[string]string
 }
 
-var sslOptions = []string{
-	"sslrootcert",
-	"sslkey",
-	"sslcert",
+var sslModeToBaseParams = map[string]map[string]string{
+	sslModeDisable: {
+		"encrypt": "disable",
+	},
+	sslModeRequire: {
+		"encrypt":                "true",
+		"trustservercertificate": "true",
+	},
+	sslModeVerifyCA: {
+		"encrypt":                "true",
+		"trustservercertificate": "false",
+	},
 }
+
+const (
+	sslModeDisable  = "disable"
+	sslModeRequire  = "require"
+	sslModeVerifyCA = "verify-ca"
+)
+
+var defaultSSLMode = []byte(sslModeRequire)
 
 const defaultMSSQLPort = uint(1433)
 
@@ -47,37 +63,48 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 		connDetails.Password = string(credentials["password"])
 	}
 
-	sslMode := string(credentials["sslmode"])
-	if sslMode != "disable" {
-		// Currently, we only support disable
-		sslMode = "disable"
-		// In the event that the user does not choose 'disable', i.e. when
-		// ssl is 'required', we want to parse the additional ssl credentials
-		// that are are needed
-		connDetails.SSLOptions = newSSLOptions(credentials)
-	}
-
-	connDetails.SSLMode = sslMode
+	connDetails.SSLParams = newSSLParams(credentials)
 
 	return connDetails
+}
+
+func newSSLParams(credentials map[string][]byte) map[string]string {
+	sslMode := string(credentials["sslmode"])
+	params, ok := sslModeToBaseParams[sslMode]
+
+	if !ok {
+		credentials["sslmode"] = defaultSSLMode
+		return newSSLParams(credentials)
+	}
+
+	if sslMode == "verify-ca" {
+		params["rawcertificate"] = string(credentials["sslrootcert"])
+	}
+
+	return params
 }
 
 // Address returns a string representing the network location (host and port)
 // of a MSSQL server.  This is the string you would would typically use to
 // connect to the database -- eg, in cmd line tools.
-func (cd *ConnectionDetails) Address() string {
+func (cd *ConnectionDetails) address() string {
 	return cd.Host + ":" + strconv.FormatUint(uint64(cd.Port), 10)
 }
 
-func newSSLOptions(credentials map[string][]byte) map[string]string {
-	SSLOptions := make(map[string]string)
+// URL returns a string URL from connection details
+func (cd *ConnectionDetails) URL() string {
+	query := url.Values{}
 
-	for _, sslOption := range sslOptions {
-		value := string(credentials[sslOption])
-		if len(value) > 0 {
-			SSLOptions[sslOption] = value
-		}
+	for key, value := range cd.SSLParams {
+		query.Add(key, value)
 	}
 
-	return SSLOptions
+	u := &url.URL{
+		Scheme:   "sqlserver",
+		User:     url.UserPassword(cd.Username, cd.Password),
+		Host:     cd.address(),
+		RawQuery: query.Encode(),
+	}
+
+	return u.String()
 }

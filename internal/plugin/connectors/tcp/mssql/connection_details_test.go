@@ -1,8 +1,9 @@
 package mssql
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type args struct {
@@ -14,55 +15,55 @@ var defaultConnectionDetails = &ConnectionDetails{
 	Password: "derp",
 	Host:     "0.0.0.0",
 	Port:     1234,
-	SSLMode:  "disable",
-	SSLOptions: map[string]string{
-		"sslrootcert": "foo",
-		"sslkey":      "bar",
-		"sslcert":     "foobar",
+	SSLParams: map[string]string{
+		"encrypt":                "true",
+		"trustservercertificate": "true",
 	},
 }
 
 var emptyConnectionDetails = &ConnectionDetails{
-	Port:       defaultMSSQLPort,
-	SSLMode:    "disable",
-	SSLOptions: map[string]string{},
+	Port: defaultMSSQLPort,
+	SSLParams: map[string]string{
+		"encrypt":                "true",
+		"trustservercertificate": "true",
+	},
 }
 
 func TestConnectionDetails_Address(t *testing.T) {
-	tests := []struct {
+	testCases := []struct {
 		description string
 		fields      *ConnectionDetails
 		expected    string
 	}{
 		{
-			description: "default address format",
+			description: "expected valid input",
 			fields:      defaultConnectionDetails,
 			expected:    "0.0.0.0:1234",
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
 			cd := &ConnectionDetails{
-				Host:     tt.fields.Host,
-				Port:     tt.fields.Port,
-				Username: tt.fields.Username,
-				Password: tt.fields.Password,
-				SSLMode:  tt.fields.SSLMode,
+				Host:      tc.fields.Host,
+				Port:      tc.fields.Port,
+				Username:  tc.fields.Username,
+				Password:  tc.fields.Password,
+				SSLParams: tc.fields.SSLParams,
 			}
 
-			assert.Equal(t, tt.expected, cd.Address())
+			assert.Equal(t, tc.expected, cd.address())
 		})
 	}
 }
 
 func TestNewConnectionDetails(t *testing.T) {
-	tests := []struct {
+	testCases := []struct {
 		description string
 		args        args
 		expected    *ConnectionDetails
 	}{
 		{
-			description: "standard case - all values filled",
+			description: "expected valid credentials",
 			args: args{
 				credentials: map[string][]byte{
 					"username":    []byte("herp"),
@@ -71,14 +72,12 @@ func TestNewConnectionDetails(t *testing.T) {
 					"port":        []byte("1234"),
 					"sslmode":     []byte("require"),
 					"sslrootcert": []byte("foo"),
-					"sslkey":      []byte("bar"),
-					"sslcert":     []byte("foobar"),
 				},
 			},
 			expected: defaultConnectionDetails,
 		},
 		{
-			description: "ssl mode is empty - use default",
+			description: "nil sslmode",
 			args: args{
 				credentials: map[string][]byte{
 					"sslmode": nil,
@@ -87,16 +86,21 @@ func TestNewConnectionDetails(t *testing.T) {
 			expected: emptyConnectionDetails,
 		},
 		{
-			description: "ssl mode is disable - use value",
+			description: "supported sslmode",
 			args: args{
 				credentials: map[string][]byte{
-					"sslmode": []byte("enable"),
+					"sslmode": []byte("disable"),
 				},
 			},
-			expected: emptyConnectionDetails,
+			expected: &ConnectionDetails{
+				Port: defaultMSSQLPort,
+				SSLParams: map[string]string{
+					"encrypt": "disable",
+				},
+			},
 		},
 		{
-			description: "ssl mode is unsupported - use default",
+			description: "unsupported sslmode",
 			args: args{
 				credentials: map[string][]byte{
 					"sslmode": []byte("foobar"),
@@ -105,50 +109,65 @@ func TestNewConnectionDetails(t *testing.T) {
 			expected: emptyConnectionDetails,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			actualConnDetails := NewConnectionDetails(tt.args.credentials)
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			actualConnDetails := NewConnectionDetails(tc.args.credentials)
 
-			assert.Equal(t, tt.expected, actualConnDetails)
+			assert.Equal(t, tc.expected, actualConnDetails)
 		})
 	}
 }
 
+func TestDefaultSSLModeExists(t *testing.T) {
+	assert.NotEmpty(t, sslModeToBaseParams[string(defaultSSLMode)])
+}
+
 func TestConnectionDetails_NewSSLOptions(t *testing.T) {
-	tests := []struct {
+	testCases := []struct {
 		description string
 		args        args
 		expected    map[string]string
 	}{
 		{
-			description: "no values",
+			description: "empty credentials map",
 			args: args{
 				credentials: map[string][]byte{},
 			},
-			expected: map[string]string{},
+			expected: sslModeToBaseParams[sslModeRequire],
 		},
 		{
-			description: "standard values found",
+			description: "sslmode:disable",
 			args: args{
 				credentials: map[string][]byte{
+					"sslmode":     []byte("disable"),
 					"sslrootcert": []byte("foo"),
-					"sslkey":      []byte("bar"),
-					"sslcert":     []byte("foobar"),
 				},
 			},
 			expected: map[string]string{
-				"sslrootcert": "foo",
-				"sslkey":      "bar",
-				"sslcert":     "foobar",
+				"encrypt": "disable",
+			},
+		},
+		{
+			description: "sslmode:verify-ca",
+			args: args{
+				credentials: map[string][]byte{
+					"sslmode":     []byte("verify-ca"),
+					"sslrootcert": []byte("foo"),
+				},
+			},
+			expected: map[string]string{
+				"encrypt":                "true",
+				"trustservercertificate": "false",
+				"rawcertificate":         "foo",
 			},
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			actualSSLOptions := newSSLOptions(tt.args.credentials)
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			actualSSLOptions := newSSLParams(tc.args.credentials)
 
-			assert.Equal(t, tt.expected, actualSSLOptions)
+			assert.Equal(t, tc.expected, actualSSLOptions)
 		})
 	}
 }

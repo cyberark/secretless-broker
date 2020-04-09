@@ -105,7 +105,7 @@ func (s *SingleUseConnector) ConnectToBackend() error {
 		return err
 	}
 
-	s.logger.Debugln(
+	s.logger.Debugf(
 		"Successfully connected to '%s:%s'",
 		s.connectionDetails.Host,
 		s.connectionDetails.Port,

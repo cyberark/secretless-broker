@@ -9,7 +9,7 @@ import (
 // Startup performs the startup handshake with the client and parses the client
 // options to extract the database name.
 func (s *SingleUseConnector) Startup() error {
-	s.logger.Debugln("Handling connection %v", s.clientConn)
+	s.logger.Debugf("Handling connection %+v -> %+v", s.clientConn.RemoteAddr(), s.clientConn.LocalAddr())
 
 	messageBytes, err := protocol.ReadStartupMessage(s.clientConn)
 	if err != nil {
@@ -21,8 +21,8 @@ func (s *SingleUseConnector) Startup() error {
 		return err
 	}
 
-	s.logger.Debugln(
-		"s.Client version : %v, (SSL mode: %v)",
+	s.logger.Debugf(
+		"s.Client version: %v, (SSL mode: %v)",
 		version,
 		version == protocol.SSLRequestCode)
 

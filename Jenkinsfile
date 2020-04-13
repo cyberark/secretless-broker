@@ -43,7 +43,7 @@ pipeline {
 
         stage('Scan Secretless Quickstart') {
           steps {
-            scanAndReport("secretless-broker-quickstart:latest", "CRITICAL")
+            scanAndReport("secretless-broker-quickstart:latest", "HIGH")
           }
         }
 

@@ -36,9 +36,9 @@ var sslModeToBaseParams = map[string]map[string]string{
 }
 
 const (
-	sslModeDisable  = "disable"
-	sslModeRequire  = "require"
-	sslModeVerifyCA = "verify-ca"
+	sslModeDisable    = "disable"
+	sslModeRequire    = "require"
+	sslModeVerifyCA   = "verify-ca"
 	sslModeVerifyFull = "verify-full"
 )
 
@@ -84,12 +84,17 @@ func newSSLParams(credentials map[string][]byte) map[string]string {
 		return newSSLParams(credentials)
 	}
 
-	if sslMode == sslModeVerifyCA  {
+	if sslMode == sslModeVerifyCA {
 		params["rawcertificate"] = string(credentials["sslrootcert"])
 	}
 
-	if sslMode == sslModeVerifyFull  {
+	if sslMode == sslModeVerifyFull {
 		params["rawcertificate"] = string(credentials["sslrootcert"])
+
+		// Ability to override hostname for verification
+		if len(credentials["sslhost"]) > 0 {
+			params["hostnameincertificate"] = string(credentials["sslhost"])
+		}
 	}
 
 	return params

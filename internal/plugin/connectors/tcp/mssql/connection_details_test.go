@@ -162,6 +162,21 @@ func TestConnectionDetails_NewSSLOptions(t *testing.T) {
 				"rawcertificate":         "foo",
 			},
 		},
+		{
+			description: "sslmode:verify-full",
+			args: args{
+				credentials: map[string][]byte{
+					"sslmode":     []byte("verify-full"),
+					"sslrootcert": []byte("foo"),
+				},
+			},
+			expected: map[string]string{
+				"encrypt":                "true",
+				"trustservercertificate": "false",
+				"disableverifyhostname":  "false",
+				"rawcertificate":         "foo",
+			},
+		},
 	}
 
 	for _, tc := range testCases {

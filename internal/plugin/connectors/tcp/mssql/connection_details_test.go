@@ -158,6 +158,7 @@ func TestConnectionDetails_NewSSLOptions(t *testing.T) {
 			expected: map[string]string{
 				"encrypt":                "true",
 				"trustservercertificate": "false",
+				"disableverifyhostname":  "true",
 				"rawcertificate":         "foo",
 			},
 		},

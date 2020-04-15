@@ -26,6 +26,7 @@ var sslModeToBaseParams = map[string]map[string]string{
 	sslModeVerifyCA: {
 		"encrypt":                "true",
 		"trustservercertificate": "false",
+		"disableverifyhostname":  "true",
 	},
 }
 

@@ -35,24 +35,45 @@ pipeline {
 
     stage('Scan Secretless') {
       parallel {
-        stage('Scan Secretless Image') {
+        stage('Scan Secretless Image for fixable issues') {
           steps {
-            scanAndReport("secretless-broker:latest", "HIGH")
+            scanAndReport("secretless-broker:latest", "HIGH", false)
           }
         }
 
-        stage('Scan Secretless Quickstart') {
+        stage('Scan Secretless Image for all issues') {
           steps {
-            scanAndReport("secretless-broker-quickstart:latest", "HIGH")
+            scanAndReport("secretless-broker:latest", "NONE", true)
           }
         }
 
-        stage('Scan Secretless RedHat') {
+        stage('Scan Secretless Quickstart for fixable issues') {
+          steps {
+            scanAndReport("secretless-broker-quickstart:latest", "HIGH", false)
+          }
+        }
+
+        stage('Scan Secretless Quickstart for all issues') {
+          steps {
+            scanAndReport("secretless-broker-quickstart:latest", "NONE", true)
+          }
+        }
+
+        stage('Scan Secretless RedHat for fixable issues') {
           steps {
             script {
               TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
             }
-            scanAndReport("secretless-broker-redhat:${TAG}", "NONE")
+            scanAndReport("secretless-broker-redhat:${TAG}", "HIGH", false)
+          }
+        }
+
+        stage('Scan Secretless RedHat for all issues') {
+          steps {
+            script {
+              TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
+            }
+            scanAndReport("secretless-broker-redhat:${TAG}", "NONE", true)
           }
         }
 

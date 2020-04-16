@@ -158,7 +158,40 @@ func TestConnectionDetails_NewSSLOptions(t *testing.T) {
 			expected: map[string]string{
 				"encrypt":                "true",
 				"trustservercertificate": "false",
+				"disableverifyhostname":  "true",
 				"rawcertificate":         "foo",
+			},
+		},
+		{
+			description: "sslmode:verify-full",
+			args: args{
+				credentials: map[string][]byte{
+					"sslmode":     []byte("verify-full"),
+					"sslrootcert": []byte("foo"),
+				},
+			},
+			expected: map[string]string{
+				"encrypt":                "true",
+				"trustservercertificate": "false",
+				"disableverifyhostname":  "false",
+				"rawcertificate":         "foo",
+			},
+		},
+		{
+			description: "sslmode:verify-full with sslhost",
+			args: args{
+				credentials: map[string][]byte{
+					"sslmode":     []byte("verify-full"),
+					"sslhost":     []byte("foo.bar"),
+					"sslrootcert": []byte("foo"),
+				},
+			},
+			expected: map[string]string{
+				"encrypt":                "true",
+				"trustservercertificate": "false",
+				"disableverifyhostname":  "false",
+				"rawcertificate":         "foo",
+				"hostnameincertificate":  "foo.bar",
 			},
 		},
 	}

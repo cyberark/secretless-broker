@@ -103,6 +103,7 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	}()
 
 	backendCredentials, err := proxy.retrieveCredentials()
+	// zeroize credentials if we exit early due to an error
 	defer internal.ZeroizeCredentials(backendCredentials)
 	if err != nil {
 		return errors.Wrap(err, "failed on retrieve credentials")
@@ -114,6 +115,9 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	if err != nil {
 		return errors.Wrap(err, "failed on connect")
 	}
+
+	// immediately zeroize credentials after connecting
+	internal.ZeroizeCredentials(backendCredentials)
 
 	logger.Debugf("Connection opened on %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
 

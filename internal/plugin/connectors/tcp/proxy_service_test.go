@@ -72,8 +72,8 @@ func TestNewProxyService(t *testing.T) {
 		}
 		assert.Equal(
 			t,
-			string(creds["credName"]),
 			strings.Repeat("\x00", len([]byte("credValue"))),
+			string(creds["credName"]),
 		)
 	})
 }

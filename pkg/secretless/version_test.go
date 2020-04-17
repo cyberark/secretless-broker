@@ -7,11 +7,11 @@ import (
 )
 
 func TestVersionIsPresent(t *testing.T) {
-	assert.NotNil(t, Version, "Expected Version to be non-empty but got an empty value")
+	assert.NotEmpty(t, Version, "Expected Version to be non-empty but got an empty value")
 }
 
 func TestTagIsPresent(t *testing.T) {
-	assert.NotNil(t, Tag, "Expected Tag to be non-empty but got an empty value")
+	assert.NotEmpty(t, Tag, "Expected Tag to be non-empty but got an empty value")
 }
 
 func TestVersionIsCorrectFormat(t *testing.T) {

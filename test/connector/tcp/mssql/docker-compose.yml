@@ -10,6 +10,24 @@ services:
       SA_PASSWORD: "yourStrong()Password"
       ACCEPT_EULA: Y
       MSSQL_PID:
+    volumes:
+      - ./mssql.conf:/var/opt/mssql/mssql.conf
+      - ./certs/server-cert.pem:/etc/ssl/certs/mssql.pem
+      - ./certs/server-key.pem:/etc/ssl/private/mssql.key
+
+  mssql-forced-tls:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    ports:
+      - 1433:1433
+    environment:
+      # This hardcoded password must match the one in secretless.yml.
+      SA_PASSWORD: "yourStrong()Password"
+      ACCEPT_EULA: Y
+      MSSQL_PID:
+    volumes:
+      - ./mssql-forced-tls.conf:/var/opt/mssql/mssql.conf
+      - ./certs/server-cert.pem:/etc/ssl/certs/mssql.pem
+      - ./certs/server-key.pem:/etc/ssl/private/mssql.key
 
   secretless:
     image: secretless-broker

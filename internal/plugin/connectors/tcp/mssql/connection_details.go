@@ -1,19 +1,9 @@
 package mssql
 
 import (
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/connectiondetails"
 	"net/url"
-	"strconv"
 )
-
-// ConnectionDetails stores the connection info to the real backend database.
-// These values are pulled from the SingleUseConnector credentials config
-type ConnectionDetails struct {
-	Host      string
-	Port      uint
-	Username  string
-	Password  string
-	SSLParams map[string]string
-}
 
 var sslModeToBaseParams = map[string]map[string]string{
 	sslModeDisable: {
@@ -44,44 +34,27 @@ const (
 
 var defaultSSLMode = []byte(sslModeRequire)
 
-const defaultMSSQLPort = uint(1433)
+const defaultMSSQLPort = "1433"
 
-// NewConnectionDetails is a constructor of ConnectionDetails structure from a
-// map of credentials.
-func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
-
-	connDetails := &ConnectionDetails{}
-
-	if len(credentials["host"]) > 0 {
-		connDetails.Host = string(credentials["host"])
-	}
-
-	connDetails.Port = defaultMSSQLPort
-	if len(credentials["port"]) > 0 {
-		port64, _ := strconv.ParseUint(string(credentials["port"]), 10, 64)
-		connDetails.Port = uint(port64)
-	}
-
-	if len(credentials["username"]) > 0 {
-		connDetails.Username = string(credentials["username"])
-	}
-
-	if len(credentials["password"]) > 0 {
-		connDetails.Password = string(credentials["password"])
-	}
-
-	connDetails.SSLParams = newSSLParams(credentials)
-
-	return connDetails
+// NewConnectionDetails is a local constructor for creating connection details and
+// injecting custom handling for MsSQL-specific parameters
+func NewConnectionDetails(credentials map[string][]byte) (*connectiondetails.ConnectionDetails, error) {
+	return connectiondetails.NewConnectionDetails(
+		credentials,
+		defaultMSSQLPort,
+		HandleSSLOptions,
+	)
 }
 
-func newSSLParams(credentials map[string][]byte) map[string]string {
+// HandleSSLOptions is a custom handler for MsSQL, converting the sslmode to the
+// corresponding value that is understood by MsSQL, and adding any needed params.
+func HandleSSLOptions(credentials map[string][]byte) (map[string]string, error) {
 	sslMode := string(credentials["sslmode"])
 	params, ok := sslModeToBaseParams[sslMode]
 
 	if !ok {
 		credentials["sslmode"] = defaultSSLMode
-		return newSSLParams(credentials)
+		return HandleSSLOptions(credentials)
 	}
 
 	if sslMode == sslModeVerifyCA {
@@ -97,28 +70,21 @@ func newSSLParams(credentials map[string][]byte) map[string]string {
 		}
 	}
 
-	return params
-}
-
-// Address returns a string representing the network location (host and port)
-// of a MSSQL server.  This is the string you would would typically use to
-// connect to the database -- eg, in cmd line tools.
-func (cd *ConnectionDetails) address() string {
-	return cd.Host + ":" + strconv.FormatUint(uint64(cd.Port), 10)
+	return params, nil
 }
 
 // URL returns a string URL from connection details
-func (cd *ConnectionDetails) URL() string {
+func URL(cd *connectiondetails.ConnectionDetails) string {
 	query := url.Values{}
 
-	for key, value := range cd.SSLParams {
+	for key, value := range cd.Options {
 		query.Add(key, value)
 	}
 
 	u := &url.URL{
 		Scheme:   "sqlserver",
 		User:     url.UserPassword(cd.Username, cd.Password),
-		Host:     cd.address(),
+		Host:     cd.Address(),
 		RawQuery: query.Encode(),
 	}
 

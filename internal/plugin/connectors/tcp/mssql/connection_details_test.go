@@ -4,125 +4,40 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/connectiondetails"
 )
 
 type args struct {
 	credentials map[string][]byte
 }
 
-var defaultConnectionDetails = &ConnectionDetails{
+var defaultConnectionDetails = &connectiondetails.ConnectionDetails{
 	Username: "herp",
 	Password: "derp",
 	Host:     "0.0.0.0",
-	Port:     1234,
-	SSLParams: map[string]string{
+	Port:     "1234",
+	Options: map[string]string{
 		"encrypt":                "true",
 		"trustservercertificate": "true",
 	},
 }
 
-var emptyConnectionDetails = &ConnectionDetails{
+var emptyConnectionDetails = &connectiondetails.ConnectionDetails{
 	Port: defaultMSSQLPort,
-	SSLParams: map[string]string{
+	Options: map[string]string{
 		"encrypt":                "true",
 		"trustservercertificate": "true",
 	},
 }
 
-func TestConnectionDetails_Address(t *testing.T) {
-	testCases := []struct {
-		description string
-		fields      *ConnectionDetails
-		expected    string
-	}{
-		{
-			description: "expected valid input",
-			fields:      defaultConnectionDetails,
-			expected:    "0.0.0.0:1234",
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			cd := &ConnectionDetails{
-				Host:      tc.fields.Host,
-				Port:      tc.fields.Port,
-				Username:  tc.fields.Username,
-				Password:  tc.fields.Password,
-				SSLParams: tc.fields.SSLParams,
-			}
-
-			assert.Equal(t, tc.expected, cd.address())
-		})
-	}
-}
-
-func TestNewConnectionDetails(t *testing.T) {
-	testCases := []struct {
-		description string
-		args        args
-		expected    *ConnectionDetails
-	}{
-		{
-			description: "expected valid credentials",
-			args: args{
-				credentials: map[string][]byte{
-					"username":    []byte("herp"),
-					"password":    []byte("derp"),
-					"host":        []byte("0.0.0.0"),
-					"port":        []byte("1234"),
-					"sslmode":     []byte("require"),
-					"sslrootcert": []byte("foo"),
-				},
-			},
-			expected: defaultConnectionDetails,
-		},
-		{
-			description: "nil sslmode",
-			args: args{
-				credentials: map[string][]byte{
-					"sslmode": nil,
-				},
-			},
-			expected: emptyConnectionDetails,
-		},
-		{
-			description: "supported sslmode",
-			args: args{
-				credentials: map[string][]byte{
-					"sslmode": []byte("disable"),
-				},
-			},
-			expected: &ConnectionDetails{
-				Port: defaultMSSQLPort,
-				SSLParams: map[string]string{
-					"encrypt": "disable",
-				},
-			},
-		},
-		{
-			description: "unsupported sslmode",
-			args: args{
-				credentials: map[string][]byte{
-					"sslmode": []byte("foobar"),
-				},
-			},
-			expected: emptyConnectionDetails,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			actualConnDetails := NewConnectionDetails(tc.args.credentials)
-
-			assert.Equal(t, tc.expected, actualConnDetails)
-		})
-	}
-}
+// Test case needed for NewConnectionDetails with handler injection
 
 func TestDefaultSSLModeExists(t *testing.T) {
 	assert.NotEmpty(t, sslModeToBaseParams[string(defaultSSLMode)])
 }
 
-func TestConnectionDetails_NewSSLOptions(t *testing.T) {
+func TestConnectionDetails_HandleSSLOptions(t *testing.T) {
 	testCases := []struct {
 		description string
 		args        args
@@ -198,7 +113,7 @@ func TestConnectionDetails_NewSSLOptions(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			actualSSLOptions := newSSLParams(tc.args.credentials)
+			actualSSLOptions, _ := HandleSSLOptions(tc.args.credentials)
 
 			assert.Equal(t, tc.expected, actualSSLOptions)
 		})

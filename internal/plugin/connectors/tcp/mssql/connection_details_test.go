@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/cyberark/secretless-broker/internal"
 )
 
 type args struct {
@@ -119,7 +121,7 @@ func TestNewConnectionDetails(t *testing.T) {
 }
 
 func TestDefaultSSLModeExists(t *testing.T) {
-	assert.NotEmpty(t, sslModeToBaseParams[string(defaultSSLMode)])
+	assert.NotEmpty(t, sslModeToBaseParams[defaultSSLMode])
 }
 
 func TestConnectionDetails_NewSSLOptions(t *testing.T) {
@@ -203,4 +205,38 @@ func TestConnectionDetails_NewSSLOptions(t *testing.T) {
 			assert.Equal(t, tc.expected, actualSSLOptions)
 		})
 	}
+}
+
+func TestConnectionDetails_NewSSLOptions_Recursion(t *testing.T) {
+	// No sslmode given - recursion will take place
+	credentials := map[string][]byte{
+		"username":    []byte("herp"),
+		"password":    []byte("derp"),
+		"host":        []byte("0.0.0.0"),
+		"port":        []byte("1234"),
+		"sslrootcert": []byte("foo"),
+	}
+
+	// To be used after initial args are zeroed
+	secondaryCredentials := map[string][]byte{
+		"username":    []byte("herp"),
+		"password":    []byte("derp"),
+		"host":        []byte("0.0.0.0"),
+		"port":        []byte("1234"),
+		"sslrootcert": []byte("foo"),
+	}
+
+	// Initial run with missing sslmode
+	_ = newSSLParams(credentials)
+
+	// Default sslmode set through recursion
+	assert.Equal(t, credentials["sslmode"], []byte(defaultSSLMode))
+
+	// Zeroize credentials as we would in production
+	internal.ZeroizeCredentials(credentials)
+
+	_ = newSSLParams(secondaryCredentials)
+
+	// Default sslmode set through recursion
+	assert.Equal(t, secondaryCredentials["sslmode"], []byte(defaultSSLMode))
 }

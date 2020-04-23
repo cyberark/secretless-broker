@@ -37,13 +37,13 @@ pipeline {
       parallel {
         stage('Scan Secretless Image') {
           steps {
-            scanAndReport("secretless-broker:latest", "HIGH")
+            scanAndReport("secretless-broker:latest", "HIGH", false)
           }
         }
 
         stage('Scan Secretless Quickstart') {
           steps {
-            scanAndReport("secretless-broker-quickstart:latest", "CRITICAL")
+            scanAndReport("secretless-broker-quickstart:latest", "CRITICAL", false)
           }
         }
 
@@ -52,7 +52,7 @@ pipeline {
             script {
               TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
             }
-            scanAndReport("secretless-broker-redhat:${TAG}", "NONE")
+            scanAndReport("secretless-broker-redhat:${TAG}", "NONE", false)
           }
         }
 

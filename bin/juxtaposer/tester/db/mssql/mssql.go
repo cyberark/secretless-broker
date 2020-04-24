@@ -40,10 +40,6 @@ func (tester *MssqlTester) GetQueryMarkers(length int) string {
 
 // Connect is used to initialize a testing connection to the SQL database
 func (tester *MssqlTester) Connect(options api.DbTesterOptions) error {
-	if options.SslMode != "" {
-		return fmt.Errorf("mssql driver doesn't support sslmodes")
-	}
-
 	if options.Port == "" {
 		options.Port = "1433"
 	}

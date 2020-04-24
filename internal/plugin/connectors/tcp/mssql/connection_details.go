@@ -42,7 +42,7 @@ const (
 	sslModeVerifyFull = "verify-full"
 )
 
-var defaultSSLMode = []byte(sslModeRequire)
+const defaultSSLMode = sslModeRequire
 
 const defaultMSSQLPort = uint(1433)
 
@@ -80,7 +80,7 @@ func newSSLParams(credentials map[string][]byte) map[string]string {
 	params, ok := sslModeToBaseParams[sslMode]
 
 	if !ok {
-		credentials["sslmode"] = defaultSSLMode
+		credentials["sslmode"] = []byte(defaultSSLMode)
 		return newSSLParams(credentials)
 	}
 

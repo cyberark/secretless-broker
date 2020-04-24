@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Updated RH image push to ensure we're logged into the RH container registry
   appropriately before pushing (#1149)
+- Fixed a stack overflow issue when running multiple multiple connections to an MsSQL
+  server consecutively
 
 ## [1.5.1] - 2020-02-12
 

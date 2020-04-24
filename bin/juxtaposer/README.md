@@ -220,6 +220,9 @@ backends:
 </p>
 </details>
 
+> Note: Be sure to modify the value for `ignore` for each backend
+> you wish to run against.
+
 Finally, start Juxtaposer with:
 
 ```

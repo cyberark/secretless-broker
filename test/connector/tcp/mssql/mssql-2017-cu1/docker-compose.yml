@@ -10,6 +10,10 @@ services:
       # This hardcoded password must match the one in secretless.yml.
       SA_PASSWORD: "yourStrong()Password"
       ACCEPT_EULA: Y
+    volumes:
+      - ../mssql.conf:/var/opt/mssql/mssql.conf
+      - ../certs/server-cert.pem:/certs/mssql.pem
+      - ../certs/server-key.pem:/certs/mssql.key
 
   secretless-2017-cu1:
     image: secretless-broker

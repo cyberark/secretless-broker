@@ -1,56 +1,98 @@
-- [Tests cases](#tests-cases)
+* [Tests cases](#tests-cases)
   * [Secretless Binary](#secretless-binary)
   * [In-process Proxy Service](#in-process-proxy-service)
-- [Debugging Secretless Broker as it is Running in a Container](#debugging-secretless-broker-as-it-is-running-in-a-container)
+* [Debugging Secretless Broker as it is Running in a Container](#debugging-secretless-broker-as-it-is-running-in-a-container)
   * [Start your MSSQL server and Secretless Broker Debug Image](#start-your-mssql-server-and-secretless-broker-debug-image)
   * [Configure Your Intellij / Goland IDE](#configure-your-intellij--goland-ide)
-    + [Create a `Go Remote` Run Configuration](#create-a-go-remote-run-configuration)
-    + [Add Breakpoint(s)](#add-breakpoints)
+    * [Create a `Go Remote` Run Configuration](#create-a-go-remote-run-configuration)
+    * [Add Breakpoint(s)](#add-breakpoints)
   * [Run an `sqlcmd` To Start Debugging](#run-an-sqlcmd-to-start-debugging)
 
 ## Tests cases
 
-The test cases in this folder are integration tests for the MSSQL service connector. The goal of these tests is to exercise functionality at a relatively high level. The tests are fully-fledged Go tests, and therefore follow the conventions of Go testing; they are defined in Go files with the suffix `_test.go`, and can be run by calling `go test`.
+The test cases in this folder are integration tests for the MSSQL service
+connector. The goal of these tests is to exercisefunctionality at a relatively
+high level. The tests are fully-fledged Go tests, and therefore follow the
+conventions of Go testing; they are defined in Go files with the suffix
+`_test.go`, and can be run by calling `go test`.
 
-There are 2 types of tests in this folder. The test cases are generally composed of a **database client**, **Secretless Proxy** and a **target service**. A realistic target service is provided through docker-compose. There's also a mock target service use to capture the packets an actual server might receive.
+There are 2 types of tests in this folder. The test cases are generally
+composed of a **database client**, **Secretless Proxy** and a **target
+service**. A realistic target service is provided through docker-compose.
+There's also a mock target service use to capture the packets an actual server
+might receive.
 
 Below are 2 sections each covering a separate type of test.
 
 ### Secretless Binary
-This type of test validates some functionality through the Secretless binary. This is a sort of end to end test whose components are **database client**, **Secretless binary**, **target service**. Its configuration is relatively static. 
+This type of test validates some functionality through the Secretless binary.
+This is a sort of end to end test whose components are **database client**,
+**Secretless binary**, **target service**. Its configuration is relatively
+static.
 
 This type of test requires:
-+ Setup of Secretless services by adding them to the Secretless configuration (`secretless.yml`)
-+ Coordination between the Secretless configuration and the test case, the client is invoked from the Go test code.
 
-Though it can seem a bit cumbersome, this type of test takes its value from being truly E2E because it consumes Secretless in its release packaging as a container image.
++ Setup of Secretless services by adding them to the Secretless configuration
+(`secretless.yml`)
++ Coordination between the Secretless configuration and the test case,
+the client is invoked from the Go test code.
+
+Though it can seem a bit cumbersome, this type of test takes its value
+from being truly E2E because it consumes Secretless in its release packaging
+as a container image.
 
 ### In-process Proxy Service
-This type of test validates some functionality through an in-process Proxy Service. This is very similar to approach above, except that it takes the **Secretless binary** component and moves the interface further inward. The Secretless binary is the combination of the many internal parts of Secretless. Roughly speaking, these are the parts:
+This type of test validates some functionality through an in-process
+Proxy Service. This is very similar to approach above, except that it
+takes the **Secretless binary** component and moves the interface further
+inward. The Secretless binary is the combination of the many internal
+parts of Secretless. Roughly speaking, these are the parts:
 
 1. Parse Config into Service and Credential Specs
-1. Each Credential Spec is used to create a closure that fetches credentials using a Credential Provider and returns them as a map of type `map[string][]byte`, string to byte-slice key-value pairs.
-1. Each Service Spec is used to create a Proxy Service. A Proxy Service listens on a particular network socket, and handles the creation of authenticated connections and the piping of authenticated connections. 
+1. Each Credential Spec is used to create a closure that fetches
+credentials using a Credential Provider and returns them as a map of
+type `map[string][]byte`, string to byte-slice key-value pairs.
+1. Each Service Spec is used to create a Proxy Service. A Proxy Service
+listens on a particular network socket, and handles the creation of
+authenticated connections and the piping of authenticated connections.
 
-A Proxy Service comes bundled with a Service Connector, network socket listener and the credential fetching closure from (2). It is the Service Connector which has the protocol specific logic to create an authenticated connection. Some Proxy Services are not configurable and the Proxy Service is tightly integrated with the Service Connector e.g. SSH. Other Proxy Services such as the TCP Proxy Service can be configured to use a particular Service Connector e.g. MSSQL, Postgres, MySQL etc. For MSSQL, the Proxy Service is made up of a MSSQL Service Connector on top of a TCP Connector.
- 
-Parts (1) and (2) above generally do not require testing on a per Service Connector basis. For this type of test we do away with these parts and instead of relying on Secretless we create the Proxy Service ourselves in-process. You likely won't ever have to worry about how this is done since we've already written a wrapper in `./mssql_proxy_service.go` that
+A Proxy Service comes bundled with a Service Connector, network socket
+listener and the credential fetching closure from (2). It is the Service
+Connector which has the protocol specific logic to create an authenticated
+connection. Some Proxy Services are not configurable and the Proxy Service
+is tightly integrated with the Service Connector e.g. SSH. Other Proxy
+Services such as the TCP Proxy Service can be configured to use a particular
+Service Connector e.g. MSSQL, Postgres, MySQL etc. For MSSQL, the Proxy
+Service is made up of a MSSQL Service Connector on top of a TCP Connector.
+
+Parts (1) and (2) above generally do not require testing on a per Service
+Connector basis. For this type of test we do away with these parts and
+instead of relying on Secretless we create the Proxy Service ourselves
+in-process. You likely won't ever have to worry about how this is done
+since we've already written a wrapper in `./mssql_proxy_service.go` that:
+
 1. Creates the network socket listener.
-2. A convenient method for wrapping a credential map in a closure (as needed by the Proxy Service) that clones and returns it every time the closure is called.
-3. Allows for easy creation (does (1) and (2)), starting and stopping of the Proxy Service.
+2. A convenient method for wrapping a credential map in a closure
+(as needed by the Proxy Service) that clones and returns it every time
+the closure is called.
+3. Allows for easy creation (does (1) and (2)), starting and stopping of
+the Proxy Service.
 
-This results in an extremely convenient and fast mechanism for testing iterations of credential values against a Proxy Service. An example where this has been useful is in testing the different scenarios that arise in supporting TLS. 
+This results in an extremely convenient and fast mechanism for testing
+iterations of credential values against a Proxy Service. An example where
+this has been useful is in testing the different scenarios that arise
+in supporting TLS.
 
 Below is an example test using this convenient wrapper.
 
 ```go
 // Specify client request
 clientRequest := clientRequest{
-	params: dbConfigParams{
-		Database: "tempdb",
-		ReadOnly: false,
-	},
-	query: encryptionOptionQuery,
+  params: dbConfigParams{
+    Database: "tempdb",
+    ReadOnly: false,
+  },
+  query: encryptionOptionQuery,
 }
 
 // Read self-signed server certificate
@@ -58,25 +100,33 @@ cert, _ := ioutil.ReadFile("./certs/server-cert.pem")
 
 // Proxy Request through Secretless
 out, _, err := clientRequest.proxyRequest(
-	sqlcmdExec,
-	map[string][]byte{
-		"sslmode":     []byte("verify-full"),
-		"sslrootcert": cert,
-		"sslhost":     []byte("test"),
-		"username":    []byte("sa"),
-		"password":    []byte("yourStrong()Password"),
-		"host":        []byte("localhost"),
-		"port":        []byte("1433"),
-	},
+  sqlcmdExec,
+  map[string][]byte{
+    "sslmode":     []byte("verify-full"),
+    "sslrootcert": cert,
+    "sslhost":     []byte("test"),
+    "username":    []byte("sa"),
+    "password":    []byte("yourStrong()Password"),
+    "host":        []byte("localhost"),
+    "port":        []byte("1433"),
+  },
 )
 ```
 
+In the example the `proxyRequest` method on the `clientRequest` instance is
+used. This method creates an MSSQL Proxy Service in-process, then runs a
+client request through it, then cleans up. It returns the output from the
+client request, and outputs the logs from the lifecycle of the Proxy Service.
+This is wonderful for debugging.
 
-In the example the `proxyRequest` method on the `clientRequest` instance is used. This method creates an MSSQL Proxy Service in-process, then runs a client request through it, then cleans up. It returns the output from the client request, and outputs the logs from the lifecycle of the Proxy Service. This is wonderful for debugging. 
+It's worth noting that a similar test case would be more cumbersome if done
+through the Secretless binary which would require creation of a service in
+Secretless config; you'd have to pick arbitrary service names, service ports,
+credential provider, and coordinate both the running of Secretless and the
+credentials with your test cases.
 
-It's worth noting that a similar test case would be more cumbersome if done through the Secretless binary which would require creation of a service in Secretless config; you'd have to pick arbitrary service names, service ports, credential provider, and coordinate both the running of Secretless and the credentials with your test cases.
+## Debugging Secretless Broker as it is Running in a Container
 
-## Debugging Secretless Broker as it is Running in a Container 
 Using a specially built "remote-debug" image for the Secretless Broker, it
 is possible to connect a Delve-capable debugger such as Intellij or Goland
 to a Secretless Broker process that is running inside a Docker container.
@@ -87,6 +137,7 @@ The steps for starting the Secretless Broker and attaching a debugger are
 described in the sections that follow.
 
 ### Start your MSSQL server and Secretless Broker Debug Image
+
 From this directory, call
 ```
 ./start -D

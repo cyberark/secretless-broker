@@ -119,7 +119,7 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 	// immediately zeroize credentials after connecting
 	internal.ZeroizeCredentials(backendCredentials)
 
-	logger.Debugf("Connection opened on %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
+	logger.Debugf("Proxying connection on %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
 
 	clientErrChan, destErrChan := duplexStream(clientConn, targetConn)
 
@@ -160,6 +160,10 @@ func (proxy *proxyService) Start() error {
 		for !proxy.done {
 			// TODO: can accepts happen in parallel ?
 			conn, err := proxy.listener.Accept()
+			if opErr, ok := err.(*net.OpError); ok && opErr.Err.Error() == "use of closed network connection" {
+				logger.Info("Listener closed")
+				return
+			}
 			if err != nil {
 				logger.Errorf("Failed on accept connection: %s", err)
 				return

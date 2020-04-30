@@ -72,17 +72,17 @@ func (clientReq clientRequest) proxyRequest(
 	clientResChan := concurrentClientExec(
 		executor,
 		dbClientConfig{
-			Host:           proxyService.host,
-			Port:           proxyService.port,
-			Username:       "dummy",
-			Password:       "dummy",
-			Database:       clientReq.database,
-			ReadOnly:       clientReq.readOnly,
+			Host:     proxyService.host,
+			Port:     proxyService.port,
+			Username: "dummy",
+			Password: "dummy",
+			Database: clientReq.database,
+			ReadOnly: clientReq.readOnly,
 		},
 		clientReq.query,
 	)
 
-	clientRes := <- clientResChan
+	clientRes := <-clientResChan
 	return clientRes.out, proxyService.port, clientRes.err
 }
 

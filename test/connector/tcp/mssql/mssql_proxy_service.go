@@ -14,10 +14,10 @@ import (
 // examples are in-process as a TCP proxy service or out-of-process as the Secretless
 // binary.
 type proxyService struct {
-	host string
-	port string
+	host  string
+	port  string
 	start func() // start runs the logic to start the proxy service
-	stop func() // stop runs the logic to stop the proxy service
+	stop  func() // stop runs the logic to stop the proxy service
 }
 
 // Start concurrently runs the start logic for a proxy service
@@ -26,7 +26,7 @@ func (s *proxyService) Start() {
 }
 
 // Stop delegates the cleanup logic for a proxy service
-func (s *proxyService) Stop()  {
+func (s *proxyService) Stop() {
 	s.stop()
 }
 

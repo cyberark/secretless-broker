@@ -65,8 +65,8 @@ func concurrentClientExec(
 		)
 
 		clientResChan <- clientResponse{
-			out:out,
-			err:err,
+			out: out,
+			err: err,
 		}
 	}()
 

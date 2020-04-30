@@ -148,7 +148,7 @@ func TestTLS(t *testing.T) {
 			clientReq := clientRequest{
 				database: "tempdb",
 				readOnly: false,
-				query: encryptionOptionQuery,
+				query:    encryptionOptionQuery,
 			}
 
 			// Proxy Request through Secretless

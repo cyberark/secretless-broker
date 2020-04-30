@@ -9,12 +9,19 @@ import (
 	"os/exec"
 	"text/tabwriter"
 
-	"github.com/cyberark/secretless-broker/test/util/testutil"
+	_ "github.com/denisenkom/go-mssqldb" // register mssql driver
 )
 
-type dbConfig struct {
+// dbClientConfig is abstract and represents the configurations that apply to all
+// clients, each dbClientExecutor translates the configuration into a form that makes
+// sense for its client.
+// e.g. Username, Database translate to the following command for sqlcmd:
+//
+// sqlcmd -d Database -U Username
+//
+type dbClientConfig struct {
 	Host     string
-	Port     int
+	Port     string
 	Username string
 	Password string
 	Database string
@@ -23,26 +30,58 @@ type dbConfig struct {
 	ReadOnly bool
 }
 
-type dbQueryExecutor func(cfg dbConfig, query string) (string, error)
+// dbClientExecutor represents the invocation of an MSSQL client. It takes two arguments,
+// database client configuration (dbClientConfig) and query (string). It returns a string
+// and an error; the string captures the success output and the error captures the failure.
+//
+// As an example, sqlcmdExec is of type dbClientExecutor. sqlcmdExec invokes the sqlcmd
+// program using the arguments provided. An example invocation might look as follows:
+//
+// sqlcmd -d Database -U Username -Q query
+//
+type dbClientExecutor func(cfg dbClientConfig, query string) (string, error)
+
+// clientResponse represents the response from calling a dbClientExecutor. It is composed
+// of a string and an error; the string captures the success output and the error
+// captures the failure.
+type clientResponse struct {
+	out string
+	err error
+}
+
+// concurrentClientExec calls the dbClientExecutor concurrently, and returns a channel
+// that can be waited on to get the client response.
+func concurrentClientExec(
+	executor dbClientExecutor,
+	clientCfg dbClientConfig,
+	query string,
+) chan clientResponse {
+	clientResChan := make(chan clientResponse)
+
+	go func() {
+		out, err := executor(
+			clientCfg,
+			query,
+		)
+
+		clientResChan <- clientResponse{
+			out:out,
+			err:err,
+		}
+	}()
+
+	return clientResChan
+}
 
 const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
 
-func defaultSecretlessDbConfig() dbConfig {
-	return dbConfig{
-		Host:     testutil.SecretlessHost,
-		Port:     testutil.SecretlessPort,
-		Username: "dummy",
-		Password: "dummy",
-	}
-}
-
-// runs queries using sqlcmd
+// sqlcmdExec runs a query by invoking sqlcmd
 func sqlcmdExec(
-	cfg dbConfig,
+	cfg dbClientConfig,
 	query string,
 ) (string, error) {
 	args := []string{
-		"-S", fmt.Sprintf("%s,%d", cfg.Host, cfg.Port),
+		"-S", fmt.Sprintf("%s,%s", cfg.Host, cfg.Port),
 		"-U", cfg.Username,
 		"-P", cfg.Password,
 		"-Q", query,
@@ -72,9 +111,9 @@ func sqlcmdExec(
 	return string(out), nil
 }
 
-// runs queries using python-odbc
+// pythonODBCExec runs a query by invoking python-odbc
 func pythonODBCExec(
-	cfg dbConfig,
+	cfg dbClientConfig,
 	query string,
 ) (string, error) {
 	applicationintent := "readwrite"
@@ -83,7 +122,7 @@ func pythonODBCExec(
 	}
 
 	args := []string{
-		"--server", fmt.Sprintf("%s,%d", cfg.Host, cfg.Port),
+		"--server", fmt.Sprintf("%s,%s", cfg.Host, cfg.Port),
 		"--username", cfg.Username,
 		"--password", cfg.Password,
 		"--query", query,
@@ -110,17 +149,17 @@ func pythonODBCExec(
 	return string(out), nil
 }
 
-// runs queries using Java JDBC
+// javaJDBCExec runs a query by invoking Java JDBC
 // Jar modified from this source: http://jdbcsql.sourceforge.net/
 func javaJDBCExec(
-	cfg dbConfig,
+	cfg dbClientConfig,
 	query string,
 ) (string, error) {
 
 	args := []string{
 		"-jar", jdbcJARPath,
 		"-m", "mssql",
-		"-h", fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		"-h", fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
 		"-U", cfg.Username,
 		"-P", cfg.Password,
 	}
@@ -150,9 +189,9 @@ func javaJDBCExec(
 	return string(out), nil
 }
 
-// runs queries using go-mssqldb
+// gomssqlExec runs a query by invoking go-mssqldb
 func gomssqlExec(
-	cfg dbConfig,
+	cfg dbClientConfig,
 	query string,
 ) (string, error) {
 	applicationIntent := "ReadWrite"
@@ -161,7 +200,7 @@ func gomssqlExec(
 	}
 
 	dsnString := fmt.Sprintf(
-		"user id=%s;password=%s;server=%s;port=%d;encrypt=%s;applicationintent=%s",
+		"user id=%s;password=%s;server=%s;port=%s;encrypt=%s;applicationintent=%s",
 		cfg.Username,
 		cfg.Password,
 		cfg.Host,

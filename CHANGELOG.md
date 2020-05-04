@@ -6,11 +6,34 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.6.0] - 2020-05-04
+
 ### Added
-- Introduce `SECRETLESS_HTTP_CA_BUNDLE` environment variable, which provides a
-  path to a bundle of CA certificates to append to the certificate pool used 
-  for verification by all http service connectors
-  [#1180](https://github.com/cyberark/secretless-broker/pull/1180)
+- Support for a `SECRETLESS_HTTP_CA_BUNDLE` environment variable that specifies
+  the path to a CA cert bundle and enables users to configure Secretless with
+  additional CA certificates for server cert verification when using HTTP
+  connectors.
+  [PR #1180](https://github.com/cyberark/secretless-broker/pull/1180)
+- TLS support for the Secretless-to-server connections of the MSSQL connector.
+  This is the recommended way to secure this connection and achieves feature
+  parity with other TLS connectors.
+  [#1163](https://github.com/cyberark/secretless-broker/issues/1163),
+  [#1164](https://github.com/cyberark/secretless-broker/issues/1164),
+  [#1165](https://github.com/cyberark/secretless-broker/issues/1165)
+- MSSQL connector supports SSL host name verification with `verify-full` SSL
+  mode. Also adds optional `sslhost` configuration parameter that is compared to
+  the server's certificate SAN.
+  [#1199](https://github.com/cyberark/secretless-broker/issues/1199)
+
+### Fixed
+- PostgreSQL connector log messages were updated to improve formatting, fixing
+  a previous issue where the log messages were improperly formatted and were
+  garbled in the logs. [PR #1192](https://github.com/cyberark/secretless-broker/pull/1192)
+
+### Security
+- TCP connectors all automatically zeroize the connection credentials in memory
+  after successfully opening a connection; previously, credentials were only
+  zeroized in memory on error. [#1188](https://github.com/cyberark/secretless-broker/issues/1188)
 
 ## [1.5.2] - 2020-02-24
 
@@ -463,7 +486,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.6.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -488,3 +511,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0
 [1.5.1]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...v1.5.1
 [1.5.2]: https://github.com/cyberark/secretless-broker/compare/v1.5.1...v1.5.2
+[1.6.0]: https://github.com/cyberark/secretless-broker/compare/v1.5.2...v1.6.0

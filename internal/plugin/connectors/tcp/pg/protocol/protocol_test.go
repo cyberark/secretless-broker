@@ -12,14 +12,14 @@ func TestReadMessage(t *testing.T) {
 	t.Run("parses contents", func(t *testing.T) {
 		r, w := net.Pipe()
 		expectedMessageType := byte(12)
-		expectedMessage := []byte{0,1,2,3,4}
+		expectedMessage := []byte{0, 1, 2, 3, 4}
 
 		go func() {
 			err := binary.Write(w, binary.BigEndian, expectedMessageType)
 			if err != nil {
 				panic(err)
 			}
-			err = binary.Write(w, binary.BigEndian, int32(len(expectedMessage) + 4))
+			err = binary.Write(w, binary.BigEndian, int32(len(expectedMessage)+4))
 			if err != nil {
 				panic(err)
 			}

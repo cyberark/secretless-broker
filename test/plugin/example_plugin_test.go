@@ -23,7 +23,6 @@ func readNLines(conn net.Conn, n int) ([]string, error) {
 	var lines []string
 	lineReader := bufio.NewReader(conn)
 
-
 	for linesRead := 0; linesRead < n; linesRead++ {
 		_ = conn.SetReadDeadline(time.Now().Add(testIODeadline))
 
@@ -31,7 +30,7 @@ func readNLines(conn net.Conn, n int) ([]string, error) {
 		if err != nil {
 			err = fmt.Errorf(
 				"failed reading line %d: %s",
-				linesRead + 1,
+				linesRead+1,
 				err)
 			return nil, err
 		}
@@ -71,7 +70,7 @@ func TestTCPPlugin(t *testing.T) {
 		_ = connection.Close()
 	}()
 
-	t.Run("can inject information from credentials", func(t * testing.T) {
+	t.Run("can inject information from credentials", func(t *testing.T) {
 		// initial write
 		err = writeLine(connection, []byte("hello"))
 		if !assert.NoError(t, err) {
@@ -91,7 +90,7 @@ func TestTCPPlugin(t *testing.T) {
 		}
 	})
 
-	t.Run("proxies connection to target service", func(t * testing.T) {
+	t.Run("proxies connection to target service", func(t *testing.T) {
 		err = writeLine(connection, []byte("ping"))
 		if !assert.NoError(t, err) {
 			return

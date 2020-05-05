@@ -5,14 +5,13 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 )
 
-
 // NewRunTestCase returns a function that, given a TestCase, will run the unit
 // tests specified by that TestCase, using the query type given by RunQueryType.
 // TODO: make ConnectionParams an interface and pass it to RunTestCase
 func NewRunTestCase(runQuery RunQueryType) RunTestCaseType {
 	_, testSuiteConfigurations := GenerateConfigurations()
 
-	return func (testCase TestCase) {
+	return func(testCase TestCase) {
 		var expectation = "throws"
 		if testCase.ShouldPass {
 			expectation = "succeeds"

@@ -3,7 +3,7 @@ package tests
 import (
 	"fmt"
 	"testing"
-	
+
 	. "github.com/smartystreets/goconvey/convey"
 
 	"github.com/cyberark/secretless-broker/test/connector/tcp/pg/pkg"

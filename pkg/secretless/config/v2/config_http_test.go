@@ -60,7 +60,7 @@ authenticateURLsMatching: false
 
 	t.Run("error on invalid file contents", func(t *testing.T) {
 		configFileContents := []byte(
-`
+			`
 {
 "x": false
 }

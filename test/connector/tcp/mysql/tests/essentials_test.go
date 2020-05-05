@@ -12,7 +12,7 @@ func TestEssentials(t *testing.T) {
 	testCases := []Definition{
 		{
 			Description: "with username, wrong password",
-			ShouldPass: true,
+			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
 				Username: "testuser",
 				Password: "wrongpassword",
@@ -20,7 +20,7 @@ func TestEssentials(t *testing.T) {
 		},
 		{
 			Description: "with wrong username, wrong password",
-			ShouldPass: true,
+			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
 				Username: "wrongusername",
 				Password: "wrongpassword",
@@ -28,7 +28,7 @@ func TestEssentials(t *testing.T) {
 		},
 		{
 			Description: "with empty username, empty password",
-			ShouldPass: true,
+			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
 				Username: "",
 				Password: "",
@@ -99,15 +99,15 @@ func TestEssentials(t *testing.T) {
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
-				SocketType:     TCP,
-				TLSSetting:     TLS,
-				SSLMode:        Default,
-				RootCertStatus: Undefined,
+				SocketType:               TCP,
+				TLSSetting:               TLS,
+				SSLMode:                  Default,
+				RootCertStatus:           Undefined,
 				AuthCredentialInvalidity: true,
 			},
 			Definition: Definition{
 				Description: "secretless using invalid credentials",
-				ShouldPass: false,
+				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
 					Username: "testuser",
 					Password: "wrongpassword",

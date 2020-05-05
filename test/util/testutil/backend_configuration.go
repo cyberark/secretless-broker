@@ -34,7 +34,7 @@ type LiveConfiguration struct {
 type LiveConfigurations []LiveConfiguration
 
 // Find returns a LiveConfiguration matching the given AbstractConfiguration.
-func (lcs LiveConfigurations) Find(ac AbstractConfiguration) (LiveConfiguration) {
+func (lcs LiveConfigurations) Find(ac AbstractConfiguration) LiveConfiguration {
 	for _, liveConfiguration := range lcs {
 		if liveConfiguration.AbstractConfiguration == ac {
 			return liveConfiguration

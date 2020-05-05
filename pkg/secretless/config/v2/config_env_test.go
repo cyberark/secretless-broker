@@ -38,7 +38,7 @@ func TestConfigEnv(t *testing.T) {
 	// relying on knowing that our implementation doesn't actually use
 	// FileInfo.  That said, this should be ok since the test will likely
 	// break cleanly if the implementation is changed to use FileInfo.
-	getInfoForExistingFile :=  func(_ string) (os.FileInfo, error) {
+	getInfoForExistingFile := func(_ string) (os.FileInfo, error) {
 		return nil, nil
 	}
 

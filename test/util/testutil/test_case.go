@@ -15,8 +15,8 @@ package testutil
 type Definition struct {
 	Description string
 	ClientConfiguration
-	ShouldPass  bool
-	CmdOutput   *string
+	ShouldPass bool
+	CmdOutput  *string
 }
 
 // TestCase represents a full test case, for use in table driven tests.

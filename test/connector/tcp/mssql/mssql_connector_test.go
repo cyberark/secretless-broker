@@ -114,10 +114,11 @@ func RunConnectivityTests(t *testing.T, queryExec dbQueryExecutor) {
 }
 
 const mockServerSecretlessPort = 2224
+
 type testClientParams struct {
-	queryExec dbQueryExecutor
+	queryExec       dbQueryExecutor
 	applicationName string
-	serverName func(server string, port int) string
+	serverName      func(server string, port int) string
 }
 
 func TestClientParams(t *testing.T) {
@@ -133,7 +134,7 @@ func TestClientParams(t *testing.T) {
 	}
 
 	sqlcmdParamsTestClient := testClientParams{
-		queryExec:        sqlcmdExec,
+		queryExec:       sqlcmdExec,
 		applicationName: "SQLCMD",
 		serverName: func(server string, port int) string {
 			return fmt.Sprintf(
@@ -144,14 +145,14 @@ func TestClientParams(t *testing.T) {
 		},
 	}
 	gomssqlParamsTestClient := testClientParams{
-		queryExec:        gomssqlExec,
+		queryExec:       gomssqlExec,
 		applicationName: "go-mssqldb",
 		serverName: func(server string, port int) string {
 			return server
 		},
 	}
 	pythonODBCParamsTestClient := testClientParams{
-		queryExec:        pythonODBCExec,
+		queryExec:       pythonODBCExec,
 		applicationName: "python3.5",
 		serverName: func(server string, port int) string {
 			return fmt.Sprintf(
@@ -164,40 +165,40 @@ func TestClientParams(t *testing.T) {
 
 	type testcase struct {
 		description string
-		readonly bool
-		testClient testClientParams
+		readonly    bool
+		testClient  testClientParams
 	}
 
 	testCases := []testcase{
 		{
 			description: "sqlcmd: client params are propagated to the server",
-			readonly: false,
-			testClient: sqlcmdParamsTestClient,
+			readonly:    false,
+			testClient:  sqlcmdParamsTestClient,
 		},
 		{
 			description: "go-mssqldb: client params are propagated to the server",
-			readonly: false,
-			testClient: gomssqlParamsTestClient,
+			readonly:    false,
+			testClient:  gomssqlParamsTestClient,
 		},
 		{
 			description: "pythonODBC: client params are propagated to the server",
-			readonly: false,
-			testClient: pythonODBCParamsTestClient,
+			readonly:    false,
+			testClient:  pythonODBCParamsTestClient,
 		},
 		{
 			description: "sqlcmd: readonly application intent is propagated",
-			readonly: true,
-			testClient: sqlcmdParamsTestClient,
+			readonly:    true,
+			testClient:  sqlcmdParamsTestClient,
 		},
 		{
 			description: "go-mssqldb: readonly application intent is propagated",
-			readonly: true,
-			testClient: gomssqlParamsTestClient,
+			readonly:    true,
+			testClient:  gomssqlParamsTestClient,
 		},
 		{
 			description: "pythonODBC: readonly application intent is propagated",
-			readonly: true,
-			testClient: pythonODBCParamsTestClient,
+			readonly:    true,
+			testClient:  pythonODBCParamsTestClient,
 		},
 	}
 
@@ -315,8 +316,8 @@ func propagateParams(
 
 	// conditionally assert on application intent
 	if readonly {
-		assert.NotEqual(t, int(loginRequest.TypeFlags & 32), 0)
+		assert.NotEqual(t, int(loginRequest.TypeFlags&32), 0)
 	} else {
-		assert.Equal(t, int(loginRequest.TypeFlags & 32), 0)
+		assert.Equal(t, int(loginRequest.TypeFlags&32), 0)
 	}
 }

@@ -92,7 +92,7 @@ func TestNewConfig(t *testing.T) {
 }
 
 func RunNewConfigTestCases(t *testing.T, label string, sampleContents string) {
-	t.Run(label + ": basic hydration", func(t *testing.T) {
+	t.Run(label+": basic hydration", func(t *testing.T) {
 		cfg, err := sampleConfig(sampleContents)
 		assert.NoError(t, err)
 		if err != nil {
@@ -104,7 +104,7 @@ func RunNewConfigTestCases(t *testing.T, label string, sampleContents string) {
 		assert.Equal(t, NetworkAddress("tcp://0.0.0.0:5432"), cfg.Services[1].ListenOn)
 	})
 
-	t.Run(label + ": config hydration", func(t *testing.T) {
+	t.Run(label+": config hydration", func(t *testing.T) {
 		cfg, err := sampleConfig(sampleContents)
 		assert.NoError(t, err)
 		if err != nil {
@@ -115,7 +115,7 @@ func RunNewConfigTestCases(t *testing.T, label string, sampleContents string) {
 		assert.Equal(t, string(expectedBytes), string(cfg.Services[1].ConnectorConfig))
 	})
 
-	t.Run(label + ": http hydration", func(t *testing.T) {
+	t.Run(label+": http hydration", func(t *testing.T) {
 		cfg, err := sampleConfig(sampleContents)
 		assert.NoError(t, err)
 		if err != nil {
@@ -127,7 +127,7 @@ func RunNewConfigTestCases(t *testing.T, label string, sampleContents string) {
 		assert.Equal(t, NetworkAddress("tcp://0.0.0.0:8080"), cfg.Services[0].ListenOn)
 	})
 
-	t.Run(label + ": credential hydration", func(t *testing.T) {
+	t.Run(label+": credential hydration", func(t *testing.T) {
 		cfg, err := sampleConfig(sampleContents)
 		assert.NoError(t, err)
 		if err != nil {

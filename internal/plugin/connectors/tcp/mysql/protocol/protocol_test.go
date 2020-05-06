@@ -274,8 +274,8 @@ func TestInjectCredentials(t *testing.T) {
 	handshake = HandshakeResponse41{
 		AuthLength:     0,
 		AuthPluginName: "mysql_native_password", // 21
-		AuthResponse:   []byte{}, // 0
-		Username:       "madeupusername", // 14
+		AuthResponse:   []byte{},                // 0
+		Username:       "madeupusername",        // 14
 		Header:         []byte{0xaa, 0x0, 0x0, 0x1},
 	}
 

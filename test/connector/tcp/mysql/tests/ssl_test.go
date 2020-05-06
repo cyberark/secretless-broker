@@ -11,8 +11,8 @@ func TestSSL(t *testing.T) {
 	testCases := []TestCase{
 		{
 			Definition: Definition{
-				Description:   "server_tls, sslmode=default",
-				ShouldPass: true,
+				Description: "server_tls, sslmode=default",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType: TCP,
@@ -22,8 +22,8 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			Definition: Definition{
-				Description:   "server_tls, sslmode=disable",
-				ShouldPass: true,
+				Description: "server_tls, sslmode=disable",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType: TCP,
@@ -33,8 +33,8 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			Definition: Definition{
-				Description:   "server_tls, sslmode=require, sslrootcert=none",
-				ShouldPass: true,
+				Description: "server_tls, sslmode=require, sslrootcert=none",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType: TCP,
@@ -79,8 +79,8 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			Definition: Definition{
-				Description:   "server_tls, sslmode=verify-ca, sslrootcert=valid",
-				ShouldPass:    true,
+				Description: "server_tls, sslmode=verify-ca, sslrootcert=valid",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:     TCP,
@@ -130,8 +130,8 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			Definition: Definition{
-				Description:   "server_no_tls, sslmode=disable",
-				ShouldPass:    true,
+				Description: "server_no_tls, sslmode=disable",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:     TCP,
@@ -142,9 +142,9 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			Definition: Definition{
-				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=malformed, sslcert=malformed",
-				ShouldPass:          false,
-				CmdOutput:           StringPointer("ERROR 2000 (HY000): tls: failed to find any PEM data in certificate input"),
+				Description: "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=malformed, sslcert=malformed",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer("ERROR 2000 (HY000): tls: failed to find any PEM data in certificate input"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:       TCP,
@@ -157,8 +157,8 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			Definition: Definition{
-				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=valid, sslcert=valid",
-				ShouldPass:          true,
+				Description: "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=valid, sslcert=valid",
+				ShouldPass:  true,
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:       TCP,
@@ -171,9 +171,9 @@ func TestSSL(t *testing.T) {
 		},
 		{
 			Definition: Definition{
-				Description:         "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=notsignedbyca, sslcert=notsignedbyca",
-				ShouldPass:          false,
-				CmdOutput:           StringPointer("ERROR 2000 (HY000): remote error: tls: unknown certificate authority"),
+				Description: "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=notsignedbyca, sslcert=notsignedbyca",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer("ERROR 2000 (HY000): remote error: tls: unknown certificate authority"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:       TCP,

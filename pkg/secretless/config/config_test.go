@@ -177,9 +177,9 @@ handlers:
 						},
 						Credentials: []crd_api_v1.Variable{
 							{
-								Name:       "accessToken",
-								Provider:   "conjur",
-								ID:         "accessToken",
+								Name:     "accessToken",
+								Provider: "conjur",
+								ID:       "accessToken",
 							},
 						},
 					},

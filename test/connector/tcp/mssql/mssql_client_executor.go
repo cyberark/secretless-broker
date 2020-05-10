@@ -12,6 +12,9 @@ import (
 	_ "github.com/denisenkom/go-mssqldb" // register mssql driver
 )
 
+// jdbcJARPath is the path to jar file containing the jdbc client.
+const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
+
 // dbClientConfig is abstract and represents the configurations that apply to all
 // clients, each dbClientExecutor translates the configuration into a form that makes
 // sense for its client.
@@ -72,8 +75,6 @@ func concurrentClientExec(
 
 	return clientResChan
 }
-
-const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
 
 // sqlcmdExec runs a query by invoking sqlcmd
 func sqlcmdExec(

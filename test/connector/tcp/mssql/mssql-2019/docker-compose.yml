@@ -12,8 +12,8 @@ services:
       ACCEPT_EULA: Y
     volumes:
       - ../mssql.conf:/var/opt/mssql/mssql.conf
-      - ../certs/server-cert.pem:/certs/mssql.pem
-      - ../certs/server-key.pem:/certs/mssql.key
+      - ../certs/server-cert.pem:/certs/server.pem
+      - ../certs/server-key.pem:/certs/server.key
 
   secretless-2019:
     image: secretless-broker

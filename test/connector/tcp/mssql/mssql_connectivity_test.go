@@ -61,10 +61,7 @@ func RunConnectivityTests(t *testing.T, queryExec dbClientExecutor) {
 		}
 
 		// Execute query
-		_, err := queryExec(
-			cfg,
-			"",
-		)
+		_, err := queryExec(cfg, "")
 
 		// Test the returned values
 		assert.Error(t, err, "direct db connection should error")
@@ -73,7 +70,7 @@ func RunConnectivityTests(t *testing.T, queryExec dbClientExecutor) {
 
 	t.Run("Passes valid database name to MSSQL through Secretless", func(t *testing.T) {
 		cfg := defaultSecretlessDbConfig()
-		// existing database name, see
+		// Existing database name, see
 		// https://docs.microsoft.com/en-us/sql/relational-databases/databases/tempdb-database?view=sql-server-ver15
 		cfg.Database = "tempdb"
 
@@ -90,7 +87,7 @@ func RunConnectivityTests(t *testing.T, queryExec dbClientExecutor) {
 
 	t.Run("Passes invalid database name to MSSQL through Secretless", func(t *testing.T) {
 		cfg := defaultSecretlessDbConfig()
-		// non-existent database name
+		// Non-existent database name
 		cfg.Database = "meow"
 
 		// Execute query

@@ -19,13 +19,13 @@ type tlsTestCase struct {
 	assertion   func(t *testing.T, out string, port string, err error)
 }
 
-var tlsServerCert = func() []byte {
+func getServerCert() []byte {
 	cert, err := ioutil.ReadFile("./certs/server-cert.pem")
 	if err != nil {
 		panic("unable to read server certificate")
 	}
 	return cert
-}()
+}
 
 var tlsTestCases = []tlsTestCase{
 	{
@@ -79,7 +79,7 @@ var tlsTestCases = []tlsTestCase{
 		description: "sslmode=verify-ca: self-signed and sslrootcert",
 		credentials: map[string][]byte{
 			"sslmode":     []byte("verify-ca"),
-			"sslrootcert": tlsServerCert,
+			"sslrootcert": getServerCert(),
 			"username":    []byte(envCfg.User),
 			"password":    []byte(envCfg.Password),
 			"host":        []byte(envCfg.HostWithTLS),
@@ -110,7 +110,7 @@ var tlsTestCases = []tlsTestCase{
 		description: "sslmode=verify-full: sslrootcert but hostname mismatch",
 		credentials: map[string][]byte{
 			"sslmode":     []byte("verify-full"),
-			"sslrootcert": tlsServerCert,
+			"sslrootcert": getServerCert(),
 			"username":    []byte(envCfg.User),
 			"password":    []byte(envCfg.Password),
 			"host":        []byte(envCfg.HostWithTLS),
@@ -124,7 +124,7 @@ var tlsTestCases = []tlsTestCase{
 		description: "sslmode=verify-full: sslrootcert and sslhost",
 		credentials: map[string][]byte{
 			"sslmode":     []byte("verify-full"),
-			"sslrootcert": tlsServerCert,
+			"sslrootcert": getServerCert(),
 			"sslhost":     []byte("test"),
 			"username":    []byte(envCfg.User),
 			"password":    []byte(envCfg.Password),

@@ -226,7 +226,7 @@ func (connector *SingleUseConnector) Connect(
 		}
 	}()
 
-	connector.Logger.Debug("Waiting for server connection")
+	connector.Logger.Debug("Waiting for target server connection")
 	backendConn, err := connector.waitForServerConnection(
 		connInterceptor,
 		connectionResultChan)
@@ -236,7 +236,7 @@ func (connector *SingleUseConnector) Connect(
 		return nil, err
 	}
 
-	connector.Logger.Debug("Off to the races")
+	connector.Logger.Debug("Returning authenticated target server connection")
 	return backendConn, nil
 }
 

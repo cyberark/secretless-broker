@@ -10,6 +10,8 @@ import (
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
+// mockTargetCapture is a capture of the packets from a client involved in a handshake
+// with an MSSQL mock server (mockTarget).
 type mockTargetCapture struct {
 	preloginRequest map[uint8][]byte
 	loginRequest    mssql.LoginRequest
@@ -18,6 +20,17 @@ type mockTargetCapture struct {
 type mockTargetResult struct {
 	capture *mockTargetCapture
 	err     error
+}
+
+// mockTarget is a fake MSSQL server that can perform a plaintext handshake with an MSSQL
+// client. It's used to capture packets from the client and make assertions on them. It is
+// particularly useful for ensuring relevant client parameters are propagated to the MSSQL
+// server when Secretless is used to proxy a connection to an MSSQL server.
+type mockTarget struct {
+	listener   net.Listener
+	host       string
+	port       string
+	acceptLock sync.Mutex
 }
 
 func newMockTarget(port string) (*mockTarget, error) {
@@ -40,19 +53,17 @@ func newMockTarget(port string) (*mockTarget, error) {
 	}, nil
 }
 
-type mockTarget struct {
-	listener  net.Listener
-	host      string
-	port      string
-	accepting sync.Mutex
-}
-
-func (m *mockTarget) accept() chan mockTargetResult {
-	m.accepting.Lock()
+// singleAcceptAndHandle handles a client connection on the mock target's listener. The
+// mock target is only capable of accepting and handling a single connection. This is to
+// allow coordination with test clients so that we know which client the listener has just
+// accepted; without this we'd have no way of telling which client connection is
+// currently being handled if multiple client connections are made at the same time.
+func (m *mockTarget) singleAcceptAndHandle() chan mockTargetResult {
+	m.acceptLock.Lock()
 	mockTargetResponseChan := make(chan mockTargetResult)
 
 	go func() {
-		defer m.accepting.Unlock()
+		defer m.acceptLock.Unlock()
 
 		clientConnection, err := m.listener.Accept()
 		if err != nil {
@@ -76,12 +87,11 @@ func (m *mockTarget) accept() chan mockTargetResult {
 }
 
 func (m *mockTarget) handleConnection(clientConnection net.Conn) (*mockTargetCapture, error) {
-	var err error
 	targetCapture := &mockTargetCapture{}
 
 	// Set a deadline so that if things hang then they fail fast
 	readWriteDeadline := time.Now().Add(1 * time.Second)
-	err = clientConnection.SetDeadline(readWriteDeadline)
+	err := clientConnection.SetDeadline(readWriteDeadline)
 	if err != nil {
 		return nil, err
 	}
@@ -98,17 +108,25 @@ func (m *mockTarget) handleConnection(clientConnection net.Conn) (*mockTargetCap
 
 	targetCapture.preloginRequest = preloginRequest
 
-	// Write prelogin response
-	// ensuring no TLS support for now
+	// Write prelogin response.
+	// The PRELOGIN packet type is used for both the client request and server response.
+	// It is described in detail at https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/60f56408-0188-4cd5-8b90-25c6f2423868.
+
+	// Craft the prelogin response from the prelogin request
 	preloginResponse := preloginRequest
+	// The version set here is taken from intercepted traffic over wireshark from an
+	// actual MSSQL server.
 	preloginResponse[mssql.PreloginVERSION] = []byte{0x0e, 0x00, 0x0c, 0xa6, 0x00, 0x00}
+	// Ensure no TLS support, otherwise the client might try to upgrade
 	preloginResponse[mssql.PreloginENCRYPTION] = []byte{mssql.EncryptNotSup}
+
+	// Write prelogin response to client
 	err = mssql.WritePreloginResponse(clientConnection, preloginResponse)
 	if err != nil {
 		return targetCapture, err
 	}
 
-	// read login request
+	// Read login request from client
 	loginRequest, err := mssql.ReadLoginRequest(clientConnection)
 	if err != nil {
 		return targetCapture, err
@@ -116,11 +134,17 @@ func (m *mockTarget) handleConnection(clientConnection net.Conn) (*mockTargetCap
 
 	targetCapture.loginRequest = *loginRequest
 
-	// write a dummy successful login response
+	// Write a dummy successful login response to the client.
+	// In the TDS protocol a login response is represented by a LOGINACK packet,
+	// for details on this packet type see https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/490e563d-cc6e-4c86-bb95-ef0186b98032.
 	loginResponse := &mssql.LoginResponse{}
+	// The name of the server.
 	loginResponse.ProgName = "test"
-	loginResponse.TDSVersion = 0x730A0003
+	// The TDS version being used by the server.
+	loginResponse.TDSVersion = 0x74000004 // TDS74
+	// The type of interface with which the server will singleAcceptAndHandle client requests.
 	loginResponse.Interface = 27
+
 	err = mssql.WriteLoginResponse(clientConnection, loginResponse)
 	if err != nil {
 		return targetCapture, err

@@ -12,8 +12,8 @@ services:
       MSSQL_PID:
     volumes:
       - ./mssql.conf:/var/opt/mssql/mssql.conf
-      - ./certs/server-cert.pem:/certs/mssql.pem
-      - ./certs/server-key.pem:/certs/mssql.key
+      - ./certs/server-cert.pem:/certs/server.pem
+      - ./certs/server-key.pem:/certs/server.key
 
   mssql-forced-tls:
     image: mcr.microsoft.com/mssql/server:2017-latest
@@ -26,8 +26,8 @@ services:
       MSSQL_PID:
     volumes:
       - ./mssql-forced-tls.conf:/var/opt/mssql/mssql.conf
-      - ./certs/server-cert.pem:/certs/mssql.pem
-      - ./certs/server-key.pem:/certs/mssql.key
+      - ./certs/server-cert.pem:/certs/server.pem
+      - ./certs/server-key.pem:/certs/server.key
 
   secretless:
     image: secretless-broker

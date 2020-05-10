@@ -2,6 +2,7 @@ package mssqltest
 
 import (
 	"net"
+	"time"
 )
 
 // ephemeralListenerOnPort creates a net.Listener (with a short deadline) on some given
@@ -13,10 +14,10 @@ func ephemeralListenerOnPort(port string) (net.Listener, error) {
 	}
 
 	// We generally don't want to wait forever for a connection to come in
-	//err = listener.(*net.TCPListener).SetDeadline(time.Now().Add(10 * time.Second))
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = listener.(*net.TCPListener).SetDeadline(time.Now().Add(10 * time.Second))
+	if err != nil {
+		return nil, err
+	}
 
 	return listener, nil
 }
@@ -65,7 +66,7 @@ func (clientReq clientRequest) proxyRequest(
 
 	// Ensure the proxy service is stopped
 	defer proxyService.Stop()
-	// Start the proxyService service. Note
+	// Start the proxyService service
 	proxyService.Start()
 
 	// Make the client request to the proxy service
@@ -82,7 +83,9 @@ func (clientReq clientRequest) proxyRequest(
 		clientReq.query,
 	)
 
+	// Block and wait for the client response
 	clientRes := <-clientResChan
+
 	return clientRes.out, proxyService.port, clientRes.err
 }
 
@@ -115,7 +118,7 @@ func (clientReq clientRequest) proxyToCreatedMock(
 	}
 
 	// Accept on mock target
-	mtResChan := mt.accept()
+	mtResChan := mt.singleAcceptAndHandle()
 
 	// We don't expect anything useful to come back from the client request.
 	// This is a fire and forget
@@ -144,7 +147,7 @@ func (clientReq clientRequest) proxyToMock(
 	}
 
 	// Accept on mock target
-	mtResChan := mt.accept()
+	mtResChan := mt.singleAcceptAndHandle()
 
 	// We don't expect anything useful to come back from the client request.
 	// This is a fire and forget.

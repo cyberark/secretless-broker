@@ -13,6 +13,8 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
 )
 
+const closedConnectionErrString = "use of closed network connection"
+
 func duplexStream(
 	source io.ReadWriter,
 	destination io.ReadWriter,
@@ -160,7 +162,8 @@ func (proxy *proxyService) Start() error {
 		for !proxy.done {
 			// TODO: can accepts happen in parallel ?
 			conn, err := proxy.listener.Accept()
-			if opErr, ok := err.(*net.OpError); ok && opErr.Err.Error() == "use of closed network connection" {
+
+			if opErr, ok := err.(*net.OpError); ok && opErr.Err.Error() == closedConnectionErrString {
 				logger.Info("Listener closed")
 				return
 			}

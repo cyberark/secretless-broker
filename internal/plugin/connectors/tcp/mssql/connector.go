@@ -190,6 +190,7 @@ func (connector *SingleUseConnector) Connect(
 	// Prepare connection details from the client, formatted for MSSQL
 	// TODO: find out if it is possible to send errors during prelogin-phase
 	// TODO: send error to client on failed credential validation
+	connector.Logger.Debug("Constructing connection details")
 	connDetails := NewConnectionDetails(credentialValuesByID)
 
 	// Create a new MSSQL connector
@@ -198,6 +199,7 @@ func (connector *SingleUseConnector) Connect(
 	// NOTE: Secretless has some unfortunate naming collisions with the
 	// go-mssqldb driver package.  The driver package has its own concept of a
 	// "connector", and its connectors also have a "Connect" method.
+	connector.Logger.Debug("Constructing MSSQL connector")
 	driverConnector, err := connector.NewMSSQLConnector(connDetails.URL())
 	if err != nil {
 		wrappedError := errors.Wrap(err, "failed to create a go-mssqldb connector")
@@ -224,6 +226,7 @@ func (connector *SingleUseConnector) Connect(
 		}
 	}()
 
+	connector.Logger.Debug("Waiting for target server connection")
 	backendConn, err := connector.waitForServerConnection(
 		connInterceptor,
 		connectionResultChan)
@@ -233,6 +236,7 @@ func (connector *SingleUseConnector) Connect(
 		return nil, err
 	}
 
+	connector.Logger.Debug("Returning authenticated target server connection")
 	return backendConn, nil
 }
 

@@ -240,3 +240,50 @@ func TestConnectionDetails_NewSSLOptions_Recursion(t *testing.T) {
 	// Default sslmode set through recursion
 	assert.Equal(t, secondaryCredentials["sslmode"], []byte(defaultSSLMode))
 }
+
+func TestConnectionDetails_URL(t *testing.T) {
+	tests := []struct {
+		description string
+		args        map[string][]byte
+		expected    string
+	}{
+		{
+			description: "valid expected input",
+			args: map[string][]byte{
+				"username":    []byte("herp"),
+				"password":    []byte("derp"),
+				"host":        []byte("0.0.0.0"),
+				"port":        []byte("1433"),
+				"sslmode":     []byte("verify-full"),
+				"sslrootcert": []byte("foo"),
+				"sslhost":     []byte("bar"),
+			},
+			expected: "sqlserver://herp:derp@0.0.0.0:1433?disableverifyhostname=false&encrypt=true&hostnameincertificate=bar&rawcertificate=foo&trustservercertificate=false",
+		},
+		{
+			description: "nil sslmode",
+			args: map[string][]byte{
+				"username": []byte("herp"),
+				"password": []byte("derp"),
+				"host":     []byte("0.0.0.0"),
+				"port":     []byte("1433"),
+				"sslmode":  nil,
+			},
+			expected: "sqlserver://herp:derp@0.0.0.0:1433?encrypt=true&trustservercertificate=true",
+		},
+		{
+			description: "empty credentials map",
+			args:        map[string][]byte{},
+			expected:    "sqlserver://:@:1433?encrypt=true&trustservercertificate=true",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.description, func(t *testing.T) {
+			connectionDetails := NewConnectionDetails(tc.args)
+			actualURL := connectionDetails.URL()
+
+			assert.Equal(t, tc.expected, actualURL)
+		})
+	}
+}

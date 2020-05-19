@@ -193,7 +193,8 @@ files = [
   "test/connector/ssh_agent/id_(.*)", # test ssh-agent handler certs
   "test/connector/tcp/mssql/certs/(.*)", # test mssql connector certs
   "test/ssh/id_(.*)", # since-removed ssh test certs
-  "test/util/ssl/(.*)" # test ssl certs
+  "test/util/ssl/(.*)", # test ssl certs
+  "internal/plugin/connectors/tcp/mssql/connection_details_test.go", # fake cert string
 ]
 regexes = [
   "AKIAJC5FABNOFVBKRWHA", # sample AWS key in AWS HTTP connector comments

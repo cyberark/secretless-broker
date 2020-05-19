@@ -1,5 +1,35 @@
 # Perf Test Agent
 
+- [Perf Test Agent](#perf-test-agent)
+- [Description](#description)
+  - [**Status**: Alpha](#--status----alpha)
+    - [**Warning: Naming and APIs are still subject to breaking changes!**](#--warning--naming-and-apis-are-still-subject-to-breaking-changes---)
+- [Running the code locally](#running-the-code-locally)
+  - [Start the test databases](#start-the-test-databases)
+    - [PG](#pg)
+    - [MySQL](#mysql)
+    - [MSSQL](#mssql)
+  - [Run Secretless Broker](#run-secretless-broker)
+  - [Run Juxtaposer](#run-juxtaposer)
+- [Running the code on OpenShift](#running-the-code-on-openshift)
+  - [Configure and source the deployment scripts](#configure-and-source-the-deployment-scripts)
+  - [Configure the backend details](#configure-the-backend-details)
+  - [Configure the deployment template](#configure-the-deployment-template)
+  - [Deploy the code to OpenShift](#deploy-the-code-to-openshift)
+  - [Cleaning up](#cleaning-up)
+- [CLI flags](#cli-flags)
+  - [`-c`: Continue running after end of tests](#--c---continue-running-after-end-of-tests)
+  - [`-f`: Path to configuration file](#--f---path-to-configuration-file)
+  - [`-t`: Run tests for this duration](#--t---run-tests-for-this-duration)
+- [Configuration](#configuration)
+- [Format](#format)
+- [Supported Drivers:](#supported-drivers-)
+- [`comparison` options](#-comparison--options)
+- [`formatters` options](#-formatters--options)
+- [`backends` options](#-backends--options)
+
+[Table of contents generated with markdown-toc](http://ecotrust-canada.github.io/markdown-toc/)
+
 ## Description
 
 This tool can be used to compare timing data between arbitrary number of similar

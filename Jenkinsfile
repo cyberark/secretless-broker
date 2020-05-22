@@ -153,13 +153,31 @@ pipeline {
       }
     }
 
-    stage('Push Images') {
+    stage('Push Images Internally') {
       when {
         branch 'master'
       }
 
       steps {
+        sh './bin/publish_internal'
+      }
+    }
+
+    stage('Push Images') {
+      agent { label 'releaser-v2' }
+      // Only run this stage when triggered by a tag
+      when { tag "v*" }
+      steps {
+        // The tag trigger sets TAG_NAME as an environment variable
+
+        // Clean up first
+        sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
+
         sh 'summon -e production ./bin/publish'
+
+        // Clean up again...
+        sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
+        deleteDir()
       }
     }
 

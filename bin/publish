@@ -7,45 +7,29 @@ set -e
 readonly REGISTRY="cyberark"
 readonly VERSION="$(short_version_tag)"
 readonly FULL_VERSION_TAG="$(full_version_tag)"
-readonly INTERNAL_REGISTRY="registry.tld"
 readonly REDHAT_IMAGE="scan.connect.redhat.com/ospid-18d9f51d-9c0c-4031-9f9e-ef08aa2ff409/secretless-broker"
 readonly IMAGES=(
   "secretless-broker"
   "secretless-broker-quickstart"
 )
-
 readonly TAGS=(
   "$VERSION"
   "latest"
 )
 
-# fetching tags is required for git_description to work
-git fetch --tags
-git_description=$(git describe)
-
-for image_name in "${IMAGES[@]}"; do
-  # always push the tag with the commit hash to internal registry
-  echo "Tagging $INTERNAL_REGISTRY/$image_name:${FULL_VERSION_TAG}"
-  docker tag "$image_name:$FULL_VERSION_TAG" "$INTERNAL_REGISTRY/$image_name:$FULL_VERSION_TAG"
-  echo "Pushing $INTERNAL_REGISTRY/$image_name:${FULL_VERSION_TAG}"
-  docker push "$INTERNAL_REGISTRY/$image_name:$FULL_VERSION_TAG"
-
-  # if it’s not a tagged commit, VERSION will have extra junk (i.e. -g666c4b2), so we won’t publish that commit
-  # only when tag matches the VERSION, push VERSION and latest releases
-  # and x and x.y releases
-  if [ "$git_description" = "v${VERSION}" ]; then
-    echo "Revision $git_description matches version $VERSION exactly. Pushing to Dockerhub..."
+function main() {
+  for image_name in "${IMAGES[@]}"; do
+    image_with_tag="$image_name:$FULL_VERSION_TAG"
 
     for tag in "${TAGS[@]}" $(gen_versions "$VERSION"); do
-      echo "Tagging and pushing $REGISTRY/$image_name:$tag"
+      image_with_version_tag="${REGISTRY}/${image_name}:${tag}"
+      echo "Tagging and pushing ${image_with_version_tag}"
 
-      docker tag "$image_name:$FULL_VERSION_TAG" "$REGISTRY/$image_name:$tag"
-      docker push "$REGISTRY/$image_name:$tag"
+      docker tag "${image_with_tag}" "${image_with_version_tag}"
+      docker push "${image_with_version_tag}"
     done
-  fi
-done
+  done
 
-if [ "$git_description" = "v${VERSION}" ]; then
   # Publish only latest to Redhat Registries
   echo "Tagging and pushing ${REDHAT_IMAGE}"
 
@@ -61,4 +45,6 @@ if [ "$git_description" = "v${VERSION}" ]; then
     echo 'Failed to log in to scan.connect.redhat.com'
     exit 1
   fi
-fi
+}
+
+main

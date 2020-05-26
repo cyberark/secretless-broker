@@ -1,13 +1,13 @@
 #!/bin/bash
 
+set -e
+
 if [[ -z "${TAG_NAME:-}" ]]; then
   echo "Please supply environment variable TAG_NAME."
   echo "If you see this error in Jenkins it means the publish script was run"
   echo "for a build that wasn't triggered by a tag - please check publish stage conditions."
   exit 1
 fi
-
-set -e
 
 . bin/build_utils
 
@@ -42,9 +42,7 @@ function main() {
 
   # Add 'latest' tag only when TAG_NAME is the highest semantic tag
   local LATEST_TAG
-  LATEST_TAG="$(
-    git for-each-ref refs/tags --sort=-refname --format='%(refname:short)' --count=1
-  )"
+  LATEST_TAG="$(git tag | sort -r --version-sort)"
   if [[ "${TAG_NAME}" == "${LATEST_TAG}" ]]; then
     TAGS+=('latest')
   fi

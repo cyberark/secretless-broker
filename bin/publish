@@ -18,6 +18,14 @@ readonly TAGS=(
 )
 
 function main() {
+  TAG_NAME="${TAG_NAME:-}"
+
+  # Compare TAG_NAME (without v prefix) to project version
+  if [[ "${TAG_NAME#"v"}" != "${VERSION}" ]]; then
+    echo "TAG_NAME envvar must match project version";
+    exit 1;
+  fi
+
   for image_name in "${IMAGES[@]}"; do
     image_with_tag="$image_name:$FULL_VERSION_TAG"
 

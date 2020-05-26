@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+. bin/build_utils
+
+readonly FULL_VERSION_TAG="$(full_version_tag)"
+readonly INTERNAL_REGISTRY="registry.tld"
+readonly IMAGES=(
+  "secretless-broker"
+  "secretless-broker-quickstart"
+)
+
+function main() {
+  for image_name in "${IMAGES[@]}"; do
+    image_with_tag="${image_name}:${FULL_VERSION_TAG}"
+    image_with_registry_and_tag="${INTERNAL_REGISTRY}/${image_with_tag}"
+
+    echo "Tagging ${image_with_registry_and_tag}"
+    docker tag "${image_with_tag}" "${image_with_registry_and_tag}"
+    echo "Pushing ${image_with_registry_and_tag}"
+    docker push "${image_with_registry_and_tag}"
+  done
+}
+
+main

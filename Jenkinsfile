@@ -169,15 +169,7 @@ pipeline {
       when { tag "v*" }
       steps {
         // The tag trigger sets TAG_NAME as an environment variable
-
-        // Clean up first
-        sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
-
         sh 'summon -e production ./bin/publish'
-
-        // Clean up again...
-        sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
-        deleteDir()
       }
     }
 

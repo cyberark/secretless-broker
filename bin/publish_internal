@@ -4,7 +4,6 @@ set -e
 
 . bin/build_utils
 
-readonly REGISTRY="cyberark"
 readonly FULL_VERSION_TAG="$(full_version_tag)"
 readonly INTERNAL_REGISTRY="registry.tld"
 readonly IMAGES=(

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [[ -z "${TAG_NAME:-}" ]]; then
+  echo "Please supply environment variable TAG_NAME."
+  echo "If you see this error in Jenkins it means the publish script was run"
+  echo "for a build that wasn't triggered by a tag - please check publish stage conditions."
+  exit 1
+fi
+
 set -e
 
 . bin/build_utils
@@ -14,8 +21,6 @@ readonly IMAGES=(
 )
 
 function main() {
-  TAG_NAME="${TAG_NAME:-}"
-
   # Ensure TAG_NAME version matches project version
   if [[ "${TAG_NAME#"v"}" != "${VERSION}" ]]; then
     echo "TAG_NAME envvar version was '${TAG_NAME#"v"}', expected '${VERSION}'";

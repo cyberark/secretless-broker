@@ -12,24 +12,46 @@ readonly IMAGES=(
   "secretless-broker"
   "secretless-broker-quickstart"
 )
-readonly TAGS=(
-  "$VERSION"
-  "latest"
-)
 
 function main() {
   TAG_NAME="${TAG_NAME:-}"
 
-  # Compare TAG_NAME (without v prefix) to project version
+  # Ensure TAG_NAME version matches project version
   if [[ "${TAG_NAME#"v"}" != "${VERSION}" ]]; then
-    echo "TAG_NAME envvar must match project version";
+    echo "TAG_NAME envvar version was '${TAG_NAME#"v"}', expected '${VERSION}'";
+    echo "TAG_NAME envvar version must match project version";
     exit 1;
   fi
 
+  # Accumulate TAGS
+  #
+
+  local TAGS=(
+    "$VERSION"
+  )
+
+  # Add less specific version tags, eg. given 1.2.3, add 1.2 and 1
+  for tag in $(gen_versions "$VERSION"); do
+    TAGS+=("${tag}")
+  done
+
+  # Add 'latest' tag only when TAG_NAME is the highest semantic tag
+  local LATEST_TAG
+  LATEST_TAG="$(
+    git for-each-ref refs/tags --sort=-refname --format='%(refname:short)' --count=1
+  )"
+  if [[ "${TAG_NAME}" == "${LATEST_TAG}" ]]; then
+    TAGS+=('latest')
+  fi
+
+  # Publish
+  #
+
+  # Publish combinations of images and tags
   for image_name in "${IMAGES[@]}"; do
     image_with_tag="$image_name:$FULL_VERSION_TAG"
 
-    for tag in "${TAGS[@]}" $(gen_versions "$VERSION"); do
+    for tag in "${TAGS[@]}"; do
       image_with_version_tag="${REGISTRY}/${image_name}:${tag}"
       echo "Tagging and pushing ${image_with_version_tag}"
 

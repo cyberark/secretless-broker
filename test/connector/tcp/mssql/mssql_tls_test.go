@@ -152,7 +152,7 @@ func TestTLS(t *testing.T) {
 			}
 
 			// Proxy Request through Secretless
-			out, port, err := clientReq.proxyRequest(
+			out, port, err := clientReq.proxyViaSecretless(
 				sqlcmdExec,           // Use SQLCMD client
 				testCase.credentials, // Credentials from test case
 			)

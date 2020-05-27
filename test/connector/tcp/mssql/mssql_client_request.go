@@ -50,11 +50,11 @@ func cloneCredentials(original map[string][]byte) map[string][]byte {
 	return credsClone
 }
 
-// proxyRequest issues a client request using a the 'executor' argument to a Secretless
-// proxy service configured using the 'credentials' argument.
-// proxyRequest uses newInProcessProxyService to creating the in-process proxy service.
-// The proxy service exists only for the lifetime of this method call.
-func (clientReq clientRequest) proxyRequest(
+// proxyViaSecretless issues a client request using a the 'executor' argument to a
+// Secretless proxy service configured using the 'credentials' argument.
+// proxyViaSecretless uses newInProcessProxyService to creating the in-process proxy
+// service. The proxy service exists only for the lifetime of this method call.
+func (clientReq clientRequest) proxyViaSecretless(
 	executor dbClientExecutor,
 	credentials map[string][]byte,
 ) (string, string, error) {
@@ -91,8 +91,6 @@ func (clientReq clientRequest) proxyRequest(
 
 // proxyToCreatedMock issues a client request using a the 'executor' argument to a Secretless
 // proxy service configured using the 'credentials' argument.
-// proxyRequest uses newInProcessProxyService to creating the in-process proxy service.
-// The proxy service exists only for the lifetime of this method call.
 //
 // NOTE: proxyToCreatedMock proxies the request to a mock server that terminates the request after the handshake
 // This can have unintended effects. gomssql in particular does some weird retry, when a query is prepared!
@@ -122,7 +120,7 @@ func (clientReq clientRequest) proxyToCreatedMock(
 
 	// We don't expect anything useful to come back from the client request.
 	// This is a fire and forget
-	_, secretlessPort, _ := clientReq.proxyRequest(
+	_, secretlessPort, _ := clientReq.proxyViaSecretless(
 		executor,
 		baseCredentials,
 	)
@@ -151,7 +149,7 @@ func (clientReq clientRequest) proxyToMock(
 
 	// We don't expect anything useful to come back from the client request.
 	// This is a fire and forget.
-	_, secretlessPort, _ := clientReq.proxyRequest(
+	_, secretlessPort, _ := clientReq.proxyViaSecretless(
 		executor,
 		baseCredentials,
 	)

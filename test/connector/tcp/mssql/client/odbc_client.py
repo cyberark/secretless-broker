@@ -22,14 +22,25 @@ CONN_INFO = {
     "password": args.password,
     "application_intent": args.application_intent,
 }
-CONN_TEMPLATE_STR="DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};applicationintent={application_intent}"
+CONN_TEMPLATE_STR = ";".join(
+    [
+        "DRIVER={{ODBC Driver 17 for SQL Server}}",
+        "SERVER={server}",
+        "DATABASE={database}",
+        "UID={username}",
+        "PWD={password}",
+        "applicationintent={application_intent}",
+    ],
+)
 conn_string = CONN_TEMPLATE_STR.format(**CONN_INFO)
 SQL_ATTR_CONNECTION_TIMEOUT = 113
 login_timeout = 2
 connection_timeout = 2
 cnx = pyodbc.connect(conn_string,
                      timeout=login_timeout,
-                     attrs_before={SQL_ATTR_CONNECTION_TIMEOUT: connection_timeout})
+                     attrs_before={
+                         SQL_ATTR_CONNECTION_TIMEOUT: connection_timeout,
+                     })
 cursor = cnx.cursor()
 
 if args.query.strip() == "":

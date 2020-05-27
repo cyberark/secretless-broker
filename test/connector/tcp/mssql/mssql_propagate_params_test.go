@@ -6,19 +6,20 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/cyberark/secretless-broker/test/connector/tcp/mssql/client"
 	mssql "github.com/denisenkom/go-mssqldb"
 )
 
 // testClientParams maps a dbClientExecutor to the params that it sends over the wire.
 // e.g. sqlcmd sends an applicationName of "SQLCMD" by default.
 type testClientParams struct {
-	executor        dbClientExecutor
+	runQuery        client.RunQuery
 	applicationName string
 	serverName      func(server string, port string) string
 }
 
 var sqlcmdParamsTestClient = testClientParams{
-	executor:        sqlcmdExec,
+	runQuery:        client.SqlcmdExec,
 	applicationName: "SQLCMD",
 	serverName: func(server string, port string) string {
 		return fmt.Sprintf(
@@ -30,7 +31,7 @@ var sqlcmdParamsTestClient = testClientParams{
 }
 
 var gomssqlParamsTestClient = testClientParams{
-	executor:        gomssqlExec,
+	runQuery:        client.GomssqlExec,
 	applicationName: "go-mssqldb",
 	serverName: func(server string, port string) string {
 		return server
@@ -38,7 +39,7 @@ var gomssqlParamsTestClient = testClientParams{
 }
 
 var pythonODBCParamsTestClient = testClientParams{
-	executor:        pythonODBCExec,
+	runQuery:        client.PythonODBCExec,
 	applicationName: "python3.5",
 	serverName: func(server string, port string) string {
 		return fmt.Sprintf(
@@ -120,7 +121,7 @@ func TestClientParams(t *testing.T) {
 				// capture the packets the server receive from an actual client request
 				// and ensure that parameters are propagated.
 				capture, port, err := clientRequest.proxyToMock(
-					tc.testClient.executor,
+					tc.testClient.runQuery,
 					map[string][]byte{
 						"username": []byte(expectedUsername),
 						"password": []byte(expectedPassword),

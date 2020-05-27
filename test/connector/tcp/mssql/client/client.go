@@ -1,4 +1,4 @@
-package mssqltest
+package client
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os/exec"
 	"text/tabwriter"
+	"time"
 
 	_ "github.com/denisenkom/go-mssqldb" // register mssql driver
 )
@@ -15,70 +16,9 @@ import (
 // jdbcJARPath is the path to jar file containing the jdbc client.
 const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
 
-// dbClientConfig is abstract and represents the configurations that apply to all
-// clients, each dbClientExecutor translates the configuration into a form that makes
-// sense for its client.
-// e.g. Username, Database translate to the following command for sqlcmd:
-//
-// sqlcmd -d Database -U Username
-//
-type dbClientConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Database string
-	// This is in relation to what is generally referred to as Application Intent.
-	// It can only take 2 values, ReadWrite or ReadOnly.
-	ReadOnly bool
-}
-
-// dbClientExecutor represents the invocation of an MSSQL client. It takes two arguments,
-// database client configuration (dbClientConfig) and query (string). It returns a string
-// and an error; the string captures the success output and the error captures the failure.
-//
-// As an example, sqlcmdExec is of type dbClientExecutor. sqlcmdExec invokes the sqlcmd
-// program using the arguments provided. An example invocation might look as follows:
-//
-// sqlcmd -d Database -U Username -Q query
-//
-type dbClientExecutor func(cfg dbClientConfig, query string) (string, error)
-
-// clientResponse represents the response from calling a dbClientExecutor. It is composed
-// of a string and an error; the string captures the success output and the error
-// captures the failure.
-type clientResponse struct {
-	out string
-	err error
-}
-
-// concurrentClientExec calls the dbClientExecutor concurrently, and returns a channel
-// that can be waited on to get the client response.
-func concurrentClientExec(
-	executor dbClientExecutor,
-	clientCfg dbClientConfig,
-	query string,
-) chan clientResponse {
-	clientResChan := make(chan clientResponse)
-
-	go func() {
-		out, err := executor(
-			clientCfg,
-			query,
-		)
-
-		clientResChan <- clientResponse{
-			out: out,
-			err: err,
-		}
-	}()
-
-	return clientResChan
-}
-
-// sqlcmdExec runs a query by invoking sqlcmd
-func sqlcmdExec(
-	cfg dbClientConfig,
+// SqlcmdExec runs a query by invoking sqlcmd
+func SqlcmdExec(
+	cfg Config,
 	query string,
 ) (string, error) {
 	args := []string{
@@ -112,9 +52,9 @@ func sqlcmdExec(
 	return string(out), nil
 }
 
-// pythonODBCExec runs a query by invoking python-odbc
-func pythonODBCExec(
-	cfg dbClientConfig,
+// PythonODBCExec runs a query by invoking python-odbc
+func PythonODBCExec(
+	cfg Config,
 	query string,
 ) (string, error) {
 	applicationintent := "readwrite"
@@ -135,7 +75,7 @@ func pythonODBCExec(
 	}
 
 	out, err := exec.Command(
-		"./odbc_client.py",
+		"./client/odbc_client.py",
 		args...,
 	).Output()
 
@@ -150,13 +90,12 @@ func pythonODBCExec(
 	return string(out), nil
 }
 
-// javaJDBCExec runs a query by invoking Java JDBC
+// JavaJDBCExec runs a query by invoking Java JDBC
 // Jar modified from this source: http://jdbcsql.sourceforge.net/
-func javaJDBCExec(
-	cfg dbClientConfig,
+func JavaJDBCExec(
+	cfg Config,
 	query string,
 ) (string, error) {
-
 	args := []string{
 		"-jar", jdbcJARPath,
 		"-m", "mssql",
@@ -190,9 +129,9 @@ func javaJDBCExec(
 	return string(out), nil
 }
 
-// gomssqlExec runs a query by invoking go-mssqldb
-func gomssqlExec(
-	cfg dbClientConfig,
+// GomssqlExec runs a query by invoking go-mssqldb
+func GomssqlExec(
+	cfg Config,
 	query string,
 ) (string, error) {
 	applicationIntent := "ReadWrite"
@@ -224,13 +163,18 @@ func gomssqlExec(
 	}
 	defer conn.Close()
 
+	ctx, _ := context.WithDeadline(
+		context.Background(),
+		time.Now().Add(1*time.Second),
+	)
+
 	if query == "" {
-		_, err := conn.Conn(context.Background())
+		_, err := conn.Conn(ctx)
 		return "", err
 	}
 
 	// Execute the query
-	rows, err := conn.Query(query)
+	rows, err := conn.QueryContext(ctx, query)
 	if err != nil {
 		return "", err
 	}

@@ -34,7 +34,7 @@ type mockTarget struct {
 }
 
 func newMockTarget(port string) (*mockTarget, error) {
-	listener, err := ephemeralListenerOnPort(port)
+	listener, err := localListenerOnPort(port)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +65,9 @@ func (m *mockTarget) singleAcceptAndHandle() chan mockTargetResult {
 	go func() {
 		defer m.acceptLock.Unlock()
 
+		// We generally don't want to wait forever for a connection to come in
+		_ = m.listener.(*net.TCPListener).SetDeadline(time.Now().Add(2 * time.Second))
+
 		clientConnection, err := m.listener.Accept()
 		if err != nil {
 			mockTargetResponseChan <- mockTargetResult{
@@ -90,8 +93,8 @@ func (m *mockTarget) handleConnection(clientConnection net.Conn) (*mockTargetCap
 	targetCapture := &mockTargetCapture{}
 
 	// Set a deadline so that if things hang then they fail fast
-	readWriteDeadline := time.Now().Add(1 * time.Second)
-	err := clientConnection.SetDeadline(readWriteDeadline)
+	deadline := time.Now().Add(1 * time.Second)
+	err := clientConnection.SetDeadline(deadline)
 	if err != nil {
 		return nil, err
 	}

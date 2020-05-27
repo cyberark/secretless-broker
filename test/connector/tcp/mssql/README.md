@@ -109,10 +109,8 @@ Below is an example test using this convenient wrapper.
 ```go
 // Specify client request
 clientRequest := clientRequest{
-  params: dbConfigParams{
-    Database: "tempdb",
-    ReadOnly: false,
-  },
+  database: "tempdb",
+  readOnly: false,
   query: encryptionOptionQuery,
 }
 

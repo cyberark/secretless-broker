@@ -40,7 +40,7 @@ func newInProcessProxyService(
 	logger := log.New(true)
 
 	// Create a net.Listener on a random port
-	listener, err := ephemeralListenerOnPort("0")
+	listener, err := localListenerOnPort("0")
 	if err != nil {
 		return nil, err
 	}

@@ -1,25 +1,17 @@
 package mssqltest
 
 import (
+	"fmt"
 	"net"
-	"time"
+	"strings"
+
+	"github.com/cyberark/secretless-broker/test/connector/tcp/mssql/client"
 )
 
-// ephemeralListenerOnPort creates a net.Listener (with a short deadline) on some given
-// port. Note that passing in a port of "0" will result in a random port being used.
-func ephemeralListenerOnPort(port string) (net.Listener, error) {
-	listener, err := net.Listen("tcp", "127.0.0.1:"+port)
-	if err != nil {
-		return nil, err
-	}
-
-	// We generally don't want to wait forever for a connection to come in
-	err = listener.(*net.TCPListener).SetDeadline(time.Now().Add(10 * time.Second))
-	if err != nil {
-		return nil, err
-	}
-
-	return listener, nil
+// localListenerOnPort creates a net.Listener at 127.0.0.1 on the given port. Note that
+// passing in a port of "0" will result in a random port being used.
+func localListenerOnPort(port string) (net.Listener, error) {
+	return net.Listen("tcp", "127.0.0.1:"+port)
 }
 
 // clientRequest is the request of an MSSQL client making a connection to a database via
@@ -50,12 +42,12 @@ func cloneCredentials(original map[string][]byte) map[string][]byte {
 	return credsClone
 }
 
-// proxyViaSecretless issues a client request using a the 'executor' argument to a
+// proxyViaSecretless issues a client request using a the 'runQuery' argument to a
 // Secretless proxy service configured using the 'credentials' argument.
 // proxyViaSecretless uses newInProcessProxyService to creating the in-process proxy
 // service. The proxy service exists only for the lifetime of this method call.
 func (clientReq clientRequest) proxyViaSecretless(
-	executor dbClientExecutor,
+	runQuery client.RunQuery,
 	credentials map[string][]byte,
 ) (string, string, error) {
 	// Create in-process proxy service
@@ -70,9 +62,8 @@ func (clientReq clientRequest) proxyViaSecretless(
 	proxyService.Start()
 
 	// Make the client request to the proxy service
-	clientResChan := concurrentClientExec(
-		executor,
-		dbClientConfig{
+	clientResChan := runQuery.ConcurrentCall(
+		client.Config{
 			Host:     proxyService.host,
 			Port:     proxyService.port,
 			Username: "dummy",
@@ -86,17 +77,17 @@ func (clientReq clientRequest) proxyViaSecretless(
 	// Block and wait for the client response
 	clientRes := <-clientResChan
 
-	return clientRes.out, proxyService.port, clientRes.err
+	return clientRes.Out, proxyService.port, clientRes.Err
 }
 
-// proxyToCreatedMock issues a client request using a the 'executor' argument to a Secretless
+// proxyToCreatedMock issues a client request using a the 'runQuery' argument to a Secretless
 // proxy service configured using the 'credentials' argument.
 //
 // NOTE: proxyToCreatedMock proxies the request to a mock server that terminates the request after the handshake
 // This can have unintended effects. gomssql in particular does some weird retry, when a query is prepared!
 // TODO: find out this weird gomssqldb behavior.
 func (clientReq clientRequest) proxyToCreatedMock(
-	executor dbClientExecutor,
+	runQuery client.RunQuery,
 	credentials map[string][]byte,
 ) (*mockTargetCapture, string, error) {
 	// Create mock target
@@ -106,32 +97,11 @@ func (clientReq clientRequest) proxyToCreatedMock(
 	}
 	defer mt.close()
 
-	// Gather credentials
-	baseCredentials := map[string][]byte{
-		"host": []byte(mt.host),
-		"port": []byte(mt.port),
-	}
-	for key, value := range credentials {
-		baseCredentials[key] = value
-	}
-
-	// Accept on mock target
-	mtResChan := mt.singleAcceptAndHandle()
-
-	// We don't expect anything useful to come back from the client request.
-	// This is a fire and forget
-	_, secretlessPort, _ := clientReq.proxyViaSecretless(
-		executor,
-		baseCredentials,
-	)
-
-	mtRes := <-mtResChan
-
-	return mtRes.capture, secretlessPort, mtRes.err
+	return clientReq.proxyToMock(runQuery, credentials, mt)
 }
 
 func (clientReq clientRequest) proxyToMock(
-	executor dbClientExecutor,
+	runQuery client.RunQuery,
 	credentials map[string][]byte,
 	mt *mockTarget,
 ) (*mockTargetCapture, string, error) {
@@ -149,12 +119,28 @@ func (clientReq clientRequest) proxyToMock(
 
 	// We don't expect anything useful to come back from the client request.
 	// This is a fire and forget.
-	_, secretlessPort, _ := clientReq.proxyViaSecretless(
-		executor,
+	_, secretlessPort, err := clientReq.proxyViaSecretless(
+		runQuery,
 		baseCredentials,
 	)
 
 	mtRes := <-mtResChan
 
-	return mtRes.capture, secretlessPort, mtRes.err
+	var errStrings []string
+	if mtRes.err != nil {
+		// We only care about err (from the client request) if there was an error in
+		// handling the request on the mock server. If this is not the case then it's
+		// likely that err is because the mock server closed the connection.
+		if err != nil {
+			errStrings = append(errStrings, err.Error())
+		}
+		errStrings = append(errStrings, mtRes.err.Error())
+	}
+
+	var combinedErr error
+	if len(errStrings) != 0 {
+		combinedErr = fmt.Errorf("%s", strings.Join(errStrings, " AND "))
+	}
+
+	return mtRes.capture, secretlessPort, combinedErr
 }

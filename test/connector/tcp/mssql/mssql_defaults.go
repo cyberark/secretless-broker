@@ -3,13 +3,14 @@ package mssqltest
 import (
 	"fmt"
 
+	"github.com/cyberark/secretless-broker/test/connector/tcp/mssql/client"
 	"github.com/cyberark/secretless-broker/test/util/testutil"
 )
 
 // defaultSecretlessDbConfig returns a dbClientConfig that points to the MSSQL Secretless
 // service that provides the happy path.
-func defaultSecretlessDbConfig() dbClientConfig {
-	return dbClientConfig{
+func defaultSecretlessDbConfig() client.Config {
+	return client.Config{
 		Host:     testutil.SecretlessHost,
 		Port:     fmt.Sprintf("%d", testutil.SecretlessPort),
 		Username: "dummy",

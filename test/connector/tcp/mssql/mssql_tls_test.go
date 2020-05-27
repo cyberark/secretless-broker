@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/cyberark/secretless-broker/test/connector/tcp/mssql/client"
 )
 
 const encryptionOptionQuery = `
@@ -152,8 +154,8 @@ func TestTLS(t *testing.T) {
 			}
 
 			// Proxy Request through Secretless
-			out, port, err := clientReq.proxyRequest(
-				sqlcmdExec,           // Use SQLCMD client
+			out, port, err := clientReq.proxyViaSecretless(
+				client.SqlcmdExec,    // Use SQLCMD client
 				testCase.credentials, // Credentials from test case
 			)
 

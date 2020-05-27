@@ -10,21 +10,33 @@ import (
 )
 
 func TestMSSQLConnector(t *testing.T) {
-	t.Run("python-ODBC", func(t *testing.T) {
-		RunConnectivityTests(t, pythonODBCExec)
-	})
+	testCases := []struct {
+		description    string
+		clientExecutor dbClientExecutor
+	}{
+		{
+			"python-ODBC",
+			pythonODBCExec,
+		},
+		{
+			"java-JDBC",
+			javaJDBCExec,
+		},
+		{
+			"go-mssql",
+			gomssqlExec,
+		},
+		{
+			"sqlcmd",
+			sqlcmdExec,
+		},
+	}
 
-	t.Run("java-JDBC", func(t *testing.T) {
-		RunConnectivityTests(t, javaJDBCExec)
-	})
-
-	t.Run("go-mssql", func(t *testing.T) {
-		RunConnectivityTests(t, gomssqlExec)
-	})
-
-	t.Run("sqlcmd", func(t *testing.T) {
-		RunConnectivityTests(t, sqlcmdExec)
-	})
+	for _, testCase := range testCases {
+		t.Run(testCase.description, func(t *testing.T) {
+			RunConnectivityTests(t, testCase.clientExecutor)
+		})
+	}
 }
 
 func RunConnectivityTests(t *testing.T, queryExec dbClientExecutor) {

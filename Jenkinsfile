@@ -27,9 +27,20 @@ pipeline {
         }
     }
 
-    stage('Image Build') {
-      steps {
-        sh './bin/build'
+    stage('Build') {
+      parallel {
+        stage('Build Images') {
+          steps {
+            sh './bin/build'
+          }
+        }
+
+        stage('Build Release Artifacts') {
+          steps {
+            sh './bin/build_release --snapshot'
+            archiveArtifacts 'dist/goreleaser/'
+          }
+        }
       }
     }
 

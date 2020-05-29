@@ -5,6 +5,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/basicauth"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/conjur"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/http/generic"
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/cassandra"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mssql"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql"
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg"
@@ -30,6 +31,7 @@ func GetInternalPluginsFunc() (plugin.AvailablePlugins, error) {
 			"pg":    pg.GetTCPPlugin(),
 			"mysql": mysql.GetTCPPlugin(),
 			"mssql": mssql.GetTCPPlugin(),
+			"cassandra": cassandra.GetTCPPlugin(),
 		},
 	}, nil
 }

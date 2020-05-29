@@ -1,0 +1,6 @@
+#!/bin/bash -ex
+
+./stop
+
+docker-compose up -d cassandra
+docker-compose up -d secretless

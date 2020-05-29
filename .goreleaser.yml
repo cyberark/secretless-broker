@@ -118,7 +118,7 @@ nfpms:
     homepage: https://secretless.io
     license: "Apache 2.0"
     maintainer: CyberArk Maintainers <conj_maintainers@cyberark.com>
-    name_template: "{{.ProjectName}}_{{.Version}}_{{.Arch}}"
+    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Arch}}"
     vendor: CyberArk
 
 snapshot:

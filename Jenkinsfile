@@ -36,6 +36,10 @@ pipeline {
         }
 
         stage('Build Release Artifacts') {
+          when {
+            branch 'master'
+          }
+
           steps {
             sh './bin/build_release --snapshot'
             archiveArtifacts 'dist/goreleaser/'

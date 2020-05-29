@@ -125,5 +125,5 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 release:
-  disable: true
+  disable: false
   prerelease: auto

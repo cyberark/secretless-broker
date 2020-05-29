@@ -14,6 +14,7 @@ echo "Current dir: $CURRENT_DIR"
 docker build -t "${GORELEASER_IMAGE}" - < "$CURRENT_DIR/Dockerfile.releaser"
 
 docker run --rm -t \
+  --env "GITHUB_TOKEN=${GITHUB_TOKEN:-}" \
   --volume "$CURRENT_DIR/..:/secretless-broker" \
   --workdir /secretless-broker \
   "${GORELEASER_IMAGE}" --rm-dist "$@"

@@ -61,6 +61,11 @@ builds:
     post:
       # Copy the binary out into the <dist> path, and give the copy the name we want
       # in the release <extra_files>.
+      # e.g. Suppose a windows amd64 build generates a binary at
+      # path/to/secretless-broker.exe. This will be copied to
+      # path/to/../secretless-broker-windows_amd64.exe. The copy path can then be added to
+      # the release <extra_files> and will result in a release artifact with the name
+      # secretless-broker-windows_amd64.exe.
       - cp "{{ .Path }}" "{{ dir .Path }}/../secretless-broker-{{.Target}}{{.Ext}}"
 
 - <<: *secretless-broker-build

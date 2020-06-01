@@ -27,24 +27,9 @@ pipeline {
         }
     }
 
-    stage('Build') {
-      parallel {
-        stage('Build Images') {
-          steps {
-            sh './bin/build'
-          }
-        }
-
-        stage('Build Release Artifacts') {
-          when {
-            branch 'master'
-          }
-
-          steps {
-            sh './bin/build_release --snapshot'
-            archiveArtifacts 'dist/goreleaser/'
-          }
-        }
+    stage('Build Images') {
+      steps {
+        sh './bin/build'
       }
     }
 
@@ -175,6 +160,17 @@ pipeline {
 
       steps {
         sh './bin/publish_internal'
+      }
+    }
+
+    stage('Build Release Artifacts') {
+      when {
+        branch 'master'
+      }
+
+      steps {
+        sh './bin/build_release --snapshot'
+        archiveArtifacts 'dist/goreleaser/'
       }
     }
 

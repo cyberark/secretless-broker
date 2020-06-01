@@ -21,7 +21,7 @@ builds:
   ldflags: -s -w -linkmode external -extldflags "-static"
 
 - <<: *summon-2-build
-  id: summon2-osx
+  id: summon2-darwin
   env:
   - CGO_ENABLED=1
   - CC=o64-clang
@@ -57,9 +57,14 @@ builds:
   # final binary. See `Static long version tags` in the `Building` section
   # of `CONTRIBUTING.md` for more information.
   ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}" -extldflags "-static"
+  hooks:
+    post:
+      # Copy the binary out into the <dist> path, and give the copy the name we want
+      # in the release <extra_files>.
+      - cp "{{ .Path }}" "{{ dir .Path }}/../secretless-broker-{{.Target}}{{.Ext}}"
 
 - <<: *secretless-broker-build
-  id: secretless-broker-osx
+  id: secretless-broker-darwin
   env:
   - CGO_ENABLED=1
   - CC=o64-clang
@@ -125,5 +130,14 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 release:
+  github:
+    owner: conjurinc
+    name: playroom
   disable: false
-  prerelease: auto
+  draft: true
+  extra_files:
+    - glob: NOTICES.txt
+    - glob: LICENSE
+    - glob: dist/goreleaser/CHANGELOG.md
+    - glob: dist/goreleaser/secretless-broker-linux_amd64
+    - glob: dist/goreleaser/secretless-broker-darwin_amd64

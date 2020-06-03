@@ -7,14 +7,11 @@ GORELEASER_IMAGE="cyberark/goreleaser:latest-xgo"
 
 echo "Current dir: $CURRENT_DIR"
 
-# TODO: the image cyberark/goreleaser:latest-xgo will need to be pushed
-# TODO: to Dockerhub, and the command below should become
-# TODO: docker pull cyberark/goreleaser:latest-xgo
 # NOTE: Piping the Dockerfile sends an empty context to docker build
 docker build -t "${GORELEASER_IMAGE}" - < "$CURRENT_DIR/Dockerfile.releaser"
 
 docker run --rm -t \
-  --env "GITHUB_TOKEN=${GITHUB_TOKEN:-}" \
+  --env GITHUB_TOKEN \
   --volume "$CURRENT_DIR/..:/secretless-broker" \
   --workdir /secretless-broker \
   "${GORELEASER_IMAGE}" --rm-dist "$@"

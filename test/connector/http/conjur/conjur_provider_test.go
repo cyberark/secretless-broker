@@ -49,6 +49,13 @@ func TestConjur_Provider(t *testing.T) {
 		So(string(value), ShouldEqual, "secret")
 	})
 
+	Convey("Can retrieve a secret value with spaces", t, func() {
+		value, err := provider.GetValue("my var")
+		So(err, ShouldBeNil)
+
+		So(string(value), ShouldEqual, "othersecret")
+	})
+
 	Convey("Can provide the default Conjur account name", t, func() {
 		value, err := provider.GetValue("variable:db/password")
 		So(err, ShouldBeNil)

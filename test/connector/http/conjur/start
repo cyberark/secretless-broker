@@ -34,4 +34,7 @@ docker-compose run \
   --rm \
   --no-deps \
   client \
-  variable values add db/password secret
+  -ec '
+   conjur variable values add db/password secret
+   conjur variable values add "my var" othersecret
+  '

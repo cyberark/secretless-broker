@@ -1,1 +1,2 @@
 - !variable db/password
+- !variable "my var"

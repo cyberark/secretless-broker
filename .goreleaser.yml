@@ -21,7 +21,7 @@ builds:
   ldflags: -s -w -linkmode external -extldflags "-static"
 
 - <<: *summon-2-build
-  id: summon2-osx
+  id: summon2-darwin
   env:
   - CGO_ENABLED=1
   - CC=o64-clang
@@ -57,9 +57,19 @@ builds:
   # final binary. See `Static long version tags` in the `Building` section
   # of `CONTRIBUTING.md` for more information.
   ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}" -extldflags "-static"
+  hooks:
+    post:
+      # Copy the binary out into the <dist> path, and give the copy the name we want
+      # in the release <extra_files>.
+      # e.g. Suppose a windows amd64 build generates a binary at
+      # path/to/secretless-broker.exe. This will be copied to
+      # path/to/../secretless-broker-windows_amd64.exe. The copy path can then be added to
+      # the release <extra_files> and will result in a release artifact with the name
+      # secretless-broker-windows_amd64.exe.
+      - cp "{{ .Path }}" "{{ dir .Path }}/../secretless-broker-{{.Target}}{{.Ext}}"
 
 - <<: *secretless-broker-build
-  id: secretless-broker-osx
+  id: secretless-broker-darwin
   env:
   - CGO_ENABLED=1
   - CC=o64-clang
@@ -118,12 +128,18 @@ nfpms:
     homepage: https://secretless.io
     license: "Apache 2.0"
     maintainer: CyberArk Maintainers <conj_maintainers@cyberark.com>
-    name_template: "{{.ProjectName}}_{{.Version}}_{{.Arch}}"
+    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Arch}}"
     vendor: CyberArk
 
 snapshot:
   name_template: "{{ .Tag }}-next"
 
 release:
-  disable: true
-  prerelease: auto
+  disable: false
+  draft: true
+  extra_files:
+    - glob: NOTICES.txt
+    - glob: LICENSE
+    - glob: CHANGELOG.md
+    - glob: dist/goreleaser/secretless-broker-linux_amd64
+    - glob: dist/goreleaser/secretless-broker-darwin_amd64

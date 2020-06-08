@@ -27,7 +27,7 @@ pipeline {
         }
     }
 
-    stage('Image Build') {
+    stage('Build Images') {
       steps {
         sh './bin/build'
       }
@@ -163,13 +163,34 @@ pipeline {
       }
     }
 
-    stage('Push Images') {
-      agent { label 'releaser-v2' }
+    stage('Build Release Artifacts') {
+      when {
+        branch 'master'
+      }
+
+      steps {
+        sh './bin/build_release --snapshot'
+        archiveArtifacts 'dist/goreleaser/'
+      }
+    }
+
+    stage('Release') {
       // Only run this stage when triggered by a tag
       when { tag "v*" }
-      steps {
-        // The tag trigger sets TAG_NAME as an environment variable
-        sh 'summon -e production ./bin/publish'
+
+      parallel {
+        stage('Push Images') {
+          steps {
+            // The tag trigger sets TAG_NAME as an environment variable
+            sh 'summon -e production ./bin/publish'
+          }
+        }
+        stage('Create draft release') {
+          steps {
+            sh "summon --provider summon-conjur --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+            archiveArtifacts 'dist/goreleaser/'
+          }
+        }
       }
     }
 

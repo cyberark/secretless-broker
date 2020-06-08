@@ -135,9 +135,6 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 release:
-  github:
-    owner: conjurinc
-    name: playroom
   disable: false
   draft: true
   extra_files:

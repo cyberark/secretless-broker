@@ -187,7 +187,7 @@ pipeline {
         }
         stage('Create draft release') {
           steps {
-            sh "summon --provider summon-conjur --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+            sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
             archiveArtifacts 'dist/goreleaser/'
           }
         }

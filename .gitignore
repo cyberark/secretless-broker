@@ -45,3 +45,7 @@ results.json
 # Ignore test coverage files
 c.out
 coverage.xml
+
+# Image scan files
+scan_results-*.json
+scan_results-*.xml

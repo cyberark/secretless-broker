@@ -3,13 +3,14 @@ services:
   pg:
     image: postgres:9.4
     environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_HOST_AUTH_METHOD: password
+      POSTGRES_PASSWORD: SuperSecure
 
   conjur:
     image: cyberark/conjur:latest
     command: server -a dev -f /work/conjur.yml
     environment:
-      DATABASE_URL: postgres://postgres@pg/postgres
+      DATABASE_URL: postgres://postgres:SuperSecure@pg/postgres
       CONJUR_DATA_KEY: 'WMfApcDBtocRWV+ZSUP3Tjr5XNU+Z2FdBb6BEezejIs='
       RAILS_ENV: development
     ports:
@@ -23,6 +24,7 @@ services:
     image: cyberark/conjur-cli:5
     depends_on:
       - conjur
+    entrypoint: /bin/bash
     environment:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
@@ -57,4 +59,4 @@ services:
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
     volumes:
-      - ../../..:/secretless
+      - ../../../..:/secretless

@@ -2,49 +2,66 @@ package mysql
 
 import "strconv"
 
-// ConnectionDetails stores the connection info to the real backend database.
-// These values are pulled from the SingleUseConnector credentials config
-type ConnectionDetails struct {
-	Host     string
-	Options  map[string]string
-	Password string
-	Port     uint
-	Username string
-}
-
 // DefaultMySQLPort is the default port on which we connect to the MySQL service
 // If another port is found within the connectionDetails, we will use that.
 const DefaultMySQLPort = uint(3306)
+
+var sslOptions = []string{
+	"host",
+	"sslhost",
+	"sslrootcert",
+	"sslmode",
+	"sslkey",
+	"sslcert",
+}
+
+// ConnectionDetails stores the connection info to the real backend database.
+// These values are pulled from the SingleUseConnector credentials config
+type ConnectionDetails struct {
+	Host       string
+	Options    map[string]string
+	Password   string
+	Port       uint
+	SSLOptions map[string]string
+	Username   string
+}
 
 // NewConnectionDetails is a constructor of ConnectionDetails structure from a
 // map of credentials.
 func NewConnectionDetails(credentials map[string][]byte) (
 	*ConnectionDetails, error) {
 
-	connDetails := &ConnectionDetails{Options: make(map[string]string)}
+	connDetails := &ConnectionDetails{
+		Options:    make(map[string]string),
+		SSLOptions: make(map[string]string),
+	}
 
-	if host := credentials["host"]; host != nil {
+	if len(credentials["host"]) > 0 {
 		connDetails.Host = string(credentials["host"])
 	}
 
 	connDetails.Port = DefaultMySQLPort
-	if credentials["port"] != nil {
+	if len(credentials["port"]) > 0 {
 		port64, _ := strconv.ParseUint(string(credentials["port"]), 10, 64)
 		connDetails.Port = uint(port64)
 	}
 
-	if credentials["username"] != nil {
+	if len(credentials["username"]) > 0 {
 		connDetails.Username = string(credentials["username"])
 	}
 
-	if credentials["password"] != nil {
+	if len(credentials["password"]) > 0 {
 		connDetails.Password = string(credentials["password"])
 	}
 
-	// Make sure that we process the SSL mode arg even if it's not specified
-	// otherwise it will get ignored
-	if _, ok := credentials["sslmode"]; !ok {
-		credentials["sslmode"] = []byte("")
+	for _, sslOption := range sslOptions {
+		if len(credentials[sslOption]) > 0 {
+			value := string(credentials[sslOption])
+			if value != "" {
+				connDetails.SSLOptions[sslOption] = value
+			}
+		}
+		delete(credentials, sslOption)
 	}
 
 	delete(credentials, "host")
@@ -52,7 +69,6 @@ func NewConnectionDetails(credentials map[string][]byte) (
 	delete(credentials, "username")
 	delete(credentials, "password")
 
-	connDetails.Options = make(map[string]string)
 	for k, v := range credentials {
 		connDetails.Options[k] = string(v)
 	}

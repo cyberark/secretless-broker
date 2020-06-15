@@ -70,7 +70,7 @@ Use [this guide][style] to maintain consistent style across the Secretless Broke
 
 First, clone `https://github.com/cyberark/secretless-broker` with the `--recurse 
 -submodules` flag. If you already have secretless-broker cloned locally, but are missing 
-submodules, perform `git fetch --recurse-submodules`. If you're new to Go, be aware 
+submodules, perform `git submodule update --init --recursive`. If you're new to Go, be aware 
 that Go can be very selective about where the files are placed on the filesystem. 
 There is an environment variable called `GOPATH`, whose default value
 is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which
@@ -326,7 +326,11 @@ information on the types of plugins we currently support, visit the [plugin API 
 
 ## Submodules
 
-Secretless makes use of some third party libraries using Git Submodules. 
+Secretless makes use of some third party libraries using Git Submodules.
+In the [build instructions](#building) we cover some of the basics of how to
+clone the repository and populate the submodules. In this section, we cover
+how to work in the submodules of the Secretless project.
+
 Development on submodules is similar to just working with a second repository, in that
 you can `cd` into it and check out branches or make separate commits. However, you also
 have the ability to commit and push recursively from the parent repository. For help

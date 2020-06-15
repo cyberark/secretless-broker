@@ -123,6 +123,33 @@ func (sslMode SSLMode) toSecret() *config_v2.Credential {
 	}
 }
 
+// SSLHost describes semantically possible sslhost settings when connecting to
+// a database. sslhost specifies the value to carry out full verification
+// against.
+type SSLHost string
+
+const (
+	// Default SSLHost
+	SSLHostDefault SSLHost = ""
+	// Invalid SSLHost
+	SSLHostInvalid = "invalid"
+)
+
+// AllSSLHosts returns a list of all possible SSLHost values.
+func AllSSLHosts() []SSLHost {
+	return []SSLHost{SSLHostDefault, SSLHostInvalid}
+}
+
+// For Secretless, sslhost="" is equivalent to not setting sslhost at all.
+// Therefore, this will work for the "Default" case too.
+func (sslHost SSLHost) toSecret() *config_v2.Credential {
+	return &config_v2.Credential{
+		Name: "sslhost",
+		From: "literal",
+		Get:  string(sslHost),
+	}
+}
+
 // AuthCredentialInvalidity specifies whether credentials are invalid.  We use
 // Invalidity as opposed to CredentialValidity because bool defaults to false.
 type AuthCredentialInvalidity bool
@@ -194,7 +221,7 @@ const (
 	// PrivateKeyUndefined PrivateKeyStatus
 	PrivateKeyUndefined PrivateKeyStatus = ""
 	// PrivateKeyValid PrivateKeyStatus
-	PrivateKeyValid = "/secretless/test/util/ssl/client-valid-key.pem"
+	PrivateKeyValid = "/secretless/test/util/ssl/client-key.pem"
 	// PrivateKeyNotSignedByCA PrivateKeyStatus
 	PrivateKeyNotSignedByCA = "/secretless/test/util/ssl/client-different-ca-key.pem"
 	// PrivateKeyMalformed PrivateKeyStatus
@@ -229,7 +256,7 @@ const (
 	// PublicCertUndefined PublicCertStatus
 	PublicCertUndefined PublicCertStatus = ""
 	// PublicCertValid PublicCertStatus
-	PublicCertValid = "/secretless/test/util/ssl/client-valid.pem"
+	PublicCertValid = "/secretless/test/util/ssl/client.pem"
 	// PublicCertNotSignedByCA PublicCertStatus
 	PublicCertNotSignedByCA = "/secretless/test/util/ssl/client-different-ca.pem"
 	// PublicCertMalformed PublicCertStatus

@@ -11,6 +11,7 @@ import (
 type AbstractConfiguration struct {
 	SocketType
 	TLSSetting
+	SSLHost
 	SSLMode
 	RootCertStatus
 	PrivateKeyStatus

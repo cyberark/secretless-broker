@@ -129,9 +129,9 @@ func (sslMode SSLMode) toSecret() *config_v2.Credential {
 type SSLHost string
 
 const (
-	// Default SSLHost
+	// SSLHostDefault is the default sslhost value which is empty
 	SSLHostDefault SSLHost = ""
-	// Invalid SSLHost
+	// SSLHostInvalid is an invalid sslhost value
 	SSLHostInvalid = "invalid"
 )
 

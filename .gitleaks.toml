@@ -150,6 +150,12 @@ tags = ["key", "Mailgun"]
 description = "Password in URL"
 regex = '''[a-zA-Z]{3,10}:\/\/[^\/\s:@]{3,20}:[^\/\s:@]{3,20}@.{1,100}\/?.?'''
 tags = ["key", "URL", "generic"]
+[[rules.whitelist]]
+description = "Testing/example url for postgresql containers"
+regex = '''postgres://postgres:SuperSecure@pg/postgres'''
+[[rules.whitelist]]
+description = "Testing/example url for sqlserver connection"
+regex = '''sqlserver://username:password@host:port\?database=master.param2=value'''
 
 [[rules]]
 description = "PayPal Braintree access token"

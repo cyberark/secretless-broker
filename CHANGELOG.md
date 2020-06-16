@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- MySQL and PostgreSQL connectors support SSL host name verification with `verify-full` SSL mode. Also adds optional `sslhost` configuration parameter that is compared to the server's certificate SAN. [#1249](https://github.com/cyberark/secretless-broker/pull/1249)
+
 ## [1.6.0] - 2020-05-04
 
 ### Added

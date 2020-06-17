@@ -56,10 +56,7 @@ func NewConnectionDetails(credentials map[string][]byte) (
 
 	for _, sslOption := range sslOptions {
 		if len(credentials[sslOption]) > 0 {
-			value := string(credentials[sslOption])
-			if value != "" {
-				connDetails.SSLOptions[sslOption] = value
-			}
+			connDetails.SSLOptions[sslOption] = string(credentials[sslOption])
 		}
 		delete(credentials, sslOption)
 	}

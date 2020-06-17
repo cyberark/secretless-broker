@@ -66,7 +66,7 @@ func NewDbSSLMode(o options, requireCanVerifyCA bool) (DbSSLMode, error) {
 		sslMode.VerifyCaOnly = false
 
 		// 'sslhost', when not empty, takes precedence over 'host'
-		if o["sslhost"] != "" {
+		if len(o["sslhost"]) > 0 {
 			sslMode.ServerName = o["sslhost"]
 		} else {
 			sslMode.ServerName = o["host"]

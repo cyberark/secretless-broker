@@ -61,13 +61,13 @@ Interface](pkg/secretless/plugin) to create [Connector Plugins](pkg/secretless/p
 to support virtually any target service. These external plugins can be integrated in environments using a standard
 Secretless Broker implementation.
 
-For more information on building a Secretless Connector Plugin please see our [documentation](https://docs.secretless.io/Latest/en/Content/References/Secretless%20Plugin%20Interface/Secretless_Plugin_Interface_Intro.htm),
+For more information on building a Secretless Connector Plugin please see our [documentation](https://docs.secretless.io/Latest/en/Content/References/Secretless%20Plugin%20Interface/scl_Secretless_Plugin_Interface_Intro.htm),
 which will walk you through creating a new Connector Plugin using our templates.
 
 Are we missing an internal service connector that you think is important? Are you curious if anyone else has thought of
 building the service connector you're interested in? Please open a [GitHub issue](https://github.com/cyberark/secretless-broker/issues) with more information on the connector you'd like, and start the conversation.
 
-For specific guidelines about using a particular service, please see our [documentation](https://docs.secretless.io/Latest/en/Content/References/connectors/overview.htm).
+For specific guidelines about using a particular service, please see our [documentation](https://docs.secretless.io/Latest/en/Content/References/connectors/scl_connectors_overview.htm).
 
 # Quick Start
 

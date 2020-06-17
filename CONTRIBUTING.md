@@ -68,22 +68,23 @@ Use [this guide][style] to maintain consistent style across the Secretless Broke
 
 ## Building
 
-First, clone `https://github.com/cyberark/secretless-broker` with the `--recurse 
--submodules` flag. If you already have secretless-broker cloned locally, but are missing 
-submodules, perform `git submodule update --init --recursive`. If you're new to Go, be aware 
-that Go can be very selective about where the files are placed on the filesystem. 
-There is an environment variable called `GOPATH`, whose default value
-is `~/go`. Secretless Broker uses [go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) which
-require either that you clone this repository outside of your `GOPATH` or you set the
-`GO111MODULE` environment variable to `on`. We recommend cloning this repository
- outside of your `GOPATH`.
+First, clone `https://github.com/cyberark/secretless-broker` with the
+`--recurse-submodules` flag. If you already have secretless-broker cloned locally,
+but are missing submodules, perform `git submodule update --init --recursive`.
+If you're new to Go, be aware that Go can be very selective about where the files
+are placed on the filesystem. There is an environment variable called `GOPATH`,
+whose default value is `~/go`. Secretless Broker uses
+[go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more)
+which require either that you clone this repository outside of your `GOPATH` or
+you set the `GO111MODULE` environment variable to `on`. We recommend cloning this
+repository outside of your `GOPATH`.
 
 Once you've cloned the repository, you can build the Secretless Broker.
 
 Note: On git submodules, taken from git documentation.
 > Luckily, you can tell Git (>=2.14) to always use the --recurse-submodules flag by setting the
-> configuration option submodule.recurse: git config submodule.recurse true. 
-> As noted above, this will also make Git recurse into submodules for every 
+> configuration option submodule.recurse: git config submodule.recurse true.
+> As noted above, this will also make Git recurse into submodules for every
 > command that has a --recurse-submodules option (except git clone)
 
 ### Static long version tags
@@ -158,7 +159,7 @@ To add a new integration test, complete the following two steps:
 
 1. Create a folder with test scripts as described above.
 2. Jenkins will automatically search the `test` directory for any sub-directories that
-meet the criteria of having both a `start` and `stop` script. It then runs the 
+meet the criteria of having both a `start` and `stop` script. It then runs the
 `./bin/run_integration` script on that directory.
 
 Note: You can test locally using the same format of `./bin/run_integration <test
@@ -344,7 +345,7 @@ the [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) docume
  configuration variable. The command line option takes precedence over the
  configuration variable. If neither is given, a checkout is performed. The recursive
  flag will handle any submodules nested within a submodule
-  
+
 ### Updating Submodules
 When making a change to a submodule, it will not be committed automatically when the
 super repository is committed. As such, there are a few steps in place to make sure
@@ -378,7 +379,7 @@ super repository uses to reference the submodule to point to the new branch you
 created, and all the commits contained within.
 
 5. Push your changes from the super repository. Be sure you are recursively checking
-for changes to your submodule, so that you don't leave anything behind, with: 
+for changes to your submodule, so that you don't leave anything behind, with:
 `git push --recurse-submodules=check`. Again, this check will be performed if you have
 modified your git config to always recurse into submodules. When you push, the
 working branch for the super repository will have the commit or branch for the
@@ -398,19 +399,19 @@ There are a few benefits to this approach
  can easily pull both at the same time and build without issues.
 - Reviewers can see the context for a change that may span more than one repository
  when Github links the two pull requests.
- 
+
 We want secretless to point to specific commits within a submodule, rather
 than master. Make sure your change to secretless considers this.
  1. `cd` into the submodule
  2. Checkout the commit we want secretless to use from within the submodule
  3. Return to the secretless-broker directory, and create a new PR with the modified
     reference
- 
+
  ### Helpful Commands for working with submodules
  To check the current hash for a submodule:
- 
+
  `git ls-tree <branch> third_party/<submodule-directory>`
- 
+
  To set (checkout) the SHA-1 of a submodule to the most recent commit:
  `git submodule --update <optional directory path>`
 
@@ -478,7 +479,7 @@ should be officially marked as a `pre-release` (eg "non-production ready")
 1. Copy the `secretless-broker.rb` homebrew formula output by goreleaser
    to the [homebrew formula for Secretless](https://github.com/cyberark/homebrew-tools/blob/master/secretless-broker.rb)
    and submit a PR to update the version of Secretless available in brew.
-   
+
 ### Publish the Red Hat image
 1. Visit the [Red Hat project page](https://connect.redhat.com/project/3100131/view) once the images have
    been pushed and manually choose to publish the latest release.

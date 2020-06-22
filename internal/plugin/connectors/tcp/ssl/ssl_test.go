@@ -12,15 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// validSSLModeTestCase represents tests cases for NewDbSSLMode when the sslmode option
-// is a valid value such as 'require'. The tests make assertions on the resulting
-// DbSSLMode from NewDbSSLMode and anticipate no error.
-type validSSLModeTestCase struct {
-	description string
-	options     options
-	assertion   func(t *testing.T, sslmode DbSSLMode)
-}
-
 // testCertificates is used to store all the test certificates
 type testCertificates struct {
 	serverCert []byte
@@ -135,61 +126,75 @@ func TestHandleSSLUpgrade(t *testing.T) {
 	assert.IsType(t, upgradedConn, &tls.Conn{})
 }
 
-// validSSLModeTestCases exercise NewDbSSLMode when the sslmode option is a valid value
-// such as 'require'.
-var validSSLModeTestCases = []validSSLModeTestCase{
-	{
-		description: "sslmode=disable",
-		options: options{
-			"sslmode": "disable",
+func TestNewDbSSLMode_valid(t *testing.T) {
+	// validSSLModeTestCase represents tests cases for NewDbSSLMode when the sslmode option
+	// is a valid value such as 'require'. The tests make assertions on the resulting
+	// DbSSLMode from NewDbSSLMode and anticipate no error.
+	type validSSLModeTestCase struct {
+		description string
+		options     options
+		assertion   func(t *testing.T, sslmode DbSSLMode)
+	}
+
+	var validSSLModeTestCases = []validSSLModeTestCase{
+		{
+			description: "sslmode=disable",
+			options:     options{"sslmode": "disable"},
+			assertion: func(t *testing.T, sslmode DbSSLMode) {
+				assert.False(t, sslmode.UseTLS)
+			},
 		},
-		assertion: func(t *testing.T, sslmode DbSSLMode) {
-			assert.False(t, sslmode.UseTLS)
+		{
+			description: "sslmode=required",
+			options:     options{"sslmode": "require"},
+			assertion: func(t *testing.T, sslmode DbSSLMode) {
+				assert.True(t, sslmode.UseTLS)
+				assert.False(t, sslmode.VerifyCaOnly)
+			},
 		},
-	},
-	{
-		description: "sslmode=required",
-		options: options{
-			"sslmode": "require",
+		{
+			description: "sslmode=verify-ca",
+			options:     options{"sslmode": "verify-ca"},
+			assertion: func(t *testing.T, sslmode DbSSLMode) {
+				assert.True(t, sslmode.UseTLS)
+				assert.True(t, sslmode.VerifyCaOnly)
+			},
 		},
-		assertion: func(t *testing.T, sslmode DbSSLMode) {
-			assert.True(t, sslmode.UseTLS)
-			assert.False(t, sslmode.VerifyCaOnly)
+		{
+			description: "sslmode=verify-full",
+			options: options{
+				"sslmode": "verify-full",
+				"host":    "some-host",
+			},
+			assertion: func(t *testing.T, sslmode DbSSLMode) {
+				assert.True(t, sslmode.UseTLS)
+				assert.Equal(t, sslmode.ServerName, "some-host")
+			},
 		},
-	},
-	{
-		description: "sslmode=verify-ca",
-		options: options{
-			"sslmode": "verify-ca",
+		{
+			description: "sslmode=verify-full sslhost takes precedence",
+			options: options{
+				"sslmode": "verify-full",
+				"host":    "some-host",
+				"sslhost": "overridden-host",
+			},
+			assertion: func(t *testing.T, sslmode DbSSLMode) {
+				assert.True(t, sslmode.UseTLS)
+				assert.Equal(t, sslmode.ServerName, "overridden-host")
+			},
 		},
-		assertion: func(t *testing.T, sslmode DbSSLMode) {
-			assert.True(t, sslmode.UseTLS)
-			assert.True(t, sslmode.VerifyCaOnly)
-		},
-	},
-	{
-		description: "sslmode=verify-full",
-		options: options{
-			"sslmode": "verify-full",
-			"host":    "some-host",
-		},
-		assertion: func(t *testing.T, sslmode DbSSLMode) {
-			assert.True(t, sslmode.UseTLS)
-			assert.Equal(t, sslmode.ServerName, "some-host")
-		},
-	},
-	{
-		description: "sslmode=verify-full sslhost takes precedence",
-		options: options{
-			"sslmode": "verify-full",
-			"host":    "some-host",
-			"sslhost": "overridden-host",
-		},
-		assertion: func(t *testing.T, sslmode DbSSLMode) {
-			assert.True(t, sslmode.UseTLS)
-			assert.Equal(t, sslmode.ServerName, "overridden-host")
-		},
-	},
+	}
+
+	for _, testCase := range validSSLModeTestCases {
+		t.Run(testCase.description, func(t *testing.T) {
+			sslmode, err := NewDbSSLMode(testCase.options, false)
+			if !assert.NoError(t, err) {
+				return
+			}
+
+			testCase.assertion(t, sslmode)
+		})
+	}
 }
 
 func TestNewDbSSLMode(t *testing.T) {
@@ -223,20 +228,4 @@ func TestNewDbSSLMode(t *testing.T) {
 			return
 		}
 	})
-
-	// validSSLModeTestCases exercise NewDbSSLMode when the sslmode option is a valid value
-	// such as 'require'.
-	for _, testCase := range validSSLModeTestCases {
-		t.Run(testCase.description, func(t *testing.T) {
-			sslmode, err := NewDbSSLMode(
-				testCase.options,
-				false,
-			)
-			if !assert.NoError(t, err) {
-				return
-			}
-
-			testCase.assertion(t, sslmode)
-		})
-	}
 }

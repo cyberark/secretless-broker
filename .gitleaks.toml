@@ -192,6 +192,7 @@ files = [
   "test/connector/ssh/id_(.*)", # test ssh handler certs
   "test/connector/ssh_agent/id_(.*)", # test ssh-agent handler certs
   "test/connector/tcp/mssql/certs/(.*)", # test mssql connector certs
+  "internal/plugin/connectors/tcp/ssl/testdata/(.*)", # test mssql connector certs
   "test/ssh/id_(.*)", # since-removed ssh test certs
   "test/util/ssl/(.*)", # test ssl certs
   "internal/plugin/connectors/tcp/mssql/connection_details_test.go", # fake cert string

@@ -111,6 +111,10 @@ func HandleSSLUpgrade(connection net.Conn, tlsConf DbSSLMode) (net.Conn, error) 
 			return nil, err
 		}
 	}
+	err = client.Handshake()
+	if err != nil {
+		return nil, err
+	}
 
 	return client, nil
 }

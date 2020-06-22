@@ -85,9 +85,16 @@ func HandleSSLUpgrade(connection net.Conn, tlsConf DbSSLMode) (net.Conn, error) 
 	if err != nil {
 		return nil, err
 	}
-	err = sslCertificateAuthority(&tlsConf.Config, tlsConf.Options)
-	if err != nil {
-		return nil, err
+
+	// Add the root CA certificate specified in the "sslrootcert" setting to the root CA
+	// pool on the tls configuration.
+	sslRootCert := []byte(tlsConf.Options["sslrootcert"])
+	if len(sslRootCert) > 0 {
+		tlsConf.RootCAs = x509.NewCertPool()
+
+		if !tlsConf.RootCAs.AppendCertsFromPEM(sslRootCert) {
+			return nil, fmt.Errorf("couldn't parse pem in sslrootcert")
+		}
 	}
 
 	// Accept renegotiation requests initiated by the backend.
@@ -128,22 +135,6 @@ func sslClientCertificates(tlsConf *tls.Config, o options) error {
 	}
 
 	tlsConf.Certificates = []tls.Certificate{cert}
-	return nil
-}
-
-// sslCertificateAuthority adds the RootCA specified in the "sslrootcert" setting.
-func sslCertificateAuthority(tlsConf *tls.Config, o options) error {
-	// The root certificate is only loaded if the setting is not blank.
-	if sslrootcert := o["sslrootcert"]; len(sslrootcert) > 0 {
-		tlsConf.RootCAs = x509.NewCertPool()
-
-		cert := []byte(sslrootcert)
-
-		if !tlsConf.RootCAs.AppendCertsFromPEM(cert) {
-			return fmt.Errorf("couldn't parse pem in sslrootcert")
-		}
-	}
-
 	return nil
 }
 

@@ -18,7 +18,7 @@ type DbSSLMode struct {
 }
 
 // NewDbSSLMode configures and creates a DbSSLMode
-func NewDbSSLMode(o options, requireCanVerifyCAOnly bool) (DbSSLMode, error) {
+func NewDbSSLMode(o options, requireCanVerifyCA bool) (DbSSLMode, error) {
 	// NOTE for the "require" case:
 	//
 	// From http://www.postgresql.org/docs/current/static/libpq-ssl.html:
@@ -34,10 +34,10 @@ func NewDbSSLMode(o options, requireCanVerifyCAOnly bool) (DbSSLMode, error) {
 	switch mode := o["sslmode"]; mode {
 	case "disable":
 		sslMode.UseTLS = false
-		return sslMode, nil
-		// "require" is the default.
+
+	// "require" is the default.
 	case "", "require":
-		// Skip TLS's own verification: it requires full verification since Go 1.3.
+		// Skip stdlib's verification: it requires full verification since Go 1.3.
 		sslMode.InsecureSkipVerify = true
 
 		// From http://www.postgresql.org/docs/current/static/libpq-ssl.html:
@@ -51,18 +51,29 @@ func NewDbSSLMode(o options, requireCanVerifyCAOnly bool) (DbSSLMode, error) {
 
 		// MySQL on the other hand notes in its docs that it ignores
 		// SSL certs if supplied in REQUIRED sslmode.
-		if requireCanVerifyCAOnly && len(o["sslrootcert"]) > 0 {
+		if requireCanVerifyCA && len(o["sslrootcert"]) > 0 {
 			sslMode.VerifyCaOnly = true
 		}
+
 	case "verify-ca":
-		// Skip TLS's own verification: it requires full verification since Go 1.3.
+		// Skip stdlib's verification: it requires full verification since Go 1.3.
 		sslMode.InsecureSkipVerify = true
 		sslMode.VerifyCaOnly = true
-	//case "verify-full":
-	//	sslMode.ServerName = o["host"]
+
+	case "verify-full":
+		// Use stdlib's verification
+		sslMode.InsecureSkipVerify = false
+		sslMode.VerifyCaOnly = false
+
+		// 'sslhost', when not empty, takes precedence over 'host'
+		if len(o["sslhost"]) > 0 {
+			sslMode.ServerName = o["sslhost"]
+		} else {
+			sslMode.ServerName = o["host"]
+		}
+
 	default:
-		// TODO add verify-full below
-		return DbSSLMode{}, fmt.Errorf(`unsupported sslmode %q; only "require" (default), "verify-ca", and "disable" supported`, mode)
+		return DbSSLMode{}, fmt.Errorf(`unsupported sslmode %q; only "require" (default), "verify-ca", "verify-full" and "disable" supported`, mode)
 	}
 
 	return sslMode, nil
@@ -74,9 +85,16 @@ func HandleSSLUpgrade(connection net.Conn, tlsConf DbSSLMode) (net.Conn, error) 
 	if err != nil {
 		return nil, err
 	}
-	err = sslCertificateAuthority(&tlsConf.Config, tlsConf.Options)
-	if err != nil {
-		return nil, err
+
+	// Add the root CA certificate specified in the "sslrootcert" setting to the root CA
+	// pool on the tls configuration.
+	sslRootCert := []byte(tlsConf.Options["sslrootcert"])
+	if len(sslRootCert) > 0 {
+		tlsConf.RootCAs = x509.NewCertPool()
+
+		if !tlsConf.RootCAs.AppendCertsFromPEM(sslRootCert) {
+			return nil, fmt.Errorf("couldn't parse pem in sslrootcert")
+		}
 	}
 
 	// Accept renegotiation requests initiated by the backend.
@@ -92,6 +110,10 @@ func HandleSSLUpgrade(connection net.Conn, tlsConf DbSSLMode) (net.Conn, error) 
 		if err != nil {
 			return nil, err
 		}
+	}
+	err = client.Handshake()
+	if err != nil {
+		return nil, err
 	}
 
 	return client, nil
@@ -117,22 +139,6 @@ func sslClientCertificates(tlsConf *tls.Config, o options) error {
 	}
 
 	tlsConf.Certificates = []tls.Certificate{cert}
-	return nil
-}
-
-// sslCertificateAuthority adds the RootCA specified in the "sslrootcert" setting.
-func sslCertificateAuthority(tlsConf *tls.Config, o options) error {
-	// The root certificate is only loaded if the setting is not blank.
-	if sslrootcert := o["sslrootcert"]; len(sslrootcert) > 0 {
-		tlsConf.RootCAs = x509.NewCertPool()
-
-		cert := []byte(sslrootcert)
-
-		if !tlsConf.RootCAs.AppendCertsFromPEM(cert) {
-			return fmt.Errorf("couldn't parse pem in sslrootcert")
-		}
-	}
-
 	return nil
 }
 

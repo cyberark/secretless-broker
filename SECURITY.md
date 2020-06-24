@@ -14,7 +14,7 @@ Thank you for improving the security of the Conjur suite. We appreciate your eff
 responsible disclosure and will make every effort to acknowledge your
 contributions.
 
-Report security bugs by emailing the lead maintainers at security@conjur.org.
+Report security bugs by emailing the lead maintainers at security@secretless.io.
 
 The maintainers will acknowledge your email within 2 business days. Subsequently, we will 
 send a more detailed response within 2 business days of our acknowledgement indicating

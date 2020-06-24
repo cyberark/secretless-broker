@@ -322,7 +322,7 @@ func (h *AuthenticationHandshake) dbSSLMode() *ssl.DbSSLMode {
 
 	var ret ssl.DbSSLMode
 	ret, h.err = ssl.NewDbSSLMode(
-		h.connectionDetails.Options, false,
+		h.connectionDetails.SSLOptions, false,
 	)
 	h.sslMode = &ret
 

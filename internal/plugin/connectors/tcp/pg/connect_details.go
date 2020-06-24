@@ -9,6 +9,8 @@ import (
 const DefaultPostgresPort = "5432"
 
 var sslOptions = []string{
+	"host",
+	"sslhost",
 	"sslrootcert",
 	"sslmode",
 	"sslkey",
@@ -75,10 +77,7 @@ func NewConnectionDetails(options map[string][]byte) (*ConnectionDetails, error)
 
 	for _, sslOption := range sslOptions {
 		if len(options[sslOption]) > 0 {
-			value := string(options[sslOption])
-			if value != "" {
-				connectionDetails.SSLOptions[sslOption] = value
-			}
+			connectionDetails.SSLOptions[sslOption] = string(options[sslOption])
 		}
 		delete(options, sslOption)
 	}

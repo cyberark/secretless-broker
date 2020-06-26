@@ -67,11 +67,16 @@ services:
       password:
         from: conjur
         get: somepassword
+      address:
+        from: conjur
+        get: address
     config:
       credentialValidations:
         username: '[^:]+'    # username cannot contain a colon
       headers:
         Authorization: "Basic {{ printf \"%s:%s\" .username .password | base64 }}"
+      queryParams:
+        location: "{{ .address }}"
       forceSSL: true
       authenticateURLsMatching:
         - ^http
@@ -96,6 +101,41 @@ template](https://golang.org/pkg/text/template/), as defined in the
 You can refer to your credentials in this template using the credential name
 preceded by a `.` (eg, `.username` and `.password` refer to the credentials
 `username` and `password`). At runtime, Secretless will replace these
+credential references with your real credentials.
+
+As you can see in the Basic auth example, the `text/template` package has
+powerful transformation features.  You can use `printf` for formatting and
+compose functions using pipes `|`.  See the text template package docs linked
+above for detailed information on these and other features.
+
+### `queryParams`
+
+Like `headers`, this is another key section. The `queryParams` section
+is used to generate a query string, which is appended to your existing URL
+without replacing any existing query parameters.
+
+The _keys_ of the queryParams are defined by the yaml keys.  In the examples
+above, these query parameter key is `location`.
+
+The query parameter _values_ are defined using a [Go text
+template](https://golang.org/pkg/text/template/), as defined in the
+`text/template` package.
+
+In the above example, let us say that your request URL looks like the following,
+
+```
+http://anything.com/foo?fruit=apple
+```
+
+After proxying through secretless, your request URL would look like the following,
+
+```
+http://anything.com/foo?location=valueofaddress&fruit=apple
+```
+
+You can refer to your credentials in this template using the credential name
+preceded by a `.` (eg, `.address` will refer to the credential
+`address`). At runtime, Secretless will replace these
 credential references with your real credentials.
 
 As you can see in the Basic auth example, the `text/template` package has

@@ -30,13 +30,20 @@ func (c *Connector) Connect(
 	}
 
 	// Add configured headers to request
-	headers, err := c.config.renderedHeaders(credentialsByID)
+	headers, err := renderTemplates(c.config.Headers, credentialsByID)
 	if err != nil {
 		return fmt.Errorf("failed to render headers: %s", err)
 	}
 	for headerName, headerVal := range headers {
 		r.Header.Set(headerName, headerVal)
 	}
+
+	// Add configured params to request
+	params, err := renderTemplates(c.config.QueryParams, credentialsByID)
+	if err != nil {
+		return fmt.Errorf("failed to render query params: %s", err)
+	}
+	r.URL.RawQuery = appendQueryParams(*r.URL, params)
 
 	return nil
 }

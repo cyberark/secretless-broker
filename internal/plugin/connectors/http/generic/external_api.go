@@ -20,6 +20,7 @@ import (
 type ConfigYAML struct {
 	CredentialValidations map[string]string `yaml:"credentialValidations"`
 	Headers               map[string]string `yaml:"headers"`
+	QueryParams           map[string]string `yaml:"queryParams"`
 	ForceSSL              bool              `yaml:"forceSSL"`
 }
 

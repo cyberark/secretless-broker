@@ -1,6 +1,7 @@
 package generic
 
 import (
+	"net/url"
 	"strings"
 	"testing"
 
@@ -16,6 +17,9 @@ func sampleConfigYAML() []byte {
     Authorization: 'Basic {{ printf "%s:%s" .username .password | base64 }}'
     Name-With-Dashes: '{{ .username }}'
     SimpleConcatenation: '{{ .username }} - {{ .password }}'
+  queryParams:
+    Key: '{{ .key | base64 }}'
+    NameWithSpaces: '{{ .name }}'
   forceSSL: true
   authenticateURLsMatching:
     - ^http
@@ -42,10 +46,12 @@ func Test_newConfig(t *testing.T) {
 			return
 		}
 
-		headers, err := cfg.renderedHeaders(map[string][]byte{
-			"username": []byte("Jonah"),
-			"password": []byte("secret"),
-		})
+		headers, err := renderTemplates(
+			cfg.Headers,
+			map[string][]byte{
+				"username": []byte("Jonah"),
+				"password": []byte("secret"),
+			})
 
 		assert.NoError(t, err)
 		if err != nil {
@@ -58,6 +64,32 @@ func Test_newConfig(t *testing.T) {
 
 		// Assert against value calculated with independent base64 encoder.
 		assert.Equal(t, "Basic Sm9uYWg6c2VjcmV0", headers["Authorization"])
+	})
+
+	t.Run("creates expected query params", func(t *testing.T) {
+		cfg, err := sampleConfig()
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		params, err := renderTemplates(
+			cfg.QueryParams,
+			map[string][]byte{
+				"key":  []byte("someKey"),
+				"name": []byte("Foo Bar"),
+			})
+
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		// A simple test case
+		assert.Equal(t, "Foo Bar", params["NameWithSpaces"])
+
+		// Assert against value calculated with independent base64 encoder.
+		assert.Equal(t, "c29tZUtleQ==", params["Key"])
 	})
 }
 
@@ -109,6 +141,46 @@ func Test_validate(t *testing.T) {
 			if err != nil {
 				assert.True(t, strings.Contains(err.Error(), tc.expErrStr))
 			}
+		})
+	}
+}
+
+func Test_appendQueryParams(t *testing.T) {
+	testCases := []struct {
+		description      string
+		params           map[string]string
+		url              url.URL
+		expectedRawQuery string
+	}{
+		{
+			description: "appends params without replacing existing params",
+			params: map[string]string{
+				"foo": "bar",
+			},
+			url: url.URL{
+				RawQuery: "some=place",
+			},
+			expectedRawQuery: "foo=bar&some=place",
+		},
+		{
+			description: "special characters encode properly",
+			params: map[string]string{
+				"space":   "bar biz",
+				"key":     "abc==",
+				"special": "@#$%^&*(){}[].,+",
+			},
+			url: url.URL{
+				RawQuery: "some=place",
+			},
+			expectedRawQuery: "key=abc%3D%3D&some=place&space=bar+biz&special=%40%23%24" +
+				"%25%5E%26%2A%28%29%7B%7D%5B%5D.%2C%2B",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			actualRawQuery := appendQueryParams(tc.url, tc.params)
+
+			assert.Equal(t, tc.expectedRawQuery, actualRawQuery)
 		})
 	}
 }

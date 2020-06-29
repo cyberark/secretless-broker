@@ -79,75 +79,80 @@ func GenerateConfigurations() (config_v2.Config, LiveConfigurations) {
 	for _, serverTLSSetting := range AllTLSSettings() {
 		for _, socketType := range AllSocketTypes() {
 			for _, sslMode := range AllSSLModes() {
-				for _, publicCertStatus := range AllPublicCertStatuses() {
-					for _, privateKeyStatus := range AllPrivateKeyStatuses() {
-						for _, rootCertStatus := range AllRootCertStatuses() {
-							for _, areAuthCredentialsInvalid := range AllAuthCredentialsInvalidity() {
+				for _, sslHost := range AllSSLHosts() {
+					for _, publicCertStatus := range AllPublicCertStatuses() {
+						for _, privateKeyStatus := range AllPrivateKeyStatuses() {
+							for _, rootCertStatus := range AllRootCertStatuses() {
+								for _, areAuthCredentialsInvalid := range AllAuthCredentialsInvalidity() {
 
-								connectionPort := ConnectionPort{
-									// TODO: perhaps resolve this duplication of listener type
-									SocketType: socketType,
-									Port:       portNumber,
+									connectionPort := ConnectionPort{
+										// TODO: perhaps resolve this duplication of listener type
+										SocketType: socketType,
+										Port:       portNumber,
+									}
+
+									name := "test_service_" + connectionPort.ToPortString()
+									credentials := areAuthCredentialsInvalid.toSecrets()
+
+									liveConfiguration := LiveConfiguration{
+										AbstractConfiguration: AbstractConfiguration{
+											SocketType:               socketType,
+											TLSSetting:               serverTLSSetting,
+											SSLHost:                  sslHost,
+											SSLMode:                  sslMode,
+											RootCertStatus:           rootCertStatus,
+											PrivateKeyStatus:         privateKeyStatus,
+											PublicCertStatus:         publicCertStatus,
+											AuthCredentialInvalidity: areAuthCredentialsInvalid,
+										},
+										ConnectionPort: connectionPort,
+									}
+
+									credentials = append(
+										credentials,
+										// rootCertStatus
+										rootCertStatus.toSecret(),
+										//sslMode
+										sslMode.toSecret(),
+										//sslHost
+										sslHost.toSecret(),
+										//sslPrivateKeyTypeValue
+										privateKeyStatus.toSecret(),
+										//sslPublicCertTypeValue
+										publicCertStatus.toSecret(),
+									)
+									// serverTLSSetting
+									credentials = append(
+										credentials,
+										serverTLSSetting.toSecrets(sampleDbConfig)...,
+									)
+
+									// socketType
+									address := ""
+									switch socketType {
+									case TCP:
+										address = "tcp://0.0.0.0:" + connectionPort.ToPortString()
+									case Socket:
+										address = "unix://" + connectionPort.ToSocketPath()
+									}
+
+									svc := &config_v2.Service{
+										Debug: true,
+										// TODO: grab value from envvar for flexibility
+										Connector:       sampleDbConfig.Protocol,
+										ConnectorConfig: nil,
+										Credentials:     credentials,
+										ListenOn:        config_v2.NetworkAddress(address),
+										Name:            name,
+									}
+
+									secretlessConfig.Services = append(
+										secretlessConfig.Services,
+										svc)
+									liveConfigurations = append(liveConfigurations, liveConfiguration)
+
+									portNumber++
 								}
-
-								name := "test_service_" + connectionPort.ToPortString()
-								credentials := areAuthCredentialsInvalid.toSecrets()
-
-								liveConfiguration := LiveConfiguration{
-									AbstractConfiguration: AbstractConfiguration{
-										SocketType:               socketType,
-										TLSSetting:               serverTLSSetting,
-										SSLMode:                  sslMode,
-										RootCertStatus:           rootCertStatus,
-										PrivateKeyStatus:         privateKeyStatus,
-										PublicCertStatus:         publicCertStatus,
-										AuthCredentialInvalidity: areAuthCredentialsInvalid,
-									},
-									ConnectionPort: connectionPort,
-								}
-
-								credentials = append(
-									credentials,
-									// rootCertStatus
-									rootCertStatus.toSecret(),
-									//sslMode
-									sslMode.toSecret(),
-									//sslPrivateKeyTypeValue
-									privateKeyStatus.toSecret(),
-									//sslPublicCertTypeValue
-									publicCertStatus.toSecret(),
-								)
-								// serverTLSSetting
-								credentials = append(
-									credentials,
-									serverTLSSetting.toSecrets(sampleDbConfig)...,
-								)
-
-								// socketType
-								address := ""
-								switch socketType {
-								case TCP:
-									address = "tcp://0.0.0.0:" + connectionPort.ToPortString()
-								case Socket:
-									address = "unix://" + connectionPort.ToSocketPath()
-								}
-
-								svc := &config_v2.Service{
-									Debug: true,
-									// TODO: grab value from envvar for flexibility
-									Connector:       sampleDbConfig.Protocol,
-									ConnectorConfig: nil,
-									Credentials:     credentials,
-									ListenOn:        config_v2.NetworkAddress(address),
-									Name:            name,
-								}
-
-								secretlessConfig.Services = append(
-									secretlessConfig.Services,
-									svc)
-								liveConfigurations = append(liveConfigurations, liveConfiguration)
-
-								portNumber++
 							}
 						}
 					}

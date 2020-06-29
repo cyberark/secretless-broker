@@ -15,12 +15,14 @@ func TestExpectedFields(t *testing.T) {
 	}
 
 	expectedConnectionDetails := ConnectionDetails{
-		Host:       "myhost",
-		Port:       "1234",
-		Username:   "myusername",
-		Password:   "mypassword",
-		Options:    map[string]string{},
-		SSLOptions: map[string]string{},
+		Host:     "myhost",
+		Port:     "1234",
+		Username: "myusername",
+		Password: "mypassword",
+		Options:  map[string]string{},
+		SSLOptions: map[string]string{
+			"host": "myhost",
+		},
 	}
 
 	actualConnectionDetails, err := NewConnectionDetails(options)
@@ -38,6 +40,7 @@ func TestSSLOptions(t *testing.T) {
 		"username": []byte("myusername"),
 		"password": []byte("mypassword"),
 
+		"sslhost":     []byte("customhost"),
 		"sslrootcert": []byte("mysslrootcert"),
 		"sslmode":     []byte("mysslmode"),
 		"sslkey":      []byte("mysslkey"),
@@ -51,6 +54,8 @@ func TestSSLOptions(t *testing.T) {
 		Password: "mypassword",
 		Options:  map[string]string{},
 		SSLOptions: map[string]string{
+			"host":        "myhost",
+			"sslhost":     "customhost",
 			"sslrootcert": "mysslrootcert",
 			"sslmode":     "mysslmode",
 			"sslkey":      "mysslkey",
@@ -74,12 +79,14 @@ func TestDefaultPort(t *testing.T) {
 	}
 
 	expectedConnectionDetails := ConnectionDetails{
-		Host:       "myhost",
-		Port:       DefaultPostgresPort,
-		Username:   "myusername",
-		Password:   "mypassword",
-		Options:    map[string]string{},
-		SSLOptions: map[string]string{},
+		Host:     "myhost",
+		Port:     DefaultPostgresPort,
+		Username: "myusername",
+		Password: "mypassword",
+		Options:  map[string]string{},
+		SSLOptions: map[string]string{
+			"host": "myhost",
+		},
 	}
 
 	actualConnectionDetails, err := NewConnectionDetails(options)

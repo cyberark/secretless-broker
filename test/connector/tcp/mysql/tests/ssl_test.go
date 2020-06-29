@@ -184,6 +184,36 @@ func TestSSL(t *testing.T) {
 				PublicCertStatus: PublicCertNotSignedByCA,
 			},
 		},
+		{
+			Definition: Definition{
+				Description: "server_tls, sslmode=verify-full, sslrootcert=valid, sslkey=valid, sslcert=valid, sslhost=valid",
+				ShouldPass:  true,
+			},
+			AbstractConfiguration: AbstractConfiguration{
+				SocketType:       TCP,
+				TLSSetting:       TLS,
+				SSLMode:          VerifyFull,
+				RootCertStatus:   Valid,
+				PrivateKeyStatus: PrivateKeyValid,
+				PublicCertStatus: PublicCertValid,
+			},
+		},
+		{
+			Definition: Definition{
+				Description: "server_tls, sslmode=verify-full, sslrootcert=valid, sslkey=valid, sslcert=valid, sslhost=invalid",
+				ShouldPass:  false,
+				CmdOutput:   StringPointer("ERROR 2000 (HY000): x509: certificate is valid for localhost, mysql, pg, not invalid"),
+			},
+			AbstractConfiguration: AbstractConfiguration{
+				SocketType:       TCP,
+				TLSSetting:       TLS,
+				SSLMode:          VerifyFull,
+				SSLHost:          SSLHostInvalid,
+				RootCertStatus:   Valid,
+				PrivateKeyStatus: PrivateKeyValid,
+				PublicCertStatus: PublicCertValid,
+			},
+		},
 	}
 
 	Convey("SSL functionality", t, func() {

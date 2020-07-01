@@ -147,7 +147,7 @@ ___
 ### Splunk API
 This example can be used to interact with [Splunk's API](https://api.slack.com/apis).
 
-The configuration file for the Slack Web API can be found at [splunk_secretless.yml](./splunk_secretless.yml).
+The configuration file for the Splunk Web API can be found at [splunk_secretless.yml](./splunk_secretless.yml).
 
 #### How to use this connector
 * Edit the supplied configuration to get your [Splunk authentication token](https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/EnableTokenAuth)

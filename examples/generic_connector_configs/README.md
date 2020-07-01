@@ -3,7 +3,7 @@
 ## Table of Contents
 * [Sample Configurations](#sample-configurations)
   * [Elasticsearch API](#elasticsearch-api)
-  * [Github API](#github-api)
+  * [GitHub API](#github-api)
   * [OAuth 2.0 API](#oauth-20-api)
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
@@ -45,26 +45,26 @@ The configuration file for the Elasticsearch API can be found at
   <summary><b>How to use this connector locally</b></summary>
   <ol>
     <li>Create an account at <a href="https://cloud.elastic.co/login">
-    ElasticSearch's website</a></li>
+    Elasticsearch's website</a></li>
     <li>Create a <a href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-restful-api-examples-create-deployment.html">deployment</a></li>
-    <li>Make a request to ElasticSearch's API to get the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-get-token.html">
-    OAuth2 Token</a>. The request should be made to your deployment ElasticSearch endpoint.</li>
+    <li>Make a request to Elasticsearch's API to get the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-get-token.html">
+    OAuth2 Token</a>. The request should be made to your deployment Elasticsearch endpoint.</li>
     <li>Run Secretless locally</li>
     <code>
       ./dist/darwin/amd64/secretless-broker \
       <br />
       -f examples/generic_connector_configs/elasticsearch.yml
     </code>
-    <li>Query the ElasticSearch API using <code>http_proxy=localhost:9020 curl <Elasticsearch Endpoint URL>/{Request}</code></li>
+    <li>Query the Elasticsearch API using <code>http_proxy=localhost:9020 curl <Elasticsearch Endpoint URL>/{Request}</code></li>
   </ol>
 </details>
 
 ___
 
-### Github API
-This example can be used to interact with [Github's API](https://developer.github.com/v3/).
+### GitHub API
+This example can be used to interact with [GitHub's API](https://developer.github.com/v3/).
 
-The configuration file for the Github API can be found at [github_secretless.yml](./github_secretless.yml).
+The configuration file for the GitHub API can be found at [github_secretless.yml](./github_secretless.yml).
 
 #### How to use this connector
 * Edit the supplied configuration to get your [GitHub OAuth token](https://developer.github.com/v3/#oauth2-token-sent-in-a-header) from the correct provider/path.
@@ -77,7 +77,7 @@ The configuration file for the Github API can be found at [github_secretless.yml
   <ol>
     <li>
       Get an OAuth token from the Developer Settings page of a user's
-      Github account
+      GitHub account
     </li>
     <li>Added that token into the local machine's OSX Keychain</li>
     <li>Build and run Secretless locally</li>
@@ -90,7 +90,7 @@ The configuration file for the Github API can be found at [github_secretless.yml
     -f examples/generic_connector_configs/github_secretless.yml
     </code>
     <li>
-      On another terminal window, make a request to Github using Secretless
+      On another terminal window, make a request to GitHub using Secretless
     </li>
     <code>
       http_proxy=localhost:8081 curl -X GET api.github.com/users/username
@@ -130,7 +130,7 @@ depending on if your endpoint requires JSON or URL encoded requests
   <summary><b>How to use this connector locally...</b></summary>
   <ol>
     <li>Get the Slack <a href="https://slack.com/help/articles/215770388-Create-and-regenerate-API-tokens">application's tokens</a></li>
-    <li>Save the local token from Slack into the OSX keychain</li>
+    <li>Save the local token from Slack into the OSX Keychain</li>
     <li>Run Secretless locally</li>
     <code>
       ./dist/darwin/amd64/secretless-broker \

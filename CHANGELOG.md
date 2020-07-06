@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Secretless and secretless-redhat containers now use Alpine 3.12 as their base
+  image. [PR #1296](https://github.com/cyberark/secretless-broker/pull/1296)
 - MySQL and PostgreSQL connectors support SSL host name verification with
   `verify-full` SSL mode. Also adds optional `sslhost` configuration parameter
   that is compared to the server's certificate SAN. [#548](https://github.com/cyberark/secretless-broker/issues/548)

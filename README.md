@@ -5,6 +5,7 @@
 - [Quick Start](#quick-start)
 - [Additional demos](#run-more-secretless-demos)
 - [Using Secretless](#using-secretless)
+  - [Using This Project With Conjur-OSS](#using-secretless-broker-with-conjur-oss)
   - [About our releases](#about-our-releases)
 - [Community](#community)
 - [Performance](#performance)
@@ -139,6 +140,17 @@ For an even more in-depth demo, check out our [Deploying to Kubernetes](https://
 # Using Secretless
 
 For complete documentation on using Secretless, please see [our documentation](https://docs.secretless.io/Latest/en/Content/Resources/_TopNav/cc_Home.htm). The documentation includes comprehensive guides for how to get up and running with Secretless.
+
+## Using secretless-broker with Conjur OSS
+
+Are you using this project with [Conjur OSS](https://github.com/cyberark/conjur)? 
+Then we **strongly** recommend choosing the version of this project to use from 
+the latest [Conjur OSS suite release](https://docs.conjur.org/Latest/en/Content/Overview/Conjur-OSS-Suite-Overview.html).
+Conjur maintainers perform additional testing on the suite release versions to ensure
+compatibility. When possible, upgrade your Conjur version to match the
+[latest suite release](https://docs.conjur.org/Latest/en/Content/ReleaseNotes/ConjurOSS-suite-RN.htm);
+when using integrations, choose the latest suite release that matches your Conjur version. 
+For any questions, please contact us on [Discourse](https://discuss.cyberarkcommons.org/c/conjur/5).
 
 ## About our releases
 

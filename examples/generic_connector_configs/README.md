@@ -2,6 +2,7 @@
 
 ## Table of Contents
 * [Sample Configurations](#sample-configurations)
+  * [Docker Registry API](#docker-registry-api)
   * [Elasticsearch API](#elasticsearch-api)
   * [GitHub API](#github-api)
   * [OAuth 2.0 API](#oauth-20-api)
@@ -32,6 +33,45 @@ target’s CA to Secretless’ trusted certificate pool.
 > **Protip:** Your target should be either `http://api-target.com` or `api-target.com`.
 A URL that starts with https will not work.
 ___
+
+### Docker Registry API
+
+This example can be used to interact with [Docker's V2 Registry API](https://docs.docker.com/registry/spec/api/#overview).
+
+The configuration file for the Docker Registry API can be found at
+[docker_registry_secretless.yml](./docker_registry_secretless.yml).
+
+#### How to use this connector
+* Edit the supplied configuration to get your Docker Registry
+[Token](https://docs.docker.com/registry/spec/auth/jwt/)
+* Run Secretless with the supplied configuration(s)
+* Query the Docker Registry API using `http_proxy=localhost:8021 curl <Registry Endpoint URL>/{Request}`
+
+#### Example Usage
+<details>
+  <summary><b>How to use this connector locally</b></summary>
+  <ol>
+    <li>Set up a <a href="https://docs.docker.com/registry/deploying/">
+    local Registry</a> or use one from <a href="https://hub.docker.com">Dockerhub</a></li>
+    <li>Make a request to the Registry API to get the <a href="https://docs.docker.com/registry/spec/auth/oauth/">
+    OAuth2 Token</a>.</li>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>secretless.yml</code>
+    </li>
+    <li>Run Secretless locally</li>
+    <code>
+      ./dist/darwin/amd64/secretless-broker \
+      <br />
+      -f examples/generic_connector_configs/docker_registry_secretless.yml
+    </code>
+    <li>List all images from your test Registry using <code>http_proxy=localhost:8021 curl {Registry Endpoint}/v2/repositories/{USERNAME}/?page_size=10000</code></li>
+    <li> If you can see the private repos in your repo, you're all set!</li>
+  </ol>
+</details>
+
+___
+
 ### Elasticsearch API
 This example can be used to interact with [Elasticsearch's API](https://www.elastic.co/guide/en/elasticsearch/reference/current).
 

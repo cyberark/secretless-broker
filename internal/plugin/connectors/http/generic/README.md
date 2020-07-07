@@ -115,7 +115,7 @@ is used to generate a query string, which is appended to your existing URL
 without replacing any existing query parameters.
 
 The _keys_ of the queryParams are defined by the yaml keys.  In the examples
-above, these query parameter key is `location`.
+above, the query parameter key is `location`.
 
 The query parameter _values_ are defined using a [Go text
 template](https://golang.org/pkg/text/template/), as defined in the

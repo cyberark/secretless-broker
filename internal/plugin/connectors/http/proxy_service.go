@@ -136,20 +136,20 @@ func (proxy *proxyService) selectSubservice(r *gohttp.Request) *Subservice {
 	// No match: Warn!
 	if len(matchingSubs) == 0 {
 		msg := "No subservices matched request '%s'"
-		proxy.logger.Warnf(msg, r.URL.String())
+		proxy.logger.Warnf(msg, r.URL.Host)
 		return nil
 	}
 
 	// Multiple matches: Warn!
 	if len(matchingSubs) > 1 {
 		msg := "Multiple subservices matched request '%s': %v\n"
-		proxy.logger.Warnf(msg, r.URL.String(), matchingSubs)
+		proxy.logger.Warnf(msg, r.URL.Host, matchingSubs)
 	}
 
 	// Select first (or only) match
 	subservice := matchingSubs[0]
 	msg := "Using connector '%s' for request %s"
-	proxy.logger.Debugf(msg, subservice.ConnectorID, r.URL.String())
+	proxy.logger.Debugf(msg, subservice.ConnectorID, r.URL.Host)
 	return &subservice
 }
 
@@ -158,9 +158,8 @@ func (proxy *proxyService) ServeHTTP(w gohttp.ResponseWriter, r *gohttp.Request)
 	logger := proxy.logger
 
 	// Log request
-
 	logMsg := "Got request %v %v %v %v"
-	logger.Debugf(logMsg, r.URL.Path, r.Host, r.Method, r.URL.String())
+	logger.Debugf(logMsg, r.URL.Path, r.Host, r.Method, r.URL.Hostname())
 
 	// Validate request
 

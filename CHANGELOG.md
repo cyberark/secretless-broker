@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - MySQL and PostgreSQL connectors support SSL host name verification with
   `verify-full` SSL mode. Also adds optional `sslhost` configuration parameter
   that is compared to the server's certificate SAN. [#548](https://github.com/cyberark/secretless-broker/issues/548)
+- Generic HTTP connector now supports `queryParam` as a configurable section
+  in the secretless configuration file, under `config`. This allows the
+  construction of a query string which can have credentials injected
+  as needed. [#1290](https://github.com/cyberark/secretless-broker/issues/1290)
 
 ## [1.6.0] - 2020-05-04
 

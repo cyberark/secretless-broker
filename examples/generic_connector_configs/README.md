@@ -8,6 +8,7 @@
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
   * [Stripe API](#stripe-api)
+  * [Twitter API](#twitter-api)
 * [Contributing](#contributing)
 
 ## Introduction
@@ -27,6 +28,9 @@ target’s CA to Secretless’ trusted certificate pool.
 > Note: The following examples use the [Keychain provider](https://docs.cyberark.com/Product-Doc/OnlineHelp/AAM-DAP/11.3/en/Content/References/providers/scl_keychain.htm?TocPath=Fundamentals%7CSecretless%20Pattern%7CSecret%20Providers%7C_____5).
 > Replace the service prefix `service#` with an appropriate service
 > or use a different provider as needed.
+
+> **Protip:** Your target should be either `http://api-target.com` or `api-target.com`.
+A URL that starts with https will not work.
 ___
 ### Elasticsearch API
 This example can be used to interact with [Elasticsearch's API](https://www.elastic.co/guide/en/elasticsearch/reference/current).
@@ -43,7 +47,7 @@ The configuration file for the Elasticsearch API can be found at
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally</b></summary>
+  <summary><b>Example setup to try this out locally</b></summary>
   <ol>
     <li>Create an account at <a href="https://cloud.elastic.co/login">
     Elasticsearch's website</a></li>
@@ -74,13 +78,16 @@ The configuration file for the GitHub API can be found at [github_secretless.yml
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally</b></summary>
+  <summary><b>Example setup to try this out locally</b></summary>
   <ol>
     <li>
       Get an OAuth token from the Developer Settings page of a user's
       GitHub account
     </li>
-    <li>Added that token into the local machine's OSX Keychain</li>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>secretless.yml</code>
+    </li>
     <li>Build and run Secretless locally</li>
     <code>
       ./bin/build_darwin
@@ -128,10 +135,13 @@ depending on if your endpoint requires JSON or URL encoded requests
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally...</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>Get the Slack <a href="https://slack.com/help/articles/215770388-Create-and-regenerate-API-tokens">application's tokens</a></li>
-    <li>Save the local token from Slack into the OSX Keychain</li>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>secretless.yml</code>
+    </li>
     <li>Run Secretless locally</li>
     <code>
       ./dist/darwin/amd64/secretless-broker \
@@ -161,7 +171,7 @@ to the backend server uses SSL.
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally</b></summary>
+  <summary><b>Example setup to try this out locally</b></summary>
   <ol>
     <li>Run a local instance of Splunk in a Docker container</li>
     <code>
@@ -186,7 +196,10 @@ to the backend server uses SSL.
       <a href="https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/EnableTokenAuth">here</a>
       to create a local Splunk token using Splunk Web
     </li>
-    <li>Save the local token from Splunk Web into the OSX keychain</li>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>secretless.yml</code>
+    </li>
     <li>
       Add 'SplunkServerDefaultCert' at IP 127.0.0.1 to etc/hosts on the machine.
       This was so the host name of the HTTP Request would match the name on the
@@ -237,7 +250,10 @@ one should be used.
   <summary><b>How to use this connector locally</b></summary>
   <ol>
     <li>Get the Stripe test <a href="https://dashboard.stripe.com/apikeys">API Key</a></li>
-    <li>Save the local token from Slack into the OSX keychain</li>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>secretless.yml</code>
+    </li>
     <li>Run Secretless locally</li>
     <code>
     ./dist/darwin/amd64/secretless-broker \
@@ -247,6 +263,69 @@ one should be used.
     <li>On another terminal window, make a request to Stripe using Secretless</li>
     <code>
     http_proxy=localhost:{secretless-server} curl api.stripe.com/v1/charges
+    </code>
+  </ol>
+</details>
+
+___
+
+### Twitter API
+This example can be used to interact with
+[Twitter's API](https://developer.twitter.com/en/docs).
+
+The configuration file for the Twitter API can be found at
+[twitter_secretless.yml](./twitter_secretless.yml).
+
+**Note:** This configuration currently only supports connecting to the
+Twitter API via OAuth2. An issue can be found
+[here](https://github.com/cyberark/secretless-broker/issues/1297)
+for adding an OAuth1 Connector for Twitter.
+
+#### How to use this connector
+* Edit the supplied service configuration to get your
+[OAuth token](https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens)
+* Run secretless with the supplied configuration(s)
+* Query the API using `http_proxy=localhost:8051 curl api.twitter.com/{Request}`
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally</b></summary>
+  <ol>
+    <li>
+      Get your
+      <a href="https://developer.twitter.com/en/apps">
+        Twitter API key and Secret Key
+      </a>
+    </li>
+    <li>
+      Get an
+      <a href="https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens">
+        OAuth token
+      </a>
+      from Twitter through CURL
+    </li>
+    <code>
+      curl -u 'API key:API secret key' \
+      <br />
+      --data 'grant_type=client_credentials' \
+      <br />
+      'https://api.twitter.com/oauth2/token'
+    </code>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>secretless.yml</code>
+    </li>
+    <li>Run Secretless locally</li>
+    <code>
+      ./dist/darwin/amd64/secretless-broker \
+      <br />
+      -f examples/generic_connector_configs/twitter_secretless.yml
+    </code>
+    <li>
+      On another terminal window, make a request to Twitter using Secretless
+    </li>
+    <code>
+      http_proxy=localhost:8051 curl "api.twitter.com/1.1/followers/ids.json?screen_name=twitterdev"
     </code>
   </ol>
 </details>

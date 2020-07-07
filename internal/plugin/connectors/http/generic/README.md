@@ -140,7 +140,7 @@ credential references with your real credentials.
 
 As you can see in the Basic auth example, the `text/template` package has
 powerful transformation features.  You can use `printf` for formatting and
-compose functions using pipes `|`.  See the text template package docs linked
+you can compose functions using pipes `|`.  See the text template package docs linked
 above for detailed information on these and other features.
 
 #### `credentialValidations`

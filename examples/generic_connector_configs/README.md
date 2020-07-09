@@ -9,6 +9,7 @@
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
   * [Stripe API](#stripe-api)
+  * [Tableau API](#tableau-api)
   * [Twitter API](#twitter-api)
 * [Contributing](#contributing)
 
@@ -272,24 +273,34 @@ to the backend server uses SSL.
 ___
 
 ### Stripe API
-This example can be used to interact with [Stripe's API](https://stripe.com/docs/api).
+This example can be used to interact with
+[Stripe's API](https://stripe.com/docs/api).
 
-The configuration file for the Stripe API can be found at [stripe_secretless.yml](./stripe_secretless.yml).
+The configuration file for the Stripe API can be found at
+[stripe_secretless.yml](./stripe_secretless.yml).
 
 This example supports several header configurations, so it is recommended to
 look at [stripe_secretless.yml](./stripe_secretless.yml) to figure out which
 one should be used.
 
 #### How to use this connector
-* Get the [Stripe API Key](https://dashboard.stripe.com/apikeys), which can be used as a Bearer token
-* Get a [connected account](https://stripe.com/docs/connect/authentication) or generate an [idempotency key](https://stripe.com/docs/api/idempotent_requests) if needed
-* Query the Striple API using `http_proxy=localhost:80*1 curl api.stripe.com/{route}`.
+* Get the [Stripe API Key](https://dashboard.stripe.com/apikeys),
+which can be used as a Bearer token
+* Get a [connected account](https://stripe.com/docs/connect/authentication)
+or generate an
+[idempotency key](https://stripe.com/docs/api/idempotent_requests) if needed
+* Query the Striple API using
+`http_proxy=localhost:80*1 curl api.stripe.com/{route}`.
 
 #### Example Usage
 <details>
   <summary><b>How to use this connector locally</b></summary>
   <ol>
-    <li>Get the Stripe test <a href="https://dashboard.stripe.com/apikeys">API Key</a></li>
+    <li>Get the Stripe test
+      <a href="https://dashboard.stripe.com/apikeys">
+        API Key
+      </a>
+    </li>
     <li>
       Store the token from your request in your local credential manager so
       that it may be retrieved in your <code>secretless.yml</code>
@@ -300,11 +311,62 @@ one should be used.
     <br />
     -f examples/generic_connector_configs/stripe_secretless.yml
     </code>
-    <li>On another terminal window, make a request to Stripe using Secretless</li>
+    <li>
+      On another terminal window, make a request to Stripe using Secretless
+    </li>
     <code>
-    http_proxy=localhost:{secretless-server} curl api.stripe.com/v1/charges
+      http_proxy=localhost:{secretless-server} curl api.stripe.com/v1/charges
     </code>
   </ol>
+</details>
+
+___
+
+### Tableau API
+This example can be used to interact with
+[Tableau's API](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api.htm).
+
+The configuraton file for the Tableau API can be found at
+[tableau_secretless.yml](./tableau_secretless.yml).
+
+#### How to use this connector
+* Create an account for Tableau Online
+* Make a request to Tableu's API to get an
+[`X-Tableau-Auth`](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_auth.htm)
+token.
+* Run secretless with the supplied configuration(s)
+* Query the API using localhost:8071 curl {data} {Tableau Endpoint URl}
+
+#### Example Usage
+<details>
+  <summary><b>How to use this connector locally</b></summary>
+  <ol>
+      <li>Create an account on
+        <a href="https://www.tableau.com/products/cloud-bi#form">
+          Tableau Online
+        </a>
+      </li>
+      <li>
+        <a href="https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_get_started_tutorial_part_1.htm#step-1-sign-in-to-your-server-with-rest">
+          Make a POST request
+        </a>
+        to Tableau Online's API using the provided credentials to secure a
+        <code>
+          X-Tableau-Auth
+        </code>
+        token
+      </li>
+      <li>
+        Store the token from your request in your local credential manager so
+        that it may be retrieved in your <code>secretless.yml</code>
+      </li>
+      <li>On another terminal window, make a request to Tableau using Secretless
+        <br />
+        <code>
+          http_proxy=localhost:8071 curl -d {data} {Tableau Endpoint URL}
+        </code>
+      </li>
+    </ol>
 </details>
 
 ___
@@ -369,8 +431,6 @@ for adding an OAuth1 Connector for Twitter.
     </code>
   </ol>
 </details>
-
-___
 
 ## Contributing
 

@@ -5,6 +5,7 @@
   * [Docker Registry API](#docker-registry-api)
   * [Elasticsearch API](#elasticsearch-api)
   * [GitHub API](#github-api)
+  * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
@@ -143,6 +144,77 @@ The configuration file for the GitHub API can be found at [github_secretless.yml
     </li>
     <code>
       http_proxy=localhost:8081 curl -X GET api.github.com/users/username
+    </code>
+  </ol>
+</details>
+
+___
+
+### Mailchimp API
+This example can be used to interact with [Mailchimp's API](https://mailchimp.com/developer/guides/get-started-with-mailchimp-api-3/).
+
+The configuration file for the Mailchimp API can be found at [mailchimp_secretless.yml](./mailchimp_secretless.yml).
+
+#### How to use this connector
+* Edit the supplied configuration to get your Mailchimp OAuth [Access Token](https://mailchimp.com/developer/guides/how-to-use-oauth2/)(OAuth2) or Mailchimp [API Token/Username](https://mailchimp.com/help/about-api-keys/)(Basic Authentication) from the correct provider/path.
+* Run Secretless with the supplied configuration
+* Query the Mailchimp API using:
+
+```
+http_proxy=localhost:{Service IP} curl {dc}.api.mailchimp.com/3.0/{request}
+```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally</b></summary>
+  <h5>Basic Authentication</h5>
+  <ol>
+    <li>
+      Get an API token from Profile > Extras > API Keys > "Create A Key"
+    </li>
+    <li>
+      Store your username and the token from your request in your local credential manager so
+      that it may be retrieved in your <code>mailchimp_secretless.yml</code>
+    </li>
+    <li>Build and run Secretless locally</li>
+    <code>
+      ./bin/build_darwin
+    </code>
+    <br />
+    <code>
+    ./dist/darwin/amd64/secretless-broker \
+    -f examples/generic_connector_configs/github_secretless.yml
+    </code>
+    <li>
+      On another terminal window, make a request to Mailchimp using Secretless
+    </li>
+    <code>
+      http_proxy=localhost:8010 curl -X GET {dc}.api.mailchimp.com/3.0/
+    </code>
+  </ol>
+  <h5>OAuth2</h5>
+  <ol>
+    <li>
+      Get an Access Token by following the <a href="https://mailchimp.com/developer/guides/how-to-use-oauth2/">provided workflow</a> or by making a Basic Auth API request to <a href="https://mailchimp.com/developer/reference/authorized-apps/">this</a> endpoint 
+    </li>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>mailchimp_secretless.yml</code>
+    </li>
+    <li>Build and run Secretless locally</li>
+    <code>
+      ./bin/build_darwin
+    </code>
+    <br />
+    <code>
+    ./dist/darwin/amd64/secretless-broker \
+    -f examples/generic_connector_configs/mailchimp_secretless.yml
+    </code>
+    <li>
+        On another terminal window, make a request to Mailchimp using Secretless
+    </li>
+    <code>
+      http_proxy=localhost:8011 curl -X GET {dc}.api.mailchimp.com/3.0/
     </code>
   </ol>
 </details>

@@ -2,6 +2,7 @@
 
 ## Table of Contents
 * [Sample Configurations](#sample-configurations)
+  * [Datadog API](#datadog-api)
   * [Docker Registry API](#docker-registry-api)
   * [Elasticsearch API](#elasticsearch-api)
   * [GitHub API](#github-api)
@@ -36,9 +37,56 @@ target’s CA to Secretless’ trusted certificate pool.
 A URL that starts with https will not work.
 ___
 
+### Datadog API
+This example can be used to interact with
+[Datadog API](https://docs.datadoghq.com/api/).
+
+The configuration file for the Datadog API can be found at
+[datadog_secretless.yml](./datadog_secretless.yml).
+
+#### How to use this connector
+* Edit the supplied configuration to get your Datadog
+[API Key](https://docs.datadoghq.com/account_management/api-app-keys/)
+or/and
+[Application Key](https://docs.datadoghq.com/account_management/api-app-keys/)
+* Run Secretless with the supplied configuration(s)
+* Query the Datadog API using
+`http_proxy=localhost:8041 curl api.datadoghq.com/{request}`
+
+#### Example Usage
+<details>
+  <summary><b>How to use this connector locally</b></summary>
+  <ol>
+    <li>Set up a
+      <a href="https://app.datadoghq.com/">Datadog account</a> and get an
+      <a href="https://docs.datadoghq.com/account_management/api-app-keys/">API key</a>
+    </li>
+    <li>
+      Get a Datadog <a href="https://docs.datadoghq.com/account_management/api-app-keys/">Application key</a>
+    </li>
+    <li>
+      Store the token from your request in your local credential manager so
+      that it may be retrieved in your <code>secretless.yml</code>
+    </li>
+    <li>Run Secretless locally</li>
+    <code>
+      ./dist/darwin/amd64/secretless-broker \
+      <br />
+      -f examples/generic_connector_configs/datadog_secretless.yml
+    </code>
+    <li>
+      Query the API using
+      <code>http_proxy=localhost:8041 curl api.datadoghq.com/api/v1/user</code>
+    </li>
+  </ol>
+</details>
+
+___
+
 ### Docker Registry API
 
-This example can be used to interact with [Docker's V2 Registry API](https://docs.docker.com/registry/spec/api/#overview).
+This example can be used to interact with
+[Docker's V2 Registry API](https://docs.docker.com/registry/spec/api/#overview).
 
 The configuration file for the Docker Registry API can be found at
 [docker_registry_secretless.yml](./docker_registry_secretless.yml).
@@ -195,7 +243,7 @@ http_proxy=localhost:{Service IP} curl {dc}.api.mailchimp.com/3.0/{request}
   <h5>OAuth2</h5>
   <ol>
     <li>
-      Get an Access Token by following the <a href="https://mailchimp.com/developer/guides/how-to-use-oauth2/">provided workflow</a> or by making a Basic Auth API request to <a href="https://mailchimp.com/developer/reference/authorized-apps/">this</a> endpoint 
+      Get an Access Token by following the <a href="https://mailchimp.com/developer/guides/how-to-use-oauth2/">provided workflow</a> or by making a Basic Auth API request to <a href="https://mailchimp.com/developer/reference/authorized-apps/">this</a> endpoint
     </li>
     <li>
       Store the token from your request in your local credential manager so

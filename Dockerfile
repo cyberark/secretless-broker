@@ -84,7 +84,8 @@ LABEL description="Secretless Broker is a connection broker which relieves clien
 applications of the need to directly handle secrets to target services"
 
     # Add Limited user
-RUN groupadd -r secretless \
+RUN yum update dbus && \
+    groupadd -r secretless \
              -g 777 && \
     useradd -c "secretless runner account" \
             -g secretless \

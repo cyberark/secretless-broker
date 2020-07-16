@@ -9,6 +9,7 @@
   * [GitHub API](#github-api)
   * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
+  * [SendGrid Web API](#sendgrid-web-api)
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
   * [Stripe API](#stripe-api)
@@ -56,7 +57,7 @@ or/and
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>Set up a
       <a href="https://app.datadoghq.com/">Datadog account</a> and get an
@@ -100,7 +101,7 @@ The configuration file for the Docker Registry API can be found at
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>Set up a <a href="https://docs.docker.com/registry/deploying/">
     local Registry</a> or use one from <a href="https://hub.docker.com">Dockerhub</a></li>
@@ -177,7 +178,7 @@ The configuration file for the Elasticsearch API can be found at
 
 #### Example Usage
 <details>
-  <summary><b>Example setup to try this out locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>Create an account at <a href="https://cloud.elastic.co/login">
     Elasticsearch's website</a></li>
@@ -208,7 +209,7 @@ The configuration file for the GitHub API can be found at [github_secretless.yml
 
 #### Example Usage
 <details>
-  <summary><b>Example setup to try this out locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>
       Get an OAuth token from the Developer Settings page of a user's
@@ -254,7 +255,7 @@ http_proxy=localhost:{Service IP} curl {dc}.api.mailchimp.com/3.0/{request}
 
 #### Example Usage
 <details>
-  <summary><b>Example setup to try this out locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <h5>Basic Authentication</h5>
   <ol>
     <li>
@@ -318,20 +319,76 @@ The configuration file for the OAuth 2.0 API can be found at
 
 #### How to use this connector
 * Edit the supplied service configuration to get your OAuth token
-* Run secretless with the supplied configuration(s)
+* Run Secretless with the supplied configuration(s)
 * Query the API using `http_proxy=localhost:8071 curl <Your OAuth2 API Endpoint URL>/{Request}`
 
 ___
 
-### Slack Web API
-This example can be used to interact with [Slack's Web API](https://api.slack.com/apis).
+### SendGrid Web API
+This example can be used to interact with the
+[SendGrid Web API](https://sendgrid.com/docs/API_Reference/api_v3.html).
 
-The configuration file for the Slack Web API can be found at [slack_secretless.yml](./slack_secretless.yml).
+The configuration file for the SendGrid Web API can be found at
+[sendgrid_secretless.yml](./sendgrid_secretless.yml).
+
+This configuration uses
+[v3](https://sendgrid.com/docs/API_Reference/api_v3.html) of the SendGrid Web
+API.
 
 #### How to use this connector
-* Edit the supplied configuration to get your Slack [OAuth token](https://api.slack.com/legacy/oauth#flow)
-* Run secretless with the supplied configuration(s)
-* Query the Slack API using `http_proxy=localhost:9030 curl -d {data} <Slack Endpoint URL>` or `http_proxy=localhost:9040 curl -d {data} <Slack Endpoint URL>`
+* Edit the supplied configuration to get your
+[SendGrid API Key](https://app.sendgrid.com/settings/api_keys)
+* Run Secretless with the supplied configuration(s)
+* Query the API using
+`http_proxy=localhost:8071 curl api.sendgrid.com/{Request}`
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Generate a
+  [SendGrid API Key](https://sendgrid.api-docs.io/v3.0/how-to-use-the-sendgrid-v3-api/api-authentication)
+
+  1. Store the token from your request in your local credential manager so
+    that it may be retrieved in your `secretless.yml`
+
+  1. Run Secretless locally
+
+     ```
+     ./dist/darwin/amd64/secretless-broker \
+     -f examples/generic_connector_configs/sendgrid_secretless.yml
+     ```
+
+  1. On another terminal window, make a request to SendGrid using Secretless
+
+     ```
+       http_proxy=localhost:8071 curl --request POST \
+       --url api.sendgrid.com/v3/mail/send \
+       --header "Authorization: Bearer $SENDGRID_API_KEY" \
+       --header 'Content-Type: application/json' \
+       --data '{"personalizations": [{"to": [{"email": "test@example.com"}]}],
+       "from": {"email": "test@example.com"},"subject": "Sending with SendGrid
+       is Fun","content": [{"type": "text/plain", "value": "and easy to do
+       anywhere, even with cURL"}]}'
+     ```
+</details>
+
+___
+
+### Slack Web API
+This example can be used to interact with
+[Slack's Web API](https://api.slack.com/apis).
+
+The configuration file for the Slack Web API can be found at
+[slack_secretless.yml](./slack_secretless.yml).
+
+#### How to use this connector
+* Edit the supplied configuration to get your Slack
+[OAuth token](https://api.slack.com/legacy/oauth#flow)
+* Run Secretless with the supplied configuration(s)
+* Query the Slack API using
+`http_proxy=localhost:9030 curl -d {data} <Slack Endpoint URL>`
+or `http_proxy=localhost:9040 curl -d {data} <Slack Endpoint URL>`
 depending on if your endpoint requires JSON or URL encoded requests
 
 #### Example Usage
@@ -372,7 +429,7 @@ to the backend server uses SSL.
 
 #### Example Usage
 <details>
-  <summary><b>Example setup to try this out locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>Run a local instance of Splunk in a Docker container</li>
     <code>
@@ -454,7 +511,7 @@ or generate an
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>Get the Stripe test
       <a href="https://dashboard.stripe.com/apikeys">
@@ -494,12 +551,12 @@ The configuraton file for the Tableau API can be found at
 * Make a request to Tableu's API to get an
 [`X-Tableau-Auth`](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_auth.htm)
 token.
-* Run secretless with the supplied configuration(s)
+* Run Secretless with the supplied configuration(s)
 * Query the API using localhost:8071 curl {data} {Tableau Endpoint URl}
 
 #### Example Usage
 <details>
-  <summary><b>How to use this connector locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
       <li>Create an account on
         <a href="https://www.tableau.com/products/cloud-bi#form">
@@ -546,12 +603,12 @@ for adding an OAuth1 Connector for Twitter.
 #### How to use this connector
 * Edit the supplied service configuration to get your
 [OAuth token](https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens)
-* Run secretless with the supplied configuration(s)
+* Run Secretless with the supplied configuration(s)
 * Query the API using `http_proxy=localhost:8051 curl api.twitter.com/{Request}`
 
 #### Example Usage
 <details>
-  <summary><b>Example setup to try this out locally</b></summary>
+  <summary><b>Example setup to try this out locally...</b></summary>
   <ol>
     <li>
       Get your

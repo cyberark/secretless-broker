@@ -4,6 +4,7 @@
 * [Sample Configurations](#sample-configurations)
   * [Datadog API](#datadog-api)
   * [Docker Registry API](#docker-registry-api)
+  * [Dropbox API](#dropbox-api)
   * [Elasticsearch API](#elasticsearch-api)
   * [GitHub API](#github-api)
   * [Mailchimp API](#mailchimp-api)
@@ -118,6 +119,45 @@ The configuration file for the Docker Registry API can be found at
     <li>List all images from your test Registry using <code>http_proxy=localhost:8021 curl {Registry Endpoint}/v2/repositories/{USERNAME}/?page_size=10000</code></li>
     <li> If you can see the private repos in your repo, you're all set!</li>
   </ol>
+</details>
+
+___
+
+### Dropbox API
+This example can be used to interact with
+[Dropbox's API](https://www.dropbox.com/developers/documentation/http/overview).
+
+The configuration file for the Dropbox API can be found at
+[dropbox_secretless.yml](./dropbox_secretless.yml).
+
+> This configuration uses v2 of the Dropbox API.
+
+#### How to use this connector
+* Edit the supplied configuration to get your
+[Dropbox API token](https://www.dropbox.com/developers/apps) or
+[App key and App Secret](https://www.dropbox.com/developers/apps)
+* Run Secretless with the supplied configuration
+* Query the Dropbox API using
+`http_proxy=localhost:8081 curl {Dropbox Route}/{Request}`
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally</b></summary>
+
+  1. Get an OAuth token from the settings page of a
+     [Dropbox application](https://www.dropbox.com/developers/apps)
+  1. Store the token from your request in your local credential manager so
+      that it may be retrieved in your `secretless.yml`
+  1. Build and run Secretless locally
+     ```
+     ./bin/build_darwin
+     ./dist/darwin/amd64/secretless-broker \
+          -f examples/generic_connector_configs/dropbox_secretless.yml
+     ```
+  1. On another terminal window, make a request to Dropbox using Secretless
+     ```
+     http_proxy=localhost:8081 curl -X POST api.dropboxapi.com/2/team/get_info
+     ```
 </details>
 
 ___

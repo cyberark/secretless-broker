@@ -52,6 +52,10 @@ plugins:
   # Markdown
   markdownlint:
     enabled: true
+    # ... CONFIG CONTENT ...
+    checks:
+      MD034:
+        enabled: false
 
   # Go
   gofmt:

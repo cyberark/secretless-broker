@@ -19,14 +19,17 @@
 * [Contributing](#contributing)
 
 ## Introduction
-The [generic HTTP connector](../../internal/plugin/connectors/http/generic/README.md)
+The
+[generic HTTP connector](../../internal/plugin/connectors/http/generic/README.md)
 enables using Secretless with a wide array of HTTP-based services _without
 having to write new Secretless connectors_. Instead, you can modify your
 Secretless configuration to specify the header structure the HTTP service
 requires to authenticate.
 
 ## Sample Configurations
-This section contains a list of generic HTTP configurations that have been built already. Each configuration contains an example of how to run the API locally.
+This section contains a list of generic HTTP configurations that have been
+built already. Each configuration contains an example of how to run the API
+locally.
 
 If your target uses self-signed certs you will need to follow the
 [documented instructions](https://docs.secretless.io/Latest/en/Content/References/connectors/scl_handlers-https.htm#Manageservercertificates) for adding the
@@ -36,52 +39,51 @@ target’s CA to Secretless’ trusted certificate pool.
 > Replace the service prefix `service#` with an appropriate service
 > or use a different provider as needed.
 
-> **Protip:** Your target should be either `http://api-target.com` or `api-target.com`.
-A URL that starts with https will not work.
+> **Protip:** Your target should be either `http://api-target.com` or
+`api-target.com`. A URL that starts with https will not work.
 ___
 
 ### Datadog API
 This example can be used to interact with
-[Datadog API](https://docs.datadoghq.com/api/).
+[Datadog API](https://docs.datadoghq.com/api/v2/).
 
 The configuration file for the Datadog API can be found at
 [datadog_secretless.yml](./datadog_secretless.yml).
 
+This configuration uses [v2](https://docs.datadoghq.com/api/v2/)
+of the DataDog API.
+
 #### How to use this connector
+
 * Edit the supplied configuration to get your Datadog
 [API Key](https://docs.datadoghq.com/account_management/api-app-keys/)
 or/and
 [Application Key](https://docs.datadoghq.com/account_management/api-app-keys/)
 * Run Secretless with the supplied configuration(s)
 * Query the Datadog API using
-`http_proxy=localhost:8041 curl api.datadoghq.com/{request}`
+
+  ```
+  http_proxy=localhost:8041 curl api.datadoghq.com/{request}
+  ```
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>Set up a
-      <a href="https://app.datadoghq.com/">Datadog account</a> and get an
-      <a href="https://docs.datadoghq.com/account_management/api-app-keys/">API key</a>
-    </li>
-    <li>
-      Get a Datadog <a href="https://docs.datadoghq.com/account_management/api-app-keys/">Application key</a>
-    </li>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>secretless.yml</code>
-    </li>
-    <li>Run Secretless locally</li>
-    <code>
-      ./dist/darwin/amd64/secretless-broker \
-      <br />
-      -f examples/generic_connector_configs/datadog_secretless.yml
-    </code>
-    <li>
-      Query the API using
-      <code>http_proxy=localhost:8041 curl api.datadoghq.com/api/v1/user</code>
-    </li>
-  </ol>
+
+  1. Set up a [Datadog Account](https://app.datadoghq.com/) and get an
+     [API Key](https://docs.datadoghq.com/account_management/api-app-keys/)
+  1. Get a DataDog
+     [Application key](https://docs.datadoghq.com/account_management/api-app-keys/)
+  1. Store the token from your request in your local credential manager so
+  that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+     ./dist/darwin/amd64/secretless-broker \
+     -f examples/generic_connector_configs/datadog_secretless.yml
+     ```
+  1. Query the API using
+  `http_proxy=localhost:8041 curl api.datadoghq.com/api/v1/user`
+
 </details>
 
 ___
@@ -94,33 +96,38 @@ This example can be used to interact with
 The configuration file for the Docker Registry API can be found at
 [docker_registry_secretless.yml](./docker_registry_secretless.yml).
 
+> This configuration uses v2 of the Docker Registry API.
+
 #### How to use this connector
+
 * Edit the supplied configuration to get your Docker Registry
 [Token](https://docs.docker.com/registry/spec/auth/jwt/)
 * Run Secretless with the supplied configuration(s)
-* Query the Docker Registry API using `http_proxy=localhost:8021 curl <Registry Endpoint URL>/{Request}`
+* Query the Docker Registry API using
+
+  ```
+  http_proxy=localhost:8021 curl <Registry Endpoint URL>/{Request}
+  ```
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>Set up a <a href="https://docs.docker.com/registry/deploying/">
-    local Registry</a> or use one from <a href="https://hub.docker.com">Dockerhub</a></li>
-    <li>Make a request to the Registry API to get the <a href="https://docs.docker.com/registry/spec/auth/oauth/">
-    OAuth2 Token</a>.</li>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>secretless.yml</code>
-    </li>
-    <li>Run Secretless locally</li>
-    <code>
-      ./dist/darwin/amd64/secretless-broker \
-      <br />
-      -f examples/generic_connector_configs/docker_registry_secretless.yml
-    </code>
-    <li>List all images from your test Registry using <code>http_proxy=localhost:8021 curl {Registry Endpoint}/v2/repositories/{USERNAME}/?page_size=10000</code></li>
-    <li> If you can see the private repos in your repo, you're all set!</li>
-  </ol>
+
+  1. Set up a [local Registry](https://docs.docker.com/registry/deploying/)
+  or use one from [Dockerhub](https://hub.docker.com)
+  1. Make a request to the Registry API to get the
+  [OAuth2 Token](https://docs.docker.com/registry/spec/auth/oauth/).
+  1. Store the token from your request in your local credential manager so
+  that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+     ./dist/darwin/amd64/secretless-broker \
+     -f examples/generic_connector_configs/docker_registry_secretless.yml
+     ```
+  1. List all images from your test Registry using
+  `http_proxy=localhost:8021 curl {Registry Endpoint}/v2/repositories/{USERNAME}/?page_size=10000`
+  1. If you can see the private repos in your repo, you're all set!
+
 </details>
 
 ___
@@ -135,6 +142,7 @@ The configuration file for the Dropbox API can be found at
 > This configuration uses v2 of the Dropbox API.
 
 #### How to use this connector
+
 * Edit the supplied configuration to get your
 [Dropbox API token](https://www.dropbox.com/developers/apps) or
 [App key and App Secret](https://www.dropbox.com/developers/apps)
@@ -165,35 +173,48 @@ The configuration file for the Dropbox API can be found at
 ___
 
 ### Elasticsearch API
-This example can be used to interact with [Elasticsearch's API](https://www.elastic.co/guide/en/elasticsearch/reference/current).
+This example can be used to interact with
+[Elasticsearch's API](https://www.elastic.co/guide/en/elasticsearch/reference/current).
 
 The configuration file for the Elasticsearch API can be found at
 [elasticsearch_secretless.yml](./elasticsearch_secretless.yml).
 
+> This configuration uses v7.8 of the Elasticsearch API.
+
 #### How to use this connector
+
 * Edit the supplied configuration to get your Elasticsearch
-[API Key](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html) or
+[API Key](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html)
+or
 [OAuth token](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-token.html)
 * Run Secretless with the supplied configuration(s)
-* Query the Elasticsearch API using `http_proxy=localhost:9020 curl <Elasticsearch Endpoint URL>/{Request}`
+* Query the Elasticsearch API using
+
+  ```
+  http_proxy=localhost:9020 curl {Elasticsearch Endpoint URL}/{Request}
+  ```
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>Create an account at <a href="https://cloud.elastic.co/login">
-    Elasticsearch's website</a></li>
-    <li>Create a <a href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-restful-api-examples-create-deployment.html">deployment</a></li>
-    <li>Make a request to Elasticsearch's API to get the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-get-token.html">
-    OAuth2 Token</a>. The request should be made to your deployment Elasticsearch endpoint.</li>
-    <li>Run Secretless locally</li>
-    <code>
-      ./dist/darwin/amd64/secretless-broker \
-      <br />
-      -f examples/generic_connector_configs/elasticsearch.yml
-    </code>
-    <li>Query the Elasticsearch API using <code>http_proxy=localhost:9020 curl <Elasticsearch Endpoint URL>/{Request}</code></li>
-  </ol>
+
+  1. Create an account at
+  [Elasticsearch's website](https://cloud.elastic.co/login)
+  1. Create a
+  [deployment](https://www.elastic.co/guide/en/cloud-enterprise/current/ece-restful-api-examples-create-deployment.html)
+  1. Make a request to Elasticsearch's API to get the
+  [OAuth2 Token](https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-get-token.html).
+  The request should be made to your deployment Elasticsearch endpoint.
+  1. Run Secretless locally
+     ```
+     ./dist/darwin/amd64/secretless-broker \
+     -f examples/generic_connector_configs/elasticsearch.yml
+     ```
+  1. Query the Elasticsearch API using
+     ```
+     http_proxy=localhost:9020 curl {Elasticsearch Endpoint URL}/{Request}
+     ```
+
 </details>
 
 ___
@@ -201,16 +222,16 @@ ___
 ### Facebook API
 
 This example focuses on [Instagram](https://developers.facebook.com/docs/instagram),
- but can be
- used to interact with [Facebook's many API's](https://developers.facebook.com/docs).
+but can be used to interact with
+[Facebook's many API's](https://developers.facebook.com/docs).
 
-The configuration file for the Instagram API
- can be found at [instagram_secretless.yml](./instagram_secretless.yml).
+The configuration file for the Instagram API can be found at
+[instagram_secretless.yml](./instagram_secretless.yml).
 
 #### How to use this connector
 
 * Edit the supplied configuration to get your
- [OAuth token](https://developers.facebook.com/docs/pages/access-tokens)
+  [OAuth token](https://developers.facebook.com/docs/pages/access-tokens)
   from the correct provider/path.
 * Run Secretless with the supplied configuration
 * Query the GitHub API using `http_proxy=localhost:8023 curl {host}/{request}`
@@ -219,147 +240,140 @@ The configuration file for the Instagram API
 
 <details>
   <summary><b>Example setup to try this out locally</b></summary>
-  This example focuses on Instagram, but using Secretless with the
-   rest of the Facebook API's is the same from Step 2 on.
+  This example focuses on Instagram, but using Secretless with the rest of the
+  Facebook API's is the same from Step 2 on.
 
   1. Follow this guide to set up an
    [example Instagram app](https://developers.facebook.com/docs/instagram-basic-display-api/getting-started)
    and acquire an access token
-
-  2. Store the token in your local credential manager so
+  1. Store the token in your local credential manager so
    that it may be retrieved in your `secretless.yml`
-
-  3. Build and run Secretless locally
-
-  ```
-  ./bin/build_darwin
-  ./dist/darwin/amd64/secretless-broker \
-  -f examples/generic_connector_configs/instagram_secretless.yml
-  ```
-
-  4. In another terminal window, make a request to Instagram using Secretless
-
-  ```
-      http_proxy=localhost:8023 curl -X GET --url 'graph.instagram.com/me?fields=id,username'
-  ```
+  1. Build and run Secretless locally
+     ```
+       ./bin/build_darwin
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/instagram_secretless.yml
+     ```
+  1. In another terminal window, make a request to Instagram using Secretless
+     ```
+        http_proxy=localhost:8023 curl -X GET --url 'graph.instagram.com/me?fields=id,username'
+     ```
 </details>
 
 ___
 
 ### GitHub API
-This example can be used to interact with [GitHub's API](https://developer.github.com/v3/).
 
-The configuration file for the GitHub API can be found at [github_secretless.yml](./github_secretless.yml).
+This example can be used to interact with
+[GitHub's API](https://developer.github.com/).
+
+The configuration file for the GitHub API can be found at
+[github_secretless.yml](./github_secretless.yml).
+
+> This configuration uses v3 of the Github API.
 
 #### How to use this connector
-* Edit the supplied configuration to get your [GitHub OAuth token](https://developer.github.com/v3/#oauth2-token-sent-in-a-header) from the correct provider/path.
+* Edit the supplied configuration to get your
+[GitHub OAuth token](https://developer.github.com/v3/#oauth2-token-sent-in-a-header)
+from the correct provider/path.
 * Run Secretless with the supplied configuration
-* Query the GitHub API using `http_proxy=localhost:8081 curl api.github.com/{request}`
+* Query the GitHub API using
+
+  ```
+  http_proxy=localhost:8081 curl api.github.com/{request}
+  ```
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>
-      Get an OAuth token from the Developer Settings page of a user's
-      GitHub account
-    </li>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>secretless.yml</code>
-    </li>
-    <li>Build and run Secretless locally</li>
-    <code>
-      ./bin/build_darwin
-    </code>
-    <br />
-    <code>
-    ./dist/darwin/amd64/secretless-broker \
-    -f examples/generic_connector_configs/github_secretless.yml
-    </code>
-    <li>
-      On another terminal window, make a request to GitHub using Secretless
-    </li>
-    <code>
-      http_proxy=localhost:8081 curl -X GET api.github.com/users/username
-    </code>
-  </ol>
+
+  1. Get an OAuth token from the Developer Settings page of a user's
+  GitHub account
+  1. Store the token from your request in your local credential manager so
+  that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+        ./dist/darwin/amd64/secretless-broker \
+        -f examples/generic_connector_configs/github_secretless.yml
+     ```
+  1. On another terminal window, make a request to GitHub using Secretless
+     ```
+        http_proxy=localhost:8081 curl -X GET api.github.com/users/username
+     ```
+
 </details>
 
 ___
 
 ### Mailchimp API
-This example can be used to interact with [Mailchimp's API](https://mailchimp.com/developer/guides/get-started-with-mailchimp-api-3/).
 
-The configuration file for the Mailchimp API can be found at [mailchimp_secretless.yml](./mailchimp_secretless.yml).
+This example can be used to interact with
+[Mailchimp's API](https://mailchimp.com/developer/guides/get-started-with-mailchimp-api-3/).
+
+The configuration file for the Mailchimp API can be found at
+[mailchimp_secretless.yml](./mailchimp_secretless.yml).
+
+> This configuration uses v3 of the Mailchimp API.
 
 #### How to use this connector
-* Edit the supplied configuration to get your Mailchimp OAuth [Access Token](https://mailchimp.com/developer/guides/how-to-use-oauth2/)(OAuth2) or Mailchimp [API Token/Username](https://mailchimp.com/help/about-api-keys/)(Basic Authentication) from the correct provider/path.
+
+* Edit the supplied configuration to get your Mailchimp OAuth
+  [Access Token](https://mailchimp.com/developer/guides/how-to-use-oauth2/)
+  OAuth2 or Mailchimp
+  [API Token/Username](https://mailchimp.com/help/about-api-keys/)
+  Basic Authentication from the correct provider/path.
 * Run Secretless with the supplied configuration
 * Query the Mailchimp API using:
 
-```
-http_proxy=localhost:{Service IP} curl {dc}.api.mailchimp.com/3.0/{request}
-```
+  ```
+  http_proxy=localhost:{Service IP} curl {dc}.api.mailchimp.com/3.0/{request}
+  ```
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <h5>Basic Authentication</h5>
-  <ol>
-    <li>
-      Get an API token from Profile > Extras > API Keys > "Create A Key"
-    </li>
-    <li>
-      Store your username and the token from your request in your local credential manager so
-      that it may be retrieved in your <code>mailchimp_secretless.yml</code>
-    </li>
-    <li>Build and run Secretless locally</li>
-    <code>
-      ./bin/build_darwin
-    </code>
-    <br />
-    <code>
-    ./dist/darwin/amd64/secretless-broker \
-    -f examples/generic_connector_configs/github_secretless.yml
-    </code>
-    <li>
-      On another terminal window, make a request to Mailchimp using Secretless
-    </li>
-    <code>
-      http_proxy=localhost:8010 curl -X GET {dc}.api.mailchimp.com/3.0/
-    </code>
-  </ol>
-  <h5>OAuth2</h5>
-  <ol>
-    <li>
-      Get an Access Token by following the <a href="https://mailchimp.com/developer/guides/how-to-use-oauth2/">provided workflow</a> or by making a Basic Auth API request to <a href="https://mailchimp.com/developer/reference/authorized-apps/">this</a> endpoint
-    </li>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>mailchimp_secretless.yml</code>
-    </li>
-    <li>Build and run Secretless locally</li>
-    <code>
-      ./bin/build_darwin
-    </code>
-    <br />
-    <code>
-    ./dist/darwin/amd64/secretless-broker \
-    -f examples/generic_connector_configs/mailchimp_secretless.yml
-    </code>
-    <li>
-        On another terminal window, make a request to Mailchimp using Secretless
-    </li>
-    <code>
+
+  **Basic Authentication**
+
+  1. Get an API token from Profile > Extras > API Keys > "Create A Key"
+  1. Store your username and the token from your request in your local
+     credential manager so that it may be retrieved in your
+     `mailchimp_secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/mailchimp_secretless.yml
+     ```
+  1. On another terminal window, make a request to Mailchimp using Secretless
+     ```
+       http_proxy=localhost:8010 curl -X GET {dc}.api.mailchimp.com/3.0/
+     ```
+
+  **OAuth2**
+
+  1. Get an Access Token by following the
+  [provided workflow](https://mailchimp.com/developer/guides/how-to-use-oauth2/)
+  or by making a Basic Auth API request to
+  [this](https://mailchimp.com/developer/reference/authorized-apps/) endpoint
+  1. Store your username and the token from your request in your local
+  credential manager so that it may be retrieved in your
+  `mailchimp_secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/mailchimp_secretless.yml
+     ```
+  1. On another terminal window, make a request to Mailchimp using Secretless
+    ```
       http_proxy=localhost:8011 curl -X GET {dc}.api.mailchimp.com/3.0/
-    </code>
-  </ol>
+    ```
+
 </details>
 
 ___
 
 ### OAuth 2.0 API
+
 This generic OAuth HTTP connector can be used for any service that accepts a
 Bearer token as an authorization header.
 
@@ -368,48 +382,53 @@ The configuration file for the OAuth 2.0 API can be found at
 
 #### How to use this connector
 * Edit the supplied service configuration to get your OAuth token
+
 * Run Secretless with the supplied configuration(s)
-* Query the API using `http_proxy=localhost:8071 curl <Your OAuth2 API Endpoint URL>/{Request}`
+
+* Query the API using
+  ```
+  http_proxy=localhost:8071 curl {Your OAuth2 API Endpoint URL}/{Request}
+  ```
 
 ___
 
 ### SendGrid Web API
+
 This example can be used to interact with the
 [SendGrid Web API](https://sendgrid.com/docs/API_Reference/api_v3.html).
 
 The configuration file for the SendGrid Web API can be found at
 [sendgrid_secretless.yml](./sendgrid_secretless.yml).
 
-This configuration uses
-[v3](https://sendgrid.com/docs/API_Reference/api_v3.html) of the SendGrid Web
-API.
+> This configuration uses [v3](https://sendgrid.com/docs/API_Reference/api_v3.html)
+> of the SendGrid WebAPI.
 
 #### How to use this connector
+
 * Edit the supplied configuration to get your
 [SendGrid API Key](https://app.sendgrid.com/settings/api_keys)
+
 * Run Secretless with the supplied configuration(s)
+
 * Query the API using
-`http_proxy=localhost:8071 curl api.sendgrid.com/{Request}`
+  ```
+  http_proxy=localhost:8071 curl api.sendgrid.com/{Request}
+  ```
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
 
   1. Generate a
-  [SendGrid API Key](https://sendgrid.api-docs.io/v3.0/how-to-use-the-sendgrid-v3-api/api-authentication)
-
+     [SendGrid API Key](https://sendgrid.api-docs.io/v3.0/how-to-use-the-sendgrid-v3-api/api-authentication)
   1. Store the token from your request in your local credential manager so
     that it may be retrieved in your `secretless.yml`
-
   1. Run Secretless locally
-
      ```
      ./dist/darwin/amd64/secretless-broker \
      -f examples/generic_connector_configs/sendgrid_secretless.yml
      ```
-
   1. On another terminal window, make a request to SendGrid using Secretless
-
      ```
        http_proxy=localhost:8071 curl --request POST \
        --url api.sendgrid.com/v3/mail/send \
@@ -420,125 +439,139 @@ API.
        is Fun","content": [{"type": "text/plain", "value": "and easy to do
        anywhere, even with cURL"}]}'
      ```
+
 </details>
 
 ___
 
 ### Slack Web API
+
 This example can be used to interact with
 [Slack's Web API](https://api.slack.com/apis).
 
 The configuration file for the Slack Web API can be found at
 [slack_secretless.yml](./slack_secretless.yml).
 
+> This configuration was created on June 22, 2020. You can read about
+what changes have been made in the
+[Slack changelog](https://api.slack.com/changelog)
+
 #### How to use this connector
+
 * Edit the supplied configuration to get your Slack
-[OAuth token](https://api.slack.com/legacy/oauth#flow)
+  [OAuth token](https://api.slack.com/legacy/oauth#flow)
+
 * Run Secretless with the supplied configuration(s)
-* Query the Slack API using
-`http_proxy=localhost:9030 curl -d {data} <Slack Endpoint URL>`
-or `http_proxy=localhost:9040 curl -d {data} <Slack Endpoint URL>`
-depending on if your endpoint requires JSON or URL encoded requests
+
+* Query the Slack API
+  ```
+  http_proxy=localhost:9030 curl -d {data} {Slack Endpoint URL}
+  ```
+  ```
+  http_proxy=localhost:9040 curl -d {data} {Slack Endpoint URL}
+  ```
+  Your query depends on if your endpoint requires JSON or URL encoded requests.
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>Get the Slack <a href="https://slack.com/help/articles/215770388-Create-and-regenerate-API-tokens">application's tokens</a></li>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>secretless.yml</code>
-    </li>
-    <li>Run Secretless locally</li>
-    <code>
-      ./dist/darwin/amd64/secretless-broker \
-      <br />
-      -f examples/generic_connector_configs/slack_secretless.yml
-    </code>
-    <li>On another terminal window, make a request to Slack using Secretless</li>
-    <code>http_proxy=localhost:9030 curl -X POST --data '{"channel":"C061EG9SL","text":"I hope the tour went well"}' slack.com/api/chat.postMessage</code>
-  </ol>
+
+  1. Get the Slack
+  [application's tokens](https://slack.com/help/articles/215770388-Create-and-regenerate-API-tokens)
+  1. Store the token from your request in your local credential manager so that
+  it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/slack_secretless.yml
+     ```
+  1. On another terminal window, make a request to Slack using Secretless
+     ```
+       http_proxy=localhost:9030 curl -X POST --data '{"channel":"C061EG9SL",
+       "text":"I hope the tour went well"}' slack.com/api/chat.postMessage
+     ```
+
 </details>
 
 ___
 
 ### Splunk API
-This example can be used to interact with [Splunk's API](https://api.slack.com/apis).
 
-The configuration file for the Splunk Web API can be found at [splunk_secretless.yml](./splunk_secretless.yml).
+This example can be used to interact with
+[Splunk's API](https://docs.splunk.com/Documentation/Splunk/8.0.5/RESTREF/RESTprolog).
+
+The configuration file for the Splunk Web API can be found at
+[splunk_secretless.yml](./splunk_secretless.yml).
+
+> This configuration uses v8.0.5 of the SendGrid Web API.
 
 #### How to use this connector
-* Edit the supplied configuration to get your [Splunk authentication token](https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/EnableTokenAuth)
-from the correct provider/path
-* Create a Splunk [certficate](https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/Howtoself-signcertificates) and add the certificate to [Secretless's trusted certificate pool](https://docs.secretless.io/Latest/en/Content/References/connectors/scl_handlers-https.htm#Manageservercertificates)
+
+* Edit the supplied configuration to get your
+  [Splunk authentication token](https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/EnableTokenAuth)
+  from the correct provider/path
+* Create a Splunk
+  [certficate](https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/Howtoself-signcertificates)
+  and add the certificate to
+  [Secretless's trusted certificate pool](https://docs.secretless.io/Latest/en/Content/References/connectors/scl_handlers-https.htm#Manageservercertificates)
 * Run Secretless with the supplied configuration
-* Query the Splunk API using `http_proxy=localhost:8081 curl {instance host name or IP address}:{management port}/{route}` - note that you do not preface your
-instance host name with `https://`; Secretless will ensure the final connection
-to the backend server uses SSL.
+* Query the Splunk API using
+
+  ```
+  http_proxy=localhost:8081 curl {instance host name or IP address}:{management port}/{route}
+  ```
+> Note: You do not preface your instance host name with `https://`.
+Secretless will ensure the final connection to the backend server uses SSL.
 
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>Run a local instance of Splunk in a Docker container</li>
-    <code>
-    docker run \
-      <br />
-        -d \
-      <br />
-        -p 8000:8000 \
-      <br />
-        -p 8089:8089 \
-      <br />
-        -e "SPLUNK_START_ARGS=--accept-license" \
-      <br />
-        -e "SPLUNK_PASSWORD=specialpass" \
-      <br />
-        --name splunk \
-      <br />
-        splunk/splunk:latest
-    </code>
-    <li>
-      Follow the instructions
-      <a href="https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/EnableTokenAuth">here</a>
-      to create a local Splunk token using Splunk Web
-    </li>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>secretless.yml</code>
-    </li>
-    <li>
-      Add 'SplunkServerDefaultCert' at IP 127.0.0.1 to etc/hosts on the machine.
-      This was so the host name of the HTTP Request would match the name on the
-      certificate that is provided on our Splunk container
-    </li>
-    <li>
-      Use the provided cacert.pem file on the Splunk docker container
-      for my certificate, and write it to the local machine
-    </li>
-    <code>docker exec -it splunk sudo cat /opt/splunk/etc/auth/cacert.pem > myLocalSplunkCertificate.pem</code>
-    <li>
-      Set a variable in the terminal named
-      <code>
-        <a href="https://docs.conjur.org/latest/en/Content/References/connectors/scl_handlers-https.htm?TocPath=Fundamentals%7CSecretless%20Pattern%7CService%20Connectors%7CHTTP%7C_____0">SECRETLESS_HTTP_CA_BUNDLE</a>
-      </code>
-      and set it to the path where myLocalSpunkCertificate.pem was
-      on the local machine.
-    </li>
-    <li>Run Secretless</li>
-    <code>
+
+  1. Run a local instance of Splunk in a Docker container
+     ```
+     docker run \
+         -d \
+         -p 8000:8000 \
+         -p 8089:8089 \
+         -e "SPLUNK_START_ARGS=--accept-license" \
+         -e "SPLUNK_PASSWORD=specialpass" \
+         --name splunk \
+         splunk/splunk:latest
+     ```
+  1. Follow the instructions
+  [here](https://docs.splunk.com/Documentation/Splunk/8.0.2/Security/EnableTokenAuth)
+  to create a local Splunk token using Splunk Web
+  1. Store the token from your request in your local credential manager so that
+  it may be retrieved in your `secretless.yml`</code>`
+  1. Add 'SplunkServerDefaultCert' at IP 127.0.0.1 to etc/hosts on the machine.
+  This was so the host name of the HTTP Request would match the name on the
+  certificate that is provided on our Splunk container.
+  1. Use the provided `cacert.pem` file on the Splunk docker container for
+  the certificate, and write it to the local machine
+     ```
+      docker exec -it splunk sudo cat /opt/splunk/etc/auth/cacert.pem > myLocalSplunkCertificate.pem
+     ```
+  1. Set a variable in the local environment named
+  [SECRETLESS_HTTP_CA_BUNDLE](https://docs.conjur.org/latest/en/Content/References/connectors/scl_handlers-https.htm?TocPath=Fundamentals%7CSecretless%20Pattern%7CService%20Connectors%7CHTTP%7C_____0)
+  and set it to the path where `myLocalSpunkCertificate.pem` was on the local
+  machine.
+  1. Run Secretless
+     ```
       ./dist/darwin/amd64/secretless-broker \
-      <br />
       -f examples/generic_connector_configs/splunk_secretless.yml
-    </code>
-    <li>On another terminal window, make a request to Splunk using Secretless</li>
-    <code>http_proxy=localhost:8081 curl -k -X GET SplunkServerDefaultCert:8089/services/apps/local</code>
-  </ol>
+     ```
+  1. On another terminal window, make a request to Splunk using Secretless
+     ```
+      http_proxy=localhost:8081 curl -k -X GET \
+      SplunkServerDefaultCert:8089/services/apps/local
+     ```
+
 </details>
 
 ___
 
 ### Stripe API
+
 This example can be used to interact with
 [Stripe's API](https://stripe.com/docs/api).
 
@@ -549,7 +582,12 @@ This example supports several header configurations, so it is recommended to
 look at [stripe_secretless.yml](./stripe_secretless.yml) to figure out which
 one should be used.
 
+> This configuration uses v2020-03-02. of the Stripe API. A
+[`Stripe-Version` header](https://stripe.com/docs/api/versioning)
+can be added to use this version.
+
 #### How to use this connector
+
 * Get the [Stripe API Key](https://dashboard.stripe.com/apikeys),
 which can be used as a Bearer token
 * Get a [connected account](https://stripe.com/docs/connect/authentication)
@@ -561,39 +599,33 @@ or generate an
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>Get the Stripe test
-      <a href="https://dashboard.stripe.com/apikeys">
-        API Key
-      </a>
-    </li>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>secretless.yml</code>
-    </li>
-    <li>Run Secretless locally</li>
-    <code>
-    ./dist/darwin/amd64/secretless-broker \
-    <br />
-    -f examples/generic_connector_configs/stripe_secretless.yml
-    </code>
-    <li>
-      On another terminal window, make a request to Stripe using Secretless
-    </li>
-    <code>
+
+  1. Get the Stripe test [API Key](https://dashboard.stripe.com/apikeys)
+  1. Store the token from your request in your local credential manager so that
+  it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/stripe_secretless.yml
+     ```
+  1. On another terminal window, make a request to Stripe using Secretless
+     ```
       http_proxy=localhost:{secretless-server} curl api.stripe.com/v1/charges
-    </code>
-  </ol>
+     ```
+
 </details>
 
 ___
 
 ### Tableau API
+
 This example can be used to interact with
 [Tableau's API](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api.htm).
 
 The configuraton file for the Tableau API can be found at
 [tableau_secretless.yml](./tableau_secretless.yml).
+
+> This configuration uses v3.6 of the Tableau API.
 
 #### How to use this connector
 * Create an account for Tableau Online
@@ -606,38 +638,25 @@ token.
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-      <li>Create an account on
-        <a href="https://www.tableau.com/products/cloud-bi#form">
-          Tableau Online
-        </a>
-      </li>
-      <li>
-        <a href="https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_get_started_tutorial_part_1.htm#step-1-sign-in-to-your-server-with-rest">
-          Make a POST request
-        </a>
-        to Tableau Online's API using the provided credentials to secure a
-        <code>
-          X-Tableau-Auth
-        </code>
-        token
-      </li>
-      <li>
-        Store the token from your request in your local credential manager so
-        that it may be retrieved in your <code>secretless.yml</code>
-      </li>
-      <li>On another terminal window, make a request to Tableau using Secretless
-        <br />
-        <code>
-          http_proxy=localhost:8071 curl -d {data} {Tableau Endpoint URL}
-        </code>
-      </li>
-    </ol>
+
+  1. Create an account on
+  [Tableau Online](https://www.tableau.com/products/cloud-bi#form)
+  1. [Make a Post Request](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_get_started_tutorial_part_1.htm#step-1-sign-in-to-your-server-with-rest)
+  to Tableau Online's API using the provided credentials to secure a
+  `X-Tableau-Auth`
+  1. Store the token from your request in your local credential manager so that
+  it may be retrieved in your `secretless.yml`
+  1. On another terminal window, make a request to Tableau using Secretless
+     ```
+      http_proxy=localhost:8071 curl -d {data} {Tableau Endpoint URL}
+     ```
+
 </details>
 
 ___
 
 ### Twitter API
+
 This example can be used to interact with
 [Twitter's API](https://developer.twitter.com/en/docs).
 
@@ -649,7 +668,11 @@ Twitter API via OAuth2. An issue can be found
 [here](https://github.com/cyberark/secretless-broker/issues/1297)
 for adding an OAuth1 Connector for Twitter.
 
+> This configuration uses [v7](https://developer.twitter.com/en/docs/ads/general/overview/versions)
+> of the Twitter API.
+
 #### How to use this connector
+
 * Edit the supplied service configuration to get your
 [OAuth token](https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens)
 * Run Secretless with the supplied configuration(s)
@@ -658,44 +681,30 @@ for adding an OAuth1 Connector for Twitter.
 #### Example Usage
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
-  <ol>
-    <li>
-      Get your
-      <a href="https://developer.twitter.com/en/apps">
-        Twitter API key and Secret Key
-      </a>
-    </li>
-    <li>
-      Get an
-      <a href="https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens">
-        OAuth token
-      </a>
-      from Twitter through CURL
-    </li>
-    <code>
+
+  1. Get your
+  [Twitter API key and Secret Key](https://developer.twitter.com/en/apps)
+  1. Get an
+  [OAuth token](https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens)
+  from Twitter through cURL
+     ```
       curl -u 'API key:API secret key' \
-      <br />
       --data 'grant_type=client_credentials' \
-      <br />
       'https://api.twitter.com/oauth2/token'
-    </code>
-    <li>
-      Store the token from your request in your local credential manager so
-      that it may be retrieved in your <code>secretless.yml</code>
-    </li>
-    <li>Run Secretless locally</li>
-    <code>
+     ```
+  1. Store the token from your request in your local credential manager so that
+  it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
       ./dist/darwin/amd64/secretless-broker \
-      <br />
       -f examples/generic_connector_configs/twitter_secretless.yml
-    </code>
-    <li>
-      On another terminal window, make a request to Twitter using Secretless
-    </li>
-    <code>
-      http_proxy=localhost:8051 curl "api.twitter.com/1.1/followers/ids.json?screen_name=twitterdev"
-    </code>
-  </ol>
+     ```
+  1. On another terminal window, make a request to Twitter using Secretless
+     ```
+      http_proxy=localhost:8051 \
+      curl "api.twitter.com/1.1/followers/ids.json?screen_name=twitterdev"
+     ```
+
 </details>
 
 ## Contributing

@@ -6,6 +6,7 @@
   * [Docker Registry API](#docker-registry-api)
   * [Dropbox API](#dropbox-api)
   * [Elasticsearch API](#elasticsearch-api)
+  * [Facebook API](#facebook-api)
   * [GitHub API](#github-api)
   * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
@@ -193,6 +194,54 @@ The configuration file for the Elasticsearch API can be found at
     </code>
     <li>Query the Elasticsearch API using <code>http_proxy=localhost:9020 curl <Elasticsearch Endpoint URL>/{Request}</code></li>
   </ol>
+</details>
+
+___
+
+### Facebook API
+
+This example focuses on [Instagram](https://developers.facebook.com/docs/instagram),
+ but can be
+ used to interact with [Facebook's many API's](https://developers.facebook.com/docs).
+
+The configuration file for the Instagram API
+ can be found at [instagram_secretless.yml](./instagram_secretless.yml).
+
+#### How to use this connector
+
+* Edit the supplied configuration to get your
+ [OAuth token](https://developers.facebook.com/docs/pages/access-tokens)
+  from the correct provider/path.
+* Run Secretless with the supplied configuration
+* Query the GitHub API using `http_proxy=localhost:8023 curl {host}/{request}`
+
+#### Example Usage
+
+<details>
+  <summary><b>Example setup to try this out locally</b></summary>
+  This example focuses on Instagram, but using Secretless with the
+   rest of the Facebook API's is the same from Step 2 on.
+
+  1. Follow this guide to set up an
+   [example Instagram app](https://developers.facebook.com/docs/instagram-basic-display-api/getting-started)
+   and acquire an access token
+
+  2. Store the token in your local credential manager so
+   that it may be retrieved in your `secretless.yml`
+
+  3. Build and run Secretless locally
+
+  ```
+  ./bin/build_darwin
+  ./dist/darwin/amd64/secretless-broker \
+  -f examples/generic_connector_configs/instagram_secretless.yml
+  ```
+
+  4. In another terminal window, make a request to Instagram using Secretless
+
+  ```
+      http_proxy=localhost:8023 curl -X GET --url 'graph.instagram.com/me?fields=id,username'
+  ```
 </details>
 
 ___

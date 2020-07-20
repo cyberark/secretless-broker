@@ -15,6 +15,7 @@
   * [Splunk API](#splunk-api)
   * [Stripe API](#stripe-api)
   * [Tableau API](#tableau-api)
+  * [Twilio API](#twilio-api)
   * [Twitter API](#twitter-api)
 * [Contributing](#contributing)
 
@@ -628,6 +629,7 @@ The configuraton file for the Tableau API can be found at
 > This configuration uses v3.6 of the Tableau API.
 
 #### How to use this connector
+
 * Create an account for Tableau Online
 * Make a request to Tableu's API to get an
 [`X-Tableau-Auth`](https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_auth.htm)
@@ -646,9 +648,60 @@ token.
   `X-Tableau-Auth`
   1. Store the token from your request in your local credential manager so that
   it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/tableau_secretless.yml
+     ```
   1. On another terminal window, make a request to Tableau using Secretless
      ```
       http_proxy=localhost:8071 curl -d {data} {Tableau Endpoint URL}
+     ```
+
+</details>
+
+___
+
+### Twilio API
+
+This example can be used to interact with
+[Twilio's Rest API](https://www.twilio.com/docs/usage/api).
+
+The configuraton file for the Tableau API can be found at
+[twilio_secretless.yml](./twilio_secretless.yml).
+
+> This configuration uses version 2010-04-01 of the Twilio API.
+
+#### How to use this connector
+
+* [Create an account](https://www.twilio.com/try-twilio) for Twilio
+* Edit the supplied configuration to get your
+  [Account SID and Auth Token](https://support.twilio.com/hc/en-us/articles/223136027-Auth-Tokens-and-How-to-Change-Them)
+  from the correct provider/path.
+* Run Secretless with the supplied configuration(s)
+* Query the API using localhost:9030 curl {data} {Twilio Endpoint URL}
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. [Create an account](https://www.twilio.com/try-twilio) for Twilio
+  1. Get your [Account SID and Auth Token](https://www.twilio.com/console)
+     from the Twilio console
+  1. Store the Account SID and Auth Token from your request in your local
+     credential manager so that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/tableau_secretless.yml
+     ```
+  1. On another terminal window, make a request to Tableau using Secretless
+     ```
+     http_proxy=localhost:9030 \
+     curl -X POST api.twilio.com/2010-04-01/Accounts/{acc-sid}/Messages.json \
+      --data-urlencode "Body=Hello from Secretless!" \
+      --data-urlencode "From=+1{your-phone}" \
+      --data-urlencode "To=+1{to-phone}"
      ```
 
 </details>

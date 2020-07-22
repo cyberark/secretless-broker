@@ -11,6 +11,7 @@
   * [Google Maps API](#google-maps-api)
   * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
+  * [Papertrail API](#papertrail-api)
   * [SendGrid Web API](#sendgrid-web-api)
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
@@ -437,6 +438,47 @@ The configuration file for the OAuth 2.0 API can be found at
   ```
   http_proxy=localhost:8071 curl {Your OAuth2 API Endpoint URL}/{Request}
   ```
+
+___
+
+### Papertrail API
+
+This example can be used to interact with the
+[Papertrail API](https://help.papertrailapp.com/kb/how-it-works/http-api/).
+
+The configuration file for the SendGrid Web API can be found at
+[papertrail_secretless.yml](./papertrail_secretless.yml).
+
+#### How to use this connector
+
+* Edit the supplied configuration to get your
+[API Key](https://papertrailapp.com/account/profile)
+
+* Run Secretless with the supplied configuration(s)
+
+* Query the API using
+  ```
+  http_proxy=localhost:8071 curl papertrailapp.com/api/v1/{Request}
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Retrieve your API token from your Profile
+  1. Store the token from your request in your local credential manager so
+    that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+     ./dist/darwin/amd64/secretless-broker \
+     -f examples/generic_connector_configs/papertrail_secretless.yml
+     ```
+  1. In another terminal window, make a request to Papertrail using Secretless
+     ```
+      http_proxy=localhost:8043 curl papertrailapp.com/api/v1/systems.json
+     ```
+
+</details>
 
 ___
 

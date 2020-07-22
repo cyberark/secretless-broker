@@ -8,6 +8,7 @@
   * [Elasticsearch API](#elasticsearch-api)
   * [Facebook API](#facebook-api)
   * [GitHub API](#github-api)
+  * [Google Maps API](#google-maps-api)
   * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
   * [SendGrid Web API](#sendgrid-web-api)
@@ -306,6 +307,52 @@ from the correct provider/path.
 
 ___
 
+### Google Maps API
+
+This example can be used to interact with the
+[Google Maps Web Services APIs](https://developers.google.com/maps/apis-by-platform).
+
+The configuration file for the GitHub API can be found at
+[google_maps_secretless.yml](./google_maps_secretless.yml).
+
+> This configuration was created on July 21, 2020. You can read about
+what changes have been made in the
+[Google API changelog](https://cloud.google.com/maps-platform/user-guide/product-changes#maps)
+
+#### How to use this connector
+* Edit the supplied configuration to get your
+[Google API Key](https://developers.google.com/maps/documentation/javascript/get-api-key)
+from the correct provider/path.
+* Run Secretless with the supplied configuration
+* Query the Google Maps Web Services API using
+
+  ```
+  http_proxy=localhost:8081 curl {Google Maps Route}/{request}/{params}
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Get a Google API key from the
+     [Google Console](https://console.developers.google.com/apis/credentials)
+  1. Store the token from your request in your local credential manager so
+  that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+        ./dist/darwin/amd64/secretless-broker \
+        -f examples/generic_connector_configs/google_maps_secretless.yml
+     ```
+  1. On another terminal window, make a request to the Google Maps Web Service
+     API using Secretless
+     ```
+        http_proxy=localhost:8081 curl -X POST www.googleapis.com/geolocation/v1/geolocate
+     ```
+
+</details>
+
+___
+
 ### Mailchimp API
 
 This example can be used to interact with
@@ -433,7 +480,6 @@ The configuration file for the SendGrid Web API can be found at
      ```
        http_proxy=localhost:8071 curl --request POST \
        --url api.sendgrid.com/v3/mail/send \
-       --header "Authorization: Bearer $SENDGRID_API_KEY" \
        --header 'Content-Type: application/json' \
        --data '{"personalizations": [{"to": [{"email": "test@example.com"}]}],
        "from": {"email": "test@example.com"},"subject": "Sending with SendGrid

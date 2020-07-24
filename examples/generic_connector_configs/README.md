@@ -9,6 +9,7 @@
   * [Facebook API](#facebook-api)
   * [GitHub API](#github-api)
   * [Google Maps API](#google-maps-api)
+  * [JFrog Artifactory API](#jfrog-artifactory-api)
   * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
   * [Papertrail API](#papertrail-api)
@@ -53,7 +54,7 @@ This example can be used to interact with
 The configuration file for the Datadog API can be found at
 [datadog_secretless.yml](./datadog_secretless.yml).
 
-This configuration uses [v2](https://docs.datadoghq.com/api/v2/)
+> This configuration uses [v2](https://docs.datadoghq.com/api/v2/)
 of the DataDog API.
 
 #### How to use this connector
@@ -231,6 +232,10 @@ but can be used to interact with
 The configuration file for the Instagram API can be found at
 [instagram_secretless.yml](./instagram_secretless.yml).
 
+> This configuration was created using v2020-05-05. You can read about
+what changes have been made in the
+[Instagram API Changelog](https://developers.facebook.com/docs/instagram-api/changelog)
+
 #### How to use this connector
 
 * Edit the supplied configuration to get your
@@ -348,6 +353,85 @@ from the correct provider/path.
      API using Secretless
      ```
         http_proxy=localhost:8081 curl -X POST www.googleapis.com/geolocation/v1/geolocate
+     ```
+
+</details>
+
+___
+
+### JFrog Artifactory API
+
+This example can be used to interact with the
+[JFrog Artifactory API](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API).
+
+The configuration file for the GitHub API can be found at
+[jfrog_artifactory_secretless.yml](./jfrog_artifactory_secretless.yml).
+
+> This configuration uses
+[v6.x](https://www.jfrog.com/confluence/display/RTF6X/Artifactory+REST+API)
+of the JFrog Artifactory REST Api.
+
+#### How to use this connector
+* Edit the supplied configuration to get your
+[JFrog Artifactory API Key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey),
+[JFrog Artifactory Access Token](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens)
+or JFrog Artifactory Username/Password.
+* Run Secretless with the supplied configuration
+* Query the JFrog Artifactory API using:
+
+  ```
+  http_proxy=localhost:8071 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  **Basic Authentication**
+  1. Get a JFrog Artifactory Account
+  1. Store your username and the password/API key/token from your request in
+     your local credential manager so that it may be retrieved in your
+     `jfrog_artifactory_secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/jfrog_artifactory_secretless.yml
+     ```
+  1. On another terminal window, make a request to Mailchimp using Secretless
+     ```
+       http_proxy=localhost:8071 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
+     ```
+
+  **API Key Authentication**
+  1. Get a JFrog Artifactory
+     [API key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey)
+  1. Store your API key from your request in your local
+     credential manager so that it may be retrieved in your
+     `jfrog_artifactory_secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/jfrog_artifactory_secretless.yml
+     ```
+  1. On another terminal window, make a request to Mailchimp using Secretless
+     ```
+       http_proxy=localhost:8081 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
+     ```
+
+  **Auth Token Authentication**
+  1. Get a JFrog Artifactory
+     [access token](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens)
+  1. Store your username and the token from your request in your local
+     credential manager so that it may be retrieved in your
+     `jfrog_artifactory_secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/jfrog_artifactory_secretless.yml
+     ```
+  1. On another terminal window, make a request to Mailchimp using Secretless
+     ```
+       http_proxy=localhost:8091 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
      ```
 
 </details>

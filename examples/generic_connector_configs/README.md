@@ -15,6 +15,7 @@
   * [OAuth 2.0 API](#oauth-20-api)
   * [Papertrail API](#papertrail-api)
   * [SendGrid Web API](#sendgrid-web-api)
+  * [Sentry API](#sentry-api)
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
   * [Stripe API](#stripe-api)
@@ -626,7 +627,7 @@ The configuration file for the SendGrid Web API can be found at
 [sendgrid_secretless.yml](./sendgrid_secretless.yml).
 
 > This configuration uses [v3](https://sendgrid.com/docs/API_Reference/api_v3.html)
-> of the SendGrid WebAPI.
+> of the SendGrid Web API.
 
 #### How to use this connector
 
@@ -662,6 +663,50 @@ The configuration file for the SendGrid Web API can be found at
        "from": {"email": "test@example.com"},"subject": "Sending with SendGrid
        is Fun","content": [{"type": "text/plain", "value": "and easy to do
        anywhere, even with cURL"}]}'
+     ```
+
+</details>
+
+___
+
+### Sentry API
+
+This example can be used to interact with
+the [Sentry API](https://docs.sentry.io/api/).
+
+The configuration file for the Sentry API can be found at
+[sentry_secretless.yml](./sentry_secretless.yml).
+
+> This configuration uses v0 of the Sentry API.
+
+#### How to use this connector
+
+* Edit the supplied configuration to get your Sentry
+  [token](https://sentry.io/settings/account/api/auth-tokens/)
+
+* Run Secretless with the supplied configurations
+
+* Query the Sentry API
+  ```
+  http_proxy=localhost:8071 curl sentry.io/api/0/projects/
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Get a Sentry
+  [token](https://sentry.io/settings/account/api/auth-tokens/)
+  1. Store the token from your request in your local credential manager so that
+  it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+     ./dist/darwin/amd64/secretless-broker \
+     -f examples/generic_connector_configs/sentry_secretless.yml
+     ```
+  1. On another terminal window, make a request to Sentry using Secretless
+     ```
+     http_proxy=localhost:8071 curl sentry.io/api/0/projects/
      ```
 
 </details>

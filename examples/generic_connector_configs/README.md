@@ -10,6 +10,7 @@
   * [GitHub API](#github-api)
   * [Google Maps API](#google-maps-api)
   * [JFrog Artifactory API](#jfrog-artifactory-api)
+  * [Loggly API](#loggly-api)
   * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
   * [Papertrail API](#papertrail-api)
@@ -432,6 +433,56 @@ or JFrog Artifactory Username/Password.
   1. On another terminal window, make a request to Mailchimp using Secretless
      ```
        http_proxy=localhost:8091 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
+     ```
+
+</details>
+
+___
+
+### Loggly API
+
+This example can be used to interact with the
+[Loggly API](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/api-overview.htm).
+
+The configuration file for the Loggly API can be found at
+[loggly_secretless.yml](./loggly_secretless.yml).
+
+> This configuration was created on July 27, 2020. The release notes for the
+Loggly API can be found [here](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/Release_Notes/release_notes.htm).
+
+> Note: This configuration does not support sending events to the Loggly API.
+To see how to send events to the Loggly API, view their
+[documentation](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/api-sending-data.htm).
+
+#### How to use this connector
+
+* Edit the supplied configuration to get your
+  [Loggly token](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/token-based-api-authentication.htm)
+  or your Loggly username and password
+* Run Secretless with the supplied configuration
+* Query the Loggly API using:
+  ```
+  http_proxy=localhost:8071 curl -v '{your-loggly-link}.loggly.com/apiv2/events/iterate?q=*&from=-10m&until=now&size=10'
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Get a
+     [Loggly token](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/token-based-api-authentication.htm)
+     or authenticate using basic authorization.
+  1. Store your username and the token from your request in your local
+     credential manager so that it may be retrieved in your
+     `loggly_secretless.yml`
+  1. Run Secretless locally
+     ```
+      ./dist/darwin/amd64/secretless-broker \
+      -f examples/generic_connector_configs/loggly_secretless.yml
+     ```
+  1. Query the Loggly API using:
+     ```
+     http_proxy=localhost:8071 curl '{your-loggly-link}.loggly.com/apiv2/events/iterate?q=*&from=-10m&until=now&size=10'
      ```
 
 </details>

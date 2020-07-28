@@ -10,6 +10,7 @@
   * [GitHub API](#github-api)
   * [Google Maps API](#google-maps-api)
   * [JFrog Artifactory API](#jfrog-artifactory-api)
+  * [Logentries API](#logentries-api)
   * [Loggly API](#loggly-api)
   * [Mailchimp API](#mailchimp-api)
   * [OAuth 2.0 API](#oauth-20-api)
@@ -399,7 +400,7 @@ or JFrog Artifactory Username/Password.
        ./dist/darwin/amd64/secretless-broker \
        -f examples/generic_connector_configs/jfrog_artifactory_secretless.yml
      ```
-  1. On another terminal window, make a request to Mailchimp using Secretless
+  1. On another terminal window, make a request to JFrog using Secretless
      ```
        http_proxy=localhost:8071 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
      ```
@@ -415,7 +416,7 @@ or JFrog Artifactory Username/Password.
        ./dist/darwin/amd64/secretless-broker \
        -f examples/generic_connector_configs/jfrog_artifactory_secretless.yml
      ```
-  1. On another terminal window, make a request to Mailchimp using Secretless
+  1. On another terminal window, make a request to JFrog using Secretless
      ```
        http_proxy=localhost:8081 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
      ```
@@ -431,11 +432,54 @@ or JFrog Artifactory Username/Password.
        ./dist/darwin/amd64/secretless-broker \
        -f examples/generic_connector_configs/jfrog_artifactory_secretless.yml
      ```
-  1. On another terminal window, make a request to Mailchimp using Secretless
+  1. On another terminal window, make a request to JFrog using Secretless
      ```
        http_proxy=localhost:8091 curl {JFrog Host Name}.jfrog.io/router/api/v1/system/ping
      ```
 
+</details>
+
+___
+
+### Logentries API
+
+This example can be used to interact with the
+[Logentries InsightOps API](https://docs.rapid7.com/insightops/rest-api-overview).
+
+The configuration file for the Logentries API can be found at
+[logentries_secretless.yml](./logentries_secretless.yml).
+
+> This configuration was made on July 28th, 2020. Logentries does not specify
+their API version, so the example usage may change in the future.
+
+#### How to use this connector
+* Edit the supplied configuration to get your
+[Logentries API Key](https://docs.rapid7.com/insightops/rest-api-overview#obtain-an-api-key)
+* Run Secretless with the supplied configuration
+* Query the Logentries API using:
+
+  ```
+  http_proxy=localhost:8071 curl {Country Name}.rest.logs.insight.rapid7.com/{Route}
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Login to create a [Logentries API Key](https://insight.rapid7.com/platform#/apiKeyManagement)
+  1. Store the token from your request in your local credential manager so
+  that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+        ./dist/darwin/amd64/secretless-broker \
+        -f examples/generic_connector_configs/logentries_secretless.yml
+     ```
+  1. On another terminal window, make a request to the Logentries API using
+     Secretless
+     ```
+        http_proxy=localhost:8071 curl us.rest.logs.insight.rapid7.com/query/saved_queries
+     ```
+     
 </details>
 
 ___
@@ -483,7 +527,7 @@ To see how to send events to the Loggly API, view their
      ```
   1. Query the Loggly API using:
      ```
-     http_proxy=localhost:8071 curl '{your-loggly-link}.loggly.com/apiv2/events/iterate?q=*&from=-10m&until=now&size=10'
+      http_proxy=localhost:8071 curl '{your-loggly-link}.loggly.com/apiv2/events/iterate?q=*&from=-10m&until=now&size=10'
      ```
 
 </details>

@@ -15,6 +15,7 @@ import (
 type config struct {
 	CredentialPatterns map[string]*regexp.Regexp
 	Headers            map[string]*template.Template
+	OAuth1Secrets      map[string]*template.Template
 	QueryParams        map[string]*template.Template
 	ForceSSL           bool
 }
@@ -89,6 +90,7 @@ func newConfig(cfgYAML *ConfigYAML) (*config, error) {
 
 	cfg.Headers, errs = stringsToTemplates(cfgYAML.Headers, errs)
 	cfg.QueryParams, errs = stringsToTemplates(cfgYAML.QueryParams, errs)
+	cfg.OAuth1Secrets, errs = stringsToTemplates(cfgYAML.OAuth1Secrets, errs)
 
 	if err := errs.Filter(); err != nil {
 		return nil, err

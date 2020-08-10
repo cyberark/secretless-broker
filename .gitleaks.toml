@@ -1,4 +1,8 @@
 title = "Secretless Broker gitleaks config"
+# gitleaks v4+ does not support whitelist regexes.  They are kept in place for backwards
+# compatibility, but future regexes of keys to ignore should be included either in the
+# file or path sections for files to ignore, or under the rule the expression/key should be
+# whitelisted for.
 
 # This is the config file for gitleaks. You can configure gitleaks what to search for and what to whitelist.
 # If GITLEAKS_CONFIG environment variable
@@ -10,6 +14,12 @@ title = "Secretless Broker gitleaks config"
 description = "AWS Client ID"
 regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
 tags = ["key", "AWS"]
+[[rules.whitelist]]
+description = "sample AWS key in AWS HTTP connector comments"
+regex = '''AKIAJC5FABNOFVBKRWHA'''
+[[rules.whitelist]]
+description = "since-removed sample AWS key"
+regex = '''AKIAJADDJE4Q4JVX3HAA'''
 
 [[rules]]
 description = "AWS Secret Key"
@@ -140,6 +150,12 @@ tags = ["key", "Mailgun"]
 description = "Password in URL"
 regex = '''[a-zA-Z]{3,10}:\/\/[^\/\s:@]{3,20}:[^\/\s:@]{3,20}@.{1,100}\/?.?'''
 tags = ["key", "URL", "generic"]
+[[rules.whitelist]]
+description = "Testing/example url for postgresql containers"
+regex = '''postgres://postgres:SuperSecure@pg/postgres'''
+[[rules.whitelist]]
+description = "Testing/example url for sqlserver connection"
+regex = '''sqlserver://username:password@host:port\?database=master.param2=value'''
 
 [[rules]]
 description = "PayPal Braintree access token"
@@ -177,6 +193,8 @@ regex = '''(?i)twilio(.{0,20})?['\"][0-9a-f]{32}['\"]'''
 tags = ["key", "twilio"]
 
 [whitelist]
+# As of v4, gitleaks only matches against filename, not path in the
+# files directive.  Leaving content for backwards compatibility.
 files = [
   "(.*?)(jpg|gif|doc|pdf|bin)$",
   ".gitleaks.toml",
@@ -196,6 +214,25 @@ files = [
   "test/ssh/id_(.*)", # since-removed ssh test certs
   "test/util/ssl/(.*)", # test ssl certs
   "internal/plugin/connectors/tcp/mssql/connection_details_test.go", # fake cert string
+]
+# As of v4, gitleaks can whitelist paths to accommodate no longer using
+# paths in the `files` whitelist.
+paths = [
+  "doc/full-demo/secrets",
+  "demos/full-demo/secrets",
+  "demos/quick-start/docker/etc",
+  "demos/k8s-demo/etc",
+  "test/pg_handler/etc",
+  "test/pg2_handler/etc",
+  "test/ssh_handler",
+  "test/ssh_agent_handler",
+  "test/connector/http/generic/certs",
+  "test/connector/ssh",
+  "test/connector/ssh_agent",
+  "test/connector/tcp/mssql/certs",
+  "test/ssh",
+  "test/util/ssl",
+  "internal/plugin/connectors/tcp/mssql"
 ]
 regexes = [
   "AKIAJC5FABNOFVBKRWHA", # sample AWS key in AWS HTTP connector comments

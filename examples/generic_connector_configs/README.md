@@ -13,6 +13,7 @@
   * [Logentries API](#logentries-api)
   * [Loggly API](#loggly-api)
   * [Mailchimp API](#mailchimp-api)
+  * [New Relic API](#new-relic-api)
   * [OAuth 2.0 API](#oauth-20-api)
   * [Papertrail API](#papertrail-api)
   * [SendGrid Web API](#sendgrid-web-api)
@@ -479,7 +480,7 @@ their API version, so the example usage may change in the future.
      ```
         http_proxy=localhost:8071 curl us.rest.logs.insight.rapid7.com/query/saved_queries
      ```
-     
+
 </details>
 
 ___
@@ -601,6 +602,50 @@ The configuration file for the Mailchimp API can be found at
 
 ___
 
+### New Relic API
+
+This example can be used to interact with
+[New Relic's API](https://docs.newrelic.com/docs/apis/rest-api-v2).
+
+The configuration file for the New Relic API can be found at
+[new_relic_secretless.yml](./new_relic_secretless.yml).
+
+> This configuration uses [v2](https://docs.newrelic.com/docs/apis/rest-api-v2)
+> of the New Relic API.
+
+#### How to use this connector
+
+* Edit the supplied configuration to get your [New Relic API Key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys)
+* Run Secretless with the supplied configuration
+* Query the New Relic API using:
+
+  ```
+  http_proxy=localhost:8071 curl api.newrelic.com/v2/applications.json
+  ```
+
+#### Example Usage
+
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Get a
+     [New Relic API Key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys)
+  1. Store the token from your request in your local credential manager so
+     that it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+      ./dist/darwin/amd64/secretless-broker \
+      -f examples/generic_connector_configs/new_relic_secretless.yml
+     ```
+  1. Query the New Relic API using:
+     ```
+      http_proxy=localhost:8071 curl api.newrelic.com/v2/{Route}
+     ```
+
+</details>
+
+___
+
 ### OAuth 2.0 API
 
 This generic OAuth HTTP connector can be used for any service that accepts a
@@ -647,7 +692,7 @@ The configuration file for the SendGrid Web API can be found at
 
   1. Retrieve your API token from your Profile
   1. Store the token from your request in your local credential manager so
-    that it may be retrieved in your `secretless.yml`
+     that it may be retrieved in your `secretless.yml`
   1. Run Secretless locally
      ```
      ./dist/darwin/amd64/secretless-broker \

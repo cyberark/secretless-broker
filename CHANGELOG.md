@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   in the secretless configuration file, under `config`. This allows the
   construction of a query string which can have credentials injected
   as needed. [#1290](https://github.com/cyberark/secretless-broker/issues/1290)
+- Generic HTTP connector now supports `oauth1` as a configurable section in the
+  secretless configuration file, under `config`. This allows the construction of
+  a header for an OAuth 1.0 request. The OAuth 1.0 feature currently only supports
+  HMAC-SHA1, but there is an [issue](https://github.com/cyberark/secretless-broker/issues/1324)
+  logged to support other hashing methods. [#1297](https://github.com/cyberark/secretless-broker/issues/1297)
 
 ## [1.6.0] - 2020-05-04
 

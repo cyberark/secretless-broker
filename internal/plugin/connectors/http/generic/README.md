@@ -34,7 +34,7 @@ services:
     connector: generic_http
     listenOn: tcp://0.0.0.0:8080
     credentials:
-      apikey: 
+      apikey:
         from: conjur
         get: my-services-api-key  # the id of your API key within conjur
     config:
@@ -61,7 +61,7 @@ services:
     connector: generic_http
     listenOn: tcp://0.0.0.0:8080
     credentials:
-      username: 
+      username:
         from: conjur
         get: someuser
       password:
@@ -123,13 +123,13 @@ template](https://golang.org/pkg/text/template/), as defined in the
 
 In the above example, let us say that your request URL looks like the following,
 
-```
+```http
 http://anything.com/foo?fruit=apple
 ```
 
 After proxying through secretless, your request URL would look like the following,
 
-```
+```http
 http://anything.com/foo?location=valueofaddress&fruit=apple
 ```
 
@@ -143,6 +143,69 @@ powerful transformation features.  You can use `printf` for formatting and
 you can compose functions using pipes `|`.  See the text template package docs linked
 above for detailed information on these and other features.
 
+### `oauth1`
+
+Like `headers` this is another key section. The `oauth1` section is used to generate
+an OAuth1 `Authorization` header.
+
+**Note: Declaring an `Authorization` header in the `config`
+ while `oauth1` is present will throw an error:
+ `authorization header already exists, cannot override header`**
+
+There are four required _keys_ for the `oauth1` section which are as follows:
+
+1. `consumer_key` - A value used by the consumer to identify itself to
+   the service provider.
+1. `consumer_secret` - A secret used by the consumer to establish ownership
+   of the consumer key.
+1. `token` - A value used by the consumer to gain access to the protected
+   resources on behalf of the user, instead of using the user’s service
+   provider credentials.
+1. `token_secret` - A secret used by the consumer to establish ownership of
+   a given token.
+
+The oauth1 _values_ are defined using a [Go text
+template](https://golang.org/pkg/text/template/), as defined in the
+`text/template` package.
+
+You can refer to your credentials in this template using the credential name
+preceded by a `.` (e.g. `.consumer_key` and `.token` refer to the credentials
+`consumer_key` and `token`). At runtime, Secretless will replace these
+credential references with your real credentials.
+
+For instance:
+
+```yaml
+
+version: 2
+services:
+  oauth1-service:
+    connector: generic_http
+    listenOn: tcp://0.0.0.0:8080
+    credentials:
+      consumer_key:
+        from: conjur
+        get: somekey
+      consumer_secret:
+        from: conjur
+        get: someconsumersecret
+      token:
+        from: conjur
+        get: sometoken
+      token_secret:
+        from: conjur
+        get: sometokensecret
+    config:
+      oauth1:
+        consumer_key: "{{ .consumer_key }}"
+        consumer_secret: "{{ .consumer_secret }}"
+        token: "{{ .token }}"
+        token_secret: "{{ .token_secret }}"
+      forceSSL: true
+      authenticateURLsMatching:
+        - ^http
+```
+
 #### `credentialValidations`
 
 This section lets you use regular expressions to define validations for the
@@ -150,7 +213,7 @@ header values.
 
 For example, in the first example above, the line:
 
-```
+```yaml
 apikey: '^[A-Z0-9]+$'
 ```
 
@@ -200,7 +263,7 @@ Let's take a look at the Basic auth connector to see how this works:
 // Taken from:
 // internal/plugin/connectors/http/basicauth/plugin.go
 //
-// Also note: 
+// Also note:
 // "NewConnectorConstructor" and "ConfigYAML" are defined in:
 // /internal/plugin/connectors/http/generic/external_api.go
 
@@ -214,7 +277,7 @@ newConnector, err := generichttp.NewConnectorConstructor(
     },
   },
 )
-``` 
+```
 
 Note how this code exactly mirrors the yaml from the end-user example.  Please
 refer to those docs above for an explanation of the `CredentialValidations` and

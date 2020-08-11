@@ -19,9 +19,10 @@ import (
 //         .yml file.  That is, we convert from .yml --> ConfigYAML --> config.
 type ConfigYAML struct {
 	CredentialValidations map[string]string `yaml:"credentialValidations"`
-	Headers               map[string]string `yaml:"headers"`
-	QueryParams           map[string]string `yaml:"queryParams"`
 	ForceSSL              bool              `yaml:"forceSSL"`
+	Headers               map[string]string `yaml:"headers"`
+	OAuth1Secrets         map[string]string `yaml:"oauth1"`
+	QueryParams           map[string]string `yaml:"queryParams"`
 }
 
 // NewConfigYAML takes the raw cfgBytes and unmarshals them into a ConfigYAML

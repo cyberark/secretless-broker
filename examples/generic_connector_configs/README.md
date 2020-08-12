@@ -14,6 +14,7 @@
   * [Loggly API](#loggly-api)
   * [Mailchimp API](#mailchimp-api)
   * [New Relic API](#new-relic-api)
+  * [OAuth 1.0 API](#oauth-10-api)
   * [OAuth 2.0 API](#oauth-20-api)
   * [Papertrail API](#papertrail-api)
   * [SendGrid Web API](#sendgrid-web-api)
@@ -646,13 +647,37 @@ The configuration file for the New Relic API can be found at
 
 ___
 
+### OAuth 1.0 API
+
+This generic OAuth HTTP connector can be used for any service that uses OAuth1
+for authorization.
+
+The configuration file for connecting to an API that uses OAuth 1.0 can be found
+at [oauth1_secretless.yml](./oauth1_secretless.yml).
+
+> Note: Secretless currently only supports HMAC-SHA1 hashing. There is an
+> [issue](https://github.com/cyberark/secretless-broker/issues/1324)
+> logged to support other hashing algorithms such as RSA-SHA1 and PLAINTEXT.
+
+#### How to use this connector
+* Edit the supplied service configuration to get your OAuth token
+
+* Run Secretless with the supplied configuration(s)
+
+* Query the API using
+  ```
+  http_proxy=localhost:8071 curl {Your OAuth1 API Endpoint URL}/{Request}
+  ```
+
+___
+
 ### OAuth 2.0 API
 
 This generic OAuth HTTP connector can be used for any service that accepts a
 Bearer token as an authorization header.
 
-The configuration file for the OAuth 2.0 API can be found at
-[oauth2_secretless.yml](./oauth2_secretless.yml).
+The configuration file for connecting to an API that uses OAuth 2.0 can be found
+at [oauth2_secretless.yml](./oauth2_secretless.yml).
 
 #### How to use this connector
 * Edit the supplied service configuration to get your OAuth token
@@ -1073,11 +1098,6 @@ This example can be used to interact with
 The configuration file for the Twitter API can be found at
 [twitter_secretless.yml](./twitter_secretless.yml).
 
-**Note:** This configuration currently only supports connecting to the
-Twitter API via OAuth2. An issue can be found
-[here](https://github.com/cyberark/secretless-broker/issues/1297)
-for adding an OAuth1 Connector for Twitter.
-
 > This configuration uses [v7](https://developer.twitter.com/en/docs/ads/general/overview/versions)
 > of the Twitter API.
 
@@ -1085,6 +1105,7 @@ for adding an OAuth1 Connector for Twitter.
 
 * Edit the supplied service configuration to get your
 [OAuth token](https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens)
+or [OAuth Consumer Key, Consumer Secret, Token Key and Token Secret](https://developer.twitter.com/en/docs/basics/authentication/oauth-1-0a/obtaining-user-access-tokens)
 * Run Secretless with the supplied configuration(s)
 * Query the API using `http_proxy=localhost:8051 curl api.twitter.com/{Request}`
 
@@ -1092,8 +1113,26 @@ for adding an OAuth1 Connector for Twitter.
 <details>
   <summary><b>Example setup to try this out locally...</b></summary>
 
+  **OAuth1:**
   1. Get your
-  [Twitter API key and Secret Key](https://developer.twitter.com/en/apps)
+     [Twitter Consumer Key and Consumer Secret](https://developer.twitter.com/en/apps)
+     and generate a Token Key and Secret.
+  1. Store the token from your request in your local credential manager so that
+     it may be retrieved in your `secretless.yml`
+  1. Run Secretless locally
+     ```
+      ./dist/darwin/amd64/secretless-broker \
+        -f examples/generic_connector_configs/twitter_secretless.yml
+     ```
+  1. On another terminal window, make a request to Twitter using Secretless
+     ```
+      http_proxy=localhost:8061 \
+      curl "api.twitter.com/1.1/statuses/update.json?status=hello%20world"
+     ```
+
+  **OAuth2:**
+  1. Get your
+  [Twitter Consumer Key and Consumer Secret](https://developer.twitter.com/en/apps)
   1. Get an
   [OAuth token](https://developer.twitter.com/en/docs/basics/authentication/oauth-2-0/bearer-tokens)
   from Twitter through cURL

@@ -20,6 +20,7 @@
   * [Papertrail API](#papertrail-api)
   * [SendGrid Web API](#sendgrid-web-api)
   * [Sentry API](#sentry-api)
+  * [Service Now API](#service-now-api)
   * [Slack Web API](#slack-web-api)
   * [Splunk API](#splunk-api)
   * [Stripe API](#stripe-api)
@@ -755,7 +756,7 @@ ___
 This example can be used to interact with the
 [Papertrail API](https://help.papertrailapp.com/kb/how-it-works/http-api/).
 
-The configuration file for the SendGrid Web API can be found at
+The configuration file for the Papertrail API can be found at
 [papertrail_secretless.yml](./papertrail_secretless.yml).
 
 #### How to use this connector
@@ -881,6 +882,67 @@ The configuration file for the Sentry API can be found at
      ```
      http_proxy=localhost:8071 curl sentry.io/api/0/projects/
      ```
+
+</details>
+
+___
+
+### Service Now API
+
+This example can be used to interact with
+[Service Now's API](https://docs.servicenow.com/bundle/orlando-application-development/page/build/applications/concept/api-rest.html)
+
+The configuration file for the Service Now API can be found at
+[service_now_secretless.yml](./service_now_secretless.yml).
+
+> This configuration uses v2 of the Service Now API.
+
+#### How to use this connector
+
+* Edit the supplied configruation to get your Service Now OAuth
+  [Token](https://hi.service-now.com/kb_view.do?sysparm_article=KB0725643)
+
+* Run Secretless with the supplied configuration(s)
+
+* Query the Service Now API
+  ```
+    http_proxy=localhost:8071 curl  {instance-name}.service-now.com/api/now/v2/table/incident
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Go to your Authorization Endpoint from the
+     [authentication documentation](https://hi.service-now.com/kb_view.do?sysparm_article=KB0725643)
+     ```
+      https://{instance}.service-now.com/oauth_auth.do?response_type=code&redirect_uri=https://{instance}.service-now.com/login.do&client_id={client-id}
+     ```
+  1. Grab the `code` parameter
+  1. Make a curl request to get your authorization endpoint.
+     ```
+     curl --location --request POST \
+      'https://{instance-name}.service-now.com/oauth_token.do' \
+      --header 'Content-Type: application/x-www-form-urlencoded' \
+      --data-urlencode 'grant_type=password' \
+      --data-urlencode 'code={code}' \
+      --data-urlencode 'client_id={client-id}' \
+      --data-urlencode 'client_secret={client-secret}}' \
+      --data-urlencode 'redirect_uri={redirect_uri}' \
+      --data-urlencode 'username={username}' \
+      --data-urlencode 'password={password}'
+     ```
+   1. Store the token from your request in your local credential manager so that
+      it may be retrieved in your `secretless.yml`
+   1. Run Secretless locally
+      ```
+        ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/service_now_secretless.yml
+      ```
+   1. On another terminal window, make a request to Slack using Secretless
+      ```
+        http_proxy=localhost:8071 curl  {instance}.service-now.com/api/now/v2/table/incident
+      ```
 
 </details>
 

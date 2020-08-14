@@ -7,6 +7,7 @@
   * [Dropbox API](#dropbox-api)
   * [Elasticsearch API](#elasticsearch-api)
   * [Facebook API](#facebook-api)
+  * [Full Contact API](#full-contact-api)
   * [GitHub API](#github-api)
   * [Google Maps API](#google-maps-api)
   * [JFrog Artifactory API](#jfrog-artifactory-api)
@@ -271,6 +272,64 @@ what changes have been made in the
      ```
         http_proxy=localhost:8023 curl -X GET --url 'graph.instagram.com/me?fields=id,username'
      ```
+</details>
+
+___
+
+### Full Contact API
+
+This example can be used to interact with
+[Full Contact's API](https://dashboard.fullcontact.com/api-ref).
+
+The configuration file for the Full Contact API can be used at
+[full_contact_secretless.yml](./full_contact_secretless.yml).
+
+> This configuration can be used for both v2 and v3 of the Full Contact API.
+
+#### How to use this connector
+
+* Edit the supplied configuration to get your
+[Full Contact API Key/Bearer Token](https://dashboard.fullcontact.com/)
+from the correct provider/path.
+* Run Secretless with the supplied configuration
+* Query the Full Contact API using:
+
+  **X-FullContact-APIKey:**
+  ```
+    http_proxy=localhost:8081 curl
+      'api.fullcontact.com/v2/person.json?email=bart@fullcontact.com'
+  ```
+
+  **OAuth 2.0:**
+  ```
+  http_proxy=localhost:8071 curl -X POST api.fullcontact.com/v3/person.enrich \
+    -H "Content-Type: application/json" \
+    -d '{"email":"bart@fullcontact.com"}'
+  ```
+
+#### Example Usage
+<details>
+  <summary><b>Example setup to try this out locally...</b></summary>
+
+  1. Get an API key from "Get an API Key" on the Full Contact dashboard.
+     Regardless of which version of the Full Contact API you are using, you can
+     use an API key as both a token and API key.
+  1. Store your API Key from your request in your local
+     credential manager so that it may be retrieved in your
+     `full_contact_secretless.yml`
+  1. Run Secretless locally
+     ```
+       ./dist/darwin/amd64/secretless-broker \
+       -f examples/generic_connector_configs/full_contact_secretless.yml
+     ```
+  1. On another terminal window, make a request to Mailchimp using Secretless
+     ```
+      http_proxy=localhost:8071 curl -X POST \
+        api.fullcontact.com/v3/person.enrich \
+        -H "Content-Type: application/json"  \
+        -d '{"email":"bart@fullcontact.com"}'
+     ```
+
 </details>
 
 ___

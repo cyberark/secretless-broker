@@ -9,7 +9,7 @@ description: Secretless Broker Community
 	<div class="col-md-4 col-sm-12">
     <h2><i class="slss-icon fas fa-code"></i> Contribute</h2>
     <p>Secretless Broker development is open to contributions from the community, including feature requests and issues (which should be logged in our <a href="https://github.com/cyberark/secretless-broker">GitHub repository</a>.)</p>
-    <p>Before contributing code changes, you will need to sign our <a href="https://github.com/cyberark/secretless-broker/blob/master/Contributing_OSS/CyberArk_Open_Source_Contributor_Agreement.pdf">Contributor Agreement</a> and submit the signed copy to <a href="mailto:oss@cyberark.com">oss@cyberark.com</a>.</p>
+    <p>Before contributing code changes, you will need to review our <a href="https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md#when-the-repo-does-not-include-the-cla">contributor licensing guide</a> to ensure your contributions will be compliant with our contributor license agreements.</p>
 	</div>
 	<div class="col-md-4 col-sm-12">
 		<h2><i class="slss-icon fas fa-comments"></i> Discuss</h2>

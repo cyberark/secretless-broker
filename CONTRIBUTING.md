@@ -1,7 +1,7 @@
 # Contributing to the Secretless Broker
 
 For general contribution and community guidelines, please see the [community repo](https://github.com/cyberark/community). In particular, before contributing
-please review our [contributor licensing guide](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md#when-the-repo-does-not-include-the-cla)
+please review our [contributor licensing guide](https://github.com/cyberark/community/blob/master/CONTRIBUTING.md#when-the-repo-does-not-include-the-cla)
 to ensure your contribution is compliant with our contributor license
 agreements.
 

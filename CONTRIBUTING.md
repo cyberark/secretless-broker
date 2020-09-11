@@ -454,11 +454,12 @@ than master. Make sure your change to secretless considers this.
 1. Push the tag: `git push vx.y.z` (or `git push origin vx.y.z` if you are working
    from your local machine).
 
-### Build a release
+### Create a GitHub pre-release
 **Note:** Until the stable quality exercises have completed, the GitHub release
 should be officially marked as a `pre-release` (eg "non-production ready")
-1. From a **clean checkout of master** run `./bin/build_release` to generate
-   the release artifacts.
+
+1. From the Jenkins pipeline for the tag, retrieve the archived `dist/goreleaser`
+   directory.
 1. Create a GitHub release from the tag, add a description by copying the CHANGELOG entries
    from the version, and upload the release artifacts from `dist/goreleaser`
    to the GitHub release. The following artifacts should be uploaded to the release:

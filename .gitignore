@@ -10,6 +10,7 @@ bench.*
 debug
 debug.*
 dist
+gosec.output
 run
 tmp
 vendor

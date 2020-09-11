@@ -17,6 +17,6 @@ description: Secretless Broker Community
 	</div>
 	<div class="col-md-4 col-sm-12">
 		<h2><i class="slss-icon fas fa-exclamation-triangle"></i> Report</h2>
-    <p>Want to report a potential security vulnerability? Contact us at <a href="mailto:security@secretless.io">security@secretless.io</a>.</p>
+    <p>Want to report a potential security vulnerability? Contact us at <a href="mailto:security@conjur.org">security@conjur.org</a>.</p>
 	</div>
 </div>

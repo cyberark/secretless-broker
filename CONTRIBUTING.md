@@ -415,22 +415,17 @@ than master. Make sure your change to secretless considers this.
 ## Releasing
 
 ### Verify and update dependencies
-1. Check whether any dependencies have been changed since the last release by running
-   `./bin/check_dependencies`. The script will tell you what has changed. Beware - the script at current DOES NOT appropriately handle `replace` directives - you will need to process these manually.
-
-1. If any dependencies have changed, for each changed dependency in assets/license_finder.txt you'll need to do the following:
-
-   - Update the [dependency spreadsheet](https://cyberark365.sharepoint.com/:x:/s/Conjur/Edko_eT7CfpEuPxnnbIEfmAB4j2ybNozY9B8QAIDOxKynQ?e=CfP6ym).
-     Copy the most recent release's tab to a new tab for this new version. Use
-     the diff of `assets/license_finder.txt` to update the spreadsheet:
-     - For new dependencies, add a row to the spreadsheet. Make sure
-       a corresponding update is made to NOTICES.txt to add the dependency
-       and copyright.
-     - For dependencies whose version has changed, update the version and
-       license link in the spreadsheet. Be sure to also update the version and
-       copyright in NOTICES.txt.
-     - For dependencies that have been removed, delete the row from the
-       spreadsheet and remove the dependency / copyright from NOTICES.txt.
+1. Review the changes to `go.mod` since the last release and make any needed
+   updates to [NOTICES.txt](./NOTICES.txt):
+   - Add any dependencies that have been added since the last tag, including
+     an entry for them alphabetically under the license type (make sure you
+     check the license type for the version of the project we use) and a copy
+     of the copyright later in the same file.
+   - Update any dependencies whose versions have changed - there are usually at
+     least two version entries that need to be modified, but if the license type
+     of the dependency has also changed, then you will need to remove the old
+     entries and add it as if it were a new dependency.
+   - Remove any dependencies we no longer include.
 
    If no dependencies have changed, you can move on to the next step.
 
@@ -438,12 +433,18 @@ than master. Make sure your change to secretless considers this.
 1. Create a new branch for the version bump.
 1. Based on the unreleased content, determine the new version number and update
    the [version.go](pkg/secretless/version.go) file.
-1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
-   the changes included in the release.
+1. Review the [changelog](CHANGELOG.md) to make sure all relevant changes since
+   the last release have been captured. You may find it helpful to look at the
+   list of commits since the last release - you can find this by visiting the
+   [releases page](https://github.com/cyberark/secretless-broker/releases) and
+   clicking the "`N commits` to master since this release" link for the latest
+   release.
+
+   This is also a good time to make sure all entries conform to our
+   [changelog guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md#changelog-guidelines).
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
    for review. Your PR should include updates to `pkg/secretless/version.go`,
-   `CHANGELOG.md`, and if there are any license updates, to `NOTICES.txt` and
-   `assets/license_finder.txt`.
+   `CHANGELOG.md`, and if there are any license updates, to `NOTICES.txt`.
 
 ### Add a git tag
 1. Once your changes have been reviewed and merged into master, tag the version
@@ -453,11 +454,12 @@ than master. Make sure your change to secretless considers this.
 1. Push the tag: `git push vx.y.z` (or `git push origin vx.y.z` if you are working
    from your local machine).
 
-### Build a release
+### Create a GitHub pre-release
 **Note:** Until the stable quality exercises have completed, the GitHub release
 should be officially marked as a `pre-release` (eg "non-production ready")
-1. From a **clean checkout of master** run `./bin/build_release` to generate
-   the release artifacts.
+
+1. From the Jenkins pipeline for the tag, retrieve the archived `dist/goreleaser`
+   directory.
 1. Create a GitHub release from the tag, add a description by copying the CHANGELOG entries
    from the version, and upload the release artifacts from `dist/goreleaser`
    to the GitHub release. The following artifacts should be uploaded to the release:

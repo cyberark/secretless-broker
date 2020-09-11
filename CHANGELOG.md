@@ -6,21 +6,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.0] - 2020-09-11
+
 ### Added
 - Secretless and secretless-redhat containers now use Alpine 3.12 as their base
-  image. [PR #1296](https://github.com/cyberark/secretless-broker/pull/1296)
+  image. [PR cyberark/secretless-broker#1296](https://github.com/cyberark/secretless-broker/pull/1296)
 - MySQL and PostgreSQL connectors support SSL host name verification with
   `verify-full` SSL mode. Also adds optional `sslhost` configuration parameter
-  that is compared to the server's certificate SAN. [#548](https://github.com/cyberark/secretless-broker/issues/548)
+  that is compared to the server's certificate SAN.
+  [cyberark/secretless-broker#548](https://github.com/cyberark/secretless-broker/issues/548)
 - Generic HTTP connector now supports `queryParam` as a configurable section
-  in the secretless configuration file, under `config`. This allows the
+  in the Secretless configuration file, under `config`. This allows the
   construction of a query string which can have credentials injected
-  as needed. [#1290](https://github.com/cyberark/secretless-broker/issues/1290)
+  as needed.
+  [cyberark/secretless-broker#1290](https://github.com/cyberark/secretless-broker/issues/1290)
 - Generic HTTP connector now supports `oauth1` as a configurable section in the
   secretless configuration file, under `config`. This allows the construction of
   a header for an OAuth 1.0 request. The OAuth 1.0 feature currently only supports
   HMAC-SHA1, but there is an [issue](https://github.com/cyberark/secretless-broker/issues/1324)
-  logged to support other hashing methods. [#1297](https://github.com/cyberark/secretless-broker/issues/1297)
+  logged to support other hashing methods.
+  [cyberark/secretless-broker#1297](https://github.com/cyberark/secretless-broker/issues/1297)
+- Many (20+) example generic connector configurations were added to the project,
+  to demonstrate support for a broad set of popular APIs and to serve as an
+  example for other APIs users may need to use Secretless with their apps.
+  See [here](https://github.com/cyberark/secretless-broker/tree/master/examples/generic_connector_configs)
+  for the full list of examples.
+  [cyberark/secretless-broker#1248](https://github.com/cyberark/secretless-broker/issues/1248)
 
 ## [1.6.0] - 2020-05-04
 
@@ -502,7 +513,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.0...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -528,3 +539,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.5.1]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...v1.5.1
 [1.5.2]: https://github.com/cyberark/secretless-broker/compare/v1.5.1...v1.5.2
 [1.6.0]: https://github.com/cyberark/secretless-broker/compare/v1.5.2...v1.6.0
+[1.7.0]: https://github.com/cyberark/secretless-broker/compare/v1.6.0...v1.7.0

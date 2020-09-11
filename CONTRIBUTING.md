@@ -433,12 +433,18 @@ than master. Make sure your change to secretless considers this.
 1. Create a new branch for the version bump.
 1. Based on the unreleased content, determine the new version number and update
    the [version.go](pkg/secretless/version.go) file.
-1. Run `./bin/prefill_changelog` to populate the [changelog](CHANGELOG.md) with
-   the changes included in the release.
+1. Review the [changelog](CHANGELOG.md) to make sure all relevant changes since
+   the last release have been captured. You may find it helpful to look at the
+   list of commits since the last release - you can find this by visiting the
+   [releases page](https://github.com/cyberark/secretless-broker/releases) and
+   clicking the "`N commits` to master since this release" link for the latest
+   release.
+
+   This is also a good time to make sure all entries conform to our
+   [changelog guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md#changelog-guidelines).
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
    for review. Your PR should include updates to `pkg/secretless/version.go`,
-   `CHANGELOG.md`, and if there are any license updates, to `NOTICES.txt` and
-   `assets/license_finder.txt`.
+   `CHANGELOG.md`, and if there are any license updates, to `NOTICES.txt`.
 
 ### Add a git tag
 1. Once your changes have been reviewed and merged into master, tag the version

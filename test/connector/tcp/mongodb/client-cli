@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+mongo "mongodb://user0:pass0@localhost:27018/?authSource=admin&ssl=false"

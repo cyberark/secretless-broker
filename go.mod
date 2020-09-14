@@ -1,7 +1,9 @@
 module github.com/cyberark/secretless-broker
 
 require (
-	github.com/aws/aws-sdk-go v1.15.79
+	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
+	github.com/Microsoft/go-winio v0.4.14 // indirect
+	github.com/aws/aws-sdk-go v1.29.15
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/codegangsta/cli v1.20.0
 	github.com/containerd/containerd v1.3.2 // indirect
@@ -17,25 +19,30 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/google/btree v1.0.0 // indirect
 	github.com/googleapis/gnostic v0.3.1 // indirect
+	github.com/gorilla/mux v1.7.4 // indirect
+	github.com/gotestyourself/gotestyourself v1.4.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/hashicorp/vault/api v1.0.2
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/imdario/mergo v0.3.8 // indirect
-	github.com/joho/godotenv v1.2.0
+	github.com/joho/godotenv v1.3.0
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/pkg/profile v1.2.1
 	github.com/prometheus/client_golang v1.2.1 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.3.0
-	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
+	github.com/stretchr/testify v1.4.0
+	go.mongodb.org/mongo-driver v1.4.1
+	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5
 	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/yaml.v2 v2.2.2
+	gotest.tools v1.4.0 // indirect
 	k8s.io/api v0.0.0-20180712090710-2d6f90ab1293
 	k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408
 	k8s.io/apimachinery v0.0.0-20180621070125-103fd098999d

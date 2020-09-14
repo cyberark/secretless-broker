@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+go run github.com/cyberark/secretless-broker/cmd/secretless-broker | tee log.txt

@@ -51,6 +51,8 @@ require (
 
 replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 
+replace go.mongodb.org/mongo-driver => github.com/doodlesbykumbi/mongo-go-driver v1.4.0-beta2.0.20200923140903-dd0d9ce83942
+
 // 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
 // This is our fix:
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3

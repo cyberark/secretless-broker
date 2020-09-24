@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- The `vault` provider now supports loading secrets from the KV Version 2 secret
+  engine. Reference a secret in Vault using the right path and a field
+  navigation in the Secretless configuration.
+  [cyberark/secretless-broker#1331](https://github.com/cyberark/secretless-broker/issues/1331)
+
 ## [1.7.0] - 2020-09-11
 
 ### Added

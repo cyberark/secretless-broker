@@ -40,15 +40,15 @@ func TestKeychainProvider(t *testing.T) {
 	Convey("Can provide a valid secret value", t, func() {
 		id := strings.Join([]string{service, account}, "#")
 
-		value, err := provider.GetValue(id)
+		values, err := provider.GetValues(id)
 		So(err, ShouldBeNil)
-		So(string(value), ShouldEqual, secret)
+		So(string(values[0]), ShouldEqual, secret)
 	})
 
 	Convey("Returns an error for an invalid secret value", t, func() {
 		id := "madeup#secret"
 
-		_, err := provider.GetValue(id)
+		_, err := provider.GetValues(id)
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, "The specified item could not be found in the keychain.")
 	})

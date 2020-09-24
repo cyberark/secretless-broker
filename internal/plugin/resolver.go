@@ -81,19 +81,34 @@ func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[stri
 	errorStrings := make([]string, 0, len(credentials))
 
 	var err error
-	for _, credential := range credentials {
-		var provider plugin_v1.Provider
-		var value []byte
 
-		if provider, err = resolver.Provider(credential.From); err != nil {
-			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", credential.From, err)
+	// Group credentials by provider
+	var credentialsByProvider = make(map[string][]*config_v2.Credential)
+	for _, credential := range credentials {
+		credentialsByProvider[credential.From] = append(
+			credentialsByProvider[credential.From],
+			credential,
+		)
+	}
+
+	// Resolve credentials by provider
+	for providerID, credentialsForProvider := range credentialsByProvider {
+		provider, err := resolver.Provider(providerID)
+		if err != nil {
+			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", providerID, err)
 		}
 
-		// This provider cannot resolve the named credential
-		if value, err = provider.GetValue(credential.Get); err != nil {
-			errInfo := fmt.Sprintf("ERROR: Resolving credential '%s' from provider '%s' failed: %v",
-				credential.Get,
-				credential.From,
+		// Create secretIds slice
+		var secretIds = make([]string, len(credentialsForProvider))
+		for idx, cred := range credentialsForProvider {
+			secretIds[idx] = cred.Get
+		}
+
+		// Resolves all credentials for current provider
+		secretValues, err := provider.GetValues(secretIds...)
+		if err != nil {
+			errInfo := fmt.Sprintf("ERROR: Resolving credentials from provider '%s' failed: %v",
+				provider.GetName(),
 				err)
 			log.Println(errInfo)
 
@@ -101,10 +116,14 @@ func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[stri
 			continue
 		}
 
-		result[credential.Name] = value
+		for idx, secretValue := range secretValues {
+			credential := credentialsForProvider[idx]
 
-		if resolver.EventNotifier != nil {
-			resolver.EventNotifier.ResolveCredential(provider, credential.Name, value)
+			result[credential.Name] = secretValue
+
+			if resolver.EventNotifier != nil {
+				resolver.EventNotifier.ResolveCredential(provider, credential.Name, secretValue)
+			}
 		}
 	}
 

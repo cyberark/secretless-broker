@@ -38,6 +38,12 @@ func (p *Provider) GetName() string {
 	return p.Name
 }
 
+// GetValues takes in variable ids and returns their resolved values. This method is
+// needed to the Provider interface
+func (p *Provider) GetValues(ids ...string) ([][]byte, error) {
+	return plugin_v1.GetValues(p, ids...)
+}
+
 // GetValue obtains a value by id. Any secret which is stored in Kubernetes Secrets is recognized.
 // The data type returned by Kubernetes Secrets is map[string][]byte. Therefore this provider needs
 // to know which field to return from the map. The field to be returned is specified by appending '#fieldName' to the id argument.

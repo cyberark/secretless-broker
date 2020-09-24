@@ -24,3 +24,9 @@ func (p *Provider) GetName() string {
 func (p *Provider) GetValue(id string) ([]byte, error) {
 	return []byte(id), nil
 }
+
+// GetValues takes in variable ids and returns their resolved values. This method is
+// needed to the Provider interface
+func (p *Provider) GetValues(ids ...string) ([][]byte, error) {
+	return plugin_v1.GetValues(p, ids...)
+}

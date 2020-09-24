@@ -32,46 +32,46 @@ func TestConjur_Provider(t *testing.T) {
 	})
 
 	Convey("Can provide an access token", t, func() {
-		value, err := provider.GetValue("accessToken")
+		values, err := provider.GetValues("accessToken")
 		So(err, ShouldBeNil)
 
 		token := make(map[string]string)
-		err = json.Unmarshal(value, &token)
+		err = json.Unmarshal(values[0], &token)
 		So(err, ShouldBeNil)
 		So(token["protected"], ShouldNotBeNil)
 		So(token["payload"], ShouldNotBeNil)
 	})
 
 	Convey("Can provide a secret to a fully qualified variable", t, func() {
-		value, err := provider.GetValue("dev:variable:db/password")
+		values, err := provider.GetValues("dev:variable:db/password")
 		So(err, ShouldBeNil)
 
-		So(string(value), ShouldEqual, "secret")
+		So(string(values[0]), ShouldEqual, "secret")
 	})
 
 	Convey("Can retrieve a secret value with spaces", t, func() {
-		value, err := provider.GetValue("my var")
+		values, err := provider.GetValues("my var")
 		So(err, ShouldBeNil)
 
-		So(string(value), ShouldEqual, "othersecret")
+		So(string(values[0]), ShouldEqual, "othersecret")
 	})
 
 	Convey("Can provide the default Conjur account name", t, func() {
-		value, err := provider.GetValue("variable:db/password")
+		values, err := provider.GetValues("variable:db/password")
 		So(err, ShouldBeNil)
 
-		So(string(value), ShouldEqual, "secret")
+		So(string(values[0]), ShouldEqual, "secret")
 	})
 
 	Convey("Can provide the default Conjur account name and resource type", t, func() {
-		value, err := provider.GetValue("db/password")
+		values, err := provider.GetValues("db/password")
 		So(err, ShouldBeNil)
 
-		So(string(value), ShouldEqual, "secret")
+		So(string(values[0]), ShouldEqual, "secret")
 	})
 
 	Convey("Cannot provide an unknown value", t, func() {
-		_, err = provider.GetValue("foobar")
+		_, err = provider.GetValues("foobar")
 		So(err, ShouldNotBeNil)
 		So(err.Error(), ShouldEqual, "404 Not Found. Variable 'foobar' not found in account 'dev'.")
 	})

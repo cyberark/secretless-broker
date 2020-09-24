@@ -21,6 +21,13 @@ type MapProvider struct {
 func (mp MapProvider) GetName() string {
 	return "mapProvider"
 }
+
+// GetValues takes in variable ids and returns their resolved values. This method is
+// needed to the Provider interface
+func (mp MapProvider) GetValues(ids ...string) ([][]byte, error) {
+	return plugin_v1.GetValues(mp, ids...)
+}
+
 func (mp MapProvider) GetValue(id string) ([]byte, error) {
 	value, ok := mp.Secrets[id]
 	if ok {

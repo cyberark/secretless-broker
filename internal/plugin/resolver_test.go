@@ -83,7 +83,7 @@ func Test_Resolver(t *testing.T) {
 			credentialValues, err := resolver.Resolve(credentials)
 			So(len(credentialValues), ShouldEqual, 0)
 			So(err, ShouldNotBeNil)
-			errorMsg := "ERROR: Resolving credential 'something-not-in-env' from provider 'env' failed: env cannot find environment variable 'something-not-in-env'"
+			errorMsg := "ERROR: Resolving credentials from provider 'env' failed: env cannot find environment variable 'something-not-in-env'"
 			So(err.Error(), ShouldEqual, errorMsg)
 
 		})

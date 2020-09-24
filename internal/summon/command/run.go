@@ -37,20 +37,31 @@ func buildEnvironment(secrets map[string]string, secretsMap secretsyml.SecretsMa
 // resolveSecrets obtains the value of each requested secret.
 func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
 	result = make(map[string]string)
+
+	var varSecretsSpecKeys []string
+	var varSecretsSpecPaths []string
+
 	for key, spec := range secretsMap {
-		var value string
 		if spec.IsVar() {
-			var valueBytes []byte
-			if valueBytes, err = provider.GetValue(spec.Path); err != nil {
-				return
-			}
-			value = string(valueBytes)
+			varSecretsSpecKeys = append(varSecretsSpecKeys, key)
+			varSecretsSpecPaths = append(varSecretsSpecPaths, spec.Path)
 		} else {
 			// If the spec isn't a variable, use its value as-is
-			value = spec.Path
+			value := spec.Path
+			result[key] = value
 		}
-		result[key] = value
 	}
+
+	// Get the variable values
+	valuesBytes, err := provider.GetValues(varSecretsSpecPaths...)
+	if err != nil {
+		return
+	}
+	// Transform variable values to strings
+	for idx, key := range varSecretsSpecKeys {
+		result[key] = string(valuesBytes[idx])
+	}
+
 	return
 }
 

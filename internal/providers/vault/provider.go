@@ -126,3 +126,9 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 
 	return parseSecret(secret, path, fields)
 }
+
+// GetValues takes in variable ids and returns their resolved values. This method is
+// needed to the Provider interface
+func (p *Provider) GetValues(ids ...string) ([][]byte, error) {
+	return plugin_v1.GetValues(p, ids...)
+}

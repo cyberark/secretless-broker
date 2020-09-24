@@ -12,6 +12,33 @@ type Provider interface {
 	// GetName returns the name that the Provider was instantiated with
 	GetName() string
 
+	// GetValues takes in variable ids and returns their resolved values
+	GetValues(ids ...string) ([][]byte, error)
+}
+
+type singleValueProvider interface {
 	// GetValue takes in an id of a variable and returns its resolved value
 	GetValue(id string) ([]byte, error)
+}
+
+// GetValues takes in variable ids and returns their resolved values by making sequential
+// calls to a singleValueProvider.
+// This is a convenience function since most providers with batch retrieval capabilities
+// will have need the exact same code. Note: most internal providers simply use this
+// function in their implementation of the Provider interface's GetValues method.
+func GetValues(
+	p singleValueProvider,
+	ids ...string,
+) ([][]byte, error) {
+	var err error
+	var res = make([][]byte, len(ids))
+
+	for idx, id := range ids {
+		res[idx], err = p.GetValue(id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return res, nil
 }

@@ -49,7 +49,13 @@ VAULT_ADDR=http://localhost:$vault_port
 VAULT_TOKEN=$root_token
 ENV
 
-vault_cmd secrets enable kv
+# cubbyhole enabled by default, mounted at /cubbyhole
+vault_cmd write cubbyhole/first-secret 'some-key=one'
+vault_cmd write cubbyhole/second-secret 'value=two'
+
+# KV v2 enabled by default, mounted at /secret
+vault_cmd secrets enable -version=1 kv
 vault_cmd kv put kv/db/password 'password=db-secret'
 vault_cmd kv put kv/frontend/admin-password 'password=frontend-secret'
 vault_cmd kv put kv/web/password 'value=web-secret'
+vault_cmd kv put secret/service 'api-key=service-api-key'

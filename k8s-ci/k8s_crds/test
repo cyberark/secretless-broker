@@ -16,6 +16,11 @@ exit_err() {
    cat ${log};
    rm -rf ${log};
 
+
+  # Snapshot of workloads
+  kubectl --namespace "$(current_namespace)" get pods || true
+  kubectl --namespace "$(current_namespace)" get events --field-selector type=Warning || true
+
    exit 1
 }
 
@@ -69,7 +74,7 @@ function wait_for_CRD() {
 
 function wait_for_pod() {
   echo "waiting for pod to be ready"
-  
+
   local attempt_count=0
   local max_attempts=10
   until pod_ready; do
@@ -161,4 +166,4 @@ function main() {
   run_test_case "update configuration object" ohnoeswechangedit supersecretpassword
 }
 
-main
+main || exit_err "Failed inside main"

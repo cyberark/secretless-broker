@@ -16,7 +16,10 @@ type Provider struct {
 }
 
 // ProviderFactory constructs a Provider. The API client is configured from
-// environment variables.
+// environment variables. Underlying Vault API client by default uses:
+// - VAULT_ADDR: endpoint of Vault, e.g. http://vault:8200/
+// - VAULT_TOKEN: token to login to Vault
+// See Vault API docs at https://godoc.org/github.com/hashicorp/vault/api
 func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	config := vault.DefaultConfig()
 
@@ -39,53 +42,87 @@ func (p *Provider) GetName() string {
 	return p.Name
 }
 
-// VaultDefaultField is the default value returned by the provider from the
-// hash returned by the Vault.
-const VaultDefaultField = "value"
+// DefaultField is the default field name the provider expects to find the secret value.
+const DefaultField = "value"
 
-// parseVaultID returns the secret id and field name.
+// parseVaultID returns the path to the secret (object) and (normalized) field/property path to the secret value.
 func parseVaultID(id string) (string, string) {
 	tokens := strings.SplitN(id, "#", 2)
 	switch len(tokens) {
 	case 1:
-		return tokens[0], VaultDefaultField
+		return tokens[0], DefaultField
 	default:
 		return tokens[0], tokens[1]
 	}
 }
 
-// GetValue obtains a value by id. Any secret which is stored in the vault is recognized.
-// The datatype returned by Vault is map[string]interface{}. Therefore this provider needs
-// to know which field to return from the map. By default, it returns the 'value'.
-// An alternative field can be obtained by appending '#fieldName' to the id argument.
-func (p *Provider) GetValue(id string) (value []byte, err error) {
-	id, fieldName := parseVaultID(id)
+// valueOf returns the value when navigating the obj along the fields.
+// Suppose obj = { "foo": { "bar": "qux" } } and fields = "foo.bar", then value returned is "qux".
+func valueOf(obj map[string]interface{}, fields string) (interface{}, bool) {
+	// Split fields to navigate by ".", e.g. if fields = [ "foo.bar" ] then it becomes a slice of [ "foo", "bar" ]
+	nav := strings.Split(fields, ".")
 
-	var secret *vault.Secret
-	if secret, err = p.Client.Logical().Read(id); err != nil {
-		return
-	}
-	// secret can be nil if it's not found
-	if secret == nil {
-		err = fmt.Errorf("HashiCorp Vault provider could not find a secret called '%s'", id)
-		return
+	// Traverse, starting at given obj, moving deeper into the object structure
+	for _, field := range nav[:len(nav)-1] {
+		// Get value of field in object
+		value, ok := obj[field]
+		if !ok {
+			return nil, false
+		}
+
+		// Value should be a (nested) object, hence update obj with value for next iteration
+		obj, ok = value.(map[string]interface{})
+		if !ok {
+			return nil, false
+		}
 	}
 
-	var ok bool
-	var valueObj interface{}
-	valueObj, ok = secret.Data[fieldName]
+	// Last field in navigation holds the actual value
+	field := nav[len(nav)-1]
+	return obj[field], true
+}
+
+// parseSecret returns value navigated by given fields on secret object.
+// Note that a secret returned from Vault is effectively a JSON object.
+func parseSecret(secret *vault.Secret, path string, fields string) ([]byte, error) {
+	value, ok := valueOf(secret.Data, fields)
 	if !ok {
-		err = fmt.Errorf("HashiCorp Vault provider expects the secret '%s' to contain field '%s'", id, fieldName)
-		return
+		err := fmt.Errorf("HashiCorp Vault provider expects secret in '%s' at '%s'", fields, path)
+		return nil, err
 	}
 
-	switch v := valueObj.(type) {
+	// Secret value must be either string or bytes
+	switch v := value.(type) {
 	case string:
-		value = []byte(v)
+		return []byte(v), nil
 	case []byte:
-		value = v
+		return v, nil
 	default:
-		err = fmt.Errorf("HashiCorp Vault provider expects the secret to be a string or byte[], got %T", v)
+		err := fmt.Errorf("HashiCorp Vault provider expects the secret to be a string or byte[], got %T", v)
+		return nil, err
 	}
-	return
+}
+
+// GetValue obtains a value by id. The id should contain the path in Vault to the secret. It may be appended with a
+// hash following the object property path to the secret value; defaults to DefaultField.
+// For example:
+//   - `kv/database/password` returns the value of field `value` in the secret object at given path.
+//   - `kv/database#password` returns the value of field `password` in the secret object at path `kv/database`.
+//   - `secret/data/database#data.value` returns the value of field `value` wrapped in object `data` in secret object
+//  	at path `secret/data/database`.
+// Secrets in Vault are stored as (JSON) objects in the shape of map[string]interface{}. Both path to the secret and
+// fields to the value in the secret must follow Vault API client conventions. Please see documentation of Vault for
+// details.
+func (p *Provider) GetValue(id string) ([]byte, error) {
+	path, fields := parseVaultID(id)
+	secret, err := p.Client.Logical().Read(path)
+	if err != nil {
+		return nil, err
+	}
+	if secret == nil {
+		err = fmt.Errorf("HashiCorp Vault provider could not find secret '%s'", path)
+		return nil, err
+	}
+
+	return parseSecret(secret, path, fields)
 }

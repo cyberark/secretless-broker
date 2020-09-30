@@ -3,7 +3,7 @@
 - [Secretless Broker](#secretless-broker)
   - [Supported services](#currently-supported-services)
 - [Quick Start](#quick-start)
-- [Additional demos](#run-more-secretless-demos)
+- [Additional demos](#run-more-secretless-broker-demos)
 - [Using Secretless](#using-secretless)
   - [Using This Project With Conjur-OSS](#using-secretless-broker-with-conjur-oss)
   - [About our releases](#about-our-releases)

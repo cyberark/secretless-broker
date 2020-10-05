@@ -29,48 +29,80 @@ func TestVault_Provider(t *testing.T) {
 	})
 
 	Convey("Reports when the secret is not found", t, func() {
-		values, err := provider.GetValues("foobar")
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "HashiCorp Vault provider could not find secret 'foobar'")
-		So(values[0], ShouldBeNil)
+		id := "foobar"
+		values, err := provider.GetValues(id)
+
+		So(err, ShouldBeNil)
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldNotBeNil)
+		So(values[id].Error, ShouldEqual, "HashiCorp Vault provider could not find secret 'foobar'")
+		So(values[id].Value, ShouldBeNil)
 	})
 
 	Convey("Reports when a field in the secret is not found", t, func() {
-		values, err := provider.GetValues("cubbyhole/first-secret#foo.bar")
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "HashiCorp Vault provider expects secret in 'foo.bar' at 'cubbyhole/first-secret'")
-		So(values[0], ShouldBeNil)
+		id := "cubbyhole/first-secret#foo.bar"
+		values, err := provider.GetValues(id)
+
+		So(err, ShouldBeNil)
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldNotBeNil)
+		So(values[id].Error, ShouldEqual, "HashiCorp Vault provider expects secret in 'foo.bar' at 'cubbyhole/first-secret'")
+		So(values[id].Value, ShouldBeNil)
 	})
 
 	Convey("Can provide a cubbyhole secret", t, func() {
-		values, err := provider.GetValues("cubbyhole/first-secret#some-key")
+		id := "cubbyhole/first-secret#some-key"
+		values, err := provider.GetValues(id)
+
 		So(err, ShouldBeNil)
-		So(string(values[0]), ShouldEqual, "one")
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, "one")
 	})
 
 	Convey("Can provide a cubbyhole secret with default field name", t, func() {
-		values, err := provider.GetValues("cubbyhole/second-secret")
+		id :="cubbyhole/second-secret"
+		values, err := provider.GetValues(id)
+
 		So(err, ShouldBeNil)
-		So(string(values[0]), ShouldEqual, "two")
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, "two")
 	})
 
 	Convey("Can provide a KV v1 secret", t, func() {
-		values, err := provider.GetValues("kv/db/password#password")
+		id := "kv/db/password#password"
+		values, err := provider.GetValues(id)
+
 		So(err, ShouldBeNil)
-		So(string(values[0]), ShouldEqual, "db-secret")
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, "db-secret")
 	})
 
 	Convey("Can provide a KV v1 secret with default field name", t, func() {
-		values, err := provider.GetValues("kv/web/password")
+		id := "kv/web/password"
+		values, err := provider.GetValues(id)
+
 		So(err, ShouldBeNil)
-		So(err, ShouldBeNil)
-		So(string(values[0]), ShouldEqual, "web-secret")
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, "web-secret")
 	})
 
 	// note the "data" in path and in the fields to navigate, which is required in KV v2
 	Convey("Can provide latest KV v2 secret", t, func() {
-		values, err := provider.GetValues("secret/data/service#data.api-key")
+		id := "secret/data/service#data.api-key"
+		values, err := provider.GetValues(id)
+
 		So(err, ShouldBeNil)
-		So(string(values[0]), ShouldEqual, "service-api-key")
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, "service-api-key")
 	})
 }

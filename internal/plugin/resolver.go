@@ -98,31 +98,52 @@ func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[stri
 			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", providerID, err)
 		}
 
-		// Create secretIds slice
-		var secretIds = make([]string, len(credentialsForProvider))
+		// Create secretIds slice and credentialBySecretId map
+		secretIds := make([]string, len(credentialsForProvider))
 		for idx, cred := range credentialsForProvider {
 			secretIds[idx] = cred.Get
 		}
 
 		// Resolves all credentials for current provider
-		secretValues, err := provider.GetValues(secretIds...)
+		providerResponses, err := provider.GetValues(secretIds...)
 		if err != nil {
-			errInfo := fmt.Sprintf("ERROR: Resolving credentials from provider '%s' failed: %v",
+			errInfo := fmt.Sprintf(
+				"ERROR: Resolving credentials from provider '%s' failed: %v",
 				provider.GetName(),
-				err)
+				err,
+			)
 			log.Println(errInfo)
 
 			errorStrings = append(errorStrings, errInfo)
 			continue
 		}
 
-		for idx, secretValue := range secretValues {
-			credential := credentialsForProvider[idx]
+		// Collect errors from provider responses
+		var hasErrors bool
+		for _, providerResponse := range providerResponses {
+			if providerResponse.Error != nil {
+				hasErrors = true
+				errorStrings = append(errorStrings, providerResponse.Error.Error())
+				continue
+			}
+		}
+		if hasErrors {
+			continue
+		}
 
-			result[credential.Name] = secretValue
+		// Set provider responses on result map before returning
+		for _, credential := range credentialsForProvider {
+			credentialName := credential.Name
+			secretValue := providerResponses[credential.Get].Value
+
+			result[credentialName] = secretValue
 
 			if resolver.EventNotifier != nil {
-				resolver.EventNotifier.ResolveCredential(provider, credential.Name, secretValue)
+				resolver.EventNotifier.ResolveCredential(
+					provider,
+					credentialName,
+					secretValue,
+				)
 			}
 		}
 	}

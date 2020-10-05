@@ -7,13 +7,19 @@ type ProviderOptions struct {
 	Name string
 }
 
+// ProviderResponse is the response from the provider for a given secret request
+type ProviderResponse struct {
+	Value []byte
+	Error error
+}
+
 // Provider is the interface used to obtain values from a secret vault backend.
 type Provider interface {
 	// GetName returns the name that the Provider was instantiated with
 	GetName() string
 
 	// GetValues takes in variable ids and returns their resolved values
-	GetValues(ids ...string) ([][]byte, error)
+	GetValues(ids ...string) (map[string]ProviderResponse, error)
 }
 
 type singleValueProvider interface {
@@ -29,16 +35,19 @@ type singleValueProvider interface {
 func GetValues(
 	p singleValueProvider,
 	ids ...string,
-) ([][]byte, error) {
-	var err error
-	var res = make([][]byte, len(ids))
+) (map[string]ProviderResponse, error) {
+	responses := map[string]ProviderResponse{}
 
-	for idx, id := range ids {
-		res[idx], err = p.GetValue(id)
-		if err != nil {
-			return nil, err
+	for _, id := range ids {
+		if _, ok := responses[id]; ok {
+			continue
 		}
+
+		var pr ProviderResponse
+		pr.Value, pr.Error = p.GetValue(id)
+
+		responses[id] = pr
 	}
 
-	return res, nil
+	return responses, nil
 }

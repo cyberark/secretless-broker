@@ -24,7 +24,7 @@ func (mp MapProvider) GetName() string {
 
 // GetValues takes in variable ids and returns their resolved values. This method is
 // needed to the Provider interface
-func (mp MapProvider) GetValues(ids ...string) ([][]byte, error) {
+func (mp MapProvider) GetValues(ids ...string) (map[string]plugin_v1.ProviderResponse, error) {
 	return plugin_v1.GetValues(mp, ids...)
 }
 

@@ -166,4 +166,4 @@ function main() {
   run_test_case "update configuration object" ohnoeswechangedit supersecretpassword
 }
 
-main || exit_err "Failed inside main"
+main || exit_err "K8s-CRD test: Failed inside main()"

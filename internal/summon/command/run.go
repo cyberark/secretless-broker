@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/cyberark/summon/secretsyml"
 
@@ -35,8 +36,9 @@ func buildEnvironment(secrets map[string]string, secretsMap secretsyml.SecretsMa
 }
 
 // resolveSecrets obtains the value of each requested secret.
-func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
-	result = make(map[string]string)
+func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (map[string]string, error) {
+	var err error
+	result := make(map[string]string)
 
 	var varSecretsSpecKeys []string
 	var varSecretsSpecPaths []string
@@ -53,16 +55,32 @@ func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMa
 	}
 
 	// Get the variable values
-	valuesBytes, err := provider.GetValues(varSecretsSpecPaths...)
+	providerResponses, err := provider.GetValues(varSecretsSpecPaths...)
 	if err != nil {
-		return
-	}
-	// Transform variable values to strings
-	for idx, key := range varSecretsSpecKeys {
-		result[key] = string(valuesBytes[idx])
+		return nil, err
 	}
 
-	return
+	// Collect errors from provider responses
+	var errorStrings []string
+	for _, providerResponse := range providerResponses {
+		if providerResponse.Error != nil {
+			errorStrings = append(errorStrings, providerResponse.Error.Error())
+			continue
+		}
+	}
+	if len(errorStrings) > 0 {
+		err = fmt.Errorf(strings.Join(errorStrings, "\n"))
+		return nil, err
+	}
+
+	// Get variable values as strings
+	for _, key := range varSecretsSpecKeys {
+		spec := secretsMap[key]
+		pr := providerResponses[spec.Path]
+		result[key] = string(pr.Value)
+	}
+
+	return result, nil
 }
 
 // runSubcommand executes a command with arguments in the context

@@ -129,6 +129,6 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 
 // GetValues takes in variable ids and returns their resolved values. This method is
 // needed to the Provider interface
-func (p *Provider) GetValues(ids ...string) ([][]byte, error) {
+func (p *Provider) GetValues(ids ...string) (map[string]plugin_v1.ProviderResponse, error) {
 	return plugin_v1.GetValues(p, ids...)
 }

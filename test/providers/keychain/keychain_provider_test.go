@@ -42,14 +42,20 @@ func TestKeychainProvider(t *testing.T) {
 
 		values, err := provider.GetValues(id)
 		So(err, ShouldBeNil)
-		So(string(values[0]), ShouldEqual, secret)
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, secret)
 	})
 
 	Convey("Returns an error for an invalid secret value", t, func() {
 		id := "madeup#secret"
 
-		_, err := provider.GetValues(id)
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "The specified item could not be found in the keychain.")
+		values, err := provider.GetValues(id)
+		So(err, ShouldBeNil)
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldNotBeNil)
+		So(values[id].Error.Error(), ShouldEqual, "The specified item could not be found in the keychain.")
+		So(values[id].Value, ShouldBeNil)
 	})
 }

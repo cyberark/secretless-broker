@@ -6,7 +6,7 @@ require (
 	github.com/codegangsta/cli v1.20.0
 	github.com/containerd/containerd v1.3.2 // indirect
 	github.com/cyberark/conjur-api-go v0.5.2
-	github.com/cyberark/conjur-authn-k8s-client v0.16.1
+	github.com/cyberark/conjur-authn-k8s-client v0.19.0
 	github.com/cyberark/summon v0.7.0
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
 	github.com/docker/distribution v2.7.1+incompatible // indirect

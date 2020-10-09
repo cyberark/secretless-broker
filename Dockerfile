@@ -115,7 +115,7 @@ COPY LICENSE /licenses
 
 USER secretless
 
-ENTRYPOINT [ "/usr/local/bin/secretless-broker" ]
+ENTRYPOINT [ "/usr/local/bin/secretless-broker -debug=true" ]
 
 COPY --from=secretless-builder /secretless/dist/linux/amd64/secretless-broker \
                                /secretless/dist/linux/amd64/summon2 /usr/local/bin/

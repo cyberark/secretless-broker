@@ -1,3 +1,6 @@
 [submodule "third_party/go-mssqldb"]
 	path = third_party/go-mssqldb
 	url = https://github.com/cyberark/go-mssqldb
+[submodule "third_party/gocql"]
+	path = third_party/gocql
+	url = https://github.com/BradleyBoutcher/gocql

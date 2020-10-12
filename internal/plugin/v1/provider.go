@@ -28,7 +28,7 @@ type singleValueProvider interface {
 }
 
 // GetValues takes in variable ids and returns their resolved values by making sequential
-// calls to a singleValueProvider.
+// getValueCallArgs to a singleValueProvider.
 // This is a convenience function since most providers with batch retrieval capabilities
 // will have need the exact same code. Note: most internal providers simply use this
 // function in their implementation of the Provider interface's GetValues method.

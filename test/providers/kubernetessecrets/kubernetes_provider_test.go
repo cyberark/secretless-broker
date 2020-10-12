@@ -56,46 +56,62 @@ func TestKubernetes_Provider(t *testing.T) {
 		So(provider.GetName(), ShouldEqual, expectedName)
 	})
 
-	Convey("Reports when the secret id does not contain a field name", t, func() {
-		values, err := provider.GetValues("foobar")
-		So(err, ShouldBeNil)
-		So(values["foobar"], ShouldNotBeNil)
-		So(values["foobar"].Value, ShouldBeNil)
-		So(values["foobar"].Error, ShouldNotBeNil)
-		So(values["foobar"].Error.Error(), ShouldEqual, "Kubernetes secret id must contain secret name and field name in the format secretName#fieldName, received 'foobar'")
-	})
-
-	Convey("Reports when the secret id has empty field name", t, func() {
-		values, err := provider.GetValues("foobar#")
-		So(err, ShouldBeNil)
-		So(values["foobar#"], ShouldNotBeNil)
-		So(values["foobar#"].Value, ShouldBeNil)
-		So(values["foobar#"].Error, ShouldNotBeNil)
-		So(values["foobar#"].Error.Error(), ShouldEqual, "field name missing from Kubernetes secret id 'foobar#'")
-	})
-
-	Convey("Reports when Kubernetes is unable to find secret", t, func() {
-		values, err := provider.GetValues("foobar#maybe")
-		So(err, ShouldBeNil)
-		So(values["foobar#maybe"], ShouldNotBeNil)
-		So(values["foobar#maybe"].Value, ShouldBeNil)
-		So(values["foobar#maybe"].Error, ShouldNotBeNil)
-		So(values["foobar#maybe"].Error.Error(), ShouldEqual, "could not find Kubernetes secret from 'foobar#maybe'")
-	})
-
-	Convey("Reports when Kubernetes is unable to find field name in secret", t, func() {
-		values, err := provider.GetValues("database#missing")
-		So(err, ShouldBeNil)
-		So(values["database#missing"], ShouldNotBeNil)
-		So(values["database#missing"].Value, ShouldBeNil)
-		So(values["database#missing"].Error, ShouldNotBeNil)
-		So(values["database#missing"].Error.Error(), ShouldEqual, "could not find field 'missing' in Kubernetes secret 'database'")
-	})
-
 	Convey("Can provide a secret", t, func() {
-		values, err := provider.GetValues("database#password")
+		id := "database#password"
+		values, err := provider.GetValues(id)
 		So(err, ShouldBeNil)
-		So(values["database#password"], ShouldNotBeNil)
-		So(string(values["database#password"].Value), ShouldEqual, "secret")
+		So(values, ShouldContainKey, id)
+		So(values[id].Error, ShouldBeNil)
+		So(string(values[id].Value), ShouldEqual, "secret")
 	})
+
+	Convey("Reports", t, func() {
+		for _, testCase := range reportsTestCases {
+			Convey(
+				testCase.description,
+				reports(provider, testCase.id, testCase.expectedErrString),
+			)
+		}
+	})
+}
+
+type reportsTestCase struct {
+	description       string
+	id                string
+	expectedErrString string
+}
+
+func reports(provider plugin_v1.Provider, id string, expectedErrString string) func() {
+	return func() {
+		values, err := provider.GetValues(id)
+
+		So(err, ShouldBeNil)
+		So(values, ShouldContainKey, id)
+		So(values[id].Value, ShouldBeNil)
+		So(values[id].Error, ShouldNotBeNil)
+		So(values[id].Error.Error(), ShouldEqual, expectedErrString)
+	}
+}
+
+var reportsTestCases = []reportsTestCase{
+	{
+		description:       "Reports when the secret id does not contain a field name",
+		id:                "foobar",
+		expectedErrString: "Kubernetes secret id must contain secret name and field name in the format secretName#fieldName, received 'foobar'",
+	},
+	{
+		description:       "Reports when the secret id has empty field name",
+		id:                "foobar#",
+		expectedErrString: "field name missing from Kubernetes secret id 'foobar#'",
+	},
+	{
+		description:       "Reports when Kubernetes is unable to find secret",
+		id:                "foobar#maybe",
+		expectedErrString: "could not find Kubernetes secret from 'foobar#maybe'",
+	},
+	{
+		description:       "Reports when Kubernetes is unable to find field name in secret",
+		id:                "database#missing",
+		expectedErrString: "could not find field 'missing' in Kubernetes secret 'database'",
+	},
 }

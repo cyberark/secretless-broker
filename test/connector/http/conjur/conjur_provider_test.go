@@ -7,7 +7,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	. "github.com/smartystreets/goconvey/convey"
 
-	pluginV1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/providers"
 )
 
@@ -15,10 +15,10 @@ import (
 // as well as secret values.
 func TestConjur_Provider(t *testing.T) {
 	var err error
-	var provider pluginV1.Provider
+	var provider plugin_v1.Provider
 	name := "conjur"
 
-	options := pluginV1.ProviderOptions{
+	options := plugin_v1.ProviderOptions{
 		Name: name,
 	}
 
@@ -47,53 +47,8 @@ func TestConjur_Provider(t *testing.T) {
 		So(token["payload"], ShouldNotBeNil)
 	})
 
-	Convey("Can provide a secret to a fully qualified variable", t, func() {
-		id := "dev:variable:db/password"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "secret")
-	})
-
-	Convey("Can retrieve a secret value with spaces", t, func() {
-		id := "my var"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "othersecret")
-	})
-
-	Convey("Can provide the default Conjur account name", t, func() {
-		id := "variable:db/password"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "secret")
-	})
-
-	Convey("Can provide the default Conjur account name and resource type", t, func() {
-		id := "db/password"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "secret")
-	})
-
-	Convey("Cannot provide an unknown value", t, func() {
+	Convey("Reports an unknown value", t, func() {
 		id := "foobar"
-
 		values, err := provider.GetValues(id)
 
 		So(err, ShouldBeNil)
@@ -102,4 +57,54 @@ func TestConjur_Provider(t *testing.T) {
 		So(values[id].Error.Error(), ShouldEqual, "404 Not Found. Variable 'foobar' not found in account 'dev'.")
 		So(values[id].Value, ShouldBeNil)
 	})
+
+	Convey("Provides", t, func() {
+		for _, testCase := range canProvideTestCases {
+			Convey(
+				testCase.description,
+				canProvide(provider, testCase.id, testCase.expectedValue),
+			)
+		}
+	})
+}
+
+type canProvideTestCase struct {
+	description   string
+	id            string
+	expectedValue string
+}
+
+func canProvide(provider plugin_v1.Provider, id string, expectedValue string) func() {
+	return func() {
+		values, err := provider.GetValues(id)
+
+		So(err, ShouldBeNil)
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, expectedValue)
+	}
+}
+
+var canProvideTestCases = []canProvideTestCase{
+	{
+		description:   "Can provide a secret to a fully qualified variable",
+		id:            "dev:variable:db/password",
+		expectedValue: "secret",
+	},
+	{
+		description:   "Can retrieve a secret value with spaces",
+		id:            "my var",
+		expectedValue: "othersecret",
+	},
+	{
+		description:   "Can provide the default Conjur account name",
+		id:            "variable:db/password",
+		expectedValue: "secret",
+	},
+	{
+		description:   "Can provide the default Conjur account name and resource type",
+		id:            "db/password",
+		expectedValue: "secret",
+	},
 }

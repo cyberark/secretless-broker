@@ -18,10 +18,14 @@ exit_err() {
 
 
   # Snapshot of workloads
+  echo "- Snapshot of workloads on exit"
+  echo "-- Current namespace: $(current_namespace)"
+  echo "-- Pods in namespace:"
   kubectl --namespace "$(current_namespace)" get pods || true
+  echo "-- Warning events in namespace:"
   kubectl --namespace "$(current_namespace)" get events --field-selector type=Warning || true
 
-   exit 1
+  exit 1
 }
 
 function cleanup() {

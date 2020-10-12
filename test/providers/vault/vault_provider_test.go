@@ -28,81 +28,101 @@ func TestVault_Provider(t *testing.T) {
 		So(provider.GetName(), ShouldEqual, "vault")
 	})
 
-	Convey("Reports when the secret is not found", t, func() {
-		id := "foobar"
+	Convey("Reports", t, func() {
+		for _, testCase := range reportsTestCases {
+			Convey(
+				testCase.description,
+				reports(provider, testCase.id, testCase.expectedErrString),
+			)
+		}
+	})
+
+	Convey("Provides", t, func() {
+		for _, testCase := range canProvideTestCases {
+			Convey(
+				testCase.description,
+				canProvide(provider, testCase.id, testCase.expectedValue),
+			)
+		}
+	})
+}
+
+type canProvideTestCase struct {
+	description   string
+	id            string
+	expectedValue string
+}
+
+func canProvide(provider plugin_v1.Provider, id string, expectedValue string) func() {
+	return func() {
+		values, err := provider.GetValues(id)
+
+		So(err, ShouldBeNil)
+		So(values[id], ShouldNotBeNil)
+		So(values[id].Error, ShouldBeNil)
+		So(values[id].Value, ShouldNotBeNil)
+		So(string(values[id].Value), ShouldEqual, expectedValue)
+	}
+}
+
+type reportsTestCase struct {
+	description       string
+	id                string
+	expectedErrString string
+}
+
+func reports(provider plugin_v1.Provider, id string, expectedErrString string) func() {
+	return func() {
 		values, err := provider.GetValues(id)
 
 		So(err, ShouldBeNil)
 		So(values[id], ShouldNotBeNil)
 		So(values[id].Error, ShouldNotBeNil)
-		So(values[id].Error, ShouldEqual, "HashiCorp Vault provider could not find secret 'foobar'")
+		So(values[id].Error.Error(), ShouldEqual, expectedErrString)
 		So(values[id].Value, ShouldBeNil)
-	})
+	}
+}
 
-	Convey("Reports when a field in the secret is not found", t, func() {
-		id := "cubbyhole/first-secret#foo.bar"
-		values, err := provider.GetValues(id)
+var reportsTestCases = []reportsTestCase{
+	{
+		description: "Reports when the secret is not found",
+		id:          "foobar",
+		expectedErrString: "HashiCorp Vault provider could not find secret " +
+			"'foobar'",
+	},
+	{
+		description: "Reports when a field in the secret is not found",
+		id:          "cubbyhole/first-secret#foo.bar",
+		expectedErrString: "HashiCorp Vault provider expects secret in " +
+			"'foo.bar' at 'cubbyhole/first-secret'",
+	},
+}
 
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldNotBeNil)
-		So(values[id].Error, ShouldEqual, "HashiCorp Vault provider expects secret in 'foo.bar' at 'cubbyhole/first-secret'")
-		So(values[id].Value, ShouldBeNil)
-	})
-
-	Convey("Can provide a cubbyhole secret", t, func() {
-		id := "cubbyhole/first-secret#some-key"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "one")
-	})
-
-	Convey("Can provide a cubbyhole secret with default field name", t, func() {
-		id :="cubbyhole/second-secret"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "two")
-	})
-
-	Convey("Can provide a KV v1 secret", t, func() {
-		id := "kv/db/password#password"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "db-secret")
-	})
-
-	Convey("Can provide a KV v1 secret with default field name", t, func() {
-		id := "kv/web/password"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "web-secret")
-	})
-
-	// note the "data" in path and in the fields to navigate, which is required in KV v2
-	Convey("Can provide latest KV v2 secret", t, func() {
-		id := "secret/data/service#data.api-key"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, "service-api-key")
-	})
+var canProvideTestCases = []canProvideTestCase{
+	{
+		description:   "Can provide a cubbyhole secret",
+		id:            "cubbyhole/first-secret#some-key",
+		expectedValue: "one",
+	},
+	{
+		description:   "Can provide a cubbyhole secret with default field name",
+		id:            "cubbyhole/second-secret",
+		expectedValue: "two",
+	},
+	{
+		description:   "Can provide a KV v1 secret",
+		id:            "kv/db/password#password",
+		expectedValue: "db-secret",
+	},
+	{
+		description:   "Can provide a KV v1 secret with default field name",
+		id:            "kv/web/password",
+		expectedValue: "web-secret",
+	},
+	{
+		// note the "data" in path and in the fields to navigate, which is required in KV v2
+		description:   "Can provide latest KV v2 secret",
+		id:            "secret/data/service#data.api-key",
+		expectedValue: "service-api-key",
+	},
 }

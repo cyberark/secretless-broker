@@ -8,6 +8,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/plugin/v1/testutils"
 	"github.com/cyberark/secretless-broker/internal/providers"
 )
 
@@ -47,64 +48,45 @@ func TestConjur_Provider(t *testing.T) {
 		So(token["payload"], ShouldNotBeNil)
 	})
 
-	Convey("Reports an unknown value", t, func() {
-		id := "foobar"
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldNotBeNil)
-		So(values[id].Error.Error(), ShouldEqual, "404 Not Found. Variable 'foobar' not found in account 'dev'.")
-		So(values[id].Value, ShouldBeNil)
-	})
+	Convey(
+		"Reports an unknown value",
+		t,
+		testutils.Reports(
+			provider,
+			"foobar",
+			"404 Not Found. Variable 'foobar' not found in account 'dev'.",
+		),
+	)
 
 	Convey("Provides", t, func() {
 		for _, testCase := range canProvideTestCases {
 			Convey(
-				testCase.description,
-				canProvide(provider, testCase.id, testCase.expectedValue),
+				testCase.Description,
+				testutils.CanProvide(provider, testCase.ID, testCase.ExpectedValue),
 			)
 		}
 	})
 }
 
-type canProvideTestCase struct {
-	description   string
-	id            string
-	expectedValue string
-}
-
-func canProvide(provider plugin_v1.Provider, id string, expectedValue string) func() {
-	return func() {
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
-		So(string(values[id].Value), ShouldEqual, expectedValue)
-	}
-}
-
-var canProvideTestCases = []canProvideTestCase{
+var canProvideTestCases = []testutils.CanProvideTestCase{
 	{
-		description:   "Can provide a secret to a fully qualified variable",
-		id:            "dev:variable:db/password",
-		expectedValue: "secret",
+		Description:   "Can provide a secret to a fully qualified variable",
+		ID:            "dev:variable:db/password",
+		ExpectedValue: "secret",
 	},
 	{
-		description:   "Can retrieve a secret value with spaces",
-		id:            "my var",
-		expectedValue: "othersecret",
+		Description:   "Can retrieve a secret value with spaces",
+		ID:            "my var",
+		ExpectedValue: "othersecret",
 	},
 	{
-		description:   "Can provide the default Conjur account name",
-		id:            "variable:db/password",
-		expectedValue: "secret",
+		Description:   "Can provide the default Conjur account name",
+		ID:            "variable:db/password",
+		ExpectedValue: "secret",
 	},
 	{
-		description:   "Can provide the default Conjur account name and resource type",
-		id:            "db/password",
-		expectedValue: "secret",
+		Description:   "Can provide the default Conjur account name and resource type",
+		ID:            "db/password",
+		ExpectedValue: "secret",
 	},
 }

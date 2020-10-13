@@ -10,6 +10,7 @@ import (
 	testclient "k8s.io/client-go/kubernetes/fake"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/cyberark/secretless-broker/internal/plugin/v1/testutils"
 	"github.com/cyberark/secretless-broker/internal/providers"
 	"github.com/cyberark/secretless-broker/internal/providers/kubernetessecrets"
 )
@@ -21,7 +22,9 @@ func TestKubernetes_Provider(t *testing.T) {
 		kubernetesProvider *kubernetessecrets.Provider
 	)
 
-	var testSecretsClient = testclient.NewSimpleClientset().CoreV1().Secrets("some-namespace")
+	var testSecretsClient = testclient.NewSimpleClientset().CoreV1().Secrets(
+		"some-namespace",
+	)
 
 	_, err = testSecretsClient.Create(&v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -68,50 +71,32 @@ func TestKubernetes_Provider(t *testing.T) {
 	Convey("Reports", t, func() {
 		for _, testCase := range reportsTestCases {
 			Convey(
-				testCase.description,
-				reports(provider, testCase.id, testCase.expectedErrString),
+				testCase.Description,
+				testutils.Reports(provider, testCase.ID, testCase.ExpectedErrString),
 			)
 		}
 	})
 }
 
-type reportsTestCase struct {
-	description       string
-	id                string
-	expectedErrString string
-}
-
-func reports(provider plugin_v1.Provider, id string, expectedErrString string) func() {
-	return func() {
-		values, err := provider.GetValues(id)
-
-		So(err, ShouldBeNil)
-		So(values, ShouldContainKey, id)
-		So(values[id].Value, ShouldBeNil)
-		So(values[id].Error, ShouldNotBeNil)
-		So(values[id].Error.Error(), ShouldEqual, expectedErrString)
-	}
-}
-
-var reportsTestCases = []reportsTestCase{
+var reportsTestCases = []testutils.ReportsTestCase{
 	{
-		description:       "Reports when the secret id does not contain a field name",
-		id:                "foobar",
-		expectedErrString: "Kubernetes secret id must contain secret name and field name in the format secretName#fieldName, received 'foobar'",
+		Description:       "Reports when the secret id does not contain a field name",
+		ID:                "foobar",
+		ExpectedErrString: "Kubernetes secret id must contain secret name and field name in the format secretName#fieldName, received 'foobar'",
 	},
 	{
-		description:       "Reports when the secret id has empty field name",
-		id:                "foobar#",
-		expectedErrString: "field name missing from Kubernetes secret id 'foobar#'",
+		Description:       "Reports when the secret id has empty field name",
+		ID:                "foobar#",
+		ExpectedErrString: "field name missing from Kubernetes secret id 'foobar#'",
 	},
 	{
-		description:       "Reports when Kubernetes is unable to find secret",
-		id:                "foobar#maybe",
-		expectedErrString: "could not find Kubernetes secret from 'foobar#maybe'",
+		Description:       "Reports when Kubernetes is unable to find secret",
+		ID:                "foobar#maybe",
+		ExpectedErrString: "could not find Kubernetes secret from 'foobar#maybe'",
 	},
 	{
-		description:       "Reports when Kubernetes is unable to find field name in secret",
-		id:                "database#missing",
-		expectedErrString: "could not find field 'missing' in Kubernetes secret 'database'",
+		Description:       "Reports when Kubernetes is unable to find field name in secret",
+		ID:                "database#missing",
+		ExpectedErrString: "could not find field 'missing' in Kubernetes secret 'database'",
 	},
 }

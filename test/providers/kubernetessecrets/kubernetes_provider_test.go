@@ -15,6 +15,16 @@ import (
 	"github.com/cyberark/secretless-broker/internal/providers/kubernetessecrets"
 )
 
+var mockSecrets = map[string]map[string][]byte{
+	"database": {
+		"password": []byte("secret-value"),
+	},
+	"server1": {
+		"api-key": []byte("api-key-value"),
+		"token":   []byte("token-value"),
+	},
+}
+
 func TestKubernetes_Provider(t *testing.T) {
 	var (
 		err                error
@@ -26,16 +36,16 @@ func TestKubernetes_Provider(t *testing.T) {
 		"some-namespace",
 	)
 
-	_, err = testSecretsClient.Create(&v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "database",
-		},
-		Data: map[string][]byte{
-			"password": []byte("secret"),
-		},
-	})
-	if err != nil {
-		panic(fmt.Errorf("unable to create secret on test client: %s", err))
+	for name, data := range mockSecrets {
+		_, err = testSecretsClient.Create(&v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: name,
+			},
+			Data: data,
+		})
+		if err != nil {
+			panic(fmt.Errorf("unable to create secret on test client: %s", err))
+		}
 	}
 
 	expectedName := "kubernetes"
@@ -65,7 +75,7 @@ func TestKubernetes_Provider(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(values, ShouldContainKey, id)
 		So(values[id].Error, ShouldBeNil)
-		So(string(values[id].Value), ShouldEqual, "secret")
+		So(string(values[id].Value), ShouldEqual, "secret-value")
 	})
 
 	Convey("Reports", t, func() {
@@ -76,13 +86,27 @@ func TestKubernetes_Provider(t *testing.T) {
 			)
 		}
 	})
+
+	Convey(
+		"Multiple Provides ",
+		t,
+		testutils.CanProvideMultiple(
+			provider,
+			map[string]string{
+				"database#password": "secret-value",
+				"server1#api-key":   "api-key-value",
+				"server1#token":     "token-value",
+			},
+		),
+	)
 }
 
 var reportsTestCases = []testutils.ReportsTestCase{
 	{
-		Description:       "Reports when the secret id does not contain a field name",
-		ID:                "foobar",
-		ExpectedErrString: "Kubernetes secret id must contain secret name and field name in the format secretName#fieldName, received 'foobar'",
+		Description: "Reports when the secret id does not contain a field name",
+		ID:          "foobar",
+		ExpectedErrString: "Kubernetes secret id must contain secret name and field name " +
+			"in the format secretName#fieldName, received 'foobar'",
 	},
 	{
 		Description:       "Reports when the secret id has empty field name",

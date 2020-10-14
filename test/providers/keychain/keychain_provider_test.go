@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
@@ -22,6 +21,15 @@ func TestKeychainProvider(t *testing.T) {
 	service := os.Getenv("SERVICE")
 	account := os.Getenv("ACCOUNT")
 	secret := os.Getenv("SECRET")
+
+	// e.g. ${service}_1#${account}_1
+	getSecretPath := func(idx int) string {
+		return service + "_" + string(idx) + "#" + account + "_" + string(idx)
+	}
+	// e.g. ${secret}_1
+	getSecretValue := func(idx int) string {
+		return secret + "_" + string(idx)
+	}
 
 	options := plugin_v1.ProviderOptions{
 		Name: name,
@@ -43,8 +51,21 @@ func TestKeychainProvider(t *testing.T) {
 		t,
 		testutils.CanProvide(
 			provider,
-			strings.Join([]string{service, account}, "#"),
-			secret,
+			getSecretPath(1),
+			getSecretValue(1),
+		),
+	)
+
+	Convey(
+		"Multiple Provides ",
+		t,
+		testutils.CanProvideMultiple(
+			provider,
+			map[string]string{
+				getSecretPath(1): getSecretValue(1),
+				getSecretPath(2): getSecretValue(2),
+				getSecretPath(3): getSecretValue(3),
+			},
 		),
 	)
 

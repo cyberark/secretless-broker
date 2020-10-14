@@ -46,6 +46,19 @@ func TestVault_Provider(t *testing.T) {
 			)
 		}
 	})
+
+	Convey(
+		"Multiple Provides ",
+		t,
+		testutils.CanProvideMultiple(
+			provider,
+			map[string]string{
+				"cubbyhole/first-secret#some-key": "one",
+				"cubbyhole/second-secret":         "two",
+				"kv/db/password#password":         "two",
+			},
+		),
+	)
 }
 
 var reportsTestCases = []testutils.ReportsTestCase{

@@ -43,7 +43,7 @@ func GetValues(
 			continue
 		}
 
-		var pr ProviderResponse
+		pr := ProviderResponse{}
 		pr.Value, pr.Error = p.GetValue(id)
 
 		responses[id] = pr

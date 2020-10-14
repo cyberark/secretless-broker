@@ -9,13 +9,12 @@ rm -rf ${log}
 export SECRETLESS_CRD_SUFFIX=${TEST_ID-}
 
 exit_err() {
-   printf '\n--------------------- \n\n'
-   printf '\n- exited\n\n'
-   echo >&2 "${1}"
-   printf '\n-- last logs\n\n'
-   cat ${log};
-   rm -rf ${log};
-
+  printf '\n--------------------- \n\n'
+  printf '\n- exited\n\n'
+  echo >&2 "${1}"
+  printf '\n-- last logs\n\n'
+  cat ${log};
+  rm -rf ${log};
 
   # Snapshot of workloads
   echo "- Snapshot of workloads on exit"

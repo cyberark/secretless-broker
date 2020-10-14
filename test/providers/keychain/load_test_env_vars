@@ -5,3 +5,4 @@ set -euo pipefail
 export SERVICE="Secretless_Test"
 export ACCOUNT="KeychainProvider"
 export SECRET="secret"
+export NUM_SECRETS="3"

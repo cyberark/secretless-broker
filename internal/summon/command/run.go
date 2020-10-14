@@ -54,6 +54,10 @@ func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMa
 		}
 	}
 
+	if atLeastOneVar := len(varSecretsSpecPaths) > 0; !atLeastOneVar {
+		return result, nil
+	}
+
 	// Get the variable values
 	providerResponses, err := provider.GetValues(varSecretsSpecPaths...)
 	if err != nil {

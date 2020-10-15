@@ -63,7 +63,7 @@ func Test_Resolver(t *testing.T) {
 			So(err.Error(), ShouldEqual,
 				"ERROR: Resolving credentials from provider 'env' failed: "+
 					"env cannot find environment variable 'something-also-not-in-env', "+
-					"env cannot find environment variable 'something-not-in-env'; "+
+					"env cannot find environment variable 'something-not-in-env'\n"+
 					"ERROR: Resolving credentials from provider 'file' failed: "+
 					"open something-not-on-file: no such file or directory")
 		})

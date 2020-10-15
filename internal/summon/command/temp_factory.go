@@ -63,24 +63,33 @@ func defaultTempPath(sharedMemoryDir string) string {
 }
 
 // Push creates a temp file with given value. Returns the path.
-func (tf *TempFactory) Push(value string) string {
-	f, _ := ioutil.TempFile(tf.path, ".summon")
+func (tf *TempFactory) Push(value string) (string, error) {
+	f, err := ioutil.TempFile(tf.path, ".summon")
+	if err != nil {
+		return "", err
+	}
+
 	defer f.Close()
 
-	f.Write([]byte(value))
+	_, err = f.Write([]byte(value))
+	if err != nil {
+		return "", err
+	}
+
 	name := f.Name()
 	tf.files = append(tf.files, name)
-	return name
+	return name, nil
 }
 
 // Cleanup removes the temporary files created with this factory.
 func (tf *TempFactory) Cleanup() {
 	for _, file := range tf.files {
-		os.Remove(file)
+		_ = os.Remove(file)
 	}
+	tf.files = nil
+
 	// Also remove the tempdir if it's not the shared memory directory
 	if !strings.Contains(tf.path, defaultSharedMemoryDir) {
-		os.Remove(tf.path)
+		_ = os.Remove(tf.path)
 	}
-	tf = nil
 }

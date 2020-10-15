@@ -124,7 +124,7 @@ func (resolver *Resolver) resolveForProvider(
 	return provider, providerResponses, ""
 }
 
-// Resolve accepts an list of Providers and a list of Credentials and
+// Resolve accepts n list of Providers and a list of Credentials and
 // attempts to obtain the value of each Credential from the appropriate Provider.
 func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[string][]byte, error) {
 	if len(credentials) == 0 {
@@ -174,7 +174,7 @@ func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[stri
 		// Sort the error strings to provide deterministic output
 		sort.Strings(errorStrings)
 
-		err = fmt.Errorf(strings.Join(errorStrings, "; "))
+		err = fmt.Errorf(strings.Join(errorStrings, "\n"))
 	}
 
 	return result, err

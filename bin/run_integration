@@ -84,7 +84,7 @@ if [[ -x "./stop" ]]; then
 fi
 
 # Translate and copy results unit junit.xml for Jenkins
-rm --force "${test_dir}/junit.xml"
+rm -f "${test_dir}/junit.xml"
 
 docker run --rm \
   --volume "${test_dir}/:/secretless/test/output/" \

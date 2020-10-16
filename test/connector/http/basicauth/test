@@ -16,6 +16,8 @@ if $local_test; then
   docker_volume_args=(--volume "$(cd ../../../..; pwd):/secretless")
 fi
 
+TEST_FAILED="false"
+
 assert_contains() {
   # assert_contains <string> <substring>
   local string=$1
@@ -36,7 +38,7 @@ assert_contains() {
   echo "${substring}"
   echo ""
 
-  exit 1
+  TEST_FAILED="true"
 }
 
 ping_target_service_thru_secretless() {
@@ -93,4 +95,9 @@ echo "Test: Secretless configured with incorrect password fails"
 bad_resp=$(ping_target_service_thru_secretless 8081)
 assert_contains "$bad_resp" "401 Unauthorized"
 
-echo "PASS"
+if [[ "$TEST_FAILED" == "true" ]]; then
+  echo "FAILED: basicauth/test"
+  exit 1
+fi
+
+echo "PASS: basicauth/test"

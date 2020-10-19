@@ -25,6 +25,12 @@ func (p *EnvironmentProvider) GetName() string {
 	return p.Name
 }
 
+// GetValues takes in variable ids and returns their resolved values. This method is
+// needed to the Provider interface
+func (p *EnvironmentProvider) GetValues(ids ...string) (map[string]plugin_v1.ProviderResponse, error) {
+	return plugin_v1.GetValues(p, ids...)
+}
+
 // GetValue obtains a value by ID. Any environment is a recognized ID.
 func (p *EnvironmentProvider) GetValue(id string) (result []byte, err error) {
 	var found bool

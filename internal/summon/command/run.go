@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sort"
+	"strings"
 
 	"github.com/cyberark/summon/secretsyml"
 
@@ -25,33 +27,84 @@ type Subcommand struct {
 
 // buildEnvironment builds the environment strings from the map of secrets values, along with the
 // secrets configuration metadata and the temp files location.
-func buildEnvironment(secrets map[string]string, secretsMap secretsyml.SecretsMap, tempFactory *TempFactory) (env []string, err error) {
-	env = make([]string, len(secrets))
-	for key, value := range secrets {
-		envvar := formatForEnv(key, value, secretsMap[key], tempFactory)
+func buildEnvironment(
+	secrets map[string]string,
+	secretsMap secretsyml.SecretsMap,
+	tempFactory *TempFactory,
+) ([]string, error) {
+	env := make([]string, 0, len(secrets))
+	keys := make([]string, 0, len(secrets))
+
+	for k := range secrets {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		envvar, err := formatForEnv(key, secrets[key], secretsMap[key], tempFactory)
+		if err != nil {
+			return nil, err
+		}
 		env = append(env, envvar)
 	}
-	return
+
+	return env, nil
 }
 
 // resolveSecrets obtains the value of each requested secret.
-func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (result map[string]string, err error) {
-	result = make(map[string]string)
+func resolveSecrets(provider plugin_v1.Provider, secretsMap secretsyml.SecretsMap) (map[string]string, error) {
+	var err error
+	result := make(map[string]string)
+
+	var varSecretsSpecKeys []string
+	var varSecretsSpecPaths []string
+
 	for key, spec := range secretsMap {
-		var value string
 		if spec.IsVar() {
-			var valueBytes []byte
-			if valueBytes, err = provider.GetValue(spec.Path); err != nil {
-				return
-			}
-			value = string(valueBytes)
+			varSecretsSpecKeys = append(varSecretsSpecKeys, key)
+			varSecretsSpecPaths = append(varSecretsSpecPaths, spec.Path)
 		} else {
 			// If the spec isn't a variable, use its value as-is
-			value = spec.Path
+			value := spec.Path
+			result[key] = value
 		}
-		result[key] = value
 	}
-	return
+
+	// If there are no variables to resolve, return what we have
+	if len(varSecretsSpecPaths) == 0 {
+		return result, nil
+	}
+
+	// Get the variable values
+	providerResponses, err := provider.GetValues(varSecretsSpecPaths...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Collect errors from provider responses
+	var errorStrings []string
+	for _, providerResponse := range providerResponses {
+		if providerResponse.Error != nil {
+			errorStrings = append(errorStrings, providerResponse.Error.Error())
+			continue
+		}
+	}
+	if len(errorStrings) > 0 {
+		// Sort the error strings to provide deterministic output
+		sort.Strings(errorStrings)
+
+		err = fmt.Errorf(strings.Join(errorStrings, "\n"))
+		return nil, err
+	}
+
+	// Get variable values as strings
+	for _, key := range varSecretsSpecKeys {
+		spec := secretsMap[key]
+		pr := providerResponses[spec.Path]
+		result[key] = string(pr.Value)
+	}
+
+	return result, nil
 }
 
 // runSubcommand executes a command with arguments in the context
@@ -78,13 +131,22 @@ func (sc *Subcommand) runSubcommand(env []string) (err error) {
 
 // formatForEnv returns a string in %k=%v format, where %k=namespace of the secret and
 // %v=the secret value or path to a temporary file containing the secret
-func formatForEnv(key string, value string, spec secretsyml.SecretSpec, tempFactory *TempFactory) string {
+func formatForEnv(
+	key string,
+	value string,
+	spec secretsyml.SecretSpec,
+	tempFactory *TempFactory,
+) (string, error) {
 	if spec.IsFile() {
-		fname := tempFactory.Push(value)
+		fname, err := tempFactory.Push(value)
+		if err != nil {
+			return "", err
+		}
+
 		value = fname
 	}
 
-	return fmt.Sprintf("%s=%s", key, value)
+	return fmt.Sprintf("%s=%s", key, value), nil
 }
 
 // Run encapsulates the logic of Action without cli Context for easier testing

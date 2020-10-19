@@ -9,7 +9,7 @@ while getopts :l opt; do
 done
 
 if $local_test; then
-  docker_args="-v $(cd ../..; pwd):/secretless"
+  docker_args="-v $(cd ../../..; pwd):/secretless"
 fi
 
 docker-compose run \

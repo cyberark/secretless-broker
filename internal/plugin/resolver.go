@@ -3,6 +3,7 @@ package plugin
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 	"sync"
 
@@ -70,7 +71,60 @@ func (resolver *Resolver) Provider(name string) (provider plugin_v1.Provider, er
 	return
 }
 
-// Resolve accepts an list of Providers and a list of Credentials and
+func (resolver *Resolver) resolveForProvider(
+	providerID string,
+	credentials []*config_v2.Credential,
+) (plugin_v1.Provider, map[string]plugin_v1.ProviderResponse, string) {
+	provider, err := resolver.Provider(providerID)
+	if err != nil {
+		resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", providerID, err)
+	}
+
+	// Create secretIds slice and credentialBySecretId map
+	secretIds := make([]string, len(credentials))
+	for idx, cred := range credentials {
+		secretIds[idx] = cred.Get
+	}
+
+	// Resolves all credentials for current provider
+	var hasErrors bool
+	var providerErrStrings []string
+	providerResponses, err := provider.GetValues(secretIds...)
+	if err != nil {
+		hasErrors = true
+		providerErrStrings = append(
+			providerErrStrings,
+			err.Error(),
+		)
+	}
+
+	// Collect errors from provider responses
+	for _, providerResponse := range providerResponses {
+		if providerResponse.Error != nil {
+			hasErrors = true
+			providerErrStrings = append(
+				providerErrStrings,
+				providerResponse.Error.Error(),
+			)
+			continue
+		}
+	}
+	if hasErrors {
+		// Sort the error strings to provide deterministic output
+		sort.Strings(providerErrStrings)
+
+		errInfo := fmt.Sprintf(
+			"ERROR: Resolving credentials from provider '%s' failed: %v",
+			provider.GetName(),
+			strings.Join(providerErrStrings, ", "),
+		)
+		return nil, nil, errInfo
+	}
+
+	return provider, providerResponses, ""
+}
+
+// Resolve accepts n list of Providers and a list of Credentials and
 // attempts to obtain the value of each Credential from the appropriate Provider.
 func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[string][]byte, error) {
 	if len(credentials) == 0 {
@@ -81,37 +135,61 @@ func (resolver *Resolver) Resolve(credentials []*config_v2.Credential) (map[stri
 	errorStrings := make([]string, 0, len(credentials))
 
 	var err error
-	for _, credential := range credentials {
-		var provider plugin_v1.Provider
-		var value []byte
 
-		if provider, err = resolver.Provider(credential.From); err != nil {
-			resolver.LogFatalf("ERROR: Provider '%s' could not be used! %v", credential.From, err)
-		}
+	// Group credentials by provider
+	credentialsByProvider := groupCredentialsByProvider(credentials)
 
-		// This provider cannot resolve the named credential
-		if value, err = provider.GetValue(credential.Get); err != nil {
-			errInfo := fmt.Sprintf("ERROR: Resolving credential '%s' from provider '%s' failed: %v",
-				credential.Get,
-				credential.From,
-				err)
-			log.Println(errInfo)
+	// Resolve credentials by provider
+	for providerID, credentialsForProvider := range credentialsByProvider {
+		provider, providerResponses, errStr := resolver.resolveForProvider(
+			providerID,
+			credentialsForProvider,
+		)
+		if errStr != "" {
+			log.Println(errStr)
 
-			errorStrings = append(errorStrings, errInfo)
+			errorStrings = append(errorStrings, errStr)
 			continue
 		}
 
-		result[credential.Name] = value
+		// Set provider responses on result map before returning
+		for _, credential := range credentialsForProvider {
+			credentialName := credential.Name
+			secretValue := providerResponses[credential.Get].Value
 
-		if resolver.EventNotifier != nil {
-			resolver.EventNotifier.ResolveCredential(provider, credential.Name, value)
+			result[credentialName] = secretValue
+
+			if resolver.EventNotifier != nil {
+				resolver.EventNotifier.ResolveCredential(
+					provider,
+					credentialName,
+					secretValue,
+				)
+			}
 		}
 	}
 
 	err = nil
 	if len(errorStrings) > 0 {
+		// Sort the error strings to provide deterministic output
+		sort.Strings(errorStrings)
+
 		err = fmt.Errorf(strings.Join(errorStrings, "\n"))
 	}
 
 	return result, err
+}
+
+func groupCredentialsByProvider(
+	credentials []*config_v2.Credential,
+) map[string][]*config_v2.Credential {
+	credentialsByProvider := make(map[string][]*config_v2.Credential)
+	for _, credential := range credentials {
+		credentialsByProvider[credential.From] = append(
+			credentialsByProvider[credential.From],
+			credential,
+		)
+	}
+
+	return credentialsByProvider
 }

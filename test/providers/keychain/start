@@ -10,16 +10,24 @@ echo "Deleting prior password values stored for this test..."
 source load_test_env_vars
 
 # add secrets to keychain
-security add-generic-password \
-  -a $ACCOUNT \
-  -s $SERVICE \
-  -w $SECRET
+for (( idx=1; idx<=NUM_SECRETS; idx++ ))
+do
+  secret_account="${ACCOUNT}_${idx}"
+  secret_service="${SERVICE}_${idx}"
+  secret_value="${SECRET}_${idx}"
 
-# verify that the secret has been loaded successfully
-secret=$(security find-generic-password -a $ACCOUNT -s $SERVICE -w)
-if [[ "$secret" == "$SECRET" ]]; then
-  echo "Secret has been loaded"
-else
-  echo "Error loading secret"
-  exit 1
-fi
+  security add-generic-password \
+    -a "${secret_account}" \
+    -s "${secret_service}" \
+    -w "${secret_value}"
+
+  # verify that the secret has been loaded successfully
+  stored_secret_value=$(security find-generic-password \
+    -a "${secret_account}" -s "${secret_service}" -w)
+  if [[ "${stored_secret_value}" == "${secret_value}" ]]; then
+    echo "Secret has been loaded"
+  else
+    echo "Error loading a secret"
+    exit 1
+  fi
+done

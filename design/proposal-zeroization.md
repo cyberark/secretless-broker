@@ -13,7 +13,7 @@ Ideally, 2 would happen in a centralized fashion to avoid the need for repeated 
 It is worth noting the journey of Secrets in Secretless.
 
 ```
-Resolver.#Resolve -> Provider.#GetValue |-> Handler -> Listener -> Target Backend
+Resolver.#Resolve -> Provider.#GetValues |-> Handler -> Listener -> Target Backend
                                         |
 					|-> EventNotifier.#ResolveSecret
 ```
@@ -87,5 +87,5 @@ The recommendation per Secret usage session is as follows:
 ## Further consideration
 
 1. Audit `Listener -> Target Backend`
-1. Audit `Provider.#GetValue`
+1. Audit `Provider.#GetValues`
 1. Reconsider `EventNotifier.#ResolveSecret`, why do we need this ?

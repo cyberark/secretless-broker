@@ -139,6 +139,12 @@ func (p *Provider) GetName() string {
 	return p.Name
 }
 
+// GetValues takes in variable ids and returns their resolved values. This method is
+// needed to the Provider interface
+func (p *Provider) GetValues(ids ...string) (map[string]plugin_v1.ProviderResponse, error) {
+	return plugin_v1.GetValues(p, ids...)
+}
+
 // GetValue obtains a value by ID. The recognized IDs are:
 //	* "accessToken"
 // 	* Any Conjur variable ID

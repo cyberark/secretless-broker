@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [0.19.0](https://github.com/cyberark/conjur-authn-k8s-client/blob/master/CHANGELOG.md#0190---2020-10-08),
   which adds some fixes around cert injection failure (see also changes in
   [0.18.1](https://github.com/cyberark/conjur-authn-k8s-client/blob/master/CHANGELOG.md#0181---2020-09-13)).
+  [cyberark/secretless-broker#1352](https://github.com/cyberark/secretless-broker/pull/1352)
 
 ## [1.7.0] - 2020-09-11
 

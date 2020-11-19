@@ -270,6 +270,11 @@ Ensure that you have:
 - Configured `oc`/`kubectl` context
 - A configured namespace (`project` in OpenShift terminology)
 
+Juxtaposer is deployed on kubernetes as part of secretless xa tests. The following
+diagram shows the architecture used:
+
+![xa_architecture](images/xa_architecture.png)
+
 ### Configure and source the deployment scripts
 
 Main configuration of the deployment scripts is done through the [./deploy/bootstrap.sh](deploy/bootstrap.sh)

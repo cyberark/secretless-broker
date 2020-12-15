@@ -34,7 +34,7 @@ RUN go build -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.T
 FROM alpine:3.12 as secretless-broker
 MAINTAINER CyberArk Software, Inc.
 
-RUN apk add -u shadow libc6-compat && \
+RUN apk add -u shadow libc6-compat openssl && \
     # Add Limited user
     groupadd -r secretless \
              -g 777 && \

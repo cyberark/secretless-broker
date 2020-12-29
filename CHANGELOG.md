@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Support for OpenShift 4.3 and 4.5.
+  [conjurdemos/kubernetes-conjur-demo#122](https://github.com/conjurdemos/kubernetes-conjur-demo/issues/122)
+
+### Deprecated
+- Support for OpenShift 3.9 and 3.10 is removed in this release.
+  [conjurdemos/kubernetes-conjur-demo#122](https://github.com/conjurdemos/kubernetes-conjur-demo/issues/122)
+
 ## [1.7.1] - 2020-10-20
 
 ### Added

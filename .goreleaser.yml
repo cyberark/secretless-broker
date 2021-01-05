@@ -112,7 +112,7 @@ brews:
       bin.install "secretless-broker"
     test: |
       system "#{bin}/secretless-broker", "-version"
-    github:
+    tap:
       owner: cyberark
       name: homebrew-tools
     skip_upload: true

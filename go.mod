@@ -46,4 +46,4 @@ replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 // This is our fix:
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
 
-go 1.13
+go 1.15

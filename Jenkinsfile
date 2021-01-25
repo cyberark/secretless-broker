@@ -192,8 +192,14 @@ pipeline {
         }
         stage('Create draft release') {
           steps {
-            sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
-            archiveArtifacts 'dist/goreleaser/'
+            dir('./pristine-checkout') {
+              // Go releaser requires a pristine checkout
+              checkout scm
+              sh 'git submodule update --init --recursive'
+              // Create draft release
+              sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+              archiveArtifacts 'dist/goreleaser/'
+            }
           }
         }
       }

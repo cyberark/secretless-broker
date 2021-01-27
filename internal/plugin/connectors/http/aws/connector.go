@@ -37,17 +37,19 @@ func (c *Connector) Connect(
 		return nil
 	}
 
+	// Set AWS endpoint
+	// NOTE: this must be done before signing the request, otherwise the modified request
+	// will fail the integrity check.
+	err = setAmzEndpoint(req, reqMeta)
+	if err != nil {
+		return err
+	}
+
 	// Use metadata and credentials to sign request
 	c.logger.Debugf(
 		"Signing for service=%s region=%s",
 		reqMeta.serviceName,
 		reqMeta.region,
 	)
-	err = signRequest(req, reqMeta, credentialsByID)
-	if err != nil {
-		return err
-	}
-
-	// Set AWS endpoint
-	return setAmzEndpoint(req, reqMeta)
+	return signRequest(req, reqMeta, credentialsByID)
 }

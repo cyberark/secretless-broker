@@ -216,6 +216,7 @@ func setAmzEndpoint(req *gohttp.Request, reqMeta *requestMetadata) error {
 
 	req.URL.Scheme = endpointURL.Scheme
 	req.URL.Host = endpointURL.Host
+	req.Host = endpointURL.Hostname()
 
 	return nil
 }

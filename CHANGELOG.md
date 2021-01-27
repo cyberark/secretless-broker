@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for OpenShift 3.9 and 3.10 is removed in this release.
   [conjurdemos/kubernetes-conjur-demo#122](https://github.com/conjurdemos/kubernetes-conjur-demo/issues/122)
 
+### Fixed
+- Automatic endpoint discovery for the aws connector was updated. This
+  functionality modifies the request endpoint. There were 2 bugs where (1) the
+  request host header was not being updated to the discovered endpoint, and (2)
+  the request modification was being done after signing the request which would
+  result in a failing integrity check.
+  [cyberark/secretless-broker#1369](https://github.com/cyberark/secretless-broker/issues/1369)
+
 ## [1.7.1] - 2020-10-20
 
 ### Added

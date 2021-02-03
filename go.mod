@@ -24,7 +24,6 @@ require (
 	github.com/joho/godotenv v1.2.0
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
-	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/pkg/profile v1.2.1

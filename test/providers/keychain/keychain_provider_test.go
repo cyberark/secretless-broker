@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"testing"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
@@ -24,11 +25,11 @@ func TestKeychainProvider(t *testing.T) {
 
 	// e.g. ${service}_1#${account}_1
 	getSecretPath := func(idx int) string {
-		return service + "_" + string(idx) + "#" + account + "_" + string(idx)
+		return service + "_" + strconv.Itoa(idx) + "#" + account + "_" + strconv.Itoa(idx)
 	}
 	// e.g. ${secret}_1
 	getSecretValue := func(idx int) string {
-		return secret + "_" + string(idx)
+		return secret + "_" + strconv.Itoa(idx)
 	}
 
 	options := plugin_v1.ProviderOptions{
@@ -72,7 +73,7 @@ func TestKeychainProvider(t *testing.T) {
 	Convey(
 		"Returns an error for an invalid secret value",
 		t,
-		testutils.CanProvide(
+		testutils.Reports(
 			provider,
 			"madeup#secret",
 			"The specified item could not be found in the keychain.",

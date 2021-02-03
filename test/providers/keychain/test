@@ -1,9 +1,5 @@
 #!/bin/bash
-
 set -euo pipefail
 
-# load the environment with the test config
-source load_test_env_vars
-
-# run the test
-go test -v .
+# Run the tests
+go test -mod=readonly -v -count 1 ./...

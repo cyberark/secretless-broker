@@ -1,0 +1,32 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    name: Build Secretless
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - run: ./bin/build
+
+  osx_tests:
+    name: Run Secretless macOS tests
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      # Cache go module dependencies based on go.sum to improve workflow execution time.
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      # Download go modules
+      - run: go mod download
+      # Run keychain tests
+      - run: cd test/providers/keychain && ./start && ./test && ./stop

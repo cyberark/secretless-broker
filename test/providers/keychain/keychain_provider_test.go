@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-	"strconv"
 	"testing"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
@@ -13,30 +11,26 @@ import (
 )
 
 func TestKeychainProvider(t *testing.T) {
-	var err error
-	var provider plugin_v1.Provider
+	// Setup.
 
-	name := "keychain"
-
-	// get the environment variables with the test config
-	service := os.Getenv("SERVICE")
-	account := os.Getenv("ACCOUNT")
-	secret := os.Getenv("SECRET")
-
-	// e.g. ${service}_1#${account}_1
-	getSecretPath := func(idx int) string {
-		return service + "_" + strconv.Itoa(idx) + "#" + account + "_" + strconv.Itoa(idx)
-	}
-	// e.g. ${secret}_1
-	getSecretValue := func(idx int) string {
-		return secret + "_" + strconv.Itoa(idx)
+	// Create all the keychain items here.
+	//
+	// It's necessary to do this here because the keychain automatically trusts the
+	// process that writes the secret. Without this a user would need confirm a keychain
+	// prompt at least once before a read is possible.
+	cleanup()
+	defer cleanup()
+	if err := setup(); err != nil {
+		t.Fatal(err)
 	}
 
-	options := plugin_v1.ProviderOptions{
-		Name: name,
-	}
+	// Testing.
 
-	provider, err = providers.ProviderFactories[name](options)
+	providerName := "keychain"
+
+	provider, err := providers.ProviderFactories[providerName](plugin_v1.ProviderOptions{
+		Name: providerName,
+	})
 	if err != nil {
 		// there was an error creating the provider, so exit the tests
 		t.Error("Unable to create keychain provider.")
@@ -44,7 +38,7 @@ func TestKeychainProvider(t *testing.T) {
 	}
 
 	Convey("Has the expected provider name", t, func() {
-		So(provider.GetName(), ShouldEqual, name)
+		So(provider.GetName(), ShouldEqual, providerName)
 	})
 
 	Convey(

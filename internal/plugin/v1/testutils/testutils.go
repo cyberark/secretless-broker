@@ -16,12 +16,14 @@ type CanProvideTestCase struct {
 
 // CanProvide calls GetValues on the provider and ensures that the provider response for
 // the given id has the expected value and no error
-func CanProvide(provider plugin_v1.Provider, id string, expectedValue string) func() {
+func CanProvide(provider plugin_v1.Provider,
+	id string,
+	expectedValue string) func() {
 	return func() {
 		values, err := provider.GetValues(id)
 
+		convey.So(values[id].Error, convey.ShouldBeNil)
 		convey.So(err, convey.ShouldBeNil)
-
 		value := values[id]
 		assertGoodProviderResponse(value, expectedValue)
 	}

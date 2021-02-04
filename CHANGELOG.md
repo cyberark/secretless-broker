@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Fixes PostgreSQL signaling in case of SSLRequest from the client,
+  correctly sends SSL Not Supported message instead of general error.
+  Supports downgrade to unsecured connection in case of `SSLMode = prefer`.  
+  [cyberark/secretless-broker#1377](https://github.com/cyberark/secretless-broker/issues/1377)
+
 ## [1.7.2] - 2020-02-05
 
 ### Added

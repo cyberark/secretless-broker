@@ -93,7 +93,7 @@ func TestEssentials(t *testing.T) {
 					Password: "wrongpassword",
 					SSL:      true,
 				},
-				CmdOutput: StringPointer("SSL not supported"),
+				CmdOutput: StringPointer("server does not support SSL, but SSL was required"),
 			},
 		})
 	})

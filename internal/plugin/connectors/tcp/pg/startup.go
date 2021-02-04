@@ -11,24 +11,23 @@ import (
 func (s *SingleUseConnector) Startup() error {
 	s.logger.Debugf("Handling connection %+v -> %+v", s.clientConn.RemoteAddr(), s.clientConn.LocalAddr())
 
-	messageBytes, err := protocol.ReadStartupMessage(s.clientConn)
+	version, options, err := s.parseStartupMessage()
 	if err != nil {
 		return err
 	}
-
-	version, options, err := protocol.ParseStartupMessage(messageBytes)
-	if err != nil {
-		return err
-	}
-
-	s.logger.Debugf(
-		"s.Client version: %v, (SSL mode: %v)",
-		version,
-		version == protocol.SSLRequestCode)
 
 	// Handle the case where the startup message was an SSL request.
 	if version == protocol.SSLRequestCode {
-		return fmt.Errorf("SSL not supported")
+		s.sslNotSupported()
+		version, options, err = s.parseStartupMessage()
+		if err != nil {
+			return err
+		}
+
+		// There should not be a second SSLRequest
+		if version == protocol.SSLRequestCode {
+			return fmt.Errorf("Unexpected SSL Request after SSL not supported response")
+		}
 	}
 
 	var ok bool
@@ -38,4 +37,23 @@ func (s *SingleUseConnector) Startup() error {
 	}
 
 	return nil
+}
+
+func (s *SingleUseConnector) parseStartupMessage() (int32, map[string]string, error) {
+	messageBytes, err := protocol.ReadStartupMessage(s.clientConn)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	version, options, err := protocol.ParseStartupMessage(messageBytes)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	s.logger.Debugf(
+		"s.Client version: %v, (SSL mode: %v)",
+		version,
+		version == protocol.SSLRequestCode)
+
+	return version, options, nil
 }

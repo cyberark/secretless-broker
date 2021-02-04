@@ -37,6 +37,14 @@ func NewRunTestCase(runQuery RunQueryType) RunTestCaseType {
 	}
 }
 
+// FindLiveConfiguration takes AbstractConfiguration and finds a live configuration for
+// an active Secretless endpoint
+func FindLiveConfiguration(ac AbstractConfiguration) LiveConfiguration {
+	_, testSuiteConfigurations := GenerateConfigurations()
+
+	return testSuiteConfigurations.Find(ac)
+}
+
 // RunQueryType represents a function that takes in database credentials
 // and options, uses them to execute a test query, and returns the output
 // of that query.

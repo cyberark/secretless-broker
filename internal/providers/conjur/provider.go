@@ -231,15 +231,8 @@ func (p *Provider) fetchAccessToken() error {
 		defer p.AuthenticationMutex.Unlock()
 
 		log.Printf("Info: Conjur provider is authenticating as %s ...", p.Authenticator.Config.Username)
-		resp, err := p.Authenticator.Authenticate()
-		if err != nil {
+		if err := p.Authenticator.Authenticate(); err != nil {
 			log.Printf("Info: Conjur provider received an error on authenticate: %s", err.Error())
-			return err
-		}
-
-		err = p.Authenticator.ParseAuthenticationResponse(resp)
-		if err != nil {
-			log.Printf("Error: Conjur provider failure parsing response: %s", err.Error())
 			return err
 		}
 

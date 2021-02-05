@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.2] - 2020-02-05
+
 ### Added
 - Support for OpenShift 4.3 and 4.5.
   [conjurdemos/kubernetes-conjur-demo#122](https://github.com/conjurdemos/kubernetes-conjur-demo/issues/122)
@@ -15,11 +17,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [conjurdemos/kubernetes-conjur-demo#122](https://github.com/conjurdemos/kubernetes-conjur-demo/issues/122)
 
 ### Fixed
-- Automatic endpoint discovery for the aws connector was updated. This
-  functionality modifies the request endpoint. There were 2 bugs where (1) the
-  request host header was not being updated to the discovered endpoint, and (2)
-  the request modification was being done after signing the request which would
-  result in a failing integrity check.
+- Automatic endpoint discovery for the AWS connector was updated to address two
+  bugs where (1) the request host header was not being updated to the discovered
+  endpoint, and (2) the request modification was being done after signing the
+  request which would result in a failing integrity check.
   [cyberark/secretless-broker#1369](https://github.com/cyberark/secretless-broker/issues/1369)
 
 ## [1.7.1] - 2020-10-20
@@ -544,7 +545,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.2...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -572,3 +573,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.6.0]: https://github.com/cyberark/secretless-broker/compare/v1.5.2...v1.6.0
 [1.7.0]: https://github.com/cyberark/secretless-broker/compare/v1.6.0...v1.7.0
 [1.7.1]: https://github.com/cyberark/secretless-broker/compare/v1.7.0...v1.7.1
+[1.7.2]: https://github.com/cyberark/secretless-broker/compare/v1.7.1...v1.7.2

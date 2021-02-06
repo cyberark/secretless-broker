@@ -18,6 +18,9 @@ tags = ["key", "AWS"]
 description = "sample AWS key in AWS HTTP connector comments"
 regex = '''AKIAJC5FABNOFVBKRWHA'''
 [[rules.whitelist]]
+description = "sample AWS key in AWS HTTP connector comments"
+regex = '''AKIAIOSFODNN7EXAMPLE'''
+[[rules.whitelist]]
 description = "since-removed sample AWS key"
 regex = '''AKIAJADDJE4Q4JVX3HAA'''
 
@@ -214,6 +217,7 @@ files = [
   "test/ssh/id_(.*)", # since-removed ssh test certs
   "test/util/ssl/(.*)", # test ssl certs
   "internal/plugin/connectors/tcp/mssql/connection_details_test.go", # fake cert string
+  "internal/plugin/connectors/http/aws/aws.go", # example AWS authorization header string
 ]
 # As of v4, gitleaks can whitelist paths to accommodate no longer using
 # paths in the `files` whitelist.
@@ -232,10 +236,12 @@ paths = [
   "test/connector/tcp/mssql/certs",
   "test/ssh",
   "test/util/ssl",
-  "internal/plugin/connectors/tcp/mssql"
+  "internal/plugin/connectors/tcp/mssql",
+  "internal/plugin/connectors/http/aws"
 ]
 regexes = [
   "AKIAJC5FABNOFVBKRWHA", # sample AWS key in AWS HTTP connector comments
+  "AKIAIOSFODNN7EXAMPLE", # sample AWS key in AWS HTTP connector comments
   "AKIAJADDJE4Q4JVX3HAA", # since-removed sample AWS key
   "SuperSecure", # dummy password used in conjur integration test docker-compose
 ]

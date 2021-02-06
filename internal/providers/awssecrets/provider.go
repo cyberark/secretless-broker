@@ -19,26 +19,30 @@ type Provider struct {
 // ProviderFactory constructs a Provider. The API client is configured from
 // in-cluster environment variables and files.
 func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
+	return NewProvider(options, aws.Config{})
+}
 
+// NewProvider creates a provider with an optional custom AWS config.
+func NewProvider(options plugin_v1.ProviderOptions, config aws.Config) (*Provider, error) {
 	// All clients require a Session. The Session provides the client with
 	// shared configuration such as region, endpoint, and credentials. A
 	// Session should be shared where possible to take advantage of
 	// configuration and credential caching.
 	sess, err := session.NewSessionWithOptions(session.Options{
+		Config: config,
 		SharedConfigState: session.SharedConfigEnable,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: Could not create AWS Secrets provider: %s", err)
 	}
+
 	// Create a new instance of the service's client with a Session.
 	client := secretsmanager.New(sess)
 
-	provider := &Provider{
+	return &Provider{
 		Name:   options.Name,
 		Client: client,
-	}
-
-	return provider, nil
+	}, nil
 }
 
 // GetName returns the name of the provider

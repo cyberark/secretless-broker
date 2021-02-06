@@ -25,8 +25,8 @@ func (c *Connector) Connect(
 ) error {
 	var err error
 
-	// Extract metadata of a signed AWS request: date, region and service name
-	reqMeta, err := newRequestMetadata(req)
+	// Extract metadata of a signed AWS request: Date, Region and service name
+	reqMeta, err := NewRequestMetadata(req)
 	if err != nil {
 		return err
 	}
@@ -47,9 +47,9 @@ func (c *Connector) Connect(
 
 	// Use metadata and credentials to sign request
 	c.logger.Debugf(
-		"Signing for service=%s region=%s",
-		reqMeta.serviceName,
-		reqMeta.region,
+		"Signing for service=%s Region=%s",
+		reqMeta.ServiceName,
+		reqMeta.Region,
 	)
 	return signRequest(req, reqMeta, credentialsByID)
 }

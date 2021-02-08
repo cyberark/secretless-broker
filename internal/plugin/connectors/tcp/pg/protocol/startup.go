@@ -40,14 +40,19 @@ func ParseStartupMessage(message []byte) (version int32, options map[string]stri
 
 // CreateStartupMessage creates a PG startup message. This message is used to
 // startup all connections with a PG backend.
-func CreateStartupMessage(username string, database string, options map[string]string) []byte {
+func CreateStartupMessage(
+	version int32,
+	username string,
+	database string,
+	options map[string]string,
+) []byte {
 	message := NewMessageBuffer([]byte{})
 
 	/* Temporarily set the message length to 0. */
 	message.WriteInt32(0)
 
 	/* Set the protocol version. */
-	message.WriteInt32(ProtocolVersion)
+	message.WriteInt32(version)
 
 	/*
 	 * The protocol version number is followed by one or more pairs of

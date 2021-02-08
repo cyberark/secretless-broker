@@ -9,7 +9,11 @@ import (
 // Startup performs the startup handshake with the client and parses the client
 // options to extract the database name.
 func (s *SingleUseConnector) Startup() error {
-	s.logger.Debugf("Handling connection %+v -> %+v", s.clientConn.RemoteAddr(), s.clientConn.LocalAddr())
+	s.logger.Debugf(
+		"Handling connection %+v -> %+v",
+		s.clientConn.RemoteAddr(),
+		s.clientConn.LocalAddr(),
+	)
 
 	version, options, err := s.parseStartupMessage()
 	if err != nil {

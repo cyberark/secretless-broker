@@ -88,6 +88,7 @@ func (s *SingleUseConnector) ConnectToBackend() error {
 	}
 
 	startupMessage := protocol.CreateStartupMessage(
+		protocol.ProtocolVersion,
 		s.connectionDetails.Username,
 		s.databaseName,
 		s.connectionDetails.Options,

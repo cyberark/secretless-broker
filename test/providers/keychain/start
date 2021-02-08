@@ -1,33 +1,4 @@
 #!/bin/bash
 
-set -euo pipefail
-
-# clear out previously created test variables
-echo "Deleting prior password values stored for this test..."
+# Clear out previously store secrets from keychain
 ./stop
-
-# load the environment with the test config
-source load_test_env_vars
-
-# add secrets to keychain
-for (( idx=1; idx<=NUM_SECRETS; idx++ ))
-do
-  secret_account="${ACCOUNT}_${idx}"
-  secret_service="${SERVICE}_${idx}"
-  secret_value="${SECRET}_${idx}"
-
-  security add-generic-password \
-    -a "${secret_account}" \
-    -s "${secret_service}" \
-    -w "${secret_value}"
-
-  # verify that the secret has been loaded successfully
-  stored_secret_value=$(security find-generic-password \
-    -a "${secret_account}" -s "${secret_service}" -w)
-  if [[ "${stored_secret_value}" == "${secret_value}" ]]; then
-    echo "Secret has been loaded"
-  else
-    echo "Error loading a secret"
-    exit 1
-  fi
-done

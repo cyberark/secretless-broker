@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"io"
 	"net"
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg/protocol"
@@ -43,6 +44,13 @@ func (s *SingleUseConnector) abort(err error) {
 	s.clientConn.Write(pgError.GetPacket())
 }
 
+func (s *SingleUseConnector) sslNotSupported() {
+	if s.clientConn == nil {
+		return
+	}
+	s.clientConn.Write([]byte{protocol.SSLNotAllowed})
+}
+
 // Connect implements the tcp.Connector func signature.
 //
 // It is the main method of the SingleUseConnector. It:
@@ -60,7 +68,10 @@ func (s *SingleUseConnector) Connect(
 	s.clientConn = clientConn
 
 	if err = s.Startup(); err != nil {
-		s.abort(err)
+		// connection closed by the client (f.e. SSLMode=require). Do not send error to the closed connection.
+		if err != io.EOF {
+			s.abort(err)
+		}
 		return nil, err
 	}
 

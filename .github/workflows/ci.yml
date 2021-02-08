@@ -3,17 +3,22 @@ name: CI
 on: [push]
 
 jobs:
-  build:
-    name: Build Secretless
+  ci:
+    name: Build and Test on Linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-      - run: ./bin/build
+      - name: Build
+        run: ./bin/build
+      - name: Unit tests
+        run: ./bin/test_unit
+      - name: Integration tests
+        run: ./bin/test
 
   osx_tests:
-    name: Run Secretless macOS tests
+    name: Test on macOS
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v2

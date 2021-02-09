@@ -2,18 +2,13 @@
 
 CURRENT_DIR=$("$(dirname "$0")/abspath")
 
-# xgo because it allows cross-compilation
-GORELEASER_IMAGE="cyberark/goreleaser:latest-xgo"
-
 echo "Current dir: $CURRENT_DIR"
 
-# NOTE: Piping the Dockerfile sends an empty context to docker build
-docker build -t "${GORELEASER_IMAGE}" - < "$CURRENT_DIR/Dockerfile.releaser"
-
+# registry.tld/goreleaser is able to carry out cross-compilation
 docker run --rm -t \
   --env GITHUB_TOKEN \
   --volume "$CURRENT_DIR/..:/secretless-broker" \
   --workdir /secretless-broker \
-  "${GORELEASER_IMAGE}" --rm-dist "$@"
+  "registry.tld/goreleaser" --rm-dist "$@"
 
 echo "Releases built. Archives can be found in dist/goreleaser"

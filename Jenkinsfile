@@ -27,9 +27,24 @@ pipeline {
         }
     }
 
-    stage('Build Images') {
-      steps {
-        sh './bin/build'
+    stage('Build and Unit tests') {
+      parallel {
+        stage('Build Images') {
+          steps {
+            sh './bin/build'
+          }
+        }
+
+        stage('Unit tests') {
+          steps {
+            sh './bin/test_unit'
+            sh 'cp ./test/unit-test-output/c.out ./c.out'
+
+            junit 'test/unit-test-output/junit.xml'
+            cobertura autoUpdateHealth: true, autoUpdateStability: true, coberturaReportFile: 'test/unit-test-output/coverage.xml', conditionalCoverageTargets: '30, 0, 0', failUnhealthy: true, failUnstable: false, lineCoverageTargets: '30, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '30, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+            ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
+          }
+        }
       }
     }
 
@@ -124,20 +139,8 @@ pipeline {
       }
     }
 
-    stage('Run Tests') {
-
+    stage('Functional Tests') {
       parallel {
-
-        stage('Unit tests') {
-          steps {
-            sh './bin/test_unit'
-
-            junit 'test/unit-test-output/junit.xml'
-            cobertura autoUpdateHealth: true, autoUpdateStability: true, coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '30, 0, 0', failUnhealthy: true, failUnstable: false, lineCoverageTargets: '30, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '30, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
-            ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
-          }
-        }
-
         stage('Quick start') {
           steps {
             sh './bin/test_demo'

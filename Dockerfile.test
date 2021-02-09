@@ -2,7 +2,6 @@ FROM golang:1.13-alpine
 MAINTAINER Conjur Inc.
 LABEL id="secretless-test-runner"
 
-ENTRYPOINT [ "go", "test", "-v", "-timeout", "3m" ]
 WORKDIR /secretless
 
 RUN apk add -u curl \
@@ -16,4 +15,9 @@ COPY third_party/ /secretless/third_party
 
 RUN go mod download
 
-COPY . .
+# go-junit-report => Convert go test output to junit xml
+# gocov => converts native coverage output to gocov's JSON interchange format
+# gocov-xml => converts gocov format to XML for use with Jenkins/Cobertura
+RUN go get -u github.com/jstemmer/go-junit-report && \
+    go get github.com/axw/gocov/gocov && \
+    go get github.com/AlekSi/gocov-xml

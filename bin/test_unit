@@ -5,16 +5,9 @@ set -eo pipefail
 current_dir=$("$(dirname "$0")"/abspath)
 toplevel_dir=$current_dir/..
 
-junit_output_dir=$toplevel_dir/test/unit-test-output
+junit_output_dir=test/unit-test-output
 mkdir -p "$junit_output_dir"
-junit_output_file=$junit_output_dir/junit.output
-coverage_output_file=$toplevel_dir/c.out
-
-rm -f "$junit_output_file"
-touch "$junit_output_file"
-
-rm -f "$coverage_output_file"
-touch "$coverage_output_file"
+rm -f "$junit_output_dir/*"
 
 echo "Building unit test image..."
 docker build "$toplevel_dir" \
@@ -28,32 +21,32 @@ set +e
   #       a "g++": executable file not found in $PATH error, and
   #       the code is not being used anyway (was part of an Envoy POC)
   docker run --rm -t \
-    --volume "$toplevel_dir"/:/secretless/test/output/ \
+    --volume "$toplevel_dir"/:/secretless \
     secretless-unit-test-runner:latest \
-    -vet=off \
-    -coverprofile="./test/output/c.out" \
-    ./cmd/secretless-broker... \
-    ./cmd/summon2... \
-    ./internal/... \
-    ./pkg/... \
-    | tee -a "$junit_output_file"
+    go test \
+      -v \
+      -timeout 3m \
+      -vet=off \
+      -coverprofile="./$junit_output_dir/c.out" \
+      ./cmd/secretless-broker... \
+      ./cmd/summon2... \
+      ./internal/... \
+      ./pkg/... \
+    | tee -a "./$junit_output_dir/junit.output"
   echo "Unit test exit status: $?"
 set -e
 
-rm -f "$junit_output_dir"/junit.xml
-
-# format test output XML
+# Format output
 docker run --rm \
-  --volume "$junit_output_dir"/:/secretless/test/output/ \
-  secretless-dev \
-  bash -exc "
-    cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml
-  "
+  --volume "$toplevel_dir"/:/secretless \
+  --workdir "/secretless/$junit_output_dir" \
+  secretless-unit-test-runner:latest \
+    sh -exc "
+rm -f junit.xml
 
-# format coverage output XML
-docker run --rm \
-  --volume "$toplevel_dir"/:/secretless/test/output/ \
-  secretless-dev \
-  bash -exc "
-    gocov convert ./test/output/c.out | gocov-xml > ./test/output/coverage.xml
-  "
+# Format test output XML
+cat junit.output | go-junit-report > junit.xml
+
+# Format coverage output XML
+gocov convert c.out | gocov-xml > coverage.xml
+"

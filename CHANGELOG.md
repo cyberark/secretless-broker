@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Update k8s authenticator client version to
+  [0.19.1](https://github.com/cyberark/conjur-authn-k8s-client/blob/master/CHANGELOG.md#0191---2021-02-08),
+  which streamlines the parsing of authentication responses, updates the
+  project Golang version to v1.15, and improves error messaging.
+
 ### Fixed
 - Fixes PostgreSQL signaling in case of SSLRequest from the client,
   correctly sends SSL Not Supported message instead of general error.

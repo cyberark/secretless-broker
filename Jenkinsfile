@@ -22,9 +22,9 @@ pipeline {
     }
 
     stage('Update Submodules') {
-        steps {
-            sh 'git submodule update --init --recursive'
-        }
+      steps {
+        sh 'git submodule update --init --recursive'
+      }
     }
 
     stage('Build and Unit tests') {
@@ -119,23 +119,21 @@ pipeline {
             '''
           ).trim().split()
 
-          def integrationSteps = [:]
+          def integrationStages = [:]
 
           // Create an integration test stage for each directory we collected previously.
           // We want to be sure to skip any tests, such as keychain tests, that can only be ran manually.
           directories.each { name ->
             if (name == "keychain") return
 
-            def stepName = "Integration: ${name}"
-
-            integrationSteps[stepName] = {
+            integrationStages["Integration: ${name}"] = {
               sh "./bin/run_integration ${name}"
-              junit "**/test/**/junit.xml"
             }
           }
 
-          parallel integrationSteps
+          parallel integrationStages
         }
+        junit "**/test/**/junit.xml"
       }
     }
 

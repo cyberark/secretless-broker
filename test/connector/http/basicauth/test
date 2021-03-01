@@ -43,7 +43,9 @@ assert_contains() {
 
 ping_target_service_thru_secretless() {
   port=$1
-  docker_cmd="docker-compose run --rm --no-deps"
+
+  id="$(openssl rand -hex 6)-basicauth"
+  docker_cmd="docker-compose run --rm --no-deps --name $id"
 
   # NOTE: We must use an array here so that we can double quote it when we use
   # it but still have it passed as individual args.  This keeps shellcheck

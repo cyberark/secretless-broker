@@ -13,7 +13,7 @@ SECTION 1: Apache License 2.0
 >>> github.com/containerd/containerd-1.3.2
 >>> github.com/CrunchyData/crunchy-proxy-0.0.0-20170717145745-c0da73ca9dde
 >>> github.com/cyberark/conjur-api-go-0.5.2
->>> github.com/cyberark/conjur-authn-k8s-client-0.19.0
+>>> github.com/cyberark/conjur-authn-k8s-client-0.19.1
 >>> github.com/docker/distribution-2.7.1
 >>> github.com/docker/docker-1.4.2-0.20191231165639-e6f6c35b7902
 >>> github.com/docker/go-connections-0.4.0
@@ -46,7 +46,7 @@ SECTION 3: BSD 3-clause "New" or "Revised" License
 >>> github.com/fsnotify/fsnotify-1.4.7
 >>> github.com/imdario/mergo-0.3.8
 >>> github.com/spf13/pflag-1.0.5
->>> golang.org/x/crypto-0.0.0-20190510104115-cbcb75029529
+>>> golang.org/x/crypto-0.0.0-20200323165209-0ec3e9974c59
 
 
 
@@ -59,10 +59,11 @@ SECTION 4: MIT License
 >>> github.com/gregjones/httpcache-0.0.0-20190611155906-901d90724c79
 >>> github.com/joho/godotenv-1.2.0
 >>> github.com/json-iterator/go-1.1.8
+>>> github.com/keybase/go-keychain-0.0.0-20201121013009-976c83ec27a6
 >>> github.com/lib/pq-0.0.0-20180123210206-19c8e9ad0095
 >>> github.com/orderbynull/lottip-0.0.0-20191127192149-2109e1a4fcc5
 >>> github.com/smartystreets/goconvey-0.0.0-20190731233626-505e41936337
->>> github.com/stretchr/testify-1.3.0
+>>> github.com/stretchr/testify-1.5.1
 >>> gopkg.in/yaml.v2-2.2.2
 
 
@@ -163,7 +164,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/cyberark/conjur-authn-k8s-client-0.19.0
+>>> github.com/cyberark/conjur-authn-k8s-client-0.19.1
 
 Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 
@@ -643,7 +644,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
->>> golang.org/x/crypto-0.0.0-20190510104115-cbcb75029529
+>>> golang.org/x/crypto-0.0.0-20200323165209-0ec3e9974c59
 
 Copyright (c) 2009 The Go Authors. All rights reserved.
 
@@ -834,6 +835,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
+>>> github.com/keybase/go-keychain-0.0.0-20201121013009-976c83ec27a6
+
+Copyright (c) 2015 Keybase
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
 >>> github.com/lib/pq-0.0.0-20180123210206-19c8e9ad0095
 
 Copyright (c) 2011-2013, 'pq' Contributors Portions Copyright (C) 2011 Blake Mizerany
@@ -871,7 +896,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 NOTE: Various optional and subordinate components carry their own licensing requirements and restrictions. Use of those components is subject to the terms and conditions outlined the respective license of each component.
 
 
->>> github.com/stretchr/testify-1.3.0
+>>> github.com/stretchr/testify-1.5.1
 
 MIT License
 

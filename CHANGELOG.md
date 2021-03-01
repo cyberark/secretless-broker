@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.3] - 2020-03-04
 ### Changed
 - Update k8s authenticator client version to
   [0.19.1](https://github.com/cyberark/conjur-authn-k8s-client/blob/master/CHANGELOG.md#0191---2021-02-08),
@@ -13,9 +14,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   project Golang version to v1.15, and improves error messaging.
 
 ### Fixed
-- Fixes PostgreSQL signaling in case of SSLRequest from the client,
-  correctly sends SSL Not Supported message instead of general error.
-  Supports downgrade to unsecured connection in case of `SSLMode = prefer`.  
+- Secretless now sends a valid "SSL is not supported" response per the
+  PostgreSQL protocol standard when a client attempts to open an SSL connection
+  (i.e. when configured with SSL mode `require` or `prefer`) via the PostgreSQL
+  connector. When the client is configured with SSL mode `prefer`, the updated
+  response enables the client to downgrade to an insecure connection and
+  continue. Previously, clients sending requests using either `require` or
+  `prefer` SSL mode would receive a generic error from Secretless, which made it
+  harder to determine the root cause of the problem and broke how `prefer` is
+  expected to work.
   [cyberark/secretless-broker#1377](https://github.com/cyberark/secretless-broker/issues/1377)
 
 ## [1.7.2] - 2020-02-05
@@ -557,7 +564,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.2...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.3...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -586,3 +593,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.0]: https://github.com/cyberark/secretless-broker/compare/v1.6.0...v1.7.0
 [1.7.1]: https://github.com/cyberark/secretless-broker/compare/v1.7.0...v1.7.1
 [1.7.2]: https://github.com/cyberark/secretless-broker/compare/v1.7.1...v1.7.2
+[1.7.3]: https://github.com/cyberark/secretless-broker/compare/v1.7.2...v1.7.3

@@ -1,5 +1,5 @@
-FROM golang:1.13-stretch
-MAINTAINER Conjur Inc.
+FROM golang:1.15-buster
+MAINTAINER CyberArk Software Ltd.
 
 RUN apt-get update && \
     apt-get install -y curl \

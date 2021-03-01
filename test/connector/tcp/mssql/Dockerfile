@@ -53,8 +53,11 @@ RUN pip3 install pyodbc
 # Fix cert issues
 RUN apt-get update && \
     apt-get install -y ant \
-                       openjdk-8-jdk \
+                       software-properties-common \
                        ca-certificates-java && \
+    apt-add-repository 'deb http://security.debian.org/debian-security stretch/updates main' && \
+    apt-get update && \
+    apt-get install -y openjdk-8-jdk && \
     apt-get clean && \
     update-ca-certificates -f
 

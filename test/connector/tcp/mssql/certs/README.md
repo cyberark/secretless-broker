@@ -11,7 +11,8 @@ openssl req \
   -newkey rsa:4096 \
   -keyout server-key.pem \
   -out server-cert.pem \
-  -subj '/CN=test' \
+  -subj '/CN=mismatchedhost' \
+  -addext "subjectAltName = DNS:mismatchedhost" \
   -nodes \
   -days 365000
 ```

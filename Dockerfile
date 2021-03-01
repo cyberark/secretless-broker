@@ -1,5 +1,5 @@
-FROM golang:1.13-stretch as secretless-builder
-MAINTAINER Conjur Inc.
+FROM golang:1.15-buster as secretless-builder
+MAINTAINER CyberArk Software Ltd.
 LABEL builder="secretless-builder"
 
 WORKDIR /secretless
@@ -32,7 +32,7 @@ RUN go build -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.T
 
 # =================== MAIN CONTAINER ===================
 FROM alpine:3.12 as secretless-broker
-MAINTAINER CyberArk Software, Inc.
+MAINTAINER CyberArk Software Ltd.
 
 RUN apk add -u shadow libc6-compat openssl && \
     # Add Limited user
@@ -71,7 +71,7 @@ COPY --from=secretless-builder /secretless/dist/linux/amd64/secretless-broker \
 
 # =================== MAIN CONTAINER (REDHAT) ===================
 FROM registry.access.redhat.com/rhel as secretless-broker-redhat
-MAINTAINER CyberArk Software, Inc.
+MAINTAINER CyberArk Software Ltd.
 
 ARG VERSION
 

@@ -1,5 +1,5 @@
-FROM golang:1.13-alpine
-MAINTAINER Conjur Inc.
+FROM golang:1.15-alpine
+MAINTAINER CyberArk Software Ltd.
 LABEL id="secretless-test-runner"
 
 WORKDIR /secretless

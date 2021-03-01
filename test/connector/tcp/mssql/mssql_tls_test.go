@@ -127,7 +127,7 @@ var tlsTestCases = []tlsTestCase{
 		credentials: map[string][]byte{
 			"sslmode":     []byte("verify-full"),
 			"sslrootcert": getServerCert(),
-			"sslhost":     []byte("test"),
+			"sslhost":     []byte("mismatchedhost"),
 			"username":    []byte(envCfg.User),
 			"password":    []byte(envCfg.Password),
 			"host":        []byte(envCfg.HostWithTLS),

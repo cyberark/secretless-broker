@@ -43,7 +43,10 @@ assert_contains() {
 
 ping_target_service_thru_secretless() {
   port=$1
-  docker_cmd="docker-compose run --rm --no-deps"
+
+  id="$(openssl rand -hex 6)-basicauth"
+
+  docker_cmd="docker-compose run --no-deps --name $id"
 
   # NOTE: We must use an array here so that we can double quote it when we use
   # it but still have it passed as individual args.  This keeps shellcheck
@@ -51,10 +54,17 @@ ping_target_service_thru_secretless() {
   wget_cmd=(env "http_proxy=http://secretless:$port" \
     wget --quiet --output-document - nginx:8080/)
 
-  # NOTE: We need to 2>&1 because we need to assert on wget's error messages
-  # and we need to "|| true" because we don't want the script to exit when this
-  # happens
-  $docker_cmd "${docker_volume_args[@]}" test "${wget_cmd[@]}" 2>&1 || true
+  # Run command
+  $docker_cmd "${docker_volume_args[@]}" test "${wget_cmd[@]}" &> /dev/null || true
+
+  # Capture logs
+  logs=$(docker logs --details "$id" 2>&1)
+
+  # Cleanup
+  docker rm -f "$id" &> /dev/null
+
+  # Return output for assertion
+  echo "$logs"
 }
 
 echo "Waiting for Secretless to start"
@@ -90,7 +100,6 @@ good_resp=$(ping_target_service_thru_secretless 8080)
 assert_contains "$good_resp" "secured resource"
 
 echo "Test: Secretless configured with incorrect password fails"
-
 # port 8081 is configured with the incorrect pw
 bad_resp=$(ping_target_service_thru_secretless 8081)
 assert_contains "$bad_resp" "401 Unauthorized"

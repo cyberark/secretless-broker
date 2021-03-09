@@ -10,7 +10,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
 
 # Install SQL Server drivers and tools
-RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libodbc1 unixodbc msodbcsql mssql-tools unixodbc-dev
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libodbc1 unixodbc msodbcsql17 mssql-tools unixodbc-dev
 ENV PATH $PATH:/opt/mssql-tools/bin
 
 # Install and set locale to en_US.UTF-8
@@ -53,8 +53,11 @@ RUN pip3 install pyodbc
 # Fix cert issues
 RUN apt-get update && \
     apt-get install -y ant \
-                       openjdk-8-jdk \
+                       software-properties-common \
                        ca-certificates-java && \
+    apt-add-repository 'deb http://security.debian.org/debian-security stretch/updates main' && \
+    apt-get update && \
+    apt-get install -y openjdk-8-jdk && \
     apt-get clean && \
     update-ca-certificates -f
 

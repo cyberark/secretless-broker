@@ -8,21 +8,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.7.3] - 2020-03-09
 ### Changed
-- Update k8s authenticator client version to
+- Updated k8s authenticator client version to
   [0.19.1](https://github.com/cyberark/conjur-authn-k8s-client/blob/master/CHANGELOG.md#0191---2021-02-08),
   which streamlines the parsing of authentication responses, updates the
   project Golang version to v1.15, and improves error messaging.
 
 ### Fixed
-- Secretless now sends a valid "SSL is not supported" response per the
-  PostgreSQL protocol standard when a client attempts to open an SSL connection
-  (i.e. when configured with SSL mode `require` or `prefer`) via the PostgreSQL
-  connector. When the client is configured with SSL mode `prefer`, the updated
-  response enables the client to downgrade to an insecure connection and
-  continue. Previously, clients sending requests using either `require` or
-  `prefer` SSL mode would receive a generic error from Secretless, which made it
-  harder to determine the root cause of the problem and broke how `prefer` is
-  expected to work.
+- When configured for the SSL mode of `require` or `prefer`, Secretless now sends
+  a valid "SSL is not supported" response per the PostgreSQL protocol standard when
+  a client attempts to open an SSL connection using the PostgreSQL connector. When
+  the client is configured for SSL mode `prefer`, the updated response enables the
+  client to downgrade to an insecure connection and continue. Previously, clients
+  sending requests using the SSL mode of either `require` or `prefer` would receive
+  a generic error from Secretless, which made it harder to determine the root cause
+  of the problem and caused the `prefer` SSL mode to not function correctly.
   [cyberark/secretless-broker#1377](https://github.com/cyberark/secretless-broker/issues/1377)
 
 ## [1.7.2] - 2020-02-05

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ## [1.7.3] - 2020-03-09
+
 ### Changed
 - Updated k8s authenticator client version to
   [0.19.1](https://github.com/cyberark/conjur-authn-k8s-client/blob/master/CHANGELOG.md#0191---2021-02-08),
@@ -23,6 +24,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   a generic error from Secretless, which made it harder to determine the root cause
   of the problem and caused the `prefer` SSL mode to not function correctly.
   [cyberark/secretless-broker#1377](https://github.com/cyberark/secretless-broker/issues/1377)
+
+### Deprecated
+- Support for OpenShift 4.3 has been deprecated as of this release.
+
+### Added
+- Support for OpenShift 4.6 has been certified as of this release.
 
 ## [1.7.2] - 2020-02-05
 

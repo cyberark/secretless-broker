@@ -54,7 +54,7 @@ func TestConjur_Provider(t *testing.T) {
 		testutils.Reports(
 			provider,
 			"foobar",
-			"404 Not Found. Variable 'foobar' not found in account 'dev'.",
+			"404 Not Found. CONJ00076E Variable dev:variable:foobar is empty or not found..",
 		),
 	)
 

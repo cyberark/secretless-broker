@@ -13,7 +13,7 @@
 - [License](#license)
 
 
-# Secretless Broker
+# Secretless Broker&trade;
 
 Secretless Broker is a connection broker which relieves client applications of the need to directly handle secrets to target services such as databases, web services, SSH connections, or any other TCP-based service.
 

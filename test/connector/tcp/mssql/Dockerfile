@@ -7,7 +7,10 @@ RUN apt-get update && apt-get install -y \
 
 # Add custom MS repository
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+RUN curl --fail \
+	--retry 5 \
+	--retry-max-time 10 \
+	https://packages.microsoft.com/config/debian/10/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
 
 # Install SQL Server drivers and tools
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libodbc1 unixodbc msodbcsql17 mssql-tools unixodbc-dev

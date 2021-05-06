@@ -3,8 +3,12 @@ package entrypoint
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
+
+	"go.opentelemetry.io/otel/exporters/metric/prometheus"
+	"go.opentelemetry.io/otel/metric/global"
 
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/configurationmanagers/configfile"
@@ -33,6 +37,27 @@ type SecretlessOptions struct {
 	ShowVersion         bool
 }
 
+func initMeter() {
+	exporter, err := prometheus.InstallNewPipeline(prometheus.Config{
+		DefaultHistogramBoundaries: []float64{
+			50, 100, 500, 1000, 5000, 10000, 50000, 1000000,
+		},
+	})
+	if err != nil {
+		log.Panicf("failed to initialize prometheus exporter %v", err)
+	}
+	http.HandleFunc("/metrics", exporter.ServeHTTP)
+	go func() {
+		err := http.ListenAndServe(":2222", nil)
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	log.Println("Prometheus server running on :2222")
+}
+
+
 // StartSecretless method is the main entry point into the broker after the CLI
 // flags have been parsed
 func StartSecretless(params *SecretlessOptions) {
@@ -40,6 +65,9 @@ func StartSecretless(params *SecretlessOptions) {
 		fmt.Printf("secretless-broker v%s\n", secretless.FullVersionName)
 		return
 	}
+
+	initMeter()
+	meter := global.Meter("secretless-broker")
 
 	log.Printf("Secretless v%s starting up...", secretless.FullVersionName)
 
@@ -95,7 +123,13 @@ func StartSecretless(params *SecretlessOptions) {
 		}
 
 		// Start Services
-		allServices = proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
+		allServices = proxyservice.NewProxyServices(
+			cfg,
+			availPlugins,
+			logger,
+			evtNotifier,
+			meter,
+		)
 		err = allServices.Start()
 		if err != nil {
 			log.Fatalf("Failed to start services: %s", err)

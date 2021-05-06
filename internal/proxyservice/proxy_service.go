@@ -7,6 +7,9 @@ import (
 	"strings"
 
 	"github.com/go-ozzo/ozzo-validation"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/unit"
 
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/internal/plugin"
@@ -33,6 +36,7 @@ type proxyServices struct {
 	logger          logapi.Logger
 	resolver        v1.Resolver
 	runningServices []internal.Service
+	meter metric.Meter
 }
 
 // Start starts all proxy services
@@ -303,11 +307,27 @@ func (s *proxyServices) createTCPService(
 		connResources.Logger(),
 		credsRetriever,
 	)
-
 	if err != nil {
 		s.logger.Errorf("could not create proxy service '%s'", config.Name)
 		return nil, err
 	}
+
+	meter := metric.Must(s.meter)
+	labels := []attribute.KeyValue{
+		attribute.String("service.name", config.Connector + ":" + "secretless"),
+		attribute.String("secretless.service_name", config.Name),
+		attribute.String("secretless.connector_name", config.Connector),
+	}
+	throughputCounter := meter.NewInt64Counter(
+		"secretless.tcp.stream.bytes",
+		metric.WithUnit(unit.Bytes),
+	).Bind(labels...)
+
+	latencyRecorder := meter.NewInt64ValueRecorder(
+		"secretless.tcp.stream.latency",
+	).Bind(labels...)
+
+	tcpproxy.AddTelemetry(newSvc, throughputCounter, latencyRecorder)
 
 	return newSvc, nil
 }
@@ -337,6 +357,7 @@ func NewProxyServices(
 	availPlugins plugin2.AvailablePlugins,
 	logger logapi.Logger,
 	evtNotifier v1.EventNotifier,
+	meter metric.Meter,
 ) internal.Service {
 
 	// Setup our resolver
@@ -355,6 +376,7 @@ func NewProxyServices(
 		eventNotifier: evtNotifier,
 		logger:        logger,
 		resolver:      resolver,
+		meter: meter,
 	}
 
 	// TODO: v2.NewConfigsByType should be an interface, so we can remove this

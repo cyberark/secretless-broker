@@ -1,12 +1,15 @@
 package tcp
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net"
+	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/metric"
 
 	"github.com/cyberark/secretless-broker/internal"
 	"github.com/cyberark/secretless-broker/pkg/secretless/log"
@@ -45,6 +48,47 @@ type proxyService struct {
 	listener            net.Listener
 	logger              log.Logger
 	retrieveCredentials internal.CredentialsRetriever
+	throughputCounter metric.BoundInt64Counter
+	latencyRecorder metric.BoundInt64ValueRecorder
+}
+
+
+type ReadWriteNotifier struct {
+	readWriter io.ReadWriter
+	onWrite    func(bytesWritten int, timeToHandoff time.Duration)
+	onRead     func(bytesRead int, timeSpentBlocking time.Duration)
+}
+
+// Write implements the io.ReadWriter interface.
+func (rwn *ReadWriteNotifier) Write(buffer []byte) (int, error) {
+	start := time.Now()
+	n, err := rwn.readWriter.Write(buffer)
+	if err == nil && rwn.onWrite != nil {
+		rwn.onWrite(n, time.Now().Sub(start))
+	}
+
+	return n, err
+}
+
+// Read implements the io.ReadWriter interface.
+func (rwn *ReadWriteNotifier) Read(buffer []byte) (int, error) {
+	start := time.Now()
+	n, err := rwn.readWriter.Read(buffer)
+	if err == nil && rwn.onRead != nil {
+		rwn.onRead(n, time.Now().Sub(start))
+	}
+
+	return n, err
+}
+
+func AddTelemetry(
+	svc internal.Service,
+	throughputCounter metric.BoundInt64Counter,
+	latencyRecorder metric.BoundInt64ValueRecorder,
+) {
+	_svc := svc.(*proxyService)
+	_svc.throughputCounter = throughputCounter
+	_svc.latencyRecorder = latencyRecorder
 }
 
 // NewProxyService constructs a new instance of a TCP ProxyService. The
@@ -123,7 +167,42 @@ func (proxy *proxyService) handleConnection(clientConn net.Conn) error {
 
 	logger.Debugf("Proxying connection on %v to %v.\n", clientConn.LocalAddr(), targetConn.RemoteAddr())
 
-	clientErrChan, destErrChan := duplexStream(clientConn, targetConn)
+	var lastTargetRead time.Time
+	var lastClientRead time.Time
+
+
+	// TODO: concurrency protections
+	clientErrChan, destErrChan := duplexStream(
+		&ReadWriteNotifier{
+			readWriter: clientConn,
+			onWrite: func(bytesWritten int, timeToHandoff time.Duration) {
+				// clientWrite
+				streamLatency := time.Now().Sub(lastTargetRead)
+
+				ctx := context.Background()
+				proxy.throughputCounter.Add(ctx, int64(bytesWritten))
+				proxy.latencyRecorder.Record(ctx, streamLatency.Microseconds())
+			},
+			onRead: func(bytesRead int, timeSpentBlocking time.Duration) {
+				// clientRead
+				lastClientRead = time.Now()
+			},
+		}, &ReadWriteNotifier{
+			readWriter: targetConn,
+			onWrite: func(bytesWritten int, timeToHandoff time.Duration) {
+				// targetWrite
+				streamLatency := time.Now().Sub(lastClientRead)
+
+				ctx := context.Background()
+				proxy.throughputCounter.Add(ctx, int64(bytesWritten))
+				proxy.latencyRecorder.Record(ctx, streamLatency.Microseconds())
+			},
+			onRead: func(bytesRead int, timeSpentBlocking time.Duration) {
+				// targetRead
+				lastTargetRead = time.Now()
+			},
+		},
+	)
 
 	var closer string
 	select {

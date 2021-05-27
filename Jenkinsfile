@@ -161,7 +161,7 @@ pipeline {
 
     stage('Push Images Internally') {
       when {
-        branch 'master'
+        branch 'main'
       }
 
       steps {
@@ -171,7 +171,7 @@ pipeline {
 
     stage('Build Release Artifacts') {
       when {
-        branch 'master'
+        branch 'main'
       }
 
       steps {
@@ -241,7 +241,7 @@ pipeline {
 
         stage('Publish Website (production)') {
           when {
-            branch 'master'
+            branch 'main'
           }
           steps {
             sh 'summon -e production bin/publish_website'

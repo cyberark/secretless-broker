@@ -12,7 +12,7 @@ toplevel_dir="$current_dir/.."
 # Default values to pass to security_scan
 confidence='medium'
 severity='high'
-current_branch='master'
+current_branch='main'
 
 while getopts 'b:c:s:' flag; do
   case "${flag}" in

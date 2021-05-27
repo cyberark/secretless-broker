@@ -6,14 +6,14 @@ set -eo pipefail
 # i.e. in any given local repository
 #
 # Performs a gosec scan with given parameters on 
-# the entire local repository (in the case of master branch)
+# the entire local repository (in the case of main branch)
 # or on just files modified, as detected in the git diff.
 print_usage() {
     echo "Security Scanner"
     echo 
     echo "Description:"
     echo "Runs gosec on directories which git detects and marks in the diff."
-    echo "If the branch is detected as 'master', it will scan all"
+    echo "If the branch is detected as 'main', it will scan all"
     echo "directories regardless of what has been modified locally."
     echo 
     echo "Format:"
@@ -23,7 +23,7 @@ print_usage() {
     echo "-h                        Show help"
     echo "-c                        Specify the minimum confidence gosec needs to report an issue."
     echo "-s                        Specify the minimum severity gosec needs to report an issue"
-    echo "-b                        Specify the github branch to compare against master"
+    echo "-b                        Specify the github branch to compare against main"
     echo "-e                        Directories to be excluded from the gosec scan"
     exit 0
 }
@@ -45,14 +45,14 @@ while getopts 'b:e:c:s:h' flag; do
   esac
 done
 
-# If we are on master, scan the entire repository
+# If we are on main, scan the entire repository
 modified_directories="./..."
 
 # Get an array of directories containing modified files
-if [[ ${current_branch} != 'master' ]]; then 
-    echo 'Current branch is not master - running gosec on modified packages for this branch only'
-    git fetch origin master:refs/remotes/origin/master
-    modified_directories=($(git diff origin/master...origin/"${current_branch}" --name-only | xargs -L1 dirname | uniq))
+if [[ ${current_branch} != 'main' ]]; then 
+    echo 'Current branch is not main - running gosec on modified packages for this branch only'
+    git fetch origin main:refs/remotes/origin/main
+    modified_directories=($(git diff origin/main...origin/"${current_branch}" --name-only | xargs -L1 dirname | uniq))
 fi
 
 # Remove output file just in case it exists

@@ -17,7 +17,7 @@
 
 Secretless Broker is a connection broker which relieves client applications of the need to directly handle secrets to target services such as databases, web services, SSH connections, or any other TCP-based service.
 
-![Secretless Broker Architecture](https://github.com/cyberark/secretless-broker/blob/master/docs/img/secretless_architecture.svg)
+![Secretless Broker Architecture](https://github.com/cyberark/secretless-broker/blob/main/docs/img/secretless_architecture.svg)
 
 Secretless is designed to solve two problems. The first is **loss or theft of credentials from applications and services**, which can occur by:
 
@@ -133,9 +133,9 @@ You have just delegated responsibility for managing credentials to a secure proc
 
 # Run more Secretless Broker demos
 
-If the PostgreSQL quick start demo piqued your interest, please check out our [additional demos](https://github.com/cyberark/secretless-broker/tree/master/demos/quick-start#ssh-quick-start) where you can try the Secretless Broker with SSH and HTTP Basic Auth.
+If the PostgreSQL quick start demo piqued your interest, please check out our [additional demos](https://github.com/cyberark/secretless-broker/tree/main/demos/quick-start#ssh-quick-start) where you can try the Secretless Broker with SSH and HTTP Basic Auth.
 
-For an even more in-depth demo, check out our [Deploying to Kubernetes](https://github.com/cyberark/secretless-broker/tree/master/demos/k8s-demo) demo, which walks you through deploying a sample app to Kubernetes with the Secretless Broker.
+For an even more in-depth demo, check out our [Deploying to Kubernetes](https://github.com/cyberark/secretless-broker/tree/main/demos/k8s-demo) demo, which walks you through deploying a sample app to Kubernetes with the Secretless Broker.
 
 # Using Secretless
 
@@ -167,7 +167,7 @@ At any given time there is only one Docker image with the `stable` tag - that of
 **Note:** the [GitHub releases page](https://github.com/cyberark/secretless-broker/releases) will also show `pre-releases`, which have not yet been promoted to stable.
 
 ### GitHub repository
-The code on `master` in the project's GitHub repository represents the development work done since the previous GitHub tag. It is possible to build Secretless from source (see [our contributing guidelines](#development) for more info), but for regular use we recommend using the `stable` Docker image from DockerHub or an official GitHub release.
+The code on `main` in the project's GitHub repository represents the development work done since the previous GitHub tag. It is possible to build Secretless from source (see [our contributing guidelines](#development) for more info), but for regular use we recommend using the `stable` Docker image from DockerHub or an official GitHub release.
 
 ### Stable release definition
 Stable components (eg service connectors, credential providers, etc.) of Secretless meet the core acceptance criteria:

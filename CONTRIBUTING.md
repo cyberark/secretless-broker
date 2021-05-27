@@ -1,7 +1,7 @@
 # Contributing to the Secretless Broker
 
 For general contribution and community guidelines, please see the [community repo](https://github.com/cyberark/community). In particular, before contributing
-please review our [contributor licensing guide](https://github.com/cyberark/community/blob/master/CONTRIBUTING.md#when-the-repo-does-not-include-the-cla)
+please review our [contributor licensing guide](https://github.com/cyberark/community/blob/main/CONTRIBUTING.md#when-the-repo-does-not-include-the-cla)
 to ensure your contribution is compliant with our contributor license
 agreements.
 
@@ -58,7 +58,7 @@ some of the project's technical design documents can be found in the project [de
 
 Use [this guide][style] to maintain consistent style across the Secretless Broker project.
 
-[design]: https://github.com/cyberark/secretless-broker/tree/master/design
+[design]: https://github.com/cyberark/secretless-broker/tree/main/design
 [issues]: https://github.com/cyberark/secretless-broker/issues
 [style]: STYLE.md
 [tests]: #testing
@@ -398,7 +398,7 @@ There are a few benefits to this approach
  when Github links the two pull requests.
 
 We want secretless to point to specific commits within a submodule, rather
-than master. Make sure your change to secretless considers this.
+than main. Make sure your change to secretless considers this.
  1. `cd` into the submodule
  2. Checkout the commit we want secretless to use from within the submodule
  3. Return to the secretless-broker directory, and create a new PR with the modified
@@ -437,17 +437,17 @@ than master. Make sure your change to secretless considers this.
    the last release have been captured. You may find it helpful to look at the
    list of commits since the last release - you can find this by visiting the
    [releases page](https://github.com/cyberark/secretless-broker/releases) and
-   clicking the "`N commits` to master since this release" link for the latest
+   clicking the "`N commits` to main since this release" link for the latest
    release.
 
    This is also a good time to make sure all entries conform to our
-   [changelog guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md#changelog-guidelines).
+   [changelog guidelines](https://github.com/cyberark/community/blob/main/Conjur/CONTRIBUTING.md#changelog-guidelines).
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
    for review. Your PR should include updates to `pkg/secretless/version.go`,
    `CHANGELOG.md`, and if there are any license updates, to `NOTICES.txt`.
 
 ### Add a git tag
-1. Once your changes have been reviewed and merged into master, tag the version
+1. Once your changes have been reviewed and merged into main, tag the version
    using `git tag -s v0.1.1`. Note this requires you to be  able to sign releases.
    Consult the [github documentation on signing commits](https://help.github.com/articles/signing-commits-with-gpg/)
    on how to set this up. `vx.y.z` is an acceptable tag message.
@@ -476,7 +476,7 @@ should be officially marked as a `pre-release` (eg "non-production ready")
    `secretless-broker-{OS}_{GOOS}_{GOARCH}` dirs to `secretless-broker-{GOOS}`
    and upload these to the release.
 1. Copy the `secretless-broker.rb` homebrew formula output by goreleaser
-   to the [homebrew formula for Secretless](https://github.com/cyberark/homebrew-tools/blob/master/secretless-broker.rb)
+   to the [homebrew formula for Secretless](https://github.com/cyberark/homebrew-tools/blob/main/secretless-broker.rb)
    and submit a PR to update the version of Secretless available in brew.
 
 ### Publish the Red Hat image

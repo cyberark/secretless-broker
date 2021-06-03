@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Update RH base image to `ubi8/ubi` instead of `rhel7/rhel`.
+  [PR cyberark/secretless-broker#1411](https://github.com/cyberark/secretless-broker/pull/1411)
+
 ## [1.7.3] - 2020-03-09
 
 ### Changed

@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Support for OpenShift 4.6 has been certified as of this release.
+- Support for OpenShift 4.7 has been certified as of this release.
 
 ## [1.7.2] - 2020-02-05
 

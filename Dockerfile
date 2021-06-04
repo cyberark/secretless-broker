@@ -70,7 +70,7 @@ COPY --from=secretless-builder /secretless/dist/linux/amd64/secretless-broker \
                                /secretless/dist/linux/amd64/summon2 /usr/local/bin/
 
 # =================== MAIN CONTAINER (REDHAT) ===================
-FROM registry.access.redhat.com/rhel as secretless-broker-redhat
+FROM registry.access.redhat.com/ubi8/ubi as secretless-broker-redhat
 MAINTAINER CyberArk Software Ltd.
 
 ARG VERSION

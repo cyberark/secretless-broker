@@ -6,11 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.4] - 2021-06-30
+
 ### Changed
 - Update RH base image to `ubi8/ubi` instead of `rhel7/rhel`.
   [PR cyberark/secretless-broker#1411](https://github.com/cyberark/secretless-broker/pull/1411)
 
-## [1.7.3] - 2020-03-09
+## [1.7.3] - 2021-03-09
 
 ### Changed
 - Updated k8s authenticator client version to
@@ -36,7 +38,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for OpenShift 4.6 has been certified as of this release.
 - Support for OpenShift 4.7 has been certified as of this release.
 
-## [1.7.2] - 2020-02-05
+## [1.7.2] - 2021-02-05
 
 ### Added
 - Support for OpenShift 4.3 and 4.5.
@@ -575,7 +577,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.3...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.4...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -605,3 +607,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.1]: https://github.com/cyberark/secretless-broker/compare/v1.7.0...v1.7.1
 [1.7.2]: https://github.com/cyberark/secretless-broker/compare/v1.7.1...v1.7.2
 [1.7.3]: https://github.com/cyberark/secretless-broker/compare/v1.7.2...v1.7.3
+[1.7.4]: https://github.com/cyberark/secretless-broker/compare/v1.7.3...v1.7.4

@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Security
+- Updated addressable to 2.8.0 in docs/Gemfile.lock to resolve GHSA-jxhc-q857-3j6g
+  [cyberark/secretless-broker#1418](https://github.com/cyberark/secretless-broker/pull/1418)
+- Updated github.com/gogo/protobuf to 1.3.2 to resolve CVE-2021-3121
+  [cyberark/secretless-broker#1418](https://github.com/cyberark/secretless-broker/pull/1418)
+
 ## [1.7.4] - 2021-06-30
 
 ### Changed

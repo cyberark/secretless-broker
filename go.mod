@@ -17,6 +17,7 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/btree v1.0.0 // indirect
 	github.com/googleapis/gnostic v0.3.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect

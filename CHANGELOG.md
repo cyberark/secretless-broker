@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.5] - 2021-08-04
+
 ### Security
 - Updated addressable to 2.8.0 in docs/Gemfile.lock to resolve GHSA-jxhc-q857-3j6g
   [cyberark/secretless-broker#1418](https://github.com/cyberark/secretless-broker/pull/1418)
@@ -583,7 +585,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.4...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.5...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -614,3 +616,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.2]: https://github.com/cyberark/secretless-broker/compare/v1.7.1...v1.7.2
 [1.7.3]: https://github.com/cyberark/secretless-broker/compare/v1.7.2...v1.7.3
 [1.7.4]: https://github.com/cyberark/secretless-broker/compare/v1.7.3...v1.7.4
+[1.7.5]: https://github.com/cyberark/secretless-broker/compare/v1.7.4...v1.7.5

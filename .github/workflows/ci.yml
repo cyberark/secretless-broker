@@ -47,5 +47,9 @@ jobs:
             ${{ runner.os }}-go-
       # Download go modules
       - run: go mod download
+      # Lock and unlock default keychain to avoid macOS test flakiness
+      - run: |
+          security lock-keychain
+          security unlock-keychain -u
       # Run keychain tests
       - run: cd test/providers/keychain && ./start && ./test && ./stop

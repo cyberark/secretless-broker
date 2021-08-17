@@ -27,5 +27,5 @@ jobs:
       # Download go modules
       - run: go mod download
       # Run keychain tests
-      - run: security lock-keychain
+      - run: security unlock-keychain
       - run: cd test/providers/keychain && ./start && ./test && ./stop

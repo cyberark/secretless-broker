@@ -9,27 +9,6 @@ on:
   push:
 
 jobs:
-  unit_test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Unit tests
-        run: ./bin/test_unit
-
-  build_and_test:
-    name: Build and Functional Tests on Linux
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Build
-        run: ./bin/build
-      - name: Integration tests
-        run: ./bin/test
 
   osx_test:
     name: Functional Tests on macOS
@@ -48,4 +27,5 @@ jobs:
       # Download go modules
       - run: go mod download
       # Run keychain tests
+      - run: security lock-keychain
       - run: cd test/providers/keychain && ./start && ./test && ./stop

@@ -18,12 +18,12 @@ jobs:
         with:
           submodules: recursive
       # Cache go module dependencies based on go.sum to improve workflow execution time.
-      - uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+#       - uses: actions/cache@v2
+#         with:
+#           path: ~/go/pkg/mod
+#           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+#           restore-keys: |
+#             ${{ runner.os }}-go-
       # Download go modules
       - run: go mod download
       # Run keychain tests

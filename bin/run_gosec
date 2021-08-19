@@ -52,7 +52,7 @@ modified_directories="./..."
 if [[ ${current_branch} != 'main' ]]; then 
     echo 'Current branch is not main - running gosec on modified packages for this branch only'
     git fetch origin main:refs/remotes/origin/main
-    modified_directories=($(git diff origin/main...origin/"${current_branch}" --name-only | xargs -L1 dirname | uniq))
+    modified_directories=($(git diff origin/main...origin/"${current_branch}" --name-only | xargs -L1 sh -c '[ "$#" -gt 0 ] && dirname "$@"' - | uniq))
 fi
 
 # Remove output file just in case it exists

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Secretless and secretless-redhat containers now use Alpine 3.14 as their base
+  image. [PR cyberark/secretless-broker#1423](https://github.com/cyberark/secretless-broker/pull/1423)
+
 ## [1.7.5] - 2021-08-04
 
 ### Security

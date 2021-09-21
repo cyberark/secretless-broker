@@ -128,7 +128,7 @@ To perform all these steps in one go, run:
 deployment.apps/quick-start-application created
 service/quick-start-application created
 
->>--- Patching deployment with us.gcr.io/conjur-gke-dev/secretless-broker:c56a710d358
+>>--- Patching deployment with us.gcr.io/refreshing-mark-284016/secretless-broker:c56a710d358
 
 deployment.extensions/quick-start-application patched
 Using app URL: http://quick-start-application.quick-start-application-ns.svc.cluster.local:8080

@@ -2,51 +2,67 @@
 
 set -eo pipefail
 
+. bin/build_utils
+
 current_dir=$("$(dirname "$0")"/abspath)
 toplevel_dir=$current_dir/..
-
 junit_output_dir=test/unit-test-output
-mkdir -p "$junit_output_dir"
-rm -f "$junit_output_dir/*"
 
-echo "Building unit test image..."
-docker build "$toplevel_dir" \
-             -t secretless-unit-test-runner:latest \
-             -f "$toplevel_dir"/Dockerfile.test
+function main() {
+  retrieve_cyberark_ca_cert
+  build_ut_docker_image
+  run_unit_tests
+  format_output
+}
 
-echo "Running unit tests..."
-set +e
-  # TODO: Use `go vet` too
-  # NOTE: We're leaving out cmd/shared because it was causing
-  #       a "g++": executable file not found in $PATH error, and
-  #       the code is not being used anyway (was part of an Envoy POC)
-  docker run --rm -t \
+function build_ut_docker_image() {
+  echo "Building unit test image..."
+  docker build "$toplevel_dir" \
+               -t secretless-unit-test-runner:latest \
+               -f "$toplevel_dir"/Dockerfile.test
+}
+
+function run_unit_tests() {
+  echo "Running unit tests..."
+  set +e
+    mkdir -p "$junit_output_dir"
+    rm -f "$junit_output_dir/*"
+
+    # TODO: Use `go vet` too
+    # NOTE: We're leaving out cmd/shared because it was causing
+    #       a "g++": executable file not found in $PATH error, and
+    #       the code is not being used anyway (was part of an Envoy POC)
+    docker run --rm -t \
+      --volume "$toplevel_dir"/:/secretless \
+      secretless-unit-test-runner:latest \
+      go test \
+        -v \
+        -timeout 3m \
+        -vet=off \
+        -coverprofile="./$junit_output_dir/c.out" \
+        ./cmd/secretless-broker... \
+        ./cmd/summon2... \
+        ./internal/... \
+        ./pkg/... \
+      | tee -a "./$junit_output_dir/junit.output"
+    echo "Unit test exit status: $?"
+  set -e
+}
+
+function format_output() {
+  # Format output
+  docker run --rm \
     --volume "$toplevel_dir"/:/secretless \
+    --workdir "/secretless/$junit_output_dir" \
     secretless-unit-test-runner:latest \
-    go test \
-      -v \
-      -timeout 3m \
-      -vet=off \
-      -coverprofile="./$junit_output_dir/c.out" \
-      ./cmd/secretless-broker... \
-      ./cmd/summon2... \
-      ./internal/... \
-      ./pkg/... \
-    | tee -a "./$junit_output_dir/junit.output"
-  echo "Unit test exit status: $?"
-set -e
+      sh -exc "
+        rm -f junit.xml
+  
+        # Format test output XML
+        cat junit.output | go-junit-report > junit.xml
+  
+        # Format coverage output XML
+        gocov convert c.out | gocov-xml > coverage.xml"
+}
 
-# Format output
-docker run --rm \
-  --volume "$toplevel_dir"/:/secretless \
-  --workdir "/secretless/$junit_output_dir" \
-  secretless-unit-test-runner:latest \
-    sh -exc "
-rm -f junit.xml
-
-# Format test output XML
-cat junit.output | go-junit-report > junit.xml
-
-# Format coverage output XML
-gocov convert c.out | gocov-xml > coverage.xml
-"
+main

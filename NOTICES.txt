@@ -10,7 +10,7 @@ of the license associated with each component.
 SECTION 1: Apache License 2.0
 
 >>> github.com/aws/aws-sdk-go-1.15.79
->>> github.com/containerd/containerd-1.3.2
+>>> github.com/containerd/containerd-1.4.11
 >>> github.com/CrunchyData/crunchy-proxy-0.0.0-20170717145745-c0da73ca9dde
 >>> github.com/cyberark/conjur-api-go-0.5.2
 >>> github.com/cyberark/conjur-authn-k8s-client-0.19.1
@@ -25,7 +25,7 @@ SECTION 1: Apache License 2.0
 >>> github.com/opencontainers/image-spec-1.0.1
 >>> github.com/prometheus/client_golang-1.2.1
 >>> google.golang.org/appengine-1.4.0
->>> gopkg.in/yaml.v2-2.2.2
+>>> gopkg.in/yaml.v2-2.2.3
 >>> k8s.io/api-0.0.0-20180712090710-2d6f90ab1293
 >>> k8s.io/apiextensions-apiserver-0.0.0-20180808065829-408db4a50408
 >>> k8s.io/apimachinery-0.0.0-20180621070125-103fd098999d
@@ -35,7 +35,7 @@ SECTION 1: Apache License 2.0
 
 SECTION 2: BSD 2-clause "Simplified" License
 
->>> github.com/pkg/errors-0.8.1
+>>> github.com/pkg/errors-0.9.1
 >>> github.com/pkg/profile-1.2.1
 
 
@@ -65,8 +65,8 @@ SECTION 4: MIT License
 >>> github.com/lib/pq-0.0.0-20180123210206-19c8e9ad0095
 >>> github.com/orderbynull/lottip-0.0.0-20191127192149-2109e1a4fcc5
 >>> github.com/smartystreets/goconvey-0.0.0-20190731233626-505e41936337
->>> github.com/stretchr/testify-1.5.1
->>> gopkg.in/yaml.v2-2.2.2
+>>> github.com/stretchr/testify-1.7.0
+>>> gopkg.in/yaml.v2-2.2.3
 
 
 

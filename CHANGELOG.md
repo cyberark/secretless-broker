@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Security
+- Updated containerd to v1.4.11 to close CVE-2020-15257 (Not vulnerable)
+  [cyberark/secretless-broker#1431](https://github.com/cyberark/secretless-broker/pull/1431)
+
 ## [1.7.6] - 2021-09-10
 
 ### Added

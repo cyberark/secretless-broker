@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	gohttp "net/http"
 	"net/url"
-	"regexp"
 	"strings"
 	"time"
 
@@ -20,15 +19,6 @@ import (
 // From https://github.com/aws/aws-sdk-go/blob/master/aws/signer/v4/v4.go#L77
 const timeFormat = "20060102T150405Z"
 
-// reForCredentialComponent matches headers strings like:
-//
-//     Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request
-//
-// See https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
-var reForCredentialComponent = regexp.MustCompile(
-	`^Credential=\w+\/\d+\/([\w-_]+)\/(\w+)\/aws4_request$`,
-)
-
 // newAmzDate parses a date string using the AWS signer time format
 func newAmzDate(amzDateStr string) (time.Time, error) {
 	if amzDateStr == "" {
@@ -39,52 +29,52 @@ func newAmzDate(amzDateStr string) (time.Time, error) {
 }
 
 // requestMetadataFromAuthz parses an authorization header string and create a
-// requestMetadata instance populated with the associated region and service
-// name
+// requestMetadata instance populated with the associated region, service
+// name and signed headers
 func requestMetadataFromAuthz(authorizationStr string) (*requestMetadata, error) {
-	// extract credentials section of authorization header
-	credentialsComponent, err := extractCredentialsComponent(authorizationStr)
-	if err != nil {
-		return nil, err
+	// Parse the following (line breaks added for readability):
+	// AWS4-HMAC-SHA256 \
+	// Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, \
+	// SignedHeaders=host;range;x-amz-date, \
+	// Signature=fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024
+	//
+	// See https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html
+
+	// Validate form of entire authorization header
+	tokens := strings.Split(authorizationStr, ", ")
+	if len(tokens) != 3 || tokens[0] == "" || tokens[1] == "" || tokens[2] == "" {
+		return nil, fmt.Errorf("malformed Authorization header")
 	}
-	// validate credential component of authorization header, then extract region
-	// and service name
-	matches := reForCredentialComponent.FindStringSubmatch(credentialsComponent)
-	if len(matches) != 3 {
+
+	// Extract region and service name from credential component
+	credentialParts := strings.SplitN(tokens[0], "/", 5)
+	if len(credentialParts) != 5 {
 		return nil, fmt.Errorf("malformed credential component of Authorization header")
 	}
 
+	region := credentialParts[2]
+	serviceName := credentialParts[3]
+
+	// Extract signed headers from signed headers component
+	signedHeaders := strings.Split(
+		strings.TrimPrefix(tokens[1], "SignedHeaders="),
+		";",
+	)
+
 	return &requestMetadata{
-		region:      matches[1],
-		serviceName: matches[2],
+		region:        region,
+		serviceName:   serviceName,
+		signedHeaders: signedHeaders,
 	}, nil
 }
 
-// requestMetadata captures the metadata of a signed AWS request: date, region
-// and service name
+// requestMetadata captures the metadata of a signed AWS request: date, region, service
+// name and signed headers
 type requestMetadata struct {
-	date        time.Time
-	region      string
-	serviceName string
-}
-
-// extractCredentialsComponent extracts the credentials component from an
-// authorization header string
-func extractCredentialsComponent(authorizationStr string) (string, error) {
-	// Parse the following (line breaks added):
-	// AWS4-HMAC-SHA256
-	// Credential=AKIAJC5FABNOFVBKRWHA/20171103/us-east-1/ec2/aws4_request, \
-	// SignedHeaders=content-type;host;x-amz-date, \
-	// Signature=c4a8ade09a5e0c644cc282311c36aae6c834596076ffde7db7d1195c7b454ed0
-
-	// validate form of entire authorization header
-	tokens := strings.Split(authorizationStr, ", ")
-	if len(tokens) != 3 || tokens[0] == "" || tokens[1] == "" || tokens[2] == "" {
-		return "", fmt.Errorf("malformed Authorization header")
-	}
-
-	// trim prefix and return credential component
-	return strings.TrimPrefix(tokens[0], "AWS4-HMAC-SHA256 "), nil
+	date          time.Time
+	region        string
+	serviceName   string
+	signedHeaders []string
 }
 
 // newRequestMetadata parses the request headers to extract the metadata
@@ -99,21 +89,21 @@ func newRequestMetadata(r *gohttp.Request) (*requestMetadata, error) {
 		return nil, nil
 	}
 
-	// parse date string
+	// Parse date string
 	//
 	date, err := newAmzDate(amzDateStr)
 	if err != nil {
 		return nil, err
 	}
 
-	// create request metadata by extracting service name and region from
+	// Create request metadata by extracting service name and region from
 	// Authorization header
 	reqMeta, err := requestMetadataFromAuthz(authorizationStr)
 	if err != nil {
 		return nil, err
 	}
 
-	// populate request metadata with date
+	// Populate request metadata with date
 	reqMeta.date = date
 
 	return reqMeta, nil
@@ -169,14 +159,10 @@ func signRequest(
 		reqMeta.region,
 		reqMeta.date,
 	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
-// setAmzEndpoint, when the request URL is http://secretless.empty, sets the
+// maybeSetAmzEndpoint, when the request URL is http://secretless.empty, sets the
 // request endpoint using the default AWS endpoint resolver. The resolver allows
 // the connector to mimic a typical AWS client and provides a TLS endpoint where
 // possible.
@@ -188,12 +174,12 @@ func signRequest(
 // endpoint and then this connector can use the AWS SDK to resolve the endpoint
 // in the same way the client might via a direct call to Amazon over HTTPS.
 //
-// Note that if the client to specifies an HTTP (not HTTPS) endpoint that is not
-// http://secretless.empty it will be respected.
+// Note that if the client specifies an HTTP (not HTTPS, because Secretless does not proxy
+// HTTPS requests) endpoint that is not http://secretless.empty it will be respected.
 //
 // Note: There is a plan to add a configuration option to instruct Secretless to
-// upgrade the connect between Secretless and the target endpoint to TLS.
-func setAmzEndpoint(req *gohttp.Request, reqMeta *requestMetadata) error {
+// upgrade the connect between Secretless and the target endpoint to TLS
+func maybeSetAmzEndpoint(req *gohttp.Request, reqMeta *requestMetadata) error {
 	shouldSetEndpoint := req.URL.Scheme == "http" &&
 		req.URL.Host == "secretless.empty"
 

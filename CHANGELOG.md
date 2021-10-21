@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Request-signing on the AWS connector was updated to address a bug that was
+  causing failed integrity checks, where the request-signing by Secretless was
+  incorporating more headers than were used on the original request-signing. The
+  fix limits the headers used by Secretless to those used in the original
+  request. [cyberark/secretless-broker#1432](https://github.com/cyberark/secretless-broker/issues/1432)
+
 ### Security
 - Updated containerd to v1.4.11 to close CVE-2020-15257 (Not vulnerable)
   [cyberark/secretless-broker#1431](https://github.com/cyberark/secretless-broker/pull/1431)

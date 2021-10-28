@@ -1,4 +1,4 @@
-FROM golang:1.15-buster as secretless-builder
+FROM golang:1.16-buster as secretless-builder
 MAINTAINER CyberArk Software Ltd.
 LABEL builder="secretless-builder"
 
@@ -23,6 +23,7 @@ ENV GOOS=linux \
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party
 
+RUN go env -w GOFLAGS=-mod=mod
 RUN go mod download
 
 # secretless source files

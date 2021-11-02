@@ -1,6 +1,7 @@
 package kubernetessecrets
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -59,7 +60,7 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 		return nil, fmt.Errorf("field name missing from Kubernetes secret id '%s'", id)
 	}
 
-	secret, err := p.SecretsClient.Get(secretName, metav1.GetOptions{})
+	secret, err := p.SecretsClient.Get(context.TODO(), secretName, metav1.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil, fmt.Errorf("could not find Kubernetes secret from '%s'", id)

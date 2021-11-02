@@ -1,6 +1,7 @@
 package crd
 
 import (
+	"context"
 	"log"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,10 +41,10 @@ func RegisterCRDListener(namespace string, configSpec string, resourceEventHandl
 	// TODO: We might not want to listen in on all namespace changes
 	watchList := &cache.ListWatch{
 		ListFunc: func(listOpts meta_v1.ListOptions) (result runtime.Object, err error) {
-			return clientset.SecretlessV1().Configurations(namespace).List(listOpts)
+			return clientset.SecretlessV1().Configurations(namespace).List(context.TODO(), listOpts)
 		},
 		WatchFunc: func(listOpts meta_v1.ListOptions) (watch.Interface, error) {
-			return clientset.SecretlessV1().Configurations(namespace).Watch(listOpts)
+			return clientset.SecretlessV1().Configurations(namespace).Watch(context.TODO(), listOpts)
 		},
 	}
 

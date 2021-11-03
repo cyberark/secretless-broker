@@ -1,4 +1,4 @@
-FROM golang:1.15-alpine
+FROM golang:1.16-alpine
 MAINTAINER CyberArk Software Ltd.
 LABEL id="secretless-test-runner"
 
@@ -24,6 +24,7 @@ RUN apk add -u curl \
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party
 
+RUN go env -w GOFLAGS=-mod=mod
 RUN go mod download
 
 # go-junit-report => Convert go test output to junit xml

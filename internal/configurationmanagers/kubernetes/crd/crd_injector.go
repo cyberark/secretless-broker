@@ -1,6 +1,7 @@
 package crd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -35,7 +36,7 @@ func createCRD(apiExtClient *apiextensionsclientset.Clientset) error {
 		},
 	}
 
-	res, err := apiExtClient.ApiextensionsV1beta1().CustomResourceDefinitions().Create(secretlessCRD)
+	res, err := apiExtClient.ApiextensionsV1beta1().CustomResourceDefinitions().Create(context.TODO(), secretlessCRD, meta_v1.CreateOptions{})
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return fmt.Errorf("%s: ERROR: Could not create Secretless CRD: %v - %v", PluginName,
 			err, res)

@@ -1,4 +1,4 @@
-FROM golang:1.15-buster
+FROM golang:1.16-buster
 MAINTAINER CyberArk Software Ltd.
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a
@@ -53,6 +53,7 @@ RUN go get -u github.com/jstemmer/go-junit-report && \
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party
 
+RUN go env -w GOFLAGS=-mod=mod
 RUN go mod download
 
 # TODO: all the stuff below this line is not needed

@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
 
@@ -37,12 +38,16 @@ func TestKubernetes_Provider(t *testing.T) {
 	)
 
 	for name, data := range mockSecrets {
-		_, err = testSecretsClient.Create(&v1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
+		_, err = testSecretsClient.Create(
+			context.TODO(),
+			&v1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: name,
+				},
+				Data: data,
 			},
-			Data: data,
-		})
+			metav1.CreateOptions{},
+		)
 		if err != nil {
 			panic(fmt.Errorf("unable to create secret on test client: %s", err))
 		}

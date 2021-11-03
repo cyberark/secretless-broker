@@ -47,3 +47,7 @@ github.com/cyberark/
 # Image scan files
 scan_results-*.json
 scan_results-*.xml
+
+# Temporary directories to store the CyberArk proxy CA certificate
+build_ca_certificate/
+bin/juxtaposer/build_ca_certificate

@@ -156,7 +156,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> gopkg.in/yaml.v2-2.2.2
+>>> gopkg.in/yaml.v2-2.2.3
 
 Copyright {yyyy} {name of copyright owner}
 
@@ -574,7 +574,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 NOTE: Various optional and subordinate components carry their own licensing requirements and restrictions. Use of those components is subject to the terms and conditions outlined the respective license of each component.
 
 
->>> github.com/stretchr/testify-1.5.1
+>>> github.com/stretchr/testify-1.7.0
 
 MIT License
 
@@ -599,7 +599,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
->>> gopkg.in/yaml.v2-2.2.2
+>>> gopkg.in/yaml.v2-2.2.3
 
 The following files were ported to Go from C files of libyaml, and thus
 are still covered by their original copyright and license:

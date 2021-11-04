@@ -1,45 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
-set -eo pipefail
+CURRENT_DIR=$("$(dirname "$0")/abspath")
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+echo "Current dir: $CURRENT_DIR"
 
-# Get the version of Go specified by the "go directive" in go.mod
-# Grep it to avoid Go binary dependency
-GO_VERSION="v$(grep "^\bgo\b" "${REPO_ROOT}/go.mod" | awk '{print $2}')"
-
-# Use a GoReleaser Docker image containing cross-compilation tools
-# This image is recommended by the official GoReleaser docs
-# https://goreleaser.com/cookbooks/cgo-and-crosscompiling/
-GORELEASER_IMAGE="troian/golang-cross"
-
-# Get the latest tags
-GORELEASER_TAGS_JSON="$(curl --silent --show-error https://registry.hub.docker.com/v2/repositories/${GORELEASER_IMAGE}/tags?page_size=100)"
-
-# Get the latest tag matching the GO_VERSION
-GORELEASER_LATEST_TAG="$(echo "${GORELEASER_TAGS_JSON}" | \
-  jq \
-    --raw-output \
-    --arg GO_VERSION "${GO_VERSION}" \
-    '
-      .results |
-      map(select(.name | contains($GO_VERSION) and (contains("-") | not))) |
-      first |
-      .name
-    '
-)"
-
-if [[ -z "${GORELEASER_LATEST_TAG}" ]]; then
-  echo "Could not find tag for Docker image \"${GORELEASER_IMAGE}\" matching GO_VERSION=${GO_VERSION}"
-  exit 1
-fi
-
-echo "Docker image for release build: ${GORELEASER_IMAGE}:${GORELEASER_LATEST_TAG}"
-
+# registry.tld/goreleaser is able to carry out cross-compilation
 docker run --rm -t \
   --env GITHUB_TOKEN \
-  --volume "${REPO_ROOT}:/secretless-broker" \
+  --volume "$CURRENT_DIR/..:/secretless-broker" \
   --workdir /secretless-broker \
-  "${GORELEASER_IMAGE}:${GORELEASER_LATEST_TAG}" --rm-dist "$@"
+  "registry.tld/goreleaser" --rm-dist "$@"
 
 echo "Releases built. Archives can be found in dist/goreleaser"

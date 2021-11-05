@@ -1,14 +1,11 @@
-FROM golang:1.12.5
+FROM golang:1.16
 
 WORKDIR /
 
 ENV GO111MODULE=on
 
-RUN git clone --depth 1 \
-              -b fix-runners \
-              https://github.com/conjurinc/code-generator.git && \
-   cd /code-generator && \
-   ./build_generators && \
-   cp -r dist/* /usr/local/bin
+ARG K8S_PKG_TAG
+
+RUN git clone --depth 1 --branch ${K8S_PKG_TAG} https://github.com/kubernetes/code-generator.git
 
 WORKDIR /secretless

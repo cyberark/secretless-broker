@@ -1,8 +1,8 @@
 module github.com/cyberark/secretless-broker
 
 require (
-	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.17 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aws/aws-sdk-go v1.15.79
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/codegangsta/cli v1.20.0
@@ -15,43 +15,33 @@ require (
 	github.com/docker/docker v1.4.2-0.20191231165639-e6f6c35b7902
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/fsnotify/fsnotify v1.4.7
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
-	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
-	github.com/google/btree v1.0.0 // indirect
-	github.com/googleapis/gnostic v0.3.1 // indirect
+	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/hashicorp/vault/api v1.0.2
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/joho/godotenv v1.2.0
-	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6
-	github.com/kr/pretty v0.2.1 // indirect
 	github.com/lib/pq v0.0.0-20180123210206-19c8e9ad0095
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/pkg/profile v1.2.1
-	github.com/prometheus/client_golang v1.2.1 // indirect
-	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/smartystreets/goconvey v1.6.4
+	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f
-	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
-	golang.org/x/sys v0.0.0-20210426230700-d19ff857e887 // indirect
+	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 	google.golang.org/grpc v1.41.0 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
-	gopkg.in/yaml.v2 v2.2.3
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools v2.2.0+incompatible // indirect
-	k8s.io/api v0.0.0-20180712090710-2d6f90ab1293
-	k8s.io/apiextensions-apiserver v0.0.0-20180808065829-408db4a50408
-	k8s.io/apimachinery v0.0.0-20180621070125-103fd098999d
-	k8s.io/client-go v0.0.0-20180806134042-1f13a808da65
+	k8s.io/api v0.22.3
+	k8s.io/apiextensions-apiserver v0.22.3
+	k8s.io/apimachinery v0.22.3
+	k8s.io/client-go v0.22.3
 )
 
 replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
@@ -60,4 +50,4 @@ replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 // This is our fix:
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
 
-go 1.15
+go 1.16

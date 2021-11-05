@@ -19,6 +19,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	secretlessiov1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -39,7 +41,7 @@ var configurationsResource = schema.GroupVersionResource{Group: "secretless.io",
 var configurationsKind = schema.GroupVersionKind{Group: "secretless.io", Version: "v1", Kind: "Configuration"}
 
 // Get takes name of the configuration, and returns the corresponding configuration object, and an error if there is any.
-func (c *FakeConfigurations) Get(name string, options v1.GetOptions) (result *secretlessiov1.Configuration, err error) {
+func (c *FakeConfigurations) Get(ctx context.Context, name string, options v1.GetOptions) (result *secretlessiov1.Configuration, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(configurationsResource, c.ns, name), &secretlessiov1.Configuration{})
 
@@ -50,7 +52,7 @@ func (c *FakeConfigurations) Get(name string, options v1.GetOptions) (result *se
 }
 
 // List takes label and field selectors, and returns the list of Configurations that match those selectors.
-func (c *FakeConfigurations) List(opts v1.ListOptions) (result *secretlessiov1.ConfigurationList, err error) {
+func (c *FakeConfigurations) List(ctx context.Context, opts v1.ListOptions) (result *secretlessiov1.ConfigurationList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(configurationsResource, configurationsKind, c.ns, opts), &secretlessiov1.ConfigurationList{})
 
@@ -72,14 +74,14 @@ func (c *FakeConfigurations) List(opts v1.ListOptions) (result *secretlessiov1.C
 }
 
 // Watch returns a watch.Interface that watches the requested configurations.
-func (c *FakeConfigurations) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeConfigurations) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(configurationsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a configuration and creates it.  Returns the server's representation of the configuration, and an error, if there is any.
-func (c *FakeConfigurations) Create(configuration *secretlessiov1.Configuration) (result *secretlessiov1.Configuration, err error) {
+func (c *FakeConfigurations) Create(ctx context.Context, configuration *secretlessiov1.Configuration, opts v1.CreateOptions) (result *secretlessiov1.Configuration, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(configurationsResource, c.ns, configuration), &secretlessiov1.Configuration{})
 
@@ -90,7 +92,7 @@ func (c *FakeConfigurations) Create(configuration *secretlessiov1.Configuration)
 }
 
 // Update takes the representation of a configuration and updates it. Returns the server's representation of the configuration, and an error, if there is any.
-func (c *FakeConfigurations) Update(configuration *secretlessiov1.Configuration) (result *secretlessiov1.Configuration, err error) {
+func (c *FakeConfigurations) Update(ctx context.Context, configuration *secretlessiov1.Configuration, opts v1.UpdateOptions) (result *secretlessiov1.Configuration, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(configurationsResource, c.ns, configuration), &secretlessiov1.Configuration{})
 
@@ -101,7 +103,7 @@ func (c *FakeConfigurations) Update(configuration *secretlessiov1.Configuration)
 }
 
 // Delete takes name of the configuration and deletes it. Returns an error if one occurs.
-func (c *FakeConfigurations) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeConfigurations) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(configurationsResource, c.ns, name), &secretlessiov1.Configuration{})
 
@@ -109,17 +111,17 @@ func (c *FakeConfigurations) Delete(name string, options *v1.DeleteOptions) erro
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeConfigurations) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(configurationsResource, c.ns, listOptions)
+func (c *FakeConfigurations) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(configurationsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &secretlessiov1.ConfigurationList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched configuration.
-func (c *FakeConfigurations) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *secretlessiov1.Configuration, err error) {
+func (c *FakeConfigurations) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *secretlessiov1.Configuration, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(configurationsResource, c.ns, name, data, subresources...), &secretlessiov1.Configuration{})
+		Invokes(testing.NewPatchSubresourceAction(configurationsResource, c.ns, name, pt, data, subresources...), &secretlessiov1.Configuration{})
 
 	if obj == nil {
 		return nil, err

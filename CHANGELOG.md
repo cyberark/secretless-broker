@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.7] - 2021-11-03
+
 ### Fixed
 - Request-signing on the AWS connector was updated to address a bug that was
   causing failed integrity checks, where the request-signing by Secretless was
@@ -602,7 +604,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.6...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.7...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -635,3 +637,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.4]: https://github.com/cyberark/secretless-broker/compare/v1.7.3...v1.7.4
 [1.7.5]: https://github.com/cyberark/secretless-broker/compare/v1.7.4...v1.7.5
 [1.7.6]: https://github.com/cyberark/secretless-broker/compare/v1.7.5...v1.7.6
+[1.7.7]: https://github.com/cyberark/secretless-broker/compare/v1.7.6...v1.7.7

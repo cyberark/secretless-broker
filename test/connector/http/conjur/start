@@ -4,7 +4,7 @@
 
 docker-compose build
 docker-compose up -d conjur
-docker-compose exec -T conjur conjurctl wait -r 120
+docker-compose exec -T conjur conjurctl wait -r 240
 
 admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
 export CONJUR_AUTHN_API_KEY=$admin_api_key

@@ -47,14 +47,12 @@ jobs:
             ${{ runner.os }}-go-
       # Uninstall old go
       - run: brew uninstall go@1.15
-      # Install go1.16
-      - run: brew install go@1.16
-      # Add go1.16 to PATH
-      - run: echo "/usr/local/opt/go@1.16/bin" >> $GITHUB_PATH
+      # Install go1.17
+      - run: brew install go@1.17
+      # Add go1.17 to PATH
+      - run: echo "/usr/local/opt/go@1.17/bin" >> $GITHUB_PATH
       # Get go version
       - run: go version
-      # Fix go1.16 module bug (https://github.com/golang/go/issues/44129#issuecomment-865249631)
-      - run: go env -w GOFLAGS=-mod=mod
       # Download go modules
       - run: go mod download
       # Run keychain tests

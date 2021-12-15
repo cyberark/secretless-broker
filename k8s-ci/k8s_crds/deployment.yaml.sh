@@ -100,4 +100,5 @@ spec:
         imagePullPolicy: Always
         ports:
           - containerPort: 8080
+
 EOL

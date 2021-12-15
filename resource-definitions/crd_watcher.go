@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
@@ -66,7 +67,7 @@ func main() {
 	}
 
 	// List the available configurations
-	list, err := clientset.SecretlessV1().Configurations("default").List(meta_v1.ListOptions{})
+	list, err := clientset.SecretlessV1().Configurations("default").List(context.Background(), meta_v1.ListOptions{})
 	log.Printf("Available configs: %v", len(list.Items))
 	for _, config := range list.Items {
 		yamlContent, err := yaml.Marshal(&config)
@@ -79,10 +80,10 @@ func main() {
 
 	watchList := &cache.ListWatch{
 		ListFunc: func(listOpts meta_v1.ListOptions) (result runtime.Object, err error) {
-			return clientset.SecretlessV1().Configurations(meta_v1.NamespaceAll).List(listOpts)
+			return clientset.SecretlessV1().Configurations(meta_v1.NamespaceAll).List(context.Background(), listOpts)
 		},
 		WatchFunc: func(listOpts meta_v1.ListOptions) (watch.Interface, error) {
-			return clientset.SecretlessV1().Configurations(meta_v1.NamespaceAll).Watch(listOpts)
+			return clientset.SecretlessV1().Configurations(meta_v1.NamespaceAll).Watch(context.Background(), listOpts)
 		},
 	}
 

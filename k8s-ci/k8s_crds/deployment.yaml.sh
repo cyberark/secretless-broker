@@ -100,4 +100,78 @@ spec:
         imagePullPolicy: Always
         ports:
           - containerPort: 8080
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: configurations.secretless${SECRETLESS_CRD_SUFFIX}.io
+spec:
+  group: secretless${SECRETLESS_CRD_SUFFIX}.io
+  names:
+    kind: Configuration
+    plural: configurations
+    singular: configuration
+    shortNames:
+      - sbconfig
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                listeners:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      protocol:
+                        type: string
+                      socket:
+                        type: string
+                      address:
+                        type: string
+                      debug:
+                        type: boolean
+                      caCertFiles:
+                        type: array
+                        items:
+                          type: string
+                handlers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      type:
+                        type: string
+                      listener:
+                        type: string
+                      debug:
+                        type: boolean
+                      match:
+                        type: array
+                        items:
+                          type: string
+                      credentials:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            provider:
+                              type: string
+                            id:
+                              type: string
+
 EOL

@@ -36,7 +36,7 @@ configurations.secretless.io   1m
 $ kubectl get crd -o yaml
 apiVersion: v1
 items:
-- apiVersion: apiextensions.k8s.io/v1beta1
+- apiVersion: apiextensions.k8s.io/v1
   kind: CustomResourceDefinition
   metadata:
     annotations:

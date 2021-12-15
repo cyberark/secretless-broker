@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
 
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +22,126 @@ var (
 	CRDName   = "configurations." + GroupName
 )
 
+// This schema should be updated to match secretless-resource-definition.yaml
+// and the Config struct in pkg/secretless/config/v1/config.go
+var secretlessCRD = &apiextensionsv1.CustomResourceDefinition{
+	ObjectMeta: meta_v1.ObjectMeta{
+		Name: CRDName,
+	},
+	Spec: apiextensionsv1.CustomResourceDefinitionSpec{
+		Group: GroupName,
+		Names: apiextensionsv1.CustomResourceDefinitionNames{
+			Kind:   "Configuration",
+			Plural: "configurations",
+			ShortNames: []string{
+				"sbconfig",
+			},
+		},
+		Versions: []apiextensionsv1.CustomResourceDefinitionVersion{
+			apiextensionsv1.CustomResourceDefinitionVersion{
+				Name:    "v1",
+				Served:  true,
+				Storage: true,
+				Schema: &apiextensionsv1.CustomResourceValidation{
+					OpenAPIV3Schema: &apiextensionsv1.JSONSchemaProps{
+						Type: "object",
+						Properties: map[string]apiextensionsv1.JSONSchemaProps{
+							"spec": {
+								Type: "object",
+								Properties: map[string]apiextensionsv1.JSONSchemaProps{
+									"listeners": {
+										Type: "array",
+										Items: &apiextensionsv1.JSONSchemaPropsOrArray{
+											Schema: &apiextensionsv1.JSONSchemaProps{
+												Type: "object",
+												Properties: map[string]apiextensionsv1.JSONSchemaProps{
+													"name": {
+														Type: "string",
+													},
+													"protocol": {
+														Type: "string",
+													},
+													"socket": {
+														Type: "string",
+													},
+													"address": {
+														Type: "string",
+													},
+													"debug": {
+														Type: "boolean",
+													},
+													"caCertFiles": {
+														Type: "array",
+														Items: &apiextensionsv1.JSONSchemaPropsOrArray{
+															Schema: &apiextensionsv1.JSONSchemaProps{
+																Type: "string",
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"handlers": {
+										Type: "array",
+										Items: &apiextensionsv1.JSONSchemaPropsOrArray{
+											Schema: &apiextensionsv1.JSONSchemaProps{
+												Type: "object",
+												Properties: map[string]apiextensionsv1.JSONSchemaProps{
+													"name": {
+														Type: "string",
+													},
+													"type": {
+														Type: "string",
+													},
+													"listener": {
+														Type: "string",
+													},
+													"debug": {
+														Type: "boolean",
+													},
+													"match": {
+														Type: "array",
+														Items: &apiextensionsv1.JSONSchemaPropsOrArray{
+															Schema: &apiextensionsv1.JSONSchemaProps{
+																Type: "string",
+															},
+														},
+													},
+													"credentials": {
+														Type: "array",
+														Items: &apiextensionsv1.JSONSchemaPropsOrArray{
+															Schema: &apiextensionsv1.JSONSchemaProps{
+																Type: "object",
+																Properties: map[string]apiextensionsv1.JSONSchemaProps{
+																	"name": {
+																		Type: "string",
+																	},
+																	"provider": {
+																		Type: "string",
+																	},
+																	"id": {
+																		Type: "string",
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Scope: apiextensionsv1.NamespaceScoped,
+	},
+}
+
 func getHomeDir() string {
 	if home := os.Getenv("HOME"); home != "" {
 		return home
@@ -29,33 +150,9 @@ func getHomeDir() string {
 }
 
 func createCRD(apiExtClient *apiextensionsclientset.Clientset) {
-	secretlessCRD := &apiextensionsv1beta1.CustomResourceDefinition{
-		ObjectMeta: meta_v1.ObjectMeta{
-			Name: CRDName,
-		},
-		Spec: apiextensionsv1beta1.CustomResourceDefinitionSpec{
-			Group: GroupName,
-			Names: apiextensionsv1beta1.CustomResourceDefinitionNames{
-				Kind:   "Configuration",
-				Plural: "configurations",
-				ShortNames: []string{
-					"sbconfig",
-				},
-			},
-			Version: "v1",
-			Versions: []apiextensionsv1beta1.CustomResourceDefinitionVersion{
-				apiextensionsv1beta1.CustomResourceDefinitionVersion{
-					Name:    "v1",
-					Served:  true,
-					Storage: true,
-				},
-			},
-			Scope: apiextensionsv1beta1.NamespaceScoped,
-		},
-	}
-
 	log.Println("Creating CRD...")
-	res, err := apiExtClient.ApiextensionsV1beta1().CustomResourceDefinitions().Create(secretlessCRD)
+	res, err := apiExtClient.ApiextensionsV1().CustomResourceDefinitions().Create(
+		context.Background(), secretlessCRD, meta_v1.CreateOptions{})
 
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		log.Fatalf("ERROR: Could not create Secretless CRD: %v - %v", err, res)
@@ -71,7 +168,7 @@ func createCRD(apiExtClient *apiextensionsclientset.Clientset) {
 // TODO: Use this to wait for the resources to be available
 func waitForCRDAvailability(client *rest.RESTClient) error {
 	checkCRDAvailableFunc := func() (bool, error) {
-		_, err := client.Get().Resource(CRDName).DoRaw()
+		_, err := client.Get().Resource(CRDName).DoRaw(context.Background())
 		if err == nil {
 			return true, nil
 		}

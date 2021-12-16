@@ -130,6 +130,7 @@ func (proxy *proxyService) Start() error {
 			// https://godoc.org/golang.org/x/crypto/ssh#NewServerConn
 			conn, chans, reqs, err := ssh.NewServerConn(nConn, serverConfig)
 			if err != nil {
+				nConn.Close()
 				logger.Debugf("Failed to handshake: %s", err)
 				continue
 			}
@@ -149,6 +150,7 @@ func (proxy *proxyService) Start() error {
 			go func() {
 				if err := proxy.handleConnections(chans); err != nil {
 					logger.Errorf("Failed on handle connection: %s", err)
+					nConn.Close()
 					return
 				}
 

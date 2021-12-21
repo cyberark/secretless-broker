@@ -35,107 +35,107 @@ pipeline {
           }
         }
 
-        stage('Unit tests') {
-          steps {
-            sh './bin/test_unit'
-            sh 'cp ./test/unit-test-output/c.out ./c.out'
+        //stage('Unit tests') {
+        //  steps {
+        //    sh './bin/test_unit'
+        //    sh 'cp ./test/unit-test-output/c.out ./c.out'
 
-            junit 'test/unit-test-output/junit.xml'
-            cobertura autoUpdateHealth: true, autoUpdateStability: true, coberturaReportFile: 'test/unit-test-output/coverage.xml', conditionalCoverageTargets: '30, 0, 0', failUnhealthy: true, failUnstable: false, lineCoverageTargets: '30, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '30, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
-            ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
-          }
-        }
+        //    junit 'test/unit-test-output/junit.xml'
+        //    cobertura autoUpdateHealth: true, autoUpdateStability: true, coberturaReportFile: 'test/unit-test-output/coverage.xml', conditionalCoverageTargets: '30, 0, 0', failUnhealthy: true, failUnstable: false, lineCoverageTargets: '30, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '30, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+        //    ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
+        //  }
+        //}
       }
     }
 
-    stage('Scan Secretless') {
-      parallel {
-        stage('Scan Secretless Image for fixable issues') {
-          steps {
-            scanAndReport("secretless-broker:latest", "HIGH", false)
-          }
-        }
+    //stage('Scan Secretless') {
+    //  parallel {
+    //    stage('Scan Secretless Image for fixable issues') {
+    //      steps {
+    //        scanAndReport("secretless-broker:latest", "HIGH", false)
+    //      }
+    //    }
 
-        stage('Scan Secretless Image for all issues') {
-          steps {
-            scanAndReport("secretless-broker:latest", "NONE", true)
-          }
-        }
+    //    stage('Scan Secretless Image for all issues') {
+    //      steps {
+    //        scanAndReport("secretless-broker:latest", "NONE", true)
+    //      }
+    //    }
 
-        stage('Scan Secretless Quickstart for fixable issues') {
-          steps {
-            scanAndReport("secretless-broker-quickstart:latest", "HIGH", false)
-          }
-        }
+    //    stage('Scan Secretless Quickstart for fixable issues') {
+    //      steps {
+    //        scanAndReport("secretless-broker-quickstart:latest", "HIGH", false)
+    //      }
+    //    }
 
-        stage('Scan Secretless Quickstart for all issues') {
-          steps {
-            scanAndReport("secretless-broker-quickstart:latest", "NONE", true)
-          }
-        }
+    //    stage('Scan Secretless Quickstart for all issues') {
+    //      steps {
+    //        scanAndReport("secretless-broker-quickstart:latest", "NONE", true)
+    //      }
+    //    }
 
-        stage('Scan Secretless RedHat for fixable issues') {
-          steps {
-            script {
-              TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
-            }
-            scanAndReport("secretless-broker-redhat:${TAG}", "HIGH", false)
-          }
-        }
+    //    stage('Scan Secretless RedHat for fixable issues') {
+    //      steps {
+    //        script {
+    //          TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
+    //        }
+    //        scanAndReport("secretless-broker-redhat:${TAG}", "HIGH", false)
+    //      }
+    //    }
 
-        stage('Scan Secretless RedHat for all issues') {
-          steps {
-            script {
-              TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
-            }
-            scanAndReport("secretless-broker-redhat:${TAG}", "NONE", true)
-          }
-        }
+    //    stage('Scan Secretless RedHat for all issues') {
+    //      steps {
+    //        script {
+    //          TAG = sh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
+    //        }
+    //        scanAndReport("secretless-broker-redhat:${TAG}", "NONE", true)
+    //      }
+    //    }
 
-        stage('Scan For Security with Gosec') {
-          // Gosec only works on branch builds
-          when {
-            not { tag "v*" }
-          }
+    //    stage('Scan For Security with Gosec') {
+    //      // Gosec only works on branch builds
+    //      when {
+    //        not { tag "v*" }
+    //      }
 
-          steps {
-            sh "./bin/check_golang_security -s High -c Medium -b ${env.BRANCH_NAME}"
-            junit(allowEmptyResults: true, testResults: 'gosec.output')
-          }
-        }
-      }
-    }
+    //      steps {
+    //        sh "./bin/check_golang_security -s High -c Medium -b ${env.BRANCH_NAME}"
+    //        junit(allowEmptyResults: true, testResults: 'gosec.output')
+    //      }
+    //    }
+    //  }
+    //}
 
-    stage('Integration Tests') {
-      steps {
-        script {
-          def directories = sh (
-            returnStdout: true,
-            // We run the 'find' directive first on all directories with test files, then run a 'find' directive
-            // to make sure they also contain start files. We then take the dirname, and basename respectively.
-            script:
-            '''
-            find $(find ./test -name test) -name 'start' -exec dirname {} \\; | xargs -n1 basename
-            '''
-          ).trim().split()
+    //stage('Integration Tests') {
+    //  steps {
+    //    script {
+    //      def directories = sh (
+    //        returnStdout: true,
+    //        // We run the 'find' directive first on all directories with test files, then run a 'find' directive
+    //        // to make sure they also contain start files. We then take the dirname, and basename respectively.
+    //        script:
+    //        '''
+    //        find $(find ./test -name test) -name 'start' -exec dirname {} \\; | xargs -n1 basename
+    //        '''
+    //      ).trim().split()
 
-          def integrationStages = [:]
+    //      def integrationStages = [:]
 
-          // Create an integration test stage for each directory we collected previously.
-          // We want to be sure to skip any tests, such as keychain tests, that can only be ran manually.
-          directories.each { name ->
-            if (name == "keychain") return
+    //      // Create an integration test stage for each directory we collected previously.
+    //      // We want to be sure to skip any tests, such as keychain tests, that can only be ran manually.
+    //      directories.each { name ->
+    //        if (name == "keychain") return
 
-            integrationStages["Integration: ${name}"] = {
-              sh "./bin/run_integration ${name}"
-            }
-          }
+    //        integrationStages["Integration: ${name}"] = {
+    //          sh "./bin/run_integration ${name}"
+    //        }
+    //      }
 
-          parallel integrationStages
-        }
-        junit "**/test/**/junit.xml"
-      }
-    }
+    //      parallel integrationStages
+    //    }
+    //    junit "**/test/**/junit.xml"
+    //  }
+    //}
 
     stage('Functional Tests') {
       parallel {

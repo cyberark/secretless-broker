@@ -3,27 +3,57 @@
 set -e
 set -o pipefail
 
+cd "$(dirname "$0")"
+
+. ../utils.sh
+
 # setup environment variables
 log=log.txt
 rm -rf ${log}
 export SECRETLESS_CRD_SUFFIX=${TEST_ID-}
 
 exit_err() {
-  printf '\n--------------------- \n\n'
-  printf '\n- exited\n\n'
+  announce "Exiting: ${1}"
   echo >&2 "${1}"
   printf '\n-- last logs\n\n'
   cat ${log};
   rm -rf ${log};
 
-  # Snapshot of workloads
-  echo "- Snapshot of workloads on exit"
-  echo "-- Pods:"
-  kubectl get pods || true
-  echo "-- Warning events:"
-  kubectl get events --field-selector type=Warning || true
+  kubernetes_dump
 
   exit 1
+}
+
+function kubernetes_dump() {
+  announce "Dumping Kubernetes state"
+  echo "--> Showing all objects in Namespace"
+  kubectl get all
+  echo "-----------------------------------------------------------"
+  echo "--> Showing all Secretless CRDs"
+  echo "-----------------------------------------------------------"
+  kubectl get crds \
+      --field-selector metadata.name="configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" \
+      -o yaml
+  echo "-----------------------------------------------------------"
+  echo "--> Showing all Secretless Config CRs (Custom Resources)"
+  echo "-----------------------------------------------------------"
+  kubectl get "configurations.secretless${SECRETLESS_CRD_SUFFIX}.io" -o yaml
+  echo "-----------------------------------------------------------"
+  echo "--> Showing all Pods in Namespace"
+  echo "-----------------------------------------------------------"
+  kubectl get pods -o yaml
+  echo "-----------------------------------------------------------"
+  echo "--> Showing Warning events:"
+  echo "-----------------------------------------------------------"
+  kubectl get events --field-selector type=Warning
+  echo "-----------------------------------------------------------"
+  echo "--> Showing echo-server container logs:"
+  echo "-----------------------------------------------------------"
+  kubectl logs -l app=secretless-k8s-crd-test -c echo-server
+  echo "-----------------------------------------------------------"
+  echo "--> Showing secretless broker container logs:"
+  echo "-----------------------------------------------------------"
+  kubectl logs -l app=secretless-k8s-crd-test -c secretless
 }
 
 function cleanup() {
@@ -84,7 +114,7 @@ function wait_for_pod() {
     if [[ "$attempt_count" -ge "$max_attempts" ]]; then
       echo ""
       echo "pod is not ready after $attempt_count readiness checks at 2 second intervals." >&2
-      exit 1
+      exit_err "test failed ✗"
     fi
     echo -n "."
     sleep 2
@@ -97,7 +127,7 @@ function wait_for_pod() {
     if [[ "$attempt_count" -ge "$max_attempts" ]]; then
       echo ""
       echo "pod endpoint is not ready after $attempt_count readiness checks at 2 second intervals." >&2
-      exit 1
+      exit_err "test failed ✗"
     fi
     echo -n "."
     sleep 2

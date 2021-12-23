@@ -36,7 +36,7 @@ configurations.secretless.io   1m
 $ kubectl get crd -o yaml
 apiVersion: v1
 items:
-- apiVersion: apiextensions.k8s.io/v1beta1
+- apiVersion: apiextensions.k8s.io/v1
   kind: CustomResourceDefinition
   metadata:
     annotations:
@@ -145,6 +145,14 @@ customresourcedefinition.apiextensions.k8s.io "configurations.secretless.io" del
 
 This method is a bit more complicated, especially if it's run in-cluster due to needing to
 have service account privileges but with that prerequisite, you can then use the `crd_injector.go`:
+
+Open the `crd_injector.go` file in an editor and add the CRD schema:
+
+```go
+var crdSchema = &apiextensionsv1.JSONSchemaProps{
+ // NOTE: Take the CRD schema from the internal/configurationmanagers/kubernetes/crd/crd_injector.go
+}
+```
 
 ```
 $ kubectl get crd

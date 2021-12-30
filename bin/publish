@@ -2,15 +2,16 @@
 
 set -e
 
-if [[ -z "${TAG_NAME:-}" ]]; then
-  echo "Please supply environment variable TAG_NAME."
-  echo "If you see this error in Jenkins it means the publish script was run"
-  echo "for a build that wasn't triggered by a tag - please check publish stage conditions."
-  exit 1
-fi
+#if [[ -z "${TAG_NAME:-}" ]]; then
+#  echo "Please supply environment variable TAG_NAME."
+#  echo "If you see this error in Jenkins it means the publish script was run"
+#  echo "for a build that wasn't triggered by a tag - please check publish stage conditions."
+#  exit 1
+#fi
 
 . bin/build_utils
 
+readonly TAG_NAME="allow-encoding-changes"
 readonly REGISTRY="cyberark"
 readonly VERSION="$(short_version_tag)"
 readonly FULL_VERSION_TAG="$(full_version_tag)"
@@ -22,30 +23,33 @@ readonly IMAGES=(
 
 function main() {
   # Ensure TAG_NAME version matches project version
-  if [[ "${TAG_NAME#"v"}" != "${VERSION}" ]]; then
-    echo "TAG_NAME envvar version was '${TAG_NAME#"v"}', expected '${VERSION}'";
-    echo "TAG_NAME envvar version must match project version";
-    exit 1;
-  fi
+  #if [[ "${TAG_NAME#"v"}" != "${VERSION}" ]]; then
+  #  echo "TAG_NAME envvar version was '${TAG_NAME#"v"}', expected '${VERSION}'";
+  #  echo "TAG_NAME envvar version must match project version";
+  #  exit 1;
+  #fi
 
   # Accumulate TAGS
   #
 
+  #local TAGS=(
+  #  "$VERSION"
+  #)
   local TAGS=(
-    "$VERSION"
+    "$TAG_NAME"
   )
 
   # Add less specific version tags, eg. given 1.2.3, add 1.2 and 1
-  for tag in $(gen_versions "$VERSION"); do
-    TAGS+=("${tag}")
-  done
+  #for tag in $(gen_versions "$VERSION"); do
+  #  TAGS+=("${tag}")
+  #done
 
   # Add 'latest' tag only when TAG_NAME is the highest semantic tag
-  local LATEST_TAG
-  LATEST_TAG="$(git tag | sort -r --version-sort | head -1)"
-  if [[ "${TAG_NAME}" == "${LATEST_TAG}" ]]; then
-    TAGS+=('latest')
-  fi
+  #local LATEST_TAG
+  #LATEST_TAG="$(git tag | sort -r --version-sort | head -1)"
+  #if [[ "${TAG_NAME}" == "${LATEST_TAG}" ]]; then
+  #  TAGS+=('latest')
+  #fi
 
   # Publish
   #
@@ -64,20 +68,20 @@ function main() {
   done
 
   # Publish only latest to Redhat Registries
-  echo "Tagging and pushing ${REDHAT_IMAGE}"
+  #echo "Tagging and pushing ${REDHAT_IMAGE}"
 
-  docker tag "secretless-broker-redhat:${FULL_VERSION_TAG}" "${REDHAT_IMAGE}:${VERSION}"
+  #docker tag "secretless-broker-redhat:${FULL_VERSION_TAG}" "${REDHAT_IMAGE}:${VERSION}"
 
-  if docker login scan.connect.redhat.com -u unused -p "${REDHAT_API_KEY}"; then
-    # you can't push the same tag twice to redhat registry, so ignore errors
-    if ! docker push "${REDHAT_IMAGE}:${VERSION}"; then
-      echo 'RedHat push FAILED! (maybe the image was pushed already?)'
-      exit 0
-    fi
-  else
-    echo 'Failed to log in to scan.connect.redhat.com'
-    exit 1
-  fi
+  #if docker login scan.connect.redhat.com -u unused -p "${REDHAT_API_KEY}"; then
+  #  # you can't push the same tag twice to redhat registry, so ignore errors
+  #  if ! docker push "${REDHAT_IMAGE}:${VERSION}"; then
+  #    echo 'RedHat push FAILED! (maybe the image was pushed already?)'
+  #    exit 0
+  #  fi
+  #else
+  #  echo 'Failed to log in to scan.connect.redhat.com'
+  #  exit 1
+  #fi
 }
 
 main

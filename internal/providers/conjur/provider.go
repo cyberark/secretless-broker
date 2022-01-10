@@ -1,6 +1,7 @@
 package conjur
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -24,7 +25,8 @@ const authenticatorTokenFile = "/run/conjur/access-token"
 type Provider struct {
 	// Data related to Provider config
 	AuthenticationMutex *sync.Mutex
-	Authenticator       *authenticator.Authenticator
+	Authenticator       authenticator.Authenticator
+	AuthenticatorConfig authnConfig.Configuration
 	Config              conjurapi.Config
 	Conjur              *conjurapi.Client
 	Version             string
@@ -36,11 +38,6 @@ type Provider struct {
 
 	// Authn URL for K8s-authenticator based auth
 	AuthnURL string
-}
-
-func hasField(field string, params *map[string]string) (ok bool) {
-	_, ok = (*params)[field]
-	return
 }
 
 // ProviderFactory constructs a Conjur Provider. The API client is configured from
@@ -57,7 +54,8 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 	}
 
 	var apiKey, authnURL, tokenFile, username, version string
-	var authenticator *authenticator.Authenticator
+	var conjurAuthenticator authenticator.Authenticator
+	var conjurAuthenticatorConf authnConfig.Configuration
 	var conjur *conjurapi.Client
 	var provider *Provider
 
@@ -77,6 +75,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		Name:                options.Name,
 		Config:              config,
 		Username:            username,
+		AuthenticatorConfig: conjurAuthenticatorConf,
 		APIKey:              apiKey,
 		AuthnURL:            authnURL,
 		AuthenticationMutex: authenticationMutex,
@@ -97,10 +96,12 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		log.Printf("Info: Conjur provider using Kubernetes authenticator-based authentication")
 
 		// Load the authenticator with the config from the environment, and log in to Conjur
-		if authenticator, err = loadAuthenticator(provider.AuthnURL, provider.Version, provider.Config); err != nil {
-			return nil, fmt.Errorf("ERROR: Conjur provider could not retrieve access token using the authenticator client: %s", err)
+		conjurAuthenticatorConf, err = authnConfig.NewConfigFromEnv()
+		if err != nil {
+			return nil, err
 		}
-		provider.Authenticator = authenticator
+		conjurAuthenticator, err = authenticator.NewAuthenticator(conjurAuthenticatorConf)
+		provider.Authenticator = conjurAuthenticator
 
 		refreshErr := provider.fetchAccessToken()
 		if refreshErr != nil {
@@ -109,7 +110,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 
 		go func() {
 			// Sleep until token needs refresh
-			time.Sleep(provider.Authenticator.Config.TokenRefreshTimeout)
+			time.Sleep(provider.AuthenticatorConfig.GetTokenTimeout())
 
 			// Authenticate in a loop
 			err := provider.fetchAccessTokenLoop()
@@ -181,36 +182,6 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 	return p.Conjur.RetrieveSecret(strings.Join(tokens, ":"))
 }
 
-// loadAuthenticator returns a Conjur Kubernetes authenticator client
-// that has performed the login process to retrieve the signed certificate
-// from Conjur
-// The authenticator will be used to retrieve a time-limited access token
-// This method requires CONJUR_ACCOUNT, CONJUR_AUTHN_URL, CONJUR_AUTHN_LOGIN, and
-// CONJUR_SSL_CERTIFICATE/CONJUR_CERT_FILE env vars to be present
-// if CONJUR_VERSION is not present, it defaults to "5"
-// Currently the deployment manifest for Secretless must also specify
-// MY_POD_NAMESPACE and MY_POD_NAME from the pod metadata, but there is a GH
-// issue logged in the authenticator for doing this via the Kubernetes API
-func loadAuthenticator(authnURL string, version string,
-	providerConfig conjurapi.Config) (*authenticator.Authenticator, error) {
-
-	var err error
-
-	// Check that required environment variables are set
-	config, err := authnConfig.NewFromEnv()
-	if err != nil {
-		return nil, err
-	}
-
-	// Create new Authenticator
-	authenticator, err := authenticator.New(*config)
-	if err != nil {
-		return nil, err
-	}
-
-	return authenticator, nil
-}
-
 // fetchAccessToken uses the Conjur Kubernetes authenticator
 // to authenticate with Conjur and retrieve a new time-limited
 // access token.
@@ -230,8 +201,8 @@ func (p *Provider) fetchAccessToken() error {
 		p.AuthenticationMutex.Lock()
 		defer p.AuthenticationMutex.Unlock()
 
-		log.Printf("Info: Conjur provider is authenticating as %s ...", p.Authenticator.Config.Username)
-		if err := p.Authenticator.Authenticate(); err != nil {
+		log.Printf("Info: Conjur provider is authenticating...")
+		if err := p.Authenticator.AuthenticateWithContext(context.Background()); err != nil {
 			log.Printf("Info: Conjur provider received an error on authenticate: %s", err.Error())
 			return err
 		}
@@ -261,6 +232,6 @@ func (p *Provider) fetchAccessTokenLoop() error {
 		}
 
 		// sleep until token needs refresh
-		time.Sleep(p.Authenticator.Config.TokenRefreshTimeout)
+		time.Sleep(p.AuthenticatorConfig.GetTokenTimeout())
 	}
 }

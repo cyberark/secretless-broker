@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/codegangsta/cli"
 	"github.com/cyberark/summon/secretsyml"
+	"github.com/urfave/cli"
 
 	"github.com/cyberark/secretless-broker/internal/plugin"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"

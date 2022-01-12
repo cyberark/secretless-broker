@@ -4,7 +4,7 @@ require (
 	github.com/aws/aws-sdk-go v1.42.31
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/cyberark/conjur-api-go v0.8.1
-	github.com/cyberark/conjur-authn-k8s-client v0.22.1-0.20220107182353-775155dce7ab
+	github.com/cyberark/conjur-authn-k8s-client v0.22.1-0.20220112151811-fa2b8dbe5b19
 	github.com/cyberark/summon v0.9.1
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
 	github.com/docker/docker v20.10.12+incompatible
@@ -39,7 +39,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/containerd/containerd v1.4.11 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
-	github.com/cyberark/secrets-provider-for-k8s v1.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect

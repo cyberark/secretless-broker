@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Use latest version of conjur-authn-k8s-client which supports JWT loging and tracing.
   [cyberark/secretless-broker#1446](https://github.com/cyberark/secretless-broker/pull/1446)
 
+### Fixed
+- Postgres connector has been updated to propagate client options through Secretless to target server.
+  [cyberark/secretless-broker#1444](https://github.com/cyberark/secretless-broker/pull/1444)
+
 ## [1.7.8] - 2021-11-09
 
 ### Fixed

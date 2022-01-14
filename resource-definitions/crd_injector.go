@@ -1,3 +1,5 @@
+//go:build ignore
+
 package main
 
 import (
@@ -42,7 +44,7 @@ var secretlessCRD = &apiextensionsv1.CustomResourceDefinition{
 			},
 		},
 		Versions: []apiextensionsv1.CustomResourceDefinitionVersion{
-			apiextensionsv1.CustomResourceDefinitionVersion{
+			{
 				Name:    "v1",
 				Served:  true,
 				Storage: true,

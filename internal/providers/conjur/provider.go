@@ -81,17 +81,21 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		Version:             version,
 	}
 
-	if provider.Username != "" && provider.APIKey != "" {
+	switch {
+	case provider.Username != "" && provider.APIKey != "":
+		// Conjur provider using API key
 		log.Printf("Info: Conjur provider using API key-based authentication")
 		if conjur, err = conjurapi.NewClientFromKey(provider.Config, authn.LoginPair{provider.Username, provider.APIKey}); err != nil {
 			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
-	} else if tokenFile != "" {
+	case tokenFile != "":
+		// Conjur provider using access token
 		log.Printf("Info: Conjur provider using access token-based authentication")
 		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, tokenFile); err != nil {
 			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
-	} else if provider.AuthnURL != "" && strings.Contains(provider.AuthnURL, "authn-k8s") {
+	case provider.AuthnURL != "" && strings.Contains(provider.AuthnURL, "authn-k8s"):
+		// Conjur provider using authenticator
 		log.Printf("Info: Conjur provider using Kubernetes authenticator-based authentication")
 
 		// Load the authenticator with the config from the environment, and log in to Conjur
@@ -130,7 +134,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, authenticatorTokenFile); err != nil {
 			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
-	} else {
+	default:
 		return nil, errors.New("ERROR: Unable to construct a Conjur provider client from the available credentials")
 	}
 

@@ -105,6 +105,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 			return nil, fmt.Errorf("ERROR: Conjur provider could not retrieve access token using the authenticator client: %s", err)
 		}
 		provider.Authenticator = conjurAuthenticator
+		provider.AuthenticatorConfig = conjurAuthenticatorConf
 
 		refreshErr := provider.fetchAccessToken()
 		if refreshErr != nil {

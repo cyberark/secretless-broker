@@ -20,6 +20,8 @@ import (
 
 const authenticatorTokenFile = "/run/conjur/access-token"
 
+var supportedAuthentications = []string{"authn-k8s", "authn-jwt"}
+
 // Provider provides data values from the Conjur vault.
 type Provider struct {
 	// Data related to Provider config
@@ -94,9 +96,8 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, tokenFile); err != nil {
 			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
-	case provider.AuthnURL != "" && strings.Contains(provider.AuthnURL, "authn-k8s"):
-		// Conjur provider using authenticator
-		log.Printf("Info: Conjur provider using Kubernetes authenticator-based authentication")
+	case urlSupported(provider.AuthnURL):
+		log.Printf("Info: Conjur provider doing auhtentication to conjur to endpoint %s", provider.AuthnURL)
 
 		// Load the authenticator with the config from the environment, and log in to Conjur
 		conjurAuthenticatorConf, err = authnConfig.NewConfigFromEnv()
@@ -242,4 +243,18 @@ func (p *Provider) fetchAccessTokenLoop() error {
 		// sleep until token needs refresh
 		time.Sleep(p.AuthenticatorConfig.GetTokenTimeout())
 	}
+}
+
+func urlSupported(url string) bool {
+	if url == "" {
+		return false
+	}
+
+	for _, authnStrategy := range supportedAuthentications {
+		if strings.Contains(url, authnStrategy) {
+			return true
+		}
+	}
+
+	return false
 }

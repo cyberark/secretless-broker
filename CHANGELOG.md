@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.9] - 2022-01-14
+
 ### Changed
 - Use latest version of conjur-authn-k8s-client which supports JWT loging and tracing.
   [cyberark/secretless-broker#1446](https://github.com/cyberark/secretless-broker/pull/1446)
@@ -614,7 +616,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.8...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.9...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -649,3 +651,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.6]: https://github.com/cyberark/secretless-broker/compare/v1.7.5...v1.7.6
 [1.7.7]: https://github.com/cyberark/secretless-broker/compare/v1.7.6...v1.7.7
 [1.7.8]: https://github.com/cyberark/secretless-broker/compare/v1.7.7...v1.7.8
+[1.7.9]: https://github.com/cyberark/secretless-broker/compare/v1.7.8...v1.7.9

@@ -23,14 +23,14 @@ func TestClientOptions(t *testing.T) {
 	runQuery := genQueryRunner(l.Host(), l.ToPortString())
 
 	t.Run("dbname", func(t *testing.T) {
-		t.Run("exisiting", func(t *testing.T) {
+		t.Run("set and found", func(t *testing.T) {
 			output, err := runQuery(nil, options, "SELECT current_database();")
 
 			assert.NoError(t, err)
 			assert.Contains(t, output, "postgres")
 		})
 
-		t.Run("not found", func(t *testing.T) {
+		t.Run("set and not found", func(t *testing.T) {
 			output, err := runQuery(nil, []string{"dbname=notfound"}, "SELECT current_database();")
 
 			assert.Error(t, err)

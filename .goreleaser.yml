@@ -86,6 +86,27 @@ builds:
   # with the OSX SDK
   ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}"
 
+- <<: *secretless-broker-build
+  # Apple silicon support
+  id: secretless-broker-arm
+  env:
+  - CGO_ENABLED=1
+  - CC=o64-clang
+  - CXX=o64-clang++
+  flags:
+  - -tags=netgo
+  goos:
+  - darwin
+  goarch:
+  - arm64
+  # Building for OSX with -extldflags "-static" results in the error:
+  # ld: library not found for -lcrt0.o
+  # This is because static builds are only possible if all libraries
+  # (including libgcc.a) have also been compiled with -static.
+  # A static version of crt0.o is not provided
+  # with the OSX SDK
+  ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}"
+
 archives:
   - id: secretless-release-archive
     files:
@@ -143,3 +164,4 @@ release:
     - glob: CHANGELOG.md
     - glob: dist/goreleaser/secretless-broker-linux_amd64
     - glob: dist/goreleaser/secretless-broker-darwin_amd64
+    - glob: dist/goreleaser/secretless-broker-darwin_arm64

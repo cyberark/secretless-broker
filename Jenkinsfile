@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+@Library('conjur@gobom') _
 
 pipeline {
   agent { label 'executor-v2' }
@@ -35,7 +36,7 @@ pipeline {
           }
         }
 
-        stage('Unit tests') {
+        /*stage('Unit tests') {
           steps {
             sh './bin/test_unit'
             sh 'cp ./test/unit-test-output/c.out ./c.out'
@@ -45,10 +46,12 @@ pipeline {
             ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
           }
         }
+    */
       }
     }
 
-    stage('Scan Secretless') {
+
+  /*stage('Scan Secretless') {
       parallel {
         stage('Scan Secretless Image for fixable issues') {
           steps {
@@ -105,7 +108,10 @@ pipeline {
         }
       }
     }
+    */
 
+
+    /* 
     stage('Integration Tests') {
       steps {
         script {
@@ -133,11 +139,12 @@ pipeline {
 
           parallel integrationStages
         }
-        junit "**/test/**/junit.xml"
       }
     }
+    */
 
-    stage('Functional Tests') {
+
+    /*stage('Functional Tests') {
       parallel {
         stage('Quick start') {
           steps {
@@ -158,6 +165,7 @@ pipeline {
         }
       }
     }
+    */
 
     stage('Push Images Internally') {
       when {
@@ -215,7 +223,7 @@ pipeline {
       }
     }
 
-    stage('Build Website') {
+    /*stage('Build Website') {
       steps {
         sh './bin/build_website'
       }
@@ -226,6 +234,7 @@ pipeline {
         sh './bin/check_website_links'
       }
     }
+    */
 
     stage('Publish') {
       parallel {
@@ -248,6 +257,18 @@ pipeline {
             archiveArtifacts 'docs/_site/'
           }
         }
+      }
+    }
+
+    stage('GOBOM') {
+      steps {
+        sh "echo '1.1' > VERSION"
+        release() { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
+          sh """go-bom --tools "${toolsDirectory}" --image "secretless-dev" --main "cmd/secretless-broker/" --output "${billOfMaterialsDirectory}/go.bom.json" """
+          sh """go-bom --tools "${toolsDirectory}" --image "golang:1.17" --main "cmd/secretless-broker/" --output "${billOfMaterialsDirectory}/go.bom2.json" """
+        }
+        sh "cat /var/lib/jenkins/workspace/yberark--secretless-broker_gobom/bom-assets/go.bom.json"
+        sh "cat /var/lib/jenkins/workspace/yberark--secretless-broker_gobom/bom-assets/go.bom2.json"
       }
     }
   }

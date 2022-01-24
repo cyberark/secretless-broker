@@ -30,16 +30,16 @@ function main() {
 }
 
 function build_docker_images() {
-  echo "Building secretless-broker:$FULL_VERSION_TAG Docker image"
+  #echo "Building secretless-broker:$FULL_VERSION_TAG Docker image"
   # NOTE: the latest tag is required by downstream pipeline stages
   # (we want the flags to be word split here)
   # shellcheck disable=SC2086
-  docker build --tag "secretless-broker:${FULL_VERSION_TAG}" \
-               --tag "secretless-broker:latest" \
-               --target "secretless-broker" \
-               $DOCKER_FLAGS \
-               --file "$TOPLEVEL_DIR/Dockerfile" \
-               "$TOPLEVEL_DIR"
+  #docker build --tag "secretless-broker:${FULL_VERSION_TAG}" \
+  #             --tag "secretless-broker:latest" \
+  #             --target "secretless-broker" \
+  #             $DOCKER_FLAGS \
+  #             --file "$TOPLEVEL_DIR/Dockerfile" \
+  #             "$TOPLEVEL_DIR"
 
   echo "Building secretless-dev:$FULL_VERSION_TAG Docker image"
   # NOTE: the latest tag is required by downstream pipeline stages
@@ -51,25 +51,23 @@ function build_docker_images() {
                --file "$TOPLEVEL_DIR/Dockerfile.dev" \
                "$TOPLEVEL_DIR"
 
-  echo "Building secretless-broker-quickstart:$FULL_VERSION_TAG Docker image"
+#  echo "Building secretless-broker-quickstart:$FULL_VERSION_TAG Docker image"
   # NOTE: the latest tag is required by downstream pipeline stages
   # (we want the flags to be word split here)
-  # shellcheck disable=SC2086
-  docker build --tag "secretless-broker-quickstart:${FULL_VERSION_TAG}" \
-               --tag "secretless-broker-quickstart:latest" \
-               $DOCKER_FLAGS \
-               --file "$QUICK_START_DIR/Dockerfile" \
-               "$QUICK_START_DIR"
+#  docker build --tag "secretless-broker-quickstart:${FULL_VERSION_TAG}" \
+#               --tag "secretless-broker-quickstart:latest" \
+#               $DOCKER_FLAGS \
+#               --file "$QUICK_START_DIR/Dockerfile" \
+#               "$QUICK_START_DIR"
 
-  echo "Building secretless-broker-redhat:$FULL_VERSION_TAG Docker image"
+#  echo "Building secretless-broker-redhat:$FULL_VERSION_TAG Docker image"
   # (we want the flags to be word split here)
-  # shellcheck disable=SC2086
-  docker build --tag "secretless-broker-redhat:${FULL_VERSION_TAG}" \
-               --target "secretless-broker-redhat" \
-               --build-arg VERSION="${FULL_VERSION_TAG}" \
-               $DOCKER_FLAGS \
-                --file "$TOPLEVEL_DIR/Dockerfile" \
-               "$TOPLEVEL_DIR"
+#  docker build --tag "secretless-broker-redhat:${FULL_VERSION_TAG}" \
+#               --target "secretless-broker-redhat" \
+#               --build-arg VERSION="${FULL_VERSION_TAG}" \
+#               $DOCKER_FLAGS \
+#                --file "$TOPLEVEL_DIR/Dockerfile" \
+#               "$TOPLEVEL_DIR"
 }
 
 main

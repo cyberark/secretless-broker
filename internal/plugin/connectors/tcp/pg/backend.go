@@ -87,11 +87,20 @@ func (s *SingleUseConnector) ConnectToBackend() error {
 		return err
 	}
 
+	options := map[string]string{}
+	for k, v := range s.connectionDetails.Options {
+		options[k] = v
+	}
+	// client options take precedence
+	for k, v := range s.options {
+		options[k] = v
+	}
+
 	startupMessage := protocol.CreateStartupMessage(
 		protocol.ProtocolVersion,
 		s.connectionDetails.Username,
 		s.databaseName,
-		s.connectionDetails.Options,
+		options,
 	)
 
 	s.backendConn.Write(startupMessage)

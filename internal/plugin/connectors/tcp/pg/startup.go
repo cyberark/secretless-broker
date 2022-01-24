@@ -40,6 +40,11 @@ func (s *SingleUseConnector) Startup() error {
 		return fmt.Errorf("no 'database' found in connect options")
 	}
 
+	delete(options, "database")
+	delete(options, "user")
+
+	s.options = options
+
 	return nil
 }
 

@@ -23,6 +23,7 @@ type SingleUseConnector struct {
 	connectionDetails *ConnectionDetails
 	// databaseName is specified by the client application
 	databaseName string
+	options      map[string]string
 }
 
 func (s *SingleUseConnector) abort(err error) {

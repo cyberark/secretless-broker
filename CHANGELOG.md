@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Security
+- Updated github.com/containerd/containerd to resolve GHSA-5j5w-g665-5m35
+  [cyberark/secretless-broker#1450](https://github.com/cyberark/secretless-broker/pull/1450)
+
 ## [1.7.9] - 2022-01-14
 
 ### Changed

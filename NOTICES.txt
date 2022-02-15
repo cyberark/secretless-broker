@@ -1,4 +1,3 @@
-
 =============== TABLE OF CONTENTS =============================
 
 
@@ -11,10 +10,10 @@ SECTION 1: Apache License 2.0
 
 >>> github.com/aws/aws-sdk-go-1.15.79
 >>> github.com/cyberark/conjur-api-go-0.8.1
->>> github.com/cyberark/conjur-authn-k8s-client-0.23.1
+>>> github.com/cyberark/conjur-authn-k8s-client-0.23.0
 >>> github.com/docker/docker-1.4.2-0.20191231165639-e6f6c35b7902
 >>> github.com/heptiolabs/healthcheck-0.0.0-20180807145615-6ff867650f40
->>> gopkg.in/yaml.v2-2.2.3
+>>> gopkg.in/yaml.v2-2.4.0
 >>> k8s.io/api-0.23.1
 >>> k8s.io/apiextensions-apiserver-0.22.3
 >>> k8s.io/apimachinery-0.23.1
@@ -28,42 +27,33 @@ SECTION 2: BSD 2-clause "Simplified" License
 SECTION 3: BSD 3-clause "New" or "Revised" License
 
 >>> github.com/cyberark/go-mssqldb-0.0.0-20191030142036-b5a965a47dd3
->>> github.com/fsnotify/fsnotify-1.4.7
->>> golang.org/x/crypto-0.0.0-20201216223049-8b5274cf687f
+>>> github.com/fsnotify/fsnotify-1.4.9
+>>> golang.org/x/crypto-0.0.0-20211215153901-e495a2d5b3d3
 
 SECTION 4: MIT License
 
 >>> github.com/cenkalti/backoff-2.2.1
 >>> github.com/codegangsta/cli-1.20.0
->>> github.com/cyberark/summon-0.7.0
+>>> github.com/cyberark/summon-0.9.1
 >>> github.com/go-ozzo/ozzo-validation-3.6.0
 >>> github.com/joho/godotenv-1.2.0
 >>> github.com/keybase/go-keychain-0.0.0-20201121013009-976c83ec27a6
 >>> github.com/lib/pq-0.0.0-20180123210206-19c8e9ad0095
->>> github.com/smartystreets/goconvey-0.0.0-20190731233626-505e41936337
+>>> github.com/smartystreets/goconvey-1.6.4
 >>> github.com/stretchr/testify-1.7.0
->>> gopkg.in/yaml.v2-2.2.3
-
-
+>>> gopkg.in/yaml.v2-2.4.0
 
 SECTION 5: Mozilla Public License 2.0
 
-   >>> github.com/hashicorp/vault/api-1.0.2
-
-
+>>> github.com/hashicorp/vault/api-1.0.2
 
 APPENDIX: Standard License Files and Templates
 
 >>> Apache License 2.0
-
 >>> BSD 2-clause "Simplified" License
-
 >>> BSD 3-clause "New" or "Revised" License
-
 >>> MIT License
-
 >>> Mozilla Public License 2.0
-
 
 
 --------------- SECTION 1: Apache License 2.0 ----------
@@ -73,13 +63,14 @@ Apache License 2.0 is applicable to the following component(s).
 
 >>> github.com/aws/aws-sdk-go-1.15.79
 
-Copyright [yyyy] [name of copyright owner]
+Copyright 2015 Amazon.com, Inc. or its affiliates. All Rights Reserved. 
+Copyright 2014-2015 Stripe, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,13 +81,13 @@ limitations under the License.
 
 >>> github.com/cyberark/conjur-api-go-0.8.1
 
-Copyright 2017 CyberArk Software, Inc
+Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-  http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,7 +96,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/cyberark/conjur-authn-k8s-client-0.23.1
+>>> github.com/cyberark/conjur-authn-k8s-client-0.23.0
 
 Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 
@@ -147,7 +138,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -156,9 +147,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> gopkg.in/yaml.v2-2.2.3
+>>> gopkg.in/yaml.v2-2.4.0
 
-Copyright {yyyy} {name of copyright owner}
+Copyright 2011-2016 Canonical Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -181,7 +172,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-		http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -198,7 +189,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -215,7 +206,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -246,7 +237,7 @@ limitations under the License.
 BSD 2-clause "Simplified" License is applicable to the following component(s).
 
 
->>> github.com/pkg/errors-0.8.1
+>>> github.com/pkg/errors-0.9.1
 
 Copyright (c) 2015, Dave Cheney <dave@cheney.net>
 All rights reserved.
@@ -337,10 +328,10 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
->>> github.com/fsnotify/fsnotify-1.4.7
+>>> github.com/fsnotify/fsnotify-1.4.9
 
 Copyright (c) 2012 The Go Authors. All rights reserved.
-Copyright (c) 2012 fsnotify Authors. All rights reserved.
+Copyright (c) 2012-2019 fsnotify Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -369,7 +360,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
->>> golang.org/x/crypto-0.0.0-20201216223049-8b5274cf687f
+>>> golang.org/x/crypto-0.0.0-20211215153901-e495a2d5b3d3
 
 Copyright (c) 2009 The Go Authors. All rights reserved.
 
@@ -454,11 +445,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
->>> github.com/cyberark/summon-0.7.0
+>>> github.com/cyberark/summon-0.9.1
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Conjur Inc
+Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -561,7 +552,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
->>> github.com/smartystreets/goconvey-0.0.0-20190731233626-505e41936337
+>>> github.com/smartystreets/goconvey-1.6.4
 
 Copyright (c) 2016 SmartyStreets, LLC
 
@@ -599,7 +590,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
->>> gopkg.in/yaml.v2-2.2.3
+>>> gopkg.in/yaml.v2-2.4.0
 
 The following files were ported to Go from C files of libyaml, and thus
 are still covered by their original copyright and license:

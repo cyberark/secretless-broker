@@ -24,6 +24,10 @@ CONJUR_AUTHN_LOGIN=admin
 CONJUR_AUTHN_API_KEY=$admin_api_key
 ENV
 
+report_dir="./test-coverage"
+mkdir -p "$report_dir"
+chmod 777 "$report_dir"
+
 docker-compose up \
   -d \
   secretless

@@ -4,6 +4,10 @@
 
 docker-compose build --pull
 
+report_dir="./test-coverage"
+mkdir -p "$report_dir"
+chmod 777 "$report_dir"
+
 docker-compose up -d secretless
 
 sleep 2

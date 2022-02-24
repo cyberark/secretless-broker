@@ -16,11 +16,15 @@ services:
       - ../certs/server-key.pem:/certs/server.key
 
   secretless-2017-cu1:
-    image: secretless-broker
+    image: secretless-broker-coverage
+    entrypoint: "/usr/local/bin/secretless-broker -test.v -test.run ^TestCoverage$$ -test.coverprofile=/test-coverage/cover.out"
+    environment:
+      SB_RUN_COVERAGE: "true"
     ports:
       - 2224:2223
     volumes:
       - ./secretless.yml:/secretless.yml
+      - ./test-coverage:/test-coverage
     depends_on:
       - mssql-2017-cu1
 

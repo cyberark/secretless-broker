@@ -43,11 +43,13 @@ RUN groupadd -r secretless \
 # reflex => Utility for watching files and executing process in response to changes
 # gocov => converts native coverage output to gocov's JSON interchange format
 # gocov-xml => converts gocov format to XML for use with Jenkins/Cobertura
+# gocovmerge => Merges multiple 'go test -coverprofile' results into one profile
 RUN go get -u github.com/jstemmer/go-junit-report && \
     go get github.com/smartystreets/goconvey && \
     go get github.com/cespare/reflex && \
     go get github.com/axw/gocov/gocov && \
-    go get github.com/AlekSi/gocov-xml
+    go get github.com/AlekSi/gocov-xml && \
+    go get github.com/wadey/gocovmerge
 
 # go mod dependency management for the secretless project
 COPY go.mod go.sum /secretless/

@@ -17,6 +17,10 @@ cp -rf ../../../util/ssl ssl
 docker-compose build
 rm -rf ssl
 
+report_dir="./test-coverage"
+mkdir -p "$report_dir"
+chmod 777 "$report_dir"
+
 docker-compose up -d pg pg_no_tls
 
 ./wait-for-pg pg_no_tls

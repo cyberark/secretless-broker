@@ -70,6 +70,16 @@ function build_docker_images() {
                $DOCKER_FLAGS \
                 --file "$TOPLEVEL_DIR/Dockerfile" \
                "$TOPLEVEL_DIR"
+
+  echo "Building secretless-broker-coverage:$FULL_VERSION_TAG Docker image"
+  # NOTE: the latest tag is required by downstream pipeline stages
+  # (we want the flags to be word split here)
+  # shellcheck disable=SC2086
+  docker build --tag "secretless-broker-coverage:${FULL_VERSION_TAG}" \
+               --tag "secretless-broker-coverage:latest" \
+               $DOCKER_FLAGS \
+               --file "$TOPLEVEL_DIR/Dockerfile.coverage" \
+               "$TOPLEVEL_DIR"
 }
 
 main

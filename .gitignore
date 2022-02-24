@@ -37,6 +37,7 @@ test/junit.*
 test/**/junit.*
 test/*.xml
 test/plugin/out/
+test-coverage
 
 # We don't use dep anymore
 Gopkg.*

@@ -33,11 +33,15 @@ services:
       - pg-socket:/sock
 
   secretless:
-    image: secretless-broker
+    image: secretless-broker-coverage
+    entrypoint: "/usr/local/bin/secretless-broker -test.v -test.run ^TestCoverage$$ -test.coverprofile=/test-coverage/cover.out"
+    environment:
+      SB_RUN_COVERAGE: "true"
     volumes:
       - ../../../../test/util/ssl:/secretless/test/util/ssl
       - ./fixtures/secretless.yml:/secretless.yml
       - pg-socket:/sock
+      - ./test-coverage:/test-coverage
 
   test:
     build:

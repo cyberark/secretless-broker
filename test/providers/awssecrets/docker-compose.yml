@@ -2,4 +2,9 @@ version: '2'
 services:
   test:
     image: secretless-dev
-    command: go test -v ./test/providers/awssecrets
+    command: go test -v -coverpkg="../../../..." -coverprofile="/test-coverage/cover.out" ./test/providers/awssecrets
+    environment:
+      SB_RUN_COVERAGE: "true"
+    user: secretless
+    volumes:
+      - ./test-coverage:/test-coverage

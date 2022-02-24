@@ -41,7 +41,6 @@ pipeline {
             sh 'cp ./test/unit-test-output/c.out ./c.out'
 
             junit 'test/unit-test-output/junit.xml'
-            cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'test/unit-test-output/coverage.xml', conditionalCoverageTargets: '50, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '50, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '50, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
             ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
           }
         }
@@ -122,7 +121,7 @@ pipeline {
           def integrationStages = [:]
 
           // Create an integration test stage for each directory we collected previously.
-          // We want to be sure to skip any tests, such as keychain tests, that can only be ran manually.
+          // We want to be sure to skip any tests, such as keychain tests, that can only be run manually.
           directories.each { name ->
             if (name == "keychain") return
 
@@ -134,6 +133,19 @@ pipeline {
           parallel integrationStages
         }
         junit "**/test/**/junit.xml"
+      }
+    }
+
+    stage('Combine Integration and Unit Test Coverage') {
+      steps {
+        sh "./bin/merge_integration_coverage"
+        archiveArtifacts 'test/test-coverage/integ-and-ut-cover.html'
+      }
+    }
+
+    stage('Cobertura') {
+      steps {
+        cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'test/test-coverage/coverage.xml', conditionalCoverageTargets: '50, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '50, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '50, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
       }
     }
 

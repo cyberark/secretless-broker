@@ -9,9 +9,13 @@ services:
 
   test:
     image: secretless-dev
-    command: go test -v ./test/providers/vault
+    command: go test -v -coverpkg="../../../..." -coverprofile="/test-coverage/cover.out" ./test/providers/vault
+    user: secretless
     environment:
+      SB_RUN_COVERAGE: "true"
       VAULT_ADDR: http://vault:8200
+    volumes:
+      - ./test-coverage:/test-coverage
     depends_on:
       - vault
 

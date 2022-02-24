@@ -2,14 +2,16 @@ version: '3.0'
 
 services:
   secretless:
-    build:
-      context: ../../../..
-    entrypoint: "/usr/local/bin/secretless-broker -debug"
+    image: secretless-broker-coverage
+    entrypoint: "/usr/local/bin/secretless-broker -test.v -test.run ^TestCoverage$$ -test.coverprofile=/test-coverage/cover.out"
     environment:
+      SB_RUN_COVERAGE: "true"
+      SB_DEBUG_ENABLED: "true"
       SECRETLESS_HTTP_CA_BUNDLE: /secretless/test/connector/http/generic/certs/server-cert-included.pem
     volumes:
       - ./secretless.yml:/secretless.yml
       - ../../../..:/secretless
+      - ./test-coverage:/test-coverage
 
   test:
     image: secretless-dev

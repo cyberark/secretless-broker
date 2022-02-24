@@ -36,6 +36,8 @@ func CmdLineParams() *entrypoint.SecretlessOptions {
 		"Directory containing Secretless plugins")
 	flag.StringVar(&params.PluginChecksumsFile, "s", "",
 		"Path to a file of sha256sum plugin checksums")
+	flag.BoolVar(&params.GracefulExitEnabled, "graceful-exit", false,
+		"Enable graceful exit when a termination signal is received.")
 
 	// Flag.parse only covers `-version` flag but for `version`, we need to explicitly
 	// check the args

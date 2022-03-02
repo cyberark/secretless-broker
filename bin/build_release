@@ -11,7 +11,7 @@ GO_VERSION="v$(grep "^\bgo\b" "${REPO_ROOT}/go.mod" | awk '{print $2}')"
 # Use a GoReleaser Docker image containing cross-compilation tools
 # This image is recommended by the official GoReleaser docs
 # https://goreleaser.com/cookbooks/cgo-and-crosscompiling/
-GORELEASER_IMAGE="troian/golang-cross"
+GORELEASER_IMAGE="goreleaser/goreleaser-cross"
 
 # Get the latest tags
 GORELEASER_TAGS_JSON="$(curl --silent --show-error https://registry.hub.docker.com/v2/repositories/${GORELEASER_IMAGE}/tags?page_size=100)"

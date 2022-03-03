@@ -21,7 +21,7 @@ builds:
   ldflags: -s -w -linkmode external -extldflags "-static"
 
 - <<: *summon-2-build
-  id: summon2-darwin
+  id: summon2-darwin-amd64
   env:
   - CGO_ENABLED=1
   - CC=o64-clang
@@ -37,6 +37,25 @@ builds:
   # A static version of crt0.o is not provided
   # with the OSX SDK
   ldflags: -s -w -linkmode external
+
+- <<: *summon-2-build
+  id: summon2-darwin-arm64
+  env:
+  - CGO_ENABLED=1
+  - CC=o64-clang
+  - CXX=o64-clang++
+  goos:
+  - darwin
+  goarch:
+  - arm64
+  # Building for OSX with -extldflags "-static" results in the error:
+  # ld: library not found for -lcrt0.o
+  # This is because static builds are only possible if all libraries
+  # (including libgcc.a) have also been compiled with -static.
+  # A static version of crt0.o is not provided
+  # with the OSX SDK
+  ldflags: -s -w -linkmode external
+
 
 - &secretless-broker-build
   id: secretless-broker-linux
@@ -78,6 +97,27 @@ builds:
   - darwin
   goarch:
   - amd64
+  # Building for OSX with -extldflags "-static" results in the error:
+  # ld: library not found for -lcrt0.o
+  # This is because static builds are only possible if all libraries
+  # (including libgcc.a) have also been compiled with -static.
+  # A static version of crt0.o is not provided
+  # with the OSX SDK
+  ldflags: -s -w -linkmode external -X "github.com/cyberark/secretless-broker/pkg/secretless.Tag={{ .ShortCommit }}"
+
+- <<: *secretless-broker-build
+  # Apple silicon support
+  id: secretless-broker-arm
+  env:
+  - CGO_ENABLED=1
+  - CC=o64-clang
+  - CXX=o64-clang++
+  flags:
+  - -tags=netgo
+  goos:
+  - darwin
+  goarch:
+  - arm64
   # Building for OSX with -extldflags "-static" results in the error:
   # ld: library not found for -lcrt0.o
   # This is because static builds are only possible if all libraries
@@ -143,3 +183,4 @@ release:
     - glob: CHANGELOG.md
     - glob: dist/goreleaser/secretless-broker-linux_amd64
     - glob: dist/goreleaser/secretless-broker-darwin_amd64
+    - glob: dist/goreleaser/secretless-broker-darwin_arm64

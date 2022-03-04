@@ -2,8 +2,21 @@
 
 ./stop
 
+devmode=false
+while getopts :d opt; do
+    case $opt in
+        d) devmode=true;;
+       \?) echo "Unknown option -$OPTARG"; exit 1;;
+    esac
+done
+
 docker-compose build --pull
 
-docker-compose up -d secretless
+if [[ "$devmode" = true ]]; then
+  echo 'Starting test container in dev mode...'
+  docker-compose up -d secretless-dev
+else
+  docker-compose up -d secretless
+fi
 
 sleep 2

@@ -98,6 +98,11 @@ func (h *ServiceConnector) Connect(
 	}
 
 	if server, err = ssh.Dial(serverConfig.Network, serverConfig.Address, &serverConfig.ClientConfig); err != nil {
+		for newChannel := range h.channels {
+			if err := newChannel.Reject(ssh.ConnectionFailed, "secretless unable to dial SSH backend"); err != nil {
+				h.logger.Errorf("Failed to send new channel rejection on dial SSH backend : %s", err)
+			}
+		}
 		return fmt.Errorf("failed to dial SSH backend '%s': %s", serverConfig.Address, err)
 	}
 

@@ -12,8 +12,8 @@ services:
       - ./basic_auth.htpasswd:/etc/nginx/.htpasswd:ro
 
   secretless:
-    build:
-      context: ../../..
+    image: secretless-broker # Local image built from REPO_ROOT/bin/build
+    hostname: secretless
     ports:
       - 2222
     volumes:
@@ -32,7 +32,15 @@ services:
     volumes:
       - ./id_insecure:/root/id_insecure:ro
 
-  dev:
+  secretless-dev:
     image: secretless-dev
+    command: ./bin/reflex
+    hostname: secretless
+    ports:
+      - 2222
     volumes:
+      - ./secretless.yml:/secretless.yml
+      - ./id_insecure:/id_insecure:ro
       - ../../..:/secretless
+    depends_on:
+      - ssh-host

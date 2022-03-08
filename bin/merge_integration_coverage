@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# This script collects test coverage results after all integration tests
+# have been run, merges the results into a single report, and then
+# calculates the overall coverage percentage (per line of source code)
+# for:
+#    - Integration tests alone
+#    - Unit tests combined with integration tests
+# This script assumes that the test coverage reports for each integration
+# test are at a path `test-coverage/cover.out` relative to the test
+# subdirectory for that particular integration test.
+
+set -eo pipefail
+
+# Execute script from top level directory
+pushd "$(dirname "$0")/.."
+trap popd EXIT
+
+. bin/build_utils
+
+TEST_DIR="$PWD/test"
+OUTPUT_DIR="$TEST_DIR/test-coverage"
+OUTPUT_XML="coverage.xml"
+
+function main() {
+  create_coverage_out_dir
+  gather_integration_coverage
+  merge_integration_coverage
+  merge_integration_ut_coverage
+  convert_integration_ut_coverage_to_xml
+}
+
+function create_coverage_out_dir() {
+  mkdir -p "$OUTPUT_DIR"
+}
+
+function gather_integration_coverage() {
+  announce "Gathering integration coverage reports"
+  index=0
+  shopt -s globstar nullglob
+  while IFS= read -r -d '' dir; do
+    file="$dir/cover.out"
+    if test -f "$file"; then
+      echo "Found: $file"
+      cp "$file" "$OUTPUT_DIR/cover-$index.out"
+      let "index=index+1"
+    fi
+  done< <(find "$TEST_DIR" -name test-coverage -print0)
+}
+
+function merge_integration_coverage() {
+  integ_cover_report="./test/test-coverage/integ-cover.txt"
+  announce "Merging integration coverage reports and showing result"
+  run_in_docker "cd test/test-coverage &&
+                 gocovmerge *.out > integ-cover.out &&
+                 go tool cover -func integ-cover.out -o integ-cover.txt"
+  cat "$integ_cover_report"
+  coverage="$(awk '/^total:/{print $3}' $integ_cover_report)"
+  banner "Integration test coverage: $coverage"
+}
+
+function merge_integration_ut_coverage() {
+  ut_cover_file="./test/unit-test-output/c.out"
+  combined_cover_report="./test/test-coverage/integ-and-ut-cover.txt"
+  if test -f "$ut_cover_file"; then
+    cp "$ut_cover_file" "$OUTPUT_DIR/ut-cover.out"
+    announce "Merging UT and integration coverage reports and showing combined result"
+    run_in_docker "cd test/test-coverage &&
+                   gocovmerge ut-cover.out integ-cover.out > integ-and-ut-cover.out &&
+                   go tool cover -func integ-and-ut-cover.out -o  integ-and-ut-cover.txt &&
+                   go tool cover -html integ-and-ut-cover.out -o  integ-and-ut-cover.html"
+    cat "$combined_cover_report"
+    coverage="$(awk '/^total:/{print $3}' $combined_cover_report)"
+    banner "Combined integration and unit test coverage: $coverage"
+  fi
+}
+
+function convert_integration_ut_coverage_to_xml() {
+  announce "Converting combined UT/integration coverage reports to XML"
+  run_in_docker "cd test/test-coverage &&
+                 gocov convert integ-and-ut-cover.out | gocov-xml > $OUTPUT_XML"
+  banner "XML Coverage report written to $OUTPUT_XML"
+}
+
+function run_in_docker() {
+  docker run --rm \
+    --volume "$OUTPUT_DIR/:/secretless/test/test-coverage/" \
+    secretless-dev \
+    bash -c "$1"
+}
+
+main

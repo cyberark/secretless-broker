@@ -8,6 +8,10 @@ while getopts :l opt; do
     esac
 done
 
+report_dir="./test-coverage"
+mkdir -p "$report_dir"
+chmod 777 "$report_dir"
+
 if $local_test; then
   docker_args="-v $(cd ../../..; pwd):/secretless"
 fi

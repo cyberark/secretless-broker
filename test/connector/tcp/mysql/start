@@ -20,6 +20,10 @@ cp -rf ../../../util/ssl/* ssl
 
 docker-compose build
 
+report_dir="./test-coverage"
+mkdir -p "$report_dir"
+chmod 777 "$report_dir"
+
 docker-compose up -d mysql mysql_no_tls
 
 ./wait-for-mysql mysql_no_tls

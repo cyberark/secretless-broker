@@ -9,4 +9,8 @@ while getopts ":d" opt; do
     esac
 done
 
+report_dir="./test-coverage"
+mkdir -p "$report_dir"
+chmod 777 "$report_dir"
+
 ../start -m $mssql_host -s $secretless_host -e Developer

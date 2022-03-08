@@ -17,6 +17,8 @@ import (
 	"github.com/cyberark/secretless-broker/internal/util"
 	"github.com/cyberark/secretless-broker/pkg/secretless"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
+	logapi "github.com/cyberark/secretless-broker/pkg/secretless/log"
+	"github.com/cyberark/secretless-broker/pkg/secretless/plugin"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/sharedobj"
 )
 
@@ -30,6 +32,7 @@ type SecretlessOptions struct {
 	PluginChecksumsFile string
 	PluginDir           string
 	ProfilingMode       string
+	GracefulExitEnabled bool
 	ShowVersion         bool
 }
 
@@ -54,7 +57,6 @@ func StartSecretless(params *SecretlessOptions) {
 	exitListener := signal.NewExitListener()
 
 	logger := secretlessLog.New(params.DebugEnabled)
-	evtNotifier := eventnotifier.New(nil)
 	availPlugins, err := sharedobj.AllAvailablePlugins(
 		params.PluginDir,
 		params.PluginChecksumsFile,
@@ -82,46 +84,9 @@ func StartSecretless(params *SecretlessOptions) {
 
 	var allServices internal.Service
 
-	// Main service reload callback
-	configEnv := v2.NewConfigEnv(logger, availPlugins)
-	reloadConfig := func(cfg v2.Config) {
-		// Health check: Not live
-		util.SetAppIsLive(false)
-
-		// Ensure config's requested services can be created.
-		err := configEnv.Prepare(cfg)
-		if err != nil {
-			log.Fatalf("cannot create all requested services: %s", err)
-		}
-
-		// Start Services
-		allServices = proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
-		err = allServices.Start()
-		if err != nil {
-			log.Fatalf("Failed to start services: %s", err)
-		}
-
-		// Health check: Live
-		util.SetAppIsLive(true)
-	}
-
 	// Main listener for exit signals
 	exitListener.AddHandler(func() {
-		fmt.Println("Received a stop signal")
-
-		if allServices == nil {
-			os.Exit(0)
-		}
-
-		err := allServices.Stop()
-		if err != nil {
-			// Log but but allow cleanup of other subscribers to continue.
-			log.Println(err)
-		}
-
-		// TODO: Ideally we would soft-close all goroutines rather than rely on the
-		//       heavy-handed os.Exit to exit the broker when we want to.
-		os.Exit(0)
+		exitHandler(allServices, params)
 	})
 
 	// Main processing loop
@@ -143,7 +108,8 @@ func StartSecretless(params *SecretlessOptions) {
 			}
 
 			logger.Info("Configuration found. Loading...")
-			reloadConfig(cfg)
+			configEnv := v2.NewConfigEnv(logger, availPlugins)
+			allServices = reloadConfig(cfg, configEnv, availPlugins, logger)
 		}
 	}()
 
@@ -204,4 +170,63 @@ func handlePerformanceProfiling(profileType string, exitSignals signal.ExitListe
 	})
 
 	perfProfile.Start()
+}
+
+// reloadConfig is the main service reload callback function.
+func reloadConfig(
+	cfg v2.Config,
+	configEnv v2.ConfigEnv,
+	availPlugins plugin.AvailablePlugins,
+	logger logapi.Logger) internal.Service {
+
+	// Health check: Not live
+	util.SetAppIsLive(false)
+
+	// Ensure config's requested services can be created.
+	err := configEnv.Prepare(cfg)
+	if err != nil {
+		log.Fatalf("cannot create all requested services: %s", err)
+		return nil
+	}
+
+	// Start Services
+	evtNotifier := eventnotifier.New(nil)
+	allServices := proxyservice.NewProxyServices(cfg, availPlugins, logger, evtNotifier)
+	err = allServices.Start()
+	if err != nil {
+		log.Fatalf("Failed to start services: %s", err)
+		return nil
+	}
+
+	// Health check: Live
+	util.SetAppIsLive(true)
+
+	return allServices
+}
+
+func exitHandler(allServices internal.Service, params *SecretlessOptions) {
+	fmt.Println("Received a stop signal")
+
+	osExit := func(code int) {
+		if params.GracefulExitEnabled {
+			fmt.Println("Graceful exit enabled, skipping forceful exit")
+		} else {
+			os.Exit(code)
+		}
+	}
+
+	if allServices == nil {
+		osExit(0)
+		return
+	}
+
+	err := allServices.Stop()
+	if err != nil {
+		// Log but but allow cleanup of other subscribers to continue.
+		log.Println(err)
+	}
+
+	// TODO: Ideally we would soft-close all goroutines rather than rely on the
+	//       heavy-handed os.Exit to exit the broker when we want to.
+	osExit(0)
 }

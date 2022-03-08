@@ -31,6 +31,10 @@ export MSSQL_PID=$mssql_edition
 
 docker-compose build
 
+report_dir="./test-coverage"
+mkdir -p "$report_dir"
+chmod 777 "$report_dir"
+
 # the order of the services is important. mssql must be up before we start secretless
 docker-compose up -d $mssql_host
 

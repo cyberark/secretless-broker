@@ -2,10 +2,13 @@ version: '2'
 services:
   test:
     image: secretless-dev
-    command: go test -v ./test/providers/kubernetessecrets
+    command: go test -v -coverpkg="../../../..." -coverprofile="/test-coverage/cover.out" ./test/providers/kubernetessecrets
+    user: secretless
     environment:
+      - SB_RUN_COVERAGE="true"
       - KUBERNETES_SERVICE_HOST=0.0.0.0
       - KUBERNETES_SERVICE_PORT=8080
     volumes:
       - ./etc/ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
       - ./etc/token:/var/run/secrets/kubernetes.io/serviceaccount/token
+      - ./test-coverage:/test-coverage

@@ -32,8 +32,10 @@ services:
       CONJUR_AUTHN_API_KEY:
 
   secretless:
-    image: secretless-broker
+    image: secretless-broker-coverage
+    entrypoint: "/usr/local/bin/secretless-broker -test.v -test.run ^TestCoverage$$ -test.coverprofile=/test-coverage/cover.out"
     environment:
+      SB_RUN_COVERAGE: "true"
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_LOGIN: admin
@@ -42,6 +44,7 @@ services:
       - conjur
     volumes:
       - ./secretless.yml:/secretless.yml
+      - ./test-coverage:/test-coverage
 
   test:
     image: secretless-dev

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Support for building on Apple M1 hardware.
+  [cyberark/secretless-broker#1456](https://github.com/cyberark/secretless-broker/pull/1456)
+
 ## [1.7.10] - 2022-02-15
 
 ### Fixed

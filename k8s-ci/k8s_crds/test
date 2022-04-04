@@ -6,7 +6,7 @@ set -o pipefail
 # setup environment variables
 log=log.txt
 rm -rf ${log}
-export SECRETLESS_CRD_SUFFIX=${SECRETLESS_CRD_SUFFIX-}
+export SECRETLESS_CRD_SUFFIX=${TEST_ID-}
 
 exit_err() {
    printf '\n--------------------- \n\n'

@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-mongo "mongodb://user0:pass0@localhost:27018/?authSource=admin&ssl=false"
+#mongo --authenticationMechanism SCRAM-SHA-1 "mongodb://user0:pass0@localhost:27018/?authSource=admin&ssl=false"
+mongo "mongodb://localhost:27018/meow?ssl=false" "$@"

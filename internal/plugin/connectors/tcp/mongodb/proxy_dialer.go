@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
 )
 
 // ProxyMessage represents a sent/received pair of parsed wire messages.
@@ -33,13 +34,18 @@ type proxyDialer struct {
 	// differ. This can happen if a connection is dialed to a host name, in which case the reported remote address will
 	// be the resolved IP address.
 	addressTranslations sync.Map
+
+	onFirstResponse func([]byte)
 }
 
 var _ options.ContextDialer = (*proxyDialer)(nil)
 
-func newProxyDialer() *proxyDialer {
+func newProxyDialer(onFirstResponse func([]byte)) *proxyDialer {
 	return &proxyDialer{
-		Dialer: &net.Dialer{Timeout: 30 * time.Second},
+		Dialer: &net.Dialer{
+			Timeout:       2 * time.Second,
+		},
+		onFirstResponse: onFirstResponse,
 	}
 }
 
@@ -66,8 +72,10 @@ func (p *proxyDialer) DialContext(ctx context.Context, network, address string) 
 	}
 
 	proxy := &proxyConn{
-		Conn:   netConn,
-		dialer: p,
+		processedFirstResponse: false,
+		onFirstResponse:        p.onFirstResponse,
+		Conn:                   netConn,
+		dialer:                 p,
 	}
 	return proxy, nil
 }
@@ -147,6 +155,8 @@ func (p *proxyDialer) Messages() []*ProxyMessage {
 // storing wire messages are wrapped to add context, while errors returned from the underlying network connection are
 // forwarded without wrapping.
 type proxyConn struct {
+	processedFirstResponse bool
+	onFirstResponse func ([]byte)
 	net.Conn
 	dialer *proxyDialer
 }
@@ -165,24 +175,31 @@ func (pc *proxyConn) Write(wm []byte) (n int, err error) {
 
 // Read reads the message from the server into the given buffer and stores the read message in the proxyDialer
 // associated with this connection.
-func (pc *proxyConn) Read(wm []byte) (int, error) {
-	n, err := pc.Conn.Read(wm)
+func (pc *proxyConn) Read(buffer []byte) (int, error) {
+	n, err := pc.Conn.Read(buffer)
 	if err != nil {
 		return n, err
 	}
+
 	//
 	//// The driver reads wire messages in two phases: a four-byte read to get the length of the incoming wire message
 	//// and a (length-4) byte read to get the message itself. There's nothing to be stored during the initial four-byte
 	//// read because we can calculate the length from the rest of the message.
-	//if len(buffer) == 4 {
-	//	return 4, nil
-	//}
+	if len(buffer) == 4 {
+		return 4, nil
+	}
+
 	//
 	//// The buffer contains the entire wire message except for the length bytes. Re-create the full message by appending
 	//// buffer to the end of a four-byte slice and using UpdateLength to set the length bytes.
-	//idx, wm := bsoncore.ReserveLength(nil)
-	//wm = append(wm, buffer...)
-	//wm = bsoncore.UpdateLength(wm, idx, int32(len(wm[idx:])))
+	idx, wm := bsoncore.ReserveLength(nil)
+	wm = append(wm, buffer...)
+	wm = bsoncore.UpdateLength(wm, idx, int32(len(wm[idx:])))
+
+	if !pc.processedFirstResponse {
+		pc.onFirstResponse(copyBytes(wm))
+		pc.processedFirstResponse = true
+	}
 
 	if err := pc.dialer.storeReceivedMessage(wm, pc.RemoteAddr().String()); err != nil {
 		wrapped := fmt.Errorf("error storing received message: %v", err)
@@ -191,4 +208,8 @@ func (pc *proxyConn) Read(wm []byte) (int, error) {
 	}
 
 	return n, nil
+}
+
+func (pc *proxyConn) NetConn() net.Conn {
+	return pc.Conn
 }

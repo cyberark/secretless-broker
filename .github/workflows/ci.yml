@@ -27,5 +27,6 @@ jobs:
       # Download go modules
       - run: go mod download
       # Run keychain tests
-      - run: security unlock-keychain
+      - run: security default-keychain
+      - run: security list-keychains | awk -F'"' '{print $2}' | xargs -L 1 security show-keychain-info
       - run: cd test/providers/keychain && ./start && ./test && ./stop

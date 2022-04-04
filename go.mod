@@ -48,3 +48,5 @@ require (
 	k8s.io/client-go v0.0.0-20180806134042-1f13a808da65
 	k8s.io/kube-openapi v0.0.0-20180731170545-e3762e86a74c // indirect
 )
+
+replace golang.org/x/crypto => github.com/doodlesbykumbi/sshr.crypto v0.0.0-20191016154246-b1c2b8ffdb9c

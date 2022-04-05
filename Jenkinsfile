@@ -145,7 +145,7 @@ pipeline {
 
     stage('Cobertura') {
       steps {
-        cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'test/test-coverage/coverage.xml', conditionalCoverageTargets: '50, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '50, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '50, 0, 0', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+        cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'test/test-coverage/coverage.xml', conditionalCoverageTargets: '70, 0, 70', failUnhealthy: true, failUnstable: true, lineCoverageTargets: '70, 70, 70', maxNumberOfBuilds: 0, methodCoverageTargets: '70, 0, 70', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
       }
     }
 

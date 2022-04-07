@@ -112,6 +112,11 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
+replace github.com/cyberark/conjur-opentelemetry-tracer =>	./modules/conjur-opentelemetry-tracer
+replace github.com/cyberark/conjur-authn-k8s-client =>	./modules/conjur-authn-k8s-client
+replace github.com/cyberark/conjur-api-go =>	./modules/conjur-api-go
+replace github.com/cyberark/summon =>	./modules/summon
+
 replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 
 // 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.

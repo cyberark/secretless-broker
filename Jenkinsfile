@@ -1,5 +1,19 @@
 #!/usr/bin/env groovy
 
+// Automated release, promotion and dependencies
+properties([
+  // Include the automated release parameters for the build
+  release.addParams(),
+  // Dependencies of the project that should trigger builds
+  dependencies([
+    'cyberark/conjur-opentelemetry-tracer',
+    'cyberark/conjur-api-go',
+    'cyberark/conjur-authn-k8s-client',
+    'cyberark/summon'
+
+  ])
+])
+
 pipeline {
   agent { label 'executor-v2' }
 

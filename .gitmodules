@@ -1,3 +1,15 @@
 [submodule "third_party/go-mssqldb"]
 	path = third_party/go-mssqldb
 	url = https://github.com/cyberark/go-mssqldb
+[submodule "modules/conjur-opentelemetry-tracer"]
+	path = modules/conjur-opentelemetry-tracer
+	url = git@github.com:cyberark/conjur-opentelemetry-tracer.git
+	branch = main
+[submodule "modules/conjur-api-go"]
+	path = modules/conjur-api-go
+	url = git@github.com:cyberark/conjur-api-go.git
+	branch = main
+[submodule "modules/summon"]
+	path = modules/summon
+	url = git@github.com:cyberark/summon.git
+	branch = main

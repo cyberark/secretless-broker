@@ -395,3 +395,63 @@ func Test_checkRequiredOAuthParams(t *testing.T) {
 		)
 	}
 }
+
+func Test_CreateOAuth1Header(t *testing.T) {
+	testCases := []struct {
+		description string
+		params      map[string]string
+		expErrStr   string
+	}{
+		{
+			description: "all values present: no error",
+			params: map[string]string{
+				"consumer_key":    "conKey",
+				"consumer_secret": "conSecret",
+				"token":           "apiToken",
+				"token_secret":    "tokSecret",
+			},
+		},
+		{
+			description: "missing value: consumer_key",
+			params: map[string]string{
+				"consumer_secret": "conSecret",
+				"token":           "apiToken",
+				"token_secret":    "tokSecret",
+			},
+			expErrStr: "required oAuth1 parameter 'consumer_key' not found",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			req := &gohttp.Request{
+				Method: "POST",
+				URL: &url.URL{
+					Scheme:   "http",
+					Host:     "example.com",
+					Path:     "/wp-json/wp/v2/posts",
+					RawQuery: "include_entities=true",
+				},
+				Header: map[string][]string{
+					"Authorization": {"doesn't matter"},
+					"Content-Type":  {"application/x-www-form-urlencoded"},
+				},
+				Body: createRequestBody("status=Hello%20Foo%20%2B%20Bar%2C%20a%20signed%20OAuth%20request%21"),
+			}
+			res, err := CreateOAuth1Header(tc.params, req)
+
+			if tc.expErrStr != "" {
+				assert.Error(t, err)
+				assert.EqualError(t, err, tc.expErrStr)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Contains(t, res, "OAuth oauth_consumer_key=\"conKey\", oauth_nonce=\"")
+			assert.Contains(t, res, "oauth_signature=\"")
+			assert.Contains(t, res, "oauth_signature_method=\"")
+			assert.Contains(t, res, "oauth_timestamp=\"")
+			assert.Contains(t, res, "oauth_token=\"apiToken\", oauth_version=\"1.0\"")
+		})
+	}
+}

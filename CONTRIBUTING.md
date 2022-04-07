@@ -430,9 +430,9 @@ than main. Make sure your change to secretless considers this.
    If no dependencies have changed, you can move on to the next step.
 
 ### Update the version and changelog
+
 1. Create a new branch for the version bump.
-1. Based on the unreleased content, determine the new version number and update
-   the [version.go](pkg/secretless/version.go) file.
+1. Based on the changelog content, determine the new version number and update.
 1. Review the [changelog](CHANGELOG.md) to make sure all relevant changes since
    the last release have been captured. You may find it helpful to look at the
    list of commits since the last release - you can find this by visiting the
@@ -443,42 +443,24 @@ than main. Make sure your change to secretless considers this.
    This is also a good time to make sure all entries conform to our
    [changelog guidelines](https://github.com/cyberark/community/blob/main/Conjur/CONTRIBUTING.md#changelog-guidelines).
 1. Commit these changes - `Bump version to x.y.z` is an acceptable commit message - and open a PR
-   for review. Your PR should include updates to `pkg/secretless/version.go`,
+   for review. Your PR should include updates to
    `CHANGELOG.md`, and if there are any license updates, to `NOTICES.txt`.
 
-### Add a git tag
-1. Once your changes have been reviewed and merged into main, tag the version
-   using `git tag -s v0.1.1`. Note this requires you to be  able to sign releases.
-   Consult the [github documentation on signing commits](https://help.github.com/articles/signing-commits-with-gpg/)
-   on how to set this up. `vx.y.z` is an acceptable tag message.
-1. Push the tag: `git push vx.y.z` (or `git push origin vx.y.z` if you are working
-   from your local machine).
+### Release and Promote
 
-### Create a GitHub pre-release
-**Note:** Until the stable quality exercises have completed, the GitHub release
-should be officially marked as a `pre-release` (eg "non-production ready")
+1. Jenkins build parameters can be utilized to release and promote successful builds.
+1. Merging into main/master branches will automatically trigger a release.
+1. Reference the [internal automated release doc]
+   (https://github.com/conjurinc/docs/blob/master/reference/infrastructure/automated_releases.md#release-and-promotion-process)
+   for releasing and promoting.
 
-1. From the Jenkins pipeline for the tag, retrieve the archived `dist/goreleaser`
-   directory.
-1. Create a GitHub release from the tag, add a description by copying the CHANGELOG entries
-   from the version, and upload the release artifacts from `dist/goreleaser`
-   to the GitHub release. The following artifacts should be uploaded to the release:
-   - CHANGELOG.md
-   - NOTICES.txt
-   - LICENSE
-   - secretless-broker_{VERSION}_amd64.deb
-   - secretless-broker_{VERSION}_amd64.rpm
-   - secretless-broker_{VERSION}_darwin_amd64.tar.gz
-   - secretless-broker_{VERSION}_linux_amd64.tar.gz
-   - SHA256SUMS.txt
+### Publish homebrew version
 
-   You should also locally rename the `secretless-broker` binaries in the
-   `secretless-broker-{OS}_{GOOS}_{GOARCH}` dirs to `secretless-broker-{GOOS}`
-   and upload these to the release.
 1. Copy the `secretless-broker.rb` homebrew formula output by goreleaser
    to the [homebrew formula for Secretless](https://github.com/cyberark/homebrew-tools/blob/main/secretless-broker.rb)
    and submit a PR to update the version of Secretless available in brew.
 
 ### Publish the Red Hat image
+
 1. Visit the [Red Hat project page](https://connect.redhat.com/project/3100131/view) once the images have
    been pushed and manually choose to publish the latest release.

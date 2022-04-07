@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.12] - 2022-05-02
+
+### Changed
+- Update to automated release process
+  [cyberark/secretless-broker#1462](https://github.com/cyberark/secretless-broker/pull/1462)
+
 ## [1.7.11] - 2022-04-29
 
 ### Added

@@ -2,75 +2,134 @@
 
 set -e
 
-if [[ -z "${TAG_NAME:-}" ]]; then
-  echo "Please supply environment variable TAG_NAME."
-  echo "If you see this error in Jenkins it means the publish script was run"
-  echo "for a build that wasn't triggered by a tag - please check publish stage conditions."
+. bin/build_utils
+
+function print_help() {
+  echo "Internal Release Usage: $0 --internal"
+  echo "External Release Usage: $0 --edge"
+  echo "Promote Usage: $0 --promote --source <VERSION> --target <VERSION>"
+  echo " --internal: publish images to registry.tld"
+  echo " --edge: publish docker images to docker hub"
+  echo " --source <VERSION>: specify version number of local image"
+  echo " --target <VERSION>: specify version number of remote image"
+}
+
+# Fail if no arguments are given.
+if [[ $# -lt 1 ]]; then
+  print_help
   exit 1
 fi
 
-. bin/build_utils
+PUBLISH_INTERNAL=false
+PUBLISH_EDGE=false
+PROMOTE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  --internal)
+    PUBLISH_INTERNAL=true
+    ;;
+  --edge)
+    PUBLISH_EDGE=true
+    ;;
+  --promote)
+    PROMOTE=true
+    ;;
+  --source)
+    SOURCE_ARG="$2"
+    shift
+    ;;
+  --target)
+    TARGET_ARG="$2"
+    shift
+    ;;
+  --help)
+    print_help
+    exit 1
+    ;;
+  *)
+    echo "Unknown option: ${1}"
+    print_help
+    exit 1
+    ;;
+  esac
+  shift
+done
 
 readonly REGISTRY="cyberark"
-readonly VERSION="$(short_version_tag)"
-readonly FULL_VERSION_TAG="$(full_version_tag)"
+readonly LOCAL_REGISTRY="registry.tld"
+# Version derived from CHANGLEOG and automated release library
+VERSION=$(<VERSION)
+FULL_VERSION_TAG="$(full_version_tag)"
+readonly VERSION
+readonly FULL_VERSION_TAG
 readonly REDHAT_IMAGE="scan.connect.redhat.com/ospid-18d9f51d-9c0c-4031-9f9e-ef08aa2ff409/secretless-broker"
+readonly REDHAT_LOCAL_IMAGE="secretless-broker-redhat"
 readonly IMAGES=(
   "secretless-broker"
   "secretless-broker-quickstart"
 )
 
-function main() {
-  # Ensure TAG_NAME version matches project version
-  if [[ "${TAG_NAME#"v"}" != "${VERSION}" ]]; then
-    echo "TAG_NAME envvar version was '${TAG_NAME#"v"}', expected '${VERSION}'";
-    echo "TAG_NAME envvar version must match project version";
-    exit 1;
-  fi
+if [[ ${PUBLISH_INTERNAL} = true ]]; then
+  echo "Publishing built images internally to registry.tld."
+  SOURCE_TAG=$FULL_VERSION_TAG
+  REMOTE_TAG=$VERSION
 
-  # Accumulate TAGS
-  #
-
-  local TAGS=(
-    "$VERSION"
-  )
-
-  # Add less specific version tags, eg. given 1.2.3, add 1.2 and 1
-  for tag in $(gen_versions "$VERSION"); do
-    TAGS+=("${tag}")
+  for IMAGE_NAME in "${IMAGES[@]}"; do
+    tag_and_push "${IMAGE_NAME}:${SOURCE_TAG}" "${LOCAL_REGISTRY}/${IMAGE_NAME}:${REMOTE_TAG}"
   done
 
-  # Add 'latest' tag only when TAG_NAME is the highest semantic tag
-  local LATEST_TAG
-  LATEST_TAG="$(git tag | sort -r --version-sort | head -1)"
-  if [[ "${TAG_NAME}" == "${LATEST_TAG}" ]]; then
-    TAGS+=('latest')
+  tag_and_push "${REDHAT_LOCAL_IMAGE}:${SOURCE_TAG}" "${LOCAL_REGISTRY}/${REDHAT_LOCAL_IMAGE}:${REMOTE_TAG}"
+fi
+
+if [[ ${PUBLISH_EDGE} = true ]]; then
+  echo "Performing edge release."
+  SOURCE_TAG=$FULL_VERSION_TAG
+  REMOTE_TAG=edge
+  readonly TAGS=(
+    "$VERSION"
+    "$REMOTE_TAG"
+  )
+
+  for IMAGE_NAME in "${IMAGES[@]}"; do
+    for tag in "${TAGS[@]}"; do
+      tag_and_push "$IMAGE_NAME:$SOURCE_TAG" "$REGISTRY/$IMAGE_NAME:$tag"
+    done
+  done
+fi
+
+if [[ ${PROMOTE} = true ]]; then
+  if [[ -z ${SOURCE_ARG:-} || -z ${TARGET_ARG:-} ]]; then
+  echo "When promoting, --source and --target flags are required."
+  print_help
+  exit 1
   fi
 
-  # Publish
-  #
+  # Update vars to utilize build_utils
+  SOURCE_TAG=$SOURCE_ARG
+  REMOTE_TAG=$TARGET_ARG
 
-  # Publish combinations of images and tags
-  for image_name in "${IMAGES[@]}"; do
-    image_with_tag="$image_name:$FULL_VERSION_TAG"
+  echo "Promoting image to $REMOTE_TAG"
+  readonly TAGS=(
+    "$REMOTE_TAG"
+    "latest"
+  )
 
-    for tag in "${TAGS[@]}"; do
-      image_with_version_tag="${REGISTRY}/${image_name}:${tag}"
-      echo "Tagging and pushing ${image_with_version_tag}"
-
-      docker tag "${image_with_tag}" "${image_with_version_tag}"
-      docker push "${image_with_version_tag}"
+  for IMAGE_NAME in "${IMAGES[@]}"; do
+    for tag in "${TAGS[@]}" $(gen_versions "$REMOTE_TAG"); do
+      echo "Tagging and pushing $REGISTRY/$IMAGE_NAME:$tag"
+      tag_and_push "${LOCAL_REGISTRY}/$IMAGE_NAME:$SOURCE_TAG" "$REGISTRY/$IMAGE_NAME:$tag"
     done
   done
 
   # Publish only latest to Redhat Registries
   echo "Tagging and pushing ${REDHAT_IMAGE}"
+  docker tag "${LOCAL_REGISTRY}/${REDHAT_LOCAL_IMAGE}:${SOURCE_TAG}" "${REDHAT_IMAGE}:${REMOTE_TAG}"
 
-  docker tag "secretless-broker-redhat:${FULL_VERSION_TAG}" "${REDHAT_IMAGE}:${VERSION}"
-
+  # Publish RedHat image to RedHat Registry
   if docker login scan.connect.redhat.com -u unused -p "${REDHAT_API_KEY}"; then
     # you can't push the same tag twice to redhat registry, so ignore errors
-    if ! docker push "${REDHAT_IMAGE}:${VERSION}"; then
+    if ! docker push "${REDHAT_IMAGE}:${REMOTE_TAG}"; then
       echo 'RedHat push FAILED! (maybe the image was pushed already?)'
       exit 0
     fi
@@ -78,6 +137,5 @@ function main() {
     echo 'Failed to log in to scan.connect.redhat.com'
     exit 1
   fi
-}
 
-main
+fi

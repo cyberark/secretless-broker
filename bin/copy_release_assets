@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+###################################
+# To prevent clashing with the automated release process
+# the release section in goreleaser.yml has been disabled.
+#
+# This script will copy and rename the packages created
+# by gorleaser into the asset directory that's published
+# to Github.
+###################################
+
+print_help() {
+    echo "About $0: Copies release files into Github release asset directory."
+    echo "Usage: $0 path/to/asset/release/directory"
+    exit 1
+}
+
+if [[ "$#" -lt 1 ]]; then
+    print_help
+fi
+
+asset_dir="$1"
+
+if [[ ! -d "${asset_dir}" ]]; then
+    echo "${asset_dir} directory does not exist."
+    print_help
+fi
+
+root_assets() {
+    local dir
+    dir=$(git rev-parse --show-toplevel)
+    local assets=(
+        'NOTICES.txt'
+        'CHANGELOG.md'
+        'LICENSE'
+    )
+
+    # shellcheck disable=SC2086
+    for asset in "${assets[@]}"; do
+        # globbing is intentional for assets
+        echo "${dir}"/${asset}
+    done
+}
+
+goreleaser_assets() {
+    local dir=pristine-checkout/dist/goreleaser
+    local assets=(
+        'SHA256SUMS.txt'
+        *.tar.gz
+        *.rpm
+        *.deb
+        secretless-broker-linux_amd64_v1
+        secretless-broker-darwin_amd64_v1
+        secretless-broker-darwin_arm64
+    )
+
+    # shellcheck disable=SC2086
+    for asset in "${assets[@]}"; do
+        # globbing is intentional for assets
+        echo "${dir}"/${asset}
+    done
+}
+
+function main() {
+    declare -a assets
+    mapfile -t assets < <(root_assets)
+    mapfile -t -O "${#assets[@]}" assets < <(goreleaser_assets)
+
+    # Copy assets into Github release asset dir
+    for asset in "${assets[@]}"; do
+        cp "${asset}" "$asset_dir"
+    done
+
+    rename_assets
+}
+
+###################################
+# rename_assets() will find and remove _v1 from filenames.
+#
+# During the Goreleaser build, _v1 is appended to some filenames.
+#
+# For more info refer to: https://golang.org/doc/install/source#environment
+# $GOAMD64 (for amd64 only; default is v1)
+#
+# Goreleaser's release section would remove _v1 from packages
+# during a release but is disabled in favor of the automated
+# release process.
+###################################
+function rename_assets() {
+    # Find all assets ending with _v1
+    for file in "${asset_dir}"/*_v1; do
+        # Rename file, removing _v1 from asset
+        mv "$file" "${file/_v1/}"
+    done
+}
+
+main

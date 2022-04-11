@@ -247,25 +247,23 @@ pipeline {
     }
 
     stage('Release') {
-          when {
-            expression {
-              MODE == "RELEASE"
-            }
-          }
-        stage('Push Images') {
-          steps {
-            release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
-              // Publish release artifacts to all the appropriate locations
-              // Copy any artifacts to assetDirectory to attach them to the Github release
-
-              //    // Create Go application SBOM using the go.mod version for the golang container image
-              sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/secretless-broker/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
-              //    // Create Go module SBOM
-              sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
-              sh 'summon -e production ./bin/publish --edge'
-            }
-          }
+      when {
+        expression {
+          MODE == "RELEASE"
         }
+      }
+      steps {
+        release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
+          // Publish release artifacts to all the appropriate locations
+          // Copy any artifacts to assetDirectory to attach them to the Github release
+
+          //    // Create Go application SBOM using the go.mod version for the golang container image
+          sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/secretless-broker/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
+          //    // Create Go module SBOM
+          sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
+          sh 'summon -e production ./bin/publish --edge'
+        }
+      }
     }
 
     // Must com after release block as it relies on the pre-release version

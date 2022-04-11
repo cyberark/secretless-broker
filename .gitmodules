@@ -13,3 +13,7 @@
 	path = modules/summon
 	url = git@github.com:cyberark/summon.git
 	branch = main
+[submodule "modules/conjur-authn-k8s-client"]
+	path = modules/conjur-authn-k8s-client
+	url = git@github.com:cyberark/conjur-authn-k8s-client.git
+	branch = main

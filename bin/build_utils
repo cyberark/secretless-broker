@@ -30,6 +30,17 @@ function gen_versions() {
   done
 }
 
+function tag_and_push() {
+  local source="$1"
+  shift
+  local target="$1"
+  shift
+
+  echo "Tagging and pushing $target..."
+  docker tag "${source}" "${target}"
+  docker push "${target}"
+}
+
 function retrieve_cyberark_ca_cert() {
   # On CyberArk dev laptops, golang module dependencies are downloaded with a
   # corporate proxy in the middle. For these connections to succeed we need to

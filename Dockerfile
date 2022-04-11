@@ -22,6 +22,7 @@ ENV GOOS=linux \
 
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party
+COPY modules/ /secretless/modules
 
 RUN go mod download
 

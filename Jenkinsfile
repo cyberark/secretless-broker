@@ -252,7 +252,6 @@ pipeline {
               MODE == "RELEASE"
             }
           }
-      parallel {
         stage('Push Images') {
           steps {
             release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
@@ -267,6 +266,7 @@ pipeline {
             }
           }
         }
+        // Must com after release block as it relies on the pre-release version
         stage('Create draft release') {
           steps {
             dir('./pristine-checkout') {
@@ -279,7 +279,6 @@ pipeline {
             }
           }
         }
-      }
     }
 
     stage('Fix Website Flags (staging)') {

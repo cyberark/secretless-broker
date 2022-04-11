@@ -230,10 +230,6 @@ pipeline {
     }
 
     stage('Push Images Internally') {
-      //when {
-      //  branch 'main'
-      //}
-
       steps {
         sh './bin/publish --internal'
       }

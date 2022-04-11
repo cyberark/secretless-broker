@@ -177,6 +177,7 @@ snapshot:
 release:
   disable: false
   draft: true
+  prerelease: auto
   extra_files:
     - glob: NOTICES.txt
     - glob: LICENSE

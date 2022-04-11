@@ -123,12 +123,12 @@ if [[ ${PROMOTE} = true ]]; then
 
   # Publish only latest to Redhat Registries
   echo "Tagging and pushing ${REDHAT_IMAGE}"
-  echo docker tag "${REDHAT_LOCAL_IMAGE}:${SOURCE_TAG}" "${REDHAT_IMAGE}:${REMOTE_TAG}"
+  echo "docker tag "${REDHAT_LOCAL_IMAGE}:${SOURCE_TAG}" "${REDHAT_IMAGE}:${REMOTE_TAG}""
 
   # Publish RedHat image to RedHat Registry
   if docker login scan.connect.redhat.com -u unused -p "${REDHAT_API_KEY}"; then
     # you can't push the same tag twice to redhat registry, so ignore errors
-    if ! docker push "${REDHAT_IMAGE}:${REMOTE_TAG}"; then
+    if ! echo "docker push "${REDHAT_IMAGE}:${REMOTE_TAG}""; then
       echo 'Red Hat push FAILED! (maybe the image was pushed already?)'
       exit 0
     fi

@@ -230,9 +230,9 @@ pipeline {
     }
 
     stage('Push Images Internally') {
-      when {
-        branch 'main'
-      }
+      //when {
+      //  branch 'main'
+      //}
 
       steps {
         sh './bin/publish --internal'
@@ -240,9 +240,9 @@ pipeline {
     }
 
     stage('Build Release Artifacts') {
-      when {
-        branch 'main'
-      }
+      //when {
+      //  branch 'main'
+      //}
 
       steps {
         sh './bin/build_release --snapshot'

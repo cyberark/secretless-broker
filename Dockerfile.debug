@@ -29,7 +29,7 @@ RUN go get github.com/cyberark/conjur-opentelemetry-tracer@latest && \
     go get github.com/cyberark/summon@latest
 
 RUN go mod download
-RUN go mod tidy
+#RUN go mod tidy
 
 # Compile Delve (for debugging)
 RUN go get github.com/go-delve/delve/cmd/dlv

@@ -93,7 +93,8 @@ pipeline {
           }
         }
 
-        /*stage('Unit tests') {
+        /*
+        stage('Unit tests') {
           steps {
             sh './bin/test_unit'
             sh 'cp ./test/unit-test-output/c.out ./c.out'
@@ -162,8 +163,8 @@ pipeline {
         }
       }
     }
-    */
 
+    */
     //stage('Integration Tests') {
     //  steps {
     //    script {
@@ -195,7 +196,7 @@ pipeline {
 //      }
 //    }
 
-/*
+    /*
     stage('Combine Integration and Unit Test Coverage') {
       steps {
         sh "./bin/merge_integration_coverage"
@@ -279,7 +280,7 @@ pipeline {
       }
     }
 
-/*
+    /*
     //stage('Create draft release') {
      // steps {
       //}

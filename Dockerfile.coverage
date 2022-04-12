@@ -31,8 +31,8 @@ RUN go get github.com/cyberark/conjur-opentelemetry-tracer@latest && \
     go get github.com/cyberark/conjur-api-go@latest && \
     go get github.com/cyberark/summon@latest
 
-RUN go mod tidy
 RUN go mod download
+RUN go mod tidy
 
 # secretless source files
 COPY ./cmd /secretless/cmd

@@ -35,7 +35,7 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/containerd/containerd v1.5.9 // indirect
-	github.com/cyberark/conjur-opentelemetry-tracer v0.0.0-20220113161145-73452511df0c // indirect
+	//github.com/cyberark/conjur-opentelemetry-tracer v0.0.0-20220113161145-73452511df0c // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect

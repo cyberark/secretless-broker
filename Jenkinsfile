@@ -105,6 +105,7 @@ pipeline {
       }
     }
 
+/*
     stage('Scan Secretless') {
       parallel {
         stage('Scan Secretless Image for fixable issues') {
@@ -162,38 +163,40 @@ pipeline {
         }
       }
     }
+    */
 
-    stage('Integration Tests') {
-      steps {
-        script {
-          def directories = sh (
-            returnStdout: true,
-            // We run the 'find' directive first on all directories with test files, then run a 'find' directive
-            // to make sure they also contain start files. We then take the dirname, and basename respectively.
-            script:
-            '''
-            find $(find ./test -name test) -name 'start' -exec dirname {} \\; | xargs -n1 basename
-            '''
-          ).trim().split()
+    //stage('Integration Tests') {
+    //  steps {
+    //    script {
+    //      def directories = sh (
+    //        returnStdout: true,
+    //        // We run the 'find' directive first on all directories with test files, then run a 'find' directive
+    //        // to make sure they also contain start files. We then take the dirname, and basename respectively.
+    //        script:
+    //        '''
+    //        find $(find ./test -name test) -name 'start' -exec dirname {} \\; | xargs -n1 basename
+    //        '''
+    //      ).trim().split()
+//
+//          def integrationStages = [:]
+//
+//          // Create an integration test stage for each directory we collected previously.
+//          // We want to be sure to skip any tests, such as keychain tests, that can only be run manually.
+//          directories.each { name ->
+//            if (name == "keychain") return
+//
+//            integrationStages["Integration: ${name}"] = {
+//              sh "./bin/run_integration ${name}"
+//            }
+//          }
+//
+//          parallel integrationStages
+//        }
+//        junit "**/test/**/junit.xml"
+//      }
+//    }
 
-          def integrationStages = [:]
-
-          // Create an integration test stage for each directory we collected previously.
-          // We want to be sure to skip any tests, such as keychain tests, that can only be run manually.
-          directories.each { name ->
-            if (name == "keychain") return
-
-            integrationStages["Integration: ${name}"] = {
-              sh "./bin/run_integration ${name}"
-            }
-          }
-
-          parallel integrationStages
-        }
-        junit "**/test/**/junit.xml"
-      }
-    }
-
+/*
     stage('Combine Integration and Unit Test Coverage') {
       steps {
         sh "./bin/merge_integration_coverage"
@@ -228,6 +231,7 @@ pipeline {
         }
       }
     }
+    */
 
     stage('Push Images Internally') {
       steps {
@@ -266,6 +270,7 @@ pipeline {
       }
     }
 
+/*
     // Must com after release block as it relies on the pre-release version
     stage('Create draft release') {
       steps {
@@ -325,6 +330,7 @@ pipeline {
       }
     }
   }
+  */
 
   post {
     always {

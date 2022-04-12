@@ -267,14 +267,15 @@ pipeline {
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
           sh 'summon -e production ./bin/publish --edge'
 
-          dir('./pristine-checkout') {
-            // Go releaser requires a pristine checkout
-            checkout scm
-            sh 'git submodule update --init --recursive'
-            // Create draft release
-            sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
-            archiveArtifacts 'dist/goreleaser/'
-          }
+        }
+
+        dir('./pristine-checkout') {
+          // Go releaser requires a pristine checkout
+          checkout scm
+          sh 'git submodule update --init --recursive'
+          // Create draft release
+          sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+          archiveArtifacts 'dist/goreleaser/'
         }
       }
     }
@@ -330,7 +331,6 @@ pipeline {
       }
     }
   */
-  }
 
   post {
     always {

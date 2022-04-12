@@ -54,7 +54,11 @@ RUN go get -u github.com/jstemmer/go-junit-report && \
 # go mod dependency management for the secretless project
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party
-COPY modules/ /secretless/modules
+#COPY modules/ /secretless/modules
+RUN go get github.com/cyberark/conjur-opentelemetry-tracer@latest && \
+    go get github.com/cyberark/conjur-authn-k8s-client@latest && \
+    go get github.com/cyberark/conjur-api-go@latest && \
+    go get github.com/cyberark/summon@latest
 
 RUN go mod download
 

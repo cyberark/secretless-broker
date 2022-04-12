@@ -104,6 +104,7 @@ pipeline {
           }
         }
       }
+        /*
     }
 
     stage('Scan Secretless') {
@@ -344,4 +345,3 @@ pipeline {
     }
   }
 }
-  }

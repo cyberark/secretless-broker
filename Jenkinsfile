@@ -93,8 +93,7 @@ pipeline {
           }
         }
 
-/*
-        stage('Unit tests') {
+        /*stage('Unit tests') {
           steps {
             sh './bin/test_unit'
             sh 'cp ./test/unit-test-output/c.out ./c.out'
@@ -280,11 +279,11 @@ pipeline {
       }
     }
 
+/*
     //stage('Create draft release') {
      // steps {
       //}
     //}
-/*
 
     stage('Fix Website Flags (staging)') {
       when {
@@ -329,8 +328,8 @@ pipeline {
           }
         }
       }
-    }
-  */
+    */}
+  }
 
   post {
     always {

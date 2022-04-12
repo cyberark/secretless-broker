@@ -175,7 +175,7 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 release:
-  disable: false
+  disable: true
   #draft: true
   #prerelease: auto
   extra_files:

@@ -269,6 +269,16 @@ pipeline {
 
         }
 
+      }
+    }
+
+    stage('Create draft release') {
+      when {
+        expression {
+          MODE == "RELEASE"
+        }
+      }
+      steps {
         dir('./pristine-checkout') {
           // Go releaser requires a pristine checkout
           checkout scm
@@ -279,12 +289,7 @@ pipeline {
         }
       }
     }
-
     /*
-    //stage('Create draft release') {
-     // steps {
-      //}
-    //}
 
     stage('Fix Website Flags (staging)') {
       when {

@@ -93,6 +93,7 @@ pipeline {
           }
         }
 
+/*
         stage('Unit tests') {
           steps {
             sh './bin/test_unit'
@@ -105,7 +106,6 @@ pipeline {
       }
     }
 
-/*
     stage('Scan Secretless') {
       parallel {
         stage('Scan Secretless Image for fixable issues') {

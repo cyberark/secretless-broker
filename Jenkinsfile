@@ -329,8 +329,8 @@ pipeline {
         }
       }
     }
-  }
   */
+  }
 
   post {
     always {

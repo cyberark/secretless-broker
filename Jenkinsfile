@@ -107,6 +107,7 @@ pipeline {
         */
     }
 
+    /*
     stage('Scan Secretless') {
       parallel {
         stage('Scan Secretless Image for fixable issues') {
@@ -164,8 +165,8 @@ pipeline {
         }
       }
     }
-
     */
+
     //stage('Integration Tests') {
     //  steps {
     //    script {

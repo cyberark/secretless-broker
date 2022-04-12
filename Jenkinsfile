@@ -266,23 +266,23 @@ pipeline {
           //    // Create Go module SBOM
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
           sh 'summon -e production ./bin/publish --edge'
+
+          dir('./pristine-checkout') {
+            // Go releaser requires a pristine checkout
+            checkout scm
+            sh 'git submodule update --init --recursive'
+            // Create draft release
+            sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+            archiveArtifacts 'dist/goreleaser/'
+          }
         }
       }
     }
 
-    // Must com after release block as it relies on the pre-release version
-    stage('Create draft release') {
-      steps {
-        dir('./pristine-checkout') {
-          // Go releaser requires a pristine checkout
-          checkout scm
-          sh 'git submodule update --init --recursive'
-          // Create draft release
-          sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
-          archiveArtifacts 'dist/goreleaser/'
-        }
-      }
-    }
+    //stage('Create draft release') {
+     // steps {
+      //}
+    //}
 /*
 
     stage('Fix Website Flags (staging)') {

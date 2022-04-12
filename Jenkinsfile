@@ -93,7 +93,6 @@ pipeline {
           }
         }
 
-        /*
         stage('Unit tests') {
           steps {
             sh './bin/test_unit'
@@ -104,7 +103,6 @@ pipeline {
           }
         }
       }
-        */
     }
 
     /*

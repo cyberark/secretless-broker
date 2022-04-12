@@ -86,23 +86,23 @@ pipeline {
     }
 
     stage('Build and Unit tests') {
-      parallel {
+      //parallel {
         stage('Build Images') {
           steps {
             sh './bin/build'
           }
         }
 
-        stage('Unit tests') {
-          steps {
-            sh './bin/test_unit'
-            sh 'cp ./test/unit-test-output/c.out ./c.out'
+        //stage('Unit tests') {
+        //  steps {
+        //    sh './bin/test_unit'
+        //    sh 'cp ./test/unit-test-output/c.out ./c.out'
 
-            junit 'test/unit-test-output/junit.xml'
-            ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
+//            junit 'test/unit-test-output/junit.xml'
+ //           ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
           }
         }
-      }
+      //}
     }
 
     /*

@@ -87,11 +87,11 @@ pipeline {
 
     stage('Build and Unit tests') {
       //parallel {
-        stage('Build Images') {
+      //  stage('Build Images') {
           steps {
             sh './bin/build'
           }
-        }
+      //  }
 
         //stage('Unit tests') {
         //  steps {

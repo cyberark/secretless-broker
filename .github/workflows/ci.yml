@@ -45,12 +45,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      # Uninstall old go
-      - run: brew uninstall go@1.15
       # Install go1.17
-      - run: brew install go@1.17
-      # Add go1.17 to PATH
-      - run: echo "/usr/local/opt/go@1.17/bin" >> $GITHUB_PATH
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '~1.17.0'
       # Get go version
       - run: go version
       # Download go modules

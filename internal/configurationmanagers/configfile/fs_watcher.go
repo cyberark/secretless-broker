@@ -7,11 +7,13 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+var logFatal = log.Fatal
+
 // AttachWatcher adds a listener of chenge event to a filepath
 func AttachWatcher(filename string, runner func()) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 
 	go func() {
@@ -47,7 +49,7 @@ func AttachWatcher(filename string, runner func()) {
 	log.Printf("Attaching filesystem notifier onto %s", filename)
 	err = watcher.Add(filename)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 		watcher.Close()
 	}
 }

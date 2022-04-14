@@ -22,20 +22,23 @@ ENV GOOS=linux \
 
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party
-#COPY modules/ /secretless/modules
+
+# Get upstream dependencies latest changes.
 RUN go get github.com/cyberark/conjur-opentelemetry-tracer@latest && \
     go get github.com/cyberark/conjur-authn-k8s-client@latest && \
     go get github.com/cyberark/conjur-api-go@latest && \
     go get github.com/cyberark/summon@latest
 
 RUN go mod download
-#RUN go mod tidy
 
 # secretless source files
 COPY ./cmd /secretless/cmd
 COPY ./internal /secretless/internal
 COPY ./pkg /secretless/pkg
 COPY ./resource-definitions /secretless/resource-definitions
+
+# Update go.mod to include the upstream dependencies.
+RUN go mod tidy
 
 ARG TAG="dev"
 

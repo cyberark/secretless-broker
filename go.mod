@@ -4,9 +4,6 @@ require (
 	github.com/aws/aws-sdk-go v1.15.79
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/codegangsta/cli v1.20.0
-	github.com/cyberark/conjur-api-go v0.8.1
-	github.com/cyberark/conjur-authn-k8s-client v0.23.0
-	github.com/cyberark/summon v0.9.1
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
 	github.com/docker/docker v1.4.2-0.20191231165639-e6f6c35b7902
 	github.com/fsnotify/fsnotify v1.4.9
@@ -35,7 +32,6 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/containerd/containerd v1.5.9 // indirect
-	//github.com/cyberark/conjur-opentelemetry-tracer v0.0.0-20220113161145-73452511df0c // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -111,11 +107,6 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-//replace github.com/cyberark/conjur-opentelemetry-tracer =>	./modules/conjur-opentelemetry-tracer
-//replace github.com/cyberark/conjur-authn-k8s-client =>	./modules/conjur-authn-k8s-client
-//replace github.com/cyberark/conjur-api-go =>	./modules/conjur-api-go
-//replace github.com/cyberark/summon =>	./modules/summon
 
 replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 

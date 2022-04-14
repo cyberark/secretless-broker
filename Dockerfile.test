@@ -23,14 +23,17 @@ RUN apk add -u curl \
 
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party
-#COPY modules/ /secretless/modules
+
+# Get upstream dependencies latest changes.
 RUN go get github.com/cyberark/conjur-opentelemetry-tracer@latest && \
     go get github.com/cyberark/conjur-authn-k8s-client@latest && \
     go get github.com/cyberark/conjur-api-go@latest && \
     go get github.com/cyberark/summon@latest
 
 RUN go mod download
-#RUN go mod tidy
+
+# Update go.mod to include the upstream dependencies.
+RUN go mod tidy
 
 # go-junit-report => Convert go test output to junit xml
 # gocov => converts native coverage output to gocov's JSON interchange format

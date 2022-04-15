@@ -245,6 +245,11 @@ pipeline {
       //}
 
       steps {
+        sh """go get github.com/cyberark/conjur-opentelemetry-tracer@latest && \
+              go get github.com/cyberark/conjur-authn-k8s-client@latest && \
+              go get github.com/cyberark/conjur-api-go@latest && \
+              go get github.com/cyberark/summon@latest"""
+        sh "go mod tidy"
         sh './bin/build_release --snapshot'
         archiveArtifacts 'dist/goreleaser/'
       }

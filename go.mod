@@ -26,6 +26,14 @@ require (
 )
 
 require (
+	// Requires latest version for automated release process
+	github.com/cyberark/conjur-opentelemetry-tracer latest
+	// Requires latest version for automated release process
+	github.com/cyberark/conjur-api-go latest
+	// Requires latest version for automated release process
+	github.com/cyberark/conjur-authn-k8s-client latest
+	// Requires latest version for automated release process
+	github.com/cyberark/summon latest
 	github.com/Microsoft/go-winio v0.4.17 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

@@ -179,9 +179,8 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 release:
-  #disable: true
+  disable: true
   #draft: true
-  prerelease: auto
   extra_files:
     - glob: NOTICES.txt
     - glob: LICENSE

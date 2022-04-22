@@ -96,7 +96,7 @@ pipeline {
       //  stage('Build Images') {
      //     steps {
      //       sh './bin/build'
-          }
+          //}
       //  }
 
         //stage('Unit tests') {

@@ -91,11 +91,11 @@ pipeline {
       }
     }
 
-    stage('Build and Unit tests') {
+    //stage('Build and Unit tests') {
       //parallel {
       //  stage('Build Images') {
-          steps {
-            sh './bin/build'
+     //     steps {
+     //       sh './bin/build'
           }
       //  }
 
@@ -237,13 +237,13 @@ pipeline {
         }
       }
     }
-    */
 
     stage('Push Images Internally') {
       steps {
         sh './bin/publish --internal'
       }
     }
+    */
 
     stage('Build Release Artifacts') {
       //when {
@@ -253,6 +253,25 @@ pipeline {
       steps {
         sh './bin/build_release --snapshot'
         archiveArtifacts 'dist/goreleaser/'
+      }
+    }
+
+    stage('Create draft release') {
+      when {
+        expression {
+          MODE == "RELEASE"
+        }
+      }
+      steps {
+        dir('./pristine-checkout') {
+          // Go releaser requires a pristine checkout
+          checkout scm
+          sh 'git submodule update --init --recursive'
+          // Create draft release
+          //sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+          sh "./bin/build_release"
+          archiveArtifacts 'dist/goreleaser/'
+        }
       }
     }
 
@@ -276,23 +295,6 @@ pipeline {
       }
     }
 
-    stage('Create draft release') {
-      when {
-        expression {
-          MODE == "RELEASE"
-        }
-      }
-      steps {
-        dir('./pristine-checkout') {
-          // Go releaser requires a pristine checkout
-          checkout scm
-          sh 'git submodule update --init --recursive'
-          // Create draft release
-          sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
-          archiveArtifacts 'dist/goreleaser/'
-        }
-      }
-    }
     /*
 
     stage('Fix Website Flags (staging)') {

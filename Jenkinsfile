@@ -267,12 +267,11 @@ pipeline {
           // Publish release artifacts to all the appropriate locations
           // Copy any artifacts to assetDirectory to attach them to the Github release
 
-          //    // Create Go application SBOM using the go.mod version for the golang container image
+          // Create Go application SBOM using the go.mod version for the golang container image
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/secretless-broker/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
-          //    // Create Go module SBOM
+          // Create Go module SBOM
           sh """go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
           sh 'summon -e production ./bin/publish --edge'
-
         }
       }
     }
@@ -289,7 +288,8 @@ pipeline {
           checkout scm
           sh 'git submodule update --init --recursive'
           // Create draft release
-          sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+          //sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+          sh "./bin/build_release"
           archiveArtifacts 'dist/goreleaser/'
         }
       }

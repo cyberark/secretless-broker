@@ -1,3 +1,7 @@
+before:
+  hooks:
+  - go mod tidy
+
 project_name: secretless-broker
 
 builds:

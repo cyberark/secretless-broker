@@ -1,7 +1,8 @@
+env:
+  - VERSION={{ .Env.VERSION }}
 before:
   hooks:
   - go mod tidy
-  - VERSION={{ .Env.VERSION }}
 
 project_name: secretless-broker
 

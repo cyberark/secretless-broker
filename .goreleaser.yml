@@ -4,6 +4,10 @@ before:
 
 project_name: secretless-broker
 
+variables:
+  description: CHANGELOG version
+  version: sh -c "cat VERSION"
+
 builds:
 - &summon-2-build
   id: summon2-linux
@@ -140,7 +144,8 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
+    name_template: "{{.ProjectName}}_{{.Var.version}}_{{.Os}}_{{.Arch}}"
+    #name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
     wrap_in_directory: true
 
 checksum:
@@ -151,7 +156,7 @@ dist: ./dist/goreleaser
 brews:
   - description: Secures your apps by making them Secretless
     homepage: https://secretless.io
-    url_template: https://github.com/cyberark/secretless-broker/releases/download/v{{.Version}}/secretless-broker_{{.Version}}_{{.Os}}_{{.Arch}}.tar.gz
+    url_template: https://github.com/cyberark/secretless-broker/releases/download/v{{.Version}}/secretless-broker_{{.Var.version}}_{{.Os}}_{{.Arch}}.tar.gz
     install: |
       bin.install "secretless-broker"
     test: |
@@ -172,7 +177,7 @@ nfpms:
     homepage: https://secretless.io
     license: "Apache 2.0"
     maintainer: CyberArk Maintainers <conj_maintainers@cyberark.com>
-    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Arch}}"
+    file_name_template: "{{.ProjectName}}_{{.Var.version}}_{{.Arch}}"
     vendor: CyberArk
 
 snapshot:

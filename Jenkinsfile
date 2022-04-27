@@ -288,7 +288,7 @@ pipeline {
           // Publish release artifacts to all the appropriate locations
           // Copy any artifacts to assetDirectory to attach them to the Github release
 
-          sh "cp pristine-checkout/dist/goreleaser/secretless-broker* ${assetDirectory}/."
+          sh "cp -r pristine-checkout/dist/goreleaser/secretless-broker* ${assetDirectory}/."
           sh "cp pristine-checkout/dist/goreleaser/CHANGELOG.md ${assetDirectory}/."
           sh "cp pristine-checkout/dist/goreleaser/NOTICES.md ${assetDirectory}/."
 

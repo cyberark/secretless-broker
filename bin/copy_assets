@@ -2,14 +2,16 @@
 
 asset_dir="$1"
 
+goreleaser_dir="dist/goreleaser/"
+
 assets=(
     "NOTICES.txt"
     "CHANGELOG.md"
-    "SHA256SUMS.txt"
+    "${goreleaser_dir}SHA256SUMS.txt"
     "LICENSE"
-    "*.tar.gz"
-    "*.deb"
-    "*.rpm"
+    "${goreleaser_dir}*.tar.gz"
+    "${goreleaser_dir}*.deb"
+    "${goreleaser_dir}*.rpm"
     )
 
 for asset in "${assets[@]}"; do

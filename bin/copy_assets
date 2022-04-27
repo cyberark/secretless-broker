@@ -2,7 +2,7 @@
 
 asset_dir="$1"
 
-goreleaser_dir="dist/goreleaser/"
+goreleaser_dir="pristine-checkout/dist/goreleaser/"
 
 assets=(
     "NOTICES.txt"

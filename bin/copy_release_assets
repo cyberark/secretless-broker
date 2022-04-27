@@ -20,8 +20,8 @@ assets=(
     "NOTICES.txt"
     "CHANGELOG.md"
     "LICENSE"
-    "${goreleaser_dir}"**/*arm64
-    "${goreleaser_dir}"**/*amd64
+    "${goreleaser_dir}"*/*arm64
+    "${goreleaser_dir}"*/*amd64
     "${goreleaser_dir}"*.tar.gz
     "${goreleaser_dir}"*.rpm
     "${goreleaser_dir}"*.deb

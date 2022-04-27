@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 
+set -eo pipefail
+
+print_help() {
+    echo "About $0: Copies a list of files into the release asset directory"
+    echo "Usage: $0  path/to/asset/release/dir"
+}
+
 asset_dir="$1"
+
+if [[ ! -d "${asset_dir}" ]]; then
+    print_help
+fi
 
 goreleaser_dir="pristine-checkout/dist/goreleaser/"
 
@@ -9,9 +20,9 @@ assets=(
     "CHANGELOG.md"
     "${goreleaser_dir}SHA256SUMS.txt"
     "LICENSE"
-    "${goreleaser_dir}*.tar.gz"
-    "${goreleaser_dir}*.deb"
-    "${goreleaser_dir}*.rpm"
+    "${goreleaser_dir}"*.tar.gz
+    "${goreleaser_dir}"*.deb
+    "${goreleaser_dir}"*.rpm
     )
 
 for asset in "${assets[@]}"; do

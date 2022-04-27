@@ -5,8 +5,8 @@ set -e
 . bin/build_utils
 
 function print_help() {
-  echo "Build Usage: $0 --internal"
-  echo "Release Usage: $0 --edge"
+  echo "Internal Release Usage: $0 --internal"
+  echo "External Release Usage: $0 --edge"
   echo "Promote Usage: $0 --promote --source <VERSION> --target <VERSION>"
   echo " --internal: publish images to registry.tld"
   echo " --edge: publish docker images to docker hub"

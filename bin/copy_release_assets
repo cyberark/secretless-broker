@@ -9,26 +9,33 @@ print_help() {
 }
 
 asset_dir="$1"
-goreleaser_dir="pristine-checkout/dist/goreleaser/"
+goreleaser_dir="pristine-checkout/dist/goreleaser"
+repo_root="$(git rev-parse --show-toplevel)"
 
 if [[ ! -d "${asset_dir}" ]]; then
     echo "${asset_dir} directory does not exist."
     print_help
 fi
 
-assets=(
+root_assets=(
     "NOTICES.txt"
     "CHANGELOG.md"
     "LICENSE"
-    "${goreleaser_dir}"*/*arm64
-    "${goreleaser_dir}"*/*amd64
-    "${goreleaser_dir}"*.tar.gz
-    "${goreleaser_dir}"*.rpm
-    "${goreleaser_dir}"*.deb
-    "${goreleaser_dir}SHA256SUMS.txt"
-    )
+)
 
-for asset in "${assets[@]}"; do
-    echo "Copying ${asset} to ${asset_dir}"
-    cp "${asset}" "${asset_dir}"
+goreleaser_assets=(
+    "SHA256SUMS.txt"
+    *arm64
+    *amd64
+    *.tar.gz
+    *.rpm
+    *.deb
+)
+
+for asset in "${root_assets[@]}"; do
+    find "${repo_root}" -name "${asset}" -type f -maxdepth 1 -exec cp {} "${asset_dir}" \;
+done
+
+for asset in "${goreleaser_assets[@]}"; do
+    find "${goreleaser_dir}" -name "${asset}" -type f -exec cp {} "${asset_dir}" \;
 done

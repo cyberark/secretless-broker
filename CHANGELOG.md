@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.11] - 2022-04-29
+
 ### Added
 - Support for building on Apple M1 hardware.
   [cyberark/secretless-broker#1456](https://github.com/cyberark/secretless-broker/pull/1456)
@@ -638,7 +640,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.10...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.11...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -675,3 +677,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.8]: https://github.com/cyberark/secretless-broker/compare/v1.7.7...v1.7.8
 [1.7.9]: https://github.com/cyberark/secretless-broker/compare/v1.7.8...v1.7.9
 [1.7.10]: https://github.com/cyberark/secretless-broker/compare/v1.7.9...v1.7.10
+[1.7.11]: https://github.com/cyberark/secretless-broker/compare/v1.7.10...v1.7.11

@@ -11,7 +11,7 @@ SECTION 1: Apache License 2.0
 >>> github.com/aws/aws-sdk-go-1.15.79
 >>> github.com/cyberark/conjur-api-go-0.8.1
 >>> github.com/cyberark/conjur-authn-k8s-client-0.23.0
->>> github.com/docker/docker-1.4.2-0.20191231165639-e6f6c35b7902
+>>> github.com/docker/docker-20.10.14+incompatible
 >>> github.com/heptiolabs/healthcheck-0.0.0-20180807145615-6ff867650f40
 >>> gopkg.in/yaml.v2-2.4.0
 >>> k8s.io/api-0.23.1
@@ -113,7 +113,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/docker/docker-1.4.2-0.20191231165639-e6f6c35b7902
+>>> github.com/docker/docker-20.10.14+incompatible
 
 Copyright 2013-2018 Docker, Inc.
 

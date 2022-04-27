@@ -288,7 +288,7 @@ pipeline {
           // Publish release artifacts to all the appropriate locations
           // Copy any artifacts to assetDirectory to attach them to the Github release
 
-          sh "./bin/copy_assets"
+          sh "./bin/copy_assets ${assetDirectory}"
           sh "ls -alh pristine-checkout/dist/goreleaser/"
 
           // Create Go application SBOM using the go.mod version for the golang container image

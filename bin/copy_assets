@@ -2,11 +2,15 @@
 
 asset_dir="$1"
 
-assets=("NOTICES.txt"
+assets=(
+    "NOTICES.txt"
     "CHANGELOG.md"
     "SHA256SUMS.txt"
     "LICENSE"
-    "*.tar.gz")
+    "*.tar.gz"
+    "*.deb"
+    "*.rpm"
+    )
 
 for asset in "${assets[@]}"; do
     echo "Copying ${asset} to ${asset_dir}"

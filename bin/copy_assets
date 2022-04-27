@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+asset_dir="$1"
+
+assets=("NOTICES.txt"
+    "CHANGELOG.md"
+    "SHA256SUMS.txt"
+    "LICENSE"
+    "*.tar.gz")
+
+for asset in "${assets[@]}"; do
+    echo "Copying ${asset} to ${asset_dir}"
+    cp "${asset}" "${asset_dir}"
+done

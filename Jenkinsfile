@@ -294,6 +294,7 @@ pipeline {
           // Copy assets to be published in Github release.
           sh "./bin/copy_release_assets ${assetDirectory}"
           sh "cp -a pristine-checkout/dist/goreleaser/secretless-broker-darwin_darwin_amd64_v1 ${assetDirectory}"
+          sh "cp -a pristine-checkout/dist/goreleaser/secretless-broker-arm_darwin_arm64 ${assetDirectory}"
           sh "ls -alh ${assetDirectory}"
 
           // Create Go application SBOM using the go.mod version for the golang container image

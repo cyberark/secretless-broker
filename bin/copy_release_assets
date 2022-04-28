@@ -10,7 +10,8 @@ print_help() {
 
 asset_dir="$1"
 goreleaser_dir="pristine-checkout/dist/goreleaser"
-repo_root="$(git rev-parse --show-toplevel)"
+#repo_root=$(git rev-parse --show-toplevel)
+mapfile -t repo_root < <(git rev-parse --show-toplevel/*)
 
 if [[ ! -d "${asset_dir}" ]]; then
     echo "${asset_dir} directory does not exist."
@@ -33,7 +34,7 @@ goreleaser_assets=(
 )
 
 for asset in "${root_assets[@]}"; do
-    find "${repo_root}" -name "${asset}" -type f -maxdepth 1 -exec cp {} "${asset_dir}" \;
+    find "${repo_root[@]}" -name "${asset}" -type f -maxdepth 0 -exec cp {} "${asset_dir}" \;
 done
 
 for asset in "${goreleaser_assets[@]}"; do

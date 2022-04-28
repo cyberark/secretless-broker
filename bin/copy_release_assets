@@ -19,23 +19,34 @@ if [[ ! -d "${asset_dir}" ]]; then
     print_help
 fi
 
-goreleaser_dir="pristine-checkout/dist/goreleaser"
-repo_root="$(git rev-parse --show-toplevel)"
+main() {
+    goreleaser_dir="pristine-checkout/dist/goreleaser"
+    repo_root="$(git rev-parse --show-toplevel)"
 
-root_assets=(
-    "NOTICES.txt"
-    "CHANGELOG.md"
-    "LICENSE"
-)
+    root_assets=(
+        "NOTICES.txt"
+        "CHANGELOG.md"
+        "LICENSE"
+    )
 
-goreleaser_assets=(
-    "SHA256SUMS.txt"
-    *amd64
-    *.tar.gz
-    *.rpm
-    *.deb
-    *arm64
-)
+    goreleaser_assets=(
+        "SHA256SUMS.txt"
+        *.tar.gz
+        *.rpm
+        *.deb
+        secretless-broker-linux_amd64_v1
+        secretless-broker-darwin_amd64_v1
+        secretless-broker-darwin_arm64
+    )
+
+    copy_assets "$repo_root" "${root_assets[@]}"
+    copy_assets "$goreleaser_dir" "${goreleaser_assets[@]}"
+
+    for file in "${asset_dir}"/secretless-broker-*_v1; do
+        mv "$file" "${file/_v1/}"
+    done
+
+}
 
 copy_assets() {
     local source_dir="$1"
@@ -48,5 +59,4 @@ copy_assets() {
     done
 }
 
-copy_assets "$repo_root" "${root_assets[@]}"
-copy_assets "$goreleaser_dir" "${goreleaser_assets[@]}"
+main

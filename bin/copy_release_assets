@@ -42,12 +42,19 @@ main() {
     copy_assets "$repo_root" "${root_assets[@]}"
     copy_assets "$goreleaser_dir" "${goreleaser_assets[@]}"
 
-    for file in "${asset_dir}"/secretless-broker-*_v1; do
+    # During Goreleaser build _v1 is added to builds. Goreleaser
+    # GOAMD64 to build when GOARCH is amd64.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Default is only v1.
+
+    # Find all assets ending with _v1
+    for file in "${asset_dir}"/*_v1; do
+        # Rename file, removing _v1 from asset
         mv "$file" "${file/_v1/}"
     done
-
 }
 
+# Copy assets into Github release asset dir
 copy_assets() {
     local source_dir="$1"
     shift

@@ -290,7 +290,7 @@ pipeline {
 
           sh "ls -alh pristine-checkout/dist/goreleaser/*/"
           sh "ls -alh pristine-checkout/dist/goreleaser/"
-          sh "file pristine-checkout/dist/goreleaser/secretless-broker-linux_amd64"
+          sh "file pristine-checkout/dist/goreleaser/secretless-broker-linux_amd64_v1"
 
           // Copy assets to be published in Github release.
           sh "./bin/copy_release_assets ${assetDirectory}"

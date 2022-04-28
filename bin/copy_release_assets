@@ -13,13 +13,14 @@ if [[ "$#" -lt 1 ]]; then
 fi
 
 asset_dir="$1"
-goreleaser_dir="pristine-checkout/dist/goreleaser"
-repo_root="$(git rev-parse --show-toplevel)"
 
 if [[ ! -d "${asset_dir}" ]]; then
     echo "${asset_dir} directory does not exist."
     print_help
 fi
+
+goreleaser_dir="pristine-checkout/dist/goreleaser"
+repo_root="$(git rev-parse --show-toplevel)"
 
 root_assets=(
     "NOTICES.txt"
@@ -29,29 +30,23 @@ root_assets=(
 
 goreleaser_assets=(
     "SHA256SUMS.txt"
-    *arm64
     *amd64
     *.tar.gz
     *.rpm
     *.deb
+    *arm64
 )
 
 copy_assets() {
     local source_dir="$1"
-    local assets=("$2")
+    shift
+    local assets=("$@")
 
     for asset in "${assets[@]}"; do
-        cp -a "${source_dir}${asset}" "$asset_dir"
+        # shellcheck disable=SC2086 # globbing is intentional for $asset
+        cp "${source_dir}"/${asset} "$asset_dir"
     done
 }
 
 copy_assets "$repo_root" "${root_assets[@]}"
 copy_assets "$goreleaser_dir" "${goreleaser_assets[@]}"
-
-#for asset in "${root_assets[@]}"; do
-#    find "${repo_root}"/* -maxdepth 0 -name "${asset}" -type f -exec cp {} "${asset_dir}" \;
-#done
-#
-#for asset in "${goreleaser_assets[@]}"; do
-#    find "${goreleaser_dir}" -name "${asset}" -type f -exec cp {} "${asset_dir}" \;
-#done

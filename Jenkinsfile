@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+@Library('conjur@fix-getAssets') _
 
 // Automated release, promotion and dependencies
 properties([

@@ -178,13 +178,13 @@ nfpms:
 snapshot:
   name_template: "{{ .Tag }}-next"
 
-release:
-  disable: true
-  #draft: true
-  extra_files:
-    - glob: NOTICES.txt
-    - glob: LICENSE
-    - glob: CHANGELOG.md
-    - glob: dist/goreleaser/secretless-broker-linux_amd64
-    - glob: dist/goreleaser/secretless-broker-darwin_amd64
-    - glob: dist/goreleaser/secretless-broker-darwin_arm64
+#release:
+#  disable: true
+#  #draft: true
+#  extra_files:
+#    - glob: NOTICES.txt
+#    - glob: LICENSE
+#    - glob: CHANGELOG.md
+#    - glob: dist/goreleaser/secretless-broker-linux_amd64
+#    - glob: dist/goreleaser/secretless-broker-darwin_amd64
+#    - glob: dist/goreleaser/secretless-broker-darwin_arm64

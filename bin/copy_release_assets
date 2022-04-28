@@ -42,23 +42,7 @@ main() {
     copy_assets "$repo_root" "${root_assets[@]}"
     copy_assets "$goreleaser_dir" "${goreleaser_assets[@]}"
 
-    ###
-        # During Goreleaser build _v1 is appended to filenames.
-        # The removal of the release section in goreleaser.yml
-        # which would add extra files to the Github release
-        # has been removed to prevent clashing with the automated release process.
-        # As a result this script will find and remove _v1 from those files.
-
-        # GOAMD64 to build when GOARCH is amd64.
-        # For more info refer to: https://golang.org/doc/install/source#environment
-        # Default is v1.
-    ###
-
-    # Find all assets ending with _v1
-    for file in "${asset_dir}"/*_v1; do
-        # Rename file, removing _v1 from asset
-        mv "$file" "${file/_v1/}"
-    done
+    rename_assets
 }
 
 # Copy assets into Github release asset dir
@@ -70,6 +54,27 @@ copy_assets() {
     for asset in "${assets[@]}"; do
         # shellcheck disable=SC2086 # globbing is intentional for $asset
         cp "${source_dir}"/${asset} "$asset_dir"
+    done
+}
+
+###################################
+# During the Goreleaser build, _v1 is appended to some filenames.
+#
+# GOAMD64 to build when GOARCH is amd64.
+# For more info refer to: https://golang.org/doc/install/source#environment
+# Default is v1.
+#
+# The removal of the release section in goreleaser.yml
+# which would add extra files to the Github release
+# has been removed to prevent clashing with the automated release process.
+#
+# As a result this function will find and remove _v1 from those files.
+###################################
+rename_assets() {
+    # Find all assets ending with _v1
+    for file in "${asset_dir}"/*_v1; do
+        # Rename file, removing _v1 from asset
+        mv "$file" "${file/_v1/}"
     done
 }
 

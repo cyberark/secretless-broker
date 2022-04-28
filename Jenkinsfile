@@ -1,5 +1,4 @@
 #!/usr/bin/env groovy
-@Library('conjur@getassets') _
 
 // Automated release, promotion and dependencies
 properties([
@@ -291,10 +290,10 @@ pipeline {
 
           sh "ls -alh pristine-checkout/dist/goreleaser/*/"
           sh "ls -alh pristine-checkout/dist/goreleaser/"
-          sh "file pristine-checkout/dist/goreleaser/secretless-broker-linux_amd64_v1"
 
           // Copy assets to be published in Github release.
           sh "./bin/copy_release_assets ${assetDirectory}"
+          sh "cp -a pristine-checkout/dist/goreleaser/* ${assetDirectory}"
           sh "ls -alh ${assetDirectory}"
 
           // Create Go application SBOM using the go.mod version for the golang container image

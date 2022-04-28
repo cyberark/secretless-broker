@@ -245,7 +245,6 @@ pipeline {
     }
     */
 
-/*
     stage('Build Release Artifacts') {
       //when {
       //  branch 'main'
@@ -256,7 +255,6 @@ pipeline {
         archiveArtifacts 'dist/goreleaser/'
       }
     }
-    */
 
     stage('Create draft release') {
       when {
@@ -269,8 +267,7 @@ pipeline {
           // Go releaser requires a pristine checkout
           checkout scm
           sh 'git submodule update --init --recursive'
-          // Create draft release
-          //sh "summon --yaml 'GITHUB_TOKEN: !var github/users/conjur-jenkins/api-token' ./bin/build_release"
+          // Create release packages without releasing to Github
           sh "./bin/build_release --skip-validate"
           archiveArtifacts 'dist/goreleaser/'
         }

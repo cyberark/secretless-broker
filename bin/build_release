@@ -40,7 +40,6 @@ fi
 echo "Docker image for release build: ${GORELEASER_IMAGE}:${GORELEASER_LATEST_TAG}"
 
 docker run --rm -t \
-  --env GITHUB_TOKEN \
   --env VERSION="${VERSION}" \
   --volume "${REPO_ROOT}:/secretless-broker" \
   --workdir /secretless-broker \

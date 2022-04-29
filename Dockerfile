@@ -42,7 +42,7 @@ RUN go build -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.T
 
 
 # =================== MAIN CONTAINER ===================
-FROM alpine:3.14 as secretless-broker
+FROM alpine:3.15 as secretless-broker
 MAINTAINER CyberArk Software Ltd.
 
 RUN apk add -u shadow libc6-compat openssl && \
@@ -93,6 +93,9 @@ LABEL release="$VERSION"
 LABEL summary="Secure your apps by making them Secretless"
 LABEL description="Secretless Broker is a connection broker which relieves client \
 applications of the need to directly handle secrets to target services"
+
+# Update packages to get CVE fixes
+RUN dnf update -y
 
     # Add Limited user
 RUN groupadd -r secretless \

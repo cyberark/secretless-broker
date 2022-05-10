@@ -1,6 +1,6 @@
 before:
   hooks:
-  - go mod tidy # Get dependencies
+  - ./bin/go_mod_tidy # Get dependencies
 
 project_name: secretless-broker
 

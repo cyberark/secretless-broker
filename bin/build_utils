@@ -17,7 +17,10 @@ function git_tag() {
 }
 
 function full_version_tag() {
-  echo "$(short_version_tag)-$(git_tag)"
+  local VERSION=unreleased
+  # Version derived from CHANGELOG and automated release library
+  [ -f VERSION ] && VERSION=$(<VERSION)
+  echo "$VERSION-$(git_tag)"
 }
 
 # generate less specific versions, eg. given 1.2.3 will print 1.2 and 1
@@ -28,6 +31,17 @@ function gen_versions() {
     version=${version%.*}
     echo $version
   done
+}
+
+function tag_and_push() {
+  local source="$1"
+  shift
+  local target="$1"
+  shift
+
+  echo "Tagging and pushing $target..."
+  docker tag "${source}" "${target}"
+  docker push "${target}"
 }
 
 function retrieve_cyberark_ca_cert() {

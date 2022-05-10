@@ -8,6 +8,16 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 # Grep it to avoid Go binary dependency
 GO_VERSION="v$(grep "^\bgo\b" "${REPO_ROOT}/go.mod" | awk '{print $2}')"
 
+# Determine where VERSION file is based on goreleaser argument
+if [[ "$1" == '--skip-validate' ]]; then
+  VERSION=$(<"${REPO_ROOT}/../VERSION")
+else
+  VERSION=$(<"${REPO_ROOT}/VERSION")
+fi
+
+# Remove Jenkins build number from VERSION
+VERSION="${VERSION/-*/}"
+
 # Use a GoReleaser Docker image containing cross-compilation tools
 # This image is recommended by the official GoReleaser docs
 # https://goreleaser.com/cookbooks/cgo-and-crosscompiling/
@@ -37,7 +47,7 @@ fi
 echo "Docker image for release build: ${GORELEASER_IMAGE}:${GORELEASER_LATEST_TAG}"
 
 docker run --rm -t \
-  --env GITHUB_TOKEN \
+  --env VERSION="${VERSION}" \
   --volume "${REPO_ROOT}:/secretless-broker" \
   --workdir /secretless-broker \
   "${GORELEASER_IMAGE}:${GORELEASER_LATEST_TAG}" --rm-dist "$@"

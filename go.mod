@@ -4,9 +4,6 @@ require (
 	github.com/aws/aws-sdk-go v1.15.79
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/codegangsta/cli v1.20.0
-	github.com/cyberark/conjur-api-go v0.8.1
-	github.com/cyberark/conjur-authn-k8s-client v0.23.0
-	github.com/cyberark/summon v0.9.1
 	github.com/denisenkom/go-mssqldb v0.0.0-20191001013358-cfbb681360f0
 	github.com/docker/docker v20.10.14+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
@@ -29,13 +26,20 @@ require (
 )
 
 require (
+	// Requires latest version for automated release process
+	github.com/cyberark/conjur-opentelemetry-tracer latest
+	// Requires latest version for automated release process
+	github.com/cyberark/conjur-api-go latest
+	// Requires latest version for automated release process
+	github.com/cyberark/conjur-authn-k8s-client latest
+	// Requires latest version for automated release process
+	github.com/cyberark/summon latest
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/containerd/containerd v1.6.2 // indirect
-	github.com/cyberark/conjur-opentelemetry-tracer v0.0.0-20220113161145-73452511df0c // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect

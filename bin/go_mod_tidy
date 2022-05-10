@@ -1,0 +1,11 @@
+#!/bin/bash
+
+##########
+# Execute go mod tidy with the compat
+# flag set to the same version in the
+# go.mod file.
+##########
+
+go_version=$(grep -P "^go\s\d+\.\d+" go.mod | grep -oP "\d+\.\d+")
+
+go mod tidy -compat="${go_version}"

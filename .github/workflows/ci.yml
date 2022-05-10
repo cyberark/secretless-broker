@@ -19,7 +19,7 @@ jobs:
       - name: Generate Version
         run: grep -m 1 -P "## \[\d+\.\d+\.\d+\] -" CHANGELOG.md | grep -o -P "\d+\.\d+\.\d+" > VERSION
       - name: go mod tidy
-        run: go mod tidy -compat=$(grep -P "^go\s\d+\.\d+" go.mod | grep -oP "\d+\.\d+")
+        run: ./bin/go_mod_tidy
       - name: Unit tests
         run: ./bin/test_unit
 
@@ -33,7 +33,7 @@ jobs:
       - name: Generate Version
         run: grep -m 1 -P "## \[\d+\.\d+\.\d+\] -" CHANGELOG.md | grep -o -P "\d+\.\d+\.\d+" > VERSION
       - name: go mod tidy
-        run: go mod tidy -compat=$(grep -P "^go\s\d+\.\d+" go.mod | grep -oP "\d+\.\d+")
+        run: ./bin/go_mod_tidy
       - name: Build
         run: ./bin/build
       - name: Integration tests

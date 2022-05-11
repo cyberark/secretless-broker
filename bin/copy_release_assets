@@ -36,12 +36,16 @@ root_assets() {
         'CHANGELOG.md'
         'LICENSE'
     )
+    local complete_assets
 
-    # shellcheck disable=SC2086
+    declare -a complete_assets
+    # shellcheck disable=SC2206
     for asset in "${assets[@]}"; do
         # globbing is intentional for assets
-        echo "${dir}"/${asset}
+        complete_assets+=("$dir/"${asset})
     done
+
+    printf "%s\n" "${complete_assets[@]}"
 }
 
 goreleaser_assets() {
@@ -55,12 +59,16 @@ goreleaser_assets() {
         secretless-broker-darwin_amd64_v1
         secretless-broker-darwin_arm64
     )
+    local complete_assets
 
-    # shellcheck disable=SC2086
+    declare -a complete_assets
+    # shellcheck disable=SC2206
     for asset in "${assets[@]}"; do
         # globbing is intentional for assets
-        echo "${dir}"/${asset}
+        complete_assets+=("$dir/"${asset})
     done
+
+    printf "%s\n" "${complete_assets[@]}"
 }
 
 function main() {
@@ -70,6 +78,7 @@ function main() {
 
     # Copy assets into Github release asset dir
     for asset in "${assets[@]}"; do
+        echo "COPYING ${asset} to ${asset_dir}"
         cp "${asset}" "$asset_dir"
     done
 
@@ -92,6 +101,7 @@ function rename_assets() {
     # Find all assets ending with _v1
     for file in "${asset_dir}"/*_v1; do
         # Rename file, removing _v1 from asset
+        echo "RENAMING ${file} to ${file/_v1/}"
         mv "$file" "${file/_v1/}"
     done
 }

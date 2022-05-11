@@ -65,11 +65,6 @@ pipeline {
     }
 
     stage('Create Release Assets') {
-      when {
-        expression {
-          MODE == "RELEASE"
-        }
-      }
       steps {
         dir('./pristine-checkout') {
           // Go releaser requires a pristine checkout
@@ -83,11 +78,6 @@ pipeline {
     }
 
     stage('Release') {
-      when {
-        expression {
-          MODE == "RELEASE"
-        }
-      }
       steps {
         release { billOfMaterialsDirectory, assetDirectory, toolsDirectory ->
           // Publish release artifacts to all the appropriate locations

@@ -63,6 +63,25 @@ pipeline {
         }
       }
     }
+    
+    // Generates a VERSION file based on the current build number and latest version in CHANGELOG.md
+    stage('Validate Changelog and set version') {
+      steps {
+        updateVersion("CHANGELOG.md", "${BUILD_NUMBER}")
+      }
+    }
+
+    stage('Update Submodules') {
+      steps {
+        sh 'git submodule update --init --recursive'
+      }
+    }
+
+    stage('Get latest upstream dependencies') {
+      steps {
+        updateGoDependencies("${WORKSPACE}/go.mod")
+      }
+    }
 
     stage('Create Release Assets') {
       steps {

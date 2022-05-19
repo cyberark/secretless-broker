@@ -26,7 +26,7 @@ if (params.MODE == "PROMOTE") {
     sh "docker pull registry.tld/secretless-broker-quickstart:${sourceVersion}"
     sh "docker pull registry.tld/secretless-broker-redhat:${sourceVersion}"
     // Promote source version to target version.
-    sh "summon ./bin/publish --promote --source ${sourceVersion} --target ${targetVersion}"
+    sh "summon -e common ./bin/publish --promote --source ${sourceVersion} --target ${targetVersion}"
   }
   return
 }

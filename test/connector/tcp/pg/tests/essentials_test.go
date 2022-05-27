@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
-
 	"github.com/cyberark/secretless-broker/test/connector/tcp/pg/pkg"
 	. "github.com/cyberark/secretless-broker/test/util/testutil"
 )
@@ -41,9 +39,9 @@ func TestEssentials(t *testing.T) {
 		},
 	}
 
-	Convey("Essentials", t, func() {
+	t.Run("Essentials", func(t *testing.T) {
 		for _, listenerTypeValue := range AllSocketTypes() {
-			Convey(fmt.Sprintf("Connect over %s", listenerTypeValue), func() {
+			t.Run(fmt.Sprintf("Connect over %s", listenerTypeValue), func(t *testing.T) {
 
 				for _, testCaseData := range testCases {
 					tc := TestCase{
@@ -55,7 +53,7 @@ func TestEssentials(t *testing.T) {
 						},
 						Definition: testCaseData,
 					}
-					RunTestCase(tc)
+					RunTestCase(tc, t)
 				}
 			})
 		}
@@ -76,7 +74,7 @@ func TestEssentials(t *testing.T) {
 					SSL:      true,
 				},
 			},
-		})
+		}, t)
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
@@ -95,13 +93,13 @@ func TestEssentials(t *testing.T) {
 				},
 				CmdOutput: StringPointer("server does not support SSL, but SSL was required"),
 			},
-		})
+		}, t)
 	})
 
-	Convey("JDBC", t, func() {
+	t.Run("JDBC", func(t *testing.T) {
 		RunJDBCTestCase := NewRunTestCase(pkg.RunJDBCQuery)
 
-		Convey(fmt.Sprintf("Connect over %s", TCP), func() {
+		t.Run(fmt.Sprintf("Connect over %s", TCP), func(t *testing.T) {
 
 			for _, testCaseData := range testCases {
 				tc := TestCase{
@@ -113,7 +111,7 @@ func TestEssentials(t *testing.T) {
 					},
 					Definition: testCaseData,
 				}
-				RunJDBCTestCase(tc)
+				RunJDBCTestCase(tc, t)
 			}
 		})
 	})

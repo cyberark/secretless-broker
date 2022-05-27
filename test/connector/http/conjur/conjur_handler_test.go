@@ -8,15 +8,15 @@ import (
 	"testing"
 
 	"github.com/cyberark/conjur-api-go/conjurapi/response"
+	"github.com/stretchr/testify/assert"
 
 	_ "github.com/joho/godotenv/autoload"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 // TestConjur_Handler verifies that Conjur API requests which are proxied through the Secretless
 // handler do not require authentication credentials.
 func TestConjur_Handler(t *testing.T) {
-	Convey("Can fetch a variable value", t, func() {
+	t.Run("Can fetch a variable value", func(t *testing.T) {
 		variableURL := fmt.Sprintf("%s/secrets/%s/variable/db/password", os.Getenv("CONJUR_APPLIANCE_URL"), os.Getenv("CONJUR_ACCOUNT"))
 
 		req, err := http.NewRequest(
@@ -24,7 +24,7 @@ func TestConjur_Handler(t *testing.T) {
 			variableURL,
 			nil,
 		)
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 
 		transport := &http.Transport{Proxy: func(req *http.Request) (proxyURL *url.URL, err error) {
 			proxyURL, err = http.ProxyFromEnvironment(req)
@@ -37,11 +37,11 @@ func TestConjur_Handler(t *testing.T) {
 		}}
 		client := &http.Client{Transport: transport}
 		resp, err := client.Do(req)
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 
 		value, err := response.DataResponse(resp)
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 
-		So(string(value), ShouldEqual, "secret")
+		assert.Equal(t, "secret", string(value))
 	})
 }

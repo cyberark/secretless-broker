@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	. "github.com/cyberark/secretless-broker/test/util/testutil"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestEssentials(t *testing.T) {
@@ -36,9 +35,9 @@ func TestEssentials(t *testing.T) {
 		},
 	}
 
-	Convey("Essentials", t, func() {
+	t.Run("Essentials", func(t *testing.T) {
 		for _, socketType := range AllSocketTypes() {
-			Convey(fmt.Sprintf("Connect over %s", socketType), func() {
+			t.Run(fmt.Sprintf("Connect over %s", socketType), func(t *testing.T) {
 
 				for _, testCaseData := range testCases {
 					tc := TestCase{
@@ -50,7 +49,7 @@ func TestEssentials(t *testing.T) {
 						},
 						Definition: testCaseData,
 					}
-					RunTestCase(tc)
+					RunTestCase(tc, t)
 				}
 			})
 		}
@@ -76,7 +75,7 @@ func TestEssentials(t *testing.T) {
 				},
 				CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 			},
-		})
+		}, t)
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
@@ -95,7 +94,7 @@ func TestEssentials(t *testing.T) {
 				},
 				CmdOutput: StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required, but the server does not support"),
 			},
-		})
+		}, t)
 
 		RunTestCase(TestCase{
 			AbstractConfiguration: AbstractConfiguration{
@@ -114,7 +113,7 @@ func TestEssentials(t *testing.T) {
 				},
 				CmdOutput: StringPointer("ERROR 1045 (28000): Access denied for user 'testuser'@"),
 			},
-		})
+		}, t)
 	})
 
 }

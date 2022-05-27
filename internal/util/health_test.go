@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 var listenerPort = strconv.Itoa(defaultHealthCheckPort)
@@ -63,55 +63,55 @@ func getHealth(endpoint string) (*HealthJSON, error) {
 	return healthJSON, nil
 }
 
-func assertHealthStatusCodeIsBad(endpoint string) {
+func assertHealthStatusCodeIsBad(endpoint string, t *testing.T) {
 	_, err := getHealth(endpoint)
 
-	So(err, ShouldNotBeNil)
+	assert.Error(t, err)
 	errorMsg := "response Status: 503: Service Unavailable"
-	So(err.Error(), ShouldEqual, errorMsg)
+	assert.EqualError(t, err, errorMsg)
 }
 
-func assertHealthStatusCodeIsGood(endpoint string) {
+func assertHealthStatusCodeIsGood(endpoint string, t *testing.T) {
 	_, err := getHealth(endpoint)
 
-	So(err, ShouldBeNil)
+	assert.NoError(t, err)
 }
 
-func assertReadyJSONIsBad(err error, healthJSON *HealthJSON) {
-	So(err, ShouldNotBeNil)
+func assertReadyJSONIsBad(err error, healthJSON *HealthJSON, t *testing.T) {
+	assert.Error(t, err)
 	errorMsg := "response Status: 503: Service Unavailable"
-	So(err.Error(), ShouldEqual, errorMsg)
+	assert.EqualError(t, err, errorMsg)
 
-	So(healthJSON, ShouldNotBeNil)
+	assert.NotNil(t, healthJSON)
 
-	So((*healthJSON).Ready, ShouldEqual, "secretless is not ready")
+	assert.Equal(t, "secretless is not ready", (*healthJSON).Ready)
 }
 
-func assertReadyJSONIsGood(err error, healthJSON *HealthJSON) {
-	So(err, ShouldBeNil)
-	So(healthJSON, ShouldNotBeNil)
-	So((*healthJSON).Ready, ShouldEqual, "OK")
+func assertReadyJSONIsGood(err error, healthJSON *HealthJSON, t *testing.T) {
+	assert.NoError(t, err)
+	assert.NotNil(t, healthJSON)
+	assert.Equal(t, "OK", (*healthJSON).Ready)
 }
 
-func assertReadyJSONIsNotPresent(healthJSON *HealthJSON) {
-	So(healthJSON, ShouldNotBeNil)
-	So((*healthJSON).Ready, ShouldEqual, "")
+func assertReadyJSONIsNotPresent(healthJSON *HealthJSON, t *testing.T) {
+	assert.NotNil(t, healthJSON)
+	assert.Equal(t, "", (*healthJSON).Ready)
 }
 
-func assertListeningJSONIsBad(err error, healthJSON *HealthJSON) {
-	So(err, ShouldNotBeNil)
+func assertListeningJSONIsBad(err error, healthJSON *HealthJSON, t *testing.T) {
+	assert.Error(t, err)
 	errorMsg := "response Status: 503: Service Unavailable"
-	So(err.Error(), ShouldEqual, errorMsg)
+	assert.EqualError(t, err, errorMsg)
 
-	So(healthJSON, ShouldNotBeNil)
+	assert.NotNil(t, healthJSON)
 
-	So((*healthJSON).Listening, ShouldEqual, "secretless is not listening")
+	assert.Equal(t, "secretless is not listening", (*healthJSON).Listening)
 }
 
-func assertListeningJSONIsGood(err error, healthJSON *HealthJSON) {
-	So(err, ShouldBeNil)
-	So(healthJSON, ShouldNotBeNil)
-	So((*healthJSON).Listening, ShouldEqual, "OK")
+func assertListeningJSONIsGood(err error, healthJSON *HealthJSON, t *testing.T) {
+	assert.NoError(t, err)
+	assert.NotNil(t, healthJSON)
+	assert.Equal(t, "OK", (*healthJSON).Listening)
 }
 
 func callEnableHealthCheck() {
@@ -132,169 +132,167 @@ func enableReadyAndLivenHealthCheck() {
 }
 
 func Test_Health(t *testing.T) {
-	Convey("Health", t, func() {
-		Convey("When nothing is proactively done", func() {
-			Convey("Shows not ready", func() {
-				callEnableHealthCheck()
-				assertHealthStatusCodeIsBad(ReadyEndpoint)
-			})
-
-			Convey("Shows not live", func() {
-				callEnableHealthCheck()
-				assertHealthStatusCodeIsBad(LiveEndpoint)
-			})
-
-			Convey("Shows expected not ready JSON", func() {
-				callEnableHealthCheck()
-
-				health, err := getHealth(VerboseReadyEndpoint)
-				assertReadyJSONIsBad(err, health)
-				assertListeningJSONIsBad(err, health)
-			})
-
-			Convey("Shows expected not live JSON", func() {
-				callEnableHealthCheck()
-
-				health, err := getHealth(VerboseLiveEndpoint)
-				assertReadyJSONIsNotPresent(health)
-				assertListeningJSONIsBad(err, health)
-			})
-
-			Reset(func() {
-				disableHealthCheck()
-			})
+	t.Run("When nothing is proactively done", func(t *testing.T) {
+		t.Run("Shows not ready", func(t *testing.T) {
+			callEnableHealthCheck()
+			assertHealthStatusCodeIsBad(ReadyEndpoint, t)
 		})
 
-		Convey("When readniness flag is turned on but liveliness is not", func() {
-			Convey("Shows not ready", func() {
-				enableAndReadyHealthCheck()
-				assertHealthStatusCodeIsBad(ReadyEndpoint)
-			})
-
-			Convey("Shows not live", func() {
-				enableAndReadyHealthCheck()
-				assertHealthStatusCodeIsBad(LiveEndpoint)
-			})
-
-			Convey("Shows expected ready JSON but bad listening status", func() {
-				enableAndReadyHealthCheck()
-
-				health, err := getHealth(VerboseReadyEndpoint)
-
-				// We ignore error manually since we know it will be checked below
-				assertReadyJSONIsGood(nil, health)
-
-				assertListeningJSONIsBad(err, health)
-			})
-
-			Convey("Shows expected not live JSON", func() {
-				enableAndReadyHealthCheck()
-
-				health, err := getHealth(VerboseLiveEndpoint)
-				assertReadyJSONIsNotPresent(health)
-				assertListeningJSONIsBad(err, health)
-			})
-
-			Reset(func() {
-				disableHealthCheck()
-			})
+		t.Run("Shows not live", func(t *testing.T) {
+			callEnableHealthCheck()
+			assertHealthStatusCodeIsBad(LiveEndpoint, t)
 		})
 
-		Convey("When app is ready and listening", func() {
-			Convey("Shows ready", func() {
-				enableReadyAndLivenHealthCheck()
-				assertHealthStatusCodeIsGood(ReadyEndpoint)
-			})
+		t.Run("Shows expected not ready JSON", func(t *testing.T) {
+			callEnableHealthCheck()
 
-			Convey("Shows live", func() {
-				enableReadyAndLivenHealthCheck()
-				assertHealthStatusCodeIsGood(LiveEndpoint)
-			})
-
-			Convey("Shows expected ready JSON", func() {
-				enableReadyAndLivenHealthCheck()
-
-				health, err := getHealth(VerboseReadyEndpoint)
-
-				assertReadyJSONIsGood(err, health)
-				assertListeningJSONIsGood(err, health)
-			})
-
-			Convey("Shows expected live JSON", func() {
-				enableReadyAndLivenHealthCheck()
-
-				health, err := getHealth(VerboseLiveEndpoint)
-				assertReadyJSONIsNotPresent(health)
-				assertListeningJSONIsGood(err, health)
-			})
-
-			Reset(func() {
-				disableHealthCheck()
-			})
+			health, err := getHealth(VerboseReadyEndpoint)
+			assertReadyJSONIsBad(err, health, t)
+			assertListeningJSONIsBad(err, health, t)
 		})
 
-		Convey("When app is ready and listening is dynamically changed", func() {
-			Convey("Updates ready status", func() {
-				enableReadyAndLivenHealthCheck()
-				assertHealthStatusCodeIsGood(ReadyEndpoint)
+		t.Run("Shows expected not live JSON", func(t *testing.T) {
+			callEnableHealthCheck()
 
-				SetAppIsLive(false)
-				assertHealthStatusCodeIsBad(ReadyEndpoint)
+			health, err := getHealth(VerboseLiveEndpoint)
+			assertReadyJSONIsNotPresent(health, t)
+			assertListeningJSONIsBad(err, health, t)
+		})
 
-				SetAppIsLive(true)
-				assertHealthStatusCodeIsGood(ReadyEndpoint)
-			})
+		t.Cleanup(func() {
+			disableHealthCheck()
+		})
+	})
 
-			Convey("Updates live status", func() {
-				enableReadyAndLivenHealthCheck()
-				assertHealthStatusCodeIsGood(LiveEndpoint)
+	t.Run("When readniness flag is turned on but liveliness is not", func(t *testing.T) {
+		t.Run("Shows not ready", func(t *testing.T) {
+			enableAndReadyHealthCheck()
+			assertHealthStatusCodeIsBad(ReadyEndpoint, t)
+		})
 
-				SetAppIsLive(false)
-				assertHealthStatusCodeIsBad(LiveEndpoint)
+		t.Run("Shows not live", func(t *testing.T) {
+			enableAndReadyHealthCheck()
+			assertHealthStatusCodeIsBad(LiveEndpoint, t)
+		})
 
-				SetAppIsLive(true)
-				assertHealthStatusCodeIsGood(LiveEndpoint)
-			})
+		t.Run("Shows expected ready JSON but bad listening status", func(t *testing.T) {
+			enableAndReadyHealthCheck()
 
-			Convey("Updates expected ready JSON", func() {
-				enableReadyAndLivenHealthCheck()
+			health, err := getHealth(VerboseReadyEndpoint)
 
-				health, err := getHealth(VerboseReadyEndpoint)
-				assertReadyJSONIsGood(err, health)
-				assertListeningJSONIsGood(err, health)
+			// We ignore error manually since we know it will be checked below
+			assertReadyJSONIsGood(nil, health, t)
 
-				SetAppIsLive(false)
-				health, err = getHealth(VerboseReadyEndpoint)
-				assertReadyJSONIsGood(nil, health)
-				assertListeningJSONIsBad(err, health)
+			assertListeningJSONIsBad(err, health, t)
+		})
 
-				SetAppIsLive(true)
-				health, err = getHealth(VerboseReadyEndpoint)
-				assertReadyJSONIsGood(err, health)
-				assertListeningJSONIsGood(err, health)
-			})
+		t.Run("Shows expected not live JSON", func(t *testing.T) {
+			enableAndReadyHealthCheck()
 
-			Convey("Updates expected live JSON", func() {
-				enableReadyAndLivenHealthCheck()
+			health, err := getHealth(VerboseLiveEndpoint)
+			assertReadyJSONIsNotPresent(health, t)
+			assertListeningJSONIsBad(err, health, t)
+		})
 
-				health, err := getHealth(VerboseLiveEndpoint)
-				assertReadyJSONIsNotPresent(health)
-				assertListeningJSONIsGood(err, health)
+		t.Cleanup(func() {
+			disableHealthCheck()
+		})
+	})
 
-				SetAppIsLive(false)
-				health, err = getHealth(VerboseLiveEndpoint)
-				assertReadyJSONIsNotPresent(health)
-				assertListeningJSONIsBad(err, health)
+	t.Run("When app is ready and listening", func(t *testing.T) {
+		t.Run("Shows ready", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+			assertHealthStatusCodeIsGood(ReadyEndpoint, t)
+		})
 
-				SetAppIsLive(true)
-				health, err = getHealth(VerboseLiveEndpoint)
-				assertReadyJSONIsNotPresent(health)
-				assertListeningJSONIsGood(err, health)
-			})
+		t.Run("Shows live", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+			assertHealthStatusCodeIsGood(LiveEndpoint, t)
+		})
 
-			Reset(func() {
-				disableHealthCheck()
-			})
+		t.Run("Shows expected ready JSON", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+
+			health, err := getHealth(VerboseReadyEndpoint)
+
+			assertReadyJSONIsGood(err, health, t)
+			assertListeningJSONIsGood(err, health, t)
+		})
+
+		t.Run("Shows expected live JSON", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+
+			health, err := getHealth(VerboseLiveEndpoint)
+			assertReadyJSONIsNotPresent(health, t)
+			assertListeningJSONIsGood(err, health, t)
+		})
+
+		t.Cleanup(func() {
+			disableHealthCheck()
+		})
+	})
+
+	t.Run("When app is ready and listening is dynamically changed", func(t *testing.T) {
+		t.Run("Updates ready status", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+			assertHealthStatusCodeIsGood(ReadyEndpoint, t)
+
+			SetAppIsLive(false)
+			assertHealthStatusCodeIsBad(ReadyEndpoint, t)
+
+			SetAppIsLive(true)
+			assertHealthStatusCodeIsGood(ReadyEndpoint, t)
+		})
+
+		t.Run("Updates live status", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+			assertHealthStatusCodeIsGood(LiveEndpoint, t)
+
+			SetAppIsLive(false)
+			assertHealthStatusCodeIsBad(LiveEndpoint, t)
+
+			SetAppIsLive(true)
+			assertHealthStatusCodeIsGood(LiveEndpoint, t)
+		})
+
+		t.Run("Updates expected ready JSON", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+
+			health, err := getHealth(VerboseReadyEndpoint)
+			assertReadyJSONIsGood(err, health, t)
+			assertListeningJSONIsGood(err, health, t)
+
+			SetAppIsLive(false)
+			health, err = getHealth(VerboseReadyEndpoint)
+			assertReadyJSONIsGood(nil, health, t)
+			assertListeningJSONIsBad(err, health, t)
+
+			SetAppIsLive(true)
+			health, err = getHealth(VerboseReadyEndpoint)
+			assertReadyJSONIsGood(err, health, t)
+			assertListeningJSONIsGood(err, health, t)
+		})
+
+		t.Run("Updates expected live JSON", func(t *testing.T) {
+			enableReadyAndLivenHealthCheck()
+
+			health, err := getHealth(VerboseLiveEndpoint)
+			assertReadyJSONIsNotPresent(health, t)
+			assertListeningJSONIsGood(err, health, t)
+
+			SetAppIsLive(false)
+			health, err = getHealth(VerboseLiveEndpoint)
+			assertReadyJSONIsNotPresent(health, t)
+			assertListeningJSONIsBad(err, health, t)
+
+			SetAppIsLive(true)
+			health, err = getHealth(VerboseLiveEndpoint)
+			assertReadyJSONIsNotPresent(health, t)
+			assertListeningJSONIsGood(err, health, t)
+		})
+
+		t.Cleanup(func() {
+			disableHealthCheck()
 		})
 	})
 }

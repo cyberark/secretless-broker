@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 
 	crd_api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 )
 
 func Test_Config(t *testing.T) {
-	Convey("Reports absence of handlers", t, func() {
+	t.Run("Reports absence of handlers", func(t *testing.T) {
 		yaml := `
 ---
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Handlers: cannot be blank")
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Listeners: cannot be blank")
+		assert.Contains(t, fmt.Sprintf("%s", err), "Handlers: cannot be blank")
+		assert.Contains(t, fmt.Sprintf("%s", err), "Listeners: cannot be blank")
 	})
 
-	Convey("Loads a realistic configuration without errors", t, func() {
+	t.Run("Loads a realistic configuration without errors", func(t *testing.T) {
 		yaml := `
 listeners:
 - name: http_default
@@ -36,11 +36,11 @@ handlers:
 
 `
 		config, err := Load([]byte(yaml))
-		So(err, ShouldBeNil)
-		So(config.Services, ShouldHaveLength, 1)
+		assert.NoError(t, err)
+		assert.Len(t, config.Services, 1)
 	})
 
-	Convey("Allows listeners to have debug flag", t, func() {
+	t.Run("Allows listeners to have debug flag", func(t *testing.T) {
 		yaml := `
 listeners:
 - name: http_default
@@ -58,29 +58,29 @@ handlers:
 
 `
 		config, err := Load([]byte(yaml))
-		So(err, ShouldBeNil)
-		So(config.Services, ShouldHaveLength, 1)
+		assert.NoError(t, err)
+		assert.Len(t, config.Services, 1)
 	})
 
-	Convey("Reports an unnamed Listener definition", t, func() {
+	t.Run("Reports an unnamed Listener definition", func(t *testing.T) {
 		yaml := `
 listeners:
   - protocol: pg
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank")
+		assert.Contains(t, fmt.Sprintf("%s", err), "Name: cannot be blank")
 	})
 
-	Convey("Reports an unknown protocol", t, func() {
+	t.Run("Reports an unknown protocol", func(t *testing.T) {
 		yaml := `
 listeners:
   - protocol: myapp
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank.")
+		assert.Contains(t, fmt.Sprintf("%s", err), "Name: cannot be blank")
 	})
 
-	Convey("Reports a Handler which wants to use an undefined Listener", t, func() {
+	t.Run("Reports a Handler which wants to use an undefined Listener", func(t *testing.T) {
 		yaml := `
 listeners:
   - name: http_default
@@ -92,10 +92,10 @@ handlers:
     listener: none
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Handlers: (0: has no associated listener.)")
+		assert.Contains(t, fmt.Sprintf("%s", err), "Handlers: (0: has no associated listener.)")
 	})
 
-	Convey("Reports a Listener without an address or socket", t, func() {
+	t.Run("Reports a Listener without an address or socket", func(t *testing.T) {
 		yaml := `
 listeners:
   - name: mylistener
@@ -105,10 +105,10 @@ handlers:
   - name: mylistener
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "address or socket is required")
+		assert.Contains(t, fmt.Sprintf("%s", err), "address or socket is required")
 	})
 
-	Convey("Reports an unnamed Handler definition", t, func() {
+	t.Run("Reports an unnamed Handler definition", func(t *testing.T) {
 		yaml := `
 listeners:
   - name: http_default
@@ -118,10 +118,10 @@ handlers:
   - listener: http_default
 `
 		_, err := Load([]byte(yaml))
-		So(fmt.Sprintf("%s", err), ShouldContainSubstring, "Name: cannot be blank")
+		assert.Contains(t, fmt.Sprintf("%s", err), "Name: cannot be blank")
 	})
 
-	Convey("Can serialize match fields", t, func() {
+	t.Run("Can serialize match fields", func(t *testing.T) {
 		yaml := `
 listeners:
   - name: http_default
@@ -139,11 +139,11 @@ handlers:
       - test_for_secretless_issues_216
 `
 		config, err := Load([]byte(yaml))
-		So(err, ShouldBeNil)
-		So(config.String(), ShouldContainSubstring, "test_for_secretless_issues_216")
+		assert.NoError(t, err)
+		assert.Contains(t, config.String(), "test_for_secretless_issues_216")
 	})
 
-	Convey("Can generate config from CRD configuration", t, func() {
+	t.Run("Can generate config from CRD configuration", func(t *testing.T) {
 		expectedConfigYaml := `
 listeners:
   - name: http_default
@@ -163,7 +163,7 @@ handlers:
 
 		// We implicitly rely on Load to work properly for this test to pass
 		expectedConfig, err := Load([]byte(expectedConfigYaml))
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 
 		// Create an API object that would be similar to one used to trigger a config reload
 		crdConfig := crd_api_v1.Configuration{
@@ -194,7 +194,7 @@ handlers:
 			},
 		}
 		config, err := LoadFromCRD(crdConfig)
-		So(err, ShouldBeNil)
-		So(config.String(), ShouldEqual, expectedConfig.String())
+		assert.NoError(t, err)
+		assert.Equal(t, expectedConfig.String(), config.String())
 	})
 }

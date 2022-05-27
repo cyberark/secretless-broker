@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/cyberark/secretless-broker/test/util/testutil"
-
-	"github.com/smartystreets/goconvey/convey"
 )
 
 const jdbcJARPath = "/secretless/test/util/jdbc/jdbc.jar"
@@ -46,9 +44,9 @@ func RunQuery(
 	args = append(args, strings.Join(connectionParams, " "))
 
 	// Pre command logs
-	convey.Println("")
-	convey.Println("---<< EXECUTED")
-	convey.Println(strings.Join(append([]string{"psql"}, args...), " "))
+	println("")
+	println("---<< EXECUTED")
+	println(strings.Join(append([]string{"psql"}, args...), " "))
 
 	cmdOut, err := exec.Command("psql", args...).CombinedOutput()
 
@@ -56,15 +54,15 @@ func RunQuery(
 	//TODO: deal with verbose
 	if testutil.Verbose {
 		if err != nil {
-			convey.Println("--->> RESULTS")
-			convey.Println("----- ERROR: ")
-			convey.Println(err.Error())
+			println("--->> RESULTS")
+			println("----- ERROR: ")
+			println(err.Error())
 		}
-		convey.Println("----- OUTPUT: ")
-		convey.Println(string(cmdOut))
+		println("----- OUTPUT: ")
+		println(string(cmdOut))
 	}
-	convey.Println("---<< END")
-	convey.Println("")
+	println("---<< END")
+	println("")
 
 	return string(cmdOut), err
 }
@@ -86,26 +84,26 @@ func RunJDBCQuery(
 	}
 
 	// Pre command logs
-	convey.Println("")
-	convey.Println("---->> ARGS")
+	println("")
+	println("---->> ARGS")
 	fmt.Println(args)
 
-	convey.Println("---<< EXECUTED")
+	println("---<< EXECUTED")
 	cmdOut, err := exec.Command("java", args...).CombinedOutput()
 
 	// Post command logs
 	//TODO: deal with verbose
 	if testutil.Verbose {
 		if err != nil {
-			convey.Println("--->> RESULTS")
-			convey.Println("----- ERROR: ")
-			convey.Println(err.Error())
+			println("--->> RESULTS")
+			println("----- ERROR: ")
+			println(err.Error())
 		}
-		convey.Println("----- OUTPUT: ")
-		convey.Println(string(cmdOut))
+		println("----- OUTPUT: ")
+		println(string(cmdOut))
 	}
-	convey.Println("---<< END")
-	convey.Println("")
+	println("---<< END")
+	println("")
 
 	return string(cmdOut), err
 }

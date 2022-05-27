@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/cyberark/summon/secretsyml"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/summon/command"
@@ -70,7 +70,7 @@ func TestSummon2_Run(t *testing.T) {
 	var stdout *bytes.Buffer
 	var err error
 
-	Convey("Provides secrets to a subprocess environment", t, func() {
+	t.Run("Provides secrets to a subprocess environment", func(t *testing.T) {
 		provider := makePasswordProvider()
 		subcommand := command.Subcommand{Args: []string{"env"}, Provider: provider, SecretsMap: makeDBPasswordSecretsMap()}
 		stdout = captureStdoutFromSubcommand(&subcommand)
@@ -78,11 +78,11 @@ func TestSummon2_Run(t *testing.T) {
 		err = subcommand.Run()
 		lines := strings.Split(string(stdout.Bytes()), "\n")
 
-		So(err, ShouldBeNil)
-		So(lines, ShouldContain, "DB_PASSWORD=secret")
+		assert.NoError(t, err)
+		assert.Contains(t, lines, "DB_PASSWORD=secret")
 	})
 
-	Convey("Echos a literal (non-secret) value", t, func() {
+	t.Run("Echos a literal (non-secret) value", func(t *testing.T) {
 		secretsMap := make(map[string]secretsyml.SecretSpec)
 		spec := secretsyml.SecretSpec{Path: "literal-secret", Tags: []secretsyml.YamlTag{secretsyml.Literal}}
 		secretsMap["DB_PASSWORD"] = spec
@@ -94,27 +94,39 @@ func TestSummon2_Run(t *testing.T) {
 		err = subcommand.Run()
 		lines := strings.Split(string(stdout.Bytes()), "\n")
 
-		So(err, ShouldBeNil)
-		So(lines, ShouldContain, "DB_PASSWORD=literal-secret")
+		assert.NoError(t, err)
+		assert.Contains(t, lines, "DB_PASSWORD=literal-secret")
 	})
 
-	Convey("Reports an error when the secrets cannot be found", t, func() {
-		provider := makeEmptyProvider()
-		subcommand := command.Subcommand{Args: []string{"env"}, Provider: provider, SecretsMap: makeDBPasswordSecretsMap()}
+	testCases := []struct {
+		name          string
+		args          []string
+		secretsMap    secretsyml.SecretsMap
+		expectedError string
+	}{
+		{
+			name:          "Reports an error when the secrets cannot be found",
+			args:          []string{"env"},
+			secretsMap:    makeDBPasswordSecretsMap(),
+			expectedError: "Value 'db/password' not found in MapProvider",
+		},
+		{
+			name:          "Reports an error when the subprocess command is invalid",
+			args:          []string{"foobar"},
+			secretsMap:    makeEmptySecretsMap(),
+			expectedError: "exec: \"foobar\": executable file not found in $PATH",
+		},
+	}
 
-		err = subcommand.Run()
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			provider := makeEmptyProvider()
+			subcommand := command.Subcommand{Args: tc.args, Provider: provider, SecretsMap: tc.secretsMap}
 
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, "Value 'db/password' not found in MapProvider")
-	})
+			err = subcommand.Run()
 
-	Convey("Reports an error when the subprocess command is invalid", t, func() {
-		provider := makeEmptyProvider()
-		subcommand := command.Subcommand{Args: []string{"foobar"}, Provider: provider, SecretsMap: makeEmptySecretsMap()}
-
-		err = subcommand.Run()
-
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldEqual, `exec: "foobar": executable file not found in $PATH`)
-	})
+			assert.Error(t, err)
+			assert.EqualError(t, err, tc.expectedError)
+		})
+	}
 }

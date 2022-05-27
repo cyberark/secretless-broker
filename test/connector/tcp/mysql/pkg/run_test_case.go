@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/cyberark/secretless-broker/test/util/testutil"
-
-	"github.com/smartystreets/goconvey/convey"
 )
 
 // RunQuery constructs a mysql cmdline command (which includes a sample query)
@@ -42,9 +40,9 @@ func RunQuery(
 	args = append(args, "--default-auth=mysql_clear_password")
 
 	// Pre command logs
-	convey.Println("")
-	convey.Println("---<< EXECUTED")
-	convey.Println(strings.Join(append([]string{"mysql"}, args...), " "))
+	println("")
+	println("---<< EXECUTED")
+	println(strings.Join(append([]string{"mysql"}, args...), " "))
 
 	cmdOut, err := exec.Command("mysql", args...).CombinedOutput()
 
@@ -52,15 +50,15 @@ func RunQuery(
 	//TODO: deal with verbose
 	if testutil.Verbose {
 		if err != nil {
-			convey.Println("--->> RESULTS")
-			convey.Println("----- ERROR: ")
-			convey.Println(err.Error())
+			println("--->> RESULTS")
+			println("----- ERROR: ")
+			println(err.Error())
 		}
-		convey.Println("----- OUTPUT: ")
-		convey.Println(string(cmdOut))
+		println("----- OUTPUT: ")
+		println(string(cmdOut))
 	}
-	convey.Println("---<< END")
-	convey.Println("")
+	println("---<< END")
+	println("")
 
 	return string(cmdOut), err
 }

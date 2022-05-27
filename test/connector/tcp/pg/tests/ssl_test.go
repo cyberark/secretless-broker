@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	. "github.com/cyberark/secretless-broker/test/util/testutil"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestSSL(t *testing.T) {
@@ -220,9 +219,9 @@ func TestSSL(t *testing.T) {
 		},
 	}
 
-	Convey("SSL functionality", t, func() {
+	t.Run("SSL functionality", func(t *testing.T) {
 		for _, testCase := range testCases {
-			RunTestCase(testCase)
+			RunTestCase(testCase, t)
 		}
 	})
 }

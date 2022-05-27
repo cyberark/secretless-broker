@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	_ "github.com/joho/godotenv/autoload"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/plugin/v1/testutils"
@@ -23,34 +23,32 @@ func TestConjur_Provider(t *testing.T) {
 		Name: name,
 	}
 
-	Convey("Can create the Conjur provider", t, func() {
+	t.Run("Can create the Conjur provider", func(t *testing.T) {
 		provider, err = providers.ProviderFactories[name](options)
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 	})
 
-	Convey("Has the expected provider name", t, func() {
-		So(provider.GetName(), ShouldEqual, "conjur")
+	t.Run("Has the expected provider name", func(t *testing.T) {
+		assert.Equal(t, "conjur", provider.GetName())
 	})
 
-	Convey("Can provide an access token", t, func() {
+	t.Run("Can provide an access token", func(t *testing.T) {
 		id := "accessToken"
 		values, err := provider.GetValues(id)
 
-		So(err, ShouldBeNil)
-		So(values[id], ShouldNotBeNil)
-		So(values[id].Error, ShouldBeNil)
-		So(values[id].Value, ShouldNotBeNil)
+		assert.NoError(t, err)
+		assert.NotNil(t, values[id])
+		assert.NoError(t, values[id].Error)
+		assert.NotNil(t, values[id].Value)
 
 		token := make(map[string]string)
 		err = json.Unmarshal(values[id].Value, &token)
-		So(err, ShouldBeNil)
-		So(token["protected"], ShouldNotBeNil)
-		So(token["payload"], ShouldNotBeNil)
+		assert.NoError(t, err)
+		assert.NotNil(t, token["protected"])
+		assert.NotNil(t, token["payload"])
 	})
 
-	Convey(
-		"Reports an unknown value",
-		t,
+	t.Run("Reports an unknown value",
 		testutils.Reports(
 			provider,
 			"foobar",
@@ -58,12 +56,9 @@ func TestConjur_Provider(t *testing.T) {
 		),
 	)
 
-	Convey("Provides", t, func() {
+	t.Run("Provides", func(t *testing.T) {
 		for _, testCase := range canProvideTestCases {
-			Convey(
-				testCase.Description,
-				testutils.CanProvide(provider, testCase.ID, testCase.ExpectedValue),
-			)
+			t.Run(testCase.Description, testutils.CanProvide(provider, testCase.ID, testCase.ExpectedValue))
 		}
 	})
 }

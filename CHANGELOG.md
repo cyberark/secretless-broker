@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.7.13] - 2022-06-14
+### Changed
+- Updated direct dependencies in bin/juxtaposer/go.mod (github.com/denisenkom/go-mssqldb -> 0.12.2,
+  github.com/go-sql-driver/mysql -> 1.6.0, github/lib/pq -> 1.10.6, 
+  github.com/stretchr/testify -> 1.7.2, gopkg.in/yaml.v3 -> 3.0.1)
+  [PR TBD]
+
 ## [1.7.12] - 2022-05-02
 
 ### Changed

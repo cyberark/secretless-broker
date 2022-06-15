@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 // Flags is a list of command-line options.

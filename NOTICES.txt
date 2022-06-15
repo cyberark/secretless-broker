@@ -9,43 +9,43 @@ of the license associated with each component.
 SECTION 1: Apache License 2.0
 
 >>> github.com/aws/aws-sdk-go-1.15.79
->>> github.com/cyberark/conjur-api-go-0.8.1
->>> github.com/cyberark/conjur-authn-k8s-client-0.23.0
->>> github.com/docker/docker-20.10.14+incompatible
->>> github.com/heptiolabs/healthcheck-0.0.0-20180807145615-6ff867650f40
+>>> github.com/cyberark/conjur-api-go-0.10.1
+>>> github.com/cyberark/conjur-authn-k8s-client-0.23.1
+>>> github.com/docker/docker-20.10.17+incompatible
+>>> github.com/heptiolabs/healthcheck-0.0.0-20211123025425-613501dd5deb
 >>> gopkg.in/yaml.v2-2.4.0
->>> k8s.io/api-0.23.1
->>> k8s.io/apiextensions-apiserver-0.22.3
->>> k8s.io/apimachinery-0.23.1
->>> k8s.io/client-go-0.23.1
+>>> k8s.io/api-0.24.1
+>>> k8s.io/apiextensions-apiserver-0.24.1
+>>> k8s.io/apimachinery-0.24.1
+>>> k8s.io/client-go-0.24.1
 
 SECTION 2: BSD 2-clause "Simplified" License
 
 >>> github.com/pkg/errors-0.9.1
->>> github.com/pkg/profile-1.2.1
+>>> github.com/pkg/profile-1.6.0
 
 SECTION 3: BSD 3-clause "New" or "Revised" License
 
 >>> github.com/cyberark/go-mssqldb-0.0.0-20191030142036-b5a965a47dd3
->>> github.com/fsnotify/fsnotify-1.4.9
->>> golang.org/x/crypto-0.0.0-20211215153901-e495a2d5b3d3
+>>> github.com/fsnotify/fsnotify-1.5.4
+>>> golang.org/x/crypto-0.0.0-20220525230936-793ad666bf5e
 
 SECTION 4: MIT License
 
 >>> github.com/cenkalti/backoff-2.2.1
->>> github.com/codegangsta/cli-1.20.0
+>>> github.com/urfave/cli-1.22.9
 >>> github.com/cyberark/summon-0.9.1
 >>> github.com/go-ozzo/ozzo-validation-3.6.0
->>> github.com/joho/godotenv-1.2.0
->>> github.com/keybase/go-keychain-0.0.0-20201121013009-976c83ec27a6
->>> github.com/lib/pq-0.0.0-20180123210206-19c8e9ad0095
->>> github.com/smartystreets/goconvey-1.6.4
->>> github.com/stretchr/testify-1.7.0
+>>> github.com/joho/godotenv-1.4.0
+>>> github.com/keybase/go-keychain-0.0.0-20220610143837-c2ce06069005
+>>> github.com/lib/pq-1.10.6
+>>> github.com/smartystreets/goconvey-1.7.2
+>>> github.com/stretchr/testify-1.7.2
 >>> gopkg.in/yaml.v2-2.4.0
 
 SECTION 5: Mozilla Public License 2.0
 
->>> github.com/hashicorp/vault/api-1.0.2
+>>> github.com/hashicorp/vault/api-1.7.2
 
 APPENDIX: Standard License Files and Templates
 
@@ -79,7 +79,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/cyberark/conjur-api-go-0.8.1
+>>> github.com/cyberark/conjur-api-go-0.10.1
 
 Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 
@@ -96,7 +96,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/cyberark/conjur-authn-k8s-client-0.23.0
+>>> github.com/cyberark/conjur-authn-k8s-client-0.23.1
 
 Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 
@@ -113,7 +113,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/docker/docker-20.10.14+incompatible
+>>> github.com/docker/docker-20.10.17+incompatible
 
 Copyright 2013-2018 Docker, Inc.
 
@@ -130,7 +130,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/heptiolabs/healthcheck-0.0.0-20180807145615-6ff867650f40
+>>> github.com/heptiolabs/healthcheck-0.0.0-20211123025425-613501dd5deb
 
 Copyright {yyyy} {name of copyright owner}
 
@@ -164,7 +164,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> k8s.io/api-0.23.1
+>>> k8s.io/api-0.24.1
 
 Copyright [yyyy] [name of copyright owner]
 
@@ -181,7 +181,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> k8s.io/apiextensions-apiserver-0.22.3
+>>> k8s.io/apiextensions-apiserver-0.24.1
 
 Copyright [yyyy] [name of copyright owner]
 
@@ -198,7 +198,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> k8s.io/apimachinery-0.23.1
+>>> k8s.io/apimachinery-0.24.1
 
 Copyright [yyyy] [name of copyright owner]
 
@@ -215,7 +215,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> k8s.io/client-go-0.23.1
+>>> k8s.io/client-go-0.24.1
 
 Copyright [yyyy] [name of copyright owner]
 
@@ -264,7 +264,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
->>> github.com/pkg/profile-1.2.1
+>>> github.com/pkg/profile-1.6.0
 
 Copyright (c) 2013 Dave Cheney. All rights reserved.
 
@@ -328,7 +328,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
->>> github.com/fsnotify/fsnotify-1.4.9
+>>> github.com/fsnotify/fsnotify-1.5.4
 
 Copyright (c) 2012 The Go Authors. All rights reserved.
 Copyright (c) 2012-2019 fsnotify Authors. All rights reserved.
@@ -360,7 +360,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
->>> golang.org/x/crypto-0.0.0-20211215153901-e495a2d5b3d3
+>>> golang.org/x/crypto-0.0.0-20220525230936-793ad666bf5e
 
 Copyright (c) 2009 The Go Authors. All rights reserved.
 
@@ -420,7 +420,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
->>> github.com/codegangsta/cli-1.20.0
+>>> github.com/urfave/cli-1.22.9
 
 MIT License
 
@@ -491,7 +491,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
->>> github.com/joho/godotenv-1.2.0
+>>> github.com/joho/godotenv-1.4.0
 
 Copyright (c) 2013 John Barton
 
@@ -517,7 +517,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
->>> github.com/keybase/go-keychain-0.0.0-20201121013009-976c83ec27a6
+>>> github.com/keybase/go-keychain-0.0.0-20220610143837-c2ce06069005
 
 Copyright (c) 2015 Keybase
 
@@ -541,7 +541,7 @@ SOFTWARE.
 
 
 
->>> github.com/lib/pq-0.0.0-20180123210206-19c8e9ad0095
+>>> github.com/lib/pq-1.10.6
 
 Copyright (c) 2011-2013, 'pq' Contributors Portions Copyright (C) 2011 Blake Mizerany
 
@@ -552,7 +552,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
->>> github.com/smartystreets/goconvey-1.6.4
+>>> github.com/smartystreets/goconvey-1.7.2
 
 Copyright (c) 2016 SmartyStreets, LLC
 
@@ -565,7 +565,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 NOTE: Various optional and subordinate components carry their own licensing requirements and restrictions. Use of those components is subject to the terms and conditions outlined the respective license of each component.
 
 
->>> github.com/stretchr/testify-1.7.0
+>>> github.com/stretchr/testify-1.7.2
 
 MIT License
 
@@ -630,7 +630,7 @@ SOFTWARE.
 Mozilla Public License 2.0 is applicable to the following component(s).
 
 
->>> github.com/hashicorp/vault/api-1.0.2
+>>> github.com/hashicorp/vault/api-1.7.2
 
 This Source Code Form is subject to the
 terms of the Mozilla Public License, v.

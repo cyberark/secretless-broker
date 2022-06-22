@@ -17,3 +17,28 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
 )
+
+// Security fixes to ensure we don't have old vulnerable packages in our
+// dependency tree. We're often not vulnerable, but removing them to ensure
+// we never end up selecting them when other dependencies change.
+
+// Only put specific versions on the left side of the =>
+// so we don't downgrade future versions unintentionally.
+
+replace golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 => golang.org/x/crypto v0.0.0-20220314234659-1baeb1ce4c0b
+
+replace golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c => golang.org/x/crypto v0.0.0-20220314234659-1baeb1ce4c0b
+
+replace golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 => golang.org/x/crypto v0.0.0-20220314234659-1baeb1ce4c0b
+
+replace golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 => golang.org/x/net v0.0.0-20211209124913-491a49abca63
+
+replace golang.org/x/net v0.0.0-20210610132358-84b48f89b13b => golang.org/x/net v0.0.0-20211209124913-491a49abca63
+
+replace golang.org/x/text v0.3.0 => golang.org/x/text v0.3.7
+
+replace golang.org/x/text v0.3.6 => golang.org/x/text v0.3.7
+
+replace gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c => gopkg.in/yaml.v3 v3.0.1
+
+replace gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b => gopkg.in/yaml.v3 v3.0.1

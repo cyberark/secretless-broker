@@ -26,20 +26,20 @@ require (
 )
 
 require (
-	// Requires latest version for automated release process
-	github.com/cyberark/conjur-opentelemetry-tracer latest
-	// Requires latest version for automated release process
-	github.com/cyberark/conjur-api-go latest
-	// Requires latest version for automated release process
-	github.com/cyberark/conjur-authn-k8s-client latest
-	// Requires latest version for automated release process
-	github.com/cyberark/summon latest
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/containerd/containerd v1.6.2 // indirect
+	// Version number used here is ignored
+	github.com/cyberark/conjur-api-go v1.55.55
+	// Version number used here is ignored
+	github.com/cyberark/conjur-authn-k8s-client v1.55.55
+	// Version number used here is ignored
+	github.com/cyberark/conjur-opentelemetry-tracer v1.55.55
+	// Version number used here is ignored
+	github.com/cyberark/summon v1.55.55
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -120,5 +120,17 @@ replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 // 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
 // This is our fix:
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
+
+// DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
+replace github.com/cyberark/conjur-api-go => github.com/cyberark/conjur-api-go latest
+
+// DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
+replace github.com/cyberark/conjur-authn-k8s-client => github.com/cyberark/conjur-authn-k8s-client latest
+
+// DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
+replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/conjur-opentelemetry-tracer latest
+
+// DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
+replace github.com/cyberark/summon => github.com/cyberark/summon latest
 
 go 1.17

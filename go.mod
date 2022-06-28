@@ -69,13 +69,12 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/containerd/containerd v1.6.2 // indirect
 	// Version number used here is ignored
 	github.com/cyberark/conjur-api-go v1.55.55
 	// Version number used here is ignored
 	github.com/cyberark/conjur-authn-k8s-client v1.55.55
 	// Version number used here is ignored
-	github.com/cyberark/conjur-opentelemetry-tracer v1.55.55
+	github.com/cyberark/conjur-opentelemetry-tracer v1.55.55 // indirect
 	// Version number used here is ignored
 	github.com/cyberark/summon v1.55.55
 	github.com/davecgh/go-spew v1.1.1 // indirect

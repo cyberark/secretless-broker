@@ -64,6 +64,7 @@ FULL_VERSION_TAG="$(full_version_tag)"
 readonly VERSION
 readonly FULL_VERSION_TAG
 readonly REDHAT_IMAGE="scan.connect.redhat.com/ospid-18d9f51d-9c0c-4031-9f9e-ef08aa2ff409/secretless-broker"
+readonly REDHAT_CERT_PID="5e621f6502235d3f505f6093"
 readonly REDHAT_LOCAL_IMAGE="secretless-broker-redhat"
 readonly IMAGES=(
   "secretless-broker"
@@ -133,6 +134,9 @@ if [[ ${PROMOTE} = true ]]; then
       echo 'RedHat push FAILED! (maybe the image was pushed already?)'
       exit 0
     fi
+
+    # scan image with preflight tool
+    scan_redhat_image "${REDHAT_IMAGE}:${REMOTE_TAG}" "${REDHAT_CERT_PID}"
   else
     echo 'Failed to log in to scan.connect.redhat.com'
     exit 1

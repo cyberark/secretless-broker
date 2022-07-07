@@ -450,8 +450,7 @@ than main. Make sure your change to secretless considers this.
 
 1. Jenkins build parameters can be utilized to release and promote successful builds.
 1. Merging into main/master branches will automatically trigger a release.
-1. Reference the [internal automated release doc]
-   (https://github.com/conjurinc/docs/blob/master/reference/infrastructure/automated_releases.md#release-and-promotion-process)
+1. Reference the [internal automated release doc](https://github.com/conjurinc/docs/blob/master/reference/infrastructure/automated_releases.md#release-and-promotion-process)
    for releasing and promoting.
 
 ### Publish homebrew version

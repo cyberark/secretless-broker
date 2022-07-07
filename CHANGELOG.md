@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.13] - 2022-06-14
+## [1.7.14] - 2022-07-07
+
+## [1.7.13] - 2022-07-07
+
 ### Changed
 - Updated direct dependencies in bin/juxtaposer/go.mod and in go.mod and add replace statements
   for known vulnerable third-party versions.
@@ -655,7 +658,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.11...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.13...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -693,3 +696,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.9]: https://github.com/cyberark/secretless-broker/compare/v1.7.8...v1.7.9
 [1.7.10]: https://github.com/cyberark/secretless-broker/compare/v1.7.9...v1.7.10
 [1.7.11]: https://github.com/cyberark/secretless-broker/compare/v1.7.10...v1.7.11
+[1.7.12]: https://github.com/cyberark/secretless-broker/compare/v1.7.11...v1.7.12
+[1.7.13]: https://github.com/cyberark/secretless-broker/compare/v1.7.12...v1.7.13
+[1.7.14]: https://github.com/cyberark/secretless-broker/compare/v1.7.13...v1.7.14

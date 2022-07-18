@@ -32,7 +32,7 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
-	github.com/emicklei/go-restful v2.9.5+incompatible // indirect
+	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
@@ -110,7 +110,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/onsi/gomega v1.10.3 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
@@ -152,6 +151,13 @@ require (
 )
 
 replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
+
+// The next 2 lines resolve CVE-2022-1996 until k8s.io/client-go v0.25.0+ is released
+replace k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 => k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8
+
+// We can't use a replace here because the import path changed with go-restful v3
+// Instead, just exclude it from the tree.
+exclude github.com/emicklei/go-restful v2.9.5+incompatible
 
 // 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
 // This is our fix:

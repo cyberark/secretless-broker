@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.14] - 2022-07-18
+
+### Security
+- Added replace & exclude statements to go.mod to remove dependency on 
+  github.com/emicklei/go-restful v2.8.5 to resolve CVE-2022-1996
+  [cyberark/secretless-broker#1473](https://github.com/cyberark/secretless-broker/pull/1473)
+
 ## [1.7.13] - 2022-07-07
 
 ### Changed

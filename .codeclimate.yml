@@ -34,6 +34,13 @@ plugins:
         ruby:
         swift:
         typescript:
+    exclude_patterns:
+      # Exclude individual tests that have code duplication
+      - "internal/util/health_test.go"
+      - "test/connector/tcp/mysql/tests/init_test.go"
+      - "test/connector/tcp/mysql/tests/essentials_test.go"
+      - "test/connector/tcp/pg/tests/init_test.go"
+      - "test/connector/tcp/pg/tests/essentials_test.go"
 
   fixme: # Flags any FIXME, TODO, BUG, XXX, HACK comments so they can be fixed
     enabled: true

@@ -6,8 +6,7 @@ import (
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/plugin/v1/testutils"
 	"github.com/cyberark/secretless-broker/internal/providers"
-
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestKeychainProvider(t *testing.T) {
@@ -37,13 +36,12 @@ func TestKeychainProvider(t *testing.T) {
 		t.FailNow()
 	}
 
-	Convey("Has the expected provider name", t, func() {
-		So(provider.GetName(), ShouldEqual, providerName)
+	t.Run("Has the expected provider name", func(t *testing.T) {
+		assert.Equal(t, providerName, provider.GetName())
 	})
 
-	Convey(
+	t.Run(
 		"Can provide a valid secret value",
-		t,
 		testutils.CanProvide(
 			provider,
 			getSecretPath(1),
@@ -51,9 +49,8 @@ func TestKeychainProvider(t *testing.T) {
 		),
 	)
 
-	Convey(
+	t.Run(
 		"Multiple Provides ",
-		t,
 		testutils.CanProvideMultiple(
 			provider,
 			map[string]string{
@@ -64,9 +61,8 @@ func TestKeychainProvider(t *testing.T) {
 		),
 	)
 
-	Convey(
+	t.Run(
 		"Returns an error for an invalid secret value",
-		t,
 		testutils.Reports(
 			provider,
 			"madeup#secret",

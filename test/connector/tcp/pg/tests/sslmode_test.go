@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	. "github.com/cyberark/secretless-broker/test/util/testutil"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCustom(t *testing.T) {
@@ -29,14 +29,14 @@ func TestCustom(t *testing.T) {
 		"--host", connectPort.Host(),
 	}
 
-	Convey("sslmode=require", t, func() {
+	t.Run("sslmode=require", func(t *testing.T) {
 		cmdOut, _ := exec.Command("psql", append(args, strings.Join(append(connectionParams, "sslmode=require"), " "))...).CombinedOutput()
-		So(string(cmdOut), ShouldContainSubstring, "psql: server does not support SSL, but SSL was required")
+		assert.Contains(t, string(cmdOut), "psql: server does not support SSL, but SSL was required")
 	})
 
-	Convey("sslmode=prefer", t, func() {
+	t.Run("sslmode=prefer", func(t *testing.T) {
 		cmdOut, _ := exec.Command("psql", append(args, strings.Join(append(connectionParams, "sslmode=prefer"), " "))...).CombinedOutput()
-		So(string(cmdOut), ShouldContainSubstring, "count")
+		assert.Contains(t, string(cmdOut), "count")
 	})
 
 }

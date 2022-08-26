@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func splitEq(s string) (string, string) {
@@ -36,73 +36,73 @@ func (e *envSnapshot) restoreEnv() {
 	}
 }
 
-func assertMissingFile(f string) {
+func assertMissingFile(f string, t *testing.T) {
 	_, err := os.Stat(f)
-	So(err, ShouldNotBeNil)
-	So(err.Error(), ShouldContainSubstring, "no such file or directory")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "no such file or directory")
 }
 
-func assertFileContents(f string, expectedValue string) {
+func assertFileContents(f string, expectedValue string, t *testing.T) {
 	actualContent, err := ioutil.ReadFile(f)
-	So(err, ShouldBeNil)
-	So(expectedValue, ShouldEqual, string(actualContent))
+	assert.NoError(t, err)
+	assert.Equal(t, expectedValue, string(actualContent))
 }
 
 func TestTempFactory_Cleanup(t *testing.T) {
-	Convey("Cleanup deletes all temp files", t, func() {
+	t.Run("Cleanup deletes all temp files", func(t *testing.T) {
 		tempFactory := NewCustomTempFactory("", "non-existent")
 
 		f1, err := tempFactory.Push("meow")
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 		f2, err := tempFactory.Push("moo")
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 
-		assertFileContents(f1, "meow")
-		assertFileContents(f2, "moo")
+		assertFileContents(f1, "meow", t)
+		assertFileContents(f2, "moo", t)
 
 		tempFactory.Cleanup()
 
-		assertMissingFile(f1)
-		assertMissingFile(f2)
+		assertMissingFile(f1, t)
+		assertMissingFile(f2, t)
 	})
 }
 
 func TestTempFactory_Push(t *testing.T) {
-	Convey("Push creates temp file", t, func() {
+	t.Run("Push creates temp file", func(t *testing.T) {
 		tempFactory := NewTempFactory("")
 		defer tempFactory.Cleanup()
 
 		f, err := tempFactory.Push("moo")
-		So(err, ShouldBeNil)
-		assertFileContents(f, "moo")
+		assert.NoError(t, err)
+		assertFileContents(f, "moo", t)
 	})
 
-	Convey("Push reports errors", t, func() {
+	t.Run("Push reports errors", func(t *testing.T) {
 		tempFactory := NewTempFactory("dir-not-found")
 		defer tempFactory.Cleanup()
 
 		_, err := tempFactory.Push("moo")
-		So(err, ShouldNotBeNil)
-		So(err.Error(), ShouldContainSubstring, "no such file or directory")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "no such file or directory")
 	})
 }
 
 func TestTempFactory_NewTempFactory(t *testing.T) {
-	Convey("Uses constructor arg path if provided", t, func() {
+	t.Run("Uses constructor arg path if provided", func(t *testing.T) {
 		tempFactory := NewTempFactory("somedir")
 		defer tempFactory.Cleanup()
 
-		So(tempFactory, ShouldResemble, TempFactory{
+		assert.ObjectsAreEqualValues(TempFactory{
 			files: []string(nil),
 			path:  "somedir",
-		})
+		}, tempFactory)
 	})
 
-	Convey("When constructor path is not provided", t, func() {
+	t.Run("When constructor path is not provided", func(t *testing.T) {
 		env := clearEnv()
 		defer env.restoreEnv()
 
-		Convey("tries using shared memory path first", func() {
+		t.Run("tries using shared memory path first", func(t *testing.T) {
 			tempFactory := NewTempFactory("")
 
 			_, err := os.Stat("/dev/shm")
@@ -110,16 +110,16 @@ func TestTempFactory_NewTempFactory(t *testing.T) {
 				return
 			}
 
-			So(tempFactory, ShouldResemble, TempFactory{
+			assert.ObjectsAreEqualValues(TempFactory{
 				files: []string(nil),
 				path:  "/dev/shm",
-			})
+			}, tempFactory)
 		})
 
-		Convey("tries using homedir prefix if shared memory path is not available", func() {
+		t.Run("tries using homedir prefix if shared memory path is not available", func(t *testing.T) {
 			// Create a fake $HOME
 			home, err := ioutil.TempDir("", "secretless_test")
-			So(err, ShouldBeNil)
+			assert.NoError(t, err)
 
 			defer func() {
 				os.RemoveAll(home)
@@ -129,14 +129,14 @@ func TestTempFactory_NewTempFactory(t *testing.T) {
 
 			// Override shared memory path
 			tempFactory := NewCustomTempFactory("", "doesnotexist")
-			So(tempFactory.path, ShouldStartWith, home)
+			assert.Contains(t, tempFactory.path, home)
 		})
 
-		Convey("tries using os.TempDir as last resort", func() {
+		t.Run("tries using os.TempDir as last resort", func(t *testing.T) {
 			// Override shared memory path
 			tempFactory := NewCustomTempFactory("", "doesnotexist")
 
-			So(tempFactory.path, ShouldEqual, os.TempDir())
+			assert.Equal(t, os.TempDir(), tempFactory.path)
 		})
 	})
 }

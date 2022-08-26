@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
@@ -14,6 +13,7 @@ import (
 	"github.com/cyberark/secretless-broker/internal/plugin/v1/testutils"
 	"github.com/cyberark/secretless-broker/internal/providers"
 	"github.com/cyberark/secretless-broker/internal/providers/kubernetessecrets"
+	"github.com/stretchr/testify/assert"
 )
 
 var mockSecrets = map[string]map[string][]byte{
@@ -59,42 +59,41 @@ func TestKubernetes_Provider(t *testing.T) {
 		Name: expectedName,
 	}
 
-	Convey("Can create the Kubernetes provider", t, func() {
+	t.Run("Can create the Kubernetes provider", func(t *testing.T) {
 		provider, err = providers.ProviderFactories[expectedName](options)
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 
 		var ok bool
 		kubernetesProvider, ok = provider.(*kubernetessecrets.Provider)
-		So(ok, ShouldBeTrue)
+		assert.True(t, ok)
 
 		kubernetesProvider.SecretsClient = testSecretsClient
 	})
 
-	Convey("Has the expected provider name", t, func() {
-		So(provider.GetName(), ShouldEqual, expectedName)
+	t.Run("Has the expected provider name", func(t *testing.T) {
+		assert.Equal(t, expectedName, provider.GetName())
 	})
 
-	Convey("Can provide a secret", t, func() {
+	t.Run("Can provide a secret", func(t *testing.T) {
 		id := "database#password"
 		values, err := provider.GetValues(id)
-		So(err, ShouldBeNil)
-		So(values, ShouldContainKey, id)
-		So(values[id].Error, ShouldBeNil)
-		So(string(values[id].Value), ShouldEqual, "secret-value")
+		assert.NoError(t, err)
+		assert.Contains(t, values, id)
+		assert.NoError(t, values[id].Error)
+		assert.Equal(t, "secret-value", string(values[id].Value))
 	})
 
-	Convey("Reports", t, func() {
+	t.Run("Reports", func(t *testing.T) {
 		for _, testCase := range reportsTestCases {
-			Convey(
+			t.Run(
 				testCase.Description,
 				testutils.Reports(provider, testCase.ID, testCase.ExpectedErrString),
 			)
 		}
 	})
 
-	Convey(
+	t.Run(
 		"Multiple Provides ",
-		t,
 		testutils.CanProvideMultiple(
 			provider,
 			map[string]string{

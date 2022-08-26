@@ -39,13 +39,11 @@ RUN groupadd -r secretless \
 # the happen to be written in Go:
 #
 # go-junit-report => Convert go test output to junit xml
-# goconvey => Go testing tool
 # reflex => Utility for watching files and executing process in response to changes
 # gocov => converts native coverage output to gocov's JSON interchange format
 # gocov-xml => converts gocov format to XML for use with Jenkins/Cobertura
 # gocovmerge => Merges multiple 'go test -coverprofile' results into one profile
 RUN go get -u github.com/jstemmer/go-junit-report && \
-    go get github.com/smartystreets/goconvey && \
     go get github.com/cespare/reflex && \
     go get github.com/axw/gocov/gocov && \
     go get github.com/AlekSi/gocov-xml && \

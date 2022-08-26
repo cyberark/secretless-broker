@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	_ "github.com/joho/godotenv/autoload"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/cyberark/secretless-broker/internal/summon/command"
 )
@@ -35,14 +35,14 @@ SVC_API_KEY: !var secret/data/service#data.api-key
 		return
 	}
 
-	Convey("Can summon secrets from Vault", t, func() {
+	t.Run("Can summon secrets from Vault", func(t *testing.T) {
 		lines, err := runCommand(defaultArgs)
 
-		So(err, ShouldBeNil)
-		So(lines, ShouldContain, "FIRST_SECRET=one")
-		So(lines, ShouldContain, "SECOND_SECRET=two")
-		So(lines, ShouldContain, "DB_PASSWORD=db-secret")
-		So(lines, ShouldContain, "WEB_PASSWORD=web-secret")
-		So(lines, ShouldContain, "SVC_API_KEY=service-api-key")
+		assert.NoError(t, err)
+		assert.Contains(t, lines, "FIRST_SECRET=one")
+		assert.Contains(t, lines, "SECOND_SECRET=two")
+		assert.Contains(t, lines, "DB_PASSWORD=db-secret")
+		assert.Contains(t, lines, "WEB_PASSWORD=web-secret")
+		assert.Contains(t, lines, "SVC_API_KEY=service-api-key")
 	})
 }

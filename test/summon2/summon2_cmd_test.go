@@ -7,9 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
-
 	"github.com/cyberark/secretless-broker/internal/summon/command"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestSummon2_Run tests Summon at the CLI level, including argument parsing etc.
@@ -32,23 +31,23 @@ DB_PASSWORD: literal-password
 		return
 	}
 
-	Convey("Provides secrets to a subprocess environment", t, func() {
+	t.Run("Provides secrets to a subprocess environment", func(t *testing.T) {
 		args := []string{"summon2", "-p", "literal", "--yaml", secretsDescriptor, "env"}
 
 		lines, err := runCommand(args)
 
-		So(err, ShouldBeNil)
-		So(lines, ShouldContain, "DB_PASSWORD=literal-password")
+		assert.NoError(t, err)
+		assert.Contains(t, lines, "DB_PASSWORD=literal-password")
 	})
 
-	Convey("Provider can be specified as an environment variable", t, func() {
+	t.Run("Provider can be specified as an environment variable", func(t *testing.T) {
 		err := os.Setenv("SUMMON_PROVIDER", "literal")
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 		defer os.Unsetenv("SUMMON_PROVIDER")
 
 		lines, err := runCommand(defaultArgs)
 
-		So(err, ShouldBeNil)
-		So(lines, ShouldContain, "DB_PASSWORD=literal-password")
+		assert.NoError(t, err)
+		assert.Contains(t, lines, "DB_PASSWORD=literal-password")
 	})
 }

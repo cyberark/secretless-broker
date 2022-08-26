@@ -1,9 +1,10 @@
 package testutils
 
 import (
-	"github.com/smartystreets/goconvey/convey"
+	"testing"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	"github.com/stretchr/testify/assert"
 )
 
 // CanProvideTestCase captures a test case where a provider is expected to return a value
@@ -18,14 +19,14 @@ type CanProvideTestCase struct {
 // the given id has the expected value and no error
 func CanProvide(provider plugin_v1.Provider,
 	id string,
-	expectedValue string) func() {
-	return func() {
+	expectedValue string) func(t *testing.T) {
+	return func(t *testing.T) {
 		values, err := provider.GetValues(id)
 
-		convey.So(values[id].Error, convey.ShouldBeNil)
-		convey.So(err, convey.ShouldBeNil)
+		assert.NoError(t, values[id].Error)
+		assert.NoError(t, err)
 		value := values[id]
-		assertGoodProviderResponse(value, expectedValue)
+		assertGoodProviderResponse(value, expectedValue, t)
 	}
 }
 
@@ -35,8 +36,8 @@ func CanProvide(provider plugin_v1.Provider,
 func CanProvideMultiple(
 	provider plugin_v1.Provider,
 	expectedStringValueByID map[string]string,
-) func() {
-	return func() {
+) func(t *testing.T) {
+	return func(t *testing.T) {
 		ids := make([]string, 0, len(expectedStringValueByID)*2)
 		expectedStringValueByID := map[string]string{}
 
@@ -48,14 +49,15 @@ func CanProvideMultiple(
 		responses, err := provider.GetValues(ids...)
 
 		// Ensure no global error
-		convey.So(err, convey.ShouldBeNil)
+		assert.NoError(t, err)
 		// Ensure there many responses as there are ids
-		convey.So(len(responses), convey.ShouldEqual, len(ids))
+		assert.Len(t, responses, len(ids))
 		// Ensure each id has the expected response
 		for _, id := range ids {
 			assertGoodProviderResponse(
 				responses[id],
 				expectedStringValueByID[id],
+				t,
 			)
 		}
 	}
@@ -66,11 +68,12 @@ func CanProvideMultiple(
 func assertGoodProviderResponse(
 	response plugin_v1.ProviderResponse,
 	expectedValueAsStr string,
+	t *testing.T,
 ) {
-	convey.So(response, convey.ShouldNotBeNil)
-	convey.So(response.Error, convey.ShouldBeNil)
-	convey.So(response.Value, convey.ShouldNotBeNil)
-	convey.So(string(response.Value), convey.ShouldEqual, expectedValueAsStr)
+	assert.NotNil(t, response)
+	assert.NoError(t, response.Error)
+	assert.NotNil(t, response.Value)
+	assert.Equal(t, expectedValueAsStr, string(response.Value))
 }
 
 // ReportsTestCase captures a test case where a provider is expected to return an error
@@ -82,14 +85,14 @@ type ReportsTestCase struct {
 
 // Reports calls GetValues on the provider and ensures that the provider response for the
 // given id has the expected error and no value
-func Reports(provider plugin_v1.Provider, id string, expectedErrString string) func() {
-	return func() {
+func Reports(provider plugin_v1.Provider, id string, expectedErrString string) func(t *testing.T) {
+	return func(t *testing.T) {
 		values, err := provider.GetValues(id)
 
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(values, convey.ShouldContainKey, id)
-		convey.So(values[id].Value, convey.ShouldBeNil)
-		convey.So(values[id].Error, convey.ShouldNotBeNil)
-		convey.So(values[id].Error.Error(), convey.ShouldEqual, expectedErrString)
+		assert.NoError(t, err)
+		assert.Contains(t, values, id)
+		assert.Nil(t, values[id].Value)
+		assert.Error(t, values[id].Error)
+		assert.EqualError(t, values[id].Error, expectedErrString)
 	}
 }

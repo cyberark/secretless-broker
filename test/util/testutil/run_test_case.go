@@ -2,7 +2,9 @@ package testutil
 
 import (
 	"fmt"
-	"github.com/smartystreets/goconvey/convey"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // NewRunTestCase returns a function that, given a TestCase, will run the unit
@@ -11,26 +13,26 @@ import (
 func NewRunTestCase(runQuery RunQueryType) RunTestCaseType {
 	_, testSuiteConfigurations := GenerateConfigurations()
 
-	return func(testCase TestCase) {
+	return func(testCase TestCase, t *testing.T) {
 		var expectation = "throws"
 		if testCase.ShouldPass {
 			expectation = "succeeds"
 		}
 
-		convey.Convey(fmt.Sprintf("%s: %s", expectation, testCase.Description), func() {
+		t.Run(fmt.Sprintf("%s: %s", expectation, testCase.Description), func(t *testing.T) {
 			// TODO: possibly move this logic into testCase
 			liveConfiguration := testSuiteConfigurations.Find(testCase.AbstractConfiguration)
 
 			cmdOut, err := runQuery(testCase.ClientConfiguration, liveConfiguration.ConnectionPort)
 
 			if testCase.ShouldPass {
-				convey.So(err, convey.ShouldBeNil)
+				assert.NoError(t, err)
 			} else {
-				convey.So(err, convey.ShouldNotBeNil)
+				assert.Error(t, err)
 			}
 
 			if testCase.CmdOutput != nil {
-				convey.So(cmdOut, convey.ShouldContainSubstring, *testCase.CmdOutput)
+				assert.Contains(t, cmdOut, *testCase.CmdOutput)
 			}
 
 		})
@@ -52,4 +54,4 @@ type RunQueryType func(ClientConfiguration, ConnectionPort) (string, error)
 
 // RunTestCaseType represents a function for executing the unit tests
 // specified by a TestCase.
-type RunTestCaseType func(testCase TestCase)
+type RunTestCaseType func(testCase TestCase, t *testing.T)

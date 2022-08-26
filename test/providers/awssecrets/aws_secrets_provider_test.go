@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	_ "github.com/joho/godotenv/autoload"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	"github.com/cyberark/secretless-broker/internal/providers"
@@ -20,12 +20,12 @@ func TestAWSSecrets_Provider(t *testing.T) {
 		Name: name,
 	}
 
-	Convey("Can create the AWS Secrets provider", t, func() {
+	t.Run("Can create the AWS Secrets provider", func(t *testing.T) {
 		provider, err = providers.ProviderFactories[name](options)
-		So(err, ShouldBeNil)
+		assert.NoError(t, err)
 	})
 
-	Convey("Has the expected provider name", t, func() {
-		So(provider.GetName(), ShouldEqual, "aws")
+	t.Run("Has the expected provider name", func(t *testing.T) {
+		assert.Equal(t, "aws", provider.GetName())
 	})
 }

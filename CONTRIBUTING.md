@@ -214,7 +214,7 @@ The source includes:
 #### Prerequisites
 
 To get the site up and running locally on your computer, ensure you have:
-1. Ruby version 2.1.0 or higher (check by running `ruby -v`)
+1. Ruby version 3.0.0 or higher (check by running `ruby -v`)
 2. Bundler (`gem install bundler`)
 3. Jekyll (`gem install jekyll`)
 4. Once Bundler and Jekyll gems are installed, run `bundle install`

@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.15] - 2022-09-22
+
+### Security
+- Upgrade website Dockerfiles to Ruby 3 to resolve CVE-2022-0778.
+  [cyberark/secretless-broker#1475](https://github.com/cyberark/secretless-broker/pull/1475)]
+
 ## [1.7.14] - 2022-08-17
 
 ### Security

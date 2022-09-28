@@ -1,6 +1,7 @@
-FROM ruby:2.5-alpine
+FROM ruby:3.0-slim-buster
 
-RUN apk add --update alpine-sdk && \
+RUN apt-get -y update && \
+    apt-get -y install build-essential && \
     mkdir -p /tmp/gems
 
 WORKDIR /tmp/gems

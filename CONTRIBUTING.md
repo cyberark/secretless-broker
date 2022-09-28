@@ -214,24 +214,28 @@ The source includes:
 #### Prerequisites
 
 To get the site up and running locally on your computer, ensure you have:
-1. Ruby version 2.1.0 or higher (check by running `ruby -v`)
-2. Bundler (`gem install bundler`)
-3. Jekyll (`gem install jekyll`)
-4. Once Bundler and Jekyll gems are installed, run `bundle install`
+
+1. Ruby version 3.0.0 or higher (check by running `ruby -v`)
+1. Bundler (`gem install bundler`)
+1. Jekyll (`gem install jekyll`)
+1. Once Bundler and Jekyll gems are installed, run `bundle install`
 
 #### Run Locally
 To construct:
+
 1. `git clone https://github.com/cyberark/secretless-broker`
-2. `cd docs`
-3. Run the following command:
-`bundle exec jekyll serve`
-4. Preview Jekyll site locally in web browser by either running `open localhost:4000` or manually navigating to http://localhost:4000
+1. `cd docs`
+1. Run the following command:
+   `bundle exec jekyll serve`
+1. Preview Jekyll site locally in web browser by either running
+   `open localhost:4000` or manually navigating to http://localhost:4000
 
 #### Run in Docker
 With `docker` and `docker-compose`:
 
 1. Run `docker-compose up -d` in the `docs` directory.
-2. Preview Jekyll site locally in web browser by either running `open localhost:4000` or manually navigating to http://localhost:4000
+1. Preview Jekyll site locally in web browser by either running
+   `open localhost:4000` or manually navigating to http://localhost:4000
 
 ### Documentation Website
 The [documentation website](https://docs.secretless.io) source is in the [secretless-docs repo](https://github.com/cyberark/secretless-docs); instructions for contributing are available there.

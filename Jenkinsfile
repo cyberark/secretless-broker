@@ -105,7 +105,6 @@ pipeline {
             sh 'cp ./test/unit-test-output/c.out ./c.out'
 
             junit 'test/unit-test-output/junit.xml'
-            ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
           }
         }
       }
@@ -210,6 +209,8 @@ pipeline {
     stage('Cobertura') {
       steps {
         cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'test/test-coverage/coverage.xml', conditionalCoverageTargets: '70, 0, 70', failUnhealthy: true, failUnstable: true, lineCoverageTargets: '70, 70, 70', maxNumberOfBuilds: 0, methodCoverageTargets: '70, 0, 70', onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
+        sh 'cp test/test-coverage/integ-and-ut-cover.out ./c.out'
+        ccCoverage("gocov", "--prefix github.com/cyberark/secretless-broker")
       }
     }
 

@@ -15,7 +15,7 @@ require (
 	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 )
 
 // Security fixes to ensure we don't have old vulnerable packages in our
@@ -31,15 +31,25 @@ replace golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c => golang.org/x/c
 
 replace golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 => golang.org/x/crypto v0.0.0-20220314234659-1baeb1ce4c0b
 
-replace golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 => golang.org/x/net v0.0.0-20211209124913-491a49abca63
+replace golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 => golang.org/x/net v0.0.0-20220906165146-f3363e06e74c
 
-replace golang.org/x/net v0.0.0-20210610132358-84b48f89b13b => golang.org/x/net v0.0.0-20211209124913-491a49abca63
+replace golang.org/x/net v0.0.0-20190620200207-3b0461eec859 => golang.org/x/net v0.0.0-20220906165146-f3363e06e74c
 
-replace golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 => golang.org/x/net v0.0.0-20211209124913-491a49abca63
+replace golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 => golang.org/x/net v0.0.0-20220906165146-f3363e06e74c
 
-replace golang.org/x/text v0.3.0 => golang.org/x/text v0.3.7
+replace golang.org/x/net v0.0.0-20210610132358-84b48f89b13b => golang.org/x/net v0.0.0-20220906165146-f3363e06e74c
 
-replace golang.org/x/text v0.3.6 => golang.org/x/text v0.3.7
+replace golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 => golang.org/x/net v0.0.0-20220906165146-f3363e06e74c
+
+replace golang.org/x/net v0.0.0-20220722155237-a158d28d115b => golang.org/x/net v0.0.0-20220906165146-f3363e06e74c
+
+replace golang.org/x/text v0.3.0 => golang.org/x/text v0.3.8
+
+replace golang.org/x/text v0.3.3 => golang.org/x/text v0.3.8
+
+replace golang.org/x/text v0.3.6 => golang.org/x/text v0.3.8
+
+replace golang.org/x/text v0.3.7 => golang.org/x/text v0.3.8
 
 replace gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c => gopkg.in/yaml.v3 v3.0.1
 

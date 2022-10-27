@@ -12,8 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.7.15] - 2022-09-22
 
 ### Security
+- Upgrade golang.org/x/text and golange.org/x/net to reolve CVE-2022-32149
+  and CVE-2022-27664
+  [cyberark/secretless-broker#1478](https://github.com/cyberark/secretless-broker/pull/1478)
 - Upgrade website Dockerfiles to Ruby 3 to resolve CVE-2022-0778.
-  [cyberark/secretless-broker#1475](https://github.com/cyberark/secretless-broker/pull/1475)]
+  [cyberark/secretless-broker#1475](https://github.com/cyberark/secretless-broker/pull/1475)
 
 ## [1.7.14] - 2022-08-17
 

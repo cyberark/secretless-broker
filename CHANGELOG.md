@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.7.15] - 2022-09-22
 
 ### Security
+- Updated direct dependencies in bin/juxtaposer/go.mod and go.mod and add replace statements
+  for known vulnerable third-party versions.
+  [cyberark/secretless-broker#1479](https://github.com/cyberark/secretless-broker/pull/1479)]
 - Upgrade golang.org/x/text and golange.org/x/net to reolve CVE-2022-32149
   and CVE-2022-27664
   [cyberark/secretless-broker#1478](https://github.com/cyberark/secretless-broker/pull/1478)

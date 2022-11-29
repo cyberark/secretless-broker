@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.15] - 2022-09-22
+## [1.7.15] - 2022-11-29
 
 ### Security
 - Updated direct dependencies in bin/juxtaposer/go.mod and go.mod and add replace statements
@@ -675,44 +675,45 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.14...HEAD
-[0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
-[0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
-[0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
-[0.5.0]: https://github.com/cyberark/secretless-broker/compare/v0.4.0...v0.5.0
-[0.5.1]: https://github.com/cyberark/secretless-broker/compare/v0.5.0...v0.5.1
-[0.5.2]: https://github.com/cyberark/secretless-broker/compare/v0.5.1...v0.5.2
-[0.6.0]: https://github.com/cyberark/secretless-broker/compare/v0.5.2...v0.6.0
-[0.6.1]: https://github.com/cyberark/secretless-broker/compare/v0.6.0...v0.6.1
-[0.6.2]: https://github.com/cyberark/secretless-broker/compare/v0.6.1...v0.6.2
-[0.6.3]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...v0.6.3
-[0.6.4]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...v0.6.4
-[0.7.0]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...v0.7.0
-[0.7.1]: https://github.com/cyberark/secretless-broker/compare/v0.7.0...v0.7.1
-[0.8.0]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...v0.8.0
-[1.0.0]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...v1.0.0
-[1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0
-[1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0
-[1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0
-[1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0
-[1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1
-[1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2
-[1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0
-[1.5.1]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...v1.5.1
-[1.5.2]: https://github.com/cyberark/secretless-broker/compare/v1.5.1...v1.5.2
-[1.6.0]: https://github.com/cyberark/secretless-broker/compare/v1.5.2...v1.6.0
-[1.7.0]: https://github.com/cyberark/secretless-broker/compare/v1.6.0...v1.7.0
-[1.7.1]: https://github.com/cyberark/secretless-broker/compare/v1.7.0...v1.7.1
-[1.7.2]: https://github.com/cyberark/secretless-broker/compare/v1.7.1...v1.7.2
-[1.7.3]: https://github.com/cyberark/secretless-broker/compare/v1.7.2...v1.7.3
-[1.7.4]: https://github.com/cyberark/secretless-broker/compare/v1.7.3...v1.7.4
-[1.7.5]: https://github.com/cyberark/secretless-broker/compare/v1.7.4...v1.7.5
-[1.7.6]: https://github.com/cyberark/secretless-broker/compare/v1.7.5...v1.7.6
-[1.7.7]: https://github.com/cyberark/secretless-broker/compare/v1.7.6...v1.7.7
-[1.7.8]: https://github.com/cyberark/secretless-broker/compare/v1.7.7...v1.7.8
-[1.7.9]: https://github.com/cyberark/secretless-broker/compare/v1.7.8...v1.7.9
-[1.7.10]: https://github.com/cyberark/secretless-broker/compare/v1.7.9...v1.7.10
-[1.7.11]: https://github.com/cyberark/secretless-broker/compare/v1.7.10...v1.7.11
-[1.7.12]: https://github.com/cyberark/secretless-broker/compare/v1.7.11...v1.7.12
-[1.7.13]: https://github.com/cyberark/secretless-broker/compare/v1.7.12...v1.7.13
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.15...HEAD
+[1.7.15]: https://github.com/cyberark/secretless-broker/compare/v1.7.14...v1.7.15
 [1.7.14]: https://github.com/cyberark/secretless-broker/compare/v1.7.13...v1.7.14
+[1.7.13]: https://github.com/cyberark/secretless-broker/compare/v1.7.12...v1.7.13
+[1.7.12]: https://github.com/cyberark/secretless-broker/compare/v1.7.11...v1.7.12
+[1.7.11]: https://github.com/cyberark/secretless-broker/compare/v1.7.10...v1.7.11
+[1.7.10]: https://github.com/cyberark/secretless-broker/compare/v1.7.9...v1.7.10
+[1.7.9]: https://github.com/cyberark/secretless-broker/compare/v1.7.8...v1.7.9
+[1.7.8]: https://github.com/cyberark/secretless-broker/compare/v1.7.7...v1.7.8
+[1.7.7]: https://github.com/cyberark/secretless-broker/compare/v1.7.6...v1.7.7
+[1.7.6]: https://github.com/cyberark/secretless-broker/compare/v1.7.5...v1.7.6
+[1.7.5]: https://github.com/cyberark/secretless-broker/compare/v1.7.4...v1.7.5
+[1.7.4]: https://github.com/cyberark/secretless-broker/compare/v1.7.3...v1.7.4
+[1.7.3]: https://github.com/cyberark/secretless-broker/compare/v1.7.2...v1.7.3
+[1.7.2]: https://github.com/cyberark/secretless-broker/compare/v1.7.1...v1.7.2
+[1.7.1]: https://github.com/cyberark/secretless-broker/compare/v1.7.0...v1.7.1
+[1.7.0]: https://github.com/cyberark/secretless-broker/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/cyberark/secretless-broker/compare/v1.5.2...v1.6.0
+[1.5.2]: https://github.com/cyberark/secretless-broker/compare/v1.5.1...v1.5.2
+[1.5.1]: https://github.com/cyberark/secretless-broker/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/cyberark/secretless-broker/compare/v1.4.2...v1.5.0
+[1.4.2]: https://github.com/cyberark/secretless-broker/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/cyberark/secretless-broker/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/cyberark/secretless-broker/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/cyberark/secretless-broker/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/cyberark/secretless-broker/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/cyberark/secretless-broker/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/cyberark/secretless-broker/compare/v0.8.0...v1.0.0
+[0.8.0]: https://github.com/cyberark/secretless-broker/compare/v0.7.1...v0.8.0
+[0.7.1]: https://github.com/cyberark/secretless-broker/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/cyberark/secretless-broker/compare/v0.6.4...v0.7.0
+[0.6.4]: https://github.com/cyberark/secretless-broker/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/cyberark/secretless-broker/compare/v0.6.2...v0.6.3
+[0.6.2]: https://github.com/cyberark/secretless-broker/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/cyberark/secretless-broker/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/cyberark/secretless-broker/compare/v0.5.2...v0.6.0
+[0.5.2]: https://github.com/cyberark/secretless-broker/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/cyberark/secretless-broker/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/cyberark/secretless-broker/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0

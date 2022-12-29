@@ -102,9 +102,14 @@ pipeline {
         stage('Unit tests') {
           steps {
             sh './bin/test_unit'
-            sh 'cp ./test/unit-test-output/c.out ./c.out'
+          }
+          post {
+            always {
+              sh './bin/coverage'
+              sh 'cp ./test/unit-test-output/c.out ./c.out'
 
-            junit 'test/unit-test-output/junit.xml'
+              junit 'test/unit-test-output/junit.xml'
+            }
           }
         }
       }

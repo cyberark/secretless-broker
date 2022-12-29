@@ -12,7 +12,6 @@ function main() {
   retrieve_cyberark_ca_cert
   build_ut_docker_image
   run_unit_tests
-  format_output
 }
 
 function build_ut_docker_image() {
@@ -24,7 +23,6 @@ function build_ut_docker_image() {
 
 function run_unit_tests() {
   echo "Running unit tests..."
-  set +e
     mkdir -p "$junit_output_dir"
     rm -f "$junit_output_dir/*"
 
@@ -46,23 +44,6 @@ function run_unit_tests() {
         ./pkg/... \
       | tee -a "./$junit_output_dir/junit.output"
     echo "Unit test exit status: $?"
-  set -e
-}
-
-function format_output() {
-  # Format output
-  docker run --rm \
-    --volume "$toplevel_dir"/:/secretless \
-    --workdir "/secretless/$junit_output_dir" \
-    secretless-unit-test-runner:latest \
-      sh -exc "
-        rm -f junit.xml
-  
-        # Format test output XML
-        cat junit.output | go-junit-report > junit.xml
-  
-        # Format coverage output XML
-        gocov convert c.out | gocov-xml > coverage.xml"
 }
 
 main

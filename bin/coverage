@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -eo pipefail
+
+current_dir=$("$(dirname "$0")"/abspath)
+toplevel_dir=$current_dir/..
+junit_output_dir=test/unit-test-output
+
+function main() {
+  format_output
+}
+
+function format_output() {
+  # Format output
+  docker run --rm \
+    --volume "$toplevel_dir"/:/secretless \
+    --workdir "/secretless/$junit_output_dir" \
+    secretless-unit-test-runner:latest \
+      sh -exc "
+        rm -f junit.xml
+  
+        # Format test output XML
+        cat junit.output | go-junit-report > junit.xml
+  
+        # Format coverage output XML
+        gocov convert c.out | gocov-xml > coverage.xml"
+}
+
+main

@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/secretless-broker#1478](https://github.com/cyberark/secretless-broker/pull/1478)
 - Upgrade website Dockerfiles to Ruby 3 to resolve CVE-2022-0778.
   [cyberark/secretless-broker#1475](https://github.com/cyberark/secretless-broker/pull/1475)
+- Update go-mssqldb submodule to resolve CVE-2022-41717 and CVE-2022-41721
+  [cyberark/secretless-broker#1483](https://github.com/cyberark/secretless-broker/pull/1483)
 
 ## [1.7.14] - 2022-08-17
 

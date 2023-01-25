@@ -11,8 +11,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.7.16] - 2022-12-27
 
-## [1.7.15] - 2022-09-22
-
 ### Security
 - Updated direct dependencies in bin/juxtaposer/go.mod and go.mod and add replace statements
   for known vulnerable third-party versions.

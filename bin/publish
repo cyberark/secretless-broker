@@ -63,9 +63,11 @@ VERSION=$(<VERSION)
 FULL_VERSION_TAG="$(full_version_tag)"
 readonly VERSION
 readonly FULL_VERSION_TAG
-readonly REDHAT_IMAGE="scan.connect.redhat.com/ospid-18d9f51d-9c0c-4031-9f9e-ef08aa2ff409/secretless-broker"
+readonly REDHAT_REGISTRY="quay.io"
 readonly REDHAT_CERT_PID="5e61546e2c5f183d03415962"
 readonly REDHAT_LOCAL_IMAGE="secretless-broker-redhat"
+readonly REDHAT_IMAGE="${REDHAT_REGISTRY}/redhat-isv-containers/${REDHAT_CERT_PID}"
+readonly REDHAT_USER="redhat-isv-containers+${REDHAT_CERT_PID}-robot"
 readonly IMAGES=(
   "secretless-broker"
   "secretless-broker-quickstart"
@@ -128,7 +130,7 @@ if [[ ${PROMOTE} = true ]]; then
   docker tag "${LOCAL_REGISTRY}/${REDHAT_LOCAL_IMAGE}:${SOURCE_TAG}" "${REDHAT_IMAGE}:${REMOTE_TAG}"
 
   # Publish RedHat image to RedHat Registry
-  if docker login scan.connect.redhat.com -u unused -p "${REDHAT_API_KEY}"; then
+  if docker login "${REDHAT_REGISTRY}" -u "${REDHAT_USER}" -p "${REDHAT_API_KEY}"; then
     # you can't push the same tag twice to redhat registry, so ignore errors
     if ! docker push "${REDHAT_IMAGE}:${REMOTE_TAG}"; then
       echo 'RedHat push FAILED! (maybe the image was pushed already?)'
@@ -138,7 +140,7 @@ if [[ ${PROMOTE} = true ]]; then
     # scan image with preflight tool
     scan_redhat_image "${REDHAT_IMAGE}:${REMOTE_TAG}" "${REDHAT_CERT_PID}"
   else
-    echo 'Failed to log in to scan.connect.redhat.com'
+    echo "Failed to log in to ${REDHAT_REGISTRY}"
     exit 1
   fi
 

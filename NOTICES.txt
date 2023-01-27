@@ -9,8 +9,8 @@ of the license associated with each component.
 SECTION 1: Apache License 2.0
 
 >>> github.com/aws/aws-sdk-go-1.15.79
->>> github.com/cyberark/conjur-api-go-0.10.1
->>> github.com/cyberark/conjur-authn-k8s-client-0.23.1
+>>> github.com/cyberark/conjur-api-go-0.10.2
+>>> github.com/cyberark/conjur-authn-k8s-client-0.24.0
 >>> github.com/docker/docker-20.10.17+incompatible
 >>> github.com/heptiolabs/healthcheck-0.0.0-20211123025425-613501dd5deb
 >>> gopkg.in/yaml.v2-2.4.0
@@ -28,18 +28,18 @@ SECTION 3: BSD 3-clause "New" or "Revised" License
 
 >>> github.com/cyberark/go-mssqldb-0.0.0-20191030142036-b5a965a47dd3
 >>> github.com/fsnotify/fsnotify-1.5.4
->>> golang.org/x/crypto-0.0.0-20220525230936-793ad666bf5e
+>>> golang.org/x/crypto-0.5.0
 
 SECTION 4: MIT License
 
 >>> github.com/cenkalti/backoff-2.2.1
 >>> github.com/urfave/cli-1.22.9
->>> github.com/cyberark/summon-0.9.1
+>>> github.com/cyberark/summon-0.9.5
 >>> github.com/go-ozzo/ozzo-validation-3.6.0
 >>> github.com/joho/godotenv-1.4.0
 >>> github.com/keybase/go-keychain-0.0.0-20220610143837-c2ce06069005
 >>> github.com/lib/pq-1.10.6
->>> github.com/stretchr/testify-1.7.2
+>>> github.com/stretchr/testify-1.8.0
 >>> gopkg.in/yaml.v2-2.4.0
 
 SECTION 5: Mozilla Public License 2.0
@@ -78,9 +78,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/cyberark/conjur-api-go-0.10.1
+>>> github.com/cyberark/conjur-api-go-0.10.2
 
-Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
+Copyright (c) 2022 CyberArk Software Ltd. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
->>> github.com/cyberark/conjur-authn-k8s-client-0.23.1
+>>> github.com/cyberark/conjur-authn-k8s-client-0.24.0
 
 Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
 
@@ -359,7 +359,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
->>> golang.org/x/crypto-0.0.0-20220525230936-793ad666bf5e
+>>> golang.org/x/crypto-0.5.0
 
 Copyright (c) 2009 The Go Authors. All rights reserved.
 
@@ -444,7 +444,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
->>> github.com/cyberark/summon-0.9.1
+>>> github.com/cyberark/summon-0.9.5
 
 The MIT License (MIT)
 
@@ -551,11 +551,11 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
->>> github.com/stretchr/testify-1.7.2
+>>> github.com/stretchr/testify-1.8.0
 
 MIT License
 
-Copyright (c) 2012-2018 Mat Ryer and Tyler Bunnell
+Copyright (c) 2012-2020 Mat Ryer, Tyler Bunnell and contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

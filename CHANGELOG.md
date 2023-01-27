@@ -677,7 +677,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.14...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.16...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -718,3 +718,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.12]: https://github.com/cyberark/secretless-broker/compare/v1.7.11...v1.7.12
 [1.7.13]: https://github.com/cyberark/secretless-broker/compare/v1.7.12...v1.7.13
 [1.7.14]: https://github.com/cyberark/secretless-broker/compare/v1.7.13...v1.7.14
+[1.7.16]: https://github.com/cyberark/secretless-broker/compare/v1.7.14...v1.7.16

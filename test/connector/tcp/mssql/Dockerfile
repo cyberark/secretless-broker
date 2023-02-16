@@ -13,7 +13,7 @@ RUN curl --fail \
 	https://packages.microsoft.com/config/debian/10/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
 
 # Install SQL Server drivers and tools
-RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libodbc1 unixodbc msodbcsql17 mssql-tools unixodbc-dev
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libodbc1 unixodbc-dev=2.3.7 unixodbc=2.3.7 odbcinst1debian2=2.3.7 odbcinst=2.3.7 msodbcsql17 mssql-tools
 ENV PATH $PATH:/opt/mssql-tools/bin
 
 # Install and set locale to en_US.UTF-8

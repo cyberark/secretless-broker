@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.7.17] - 2023-02-09
 
+### Security
+- Updated golang.org/x/net to v0.7.0 to remove CVE-2022-41723
+  [cyberark/secretless-broker#1488](https://github.com/cyberark/secretless-broker/pull/1488)
+
 ## [1.7.16] - 2022-12-27
 
 ### Security

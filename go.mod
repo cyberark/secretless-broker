@@ -163,16 +163,16 @@ exclude github.com/emicklei/go-restful v2.9.5+incompatible
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-api-go => github.com/cyberark/conjur-api-go v0.11.0
+replace github.com/cyberark/conjur-api-go => github.com/cyberark/conjur-api-go latest
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-authn-k8s-client => github.com/cyberark/conjur-authn-k8s-client v0.24.0
+replace github.com/cyberark/conjur-authn-k8s-client => github.com/cyberark/conjur-authn-k8s-client latest
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/conjur-opentelemetry-tracer v0.0.1-859
+replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/conjur-opentelemetry-tracer latest
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/summon => github.com/cyberark/summon v0.9.5
+replace github.com/cyberark/summon => github.com/cyberark/summon latest
 
 go 1.17
 

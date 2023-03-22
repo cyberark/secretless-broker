@@ -8,7 +8,7 @@ of the license associated with each component.
 
 SECTION 1: Apache License 2.0
 
->>> github.com/aws/aws-sdk-go-1.15.79
+>>> github.com/aws/aws-sdk-go-1.44.0
 >>> github.com/cyberark/conjur-api-go-0.10.2
 >>> github.com/cyberark/conjur-authn-k8s-client-0.24.0
 >>> github.com/docker/docker-20.10.17+incompatible
@@ -60,7 +60,7 @@ APPENDIX: Standard License Files and Templates
 Apache License 2.0 is applicable to the following component(s).
 
 
->>> github.com/aws/aws-sdk-go-1.15.79
+>>> github.com/aws/aws-sdk-go-1.44.0
 
 Copyright 2015 Amazon.com, Inc. or its affiliates. All Rights Reserved. 
 Copyright 2014-2015 Stripe, Inc.

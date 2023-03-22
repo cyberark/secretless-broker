@@ -1,7 +1,7 @@
 module github.com/cyberark/secretless-broker
 
 require (
-	github.com/aws/aws-sdk-go v1.15.79
+	github.com/aws/aws-sdk-go v1.44.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/docker/docker v20.10.17+incompatible
@@ -27,15 +27,18 @@ require (
 require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
+	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
+	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/hashicorp/go-hclog v0.16.2 // indirect
@@ -59,6 +62,7 @@ require (
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/zalando/go-keyring v0.2.2 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 )
 

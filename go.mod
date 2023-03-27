@@ -175,7 +175,7 @@ replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/c
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
 replace github.com/cyberark/summon => github.com/cyberark/summon latest
 
-go 1.17
+go 1.19
 
 // Security fixes to ensure we don't have old vulnerable packages in ou1571 0-36327r
 // dependency tree. We're often not vulnerable, but removing them to ensure

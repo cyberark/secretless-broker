@@ -1,4 +1,4 @@
-FROM ruby:3.0-slim-buster
+FROM ruby:3.0.5-slim-bullseye
 
 RUN apt-get -y update && \
     apt-get -y install build-essential && \

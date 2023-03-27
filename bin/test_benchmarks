@@ -55,7 +55,7 @@ pushd test
     -v "$project_dir/test/:/secretless/test/output/" \
     secretless-dev \
     bash -exc "
-      go get -u github.com/jstemmer/go-junit-report
+      go install github.com/jstemmer/go-junit-report@latest
       cat ./test/output/bench.output | go-junit-report > ./test/output/bench.xml
     "
 popd || true
@@ -94,7 +94,7 @@ docker run --rm \
   -v "$project_dir/docs/_includes/:/secretless/docs/_includes/" \
   secretless-dev \
   bash -exc "
-    go get -u github.com/hhatto/gocloc/cmd/gocloc
+    go install github.com/hhatto/gocloc/cmd/gocloc@latest
     gocloc . | tee -a ./${auto_bench_file}
   " \
   | tee -a "$project_dir/test/bench.output"

@@ -1,4 +1,4 @@
-FROM golang:1.12.5-alpine as perftool-builder
+FROM golang:1.19-alpine as perftool-builder
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a
 # corporate proxy in the middle. For these connections to succeed we need to
@@ -26,7 +26,7 @@ COPY . /perftool/
 RUN go build -a -ldflags '-extldflags "-static"' -o juxtaposer ./main.go
 
 # =================== MAIN CONTAINER ===================
-FROM alpine:3.9
+FROM alpine:3.17
 
 ENTRYPOINT [ "/bin/juxtaposer" ]
 

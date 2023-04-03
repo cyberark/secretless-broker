@@ -30,6 +30,7 @@ docker run --rm \
     -v "$toplevel_dir/:/secretless/" \
     secretless-dev \
     bash -exc "
-      go get github.com/securego/gosec/cmd/gosec
+      go install github.com/securego/gosec/v2/cmd/gosec@latest
+      git config --global --add safe.directory /secretless
       ./bin/run_gosec -c ${confidence} -s ${severity} -b ${current_branch} -e ${excluded_directories}
     "

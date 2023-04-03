@@ -76,7 +76,7 @@ pushd test
     -v "${project_dir}/test/:/secretless/test/output/" \
     secretless-dev \
     bash -exc "
-      go get -u github.com/jstemmer/go-junit-report
+      go install github.com/jstemmer/go-junit-report@latest
       cat ./test/output/junit.output | go-junit-report > ./test/output/junit.xml
     "
 popd || true

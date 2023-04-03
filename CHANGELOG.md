@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.17] - 2023-02-09
+## [1.7.17] - 2023-03-27
+
+### Changed
+- Updated Go version to 1.19
+  [cyberark/secretless-broker#1491](https://github.com/cyberark/secretless-broker/pull/1491)
 
 ### Security
 - Updated github.com/aws/aws-sdk-go to v1.44.0 to remove security issues

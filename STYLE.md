@@ -8,7 +8,7 @@ should make.
 
 To use `golint` on any project path, run
 ```
-go get -u golang.org/x/lint/golint
+go install golang.org/x/lint/golint@latest
 golint ./[path]/...
 ```
 

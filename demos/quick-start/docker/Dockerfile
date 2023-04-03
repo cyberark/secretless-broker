@@ -1,6 +1,6 @@
 FROM secretless-broker:latest as secretless-broker
 
-FROM postgres:9.6.9-alpine
+FROM postgres:alpine
 
 MAINTAINER "CyberArk Software, Inc."
 LABEL maintainer="CyberArk Software, Inc."

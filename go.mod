@@ -4,7 +4,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/denisenkom/go-mssqldb v0.12.3
-	github.com/docker/docker v20.10.17+incompatible
+	github.com/docker/docker v23.0.3+incompatible
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/hashicorp/vault/api v1.7.2

@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.18] - 2023-05-03
+
+### Security
+- Updated github.com/docker/docker to remove security issues
+  [cyberark/secretless-broker#1495](https://github.com/cyberark/secretless-broker/pull/1495)
+
 ## [1.7.17] - 2023-04-17
 
 ### Changed

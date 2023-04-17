@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.17] - 2023-03-27
+## [1.7.17] - 2023-04-17
 
 ### Changed
 - Updated Go version to 1.19
@@ -689,7 +689,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.16...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.17...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -731,3 +731,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.13]: https://github.com/cyberark/secretless-broker/compare/v1.7.12...v1.7.13
 [1.7.14]: https://github.com/cyberark/secretless-broker/compare/v1.7.13...v1.7.14
 [1.7.16]: https://github.com/cyberark/secretless-broker/compare/v1.7.14...v1.7.16
+[1.7.17]: https://github.com/cyberark/secretless-broker/compare/v1.7.16...v1.7.17

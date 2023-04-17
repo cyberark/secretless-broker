@@ -46,8 +46,8 @@ builds:
   id: summon2-darwin-arm64
   env:
   - CGO_ENABLED=1
-  - CC=o64-clang
-  - CXX=o64-clang++
+  - CC=oa64-clang
+  - CXX=oa64-clang++
   goos:
   - darwin
   goarch:
@@ -114,8 +114,8 @@ builds:
   id: secretless-broker-arm
   env:
   - CGO_ENABLED=1
-  - CC=o64-clang
-  - CXX=o64-clang++
+  - CC=oa64-clang
+  - CXX=oa64-clang++
   flags:
   - -tags=netgo
   goos:
@@ -164,8 +164,9 @@ brews:
 nfpms:
   - bindir: /usr/bin
     description: Secures your apps by making them Secretless
-    empty_folders:
-    - /usr/local/lib/secretless
+    contents:
+    - dst: /usr/local/lib/secretless
+      type: dir
     formats:
     - deb
     - rpm

@@ -85,7 +85,10 @@ func httpsServer(
 		return nil, err
 	}
 
-	config := &tls.Config{Certificates: []tls.Certificate{cert}}
+	config := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS12,
+	}
 	s.TLS = config
 
 	s.StartTLS()

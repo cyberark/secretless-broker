@@ -97,7 +97,8 @@ func NewProxyService(
 
 	transport := &gohttp.Transport{
 		TLSClientConfig: &tls.Config{
-			RootCAs: caCertPool,
+			RootCAs:    caCertPool,
+			MinVersion: tls.VersionTLS12,
 		},
 	}
 

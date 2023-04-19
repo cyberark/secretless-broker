@@ -3,11 +3,12 @@ package oauth1protocol
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	"math/big"
 	gohttp "net/http"
 	"net/url"
 	"sort"
@@ -71,14 +72,15 @@ var requiredConfigParams = []string{
 }
 
 func generateNonce(length int, charset string) string {
-	seededRand := rand.New(
-		rand.NewSource(time.Now().UnixNano()))
-
-	randomChars := make([]byte, length)
-	for index := range randomChars {
-		randomChars[index] = charset[seededRand.Intn(len(charset))]
+	randomBytes := make([]byte, length)
+	for i := 0; i < length; i++ {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			panic(err)
+		}
+		randomBytes[i] = charset[n.Int64()]
 	}
-	return string(randomChars)
+	return string(randomBytes)
 }
 
 // checkRequiredOAuthParams returns an error if a key from

@@ -40,8 +40,6 @@ services:
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_LOGIN: admin
       CONJUR_AUTHN_API_KEY:
-    depends_on:
-      - conjur
     volumes:
       - ./secretless.yml:/secretless.yml
       - ./test-coverage:/test-coverage

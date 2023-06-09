@@ -64,7 +64,7 @@ function wait_for_CRD() {
     if [[ "$attempt_count" -ge "$max_attempts" ]]; then
       echo ""
       echo "CRD is not ready after $attempt_count readiness checks at 2 second intervals." >&2
-      exit 1
+      return 1
     fi
     echo -n "."
     sleep 2
@@ -84,7 +84,7 @@ function wait_for_pod() {
     if [[ "$attempt_count" -ge "$max_attempts" ]]; then
       echo ""
       echo "pod is not ready after $attempt_count readiness checks at 2 second intervals." >&2
-      exit 1
+      return 1
     fi
     echo -n "."
     sleep 2
@@ -97,7 +97,7 @@ function wait_for_pod() {
     if [[ "$attempt_count" -ge "$max_attempts" ]]; then
       echo ""
       echo "pod endpoint is not ready after $attempt_count readiness checks at 2 second intervals." >&2
-      exit 1
+      return 1
     fi
     echo -n "."
     sleep 2
@@ -160,12 +160,12 @@ function main() {
 
   # deploy secretless and echo-server
   deploy_secretless
-  wait_for_CRD
-  wait_for_pod
+  wait_for_CRD || exit_err "K8s-CRD test: Failed in wait_for_CRD()"
+  wait_for_pod || exit_err "K8s-CRD test: Failed in wait_for_pod()"
 
   # run test cases
   run_test_case "create configuration object" user1 password1
   run_test_case "update configuration object" ohnoeswechangedit supersecretpassword
 }
 
-main || exit_err "K8s-CRD test: Failed inside main()"
+main

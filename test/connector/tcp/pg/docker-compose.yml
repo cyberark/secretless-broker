@@ -7,11 +7,13 @@ services:
       dockerfile: Dockerfile.pg
     ports:
       - 5432
-    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.pem -c ssl_key_file=/var/lib/postgresql/server-key.pem -c ssl_ca_file=/var/lib/postgresql/ca.pem
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.pem -c ssl_key_file=/var/lib/postgresql/server-key.pem -c ssl_ca_file=/var/lib/postgresql/ca.pem -c config_file=/etc/postgresql.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 30s
+    environment:
+      POSTGRES_PASSWORD: password
 
   pg_no_tls:
     build:
@@ -19,10 +21,13 @@ services:
       dockerfile: Dockerfile.pg
     ports:
       - 5432
+    command: -c config_file=/etc/postgresql.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 30s
+    environment:
+      POSTGRES_PASSWORD: password
 
   secretless-dev:
     image: secretless-dev

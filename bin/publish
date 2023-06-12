@@ -126,7 +126,7 @@ if [[ ${PROMOTE} = true ]]; then
   done
 
   # Publish only latest to Redhat Registries
-  echo "Tagging and pushing ${REDHAT_IMAGE}"
+  echo "Tagging and pushing ${REDHAT_REMOTE_IMAGE} with tag ${REMOTE_TAG}"
   docker tag "${LOCAL_REGISTRY}/${REDHAT_LOCAL_IMAGE}:${SOURCE_TAG}" "${REDHAT_IMAGE}:${REMOTE_TAG}"
 
   # Publish RedHat image to RedHat Registry
@@ -139,6 +139,11 @@ if [[ ${PROMOTE} = true ]]; then
 
     # scan image with preflight tool
     scan_redhat_image "${REDHAT_IMAGE}:${REMOTE_TAG}" "${REDHAT_CERT_PID}"
+
+    # Publish latest tag to Redhat Registry
+    echo "Tagging and pushing ${REDHAT_REMOTE_IMAGE} with tag latest"
+    docker tag "${LOCAL_REGISTRY}/${REDHAT_LOCAL_IMAGE}:${SOURCE_TAG}" "${REDHAT_REMOTE_IMAGE}:latest"
+    docker push "${REDHAT_REMOTE_IMAGE}:latest"
   else
     echo "Failed to log in to ${REDHAT_REGISTRY}"
     exit 1

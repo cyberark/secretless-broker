@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.18] - 2023-06-08
+## [1.7.18] - 2023-06-12
+
+### Changed
+- Update CRD test script.
+  [cyberark/secretless-broker#1499](https://github.com/cyberark/secretless-broker/pull/1499)
 
 ## [1.7.17] - 2023-04-17
 

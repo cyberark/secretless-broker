@@ -19,7 +19,9 @@ trap cleanup EXIT ABRT QUIT
 
 echo "Starting Quick Start demo tests..."
 set +e
+echo "Calling test"
   ./bin/test
+echo "Starting Quick Start demo tests again..."
   exit_status=$?
 set -e
 

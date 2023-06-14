@@ -5,7 +5,7 @@ services:
     image: secretless-broker-quickstart
 
   test-client:
-    image: postgres:9.6.9-alpine
+    image: postgres:alpine
     volumes: [ "./bin/entrypoint:/entrypoint" ]
     entrypoint: [ "/entrypoint" ]
     depends_on: [ "quickstart" ]

@@ -51,7 +51,10 @@ modified_directories="./..."
 # Get an array of directories containing modified files
 if [[ ${current_branch} != 'main' ]]; then 
     echo 'Current branch is not main - running gosec on modified packages for this branch only'
-    git fetch origin main:refs/remotes/origin/main
+    # Jenkins already fetches the main refs so only run locally
+    if [[ ! -v BRANCH_NAME ]]; then
+      git fetch origin main:refs/remotes/origin/main
+    fi
     modified_directories=($(git diff origin/main...origin/"${current_branch}" --name-only | xargs -L1 sh -c '[ "$#" -gt 0 ] && dirname "$@"' - | uniq))
 fi
 
@@ -61,7 +64,7 @@ rm -f "gosec.output"
 set +e && set +o pipefail
 
 # Run our scan, flagging only 'high' level issues with 'medium' or higher severity
-gosec -fmt=junit-xml \
+"$(go env GOPATH)"/bin/gosec -fmt=junit-xml \
     -out=gosec.output \
     -severity="${severity}" \
     -confidence="${confidence}" \

@@ -15,7 +15,7 @@ require (
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.2.0 // indirect
+	golang.org/x/crypto v0.10.0 // indirect
 )
 
 // Security fixes to ensure we don't have old vulnerable packages in our
@@ -37,19 +37,25 @@ replace golang.org/x/crypto v0.0.0-20220314234659-1baeb1ce4c0b => golang.org/x/c
 
 replace golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d => golang.org/x/crypto v0.2.0
 
-replace golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 => golang.org/x/net v0.2.0
+replace golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 => golang.org/x/net v0.11.0
 
-replace golang.org/x/net v0.0.0-20190620200207-3b0461eec859 => golang.org/x/net v0.2.0
+replace golang.org/x/net v0.0.0-20190620200207-3b0461eec859 => golang.org/x/net v0.11.0
 
-replace golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 => golang.org/x/net v0.2.0
+replace golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 => golang.org/x/net v0.11.0
 
-replace golang.org/x/net v0.0.0-20210610132358-84b48f89b13b => golang.org/x/net v0.2.0
+replace golang.org/x/net v0.0.0-20210610132358-84b48f89b13b => golang.org/x/net v0.11.0
 
-replace golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 => golang.org/x/net v0.2.0
+replace golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 => golang.org/x/net v0.11.0
 
-replace golang.org/x/net v0.0.0-20220722155237-a158d28d115b => golang.org/x/net v0.2.0
+replace golang.org/x/net v0.0.0-20220722155237-a158d28d115b => golang.org/x/net v0.11.0
 
-replace golang.org/x/net v0.0.0-20211209124913-491a49abca63 => golang.org/x/net v0.2.0
+replace golang.org/x/net v0.0.0-20211209124913-491a49abca63 => golang.org/x/net v0.11.0
+
+replace golang.org/x/net v0.2.0 => golang.org/x/net v0.11.0
+
+replace golang.org/x/net v0.6.0 => golang.org/x/net v0.11.0
+
+replace golang.org/x/net v0.10.0 => golang.org/x/net v0.11.0
 
 replace golang.org/x/text v0.3.0 => golang.org/x/text v0.4.0
 

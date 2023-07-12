@@ -18,7 +18,7 @@ else
   docker_args="-v $(pwd)/.env:/secretless/test/providers/vault/.env"
 fi
 
-docker-compose run \
+docker compose run \
   --rm \
   --no-deps \
   $docker_args \

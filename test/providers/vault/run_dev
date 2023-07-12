@@ -2,7 +2,7 @@
 
 platform=$(go run ../../print_platform.go)
 
-hcv_host_port=$(docker-compose port vault 8200)
+hcv_host_port=$(docker compose port vault 8200)
 hcv_port="${hcv_host_port##*:}"
 
 # TODO: Fix this. We have no secretless.dev.yml in this folder.

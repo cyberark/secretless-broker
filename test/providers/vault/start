@@ -2,16 +2,16 @@
 
 ./stop
 
-docker-compose build
+docker compose build
 
-docker-compose up \
+docker compose up \
   -d \
   vault
 
 function wait_for_vault() {
   for _ in $(seq 20); do
     # curl for /v1/sys/health hangs
-    if ! docker-compose run --rm -T dev curl -s http://vault:8200 > /dev/null; then
+    if ! docker compose run --rm -T dev curl -s http://vault:8200 > /dev/null; then
       echo .
       sleep 2
     else
@@ -20,15 +20,15 @@ function wait_for_vault() {
   done
 
   # Fail if the server isn't up yet
-  docker-compose run --rm -T dev curl -s http://vault:8200 > /dev/null
+  docker compose run --rm -T dev curl -s http://vault:8200 > /dev/null
 }
 
 wait_for_vault
 
-root_token=$(docker-compose logs vault | grep "Root Token:" | tail -n 1 | awk '{print $NF}')
+root_token=$(docker compose logs vault | grep "Root Token:" | tail -n 1 | awk '{print $NF}')
 
 function vault_cmd() {
-  docker-compose run --rm \
+  docker compose run --rm \
     -T \
     -e VAULT_ADDR=http://vault:8200 \
     -e VAULT_TOKEN="$root_token" \

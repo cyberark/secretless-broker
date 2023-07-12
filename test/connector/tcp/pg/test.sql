@@ -15,7 +15,7 @@ GRANT ALL ON test.encodings TO test;
 
 -- Run the following command :
 -- 
--- docker-compose exec -e PGCLIENTENCODING=latin1 test psql -h secretless-dev -p 3318 -d postgres -c "select value from test.encodings where encoding='latin1'"
+-- docker compose exec -e PGCLIENTENCODING=latin1 test psql -h secretless-dev -p 3318 -d postgres -c "select value from test.encodings where encoding='latin1'"
 -- 
 -- It should yield:
 -- 

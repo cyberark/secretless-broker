@@ -1,4 +1,4 @@
-FROM golang:1.19-buster
+FROM golang:1.21.3-bullseye
 MAINTAINER CyberArk Software Ltd.
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a

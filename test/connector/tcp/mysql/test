@@ -34,11 +34,11 @@ done
 # command will use the secretless-dev container.
 
 
-if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
+if [[ ! -z $(docker compose ps -q secretless-dev) ]]; then
   echo "Please run the ./start script before running this script"
   exit 1
 fi
 
-docker-compose run --rm --no-deps \
+docker compose run --rm --no-deps \
   -e SECRETLESS_HOST="secretless" \
   test bash -c "go test -v ./test/connector/tcp/mysql/tests"

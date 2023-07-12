@@ -46,7 +46,7 @@ ping_target_service_thru_secretless() {
 
   id="$(openssl rand -hex 6)-basicauth"
 
-  docker_cmd="docker-compose run --no-deps --name $id"
+  docker_cmd="docker compose run --no-deps --name $id"
 
   # NOTE: We must use an array here so that we can double quote it when we use
   # it but still have it passed as individual args.  This keeps shellcheck
@@ -74,7 +74,7 @@ echo "Waiting for Secretless to start"
 
 # single quotes are intentional:
 # shellcheck disable=SC2016
-docker-compose run --rm --no-deps test sh -ec '
+docker compose run --rm --no-deps test sh -ec '
 counter=0
 while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/null 2>&1; do
     if expr $counter = 5 > /dev/null; then

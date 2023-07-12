@@ -2,14 +2,14 @@
 
 ./stop
 
-docker-compose build
-docker-compose up -d conjur
-docker-compose exec -T conjur conjurctl wait -r 240
+docker compose build
+docker compose up -d conjur
+docker compose exec -T conjur conjurctl wait -r 240
 
-admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
+admin_api_key=$(docker compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
 export CONJUR_AUTHN_API_KEY=$admin_api_key
 
-conjur_host_port=$(docker-compose port conjur 80)
+conjur_host_port=$(docker compose port conjur 80)
 conjur_port="${conjur_host_port##*:}"
 
 # Remove files from tmp but avoid recreating the folder to
@@ -28,13 +28,13 @@ report_dir="./test-coverage"
 mkdir -p "$report_dir"
 chmod 777 "$report_dir"
 
-docker-compose up \
+docker compose up \
   -d \
   secretless
 
 sleep 2
 
-docker-compose run \
+docker compose run \
   --rm \
   --no-deps \
   client \

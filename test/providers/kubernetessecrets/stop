@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-docker-compose down -v
+docker compose down -v
 
 # Only include Secretless Broker source in coverage report.
 cov_file="test-coverage/cover.out"

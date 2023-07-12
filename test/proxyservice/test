@@ -16,7 +16,7 @@ if $local_test; then
   docker_args="-v $(pwd)/../..:/secretless"
 fi
 
-docker-compose run \
+docker compose run \
   --rm \
   --no-deps \
   $docker_args \

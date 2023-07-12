@@ -38,7 +38,7 @@ done
 # command will use the secretless-dev container.
 
 
-if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
+if [[ ! -z $(docker compose ps -q secretless-dev) ]]; then
     echo "Please run the ./start script before running this script"
     exit 1
 fi
@@ -47,8 +47,8 @@ if $benchmark; then
 
   # get the container ids and ip address
   #
-  pg_cid=$(docker-compose ps -q pg)
-  secretless_cid=$(docker-compose ps -q $SECRETLESS_HOST)
+  pg_cid=$(docker compose ps -q pg)
+  secretless_cid=$(docker compose ps -q $SECRETLESS_HOST)
   pg_ip=$(docker inspect \
     -f "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" "$pg_cid")
   secretless_ip=$(docker inspect \
@@ -64,7 +64,7 @@ if $benchmark; then
   echo "++++++++++++++++++++++++++++++++++++++"
   echo "working with $SECRETLESS_HOST"
 
-  docker-compose run --rm --no-deps \
+  docker compose run --rm --no-deps \
     test bash -c "
       echo '--- QUERYING POSTGRES DIRECTLY ---' && \
       BENCH_ADDRESS=$PG_ADDRESS go test -v -bench=. -test.benchtime=10s ./test/pg_handler/bench_test.go | tee bench.old && \
@@ -76,7 +76,7 @@ if $benchmark; then
       benchcmp bench.old bench.new
     "
 else
-  docker-compose run --rm --no-deps \
+  docker compose run --rm --no-deps \
     -e SECRETLESS_HOST="$SECRETLESS_HOST" \
     test bash -c "go test -v ./test/connector/tcp/pg/tests"
 fi

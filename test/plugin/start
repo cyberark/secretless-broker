@@ -2,6 +2,6 @@
 
 ./stop
 
-docker-compose build
-docker-compose up -d echo \
+docker compose build
+docker compose up -d echo \
                      secretless-with-plugin

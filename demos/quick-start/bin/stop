@@ -3,4 +3,4 @@
 pushd test >/dev/null
 trap popd EXIT INT QUIT
 
-docker-compose down -v
+docker compose down -v

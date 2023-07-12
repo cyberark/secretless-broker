@@ -148,7 +148,7 @@ func TestSSL(t *testing.T) {
 			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=malformed, sslcert=malformed",
 				ShouldPass:  false,
-				CmdOutput:   StringPointer("psql: FATAL:  tls: failed to find any PEM data in certificate input"),
+				CmdOutput:   StringPointer("psql: error: FATAL:  tls: failed to find any PEM data in certificate input"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:       TCP,
@@ -205,7 +205,7 @@ func TestSSL(t *testing.T) {
 			Definition: Definition{
 				Description: "server_tls, sslmode=verify-full, sslrootcert=valid, sslkey=valid, sslcert=valid, sslhost=invalid",
 				ShouldPass:  false,
-				CmdOutput:   StringPointer("psql: FATAL:  x509: certificate is valid for localhost, mysql, pg, not invalid"),
+				CmdOutput:   StringPointer("psql: error: FATAL:  x509: certificate is valid for localhost, mysql, pg, not invalid"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:       TCP,

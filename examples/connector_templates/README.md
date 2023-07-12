@@ -27,9 +27,9 @@ To create a new Secretless connector plugin, follow these instructions:
    directory onto your local machine.
 
    If you follow the `TODO`-based instructions included in the files in this directory,
-   you will be able to write integration tests for your connector using `docker-compose`.
+   you will be able to write integration tests for your connector using `docker compose`.
    The included test scripts & files will help you stand up networked containers with
-   `docker-compose`.
+   `docker compose`.
 
    **Note for internal connectors:** The the test directory should be copied
    into `test/connector/<connector type>/` and renamed to `<connector_name>`.

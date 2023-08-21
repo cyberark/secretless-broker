@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update CRD test script.
   [cyberark/secretless-broker#1499](https://github.com/cyberark/secretless-broker/pull/1499)
+- Updated dependencies to latest versions
+  [cyberark/secretless-broker#1503](https://github.com/cyberark/secretless-broker/pull/1503)
 
 ## [1.7.17] - 2023-04-17
 

@@ -1,4 +1,4 @@
-FROM phusion/baseimage:master-amd64
+FROM phusion/baseimage:jammy-1.0.1
 
 COPY ./id_insecure.pub /tmp/id_insecure.pub
 

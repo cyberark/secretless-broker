@@ -4,7 +4,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/denisenkom/go-mssqldb v0.12.3
-	github.com/docker/docker v20.10.17+incompatible
+	github.com/docker/docker v24.0.5+incompatible
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/hashicorp/vault/api v1.7.2
@@ -62,7 +62,7 @@ require (
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/zalando/go-keyring v0.2.2 // indirect
+	github.com/zalando/go-keyring v0.2.3-0.20230503081219-17db2e5354bd // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 )
 
@@ -128,11 +128,11 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.7.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.7.0 // indirect
 	go.opentelemetry.io/otel/trace v1.7.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/term v0.8.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220107163113-42d7afdf6368 // indirect

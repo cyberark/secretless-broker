@@ -62,7 +62,7 @@ require (
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/zalando/go-keyring v0.2.2 // indirect
+	github.com/zalando/go-keyring v0.2.3-0.20230503081219-17db2e5354bd // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 )
 
@@ -128,11 +128,11 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.7.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.7.0 // indirect
 	go.opentelemetry.io/otel/trace v1.7.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/term v0.8.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220107163113-42d7afdf6368 // indirect
@@ -164,16 +164,16 @@ exclude github.com/emicklei/go-restful v2.9.5+incompatible
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-api-go => github.com/cyberark/conjur-api-go latest
+replace github.com/cyberark/conjur-api-go => github.com/cyberark/conjur-api-go v0.11.1
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-authn-k8s-client => github.com/cyberark/conjur-authn-k8s-client latest
+replace github.com/cyberark/conjur-authn-k8s-client => github.com/cyberark/conjur-authn-k8s-client v0.26.0
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/conjur-opentelemetry-tracer latest
+replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/conjur-opentelemetry-tracer v0.0.1-1250
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/summon => github.com/cyberark/summon latest
+replace github.com/cyberark/summon => github.com/cyberark/summon v0.9.6
 
 go 1.19
 

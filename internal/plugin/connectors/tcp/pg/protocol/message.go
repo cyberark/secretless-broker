@@ -62,6 +62,13 @@ func (message *MessageBuffer) ReadByte() (byte, error) {
 	return message.buffer.ReadByte()
 }
 
+func (message *MessageBuffer) Read(n int) ([]byte, error) {
+	readData := make([]byte, n)
+	_, err := message.buffer.Read(readData)
+	// TODO: what if the contents read are less than the slot ?
+	return readData, err
+}
+
 // ReadString reads a string from the message buffer.
 //
 // This function will read and return the next Null terminated string from the
@@ -74,6 +81,11 @@ func (message *MessageBuffer) ReadString() (string, error) {
 // WriteByte will write the specified byte to the message buffer.
 func (message *MessageBuffer) WriteByte(value byte) error {
 	return message.buffer.WriteByte(value)
+}
+
+// WriteBytes will write the specified bytes to the message buffer.
+func (message *MessageBuffer) WriteBytes(value []byte) (int, error) {
+	return message.buffer.Write(value)
 }
 
 // WriteInt32 will write a 4 byte int32 to the message buffer.

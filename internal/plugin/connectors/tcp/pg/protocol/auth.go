@@ -17,10 +17,13 @@ package protocol
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg/protocol/scram"
 )
 
 // HandleAuthenticationRequest sends credentials to the server and reports whether they were accepted or not.
@@ -58,6 +61,9 @@ func HandleAuthenticationRequest(username string, password string, connection ne
 			return
 		}
 		return handleAuthMD5(username, password, string(salt), connection)
+
+	case AuthenticationSASL:
+		return handleAuthSCRAM(username, password, connection)
 	case AuthenticationOk:
 		/* Covers the case where the authentication type is 'cert' or 'trust' */
 		return
@@ -94,6 +100,85 @@ func handleAuthMD5(username string, password string, salt string, connection net
 	return
 }
 
+// TODO: Also look into SCRAM-SHA-256-PLUS, see https://www.postgresql.org/docs/current/sasl-authentication.html
+// https://github.com/lib/pq/blob/master/conn.go
+// https://github.com/lib/pq/blob/master/buf.go
+func handleAuthSCRAM(username string, password string, connection net.Conn) error {
+	sc := scram.NewClient(sha256.New, username, password)
+	sc.Step(nil)
+	if sc.Err() != nil {
+		return fmt.Errorf("SCRAM-SHA-256 error: %s", sc.Err().Error())
+	}
+	scOut := sc.Out()
+
+	message := NewMessageBuffer([]byte{})
+	message.WriteByte(PasswordMessageType)
+	message.WriteInt32(0)
+	message.WriteString("SCRAM-SHA-256")
+	message.WriteInt32(int32(len(scOut)))
+	message.WriteBytes(scOut)
+	message.ResetLength(PGMessageLengthOffset)
+
+	if _, err := connection.Write(message.Bytes()); err != nil {
+		return err
+	}
+
+	messageType, rawMessage, err := ReadMessage(connection)
+	if err != nil {
+		return err
+	}
+	if messageType != AuthenticationMessageType {
+		return fmt.Errorf("unexpected password response: %q", messageType)
+	}
+	message = NewMessageBuffer(rawMessage)
+
+	if v, err := message.ReadInt32(); err != nil {
+		return err
+	} else if v != AuthenticationSASLContinue {
+		return fmt.Errorf("unexpected authentication response: %q", messageType)
+	}
+
+	nextStep := message.Bytes()
+	sc.Step(nextStep)
+	if sc.Err() != nil {
+		return fmt.Errorf("SCRAM-SHA-256 error: %s", sc.Err().Error())
+	}
+
+	scOut = sc.Out()
+
+	message = NewMessageBuffer([]byte{})
+	message.WriteByte(PasswordMessageType)
+	message.WriteInt32(0)
+	message.WriteBytes(scOut)
+	message.ResetLength(PGMessageLengthOffset)
+	if _, err := connection.Write(message.Bytes()); err != nil {
+		return err
+	}
+
+	messageType, rawMessage, err = ReadMessage(connection)
+	if err != nil {
+		return err
+	}
+	if messageType != AuthenticationMessageType {
+		return fmt.Errorf("unexpected password response: %q", messageType)
+	}
+	message = NewMessageBuffer(rawMessage)
+
+	if v, err := message.ReadInt32(); err != nil {
+		return err
+	} else if v != AuthenticationSASLFinal {
+		return fmt.Errorf("unexpected authentication response: %q", messageType)
+	}
+
+	nextStep = message.Bytes()
+	sc.Step(nextStep)
+	if sc.Err() != nil {
+		return fmt.Errorf("SCRAM-SHA-256 error: %s", sc.Err().Error())
+	}
+
+	return verifyAuthentication(connection)
+}
+
 func handleAuthClearText(password string, connection net.Conn) (err error) {
 	passwordMessage := createPasswordMessage(password)
 
@@ -105,34 +190,33 @@ func handleAuthClearText(password string, connection net.Conn) (err error) {
 	return
 }
 
-func verifyAuthentication(connection net.Conn) (err error) {
+func verifyAuthentication(connection net.Conn) error {
 	var messageType byte
 	var message []byte
+	var err error
+
 	if messageType, message, err = ReadMessage(connection); err != nil {
-		return
+		return err
 	}
 
 	if messageType == ErrorMessageType {
-		err = NewError(message)
-		return
+		return NewError(message)
 	}
 
 	if messageType != AuthenticationMessageType {
-		err = fmt.Errorf("Expected %d message type, got %d", AuthenticationMessageType, messageType)
-		return
+		return fmt.Errorf("Expected %d message type, got %d", AuthenticationMessageType, messageType)
 	}
 
 	var messageValue int32
 	if err = binary.Read(bytes.NewBuffer(message), binary.BigEndian, &messageValue); err != nil {
-		return
+		return err
 	}
 
 	if messageValue != AuthenticationOk {
-		err = fmt.Errorf("Expected %d (AuthenticationOk), got %d", AuthenticationOk, messageValue)
-		return
+		return fmt.Errorf("Expected %d (AuthenticationOk), got %d", AuthenticationOk, messageValue)
 	}
 
-	return
+	return nil
 }
 
 // CreatePasswordMessage creates a message which provides the password in response

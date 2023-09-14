@@ -23,7 +23,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/pg/protocol/scram"
+	"github.com/lib/pq/scram"
 )
 
 // HandleAuthenticationRequest sends credentials to the server and reports whether they were accepted or not.

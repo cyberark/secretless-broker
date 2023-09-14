@@ -62,13 +62,6 @@ func (message *MessageBuffer) ReadByte() (byte, error) {
 	return message.buffer.ReadByte()
 }
 
-func (message *MessageBuffer) Read(n int) ([]byte, error) {
-	readData := make([]byte, n)
-	_, err := message.buffer.Read(readData)
-	// TODO: what if the contents read are less than the slot ?
-	return readData, err
-}
-
 // ReadString reads a string from the message buffer.
 //
 // This function will read and return the next Null terminated string from the

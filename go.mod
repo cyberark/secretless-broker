@@ -4,14 +4,14 @@ require (
 	github.com/aws/aws-sdk-go v1.44.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/denisenkom/go-mssqldb v0.12.3
-	github.com/docker/docker v24.0.5+incompatible
+	github.com/docker/docker v20.10.17+incompatible
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/hashicorp/vault/api v1.7.2
 	github.com/heptiolabs/healthcheck v0.0.0-20211123025425-613501dd5deb
 	github.com/joho/godotenv v1.4.0
 	github.com/keybase/go-keychain v0.0.0-20220610143837-c2ce06069005
-	github.com/lib/pq v1.10.6
+	github.com/lib/pq v1.10.9
 	github.com/pkg/errors v0.9.1
 	github.com/pkg/profile v1.6.0
 	github.com/stretchr/testify v1.8.0

@@ -48,14 +48,17 @@ const (
 
 /* PostgreSQL Authentication Method constants. */
 const (
-	AuthenticationOk          int32 = 0
-	AuthenticationKerberosV5  int32 = 2
-	AuthenticationClearText   int32 = 3
-	AuthenticationMD5         int32 = 5
-	AuthenticationSCM         int32 = 6
-	AuthenticationGSS         int32 = 7
-	AuthenticationGSSContinue int32 = 8
-	AuthenticationSSPI        int32 = 9
+	AuthenticationOk           int32 = 0
+	AuthenticationKerberosV5   int32 = 2
+	AuthenticationClearText    int32 = 3
+	AuthenticationMD5          int32 = 5
+	AuthenticationSCM          int32 = 6
+	AuthenticationGSS          int32 = 7
+	AuthenticationGSSContinue  int32 = 8
+	AuthenticationSSPI         int32 = 9
+	AuthenticationSASL         int32 = 10
+	AuthenticationSASLContinue int32 = 11
+	AuthenticationSASLFinal    int32 = 12
 )
 
 // ReadStartupMessage reads the startup message. The startup message is the same as a regular

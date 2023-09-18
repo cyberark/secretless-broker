@@ -76,6 +76,11 @@ func (message *MessageBuffer) WriteByte(value byte) error {
 	return message.buffer.WriteByte(value)
 }
 
+// WriteBytes will write the specified bytes to the message buffer.
+func (message *MessageBuffer) WriteBytes(value []byte) (int, error) {
+	return message.buffer.Write(value)
+}
+
 // WriteInt32 will write a 4 byte int32 to the message buffer.
 func (message *MessageBuffer) WriteInt32(value int32) (err error) {
 	err = binary.Write(message.buffer, binary.BigEndian, value)

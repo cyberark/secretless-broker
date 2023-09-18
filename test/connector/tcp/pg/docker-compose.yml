@@ -1,21 +1,7 @@
 version: '3.0'
 
 services:
-  pg:
-    build:
-      context: .
-      dockerfile: Dockerfile.pg
-    ports:
-      - 5432
-    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.pem -c ssl_key_file=/var/lib/postgresql/server-key.pem -c ssl_ca_file=/var/lib/postgresql/ca.pem -c config_file=/etc/postgresql.conf
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 1s
-      timeout: 30s
-    environment:
-      POSTGRES_PASSWORD: password
-
-  pg_no_tls:
+  pg_no_tls: &pg_no_tls
     build:
       context: .
       dockerfile: Dockerfile.pg
@@ -28,6 +14,13 @@ services:
       timeout: 30s
     environment:
       POSTGRES_PASSWORD: password
+    volumes:
+      - ./pg_hba.conf:/etc/pg_hba.conf
+      - ./postgresql.conf:/etc/postgresql.conf
+
+  pg:
+    <<: *pg_no_tls
+    command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.pem -c ssl_key_file=/var/lib/postgresql/server-key.pem -c ssl_ca_file=/var/lib/postgresql/ca.pem -c config_file=/etc/postgresql.conf
 
   secretless-dev:
     image: secretless-dev

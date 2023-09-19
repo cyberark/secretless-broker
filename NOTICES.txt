@@ -38,7 +38,7 @@ SECTION 4: MIT License
 >>> github.com/go-ozzo/ozzo-validation-3.6.0
 >>> github.com/joho/godotenv-1.4.0
 >>> github.com/keybase/go-keychain-0.0.0-20220610143837-c2ce06069005
->>> github.com/lib/pq-1.10.6
+>>> github.com/lib/pq-1.10.9
 >>> github.com/stretchr/testify-1.8.0
 >>> gopkg.in/yaml.v2-2.4.0
 
@@ -540,7 +540,7 @@ SOFTWARE.
 
 
 
->>> github.com/lib/pq-1.10.6
+>>> github.com/lib/pq-1.10.9
 
 Copyright (c) 2011-2013, 'pq' Contributors Portions Copyright (C) 2011 Blake Mizerany
 

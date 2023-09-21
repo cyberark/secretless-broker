@@ -383,7 +383,7 @@ pipeline {
             dir('./pristine-checkout') {
               // Go releaser requires a pristine checkout
               checkout scm
-              infrapool.agentPut from: """${WORKSPACE}/pristine-checkout""", to: '''$WORKSPACE/'''
+              infrapool.agentPut from: """${WORKSPACE}/pristine-checkout""", to: """$WORKSPACE/"""
               infrapool.agentSh 'git submodule update --init --recursive'
               // Create release packages without releasing to Github
               infrapool.agentSh "./bin/build_release --skip-validate"

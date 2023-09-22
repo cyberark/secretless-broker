@@ -24,6 +24,7 @@ if (params.MODE == "PROMOTE") {
 
     // Pull existing images from internal registry in order to promote
     infrapool.agentSh """
+      export PATH="release-tools/bin:${PATH}"
       docker pull registry.tld/secretless-broker:${sourceVersion}
       docker pull registry.tld/secretless-broker-quickstart:${sourceVersion}
       docker pull registry.tld/secretless-broker-redhat:${sourceVersion}

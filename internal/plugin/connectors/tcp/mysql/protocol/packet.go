@@ -185,7 +185,7 @@ func ReadResponse(conn net.Conn, deprecateEOF bool) ([]byte, byte, error) {
 
 		data = append(data, pkt...)
 
-		if pkt[4] == responseEOF {
+		if pkt[4] == ResponseEOF {
 			break
 		}
 	}
@@ -197,7 +197,7 @@ func ReadResponse(conn net.Conn, deprecateEOF bool) ([]byte, byte, error) {
 func ReadPacket(conn net.Conn) ([]byte, error) {
 
 	// Read packet header
-	header := []byte{0, 0, 0, 0}
+	header := make([]byte, 4)
 	if _, err := io.ReadFull(conn, header); err != nil {
 		return nil, err
 	}

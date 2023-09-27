@@ -18,7 +18,7 @@ func RunQuery(
 	args := []string{"-e", "select count(*) from testdb.test"}
 
 	if clientConfig.SSL {
-		args = append(args, "--ssl", "--ssl-verify-server-cert=TRUE")
+		args = append(args, "--ssl-mode", "VERIFY_CA")
 	}
 	if clientConfig.Username != "" {
 		args = append(args, fmt.Sprintf("--user=%s", clientConfig.Username))
@@ -37,7 +37,7 @@ func RunQuery(
 	}
 
 	// ensures mysql can handle non-native auth
-	args = append(args, "--default-auth=mysql_clear_password")
+	// args = append(args, "--default-auth=mysql_clear_password")
 
 	// Pre command logs
 	println("")

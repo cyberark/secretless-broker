@@ -26,9 +26,13 @@ package protocol
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -49,10 +53,12 @@ var ErrFieldTypeNotImplementedYet = errors.New("Protocol: Required field type no
 // int<1> PacketType (0xFF)
 // int<2> ErrorCode
 // if clientCapabilities & clientProtocol41
-// {
-//		string<1> SqlStateMarker (#)
-//		string<5> SqlState
-// }
+//
+//	{
+//			string<1> SqlStateMarker (#)
+//			string<5> SqlState
+//	}
+//
 // string<EOF> Error
 func UnpackErrResponse(data []byte) error {
 	// Min packet length =
@@ -96,10 +102,10 @@ func UnpackErrResponse(data []byte) error {
 // GetPacketType extracts the PacketType byte
 // Part of basic packet structure shown below.
 //
-//     int<3> PacketLength
-//     int<1> PacketNumber
-//     int<1> PacketType (0xFF)
-//     ... more ...
+//	int<3> PacketLength
+//	int<1> PacketNumber
+//	int<1> PacketType (0xFF)
+//	... more ...
 func GetPacketType(packet []byte) byte {
 	return packet[4]
 }
@@ -186,6 +192,8 @@ type HandshakeV10 struct {
 	ProtocolVersion    byte
 	ServerVersion      string
 	ConnectionID       uint32
+	StatusFlags        uint16
+	CharacterSet       uint8
 	ServerCapabilities uint32
 	AuthPlugin         string
 	Salt               []byte
@@ -207,22 +215,29 @@ type HandshakeV10 struct {
 // int<2> StatusFlags
 // int<2> ServerCapabilities (2nd part)
 // if capabilities & clientPluginAuth
-// {
-// 		int<1> AuthPluginDataLength
-// }
+//
+//	{
+//			int<1> AuthPluginDataLength
+//	}
+//
 // else
-// {
-//		int<1> 0x00
-// }
+//
+//	{
+//			int<1> 0x00
+//	}
+//
 // string<10> Reserved (all 0x00)
 // if capabilities & clientSecureConnection
-// {
-// 		string[$len] AuthPluginDataPart2 ($len=MAX(13, AuthPluginDataLength - 8))
-// }
+//
+//	{
+//			string[$len] AuthPluginDataPart2 ($len=MAX(13, AuthPluginDataLength - 8))
+//	}
+//
 // if capabilities & clientPluginAuth
-// {
-//		string[NUL] AuthPluginName
-// }
+//
+//	{
+//			string[NUL] AuthPluginName
+//	}
 func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
@@ -263,10 +278,16 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		return nil, err
 	}
 
-	// Skip ServerDefaultCollation and StatusFlags
-	if _, err := r.Seek(3, io.SeekCurrent); err != nil {
+	// Read ServerCharacterSet and StatusFlags
+	serverCharacterSet, err := r.ReadByte()
+	if err != nil {
 		return nil, err
 	}
+	serverStatusFlagsBuf := make([]byte, 2)
+	if _, err := r.Read(serverStatusFlagsBuf); err != nil {
+		return nil, err
+	}
+	serverStatusFlags := binary.LittleEndian.Uint16(serverStatusFlagsBuf)
 
 	// Read ExServerCapabilities
 	serverCapabilitiesHigherBuf := make([]byte, 2)
@@ -332,7 +353,89 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 		ServerCapabilities: serverCapabilities,
 		AuthPlugin:         authPlugin,
 		Salt:               salt,
+		StatusFlags:        serverStatusFlags,
+		CharacterSet:       serverCharacterSet,
 	}, nil
+}
+
+// PackHandshakeV10 takes in a HandshakeResponse41 object and
+// returns a handshake response packet
+func PackHandshakeV10(serverHandshake *HandshakeV10) ([]byte, error) {
+	// Create a buffer to write the packet data
+	buffer := new(bytes.Buffer)
+
+	// Write ProtocolVersion (int<1>)
+	binary.Write(buffer, binary.LittleEndian, serverHandshake.ProtocolVersion)
+
+	// Write ServerVersion (string<NUL>)
+	buffer.WriteString(serverHandshake.ServerVersion)
+	buffer.WriteByte(0)
+
+	// Write ConnectionID (int<4>)
+	binary.Write(buffer, binary.LittleEndian, serverHandshake.ConnectionID)
+
+	// Write AuthPluginDataPart1 (string<8>)
+	buffer.Write(serverHandshake.Salt[:8]) // Write the first 8 bytes of the salt
+
+	// Write Reserved (int<1>)
+	buffer.WriteByte(0)
+
+	// Write ServerCapabilities (int<2>)
+	binary.Write(buffer, binary.LittleEndian, uint16(serverHandshake.ServerCapabilities&0xFFFF))
+
+	// Write ServerCharacterSet (int<1>)
+	buffer.WriteByte(serverHandshake.CharacterSet)
+
+	// Write StatusFlags (int<2>)
+	binary.Write(buffer, binary.LittleEndian, serverHandshake.StatusFlags)
+
+	// Write ServerCapabilities (int<2>), the higher part
+	binary.Write(buffer, binary.LittleEndian, uint16(serverHandshake.ServerCapabilities>>16))
+
+	// Write AuthPluginDataLength (int<1>) if required
+	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
+		buffer.WriteByte(byte(len(serverHandshake.Salt) + 1))
+	}
+
+	// Write Reserved (string<10>)
+	buffer.Write(make([]byte, 10))
+
+	// Calculate the length of AuthPluginDataPart2
+	var authPluginDataLength byte
+	if serverHandshake.ServerCapabilities&ClientSecureConnection != 0 {
+		numBytes := len(serverHandshake.Salt) - 8
+		if numBytes > 13 {
+			numBytes = 13
+		}
+		authPluginDataLength = byte(numBytes)
+	}
+
+	// Write AuthPluginDataPart2 (string[$len]) if required
+	if serverHandshake.ServerCapabilities&ClientSecureConnection != 0 {
+		buffer.Write(serverHandshake.Salt[8 : 8+int(authPluginDataLength)])
+		buffer.WriteByte(0)
+	}
+
+	// Write AuthPluginName (string<NUL>) if required
+	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
+		buffer.WriteString(serverHandshake.AuthPlugin)
+		buffer.WriteByte(0)
+	}
+
+	// Calculate the packet length (excluding the length field itself)
+	packetLength := buffer.Len()
+
+	// Create a header buffer and write the packet length (int<3>)
+	headerBuffer := make([]byte, 4)
+	headerBuffer[0] = byte(packetLength & 0xFF)
+	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
+	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
+	headerBuffer[3] = 0
+
+	// Combine the header and packet data to create the final packet
+	finalPacket := append(headerBuffer, buffer.Bytes()...)
+
+	return finalPacket, nil
 }
 
 // RemoveSSLFromHandshakeV10 removes Client SSL Capability from Server
@@ -426,17 +529,17 @@ func writeUint16(data []byte, pos int, value uint16) {
 //
 // The format of the header is also described here:
 //
-//   https://dev.mysql.com/doc/internals/en/mysql-packet.html
+//	  https://dev.mysql.com/doc/internals/en/mysql-packet.html
 //
-//  +-------------+----------------+---------------------------------------------+
-//  |    Type     |      Name      |                 Description                 |
-//	+-------------+----------------+---------------------------------------------+
-//  | int<3>      | payload_length | Length of the payload. The number of bytes  |
-//  |             |                | in the packet beyond the initial 4 bytes    |
-//  |             |                | that make up the packet header.             |
-//  | int<1>      | sequence_id    | Sequence ID                                 |
-//  | string<var> | payload        | [len=payload_length] payload of the packet  |
-//  +-------------+----------------+---------------------------------------------+
+//	 +-------------+----------------+---------------------------------------------+
+//	 |    Type     |      Name      |                 Description                 |
+//		+-------------+----------------+---------------------------------------------+
+//	 | int<3>      | payload_length | Length of the payload. The number of bytes  |
+//	 |             |                | in the packet beyond the initial 4 bytes    |
+//	 |             |                | that make up the packet header.             |
+//	 | int<1>      | sequence_id    | Sequence ID                                 |
+//	 | string<var> | payload        | [len=payload_length] payload of the packet  |
+//	 +-------------+----------------+---------------------------------------------+
 type HandshakeResponse41 struct {
 	Header          []byte
 	CapabilityFlags uint32
@@ -554,13 +657,34 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		PacketTail:      packetTail}, nil
 }
 
+func CreateAuthResponse(authPlugin string, password []byte, salt []byte) ([]byte, error) {
+	var authResponse []byte
+	var err error
+
+	switch authPlugin {
+	case "mysql_native_password":
+		authResponse, err = NativePassword([]byte(password), salt)
+	case "caching_sha2_password":
+		authResponse = scrambleSHA256Password([]byte(password), salt)
+	default:
+		err = fmt.Errorf("Unknown auth plugin: %s", authPlugin)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return authResponse, nil
+}
+
 // InjectCredentials takes in a HandshakeResponse41 from the client, the
 // salt from the server, and a username / password, and uses the salt
 // from the server handshake to inject the username / password credentials into
 // the client handshake response
-func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, username string, password string) (err error) {
-
-	authResponse, err := NativePassword([]byte(password), salt)
+// TODO: we can do a much better job than this. We just need to calculate the paylod and not do all this resetting BS!
+// TODO: the plugin name should come from the server, not the client!
+func InjectCredentials(authPlugin string, clientHandshake *HandshakeResponse41, salt []byte, username string, password string) (err error) {
+	fmt.Println("Injecting credentials to", authPlugin)
+	authResponse, err := CreateAuthResponse(authPlugin, []byte(password), salt)
 	if err != nil {
 		return
 	}
@@ -568,13 +692,14 @@ func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, userna
 	// Reset the payload length for the packet
 	payloadLengthDiff := int32(len(username) - len(clientHandshake.Username))
 	payloadLengthDiff += int32(len(authResponse) - int(clientHandshake.AuthLength))
-	payloadLengthDiff += int32(len(defaultAuthPluginName) - len(clientHandshake.AuthPluginName))
+	payloadLengthDiff += int32(len(authPlugin) - len(clientHandshake.AuthPluginName))
 
 	clientHandshake.Header, err = UpdateHeaderPayloadLength(clientHandshake.Header, payloadLengthDiff)
 	if err != nil {
 		return
 	}
 
+	clientHandshake.AuthPluginName = authPlugin
 	clientHandshake.Username = username
 	clientHandshake.AuthLength = int64(len(authResponse))
 	clientHandshake.AuthResponse = authResponse
@@ -582,14 +707,42 @@ func InjectCredentials(clientHandshake *HandshakeResponse41, salt []byte, userna
 	return
 }
 
+// Hash password using MySQL 8+ method (SHA256)
+func scrambleSHA256Password(password []byte, scramble []byte) []byte {
+	if len(password) == 0 {
+		return nil
+	}
+
+	// XOR(SHA256(password), SHA256(SHA256(SHA256(password)), scramble))
+
+	crypt := sha256.New()
+	crypt.Write(password)
+	message1 := crypt.Sum(nil)
+
+	crypt.Reset()
+	crypt.Write(message1)
+	message1Hash := crypt.Sum(nil)
+
+	crypt.Reset()
+	crypt.Write(message1Hash)
+	crypt.Write(scramble)
+	message2 := crypt.Sum(nil)
+
+	for i := range message1 {
+		message1[i] ^= message2[i]
+	}
+
+	return message1
+}
+
 // PackHandshakeResponse41 takes in a HandshakeResponse41 object and
 // returns a handshake response packet
-func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byte, err error) {
+func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) ([]byte, error) {
 
 	var buf bytes.Buffer
 
 	// write the header (same as the original)
-	buf.Write(clientHandshake.Header)
+	// buf.Write(clientHandshake.Header)
 
 	// write the capability flags
 	capabilityFlagsBuf := make([]byte, 4)
@@ -633,7 +786,7 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byt
 	}
 
 	// write auth plugin name
-	buf.WriteString(defaultAuthPluginName)
+	buf.WriteString(clientHandshake.AuthPluginName)
 	buf.WriteByte(0)
 
 	// write tail of packet (if set)
@@ -641,9 +794,20 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) (packet []byt
 		buf.Write(clientHandshake.PacketTail)
 	}
 
-	packet = buf.Bytes()
+	// Calculate the packet length (excluding the length field itself)
+	packetLength := buf.Len()
 
-	return
+	// Create a header buffer and write the packet length (int<3>)
+	headerBuffer := make([]byte, 4)
+	headerBuffer[0] = byte(packetLength & 0xFF)
+	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
+	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
+	headerBuffer[3] = clientHandshake.Header[3]
+
+	// Combine the header and packet data to create the final packet
+	finalPacket := append(headerBuffer, buf.Bytes()...)
+
+	return finalPacket, nil
 }
 
 // GetLenEncodedIntegerSize returns bytes count for length encoded integer
@@ -744,6 +908,45 @@ func ReadNullTerminatedString(r *bytes.Reader) string {
 	}
 }
 
+type AuthSwitchRequest struct {
+	SequenceNumber uint8
+	PluginName     string
+	PluginData     []byte
+}
+
+// UnpackAuthSwitchRequest decodes an AuthSwitchRequest packet from the provided data.
+func UnpackAuthSwitchRequest(data []byte) (*AuthSwitchRequest, error) {
+	sequenceNumber := data[3]
+	data = data[4:]
+
+	// Find the position of the null-terminated plugin name
+	nullTerminatorIndex := 1
+	for i := 1; i < len(data); i++ {
+		if data[i] == 0x00 {
+			nullTerminatorIndex = i
+			break
+		}
+	}
+
+	// Extract the plugin name
+	if nullTerminatorIndex == 1 {
+		return nil, fmt.Errorf("Invalid AuthSwitchRequest packet: Missing plugin name")
+	}
+	pluginName := string(data[1:nullTerminatorIndex])
+
+	// Extract the plugin provided data
+	var pluginData []byte
+	if nullTerminatorIndex+1 < len(data) {
+		pluginData = data[nullTerminatorIndex+1:]
+	}
+
+	return &AuthSwitchRequest{
+		SequenceNumber: sequenceNumber,
+		PluginName:     pluginName,
+		PluginData:     pluginData,
+	}, nil
+}
+
 // ReadNullTerminatedBytes reads bytes from reader until 0x00 byte
 func ReadNullTerminatedBytes(r *bytes.Reader) (str []byte) {
 	for {
@@ -838,4 +1041,98 @@ func WriteUint24(u uint32) (b []byte) {
 	b[2] = byte(u >> 16)
 
 	return
+}
+
+// PackAuthSwitchResponse creates an AuthSwitchResponse packet with the provided response data.
+func PackAuthSwitchResponse(authSwitchRequestSequenceId uint8, data []byte) ([]byte, error) {
+	// Create a buffer to write the packet data
+	buffer := new(bytes.Buffer)
+
+	// Write the response data to the buffer
+	buffer.Write(data)
+
+	// Calculate the packet length (excluding the length field itself)
+	packetLength := buffer.Len()
+
+	// Create a header buffer and write the packet length (int<3>)
+	headerBuffer := make([]byte, 4)
+	headerBuffer[0] = byte(packetLength & 0xFF)
+	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
+	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
+	headerBuffer[3] = 0
+
+	// Combine the header and packet data to create the final packet
+	finalPacket := append(headerBuffer, buffer.Bytes()...)
+
+	return finalPacket, nil
+}
+
+type AuthMoreDataResponse struct {
+	PacketType byte
+	StatusTag  byte
+}
+
+// UnpackAuthMoreDataResponse decodes AuthMoreData from server.
+// Basic packet structure shown below.
+//
+// int<3> PacketLength
+// int<1> PacketNumber
+// int<1> PacketType (0x01)
+// int<1> StatusTag (0x03 or 0x04)
+// string<EOF> AuthenticationMethodData (unused by secretless)
+func UnpackAuthMoreDataResponse(packet []byte) (*AuthMoreDataResponse, error) {
+
+	// Min packet length = header(4 bytes) + PacketType(1 byte)
+	if err := CheckPacketLength(5, packet); err != nil {
+		return nil, err
+	}
+
+	r := bytes.NewReader(packet)
+
+	// Skip packet header
+	if _, err := GetPacketHeader(r); err != nil {
+		return nil, err
+	}
+
+	// Read header, validate OK
+	packetType, err := r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+	if packetType != ResponseAuthMoreData {
+		return nil, errors.New("Malformed packet")
+	}
+
+	// Read status tag
+	statusTag, err := r.ReadByte()
+	if err != nil {
+		return nil, err
+	}
+
+	return &AuthMoreDataResponse{
+		PacketType: packetType,
+		StatusTag:  statusTag,
+	}, nil
+}
+
+func PackAuthRequestPubKeyResponse() (packet []byte) {
+	packet = append(WriteUint24(uint32(1)), 3, CachingSha2PasswordRequestPublicKey)
+	return
+}
+
+func PackAuthEncryptedPasswordResponse(encPwd []byte) (packet []byte) {
+	packet = append(WriteUint24(uint32(len(encPwd))), 5)
+	packet = append(packet, encPwd...)
+	return
+}
+
+func EncryptPassword(password string, seed []byte, pub *rsa.PublicKey) ([]byte, error) {
+	plain := make([]byte, len(password)+1)
+	copy(plain, password)
+	for i := range plain {
+		j := i % len(seed)
+		plain[i] ^= seed[j]
+	}
+	sha1 := sha1.New()
+	return rsa.EncryptOAEP(sha1, rand.Reader, pub, plain, nil)
 }

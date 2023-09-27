@@ -1,6 +1,11 @@
 package mysql
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
+	"fmt"
 	"net"
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql/protocol"
@@ -8,7 +13,6 @@ import (
 )
 
 /*
-
 AuthenticationHandshake represents the entire back and forth process
 between a MySQL client and server during which authentication occurs.
 Note this is distinct from the various specific handshake packets that are
@@ -58,7 +62,6 @@ following source:
 	Secretless->Backend: HandshakeResponse
 	Backend->Secretless: OkPacket
 	Secretless->Client: OkPacket
-
 */
 type AuthenticationHandshake struct {
 	connectionDetails *ConnectionDetails
@@ -94,15 +97,58 @@ func NewAuthenticationHandshake(
 // AuthenticatedBackendConn will return the raw, authenticated network conn.
 func (h *AuthenticationHandshake) Run() error {
 	h.readServerHandshake()
+	// Pass along the handshake but make sure client doesn't use TLS to connect to Secretless
 	h.writeHandshakeToClient()
+
+	// Does the server support TLS when needed?
 	h.validateServerSSL()
+	// Get the client handshake response. I thought it would be good to only make this
+	// use the simpliest auth mechanism, but no need since the server won't do the entire dance.
+	// It will only ever return success or error, not auth switch or anything else
 	h.readClientHandshakeResponse()
-	h.overrideClientCapabilities()
-	h.injectCredentials()
-	h.handleClientSSLRequest()
-	h.writeClientHandshakeResponseToBackend()
-	h.verifyAndProxyOkResponse()
+
+	// Everything in here is about responding to the server authentication challenge
+	// No need to talk to the client an
+	if true {
+		h.overrideClientCapabilities()
+		h.injectCredentials()
+		// Deal with this later
+		h.handleClientSSLRequest()
+		h.writeClientHandshakeResponseToBackend()
+		h.verifyAndProxyOkResponse()
+	}
+
 	return h.err
+}
+
+func (h *AuthenticationHandshake) NewRun() error {
+	backendPacket := h.readBackendPacket()
+	if h.err != nil {
+		return h.err
+	}
+
+	serverHandshake, err := protocol.UnpackHandshakeV10(backendPacket)
+	if err != nil {
+		return err
+	}
+	fmt.Println("serverHandshake:", serverHandshake)
+
+	backendPacket1, err := protocol.PackHandshakeV10(serverHandshake)
+	if err != nil {
+		return err
+	}
+	fmt.Println("backendPacket:", backendPacket)
+	fmt.Println("backendPacket:", backendPacket1)
+
+	serverHandshake, err = protocol.UnpackHandshakeV10(backendPacket)
+	if err != nil {
+		return err
+	}
+	fmt.Println("serverHandshake:", serverHandshake)
+
+	return h.clientConn.write(backendPacket1)
+
+	// return nil
 }
 
 // AuthenticatedBackendConn returns an already authenticated connection
@@ -128,10 +174,17 @@ func (h *AuthenticationHandshake) writeHandshakeToClient() {
 		return
 	}
 
+	serverHandshake := *h.serverHandshake
 	// Remove Client SSL Capability from Server Handshake Packet
 	// to force client to connect to Secretless without SSL
 	// TODO: update this after kumbi's work
-	packetWithNoSSL, err := protocol.RemoveSSLFromHandshakeV10(h.rawServerHandshake)
+	serverHandshake.ServerCapabilities &^= protocol.ClientSSL
+
+	// Give client the simplest auth plugin request
+	// This might work for now, but we'll likely need to add support for other auth plugins
+	serverHandshake.AuthPlugin = "mysql_native_password"
+
+	packetWithNoSSL, err := protocol.PackHandshakeV10(&serverHandshake)
 	if err != nil {
 		h.err = err
 		return
@@ -161,7 +214,8 @@ func (h *AuthenticationHandshake) readClientHandshakeResponse() {
 		return
 	}
 
-	// TODO: client requesting SSL results ERROR 2026 (HY000): SSL connection error: protocol version mismatch
+	// TODO: client requesting SSL results in ERROR 2026 (HY000): SSL connection error: protocol version mismatch
+	// TODO: Find out if this is a client request SSL after we advertise not supporting SSL ?
 	h.clientHandshakeResponse, h.err = protocol.UnpackHandshakeResponse41(rawResponse)
 }
 func (h *AuthenticationHandshake) overrideClientCapabilities() {
@@ -173,7 +227,7 @@ func (h *AuthenticationHandshake) overrideClientCapabilities() {
 
 	// TODO: add tests cases for authentication plugins support
 	// Disable CapabilityFlag for authentication plugins support
-	h.clientHandshakeResponse.CapabilityFlags &^= protocol.ClientPluginAuth
+	h.clientHandshakeResponse.CapabilityFlags |= protocol.ClientPluginAuth
 
 	// TODO: add tests cases for client secure connection
 	// Enable CapabilityFlag for client secure connection
@@ -193,6 +247,7 @@ func (h *AuthenticationHandshake) injectCredentials() {
 
 	// TODO: change this to method call on clientHandshakeResponse when Kumbi's work done
 	h.err = protocol.InjectCredentials(
+		h.serverHandshake.AuthPlugin,
 		h.clientHandshakeResponse,
 		h.serverHandshake.Salt,
 		h.connectionDetails.Username,
@@ -270,6 +325,8 @@ func (h *AuthenticationHandshake) writeClientHandshakeResponseToBackend() {
 		return
 	}
 
+	// TODO: We should probably be carrying out a comprehensive unpacking, so that
+	// 1. we can be selective about the contents of the response
 	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(h.clientHandshakeResponse)
 	if err != nil {
 		h.err = err
@@ -289,7 +346,9 @@ func (h *AuthenticationHandshake) verifyAndProxyOkResponse() {
 		return
 	}
 
-	switch protocol.GetPacketType(rawPkt) {
+	packetType := protocol.GetPacketType(rawPkt)
+	fmt.Println("packetType", packetType)
+	switch packetType {
 	case protocol.ResponseErr:
 		// Return after adding the error response to AuthenticationHandshake
 		// as a protocol.Error type
@@ -300,6 +359,104 @@ func (h *AuthenticationHandshake) verifyAndProxyOkResponse() {
 		err := protocol.UnpackErrResponse(rawPkt)
 		h.err = err
 		return
+	case protocol.ResponseAuthMoreData:
+		moreDataResp, err := protocol.UnpackAuthMoreDataResponse(rawPkt)
+		if err != nil {
+			h.err = err
+			return
+		}
+
+		switch moreDataResp.StatusTag {
+		case protocol.CachingSha2PasswordFastAuthSuccess:
+			// The user was cached and a fast login was performed successfully.
+			// Do nothing. An OK packet will be sent by the server immediately
+			// following this packet.
+			return
+		case protocol.CachingSha2PasswordPerformFullAuthentication:
+			// The server is requesting a full authentication handshake.
+			//https://dev.mysql.com/doc/dev/mysql-server/latest/page_caching_sha2_authentication_exchanges.html
+			//https://github.com/go-sql-driver/mysql/blob/master/auth.go#L353
+
+			// request public key from server
+			data := protocol.PackAuthRequestPubKeyResponse()
+
+			h.writeBackendPacket(data)
+			if h.err != nil {
+				return
+			}
+
+			// read public key from server
+			pubKeyPkt := h.readBackendPacket()
+			if h.err != nil {
+				return
+			}
+
+			// parse public key
+			if pubKeyPkt[4] != protocol.ResponseAuthMoreData {
+				h.err = errors.New("expected ResponseAuthMoreData packet")
+				//TODO: For some reason we're getting "28000Access denied for user..." packets here in some cases
+				return
+			}
+
+			block, rest := pem.Decode(pubKeyPkt[5:])
+			if block == nil {
+				h.err = fmt.Errorf("no pem data found, data: %s", rest)
+				return
+			}
+			pkix, err := x509.ParsePKIXPublicKey(block.Bytes)
+			if err != nil {
+				h.err = err
+				return
+			}
+			pubKey := pkix.(*rsa.PublicKey)
+
+			// encrypt password with public key
+			enc, err := protocol.EncryptPassword(h.connectionDetails.Password, h.serverHandshake.Salt, pubKey)
+			if err != nil {
+				h.err = err
+				return
+			}
+
+			encPkt := protocol.PackAuthEncryptedPasswordResponse(enc)
+
+			h.writeBackendPacket(encPkt)
+
+			return
+		}
+		return
+	case 0xfe:
+		authSwitchRequest, err := protocol.UnpackAuthSwitchRequest(rawPkt)
+		if err != nil {
+			h.err = err
+			return
+		}
+
+		salt := authSwitchRequest.PluginData
+		// This is because the salt seems to actually be 21 bytes, ending in a null byte.
+		// However the documentation suggests auth switch requests should be an EOF string
+		// See https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_auth_switch_request.html
+		if authSwitchRequest.PluginName == "mysql_native_password" {
+			salt = salt[:20]
+		}
+		authResponse, err := protocol.CreateAuthResponse(authSwitchRequest.PluginName, []byte(h.connectionDetails.Password), salt)
+		if err != nil {
+			return
+		}
+
+		authSwitchResponseData, err := protocol.PackAuthSwitchResponse(
+			authSwitchRequest.SequenceNumber,
+			authResponse,
+		)
+		if err != nil {
+			h.err = err
+			return
+		}
+		h.writeBackendPacket(authSwitchResponseData)
+
+		// TODO: Avoid infinite recursion?
+		h.verifyAndProxyOkResponse()
+		return
+
 	default:
 		// Verify packet is valid; don't do anything with unpacked
 		if _, err := protocol.UnpackOkResponse(rawPkt); err != nil {

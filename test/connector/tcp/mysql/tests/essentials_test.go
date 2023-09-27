@@ -13,16 +13,16 @@ func TestEssentials(t *testing.T) {
 			Description: "with username, wrong password",
 			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
-				Username: "testuser",
-				Password: "wrongpassword",
+				Username: "placeholder",
+				Password: "placeholder",
 			},
 		},
 		{
 			Description: "with wrong username, wrong password",
 			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
-				Username: "wrongusername",
-				Password: "wrongpassword",
+				Username: "placeholder",
+				Password: "placeholder",
 			},
 		},
 		{
@@ -69,11 +69,11 @@ func TestEssentials(t *testing.T) {
 				Description: "Socket, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: "wrongusername",
-					Password: "wrongpassword",
+					Username: "placeholder",
+					Password: "placeholder",
 					SSL:      true,
 				},
-				CmdOutput: StringPointer("ERROR 2026 (HY000): TLS/SSL error: SSL is required, but the server does not support it"),
+				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
 			},
 		}, t)
 
@@ -88,11 +88,11 @@ func TestEssentials(t *testing.T) {
 				Description: "TCP, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: "wrongusername",
-					Password: "wrongpassword",
+					Username: "placeholder",
+					Password: "placeholder",
 					SSL:      true,
 				},
-				CmdOutput: StringPointer("ERROR 2026 (HY000): TLS/SSL error: SSL is required, but the server does not support it"),
+				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
 			},
 		}, t)
 
@@ -108,10 +108,10 @@ func TestEssentials(t *testing.T) {
 				Description: "secretless using invalid credentials",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: "testuser",
-					Password: "wrongpassword",
+					Username: "placeholder",
+					Password: "placeholder",
 				},
-				CmdOutput: StringPointer("ERROR 1045 (28000): Access denied for user 'testuser'@"),
+				CmdOutput: StringPointer("ERROR 1045 (28000): Access denied for user 'testuser_native_password'@"),
 			},
 		}, t)
 	})

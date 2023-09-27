@@ -27,11 +27,12 @@ package protocol
 // Random constants
 const (
 	// MySQL response types
-	responseEOF         = 0xfe
-	responseOk          = 0x00
-	responsePrepareOk   = 0x00
-	ResponseErr         = 0xff
-	responseLocalinfile = 0xfb
+	ResponseAuthMoreData = 0x01
+	ResponseEOF          = 0xfe
+	responseOk           = 0x00
+	responsePrepareOk    = 0x00
+	ResponseErr          = 0xff
+	responseLocalinfile  = 0xfb
 
 	// MySQL field types constants
 	fieldTypeString   = 0xfd
@@ -49,7 +50,10 @@ const (
 	// Digits after comma
 	doubleDecodePrecision = 6
 
-	defaultAuthPluginName = "mysql_native_password"
+	defaultAuthPluginName                        = "mysql_native_password"
+	CachingSha2PasswordRequestPublicKey          = 2
+	CachingSha2PasswordFastAuthSuccess           = 3
+	CachingSha2PasswordPerformFullAuthentication = 4
 )
 
 // Protocol commands

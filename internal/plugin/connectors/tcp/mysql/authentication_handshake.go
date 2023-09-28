@@ -100,12 +100,13 @@ func (h *AuthenticationHandshake) Run() error {
 	// Pass along the handshake but make sure client doesn't use TLS to connect to Secretless
 	h.writeHandshakeToClient()
 
-	// Does the server support TLS when needed?
-	h.validateServerSSL()
 	// Get the client handshake response. I thought it would be good to only make this
 	// use the simpliest auth mechanism, but no need since the server won't do the entire dance.
 	// It will only ever return success or error, not auth switch or anything else
 	h.readClientHandshakeResponse()
+
+	// Does the server support TLS when needed?
+	h.validateServerSSL()
 
 	// Everything in here is about responding to the server authentication challenge
 	// No need to talk to the client an
@@ -119,36 +120,6 @@ func (h *AuthenticationHandshake) Run() error {
 	}
 
 	return h.err
-}
-
-func (h *AuthenticationHandshake) NewRun() error {
-	backendPacket := h.readBackendPacket()
-	if h.err != nil {
-		return h.err
-	}
-
-	serverHandshake, err := protocol.UnpackHandshakeV10(backendPacket)
-	if err != nil {
-		return err
-	}
-	fmt.Println("serverHandshake:", serverHandshake)
-
-	backendPacket1, err := protocol.PackHandshakeV10(serverHandshake)
-	if err != nil {
-		return err
-	}
-	fmt.Println("backendPacket:", backendPacket)
-	fmt.Println("backendPacket:", backendPacket1)
-
-	serverHandshake, err = protocol.UnpackHandshakeV10(backendPacket)
-	if err != nil {
-		return err
-	}
-	fmt.Println("serverHandshake:", serverHandshake)
-
-	return h.clientConn.write(backendPacket1)
-
-	// return nil
 }
 
 // AuthenticatedBackendConn returns an already authenticated connection
@@ -347,7 +318,7 @@ func (h *AuthenticationHandshake) verifyAndProxyOkResponse() {
 	}
 
 	packetType := protocol.GetPacketType(rawPkt)
-	fmt.Println("packetType", packetType)
+
 	switch packetType {
 	case protocol.ResponseErr:
 		// Return after adding the error response to AuthenticationHandshake

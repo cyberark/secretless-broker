@@ -193,6 +193,24 @@ func TestUnpackHandshakeV10(t *testing.T) {
 	}
 }
 
+func TestPackHandshakeV10(t *testing.T) {
+	input := &HandshakeV10{
+		ProtocolVersion:    byte(10),
+		ServerVersion:      "5.5.56",
+		ConnectionID:       uint32(1630),
+		AuthPlugin:         "mysql_native_password",
+		ServerCapabilities: binary.LittleEndian.Uint32([]byte{255, 247, 15, 128}),
+		Salt: []byte{0x48, 0x6a, 0x5b, 0x6a, 0x24, 0x71, 0x30, 0x3a, 0x6f, 0x43, 0x40, 0x56, 0x6e, 0x4b,
+			0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a},
+	}
+
+	output, err := PackHandshakeV10(input)
+	newInput, err := UnpackHandshakeV10(output)
+
+	assert.Equal(t, input, newInput)
+	assert.Equal(t, nil, err)
+}
+
 func TestUnpackHandshakeResponse41(t *testing.T) {
 	expected := HandshakeResponse41{
 		SequenceID:      1,

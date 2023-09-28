@@ -148,7 +148,7 @@ func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	if packetType != responseOk {
+	if packetType != ResponseOk {
 		return nil, errors.New("Malformed packet")
 	}
 
@@ -190,6 +190,7 @@ func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 // See https://mariadb.com/kb/en/mariadb/1-connecting-connecting/#initial-handshake-packet
 type HandshakeV10 struct {
 	ProtocolVersion    byte
+	SequenceId         uint8
 	ServerVersion      string
 	ConnectionID       uint32
 	StatusFlags        uint16
@@ -241,8 +242,9 @@ type HandshakeV10 struct {
 func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	r := bytes.NewReader(packet)
 
-	// Skip packet header
-	if _, err := GetPacketHeader(r); err != nil {
+	// Header
+	header, err := GetPacketHeader(r)
+	if err != nil {
 		return nil, err
 	}
 
@@ -347,6 +349,7 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	return &HandshakeV10{
+		SequenceId:         header[3],
 		ProtocolVersion:    protoVersion,
 		ServerVersion:      serverVersion,
 		ConnectionID:       connectionID,
@@ -422,7 +425,7 @@ func PackHandshakeV10(serverHandshake *HandshakeV10) ([]byte, error) {
 		buffer.WriteByte(0)
 	}
 
-	return AddHeaderToPacket(0, buffer.Bytes()), nil
+	return AddHeaderToPacket(serverHandshake.SequenceId, buffer.Bytes()), nil
 }
 
 // RemoveSSLFromHandshakeV10 removes Client SSL Capability from Server
@@ -994,10 +997,11 @@ func PackAuthSwitchResponse(authSwitchRequestSequenceId uint8, data []byte) ([]b
 	// Write the response data to the buffer
 	buffer.Write(data)
 
-	return AddHeaderToPacket(0, buffer.Bytes()), nil
+	return AddHeaderToPacket(authSwitchRequestSequenceId, buffer.Bytes()), nil
 }
 
 type AuthMoreDataResponse struct {
+	SequenceId uint8
 	PacketType byte
 	StatusTag  byte
 }
@@ -1019,8 +1023,8 @@ func UnpackAuthMoreDataResponse(packet []byte) (*AuthMoreDataResponse, error) {
 
 	r := bytes.NewReader(packet)
 
-	// Skip packet header
-	if _, err := GetPacketHeader(r); err != nil {
+	header, err := GetPacketHeader(r)
+	if err != nil {
 		return nil, err
 	}
 
@@ -1040,17 +1044,18 @@ func UnpackAuthMoreDataResponse(packet []byte) (*AuthMoreDataResponse, error) {
 	}
 
 	return &AuthMoreDataResponse{
+		SequenceId: header[3],
 		PacketType: packetType,
 		StatusTag:  statusTag,
 	}, nil
 }
 
-func PackAuthRequestPubKeyResponse() []byte {
-	return AddHeaderToPacket(3, []byte{CachingSha2PasswordRequestPublicKey})
+func PackAuthRequestPubKeyResponse(sequenceId uint8) []byte {
+	return AddHeaderToPacket(sequenceId, []byte{CachingSha2PasswordRequestPublicKey})
 }
 
-func PackAuthEncryptedPasswordResponse(encPwd []byte) []byte {
-	return AddHeaderToPacket(5, encPwd)
+func PackAuthEncryptedPasswordResponse(sequenceId uint8, encPwd []byte) []byte {
+	return AddHeaderToPacket(sequenceId, encPwd)
 }
 
 func EncryptPassword(password string, seed []byte, pub *rsa.PublicKey) ([]byte, error) {

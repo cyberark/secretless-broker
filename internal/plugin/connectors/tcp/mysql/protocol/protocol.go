@@ -422,20 +422,7 @@ func PackHandshakeV10(serverHandshake *HandshakeV10) ([]byte, error) {
 		buffer.WriteByte(0)
 	}
 
-	// Calculate the packet length (excluding the length field itself)
-	packetLength := buffer.Len()
-
-	// Create a header buffer and write the packet length (int<3>)
-	headerBuffer := make([]byte, 4)
-	headerBuffer[0] = byte(packetLength & 0xFF)
-	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
-	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
-	headerBuffer[3] = 0
-
-	// Combine the header and packet data to create the final packet
-	finalPacket := append(headerBuffer, buffer.Bytes()...)
-
-	return finalPacket, nil
+	return AddHeaderToPacket(0, buffer.Bytes()), nil
 }
 
 // RemoveSSLFromHandshakeV10 removes Client SSL Capability from Server
@@ -541,7 +528,7 @@ func writeUint16(data []byte, pos int, value uint16) {
 //	 | string<var> | payload        | [len=payload_length] payload of the packet  |
 //	 +-------------+----------------+---------------------------------------------+
 type HandshakeResponse41 struct {
-	Header          []byte
+	SequenceID      uint8
 	CapabilityFlags uint32
 	MaxPacketSize   uint32
 	ClientCharset   uint8
@@ -645,7 +632,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 	}
 
 	return &HandshakeResponse41{
-		Header:          header,
+		SequenceID:      header[3],
 		CapabilityFlags: capabilityFlags,
 		MaxPacketSize:   maxPacketSize,
 		ClientCharset:   charset,
@@ -683,18 +670,7 @@ func CreateAuthResponse(authPlugin string, password []byte, salt []byte) ([]byte
 // TODO: we can do a much better job than this. We just need to calculate the paylod and not do all this resetting BS!
 // TODO: the plugin name should come from the server, not the client!
 func InjectCredentials(authPlugin string, clientHandshake *HandshakeResponse41, salt []byte, username string, password string) (err error) {
-	fmt.Println("Injecting credentials to", authPlugin)
 	authResponse, err := CreateAuthResponse(authPlugin, []byte(password), salt)
-	if err != nil {
-		return
-	}
-
-	// Reset the payload length for the packet
-	payloadLengthDiff := int32(len(username) - len(clientHandshake.Username))
-	payloadLengthDiff += int32(len(authResponse) - int(clientHandshake.AuthLength))
-	payloadLengthDiff += int32(len(authPlugin) - len(clientHandshake.AuthPluginName))
-
-	clientHandshake.Header, err = UpdateHeaderPayloadLength(clientHandshake.Header, payloadLengthDiff)
 	if err != nil {
 		return
 	}
@@ -794,20 +770,7 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) ([]byte, erro
 		buf.Write(clientHandshake.PacketTail)
 	}
 
-	// Calculate the packet length (excluding the length field itself)
-	packetLength := buf.Len()
-
-	// Create a header buffer and write the packet length (int<3>)
-	headerBuffer := make([]byte, 4)
-	headerBuffer[0] = byte(packetLength & 0xFF)
-	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
-	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
-	headerBuffer[3] = clientHandshake.Header[3]
-
-	// Combine the header and packet data to create the final packet
-	finalPacket := append(headerBuffer, buf.Bytes()...)
-
-	return finalPacket, nil
+	return AddHeaderToPacket(clientHandshake.SequenceID, buf.Bytes()), nil
 }
 
 // GetLenEncodedIntegerSize returns bytes count for length encoded integer
@@ -1007,40 +970,20 @@ func NativePassword(password []byte, salt []byte) (nativePassword []byte, err er
 	return
 }
 
-// UpdateHeaderPayloadLength takes in a 4 byte header and a difference
-// in length, and returns a new header
-func UpdateHeaderPayloadLength(origHeader []byte, diff int32) (header []byte, err error) {
+// AddHeaderToPacket adds a header to a packet
+func AddHeaderToPacket(sequenceId uint8, restOfPacket []byte) []byte {
+	// Calculate the packet length (excluding the length field itself)
+	packetLength := len(restOfPacket)
 
-	initialPayloadLength, err := ReadUint24(origHeader[0:3])
-	if err != nil {
-		return nil, err
-	}
-	updatedPayloadLength := int32(initialPayloadLength) + diff
-	if updatedPayloadLength < 0 {
-		return nil, errors.New("Malformed packet")
-	}
-	header = append(WriteUint24(uint32(updatedPayloadLength)), origHeader[3])
+	// Create a header buffer and write the packet length (int<3>)
+	headerBuffer := make([]byte, 4)
+	headerBuffer[0] = byte(packetLength & 0xFF)
+	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
+	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
+	headerBuffer[3] = sequenceId
 
-	return
-}
-
-// ReadUint24 takes in a byte slice and returns a uint32
-func ReadUint24(b []byte) (uint32, error) {
-	if len(b) < 3 {
-		return 0, errors.New("Invalid packet")
-	}
-
-	return uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16, nil
-}
-
-// WriteUint24 takes in a uint32 and returns a byte slice
-func WriteUint24(u uint32) (b []byte) {
-	b = make([]byte, 3)
-	b[0] = byte(u)
-	b[1] = byte(u >> 8)
-	b[2] = byte(u >> 16)
-
-	return
+	// Combine the header and packet data to create the final packet
+	return append(headerBuffer, restOfPacket...)
 }
 
 // PackAuthSwitchResponse creates an AuthSwitchResponse packet with the provided response data.
@@ -1051,20 +994,7 @@ func PackAuthSwitchResponse(authSwitchRequestSequenceId uint8, data []byte) ([]b
 	// Write the response data to the buffer
 	buffer.Write(data)
 
-	// Calculate the packet length (excluding the length field itself)
-	packetLength := buffer.Len()
-
-	// Create a header buffer and write the packet length (int<3>)
-	headerBuffer := make([]byte, 4)
-	headerBuffer[0] = byte(packetLength & 0xFF)
-	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
-	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
-	headerBuffer[3] = 0
-
-	// Combine the header and packet data to create the final packet
-	finalPacket := append(headerBuffer, buffer.Bytes()...)
-
-	return finalPacket, nil
+	return AddHeaderToPacket(0, buffer.Bytes()), nil
 }
 
 type AuthMoreDataResponse struct {
@@ -1115,15 +1045,12 @@ func UnpackAuthMoreDataResponse(packet []byte) (*AuthMoreDataResponse, error) {
 	}, nil
 }
 
-func PackAuthRequestPubKeyResponse() (packet []byte) {
-	packet = append(WriteUint24(uint32(1)), 3, CachingSha2PasswordRequestPublicKey)
-	return
+func PackAuthRequestPubKeyResponse() []byte {
+	return AddHeaderToPacket(3, []byte{CachingSha2PasswordRequestPublicKey})
 }
 
-func PackAuthEncryptedPasswordResponse(encPwd []byte) (packet []byte) {
-	packet = append(WriteUint24(uint32(len(encPwd))), 5)
-	packet = append(packet, encPwd...)
-	return
+func PackAuthEncryptedPasswordResponse(encPwd []byte) []byte {
+	return AddHeaderToPacket(5, encPwd)
 }
 
 func EncryptPassword(password string, seed []byte, pub *rsa.PublicKey) ([]byte, error) {

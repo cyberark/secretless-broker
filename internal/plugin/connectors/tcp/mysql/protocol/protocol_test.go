@@ -195,7 +195,7 @@ func TestUnpackHandshakeV10(t *testing.T) {
 
 func TestUnpackHandshakeResponse41(t *testing.T) {
 	expected := HandshakeResponse41{
-		Header:          []byte{0xaa, 0x0, 0x0, 0x1},
+		SequenceID:      1,
 		CapabilityFlags: uint32(33464965),
 		MaxPacketSize:   uint32(1073741824),
 		ClientCharset:   uint8(8),
@@ -256,8 +256,8 @@ func TestInjectCredentials(t *testing.T) {
 		AuthPluginName: "caching_sha256_password", // 23
 		AuthResponse: []byte{0xc0, 0xb, 0xbc, 0xb6, 0x6, 0xf5, 0x4f, 0x4e,
 			0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae, 0xc4, 0x49, 0x7c, 0x46, 0xf3}, // 20
-		Username: "madeupusername", // 14
-		Header:   []byte{0xaa, 0x0, 0x0, 0x1},
+		Username:   "madeupusername", // 14
+		SequenceID: 1,
 	}
 
 	err := InjectCredentials("mysql_native_password", &handshake, salt, username, password)
@@ -265,7 +265,7 @@ func TestInjectCredentials(t *testing.T) {
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
 	assert.Equal(t, expectedAuth, handshake.AuthResponse)
-	assert.Equal(t, expectedHeader, handshake.Header)
+	assert.Equal(t, expectedHeader[3], handshake.SequenceID)
 	assert.Equal(t, nil, err)
 
 	// test with handshake response with empty auth and mysql_native_password
@@ -276,7 +276,7 @@ func TestInjectCredentials(t *testing.T) {
 		AuthPluginName: "mysql_native_password", // 21
 		AuthResponse:   []byte{},                // 0
 		Username:       "madeupusername",        // 14
-		Header:         []byte{0xaa, 0x0, 0x0, 0x1},
+		SequenceID:     1,
 	}
 
 	err = InjectCredentials("mysql_native_password", &handshake, salt, username, password)
@@ -284,13 +284,13 @@ func TestInjectCredentials(t *testing.T) {
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
 	assert.Equal(t, expectedAuth, handshake.AuthResponse)
-	assert.Equal(t, expectedHeader, handshake.Header)
+	assert.Equal(t, expectedHeader[3], handshake.SequenceID)
 	assert.Equal(t, nil, err)
 }
 
 func TestPackHandshakeResponse41(t *testing.T) {
 	input := &HandshakeResponse41{
-		Header:          []byte{0x95, 0x0, 0x0, 0x1},
+		SequenceID:      1,
 		CapabilityFlags: uint32(33464965),
 		MaxPacketSize:   uint32(1073741824),
 		ClientCharset:   uint8(8),
@@ -419,53 +419,4 @@ func TestNativePassword(t *testing.T) {
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)
-}
-
-func TestUpdateHeaderPayloadLength(t *testing.T) {
-	// Test with a valid negative value
-	expectedHeader := []byte{170, 0, 0, 0}
-	inputHeader := []byte{173, 0, 0, 0}
-	inputLength := int32(-3)
-
-	output, err := UpdateHeaderPayloadLength(inputHeader, inputLength)
-
-	assert.Equal(t, expectedHeader, output)
-	assert.Equal(t, nil, err)
-
-	// Test with a valid positive value
-	expectedHeader = []byte{176, 0, 0, 0}
-	inputHeader = []byte{173, 0, 0, 0}
-	inputLength = int32(3)
-
-	output, err = UpdateHeaderPayloadLength(inputHeader, inputLength)
-
-	assert.Equal(t, expectedHeader, output)
-	assert.Equal(t, nil, err)
-
-	// Test with an invalid value for the length difference
-	inputHeader = []byte{173, 0, 0, 0}
-	inputLength = int32(-180)
-
-	output, err = UpdateHeaderPayloadLength(inputHeader, inputLength)
-
-	assert.EqualError(t, err, "Malformed packet")
-}
-
-func TestReadUint24(t *testing.T) {
-	expected := uint32(173)
-	input := []byte{173, 0, 0}
-
-	output, err := ReadUint24(input)
-
-	assert.Equal(t, expected, output)
-	assert.Equal(t, nil, err)
-}
-
-func TestWriteUint24(t *testing.T) {
-	expected := []byte{173, 0, 0}
-	input := uint32(173)
-
-	output := WriteUint24(input)
-
-	assert.Equal(t, expected, output)
 }

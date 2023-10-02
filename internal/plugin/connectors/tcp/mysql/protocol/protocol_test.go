@@ -26,7 +26,11 @@ package protocol
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/binary"
+	"encoding/pem"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -437,4 +441,190 @@ func TestNativePassword(t *testing.T) {
 
 	assert.Equal(t, expected, output)
 	assert.Equal(t, nil, err)
+}
+
+func TestCreateAuthResponse(t *testing.T) {
+	testCases := []struct {
+		authPlugin  string
+		password    []byte
+		salt        []byte
+		expectedLen int
+		expectErr   bool
+	}{
+		{
+			authPlugin:  "mysql_native_password",
+			password:    []byte("password"),
+			salt:        []byte("salt"),
+			expectedLen: 20,
+		},
+		{
+			authPlugin:  "caching_sha2_password",
+			password:    []byte("password"),
+			salt:        []byte("salt"),
+			expectedLen: 32,
+		},
+		{
+			authPlugin: "unknown_auth_plugin",
+			password:   []byte("password"),
+			salt:       []byte("salt"),
+			expectErr:  true,
+		},
+	}
+
+	for _, tc := range testCases {
+		actual, err := CreateAuthResponse(tc.authPlugin, tc.password, tc.salt)
+		if tc.expectErr {
+			assert.NotNil(t, err)
+		} else {
+			assert.Nil(t, err)
+			assert.Equal(t, tc.expectedLen, len(actual))
+		}
+	}
+}
+
+func TestUnpackAuthSwitchRequest(t *testing.T) {
+	testCases := []struct {
+		name          string
+		input         []byte
+		expectedError string
+		expectedReq   *AuthSwitchRequest
+	}{
+		{
+			name: "valid AuthSwitchRequest packet",
+			input: []byte{
+				0x02, 0x00, 0x00, 0x01, // Header
+				0x01, 0x70, 0x6c, 0x75, 0x67, 0x69, 0x6e, 0x00, // Plugin name ("plugin")
+				0x01, 0x02, 0x03, // Plugin data
+			},
+			expectedReq: &AuthSwitchRequest{
+				SequenceNumber: 1,
+				PluginName:     "plugin",
+				PluginData:     []byte{0x01, 0x02, 0x03},
+			},
+		},
+		{
+			name:          "missing plugin name",
+			input:         []byte{0x00, 0x00, 0x00, 0x01},
+			expectedError: "Invalid AuthSwitchRequest packet: Missing plugin name",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req, err := UnpackAuthSwitchRequest(tc.input)
+
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+				assert.Nil(t, req)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, req)
+				assert.Equal(t, tc.expectedReq.SequenceNumber, req.SequenceNumber)
+				assert.Equal(t, tc.expectedReq.PluginName, req.PluginName)
+				assert.Equal(t, tc.expectedReq.PluginData, req.PluginData)
+			}
+		})
+	}
+}
+
+func TestUnpackAuthRequestPubKeyResponse(t *testing.T) {
+	// Generate a test RSA public key
+	testPubKey, _ := rsa.GenerateKey(rand.Reader, 256)
+	testPubKeyBytes, _ := x509.MarshalPKIXPublicKey(&testPubKey.PublicKey)
+	testPubKeyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: testPubKeyBytes,
+	})
+	testPubKeyBytes = append([]byte{0x02, 0x00, 0x00, 0x04, 0x01}, testPubKeyPem...)
+
+	testCases := []struct {
+		name          string
+		input         []byte
+		expectedError string
+		expectedResp  *rsa.PublicKey
+	}{
+		{
+			name:         "valid AuthRequestPubKeyResponse packet",
+			input:        testPubKeyBytes,
+			expectedResp: &testPubKey.PublicKey,
+		},
+		{
+			name:          "missing RSA public key",
+			input:         []byte{0x02, 0x00, 0x00, 0x04, 0x01},
+			expectedError: "no pem data found, data: ",
+		},
+		{
+			name:          "invalid RSA public key",
+			input:         []byte{0x02, 0x00, 0x00, 0x04, 0x01, 0x01, 0x02},
+			expectedError: "no pem data found, data: \x01\x02",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := UnpackAuthRequestPubKeyResponse(tc.input)
+
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.EqualValues(t, tc.expectedResp, resp)
+			}
+		})
+	}
+}
+
+func TestPackAuthSwitchResponse(t *testing.T) {
+	data := []byte{0x01, 0x02, 0x03}
+	seqID := uint8(9)
+
+	expected := []byte{
+		0x03, 0x00, 0x00, 0x09, // Header (including sequence number)
+		0x01, 0x02, 0x03, // Data
+	}
+
+	output, err := PackAuthSwitchResponse(seqID, data)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, output)
+}
+
+func TestUnpackAuthMoreDataResponse(t *testing.T) {
+	testCases := []struct {
+		name          string
+		input         []byte
+		expectedError string
+		expectedResp  *AuthMoreDataResponse
+	}{
+		{
+			name:  "valid AuthMoreDataResponse packet",
+			input: []byte{0x01, 0x00, 0x00, 0x09, 0x01, 0x04},
+			expectedResp: &AuthMoreDataResponse{
+				SequenceID: 9,
+				PacketType: 1,
+				StatusTag:  4,
+			},
+		},
+		{
+			name:          "missing data",
+			input:         []byte{0x01, 0x00, 0x00, 0x09},
+			expectedError: ErrInvalidPacketLength.Error(),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := UnpackAuthMoreDataResponse(tc.input)
+
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, tc.expectedResp, resp)
+			}
+		})
+	}
 }

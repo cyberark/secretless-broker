@@ -13,16 +13,16 @@ func TestEssentials(t *testing.T) {
 			Description: "with username, wrong password",
 			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
-				Username: "placeholder",
-				Password: "placeholder",
+				Username: "testuser",
+				Password: "wrongpassword",
 			},
 		},
 		{
 			Description: "with wrong username, wrong password",
 			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
-				Username: "placeholder",
-				Password: "placeholder",
+				Username: "wrongusername",
+				Password: "wrongpassword",
 			},
 		},
 		{
@@ -69,8 +69,8 @@ func TestEssentials(t *testing.T) {
 				Description: "Socket, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: "placeholder",
-					Password: "placeholder",
+					Username: "wrongusername",
+					Password: "wrongpassword",
 					SSL:      true,
 				},
 				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
@@ -88,8 +88,8 @@ func TestEssentials(t *testing.T) {
 				Description: "TCP, client -> TLS -> secretless",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: "placeholder",
-					Password: "placeholder",
+					Username: "wrongusername",
+					Password: "wrongpassword",
 					SSL:      true,
 				},
 				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
@@ -108,10 +108,10 @@ func TestEssentials(t *testing.T) {
 				Description: "secretless using invalid credentials",
 				ShouldPass:  false,
 				ClientConfiguration: ClientConfiguration{
-					Username: "placeholder",
-					Password: "placeholder",
+					Username: "testuser",
+					Password: "wrongpassword",
 				},
-				CmdOutput: StringPointer("ERROR 1045 (28000): Access denied for user 'testuser_native_password'@"),
+				CmdOutput: StringPointer("ERROR 1045 (28000): Access denied for user 'testuser'@"),
 			},
 		}, t)
 	})

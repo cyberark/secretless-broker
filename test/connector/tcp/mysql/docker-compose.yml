@@ -28,7 +28,7 @@ services:
       DB_HOST_NO_TLS: mysql_no_tls
       DB_HOST_TLS: mysql
       DB_PORT: 3306
-      DB_USER: testuser_native_password
+      DB_USER: testuser
       DB_PASSWORD: testpass
     volumes:
       - ../../../../:/secretless
@@ -57,7 +57,7 @@ services:
       DB_HOST_TLS: mysql
       DB_HOST_NO_TLS: mysql_no_tls
       DB_PORT: 3306
-      DB_USER: testuser_native_password
+      DB_USER: testuser
       DB_PASSWORD: testpass
       SECRETLESS_HOST:
       VERBOSE:

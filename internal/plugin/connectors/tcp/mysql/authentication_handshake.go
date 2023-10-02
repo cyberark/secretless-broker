@@ -1,11 +1,6 @@
 package mysql
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
-	"errors"
-	"fmt"
 	"net"
 
 	"github.com/cyberark/secretless-broker/internal/plugin/connectors/tcp/mysql/protocol"
@@ -253,7 +248,7 @@ func (h *AuthenticationHandshake) handleClientSSLRequest() {
 	// but truncating the username and everything after the username in
 	// the payload, as described here:
 	//
-	// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest
+	// https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_ssl_request.html
 	//
 	// The payload itself breaks down as follows:
 	//
@@ -311,7 +306,7 @@ func (h *AuthenticationHandshake) writeClientHandshakeResponseToBackend() {
 	}
 
 	// TODO: We should probably be carrying out a comprehensive unpacking, so that
-	// 1. we can be selective about the contents of the response
+	// we can be selective about the contents of the response
 	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(h.clientHandshakeResponse)
 	if err != nil {
 		h.err = err
@@ -364,6 +359,9 @@ func (h *AuthenticationHandshake) handleBackendAuthResponse() {
 			// https://dev.mysql.com/doc/dev/mysql-server/latest/page_caching_sha2_authentication_exchanges.html
 			// https://github.com/go-sql-driver/mysql/blob/master/auth.go#L353
 
+			// When using caching_sha2_password and TLS is enabled, no need
+			// to fetch public key and sign password with it, since
+			// the password is already encrypted in the TLS session.
 			if h.clientRequestedSSL() {
 				data, err := protocol.PackAuthSwitchResponse(
 					h.backendConn.sequenceID,
@@ -395,24 +393,12 @@ func (h *AuthenticationHandshake) handleBackendAuthResponse() {
 				return
 			}
 
-			// Parse public key
-			if pubKeyPkt[4] != protocol.ResponseAuthMoreData {
-				h.err = errors.New("expected ResponseAuthMoreData packet")
-				//TODO: For some reason we're getting "28000Access denied for user..." packets here in some cases
-				return
-			}
-
-			block, rest := pem.Decode(pubKeyPkt[5:])
-			if block == nil {
-				h.err = fmt.Errorf("no pem data found, data: %s", rest)
-				return
-			}
-			pkix, err := x509.ParsePKIXPublicKey(block.Bytes)
+			// Unpack public key from packet
+			pubKey, err := protocol.UnpackAuthRequestPubKeyResponse(pubKeyPkt)
 			if err != nil {
 				h.err = err
 				return
 			}
-			pubKey := pkix.(*rsa.PublicKey)
 
 			// Encrypt password with public key
 			enc, err := protocol.EncryptPassword(h.connectionDetails.Password, h.serverHandshake.Salt, pubKey)
@@ -421,6 +407,7 @@ func (h *AuthenticationHandshake) handleBackendAuthResponse() {
 				return
 			}
 
+			// Send encrypted password to server
 			encPkt := protocol.PackAuthEncryptedPasswordResponse(h.backendConn.sequenceID, enc)
 
 			h.writeBackendPacket(encPkt)

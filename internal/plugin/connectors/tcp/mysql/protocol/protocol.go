@@ -30,7 +30,9 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/binary"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
@@ -190,7 +192,7 @@ func UnpackOkResponse(packet []byte) (*OkResponse, error) {
 // See https://mariadb.com/kb/en/mariadb/1-connecting-connecting/#initial-handshake-packet
 type HandshakeV10 struct {
 	ProtocolVersion    byte
-	SequenceId         uint8
+	SequenceID         uint8
 	ServerVersion      string
 	ConnectionID       uint32
 	StatusFlags        uint16
@@ -349,7 +351,7 @@ func UnpackHandshakeV10(packet []byte) (*HandshakeV10, error) {
 	}
 
 	return &HandshakeV10{
-		SequenceId:         header[3],
+		SequenceID:         header[3],
 		ProtocolVersion:    protoVersion,
 		ServerVersion:      serverVersion,
 		ConnectionID:       connectionID,
@@ -425,7 +427,7 @@ func PackHandshakeV10(serverHandshake *HandshakeV10) ([]byte, error) {
 		buffer.WriteByte(0)
 	}
 
-	return AddHeaderToPacket(serverHandshake.SequenceId, buffer.Bytes()), nil
+	return AddHeaderToPacket(serverHandshake.SequenceID, buffer.Bytes()), nil
 }
 
 // RemoveSSLFromHandshakeV10 removes Client SSL Capability from Server
@@ -515,11 +517,11 @@ func writeUint16(data []byte, pos int, value uint16) {
 
 // HandshakeResponse41 represents handshake response packet sent by 4.1+ clients supporting clientProtocol41 capability,
 // if the server announced it in its initial handshake packet.
-// See http://imysql.com/mysql-internal-manual/connection-phase-packets.html#packet-Protocol::HandshakeResponse41
+// See https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_handshake_response.html#sect_protocol_connection_phase_packets_protocol_handshake_response41
 //
 // The format of the header is also described here:
 //
-//	  https://dev.mysql.com/doc/internals/en/mysql-packet.html
+//	  https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_packets.html
 //
 //	 +-------------+----------------+---------------------------------------------+
 //	 |    Type     |      Name      |                 Description                 |
@@ -647,6 +649,7 @@ func UnpackHandshakeResponse41(packet []byte) (*HandshakeResponse41, error) {
 		PacketTail:      packetTail}, nil
 }
 
+// CreateAuthResponse creates an auth response for the given auth plugin
 func CreateAuthResponse(authPlugin string, password []byte, salt []byte) ([]byte, error) {
 	var authResponse []byte
 	var err error
@@ -670,8 +673,6 @@ func CreateAuthResponse(authPlugin string, password []byte, salt []byte) ([]byte
 // salt from the server, and a username / password, and uses the salt
 // from the server handshake to inject the username / password credentials into
 // the client handshake response
-// TODO: we can do a much better job than this. We just need to calculate the paylod and not do all this resetting BS!
-// TODO: the plugin name should come from the server, not the client!
 func InjectCredentials(authPlugin string, clientHandshake *HandshakeResponse41, salt []byte, username string, password string) (err error) {
 	authResponse, err := CreateAuthResponse(authPlugin, []byte(password), salt)
 	if err != nil {
@@ -719,9 +720,6 @@ func scrambleSHA256Password(password []byte, scramble []byte) []byte {
 func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) ([]byte, error) {
 
 	var buf bytes.Buffer
-
-	// write the header (same as the original)
-	// buf.Write(clientHandshake.Header)
 
 	// write the capability flags
 	capabilityFlagsBuf := make([]byte, 4)
@@ -874,6 +872,8 @@ func ReadNullTerminatedString(r *bytes.Reader) string {
 	}
 }
 
+// AuthSwitchRequest represents a request from the server to switch to a different authentication method.
+// https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_auth_switch_request.html
 type AuthSwitchRequest struct {
 	SequenceNumber uint8
 	PluginName     string
@@ -913,6 +913,24 @@ func UnpackAuthSwitchRequest(data []byte) (*AuthSwitchRequest, error) {
 	}, nil
 }
 
+// UnpackAuthRequestPubKeyResponse decodes a response from the server to a request for its public key.
+func UnpackAuthRequestPubKeyResponse(data []byte) (*rsa.PublicKey, error) {
+	// Parse public key
+	if data[4] != ResponseAuthMoreData {
+		return nil, fmt.Errorf("expected ResponseAuthMoreData packet")
+	}
+
+	block, rest := pem.Decode(data[5:])
+	if block == nil {
+		return nil, fmt.Errorf("no pem data found, data: %s", rest)
+	}
+	pkix, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse public key: %s", err)
+	}
+	return pkix.(*rsa.PublicKey), nil
+}
+
 // ReadNullTerminatedBytes reads bytes from reader until 0x00 byte
 func ReadNullTerminatedBytes(r *bytes.Reader) (str []byte) {
 	for {
@@ -948,7 +966,7 @@ func CheckPacketLength(expected int, packet []byte) error {
 }
 
 // NativePassword calculates native password expected by server in HandshakeResponse41
-// https://dev.mysql.com/doc/internals/en/secure-password-authentication.html#packet-Authentication::Native41
+// https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_handshake_response.html#sect_protocol_connection_phase_packets_protocol_handshake_response41
 // SHA1( password ) XOR SHA1( "20-bytes random data from server" <concat> SHA1( SHA1( password ) ) )
 func NativePassword(password []byte, salt []byte) (nativePassword []byte, err error) {
 	sha1 := sha1.New()
@@ -974,7 +992,7 @@ func NativePassword(password []byte, salt []byte) (nativePassword []byte, err er
 }
 
 // AddHeaderToPacket adds a header to a packet
-func AddHeaderToPacket(sequenceId uint8, restOfPacket []byte) []byte {
+func AddHeaderToPacket(sequenceID uint8, restOfPacket []byte) []byte {
 	// Calculate the packet length (excluding the length field itself)
 	packetLength := len(restOfPacket)
 
@@ -983,25 +1001,26 @@ func AddHeaderToPacket(sequenceId uint8, restOfPacket []byte) []byte {
 	headerBuffer[0] = byte(packetLength & 0xFF)
 	headerBuffer[1] = byte((packetLength >> 8) & 0xFF)
 	headerBuffer[2] = byte((packetLength >> 16) & 0xFF)
-	headerBuffer[3] = sequenceId
+	headerBuffer[3] = sequenceID
 
 	// Combine the header and packet data to create the final packet
 	return append(headerBuffer, restOfPacket...)
 }
 
 // PackAuthSwitchResponse creates an AuthSwitchResponse packet with the provided response data.
-func PackAuthSwitchResponse(authSwitchRequestSequenceId uint8, data []byte) ([]byte, error) {
+func PackAuthSwitchResponse(authSwitchRequestSequenceID uint8, data []byte) ([]byte, error) {
 	// Create a buffer to write the packet data
 	buffer := new(bytes.Buffer)
 
 	// Write the response data to the buffer
 	buffer.Write(data)
 
-	return AddHeaderToPacket(authSwitchRequestSequenceId, buffer.Bytes()), nil
+	return AddHeaderToPacket(authSwitchRequestSequenceID, buffer.Bytes()), nil
 }
 
+// AuthMoreDataResponse represents a packet sent from the server to request more auth data from the client.
 type AuthMoreDataResponse struct {
-	SequenceId uint8
+	SequenceID uint8
 	PacketType byte
 	StatusTag  byte
 }
@@ -1044,21 +1063,26 @@ func UnpackAuthMoreDataResponse(packet []byte) (*AuthMoreDataResponse, error) {
 	}
 
 	return &AuthMoreDataResponse{
-		SequenceId: header[3],
+		SequenceID: header[3],
 		PacketType: packetType,
 		StatusTag:  statusTag,
 	}, nil
 }
 
-func PackAuthRequestPubKeyResponse(sequenceId uint8) []byte {
-	return AddHeaderToPacket(sequenceId, []byte{CachingSha2PasswordRequestPublicKey})
+// PackAuthRequestPubKeyResponse encodes the request for the server's public key
+func PackAuthRequestPubKeyResponse(sequenceID uint8) []byte {
+	return AddHeaderToPacket(sequenceID, []byte{CachingSha2PasswordRequestPublicKey})
 }
 
-func PackAuthEncryptedPasswordResponse(sequenceId uint8, encPwd []byte) []byte {
-	return AddHeaderToPacket(sequenceId, encPwd)
+// PackAuthEncryptedPasswordResponse encodes the encrypted password response packet
+func PackAuthEncryptedPasswordResponse(sequenceID uint8, encPwd []byte) []byte {
+	return AddHeaderToPacket(sequenceID, encPwd)
 }
 
+// EncryptPassword encrypts a password using the provided seed and public key.
 func EncryptPassword(password string, seed []byte, pub *rsa.PublicKey) ([]byte, error) {
+	// For this stage of the authentication, we must use sha1. See
+	// https://github.com/go-sql-driver/mysql/blob/19171b59bf90e6bf7a5bdf979e5e24a84b328b8a/auth.go#L217-L226
 	plain := make([]byte, len(password)+1)
 	copy(plain, password)
 	for i := range plain {

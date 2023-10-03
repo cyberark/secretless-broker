@@ -93,7 +93,7 @@ func ReadPrepareResponse(conn net.Conn) ([]byte, byte, error) {
 	}
 
 	switch pkt[4] {
-	case responsePrepareOk:
+	case ResponsePrepareOk:
 		numParams := binary.LittleEndian.Uint16(pkt[9:11])
 		numColumns := binary.LittleEndian.Uint16(pkt[11:13])
 		packetsExpected := 0
@@ -121,7 +121,7 @@ func ReadPrepareResponse(conn net.Conn) ([]byte, byte, error) {
 			data = append(data, pkt...)
 		}
 
-		return data, responseOk, nil
+		return data, ResponseOk, nil
 
 	case ResponseErr:
 		return pkt, ResponseErr, nil
@@ -148,8 +148,8 @@ func ReadResponse(conn net.Conn, deprecateEOF bool) ([]byte, byte, error) {
 	}
 
 	switch pkt[4] {
-	case responseOk:
-		return pkt, responseOk, nil
+	case ResponseOk:
+		return pkt, ResponseOk, nil
 
 	case ResponseErr:
 		return pkt, ResponseErr, nil
@@ -185,7 +185,7 @@ func ReadResponse(conn net.Conn, deprecateEOF bool) ([]byte, byte, error) {
 
 		data = append(data, pkt...)
 
-		if pkt[4] == responseEOF {
+		if pkt[4] == ResponseEOF {
 			break
 		}
 	}
@@ -197,7 +197,7 @@ func ReadResponse(conn net.Conn, deprecateEOF bool) ([]byte, byte, error) {
 func ReadPacket(conn net.Conn) ([]byte, error) {
 
 	// Read packet header
-	header := []byte{0, 0, 0, 0}
+	header := make([]byte, 4)
 	if _, err := io.ReadFull(conn, header); err != nil {
 		return nil, err
 	}

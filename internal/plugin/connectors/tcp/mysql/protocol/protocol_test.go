@@ -26,7 +26,11 @@ package protocol
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/binary"
+	"encoding/pem"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -193,9 +197,27 @@ func TestUnpackHandshakeV10(t *testing.T) {
 	}
 }
 
+func TestPackHandshakeV10(t *testing.T) {
+	input := &HandshakeV10{
+		ProtocolVersion:    byte(10),
+		ServerVersion:      "5.5.56",
+		ConnectionID:       uint32(1630),
+		AuthPlugin:         "mysql_native_password",
+		ServerCapabilities: binary.LittleEndian.Uint32([]byte{255, 247, 15, 128}),
+		Salt: []byte{0x48, 0x6a, 0x5b, 0x6a, 0x24, 0x71, 0x30, 0x3a, 0x6f, 0x43, 0x40, 0x56, 0x6e, 0x4b,
+			0x68, 0x4a, 0x79, 0x46, 0x30, 0x5a},
+	}
+
+	output, err := PackHandshakeV10(input)
+	newInput, err := UnpackHandshakeV10(output)
+
+	assert.Equal(t, input, newInput)
+	assert.Equal(t, nil, err)
+}
+
 func TestUnpackHandshakeResponse41(t *testing.T) {
 	expected := HandshakeResponse41{
-		Header:          []byte{0xaa, 0x0, 0x0, 0x1},
+		SequenceID:      1,
 		CapabilityFlags: uint32(33464965),
 		MaxPacketSize:   uint32(1073741824),
 		ClientCharset:   uint8(8),
@@ -247,25 +269,25 @@ func TestInjectCredentials(t *testing.T) {
 	expectedAuth := []byte{0xf, 0xf8, 0xe1, 0xa3, 0xe7, 0xe3, 0x5f, 0xd2,
 		0xb1, 0x69, 0x8c, 0x39, 0x5b, 0xfa, 0x99, 0x4f, 0x53, 0xdd, 0xe5,
 		0x35} // 20
-	expectedHeader := []byte{0x99, 0x0, 0x0, 0x1}
-	// expectedHeader[0] = 0xaa + (8 - 14) + (20 - 20) + (21 - 32)
+	expectedHeader := []byte{0xa2, 0x0, 0x0, 0x1}
+	// expectedHeader[0] = 0xaa + (8 - 14) + (20 - 20) + (21 - 23)
 
 	// test with handshake response that already has auth set to another value
 	handshake := HandshakeResponse41{
 		AuthLength:     int64(20),
-		AuthPluginName: "non_native_mysql_native_password", // 32
+		AuthPluginName: "caching_sha256_password", // 23
 		AuthResponse: []byte{0xc0, 0xb, 0xbc, 0xb6, 0x6, 0xf5, 0x4f, 0x4e,
 			0xf4, 0x1b, 0x87, 0xc0, 0xb8, 0x89, 0xae, 0xc4, 0x49, 0x7c, 0x46, 0xf3}, // 20
-		Username: "madeupusername", // 14
-		Header:   []byte{0xaa, 0x0, 0x0, 0x1},
+		Username:   "madeupusername", // 14
+		SequenceID: 1,
 	}
 
-	err := InjectCredentials(&handshake, salt, username, password)
+	err := InjectCredentials("mysql_native_password", &handshake, salt, username, password)
 
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
 	assert.Equal(t, expectedAuth, handshake.AuthResponse)
-	assert.Equal(t, expectedHeader, handshake.Header)
+	assert.Equal(t, expectedHeader[3], handshake.SequenceID)
 	assert.Equal(t, nil, err)
 
 	// test with handshake response with empty auth and mysql_native_password
@@ -276,21 +298,21 @@ func TestInjectCredentials(t *testing.T) {
 		AuthPluginName: "mysql_native_password", // 21
 		AuthResponse:   []byte{},                // 0
 		Username:       "madeupusername",        // 14
-		Header:         []byte{0xaa, 0x0, 0x0, 0x1},
+		SequenceID:     1,
 	}
 
-	err = InjectCredentials(&handshake, salt, username, password)
+	err = InjectCredentials("mysql_native_password", &handshake, salt, username, password)
 
 	assert.Equal(t, username, handshake.Username)
 	assert.Equal(t, int64(20), handshake.AuthLength)
 	assert.Equal(t, expectedAuth, handshake.AuthResponse)
-	assert.Equal(t, expectedHeader, handshake.Header)
+	assert.Equal(t, expectedHeader[3], handshake.SequenceID)
 	assert.Equal(t, nil, err)
 }
 
 func TestPackHandshakeResponse41(t *testing.T) {
-	input := HandshakeResponse41{
-		Header:          []byte{0xaa, 0x0, 0x0, 0x1},
+	input := &HandshakeResponse41{
+		SequenceID:      1,
 		CapabilityFlags: uint32(33464965),
 		MaxPacketSize:   uint32(1073741824),
 		ClientCharset:   uint8(8),
@@ -310,26 +332,11 @@ func TestPackHandshakeResponse41(t *testing.T) {
 			0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72, 0x6d, 0x6, 0x78, 0x38,
 			0x36, 0x5f, 0x36, 0x34},
 	}
-	expected := []byte{0xaa, 0x0, 0x0, 0x1, 0x85, 0xa2, 0xfe, 0x1, 0x0,
-		0x0, 0x0, 0x40, 0x8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-		0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-		0x0, 0x0, 0x0, 0x72, 0x6f, 0x67, 0x65, 0x72, 0x0, 0x14, 0xc0,
-		0xb, 0xbc, 0xb6, 0x6, 0xf5, 0x4f, 0x4e, 0xf4, 0x1b, 0x87, 0xc0,
-		0xb8, 0x89, 0xae, 0xc4, 0x49, 0x7c, 0x46, 0xf3, 0x6d, 0x79, 0x73,
-		0x71, 0x6c, 0x5f, 0x6e, 0x61, 0x74, 0x69, 0x76, 0x65, 0x5f, 0x70,
-		0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x0, 0x58, 0x3, 0x5f,
-		0x6f, 0x73, 0xa, 0x6d, 0x61, 0x63, 0x6f, 0x73, 0x31, 0x30, 0x2e,
-		0x31, 0x32, 0xc, 0x5f, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f,
-		0x6e, 0x61, 0x6d, 0x65, 0x8, 0x6c, 0x69, 0x62, 0x6d, 0x79, 0x73,
-		0x71, 0x6c, 0x4, 0x5f, 0x70, 0x69, 0x64, 0x5, 0x36, 0x36, 0x34,
-		0x37, 0x39, 0xf, 0x5f, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f,
-		0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x6, 0x35, 0x2e, 0x37,
-		0x2e, 0x32, 0x30, 0x9, 0x5f, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f,
-		0x72, 0x6d, 0x6, 0x78, 0x38, 0x36, 0x5f, 0x36, 0x34}
 
-	output, err := PackHandshakeResponse41(&input)
+	output, err := PackHandshakeResponse41(input)
+	newInput, err := UnpackHandshakeResponse41(output)
 
-	assert.Equal(t, expected, output)
+	assert.Equal(t, input, newInput)
 	assert.Equal(t, nil, err)
 }
 
@@ -436,51 +443,188 @@ func TestNativePassword(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
-func TestUpdateHeaderPayloadLength(t *testing.T) {
-	// Test with a valid negative value
-	expectedHeader := []byte{170, 0, 0, 0}
-	inputHeader := []byte{173, 0, 0, 0}
-	inputLength := int32(-3)
+func TestCreateAuthResponse(t *testing.T) {
+	testCases := []struct {
+		authPlugin  string
+		password    []byte
+		salt        []byte
+		expectedLen int
+		expectErr   bool
+	}{
+		{
+			authPlugin:  "mysql_native_password",
+			password:    []byte("password"),
+			salt:        []byte("salt"),
+			expectedLen: 20,
+		},
+		{
+			authPlugin:  "caching_sha2_password",
+			password:    []byte("password"),
+			salt:        []byte("salt"),
+			expectedLen: 32,
+		},
+		{
+			authPlugin: "unknown_auth_plugin",
+			password:   []byte("password"),
+			salt:       []byte("salt"),
+			expectErr:  true,
+		},
+	}
 
-	output, err := UpdateHeaderPayloadLength(inputHeader, inputLength)
-
-	assert.Equal(t, expectedHeader, output)
-	assert.Equal(t, nil, err)
-
-	// Test with a valid positive value
-	expectedHeader = []byte{176, 0, 0, 0}
-	inputHeader = []byte{173, 0, 0, 0}
-	inputLength = int32(3)
-
-	output, err = UpdateHeaderPayloadLength(inputHeader, inputLength)
-
-	assert.Equal(t, expectedHeader, output)
-	assert.Equal(t, nil, err)
-
-	// Test with an invalid value for the length difference
-	inputHeader = []byte{173, 0, 0, 0}
-	inputLength = int32(-180)
-
-	output, err = UpdateHeaderPayloadLength(inputHeader, inputLength)
-
-	assert.EqualError(t, err, "Malformed packet")
+	for _, tc := range testCases {
+		actual, err := CreateAuthResponse(tc.authPlugin, tc.password, tc.salt)
+		if tc.expectErr {
+			assert.NotNil(t, err)
+		} else {
+			assert.Nil(t, err)
+			assert.Equal(t, tc.expectedLen, len(actual))
+		}
+	}
 }
 
-func TestReadUint24(t *testing.T) {
-	expected := uint32(173)
-	input := []byte{173, 0, 0}
+func TestUnpackAuthSwitchRequest(t *testing.T) {
+	testCases := []struct {
+		name          string
+		input         []byte
+		expectedError string
+		expectedReq   *AuthSwitchRequest
+	}{
+		{
+			name: "valid AuthSwitchRequest packet",
+			input: []byte{
+				0x02, 0x00, 0x00, 0x01, // Header
+				0x01, 0x70, 0x6c, 0x75, 0x67, 0x69, 0x6e, 0x00, // Plugin name ("plugin")
+				0x01, 0x02, 0x03, // Plugin data
+			},
+			expectedReq: &AuthSwitchRequest{
+				SequenceNumber: 1,
+				PluginName:     "plugin",
+				PluginData:     []byte{0x01, 0x02, 0x03},
+			},
+		},
+		{
+			name:          "missing plugin name",
+			input:         []byte{0x00, 0x00, 0x00, 0x01},
+			expectedError: "Invalid AuthSwitchRequest packet: Missing plugin name",
+		},
+	}
 
-	output, err := ReadUint24(input)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req, err := UnpackAuthSwitchRequest(tc.input)
 
-	assert.Equal(t, expected, output)
-	assert.Equal(t, nil, err)
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+				assert.Nil(t, req)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, req)
+				assert.Equal(t, tc.expectedReq.SequenceNumber, req.SequenceNumber)
+				assert.Equal(t, tc.expectedReq.PluginName, req.PluginName)
+				assert.Equal(t, tc.expectedReq.PluginData, req.PluginData)
+			}
+		})
+	}
 }
 
-func TestWriteUint24(t *testing.T) {
-	expected := []byte{173, 0, 0}
-	input := uint32(173)
+func TestUnpackAuthRequestPubKeyResponse(t *testing.T) {
+	// Generate a test RSA public key
+	testPubKey, _ := rsa.GenerateKey(rand.Reader, 256)
+	testPubKeyBytes, _ := x509.MarshalPKIXPublicKey(&testPubKey.PublicKey)
+	testPubKeyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: testPubKeyBytes,
+	})
+	testPubKeyBytes = append([]byte{0x02, 0x00, 0x00, 0x04, 0x01}, testPubKeyPem...)
 
-	output := WriteUint24(input)
+	testCases := []struct {
+		name          string
+		input         []byte
+		expectedError string
+		expectedResp  *rsa.PublicKey
+	}{
+		{
+			name:         "valid AuthRequestPubKeyResponse packet",
+			input:        testPubKeyBytes,
+			expectedResp: &testPubKey.PublicKey,
+		},
+		{
+			name:          "missing RSA public key",
+			input:         []byte{0x02, 0x00, 0x00, 0x04, 0x01},
+			expectedError: "no pem data found, data: ",
+		},
+		{
+			name:          "invalid RSA public key",
+			input:         []byte{0x02, 0x00, 0x00, 0x04, 0x01, 0x01, 0x02},
+			expectedError: "no pem data found, data: \x01\x02",
+		},
+	}
 
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := UnpackAuthRequestPubKeyResponse(tc.input)
+
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.EqualValues(t, tc.expectedResp, resp)
+			}
+		})
+	}
+}
+
+func TestPackAuthSwitchResponse(t *testing.T) {
+	data := []byte{0x01, 0x02, 0x03}
+	seqID := uint8(9)
+
+	expected := []byte{
+		0x03, 0x00, 0x00, 0x09, // Header (including sequence number)
+		0x01, 0x02, 0x03, // Data
+	}
+
+	output, err := PackAuthSwitchResponse(seqID, data)
+	assert.NoError(t, err)
 	assert.Equal(t, expected, output)
+}
+
+func TestUnpackAuthMoreDataResponse(t *testing.T) {
+	testCases := []struct {
+		name          string
+		input         []byte
+		expectedError string
+		expectedResp  *AuthMoreDataResponse
+	}{
+		{
+			name:  "valid AuthMoreDataResponse packet",
+			input: []byte{0x01, 0x00, 0x00, 0x09, 0x01, 0x04},
+			expectedResp: &AuthMoreDataResponse{
+				SequenceID: 9,
+				PacketType: 1,
+				StatusTag:  4,
+			},
+		},
+		{
+			name:          "missing data",
+			input:         []byte{0x01, 0x00, 0x00, 0x09},
+			expectedError: ErrInvalidPacketLength.Error(),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := UnpackAuthMoreDataResponse(tc.input)
+
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+				assert.Nil(t, resp)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, tc.expectedResp, resp)
+			}
+		})
+	}
 }

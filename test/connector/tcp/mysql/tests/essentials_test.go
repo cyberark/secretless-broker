@@ -73,7 +73,7 @@ func TestEssentials(t *testing.T) {
 					Password: "wrongpassword",
 					SSL:      true,
 				},
-				CmdOutput: StringPointer("ERROR 2026 (HY000): TLS/SSL error: SSL is required, but the server does not support it"),
+				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
 			},
 		}, t)
 
@@ -92,7 +92,7 @@ func TestEssentials(t *testing.T) {
 					Password: "wrongpassword",
 					SSL:      true,
 				},
-				CmdOutput: StringPointer("ERROR 2026 (HY000): TLS/SSL error: SSL is required, but the server does not support it"),
+				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
 			},
 		}, t)
 

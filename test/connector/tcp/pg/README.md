@@ -1,19 +1,24 @@
-# Postgresql Handler Development
+# Postgresql Connector Development
 
-##TLDR
+## TLDR
+
 The following two steps are all you need to know:
+
 1. A single command starts the dev workflow:
 
     ```sh-session
     $ ./dev
     ```
+
 2. Another one runs the tests:
+
     ```sh-session
     $ ./test
     ```
+
 So while developing, you'll do a single `./dev` and then many `./test` runs as you iteratively change the code or add new tests.
 
-##Additional Details
+## Additional Details
 
 `./dev` uses `docker-compose` to start both `pg` containers, the `secretless` container, and the `test` container (where tests are run from).  
 

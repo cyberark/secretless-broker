@@ -39,9 +39,9 @@ func (connector *SingleUseConnector) sendErrorToClient(err error) {
 // Connect implements the tcp.Connector func signature
 //
 // It is the main method of the SingleUseConnector. It:
-//   1. Constructs connection details from the provided credentials map.
-//   2. Dials the backend using credentials.
-//   3. Runs through the connection phase steps to authenticate.
+//  1. Constructs connection details from the provided credentials map.
+//  2. Dials the backend using credentials.
+//  3. Runs through the connection phase steps to authenticate.
 //
 // Connect requires "host", "port", "username" and "password" credentials.
 func (connector *SingleUseConnector) Connect(

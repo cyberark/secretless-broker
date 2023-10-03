@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.19] - 2023-11-02
+
+### Added
+- Add support for caching_sha256_password to mysql connector (CONJSE-1801)
+
 ## [1.7.18] - 2023-08-22
 
 ### Changed
@@ -16,7 +21,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/secretless-broker#1499](https://github.com/cyberark/secretless-broker/pull/1499)
 
 ### Security
-- Updated jquery to v3.7.1
 - Updated github.com/docker/docker to v24.0.5 (CONJSE-1798)
 
 ### Added

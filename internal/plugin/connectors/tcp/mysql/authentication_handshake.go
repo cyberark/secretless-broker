@@ -8,7 +8,6 @@ import (
 )
 
 /*
-
 AuthenticationHandshake represents the entire back and forth process
 between a MySQL client and server during which authentication occurs.
 Note this is distinct from the various specific handshake packets that are
@@ -58,7 +57,6 @@ following source:
 	Secretless->Backend: HandshakeResponse
 	Backend->Secretless: OkPacket
 	Secretless->Client: OkPacket
-
 */
 type AuthenticationHandshake struct {
 	connectionDetails *ConnectionDetails
@@ -93,15 +91,42 @@ func NewAuthenticationHandshake(
 // MySQL server and client.  When it completes successfully,
 // AuthenticatedBackendConn will return the raw, authenticated network conn.
 func (h *AuthenticationHandshake) Run() error {
+	// The server is the first to communicate. Read the server handshake
 	h.readServerHandshake()
+	// Pass along the server handshake to the client, with some minor modifications
+	//
+	// 1. Remove TLS capability to avoid TLS connections to Secretless.
+	// 2. Use `mysql_native_password` as the auth plugin between the client and Secretless, to make
+	// life easier. We actually don't care about the credentials from the client, we just need the rest
+	// of the packet.
 	h.writeHandshakeToClient()
-	h.validateServerSSL()
+
+	// Read the client handshake response.
+	//
+	// We are done listening to the client!
 	h.readClientHandshakeResponse()
+
+	// Make sure if the connector (not the client) is configured to use TLS
+	// then the server supports TLS. This must be done after reading the client response otherwise if validation
+	// fails then the client connection hangs
+	h.validateServerSSL()
+
+	// Everything beyond this point is in service of responding to the server authentication challenge.
+
+	// Override client capabilities. For example, the connector has secure connection capabilities and supports
+	// authentication plugins.
 	h.overrideClientCapabilities()
+	// Inject credentials into the client handshake response
 	h.injectCredentials()
+
 	h.handleClientSSLRequest()
+
+	// Write modified client handshake to server, and
+	// carry out the rest of the authentication dance between Secretless and the server.
+	// When we're done we just let the client know of the outcome.
 	h.writeClientHandshakeResponseToBackend()
-	h.verifyAndProxyOkResponse()
+	h.handleBackendAuthResponse()
+
 	return h.err
 }
 
@@ -128,10 +153,17 @@ func (h *AuthenticationHandshake) writeHandshakeToClient() {
 		return
 	}
 
+	serverHandshake := *h.serverHandshake
 	// Remove Client SSL Capability from Server Handshake Packet
 	// to force client to connect to Secretless without SSL
 	// TODO: update this after kumbi's work
-	packetWithNoSSL, err := protocol.RemoveSSLFromHandshakeV10(h.rawServerHandshake)
+	serverHandshake.ServerCapabilities &^= protocol.ClientSSL
+
+	// Give client the simplest auth plugin request
+	// This might work for now, but we'll likely need to add support for other auth plugins
+	serverHandshake.AuthPlugin = "mysql_native_password"
+
+	packetWithNoSSL, err := protocol.PackHandshakeV10(&serverHandshake)
 	if err != nil {
 		h.err = err
 		return
@@ -161,9 +193,10 @@ func (h *AuthenticationHandshake) readClientHandshakeResponse() {
 		return
 	}
 
-	// TODO: client requesting SSL results ERROR 2026 (HY000): SSL connection error: protocol version mismatch
+	// TODO: client requesting SSL results in ERROR 2026 (HY000): SSL connection error: protocol version mismatch
 	h.clientHandshakeResponse, h.err = protocol.UnpackHandshakeResponse41(rawResponse)
 }
+
 func (h *AuthenticationHandshake) overrideClientCapabilities() {
 	if h.err != nil {
 		return
@@ -173,10 +206,11 @@ func (h *AuthenticationHandshake) overrideClientCapabilities() {
 
 	// TODO: add tests cases for authentication plugins support
 	// Disable CapabilityFlag for authentication plugins support
-	h.clientHandshakeResponse.CapabilityFlags &^= protocol.ClientPluginAuth
+	h.clientHandshakeResponse.CapabilityFlags |= protocol.ClientPluginAuth
 
 	// TODO: add tests cases for client secure connection
 	// Enable CapabilityFlag for client secure connection
+	// TODO: explore weird heisenbug when this is toggled off:  ERROR: 1043 (08S01): Bad handshake
 	h.clientHandshakeResponse.CapabilityFlags |= protocol.ClientSecureConnection
 
 	// Ensure CapabilityFlag is set when using TLS
@@ -193,6 +227,7 @@ func (h *AuthenticationHandshake) injectCredentials() {
 
 	// TODO: change this to method call on clientHandshakeResponse when Kumbi's work done
 	h.err = protocol.InjectCredentials(
+		h.serverHandshake.AuthPlugin,
 		h.clientHandshakeResponse,
 		h.serverHandshake.Salt,
 		h.connectionDetails.Username,
@@ -213,7 +248,7 @@ func (h *AuthenticationHandshake) handleClientSSLRequest() {
 	// but truncating the username and everything after the username in
 	// the payload, as described here:
 	//
-	// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest
+	// https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_ssl_request.html
 	//
 	// The payload itself breaks down as follows:
 	//
@@ -270,6 +305,8 @@ func (h *AuthenticationHandshake) writeClientHandshakeResponseToBackend() {
 		return
 	}
 
+	// TODO: We should probably be carrying out a comprehensive unpacking, so that
+	// we can be selective about the contents of the response
 	packedHandshakeRespPacket, err := protocol.PackHandshakeResponse41(h.clientHandshakeResponse)
 	if err != nil {
 		h.err = err
@@ -284,31 +321,141 @@ func (h *AuthenticationHandshake) verifyAndProxyOkResponse() {
 		return
 	}
 
+	// This proxying needs to take place to ensure the client gets the OK packet with
+	// the correct sequence id, the connection keeps track of this information whereas
+	// Secretless duplex streaming does not.
+	rawPkt := h.readBackendPacket()
+	h.writeClientPacket(rawPkt)
+}
+
+func (h *AuthenticationHandshake) handleBackendAuthResponse() {
+	if h.err != nil {
+		return
+	}
+
 	rawPkt := h.readBackendPacket()
 	if h.err != nil {
 		return
 	}
 
 	switch protocol.GetPacketType(rawPkt) {
-	case protocol.ResponseErr:
-		// Return after adding the error response to AuthenticationHandshake
-		// as a protocol.Error type
-		//
-		// The protocol.Error type makes it possible
-		// to have Go errors that can contain rich protocol specific information
-		// and have the smarts to encode themselves into a MYSQL error packet
-		err := protocol.UnpackErrResponse(rawPkt)
-		h.err = err
-		return
-	default:
-		// Verify packet is valid; don't do anything with unpacked
-		if _, err := protocol.UnpackOkResponse(rawPkt); err != nil {
+	case protocol.ResponseAuthMoreData:
+		defer h.verifyAndProxyOkResponse()
+
+		moreDataResp, err := protocol.UnpackAuthMoreDataResponse(rawPkt)
+		if err != nil {
 			h.err = err
 			return
 		}
+
+		switch moreDataResp.StatusTag {
+		case protocol.CachingSha2PasswordFastAuthSuccess:
+			// The user was cached and a fast login was performed successfully.
+			// Do nothing. An OK packet will be sent by the server immediately
+			// following this packet.
+			return
+		case protocol.CachingSha2PasswordPerformFullAuthentication:
+			// The server is requesting a full authentication handshake.
+			// https://dev.mysql.com/doc/dev/mysql-server/latest/page_caching_sha2_authentication_exchanges.html
+			// https://github.com/go-sql-driver/mysql/blob/master/auth.go#L353
+
+			// When using caching_sha2_password and TLS is enabled, no need
+			// to fetch public key and sign password with it, since
+			// the password is already encrypted in the TLS session.
+			if h.clientRequestedSSL() {
+				data, err := protocol.PackAuthSwitchResponse(
+					h.backendConn.sequenceID,
+					append([]byte(h.connectionDetails.Password), 0),
+				)
+				if err != nil {
+					h.err = err
+					return
+				}
+
+				h.writeBackendPacket(data)
+				if h.err != nil {
+					return
+				}
+				return
+			}
+
+			// Request public key from server
+			data := protocol.PackAuthRequestPubKeyResponse(h.backendConn.sequenceID)
+
+			h.writeBackendPacket(data)
+			if h.err != nil {
+				return
+			}
+
+			// Read public key from server
+			pubKeyPkt := h.readBackendPacket()
+			if h.err != nil {
+				return
+			}
+
+			// Unpack public key from packet
+			pubKey, err := protocol.UnpackAuthRequestPubKeyResponse(pubKeyPkt)
+			if err != nil {
+				h.err = err
+				return
+			}
+
+			// Encrypt password with public key
+			enc, err := protocol.EncryptPassword(h.connectionDetails.Password, h.serverHandshake.Salt, pubKey)
+			if err != nil {
+				h.err = err
+				return
+			}
+
+			// Send encrypted password to server
+			encPkt := protocol.PackAuthEncryptedPasswordResponse(h.backendConn.sequenceID, enc)
+
+			h.writeBackendPacket(encPkt)
+			return
+		}
+
+		return
+
+	case protocol.ResponseAuthSwitchRequest:
+		defer h.verifyAndProxyOkResponse()
+
+		authSwitchRequest, err := protocol.UnpackAuthSwitchRequest(rawPkt)
+		if err != nil {
+			h.err = err
+			return
+		}
+
+		salt := authSwitchRequest.PluginData
+		// This is because the salt seems to actually be 21 bytes, ending in a null byte.
+		// However the documentation suggests auth switch requests should be an EOF string
+		// See https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_auth_switch_request.html
+		if authSwitchRequest.PluginName == "mysql_native_password" {
+			salt = salt[:20]
+		}
+		authResponse, err := protocol.CreateAuthResponse(authSwitchRequest.PluginName, []byte(h.connectionDetails.Password), salt)
+		if err != nil {
+			return
+		}
+
+		authSwitchResponseData, err := protocol.PackAuthSwitchResponse(
+			authSwitchRequest.SequenceNumber,
+			authResponse,
+		)
+		if err != nil {
+			h.err = err
+			return
+		}
+		h.writeBackendPacket(authSwitchResponseData)
+
+		return
+
+	default:
+		// Let the client deal with it
+		h.writeClientPacket(rawPkt)
+
+		return
 	}
 
-	h.writeClientPacket(rawPkt)
 }
 
 func (h *AuthenticationHandshake) dbSSLMode() *ssl.DbSSLMode {

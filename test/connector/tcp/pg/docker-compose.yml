@@ -21,14 +21,19 @@ services:
   pg:
     <<: *pg_no_tls
     command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.pem -c ssl_key_file=/var/lib/postgresql/server-key.pem -c ssl_ca_file=/var/lib/postgresql/ca.pem -c config_file=/etc/postgresql.conf
+    ports:
+      - 5432:5432
 
   secretless-dev:
     image: secretless-dev
     command: ./bin/reflex
     volumes:
       - ../../../..:/secretless
-      - ./fixtures/secretless.yml:/secretless.yml
+      - ./fixtures/secretless.dev.yml:/secretless.yml
       - pg-socket:/sock
+    ports:
+      - 5555
+      - 6666
 
   secretless:
     image: secretless-broker-coverage

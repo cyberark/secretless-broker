@@ -5,6 +5,7 @@
 .jekyll-cache/
 .keep
 .vscode/
+!.vscode/launch.json
 
 bench.*
 debug

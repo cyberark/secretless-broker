@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v2"
 
@@ -14,5 +14,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile("./fixtures/secretless.yml", d, 0644)
+	os.WriteFile("./fixtures/secretless.yml", d, 0644)
 }

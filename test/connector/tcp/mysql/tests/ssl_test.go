@@ -170,6 +170,9 @@ func TestSSL(t *testing.T) {
 			},
 		},
 		{
+			// TODO: This test is flaky. It fails intermittently with the following error:
+			// `ERROR 2000 (HY000): write tcp 172.28.0.4:53380->172.28.0.3:3306: write: broken pipe\n" does
+			// not contain "ERROR 2000 (HY000): remote error: tls: unknown certificate authority"`
 			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=valid, sslkey=notsignedbyca, sslcert=notsignedbyca",
 				ShouldPass:  false,

@@ -1,4 +1,4 @@
-# Contributing to the Secretless Broker
+# Contributing to Secretless Broker
 
 For general contribution and community guidelines, please see the [community repo](https://github.com/cyberark/community). In particular, before contributing
 please review our [contributor licensing guide](https://github.com/cyberark/community/blob/main/CONTRIBUTING.md#when-the-repo-does-not-include-the-cla)
@@ -21,25 +21,29 @@ agreements.
 ## Prerequisites
 
 ### Go version
-To work in this codebase, you will want to have at least Go 1.11.4 installed.
+
+To work in this codebase, you will want to have at least Go 1.19 installed.
 
 ### Mercurial (`hg`)
+
 Due to a dependency on `k8s/client-go`, our project requires that you have
 installed Mercurial (`hg` on the CLI) on your system.
 
 macOS:
-```
-$ brew install mercurial
+
+```sh
+brew install mercurial
 ```
 
 Linux:
-```
+
+```sh
 # Alpine
-$ apk add -u mercurial
+apk add -u mercurial
 
 # Debian-based
-$ apt update
-$ apt install mercurial
+apt update
+apt install mercurial
 ```
 
 ## Pull Request Workflow
@@ -90,7 +94,8 @@ In most of our build scripts we provide a static (compile-time) version augmenta
 the final artifacts include the Git short-hash of the code used to build it so that it looks
 similar to: `<sem_ver>-<git_short_hash>`. We do this in most cases by over-riding the `Tag`
 variable value in `pkg/secretless` package with ldflags in this manner:
-```
+
+```sh
 ...
 -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.Tag=<git_short_hash>"
 ...
@@ -103,43 +108,46 @@ create your final deliverable.
 ### Docker containers
 
 ```sh-session
-$ # From Secretless Broker repository root
-$ ./bin/build
+# From Secretless Broker repository root
+./bin/build
 ```
 
 This should create a Docker container with tag `secretless-broker:latest` in your local registry.
 
 ### Binaries
+
 #### Linux
+
 ```sh-session
-$ # From Secretless Broker repository root
-$ go build -o ./secretless-broker ./cmd/secretless-broker
+# From Secretless Broker repository root
+go build -o ./secretless-broker ./cmd/secretless-broker
 ```
 
-#### OSX
+#### Mac OS
 
 ```sh-session
-$ # From Secretless Broker repository root
-$ ./bin/build_darwin
+# From Secretless Broker repository root
+./bin/build_darwin
 ```
 
 ## Testing
 
 ### Prerequisites
 
-* **Docker** You need Docker to run the tests.
+- **Docker** You need Docker to run the tests.
 
 Build the project by running:
 
 ```sh-session
-$ ./bin/build
+./bin/build
 ```
 
 Then run the test cases:
 
 ```sh-session
-$ ./bin/test
+./bin/test
 ```
+
 ### Adding New Integration tests
 
 Each integration test exists in its own subdirectory within the "test"
@@ -163,16 +171,18 @@ Note: You can test locally using the same format of `./bin/run_integration <test
 directory name>`. You can pass in the name of the directory itself, you don't need the
 full path.
 
-### OSX Keychain provider Test
+### Mac OS Keychain provider Test
 
-**OSX Keychain provider**
+#### Mac OS Keychain provider
 
-If you are on a Mac, you may also test the OSX Keychain provider:
+If you are on a Mac, you may also test the Mac OS Keychain provider:
+
 ```sh-session
 cd test/providers/keychain/
 ./start
 ./test
 ```
+
 This test will not be run as part of the test suite, since it requires access
 to the Mac OSX Keychain. You will be prompted for your password when running
 this test, as it temporarily adds a generic password to your account, and
@@ -184,9 +194,10 @@ verifies that it can retrieve the value.
 cd test/manual/k8s_crds
 ./deploy
 ```
+
 This test currently does not run as part of the test suite.
 
-**Code Climate**
+### Code Climate
 
 We use Code Climate in our CI pipeline to perform linting and other style
 checks.  The specific engines we use and their configuration is in
@@ -198,19 +209,29 @@ To run linting checks via the Code Climate golint engine, simply run:
 ./bin/check_style
 ```
 
+### Testing Individual Connectors
+
+For instructions on how to test individual connectors, see the README.md file in
+the connector's test directory, eg:
+[test/connector/tcp/mysql/README.md](test/connector/tcp/mysql/README.md).
+
 ## Documentation
+
 Secretless has a few sources for documentation: a website, a documentation subdomain, and godocs.
 
 ### Website
+
 The [website](https://secretless.io) source is in the [docs](docs/) folder in this repository. It is generated using Jekyll.
 
 The source includes:
+
 - the website main page
 - some old pages that redirect to the documentation subdomain
 - tutorials
 - godocs for the plugin API
 - Secretless blog
 - community info page
+
 #### Prerequisites
 
 To get the site up and running locally on your computer, ensure you have:
@@ -221,6 +242,7 @@ To get the site up and running locally on your computer, ensure you have:
 1. Once Bundler and Jekyll gems are installed, run `bundle install`
 
 #### Run Locally
+
 To construct:
 
 1. `git clone https://github.com/cyberark/secretless-broker`
@@ -231,6 +253,7 @@ To construct:
    `open localhost:4000` or manually navigating to http://localhost:4000
 
 #### Run in Docker
+
 With `docker` and `docker-compose`:
 
 1. Run `docker-compose up -d` in the `docs` directory.
@@ -238,15 +261,19 @@ With `docker` and `docker-compose`:
    `open localhost:4000` or manually navigating to http://localhost:4000
 
 ### Documentation Website
+
 The [documentation website](https://docs.secretless.io) source is in the [secretless-docs repo](https://github.com/cyberark/secretless-docs); instructions for contributing are available there.
 
 ### Godocs
+
 [Godocs](https://godoc.org/github.com/cyberark/secretless-broker) are auto-published, and our `./bin/build_website` script also generates godocs for our plugin API that are published to our website.
 
 ## Profiling
-Profiling can be used to monitor the impact of Secretless on CPU and Memory consumption. Currently, Secretless supports two types- CPU and Memory.
+
+Profiling can be used to monitor the impact of Secretless on CPU and Memory consumption. Currently, Secretless supports two types - CPU and Memory.
 
 **Prerequisites:**
+
 - [Graphviz](https://graphviz.gitlab.io/download/) to visualize profiling results
 - [Postgresql](https://www.postgresql.org/download/) to install Postgres
 
@@ -348,6 +375,7 @@ the [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) docume
  flag will handle any submodules nested within a submodule
 
 ### Updating Submodules
+
 When making a change to a submodule, it will not be committed automatically when the
 super repository is committed. As such, there are a few steps in place to make sure
 this happens.

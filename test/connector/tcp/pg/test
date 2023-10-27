@@ -7,9 +7,11 @@ This script detects if you're in "dev" mode by the existence of
 the secretless-dev container.  That container will exist only if
 the development process was started using the "./dev" command.
 
-If in dev mode, all tests will be run against the "secretless-dev"
-container, which will not be torn down.  If not, they will be run
-in a fresh test container which will be torn down afterward.
+If in dev mode, this script will exit with an error, and notify
+you that you should use the "./start" command before running tests.
+The "./dev" command cannot be used for tests since it uses static
+fixtures instead of the dynamically generated ones needed for the
+tests. See the README.md in this directory for more information.
 
 Options:
   -b runs benchmarks
@@ -21,7 +23,6 @@ EOF
 export SECRETLESS_HOST=secretless
 export VERBOSE=false
 benchmark=false
-docker_compose_cmd="docker-compose run --rm --no-deps"
 
 while getopts :bv opt; do
     case $opt in
@@ -38,10 +39,8 @@ done
 
 
 if [[ ! -z $(docker-compose ps -q secretless-dev) ]]; then
-  export SECRETLESS_HOST=secretless-dev
-
-  # use exec because the container is already running
-  docker_compose_cmd="docker-compose exec"
+    echo "Please run the ./start script before running this script"
+    exit 1
 fi
 
 if $benchmark; then
@@ -77,7 +76,7 @@ if $benchmark; then
       benchcmp bench.old bench.new
     "
 else
-  ${docker_compose_cmd} \
+  docker-compose run --rm --no-deps \
     -e SECRETLESS_HOST="$SECRETLESS_HOST" \
     test bash -c "go test -v ./test/connector/tcp/pg/tests"
 fi

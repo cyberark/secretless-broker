@@ -1,141 +1,88 @@
 # MySQL Connector Development
 
-## Usage / known limitations
+## Building
 
-- The MySQL connector is currently limited to connections via Unix domain socket
-
-### To use the MySQL connector
-
-#### Start your MySQL server
-
-From this directory, call
+From the project root directory, build the Secretless Broker containers.
 
 ```sh
-docker-compose up -d mysql
+./bin/build
 ```
 
-This will automatically start a MySQL server in a Docker container at `localhost:$(docker-compose port mysql 3306)`.
+## Testing
 
-It will also configure the MySQL server as follows:
+### Run the tests in Docker
+
+To run the test suite in Docker, run:
+
+```sh
+./start  # Stand up MySQL and Secretless Broker servers
+./test   # Run tests in a test container
+./stop   # Clean up all running containers
+```
+
+## Developing
+
+### Start the development environment
+
+Run `./dev` from this directory. This will automatically start a MySQL server in
+a Docker container at `localhost:3306`. It will also configure the MySQL server as follows:
 
 - Create a `testuser` user (with password `testpass`)
 - Authorize the `testuser` user to connect to the database server from any IP and access any schema
 - Create a table `test` in the `testdb` schema and add two rows
 
-#### Start and configure secretless-broker
+It will also start a container running Secretless Broker and a test container
+that can be used to send requests to the MySQL server via Secretless Broker.
 
-From the root project directory, build the Secretless Broker binaries for your platform:
+Note: When you run `./dev`, it will start Secretless Broker wtih two services:
+(See [fixtures/secretless.dev.yml](fixtures/secretless.dev.yml))
 
-```sh
-platform=$(go run test/print_platform.go)
-./bin/build $platform amd64
-```
+- On port 5555, it will start a service that connects to the `mysql` server via TCP
+- On port 6666, it will start a service that connects to the `mysql_no_tls` server via TCP
 
-From this directory, start Secretless Broker:
-
-```sh
-./dev
-```
+This is different from the behavior of the `./start` script, which starts Secretless Broker with
+a large number of services in order to run the full automated test suite. Therefore,
+running `./test` will fail if you run it after running `./dev` instead of `./start`.
 
 #### Log in to the MySQL server via the MySQL connector
 
-In another terminal, navigate to the `test/mysql_handler` directory and send a MySQL request via Unix socket:
-
-_Note: Since the Secretless Broker container runs the daemon as a limited user, sockets should be mounted to `/sock` directory._
+To connect to the MySQL server directly, you can run:
 
 ```sh
-mysql --socket=sock/mysql.sock
+docker-compose exec test mysql -h mysql -P 3306 -u testuser -ptestpass
 ```
 
-or via TCP:
+To connect to the MySQL server via Secretless Broker, you can run:
 
 ```sh
-mysql -h 0.0.0.0 -P 13306 -u testuser --ssl-mode=DISABLED
+# MySQL will prompt you for a password, but you can just press "Enter"
+docker-compose exec test mysql -h secretless-dev -P 5555 # Will connect to the `mysql` container
+docker-compose exec test mysql -h secretless-dev -P 6666 # Will connect to `mysql_no_tls`
 ```
 
-You may be prompted for a password, but you don't need to enter one; just hit return to continue.
-
-Once logged in, you should be able to `SELECT * FROM testdb.test` and see the rows that were added to the sample table.
-
-Note: this assumes you have a MySQL client installed locally on your machine. In the examples above and when you run the test suite locally, it is assumed you use one like [mysqlsh](https://dev.mysql.com/doc/refman/5.7/en/mysqlsh.html), which assumes SSL connections when possible by default (and has an `--ssl-mode` flag you can use to disable SSL).
-
-If you use `mysqlsh`, you will need to create an executable `mysql` file in your `PATH` that contains the following in order to be able to run `run_dev_test` locally:
-
-```sh
-#!/bin/bash -ex
-
-mysqlsh --sql "$@"
-```
-
-This will run the MySQL shell as a client in SQL mode.
-
-## MySQL Handler Development
+## Debugging
 
 ### Using VS Code
 
-The easiest way to do Secretless Broker development is to use the VS Code debugger. As above, you will want to start up your MySQL server container before beginning development. To configure the Secretless Broker, you can provide VS Code with a `launch.json` file for debugging by copying the sample file below to `.vscode/launch.json`, replacing `[YOUR MYSQL PORT]` with the actual exposed port of your MySQL Docker container.
+The easiest way to do Secretless Broker development is to use the VS Code
+debugger. As above, you will want to start up your MySQL server container before
+beginning development. You can choose to run `./dev` to start the entire environment
+or just start the MySQL server by running `docker-compose up -d mysql` from this directory.
 
-Sample `launch.json`:
-
-```json
-{
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "MySQL Connector",
-      "type": "go",
-      "request": "launch",
-      "mode": "debug",
-      "remotePath": "",
-      "port": 2345,
-      "host": "127.0.0.1",
-      "program": "${workspaceFolder}/cmd/secretless-broker/",
-      "env": { "MYSQL_HOST": "localhost", "MYSQL_PORT": "[YOUR MYSQL PORT]", "MYSQL_PASSWORD": "testpass" },
-      "args": [ "-f", "${workspaceFolder}/test/connector/tcp/mysql/fixtures/secretless.dev.yml"],
-      "showLog": true
-    }
-  ]
-}
-```
-
-Once you start the debugger (which will automatically start the Secretless Broker with the dev MySQL Connector configuration), you can send requests to the MySQL server via a client as described above.
-
-### Using Docker
-
-You can also run:
+This repository includes a VS Code launch configuration in
+`/.vscode/launch.json` for the MySQL connector. Once you start the debugger in
+VS Code (which will automatically start the Secretless Broker with the dev MySQL
+Connector configuration), you can send requests to the MySQL server using a
+MySQL client pointed towards the port you specified in the
+`fixtures/secretless.debug.yml` file (in this case, `7777`).
 
 ```sh
-cd test/connector/tcp/mysql/
-./start
-docker-compose run --rm secretless-dev
+# Connect directly to MySQL server, should require correct password ("testpass").
+mysql -h 0.0.0.0 -P 3306
+# Connect to Secretless Broker, press "Enter" if prompted for password.
+# Should work regardless of whether you enter a password.
+mysql -h 0.0.0.0 -P 7777
 ```
 
-Then, to connect with MySQL you can run either
-`mysql -h secretless -P 3306`
-to connect via TCP (SSL mode is disabled by default), or
-`mysql --socket=/sock/mysql.sock`
-to connect via Unix socket.
-
-## Running the test suite
-
-#### Run the tests in Docker
-
-Make sure you have built updated Secretless Broker binaries for Linux and updated Docker images before running the test suite.
-
-To run the test suite in Docker, run:
-
-```sh
-./stop   # Remove all existing project containers
-./start  # Stand up MySQL and Secretless Broker servers
-./test   # Run tests in a test container
-```
-
-Make sure you build the project by running `./bin/build` in the project root
-before running the tests so that the test container will be using updated
-code. If you want to run using your local changes, you can run `./test -l`
-instead, which will mount your local project directory as a volume in the
-test container, overwriting the project directory built into the container
-image.
+You can now set breakpoints in your code and step through the code using the
+debugger.

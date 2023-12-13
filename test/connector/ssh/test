@@ -46,7 +46,7 @@ fi
 start=`date +%s`
 # Test is temporarily turned off due to bug
 # See https://github.com/cyberark/secretless-broker/issues/658 for more info
-docker-compose run \
+docker compose run \
   --rm \
   --no-deps \
   $docker_args \

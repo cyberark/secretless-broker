@@ -3,4 +3,4 @@
 ./stop
 
 # TODO: Prepare the container of the platform you are connecting to secretless.
-docker-compose up -d secretless
+docker compose up -d secretless

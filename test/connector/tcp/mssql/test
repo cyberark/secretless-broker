@@ -2,15 +2,15 @@
 
 echo -e "\nRunning tests\n"
 
-docker-compose exec -T \
+docker compose exec -T \
   test bash -c "go test -v ./test/connector/tcp/mssql"
 
 echo ""
 echo 'Creating pet:'
 echo '{"name": "Mr. Init"}'
-docker-compose exec -T test curl -s -d '{"name": "Mr. Init"}' -H "Content-Type: application/json" app:8080/pet
+docker compose exec -T test curl -s -d '{"name": "Mr. Init"}' -H "Content-Type: application/json" app:8080/pet
 
 echo "Retrieving pet:"
-docker-compose exec -T test curl -s app:8080/pets
+docker compose exec -T test curl -s app:8080/pets
 echo ""
 echo ""

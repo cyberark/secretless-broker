@@ -31,7 +31,7 @@ func TestCustom(t *testing.T) {
 
 	t.Run("sslmode=require", func(t *testing.T) {
 		cmdOut, _ := exec.Command("psql", append(args, strings.Join(append(connectionParams, "sslmode=require"), " "))...).CombinedOutput()
-		assert.Contains(t, string(cmdOut), "psql: server does not support SSL, but SSL was required")
+		assert.Contains(t, string(cmdOut), "psql: error: server does not support SSL, but SSL was required")
 	})
 
 	t.Run("sslmode=prefer", func(t *testing.T) {

@@ -15,7 +15,7 @@ connector.
 
 A number of integration tests rely on the existence of MSSQL clients in the
 environment and pre-running services, i.e. Secretless, MSSQL server instances
-etc. We have decided to standardise on **docker-compose** to run these services,
+etc. We have decided to standardise on **docker compose** to run these services,
 and to run the tests inside a test container image that can have any other
 dependencies the tests might have. The biggest benefit for us with this setup is
 ease of reproduction.
@@ -36,7 +36,7 @@ conventions of Go testing; they are defined in Go files with the suffix
 
 There are 2 types of tests in this folder. The test cases are generally
 composed of a **database client**, **Secretless Proxy** and a **target
-service**. A realistic target service is provided through docker-compose.
+service**. A realistic target service is provided through docker compose.
 There's also a mock target service use to capture the packets an actual server
 might receive.
 

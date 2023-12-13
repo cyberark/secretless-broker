@@ -9,7 +9,7 @@ while getopts :m: opt; do
 done
 
 mssql_is_up() {
-    docker-compose logs $mssql_host | grep "SQL Server is now ready for client connections"
+    docker compose logs $mssql_host | grep "SQL Server is now ready for client connections"
 }
 
 # TODO: Use bash-lib for this function once it is implemented there

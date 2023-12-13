@@ -49,14 +49,14 @@ running `./test` will fail if you run it after running `./dev` instead of `./sta
 To connect to the Postgres server directly, you can run:
 
 ```sh
-docker-compose exec test psql -h pg -p 5432 -U test -d postgres # Password: "test"
+docker compose exec test psql -h pg -p 5432 -U test -d postgres # Password: "test"
 ```
 
 To connect to the Postgres server via Secretless Broker, you can run:
 
 ```sh
-docker-compose exec test psql -h secretless-dev -p 5555 -d postgres # Will connect to the `pg` container
-docker-compose exec test psql -h secretless-dev -p 6666 -d postgres # Will connect to `pg_no_tls`
+docker compose exec test psql -h secretless-dev -p 5555 -d postgres # Will connect to the `pg` container
+docker compose exec test psql -h secretless-dev -p 6666 -d postgres # Will connect to `pg_no_tls`
 ```
 
 ## Debugging
@@ -66,7 +66,7 @@ docker-compose exec test psql -h secretless-dev -p 6666 -d postgres # Will conne
 The easiest way to do Secretless Broker development is to use the VS Code
 debugger. As above, you will want to start up your Postgres server container before
 beginning development. You can choose to run `./dev` to start the entire environment
-or just start the Postgres server by running `docker-compose up -d pg` from this directory.
+or just start the Postgres server by running `docker compose up -d pg` from this directory.
 
 This repository includes a VS Code launch configuration in
 `/.vscode/launch.json` for the Postgres connector. Once you start the debugger in

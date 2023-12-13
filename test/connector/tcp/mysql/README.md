@@ -49,15 +49,15 @@ running `./test` will fail if you run it after running `./dev` instead of `./sta
 To connect to the MySQL server directly, you can run:
 
 ```sh
-docker-compose exec test mysql -h mysql -P 3306 -u testuser -ptestpass
+docker compose exec test mysql -h mysql -P 3306 -u testuser -ptestpass
 ```
 
 To connect to the MySQL server via Secretless Broker, you can run:
 
 ```sh
 # MySQL will prompt you for a password, but you can just press "Enter"
-docker-compose exec test mysql -h secretless-dev -P 5555 # Will connect to the `mysql` container
-docker-compose exec test mysql -h secretless-dev -P 6666 # Will connect to `mysql_no_tls`
+docker compose exec test mysql -h secretless-dev -P 5555 # Will connect to the `mysql` container
+docker compose exec test mysql -h secretless-dev -P 6666 # Will connect to `mysql_no_tls`
 ```
 
 ## Debugging
@@ -67,7 +67,7 @@ docker-compose exec test mysql -h secretless-dev -P 6666 # Will connect to `mysq
 The easiest way to do Secretless Broker development is to use the VS Code
 debugger. As above, you will want to start up your MySQL server container before
 beginning development. You can choose to run `./dev` to start the entire environment
-or just start the MySQL server by running `docker-compose up -d mysql` from this directory.
+or just start the MySQL server by running `docker compose up -d mysql` from this directory.
 
 This repository includes a VS Code launch configuration in
 `/.vscode/launch.json` for the MySQL connector. Once you start the debugger in

@@ -4,7 +4,7 @@ echo "Waiting for Secretless to start"
 
 # single quotes are intentional:
 # shellcheck disable=SC2016
-docker-compose exec -T test bash -ec '
+docker compose exec -T test bash -ec '
 counter=0
 while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/null 2>&1; do
     if expr $counter = 5 > /dev/null; then
@@ -23,4 +23,4 @@ echo ""
 echo "Running tests"
 echo ""
 
-docker-compose exec -T test go test -v -count=1 ./test/connector/http/generic/...
+docker compose exec -T test go test -v -count=1 ./test/connector/http/generic/...

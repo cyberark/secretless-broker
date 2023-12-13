@@ -31,7 +31,7 @@ $ go run cmd/secretless/main.go -f test/ssh_agent_handler/secretless.dev.yml
 
 You can test the code by first either:
 - running the previous command in the background (appending ` &` to it)
-- or connecting with a different terminal to the container with `docker-compose exec dev /bin/bash`
+- or connecting with a different terminal to the container with `docker compose exec dev /bin/bash`
 
 After doing that, you can try opening a separate connection to the Secretless Broker on `/sock/.agent` and ensuring
 that no authentication is needed.

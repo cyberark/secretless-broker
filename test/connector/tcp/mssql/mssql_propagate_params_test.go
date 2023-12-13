@@ -40,7 +40,7 @@ var gomssqlParamsTestClient = testClientParams{
 
 var pythonODBCParamsTestClient = testClientParams{
 	runQuery:        client.PythonODBCExec,
-	applicationName: "python3.7",
+	applicationName: "python3.9",
 	serverName: func(server string, port string) string {
 		return fmt.Sprintf(
 			"%s,%s",

@@ -10,19 +10,19 @@ echo "Clean up complete"
 pushd test &>/dev/null
 cleanup() {
   local exit_status=$?
-  docker-compose rm -fsv || true
+  docker compose rm -fsv || true
   exit $exit_status
 }
 trap cleanup EXIT ABRT QUIT ERR
 
-docker-compose up -d quickstart
+docker compose up -d quickstart
 
 # Used to show in the builds what the test image is doing
-docker-compose logs quickstart &
+docker compose logs quickstart &
 
 echo "Waiting for services to be running.."
-until docker-compose exec -T quickstart ls /run/postgresql/.init &>/dev/null; do
+until docker compose exec -T quickstart ls /run/postgresql/.init &>/dev/null; do
   sleep 1s
 done
 
-docker-compose run -T test-client
+docker compose run -T test-client

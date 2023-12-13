@@ -7,7 +7,7 @@ These instructions show how to develop the Conjur Handler and Provider on you lo
 First you'll need a Conjur server. It's easy to bring one up using the provided `docker-compose.yml`:
 
 ```sh-session
-$ docker-compose up -d conjur
+$ docker compose up -d conjur
 ```
 
 Next, run `secretless-broker` in a terminal:
@@ -20,10 +20,10 @@ $ ./run_dev
 2018/01/16 11:06:03 http listener 'http_default' listening at: [::]:1080```
 ```
 
-Docker has automatically mapped port 80 of the `conjur` container to a local port. Find out this port using `docker-compose port`:
+Docker has automatically mapped port 80 of the `conjur` container to a local port. Find out this port using `docker compose port`:
 
 ```sh-session
-$ docker-compose port conjur 80
+$ docker compose port conjur 80
 0.0.0.0:32812
 ```
 

@@ -18,13 +18,13 @@ mkdir -p ssl
 rm -rf ssl/*
 cp -rf ../../../util/ssl/* ssl
 
-docker-compose build
+docker compose build
 
 report_dir="./test-coverage"
 mkdir -p "$report_dir"
 chmod 777 "$report_dir"
 
-docker-compose up -d mysql mysql_no_tls
+docker compose up -d mysql mysql_no_tls
 
 ./wait-for-mysql mysql_no_tls
 ./wait-for-mysql mysql
@@ -33,12 +33,12 @@ if [[ "$devmode" != true ]]; then
   # Generate secretless.yml fixtures for automated tests. Not needed in dev mode
   # since we use secretless.dev.yml instead of generating them on the fly.
 
-  docker-compose run --rm test \
+  docker compose run --rm test \
     bash -c "go run ./test/util/testutil/cmd/generate_secretless_yml.go"
 fi
 
 # start secretless once mysql is running
-docker-compose up -d "$SECRETLESS_HOST"
+docker compose up -d "$SECRETLESS_HOST"
 
 ./wait-for-secretless "$SECRETLESS_HOST"
 
@@ -46,5 +46,5 @@ docker-compose up -d "$SECRETLESS_HOST"
 #
 if [[ "$devmode" = true ]]; then
   echo 'Starting test container in dev mode...'
-  docker-compose up -d test
+  docker compose up -d test
 fi

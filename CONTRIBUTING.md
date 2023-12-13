@@ -254,9 +254,9 @@ To construct:
 
 #### Run in Docker
 
-With `docker` and `docker-compose`:
+With `docker` and `docker compose`:
 
-1. Run `docker-compose up -d` in the `docs` directory.
+1. Run `docker compose up -d` in the `docs` directory.
 1. Preview Jekyll site locally in web browser by either running
    `open localhost:4000` or manually navigating to http://localhost:4000
 

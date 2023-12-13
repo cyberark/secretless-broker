@@ -2,10 +2,10 @@
 
 ./stop
 
-docker-compose build
+docker compose build
 
 report_dir="./test-coverage"
 mkdir -p "$report_dir"
 chmod 777 "$report_dir"
 
-docker-compose up --detach secretless test
+docker compose up --detach secretless test

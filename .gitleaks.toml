@@ -239,7 +239,7 @@ paths = [
 regexes = [
   "AKIAIOSFODNN7EXAMPLE", # sample AWS key in AWS HTTP connector
   "AKIAJADDJE4Q4JVX3HAA", # since-removed sample AWS key
-  "SuperSecure", # dummy password used in conjur integration test docker-compose
+  "SuperSecure", # dummy password used in conjur integration test docker compose
 ]
 commits = [
   "21c8edd1766c146dccdbf9fc4752c0588f8b00b6", # old commit with disabled API key

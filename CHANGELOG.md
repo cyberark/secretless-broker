@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Security
+- Updated golang.org/x/net to v0.19.0, github.com/go-sql-driver/mysql to v1.7.1, 
+  golang:1.19-buster to golang:1.21.3-bullseye, golang:1.19 to golang:1.20.10,
+  and ruby:3.0.5-slim-bullseye to ruby:3.0.6-bullseye
+
 ### Changed
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.

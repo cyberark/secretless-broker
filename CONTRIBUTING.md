@@ -22,7 +22,7 @@ agreements.
 
 ### Go version
 
-To work in this codebase, you will want to have at least Go 1.19 installed.
+To work in this codebase, you will want to have at least Go 1.21 installed.
 
 ### Mercurial (`hg`)
 

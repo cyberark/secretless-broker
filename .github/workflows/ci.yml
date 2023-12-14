@@ -18,7 +18,7 @@ jobs:
           submodules: recursive
       - uses: actions/setup-go@v3
         with:
-          go-version: '~1.19.0'
+          go-version: '~1.21.0'
       - name: Generate Version
         run: grep -m 1 -P "## \[\d+\.\d+\.\d+\] -" CHANGELOG.md | grep -o -P "\d+\.\d+\.\d+" > VERSION
       - name: go mod tidy
@@ -35,7 +35,7 @@ jobs:
           submodules: recursive
       - uses: actions/setup-go@v3
         with:
-          go-version: '~1.19.0'
+          go-version: '~1.21.0'
       - name: Generate Version
         run: grep -m 1 -P "## \[\d+\.\d+\.\d+\] -" CHANGELOG.md | grep -o -P "\d+\.\d+\.\d+" > VERSION
       - name: go mod tidy
@@ -59,10 +59,10 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      # Install go1.19
+      # Install go1.21
       - uses: actions/setup-go@v3
         with:
-          go-version: '~1.19.0'
+          go-version: '~1.21.0'
       # Get go version
       - run: go version
       # Download go modules

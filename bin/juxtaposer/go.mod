@@ -1,6 +1,6 @@
 module github.com/cyberark/secretless-broker/bin/juxtaposer
 
-go 1.19
+go 1.21
 
 require (
 	github.com/denisenkom/go-mssqldb v0.12.3

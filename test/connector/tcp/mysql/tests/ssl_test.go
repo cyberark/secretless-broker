@@ -68,7 +68,7 @@ func TestSSL(t *testing.T) {
 			Definition: Definition{
 				Description: "server_tls, sslmode=verify-ca, sslrootcert=none",
 				ShouldPass:  false,
-				CmdOutput:   StringPointer("ERROR 2000 (HY000): x509: certificate signed by unknown authority"),
+				CmdOutput:   StringPointer("x509: certificate signed by unknown authority"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:     TCP,
@@ -203,7 +203,7 @@ func TestSSL(t *testing.T) {
 			Definition: Definition{
 				Description: "server_tls, sslmode=verify-full, sslrootcert=valid, sslkey=valid, sslcert=valid, sslhost=invalid",
 				ShouldPass:  false,
-				CmdOutput:   StringPointer("ERROR 2000 (HY000): x509: certificate is valid for localhost, mysql, pg, not invalid"),
+				CmdOutput:   StringPointer("tls: failed to verify certificate: x509: certificate is valid for localhost, mysql, pg, not invalid"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:       TCP,

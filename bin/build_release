@@ -23,24 +23,19 @@ VERSION="${VERSION/-*/}"
 # https://goreleaser.com/cookbooks/cgo-and-crosscompiling/
 GORELEASER_IMAGE="goreleaser/goreleaser-cross"
 
-# Currently there is an issue with the latest tag (v1.19.5) which
-# is breaking release builds of the Darwin ARM64 binary. For now,
-# pin to the previous tag (v1.19.4) until the issue is resolved.
-GORELEASER_LATEST_TAG="v1.19.4"
-
-# # Get the latest tag matching the GO_VERSION
-# GORELEASER_TAGS_JSON="$(curl --silent --show-error https://registry.hub.docker.com/v2/repositories/${GORELEASER_IMAGE}/tags?page_size=100)"
-# GORELEASER_LATEST_TAG="$(echo "${GORELEASER_TAGS_JSON}" | \
-#   jq \
-#     --raw-output \
-#     --arg GO_VERSION "${GO_VERSION}" \
-#     '
-#       .results |
-#       map(select(.name | contains($GO_VERSION) and (contains("-") | not))) |
-#       first |
-#       .name
-#     '
-# )"
+# Get the latest tag matching the GO_VERSION
+GORELEASER_TAGS_JSON="$(curl --silent --show-error https://registry.hub.docker.com/v2/repositories/${GORELEASER_IMAGE}/tags?page_size=100)"
+GORELEASER_LATEST_TAG="$(echo "${GORELEASER_TAGS_JSON}" | \
+  jq \
+    --raw-output \
+    --arg GO_VERSION "${GO_VERSION}" \
+    '
+      .results |
+      map(select(.name | contains($GO_VERSION) and (contains("-") | not))) |
+      first |
+      .name
+    '
+)"
 
 if [[ -z "${GORELEASER_LATEST_TAG}" ]]; then
   echo "Could not find tag for Docker image \"${GORELEASER_IMAGE}\" matching GO_VERSION=${GO_VERSION}"

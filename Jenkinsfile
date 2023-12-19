@@ -264,8 +264,12 @@ pipeline {
               if (name == "keychain") return
 
               integrationStages["Integration: ${name}"] = {
-                infrapool.agentSh "./bin/run_integration ${name}"
-                infrapool.agentStash name: 'integration-junit-report', includes: '**/test/**/junit.xml'
+                stage("${name}") {
+                    script {
+                      infrapool.agentSh "./bin/run_integration ${name}"
+                      infrapool.agentStash name: 'integration-junit-report', includes: '**/test/**/junit.xml'
+                    }
+                }
               }
             }
 

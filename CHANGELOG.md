@@ -6,11 +6,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Security
-- Updated golang.org/x/net to v0.19.0, github.com/go-sql-driver/mysql to v1.7.1, 
-  golang:1.19-buster to golang:1.21.3-bullseye, golang:1.19 to golang:1.20.10,
-  and ruby:3.0.5-slim-bullseye to ruby:3.0.6-bullseye
-
 ### Changed
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
@@ -18,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.7.20] - 2023-11-03
 
 ### Security
+- Upgrade to go 1.21 (CNJR-3417)
+- Updated golang.org/x/net to v0.19.0, github.com/go-sql-driver/mysql to v1.7.1, 
+  golang:1.19-buster to golang:1.21.3-bullseye, golang:1.19 to golang:1.20.10,
+  and ruby:3.0.5-slim-bullseye to ruby:3.0.6-bullseye
 - Updated golang.org/x/net to v0.17.0 to remove CVE-2023-39325 and CVE-2023-44487 (CNJR-3020)
 
 ## [1.7.19] - 2023-11-02

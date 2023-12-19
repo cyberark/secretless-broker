@@ -1,4 +1,4 @@
-FROM golang:1.19-buster as secretless-builder
+FROM golang:1.21-bookworm as secretless-builder
 MAINTAINER CyberArk Software Ltd.
 LABEL builder="secretless-builder"
 

@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.21] - 2023-12-22
+
 ## [1.7.20] - 2023-12-22
 
 ### Security
@@ -762,3 +764,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.18]: https://github.com/cyberark/secretless-broker/compare/v1.7.17...v1.7.18
 [1.7.19]: https://github.com/cyberark/secretless-broker/compare/v1.7.18...v1.7.19
 [1.7.20]: https://github.com/cyberark/secretless-broker/compare/v1.7.19...v1.7.20
+[1.7.21]: https://github.com/cyberark/secretless-broker/compare/v1.7.20...v1.7.21

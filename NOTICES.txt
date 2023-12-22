@@ -28,7 +28,7 @@ SECTION 3: BSD 3-clause "New" or "Revised" License
 
 >>> github.com/cyberark/go-mssqldb-0.0.0-20191030142036-b5a965a47dd3
 >>> github.com/fsnotify/fsnotify-1.5.4
->>> golang.org/x/crypto-0.5.0
+>>> golang.org/x/crypto-0.14.0
 
 SECTION 4: MIT License
 
@@ -359,7 +359,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
->>> golang.org/x/crypto-0.5.0
+>>> golang.org/x/crypto-0.14.0
 
 Copyright (c) 2009 The Go Authors. All rights reserved.
 

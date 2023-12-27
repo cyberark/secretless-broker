@@ -487,5 +487,5 @@ than main. Make sure your change to secretless considers this.
 
 ### Publish the Red Hat image
 
-1. Visit the [Red Hat project page](https://connect.redhat.com/project/3100131/view) once the images have
+1. Visit the [Red Hat project page](https://connect.redhat.com/projects/5e61546e2c5f183d03415962/overview) once the images have
    been pushed and manually choose to publish the latest release.

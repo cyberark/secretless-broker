@@ -485,13 +485,7 @@ than main. Make sure your change to secretless considers this.
 1. Reference the [internal automated release doc](https://github.com/conjurinc/docs/blob/master/reference/infrastructure/automated_releases.md#release-and-promotion-process)
    for releasing and promoting.
 
-### Publish homebrew version
-
-1. Copy the `secretless-broker.rb` homebrew formula output by goreleaser
-   to the [homebrew formula for Secretless](https://github.com/cyberark/homebrew-tools/blob/main/secretless-broker.rb)
-   and submit a PR to update the version of Secretless available in brew.
-
 ### Publish the Red Hat image
 
-1. Visit the [Red Hat project page](https://connect.redhat.com/project/3100131/view) once the images have
+1. Visit the [Red Hat project page](https://connect.redhat.com/projects/5e61546e2c5f183d03415962/overview) once the images have
    been pushed and manually choose to publish the latest release.

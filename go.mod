@@ -187,6 +187,8 @@ replace github.com/aws/aws-sdk-go v1.15.79 => github.com/aws/aws-sdk-go v1.34.2
 
 replace github.com/dgrijalva/jwt-go v3.2.0+incompatible => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 
+replace github.com/emicklei/go-restful/v3 v3.8.0 => github.com/emicklei/go-restful/v3 v3.10.0
+
 replace github.com/gogo/protobuf v1.1.1 => github.com/gogo/protobuf v1.3.2
 
 replace github.com/gogo/protobuf v1.2.1 => github.com/gogo/protobuf v1.3.2

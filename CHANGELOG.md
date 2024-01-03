@@ -10,7 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.21] - 2023-12-22
+## [1.7.21] - 2024-01-03
+
+### Security
+- Update `alpine` base image to v3.19 (CONJSE-1825)
 
 ## [1.7.20] - 2023-12-22
 

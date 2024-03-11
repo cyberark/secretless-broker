@@ -1,4 +1,4 @@
-FROM ruby:3.0.6-slim-bullseye
+FROM ruby:3-slim-bullseye
 
 RUN apt-get -y update && \
     apt-get -y install build-essential && \
@@ -11,4 +11,4 @@ RUN bundle install
 
 WORKDIR /usr/src/app
 
-CMD ["jekyll", "build", "--destination", "/tmp/_site"]
+CMD ["bundle", "exec", "jekyll", "build", "--destination", "/tmp/_site"]

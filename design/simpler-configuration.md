@@ -14,8 +14,6 @@ unnecessary concepts and present better chrome to the user.  This improvement co
 1. Shorter, simpler `secretless.yml` configuration files
 2. Shorter, simpler "concept" documentation
 
-Aha Card: https://cyberark.aha.io/features/AAM-<>
-
 - [Objective](#objective)
 - [Team](#team)
 - [SDLC Timeline](#sdlc-timeline)

@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.7.22] - 2024-03-11
 
+### Security
+- Update ruby:3.0.6-slim-bullseye to ruby:3-slim-bullseye for docs and website generation (CONJSE-1850)
+- Update Jekyll to v4.3.3 (CONJSE-1850)
+
 ## [1.7.21] - 2024-01-03
 
 ### Security

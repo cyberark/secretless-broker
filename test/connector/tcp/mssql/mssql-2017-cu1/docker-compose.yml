@@ -2,8 +2,8 @@ version: '3.0'
 
 services:
 
-  mssql-2017-cu1:
-    image: mcr.microsoft.com/mssql/server:2017-CU1-ubuntu
+  mssql-2017-cu2:
+    image: mcr.microsoft.com/mssql/server:2017-CU2-ubuntu
     ports:
       - 1434:1433
     environment:
@@ -15,7 +15,7 @@ services:
       - ../certs/server-cert.pem:/certs/server.pem
       - ../certs/server-key.pem:/certs/server.key
 
-  secretless-2017-cu1:
+  secretless-2017-cu2:
     image: secretless-broker-coverage
     entrypoint: "/usr/local/bin/secretless-broker -test.v -test.run ^TestCoverage$$ -test.coverprofile=/test-coverage/cover.out"
     environment:
@@ -26,9 +26,9 @@ services:
       - ./secretless.yml:/secretless.yml
       - ./test-coverage:/test-coverage
     depends_on:
-      - mssql-2017-cu1
+      - mssql-2017-cu2
 
-  secretless-2017-cu1-dev:
+  secretless-2017-cu2-dev:
     image: secretless-dev
     command: ./bin/reflex
     ports:
@@ -37,7 +37,7 @@ services:
       - ../../../../..:/secretless
       - ./secretless.yml:/secretless.yml
     depends_on:
-      - mssql-2017-cu1
+      - mssql-2017-cu2
 
   test:
     build:
@@ -46,8 +46,8 @@ services:
     environment:
       TEST_ROOT: /secretless/test/connector/tcp/mssql
       DB_PROTOCOL: mssql
-      DB_HOST_TLS: mssql-2017-cu1
-      DB_HOST_NO_TLS: mssql-2017-cu1 # TODO: configure a non-ssl container?
+      DB_HOST_TLS: mssql-2017-cu2
+      DB_HOST_NO_TLS: mssql-2017-cu2 # TODO: configure a non-ssl container?
       DB_PORT: 1433
       DB_USER: sa
       DB_PASSWORD: yourStrong()Password
@@ -63,4 +63,4 @@ services:
       DB_USERNAME: x
       DB_PASSWORD: x
     depends_on:
-      - mssql-2017-cu1
+      - mssql-2017-cu2

@@ -1,10 +1,10 @@
 #!/bin/bash -ex
 
-mssql_host="mssql-2017-cu1"
-secretless_host="secretless-2017-cu1"
+mssql_host="mssql-2017-cu2"
+secretless_host="secretless-2017-cu2"
 while getopts ":d" opt; do
     case $opt in
-        d) secretless_host=secretless-2017-cu1-dev;;
+        d) secretless_host=secretless-2017-cu2-dev;;
         *) echo "Unknown option -$OPTARG"; exit 1;;
     esac
 done

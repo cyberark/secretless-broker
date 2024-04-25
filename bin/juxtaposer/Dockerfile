@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine as perftool-builder
+FROM golang:1.22-alpine as perftool-builder
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a
 # corporate proxy in the middle. For these connections to succeed we need to

@@ -4,8 +4,8 @@
 
 export TEST_ROOT="/secretless/test/connector/tcp/mssql"
 export DB_PROTOCOL="mssql"
-export DB_HOST_TLS="mssql-2017-cu1"
-export DB_HOST_NO_TLS="mssql-2017-cu1"
+export DB_HOST_TLS="mssql-2017-cu2"
+export DB_HOST_NO_TLS="mssql-2017-cu2"
 export DB_PORT="1434"
 export DB_USER="sa"
 export DB_PASSWORD="yourStrong()Password"

@@ -209,6 +209,17 @@ To run linting checks via the Code Climate golint engine, simply run:
 ./bin/check_style
 ```
 
+### gosec
+
+We use [gosec](https://github.com/securego/gosec) to perform static analysis of
+our codebase in our CI for all changed code. To run gosec locally for the entire
+repository, simply run:
+
+```sh-session
+go install github.com/securego/gosec/v2/cmd/gosec@latest
+$(go env GOPATH)/bin/gosec ./...
+```
+
 ### Testing Individual Connectors
 
 For instructions on how to test individual connectors, see the README.md file in

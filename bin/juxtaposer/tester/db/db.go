@@ -77,13 +77,12 @@ func (manager *DriverManager) ensureWantedDbDataState() error {
 		insertItemStatement := QueryTypes["insertItem"] +
 			fmt.Sprintf("(%s)", manager.Tester.GetQueryMarkers(5))
 
-		/* #nosec */
 		err = manager.Tester.Query(insertItemStatement,
 			fmt.Sprintf("%s%d", NameFieldPrefix, itemIndex),
 			itemIndex,
 			time.Now().AddDate(0, 0, itemIndex),
 			float32(itemIndex)*10,
-			rand.Int31()&0x1,
+			rand.Int31()&0x1, // #nosec
 		)
 
 		if err != nil {

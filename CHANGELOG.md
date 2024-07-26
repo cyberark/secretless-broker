@@ -6,12 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Security
-- Update golang.org/x/net to v0.24.0
-
 ### Changed
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
+
+## [1.7.24] - 2024-07-25
+
+### Security
+- Update golang.org/x/net to v0.24.0
 
 ## [1.7.23] - 2024-03-21
 
@@ -33,7 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Security
 - Upgrade to go 1.21 (CNJR-3417)
-- Updated golang.org/x/net to v0.19.0, github.com/go-sql-driver/mysql to v1.7.1, 
+- Updated golang.org/x/net to v0.19.0, github.com/go-sql-driver/mysql to v1.7.1,
   golang:1.19-buster to golang:1.21.3-bullseye, golang:1.19 to golang:1.20.10,
   and ruby:3.0.5-slim-bullseye to ruby:3.0.6-bullseye
 - Updated golang.org/x/net to v0.17.0 to remove CVE-2023-39325 and CVE-2023-44487 (CNJR-3020)
@@ -84,7 +86,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.7.14] - 2022-08-17
 
 ### Security
-- Added replace & exclude statements to go.mod to remove dependency on 
+- Added replace & exclude statements to go.mod to remove dependency on
   github.com/emicklei/go-restful v2.8.5 to resolve CVE-2022-1996
   [cyberark/secretless-broker#1473](https://github.com/cyberark/secretless-broker/pull/1473)
 
@@ -735,7 +737,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.23...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.24...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -784,3 +786,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.21]: https://github.com/cyberark/secretless-broker/compare/v1.7.20...v1.7.21
 [1.7.22]: https://github.com/cyberark/secretless-broker/compare/v1.7.21...v1.7.22
 [1.7.23]: https://github.com/cyberark/secretless-broker/compare/v1.7.22...v1.7.23
+[1.7.24]: https://github.com/cyberark/secretless-broker/compare/v1.7.23...v1.7.24

@@ -1,6 +1,6 @@
 module github.com/cyberark/secretless-broker
 
-go 1.22.2
+go 1.22.5
 
 require (
 	github.com/aws/aws-sdk-go v1.44.0

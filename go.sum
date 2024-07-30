@@ -129,8 +129,8 @@ github.com/cyberark/conjur-authn-k8s-client v0.26.2 h1:HEjS7f6wpItnPbse6CQ/Dp3aH
 github.com/cyberark/conjur-authn-k8s-client v0.26.2/go.mod h1:C57WW0NZyinwsVuRFSKEHkrxw0L3kXZ5Lb7BAosOxdA=
 github.com/cyberark/conjur-opentelemetry-tracer v0.0.2 h1:HMC5fDg6tyIlNJq4jMdMs0nGt0Ml23U+KUIyld4f+tY=
 github.com/cyberark/conjur-opentelemetry-tracer v0.0.2/go.mod h1:hn2e6WYNnB6lPKbnLg1jHZkBNT4mgH3/u7kH1hK60A0=
-github.com/cyberark/summon v0.9.6 h1:5QwicMbYK+JY383qoV9EfcZWwsiZFtf6zZa3pyp7Odg=
-github.com/cyberark/summon v0.9.6/go.mod h1:jqnBnqTRYNvTT2UlwKRh1FdUe3NcPFobaaGRTEzVZG4=
+github.com/cyberark/summon v0.10.0 h1:HD+d5FwP+XOmHQUW1ZxEVbliaGORnS8KXqSxgahK2n4=
+github.com/cyberark/summon v0.10.0/go.mod h1:3+QxuD8b2K80O8e+kmlMGIORo+v/8fc6+UEWC0PalVg=
 github.com/danieljoos/wincred v1.1.2 h1:QLdCxFs1/Yl4zduvBdcHB8goaYk9RARS2SgLLRuAyr0=
 github.com/danieljoos/wincred v1.1.2/go.mod h1:GijpziifJoIBfYh+S7BbkdUTU4LfM+QnGqR5Vl2tAx0=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

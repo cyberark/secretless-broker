@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cyberark/summon/secretsyml"
+	"github.com/cyberark/summon/pkg/secretsyml"
 	"github.com/stretchr/testify/assert"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"

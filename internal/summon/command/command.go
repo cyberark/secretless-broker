@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cyberark/summon/secretsyml"
+	"github.com/cyberark/summon/pkg/secretsyml"
 	"github.com/urfave/cli"
 
 	"github.com/cyberark/secretless-broker/internal/plugin"

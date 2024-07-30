@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cyberark/summon/secretsyml"
+	"github.com/cyberark/summon/pkg/secretsyml"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )

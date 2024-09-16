@@ -101,7 +101,7 @@ To deploy a PostgreSQL StatefulSet:
            fsGroup: 999
          containers:
          - name: quick-start-backend
-           image: postgres:9.6
+           image: postgres:15
            imagePullPolicy: IfNotPresent
            ports:
              - containerPort: 5432
@@ -155,7 +155,7 @@ To deploy a PostgreSQL StatefulSet:
    </pre>
 
    This StatefulSet uses the DockerHub
-   [**postgres:9.6**](https://hub.docker.com/r/library/postgres/) container.
+   [**postgres:15**](https://hub.docker.com/r/library/postgres/) container.
 
    On startup, the container creates a superuser from the environment
    variables `POSTGRES_USER` and `POSTGRES_PASSWORD`, which
@@ -227,7 +227,7 @@ export SECURITY_ADMIN_PASSWORD=security_admin_password
 export REMOTE_DB_HOST=$(minikube ip)
 export REMOTE_DB_PORT=30001
 
-docker run --rm -it -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
+docker run --rm -it -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:15 \
   psql -U ${SECURITY_ADMIN_USER} "postgres://${REMOTE_DB_HOST}:${REMOTE_DB_PORT}/postgres" -c "\du"
 ```
 
@@ -289,7 +289,7 @@ export APPLICATION_DB_INITIAL_PASSWORD=app_user_password
 Finally, to perform the 4 steps listed above, run:
 
 ```bash
-docker run --rm -i -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:9.6 \
+docker run --rm -i -e PGPASSWORD=${SECURITY_ADMIN_PASSWORD} postgres:15 \
     psql -U ${SECURITY_ADMIN_USER} "postgres://${REMOTE_DB_HOST}:${REMOTE_DB_PORT}/postgres" \
     << EOSQL
 

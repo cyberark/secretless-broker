@@ -58,7 +58,7 @@ kubectl run --rm -i \
  --namespace "${BACKEND_NAMESPACE}" \
  --wait \
  postgres-cli \
- --image="postgres:9.6" -- \
+ --image="postgres:15" -- \
     psql \
     --username "${DB_ADMIN_USER}" \
     "postgres://$db_url" \

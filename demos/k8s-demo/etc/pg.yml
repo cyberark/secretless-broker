@@ -19,7 +19,7 @@ spec:
         fsGroup: 999
       containers:
       - name: quick-start-backend
-        image: postgres:9.6
+        image: postgres:15
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 5432

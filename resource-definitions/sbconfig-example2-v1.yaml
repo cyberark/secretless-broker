@@ -1,3 +1,6 @@
+# kics-scan disable=611ab018-c4aa-4ba2-b0f6-a448337509a6
+# NOTE: Example for illustrative purposes only. For production use, consider using
+# a non-default namespace.
 apiVersion: "secretless.io/v1"
 kind: Configuration
 metadata:

@@ -1,11 +1,12 @@
-version: "3"
+# NOTE: Example for illustrative purposes only. For production use, consider adding configuration options
+# such as resource limits, health checks, and non-root users.
 
 services:
   quickstart:
     image: secretless-broker-quickstart
 
   test-client:
-    image: postgres:9.6.9-alpine
+    image: postgres:15-alpine
     volumes: [ "./bin/entrypoint:/entrypoint" ]
     entrypoint: [ "/entrypoint" ]
     depends_on: [ "quickstart" ]

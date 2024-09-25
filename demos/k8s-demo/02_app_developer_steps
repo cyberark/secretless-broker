@@ -45,7 +45,7 @@ kubectl run --rm -i \
   --generator=run-pod/v1 \
   --namespace "${APP_NAMESPACE}" \
   --wait \
-  --image "alpine:3.9" \
+  --image "alpine:3.20" \
   alpine-curl << EOF
   set -e
   

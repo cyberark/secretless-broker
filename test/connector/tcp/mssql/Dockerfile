@@ -1,7 +1,7 @@
 FROM secretless-dev
 
 # apt-get and system utilities
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
 	curl apt-transport-https debconf-utils \
     && rm -rf /var/lib/apt/lists/*
 
@@ -13,7 +13,8 @@ RUN curl --fail \
 	https://packages.microsoft.com/config/debian/10/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
 
 # Install SQL Server drivers and tools
-RUN apt-get update && ACCEPT_EULA=Y apt-get install -y libodbc1 unixodbc msodbcsql17 mssql-tools unixodbc-dev
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
+                                                    libodbc1 unixodbc msodbcsql17 mssql-tools unixodbc-dev
 ENV PATH $PATH:/opt/mssql-tools/bin
 
 # Install and set locale to en_US.UTF-8
@@ -49,18 +50,18 @@ RUN rm -rf /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update
 
 # Add python 3 and pyodbc
-RUN apt-get install -y python3 python3-pip
-RUN pip3 install pyodbc
+RUN apt-get install -y --no-install-recommends python3 python3-pip
+RUN pip3 install --no-cache-dir pyodbc
 
 # Add java8 and add to $PATH
 # Fix cert issues
 RUN apt-get update && \
-    apt-get install -y ant \
+    apt-get install -y --no-install-recommends ant \
                        software-properties-common \
                        ca-certificates-java && \
     apt-add-repository 'deb http://archive.debian.org/debian-security stretch/updates main' && \
     apt-get update && \
-    apt-get install -y openjdk-8-jdk && \
+    apt-get install -y --no-install-recommends openjdk-8-jdk && \
     apt-get clean && \
     update-ca-certificates -f
 

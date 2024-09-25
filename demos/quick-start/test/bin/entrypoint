@@ -20,7 +20,7 @@ report_result () {
 }
 
 # Install packages required for testing
-apk add -U curl openssh expect &>/dev/null
+apk add --no-cache -U curl openssh expect &>/dev/null
 
 # Test postgres connection
 set +e

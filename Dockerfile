@@ -1,5 +1,5 @@
 FROM golang:1.22-bookworm as secretless-builder
-MAINTAINER CyberArk Software Ltd.
+LABEL maintainer="CyberArk Software Ltd."
 LABEL builder="secretless-builder"
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a
@@ -10,7 +10,7 @@ LABEL builder="secretless-builder"
 # certificate is not available, we copy the (potentially empty) directory
 # and update container certificates based on that, rather than rely on the
 # CA file itself.
-ADD build_ca_certificate /usr/local/share/ca-certificates/
+COPY build_ca_certificate /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 WORKDIR /secretless
@@ -42,10 +42,10 @@ RUN go build -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.T
 
 
 # =================== MAIN CONTAINER ===================
-FROM alpine:3.19 as secretless-broker
-MAINTAINER CyberArk Software Ltd.
+FROM alpine:3.20 as secretless-broker
+LABEL maintainer="CyberArk Software Ltd."
 
-RUN apk add -u shadow libc6-compat openssl && \
+RUN apk add -u --no-cache shadow libc6-compat openssl && \
     # Add Limited user
     groupadd -r secretless \
              -g 777 && \
@@ -82,7 +82,7 @@ COPY --from=secretless-builder /secretless/dist/linux/amd64/secretless-broker \
 
 # =================== MAIN CONTAINER (REDHAT) ===================
 FROM registry.access.redhat.com/ubi8/ubi as secretless-broker-redhat
-MAINTAINER CyberArk Software Ltd.
+LABEL maintainer="CyberArk Software Ltd."
 
 ARG VERSION
 

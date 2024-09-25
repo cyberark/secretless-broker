@@ -22,7 +22,7 @@ docker compose logs quickstart &
 
 echo "Waiting for services to be running.."
 until docker compose exec -T quickstart ls /run/postgresql/.init &>/dev/null; do
-  sleep 1s
+  sleep 1
 done
 
 docker compose run -T test-client

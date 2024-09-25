@@ -1,6 +1,6 @@
 FROM secretless-dev
 
 RUN apt-get update && \
-    apt-get install -y groff \
-                       python-pip && \
-    pip install awscli
+    apt-get install -y --no-install-recommends groff python-pip && \
+    apt-get clean && \
+    pip install --no-cache-dir awscli

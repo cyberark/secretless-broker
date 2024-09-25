@@ -5,8 +5,8 @@ WORKDIR /src
 
 # Install Docker client
 RUN apt-get update -y && \
-    apt-get install -y apt-transport-https ca-certificates curl gnupg2 \
-      software-properties-common wget && \
+    apt-get install -y --no-install-recommends apt-transport-https ca-certificates \
+      curl gnupg2 software-properties-common wget && \
     curl -fsSL \
       https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg \
       | apt-key add - && \
@@ -14,7 +14,7 @@ RUN apt-get update -y && \
       https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
       $(lsb_release -cs) stable" && \
     apt-get update && \
-    apt-get install -y docker-ce && \
+    apt-get install -y --no-install-recommends docker-ce && \
     rm -rf /var/lib/apt/lists/*
 
 # Install kubectl CLI

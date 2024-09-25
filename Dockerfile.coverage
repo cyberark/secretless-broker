@@ -1,5 +1,5 @@
 FROM golang:1.22-bookworm as secretless-builder
-MAINTAINER CyberArk Software Ltd.
+LABEL maintainer="CyberArk Software Ltd."
 LABEL builder="secretless-builder"
 
 # This Dockerfile is used to create a Secretless Broker binary image
@@ -14,7 +14,7 @@ LABEL builder="secretless-builder"
 # certificate is not available, we copy the (potentially empty) directory
 # and update container certificates based on that, rather than rely on the
 # CA file itself.
-ADD build_ca_certificate /usr/local/share/ca-certificates/
+COPY build_ca_certificate /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 WORKDIR /secretless
@@ -40,10 +40,10 @@ RUN go test -c -coverpkg="./..." ./cmd/secretless-broker && \
 
 
 # =================== MAIN CONTAINER ===================
-FROM alpine:3.17 as secretless-broker
-MAINTAINER CyberArk Software Ltd.
+FROM alpine:3.20 as secretless-broker
+LABEL maintainer="CyberArk Software Ltd."
 
-RUN apk add -u shadow libc6-compat openssl && \
+RUN apk add -u --no-cache shadow libc6-compat openssl && \
     # Add Limited user
     groupadd -r secretless \
              -g 777 && \

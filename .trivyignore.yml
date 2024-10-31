@@ -1,0 +1,106 @@
+# Ignore false positives in the gosu binary which is present in the quickstart image
+# (demos/quick-start/docker/Dockerfile) via postgres:15-alpine.
+# See https://github.com/tianon/gosu/issues/136#issuecomment-2429559065
+vulnerabilities:
+  - id: CVE-2023-24538
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-24540
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2024-24790
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-27664
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-28131
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-2879 
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-2880 
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-29804
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-30580
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-30630
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-30631
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-30632
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-30633
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-30634
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-30635
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-32189
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-41715
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-41716
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-41720
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-41722
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-41723
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-41724
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2022-41725
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-24534
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-24536
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-24537
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-24539
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-29400
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-29403
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-39325
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-45283
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-45287
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2023-45288
+    paths:
+      - "usr/local/bin/gosu"
+  - id: CVE-2024-34156
+    paths:
+      - "usr/local/bin/gosu"

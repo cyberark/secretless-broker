@@ -1,3 +1,6 @@
+# NOTE: Example for illustrative purposes only. For production use, consider adding configuration options
+# such as resource limits, health checks, and non-root users.
+
 ---
 # This role is allow to [get] the quick-start-backend-credentials secret
 # in the namespace where this manifest is applied

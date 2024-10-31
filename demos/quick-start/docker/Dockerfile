@@ -1,11 +1,12 @@
 FROM secretless-broker:latest as secretless-broker
 
-FROM postgres:9.6.9-alpine
+FROM postgres:15-alpine
 
-MAINTAINER "CyberArk Software, Inc."
 LABEL maintainer="CyberArk Software, Inc."
 
 EXPOSE 80 8081 2222 5454
+# NOTE: Example for illustrative purposes only. For production use, consider using a non-root user.
+# kics-scan ignore-line
 USER root
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD [ "/entrypoint" ]

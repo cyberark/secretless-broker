@@ -1,5 +1,5 @@
 FROM golang:1.22-bullseye
-MAINTAINER CyberArk Software Ltd.
+LABEL maintainer="CyberArk Software Ltd."
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a
 # corporate proxy in the middle. For these connections to succeed we need to
@@ -9,14 +9,15 @@ MAINTAINER CyberArk Software Ltd.
 # certificate is not available, we copy the (potentially empty) directory
 # and update container certificates based on that, rather than rely on the
 # CA file itself.
-ADD build_ca_certificate /usr/local/share/ca-certificates/
+COPY build_ca_certificate /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 RUN apt-get update && \
-    apt-get install -y curl \
-                       jq \
-                       less \
-                       vim
+    apt-get install -y --no-install-recommends curl \
+                                               jq \
+                                               less \
+                                               vim && \
+    apt-get clean
 
 ENV ROOT_DIR=/secretless
 

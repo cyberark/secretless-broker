@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --update openssh
+RUN apk add --no-cache --update openssh
 
 COPY ./id_insecure.pub /tmp/id_insecure.pub
 

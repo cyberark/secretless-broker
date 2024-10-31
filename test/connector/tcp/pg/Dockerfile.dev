@@ -1,8 +1,7 @@
 FROM secretless-dev
 
 RUN apt-get update && \
-    apt-get install -y postgresql-client \
-                       postgresql-contrib
+    apt-get install -y --no-install-recommends postgresql-client postgresql-contrib
 
 RUN go install github.com/ajstarks/svgo/benchviz@latest && \
     go install golang.org/x/tools/cmd/benchcmp@latest
@@ -10,12 +9,12 @@ RUN go install github.com/ajstarks/svgo/benchviz@latest && \
 # Add java8 and add to $PATH
 # Fix certificate issues
 RUN apt-get update && \
-    apt-get install -y ant \
+    apt-get install -y --no-install-recommends ant \
                        ca-certificates-java \
                        software-properties-common && \
     apt-add-repository 'deb http://archive.debian.org/debian-security stretch/updates main' && \
     apt-get update && \
-    apt-get install -y openjdk-8-jdk && \
+    apt-get install -y --no-install-recommends openjdk-8-jdk && \
     apt-get clean && \
     update-ca-certificates -f
 

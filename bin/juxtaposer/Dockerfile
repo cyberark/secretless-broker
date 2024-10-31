@@ -8,7 +8,7 @@ FROM golang:1.22-alpine as perftool-builder
 # certificate is not available, we copy the (potentially empty) directory
 # and update container certificates based on that, rather than rely on the
 # CA file itself.
-ADD build_ca_certificate /usr/local/share/ca-certificates/
+COPY build_ca_certificate /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 WORKDIR /perftool

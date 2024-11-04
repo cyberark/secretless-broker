@@ -13,6 +13,7 @@ type args struct {
 }
 
 var defaultConnectionDetails = &ConnectionDetails{
+	// deepcode ignore NoHardcodedCredentials: This is a test file
 	Username: "herp",
 	Password: "derp",
 	Host:     "0.0.0.0",

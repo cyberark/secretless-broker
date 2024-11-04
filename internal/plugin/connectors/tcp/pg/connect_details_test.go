@@ -15,9 +15,11 @@ func TestExpectedFields(t *testing.T) {
 	}
 
 	expectedConnectionDetails := ConnectionDetails{
-		Host:     "myhost",
-		Port:     "1234",
+		Host: "myhost",
+		Port: "1234",
+		// file deepcode ignore NoHardcodedCredentials/test: This is a test file
 		Username: "myusername",
+		// file deepcode ignore HardcodedPassword/test: This is a test file
 		Password: "mypassword",
 		Options:  map[string]string{},
 		SSLOptions: map[string]string{

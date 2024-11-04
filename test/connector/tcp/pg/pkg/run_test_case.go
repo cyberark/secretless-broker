@@ -86,6 +86,7 @@ func RunJDBCQuery(
 	// Pre command logs
 	println("")
 	println("---->> ARGS")
+	// deepcode ignore ClearTextLogging: This is a test file
 	fmt.Println(args)
 
 	println("---<< EXECUTED")

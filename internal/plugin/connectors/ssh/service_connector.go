@@ -40,6 +40,7 @@ func (h *ServiceConnector) serverConfig(values map[string][]byte) (config Server
 	}
 
 	// XXX: Should this be the user that the client was trying to connect as?
+	// deepcode ignore NoHardcodedCredentials: False positive - 'root' is simply the default user if config.ClientConfig.User is empty
 	config.ClientConfig.User = "root"
 	if user, ok := values["user"]; ok {
 		config.ClientConfig.User = string(user)

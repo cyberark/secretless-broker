@@ -8,6 +8,8 @@ const serverCertExcluded = "certs/server-cert-excluded.pem"
 const serverKeyExcluded = "certs/server-key-excluded.pem"
 
 const fromProxyUsername = "someuser"
+
+// deepcode ignore HardcodedPassword: This is a test file
 const fromProxyPassword = "testpassword"
 
 const serverResponseOK = "Secured resource."

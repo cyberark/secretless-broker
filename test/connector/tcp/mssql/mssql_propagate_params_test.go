@@ -103,6 +103,7 @@ func TestClientParams(t *testing.T) {
 			func(t *testing.T) {
 				// 0. Setup expectations
 				expectedUsername := "someuser"
+				// deepcode ignore HardcodedPassword: This is a test file
 				expectedPassword := "somepassword"
 				expectedAppname := tc.testClient.applicationName
 				expectedDatabase := "random"

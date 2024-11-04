@@ -46,6 +46,7 @@ cursor = cnx.cursor()
 if args.query.strip() == "":
     exit()
 
+# deepcode ignore Sqli: This is a test file
 cursor.execute(args.query)
 for row in cursor:
     print(row)

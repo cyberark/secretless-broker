@@ -13,7 +13,9 @@ func TestEssentials(t *testing.T) {
 			Description: "with username, wrong password",
 			ShouldPass:  true,
 			ClientConfiguration: ClientConfiguration{
+				// file deepcode ignore NoHardcodedCredentials: This is a test file
 				Username: "testuser",
+				// file deepcode ignore HardcodedPassword: This is a test file
 				Password: "wrongpassword",
 			},
 		},

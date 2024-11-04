@@ -64,6 +64,7 @@ func TestProductionReadLoginRequest(t *testing.T) {
 	// expected login request available from net.Conn passed to ReadLogin
 	expectedLoginRequest := &mssql.LoginRequest{}
 	expectedLoginRequest.AppName = "test-app-name"
+	// deepcode ignore NoHardcodedCredentials: This is a test file
 	expectedLoginRequest.UserName = "test-user-name"
 	expectedLoginRequest.Database = "test-database"
 

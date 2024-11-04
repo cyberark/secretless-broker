@@ -53,7 +53,7 @@ func (tester *MySqlTester) Connect(options api.DbTesterOptions) error {
 		options.DatabaseName)
 
 	if options.Debug {
-		log.Printf("Connection string: %s", connectionString)
+		log.Printf("Connecting to: %s/%s", host, options.DatabaseName)
 	}
 
 	db, err := sql.Open("mysql", connectionString)

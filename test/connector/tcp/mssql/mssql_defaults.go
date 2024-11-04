@@ -11,8 +11,9 @@ import (
 // service that provides the happy path.
 func defaultSecretlessDbConfig() client.Config {
 	return client.Config{
-		Host:     testutil.SecretlessHost,
-		Port:     fmt.Sprintf("%d", testutil.SecretlessPort),
+		Host: testutil.SecretlessHost,
+		Port: fmt.Sprintf("%d", testutil.SecretlessPort),
+		// deepcode ignore NoHardcodedCredentials: This is a test file
 		Username: "dummy",
 		Password: "dummy",
 	}

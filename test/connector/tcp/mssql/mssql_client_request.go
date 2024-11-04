@@ -64,8 +64,9 @@ func (clientReq clientRequest) proxyViaSecretless(
 	// Make the client request to the proxy service
 	clientResChan := runQuery.ConcurrentCall(
 		client.Config{
-			Host:     proxyService.host,
-			Port:     proxyService.port,
+			Host: proxyService.host,
+			Port: proxyService.port,
+			// deepcode ignore NoHardcodedCredentials: This is a test file
 			Username: "dummy",
 			Password: "dummy",
 			Database: clientReq.database,

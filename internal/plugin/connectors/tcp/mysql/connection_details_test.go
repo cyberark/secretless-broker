@@ -22,8 +22,10 @@ func TestExpectedFields(t *testing.T) {
 			"host":    "myhost",
 			"sslmode": "disable",
 		},
+		// file deepcode ignore HardcodedPassword: This is a test file
 		Password: "mypassword",
 		Port:     1234,
+		// file deepcode ignore NoHardcodedCredentials: This is a test file
 		Username: "myusername",
 	}
 

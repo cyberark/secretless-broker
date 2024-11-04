@@ -79,6 +79,8 @@ func createMD5Password(username string, password string, salt string) string {
 	passwordString := fmt.Sprintf("%s%s", password, username)
 
 	// Compute the MD5 sum of the password+username string.
+	// file deepcode ignore InsecureHash: MD5 support is necessary for old versions of Postgres
+	// file deepcode ignore InsecureCipher: MD5 support is necessary for old versions of Postgres
 	passwordString = fmt.Sprintf("%x", md5.Sum([]byte(passwordString)))
 
 	// Compute the MD5 sum of the password hash and the salt

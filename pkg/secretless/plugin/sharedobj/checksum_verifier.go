@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -15,10 +14,10 @@ import (
 
 // VerifyPluginChecksums verifies all plugin files, and returns the FileInfo
 // for the verified files.
-func VerifyPluginChecksums(pluginDir string, checksumsFile string) ([]os.FileInfo, error) {
+func VerifyPluginChecksums(pluginDir string, checksumsFile string) ([]os.DirEntry, error) {
 	log.Println("Verifying checksums of plugins...")
 
-	pluginFiles, err := ioutil.ReadDir(pluginDir)
+	pluginFiles, err := os.ReadDir(pluginDir)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: %s", err)
 	}
@@ -36,7 +35,7 @@ func VerifyPluginChecksums(pluginDir string, checksumsFile string) ([]os.FileInf
 	return pluginFiles, nil
 }
 
-func compareChecksums(pluginDir string, pluginFiles []os.FileInfo, checksums map[string]string) error {
+func compareChecksums(pluginDir string, pluginFiles []os.DirEntry, checksums map[string]string) error {
 	for pluginIndex, pluginFile := range pluginFiles {
 		pluginBasename := pluginFile.Name()
 		fullPluginPath := path.Join(pluginDir, pluginBasename)
@@ -64,7 +63,7 @@ func compareChecksums(pluginDir string, pluginFiles []os.FileInfo, checksums map
 }
 
 func loadChecksumsFile(checksumsPath string) (map[string]string, error) {
-	checksumsFile, err := os.Open(checksumsPath)
+	checksumsFile, err := os.Open(filepath.Clean(checksumsPath))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +96,7 @@ func loadChecksumsFile(checksumsPath string) (map[string]string, error) {
 }
 
 func getSha256Sum(filename string) (string, error) {
-	filePt, err := os.Open(filename)
+	filePt, err := os.Open(filepath.Clean(filename))
 	if err != nil {
 		return "", err
 	}

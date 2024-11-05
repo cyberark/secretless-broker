@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import pyodbc
-from sys import exit
+import sys
 
 parser = argparse.ArgumentParser(description='Run an ODBC query.')
 parser.add_argument('--server', default="127.0.0.1",
@@ -34,17 +34,17 @@ CONN_TEMPLATE_STR = ";".join(
 )
 conn_string = CONN_TEMPLATE_STR.format(**CONN_INFO)
 SQL_ATTR_CONNECTION_TIMEOUT = 113
-login_timeout = 2
-connection_timeout = 2
+LOGIN_TIMEOUT = 2
+CONNECTION_TIMEOUT = 2
 cnx = pyodbc.connect(conn_string,
-                     timeout=login_timeout,
+                     timeout=LOGIN_TIMEOUT,
                      attrs_before={
-                         SQL_ATTR_CONNECTION_TIMEOUT: connection_timeout,
+                         SQL_ATTR_CONNECTION_TIMEOUT: CONNECTION_TIMEOUT,
                      })
 cursor = cnx.cursor()
 
 if args.query.strip() == "":
-    exit()
+    sys.exit()
 
 # deepcode ignore Sqli: This is a test file
 cursor.execute(args.query)

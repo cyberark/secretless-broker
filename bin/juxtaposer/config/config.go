@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v3"
 
@@ -68,7 +68,7 @@ func (configuration *Config) verify() error {
 }
 
 func NewConfiguration(configFile string) (*Config, error) {
-	yamlFile, err := ioutil.ReadFile(configFile)
+	yamlFile, err := os.ReadFile(configFile)
 	if err != nil {
 		return nil, err
 	}

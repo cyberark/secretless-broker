@@ -3,7 +3,6 @@ package sharedobj
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	go_plugin "plugin"
@@ -68,7 +67,7 @@ func checkedPlugins(
 	logger log.Logger,
 ) ([]string, error) {
 
-	files, err := ioutil.ReadDir(pluginDir)
+	files, err := os.ReadDir(pluginDir)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +87,7 @@ func checkedPlugins(
 	return filePaths(pluginDir, files), nil
 }
 
-func filePaths(pluginDir string, files []os.FileInfo) []string {
+func filePaths(pluginDir string, files []os.DirEntry) []string {
 	filePaths := []string{}
 	for _, file := range files {
 		filePaths = append(filePaths, path.Join(pluginDir, file.Name()))

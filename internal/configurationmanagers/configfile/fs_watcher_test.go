@@ -1,7 +1,6 @@
 package configfile
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -31,7 +30,7 @@ func TestAttachWatcher(t *testing.T) {
 		}
 
 		// Create a temp file to watch
-		tempDir, _ := ioutil.TempDir("", "configfile_watcher")
+		tempDir, _ := os.MkdirTemp("", "configfile_watcher")
 		defer os.RemoveAll(tempDir)
 		file, err := os.CreateTemp(tempDir, "configfile")
 		assert.NoError(t, err)

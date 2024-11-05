@@ -1,7 +1,7 @@
 package file
 
 import (
-	"io/ioutil"
+	"os"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
@@ -32,5 +32,5 @@ func (p *Provider) GetValues(ids ...string) (map[string]plugin_v1.ProviderRespon
 
 // GetValue reads the contents of the identified file.
 func (p *Provider) GetValue(id string) ([]byte, error) {
-	return ioutil.ReadFile(id)
+	return os.ReadFile(id)
 }

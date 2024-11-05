@@ -5,7 +5,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -49,7 +48,7 @@ func _GenerateSSHKeys(keyPath string) error {
 
 	// Write the public key into the provided path
 	publicKeyPath := keyPath + ".pub"
-	return ioutil.WriteFile(publicKeyPath,
+	return os.WriteFile(publicKeyPath,
 		ssh.MarshalAuthorizedKey(publicKey),
 		0644)
 }

@@ -115,7 +115,7 @@ clientRequest := clientRequest{
 }
 
 // Read self-signed server certificate
-cert, _ := ioutil.ReadFile("./certs/server-cert.pem")
+cert, _ := os.ReadFile("./certs/server-cert.pem")
 
 // Proxy Request through Secretless
 out, _, err := clientRequest.proxyRequest(

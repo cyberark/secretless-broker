@@ -1,7 +1,6 @@
 package command
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -43,7 +42,7 @@ func assertMissingFile(f string, t *testing.T) {
 }
 
 func assertFileContents(f string, expectedValue string, t *testing.T) {
-	actualContent, err := ioutil.ReadFile(f)
+	actualContent, err := os.ReadFile(f)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedValue, string(actualContent))
 }
@@ -118,7 +117,7 @@ func TestTempFactory_NewTempFactory(t *testing.T) {
 
 		t.Run("tries using homedir prefix if shared memory path is not available", func(t *testing.T) {
 			// Create a fake $HOME
-			home, err := ioutil.TempDir("", "secretless_test")
+			home, err := os.MkdirTemp("", "secretless_test")
 			assert.NoError(t, err)
 
 			defer func() {

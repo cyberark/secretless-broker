@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 
@@ -107,7 +106,7 @@ func (proxy *proxyService) Start() error {
 			},
 		}
 
-		privateBytes, err := ioutil.ReadFile(expectedHostKeyPath)
+		privateBytes, err := os.ReadFile(expectedHostKeyPath)
 		if err != nil {
 			logger.Panicf("Failed to load private key: ", err)
 		}

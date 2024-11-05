@@ -3,10 +3,10 @@ package ssl
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,23 +23,23 @@ type testCertificates struct {
 
 // loadTestCerts loads test certificates from the `./testdata` directory
 func loadTestCerts() (*testCertificates, error) {
-	serverCert, err := ioutil.ReadFile("./testdata/server.pem")
+	serverCert, err := os.ReadFile("./testdata/server.pem")
 	if err != nil {
 		return nil, err
 	}
-	serverKey, err := ioutil.ReadFile("./testdata/server-key.pem")
+	serverKey, err := os.ReadFile("./testdata/server-key.pem")
 	if err != nil {
 		return nil, err
 	}
-	rootCert, err := ioutil.ReadFile("./testdata/ca.pem")
+	rootCert, err := os.ReadFile("./testdata/ca.pem")
 	if err != nil {
 		return nil, err
 	}
-	clientCert, err := ioutil.ReadFile("./testdata/client.pem")
+	clientCert, err := os.ReadFile("./testdata/client.pem")
 	if err != nil {
 		return nil, err
 	}
-	clientKey, err := ioutil.ReadFile("./testdata/client-key.pem")
+	clientKey, err := os.ReadFile("./testdata/client-key.pem")
 	if err != nil {
 		return nil, err
 	}

@@ -1,7 +1,6 @@
 package command
 
 import (
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -53,7 +52,7 @@ func defaultTempPath(sharedMemoryDir string) string {
 
 	home, err := os.UserHomeDir()
 	if err == nil {
-		dir, err := ioutil.TempDir(home, ".tmp")
+		dir, err := os.MkdirTemp(home, ".tmp")
 		if err == nil {
 			return dir
 		}
@@ -64,7 +63,7 @@ func defaultTempPath(sharedMemoryDir string) string {
 
 // Push creates a temp file with given value. Returns the path.
 func (tf *TempFactory) Push(value string) (string, error) {
-	f, err := ioutil.TempFile(tf.path, ".summon")
+	f, err := os.CreateTemp(tf.path, ".summon")
 	if err != nil {
 		return "", err
 	}

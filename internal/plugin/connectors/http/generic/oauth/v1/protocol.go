@@ -7,7 +7,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/big"
 	gohttp "net/http"
 	"net/url"
@@ -124,9 +124,9 @@ func collectParameters(oauth1 OAuth1, r *gohttp.Request) map[string][]string {
 	// Create two copies of the request body
 	// Since r.Body is io.ReadCloser the body is empty after reading.
 	// Need to replace r.Body after r.ParseForm() dumps the body contents
-	buf, _ := ioutil.ReadAll(r.Body)
-	originalBody := ioutil.NopCloser(bytes.NewBuffer(buf))
-	copyBody := ioutil.NopCloser(bytes.NewBuffer(buf))
+	buf, _ := io.ReadAll(r.Body)
+	originalBody := io.NopCloser(bytes.NewBuffer(buf))
+	copyBody := io.NopCloser(bytes.NewBuffer(buf))
 	r.Body = originalBody
 
 	paramMap := make(map[string][]string, 0)

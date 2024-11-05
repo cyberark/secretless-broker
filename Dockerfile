@@ -1,4 +1,4 @@
-FROM golang:1.22-bookworm as secretless-builder
+FROM golang:1.22-bookworm AS secretless-builder
 LABEL maintainer="CyberArk Software Ltd."
 LABEL builder="secretless-builder"
 
@@ -42,7 +42,7 @@ RUN go build -ldflags="-X github.com/cyberark/secretless-broker/pkg/secretless.T
 
 
 # =================== MAIN CONTAINER ===================
-FROM alpine:3.20 as secretless-broker
+FROM alpine:3.20 AS secretless-broker
 LABEL maintainer="CyberArk Software Ltd."
 
 RUN apk add -u --no-cache shadow libc6-compat openssl && \
@@ -81,7 +81,7 @@ COPY --from=secretless-builder /secretless/dist/linux/amd64/secretless-broker \
                                /secretless/dist/linux/amd64/summon2 /usr/local/bin/
 
 # =================== MAIN CONTAINER (REDHAT) ===================
-FROM registry.access.redhat.com/ubi8/ubi as secretless-broker-redhat
+FROM registry.access.redhat.com/ubi8/ubi AS secretless-broker-redhat
 LABEL maintainer="CyberArk Software Ltd."
 
 ARG VERSION

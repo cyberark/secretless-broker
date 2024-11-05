@@ -3,7 +3,6 @@ package oauth1protocol
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	gohttp "net/http"
 	"net/url"
 	"strings"
@@ -42,7 +41,7 @@ func Test_extractOAuthParams(t *testing.T) {
 }
 
 func createRequestBody(s string) io.ReadCloser {
-	return ioutil.NopCloser(strings.NewReader(s))
+	return io.NopCloser(strings.NewReader(s))
 }
 
 func Test_collectParameters(t *testing.T) {

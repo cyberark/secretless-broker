@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v2"
 
@@ -15,7 +15,7 @@ import (
 // LoadFromFile loads a configuration file into a Config object.
 func LoadFromFile(fileName string) (config config_v2.Config, err error) {
 	var buffer []byte
-	if buffer, err = ioutil.ReadFile(fileName); err != nil {
+	if buffer, err = os.ReadFile(fileName); err != nil {
 		err = fmt.Errorf("error reading config file '%s': '%s'", fileName, err)
 		return
 	}

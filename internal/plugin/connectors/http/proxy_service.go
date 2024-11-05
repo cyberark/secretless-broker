@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	gohttp "net/http"
 	"os"
@@ -84,7 +83,7 @@ func NewProxyService(
 
 	if caBundle, ok := os.LookupEnv("SECRETLESS_HTTP_CA_BUNDLE"); ok {
 		// Read in the cert file
-		certs, err := ioutil.ReadFile(caBundle)
+		certs, err := os.ReadFile(caBundle)
 		if err != nil {
 			return nil, fmt.Errorf("failed to append SECRETLESS_HTTP_CA_BUNDLE to RootCAs: %v", err)
 		}

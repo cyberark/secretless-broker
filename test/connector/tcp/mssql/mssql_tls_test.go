@@ -1,7 +1,7 @@
 package mssqltest
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +22,7 @@ type tlsTestCase struct {
 }
 
 func getServerCert() []byte {
-	cert, err := ioutil.ReadFile("./certs/server-cert.pem")
+	cert, err := os.ReadFile("./certs/server-cert.pem")
 	if err != nil {
 		panic("unable to read server certificate")
 	}

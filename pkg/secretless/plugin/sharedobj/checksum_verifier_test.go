@@ -49,7 +49,7 @@ func TestChecksumVerifier(t *testing.T) {
 
 			_, err := VerifyPluginChecksums(pluginDir, checksumsFile)
 
-			errorMsg := "ERROR: open ./testdata/checksum/doesntexist.txt: no such file or directory"
+			errorMsg := "ERROR: open testdata/checksum/doesntexist.txt: no such file or directory"
 			assert.EqualError(t, err, errorMsg)
 		})
 

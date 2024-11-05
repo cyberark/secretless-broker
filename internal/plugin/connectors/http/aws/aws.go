@@ -3,7 +3,7 @@ package aws
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	gohttp "net/http"
 	"net/url"
 	"strings"
@@ -147,7 +147,7 @@ func signRequest(
 		return err
 	}
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}

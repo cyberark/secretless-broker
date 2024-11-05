@@ -3,8 +3,8 @@ package json
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	formatter_api "github.com/cyberark/secretless-broker/bin/juxtaposer/formatter/api"
@@ -98,7 +98,7 @@ func (formatter *JsonFormatter) ProcessResults(backendNames []string,
 		return nil
 	}
 
-	err = ioutil.WriteFile(outputFilename, timingInfoBytes, 0644)
+	err = os.WriteFile(outputFilename, timingInfoBytes, 0644)
 	if err == nil {
 		log.Printf("Successfully wrote JSON results to file '%s'.", outputFilename)
 	}

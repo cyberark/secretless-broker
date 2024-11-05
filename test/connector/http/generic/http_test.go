@@ -1,7 +1,7 @@
 package generic
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +42,7 @@ func TestCreds(t *testing.T) {
 				return
 			}
 
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 			if !assert.NoError(t, err) {
 				return
 			}
@@ -92,7 +92,7 @@ func TestForceSSL(t *testing.T) {
 				return
 			}
 
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 			if !assert.NoError(t, err) {
 				return
 			}

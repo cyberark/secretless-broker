@@ -3,7 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"testing"
@@ -40,7 +40,7 @@ func getHealth(endpoint string) (*HealthJSON, error) {
 		return nil, responseErr
 	}
 
-	body, readErr := ioutil.ReadAll(response.Body)
+	body, readErr := io.ReadAll(response.Body)
 	if readErr != nil {
 		return nil, readErr
 	}

@@ -3,7 +3,7 @@ package aws
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"testing"
@@ -61,7 +61,7 @@ func (c connectTestCase) Run(t *testing.T) {
 		// Call Connect method using the clone of the original request. Some of our assertions
 		// will be based on the comparison of the original and the clone, since Connect will
 		// potentially mutate the request passed to it.
-		connector := Connector{logger: log.NewWithOptions(ioutil.Discard, "", false)}
+		connector := Connector{logger: log.NewWithOptions(io.Discard, "", false)}
 		err := connector.Connect(afterR, c.credentialsByID)
 
 		// Make assertions

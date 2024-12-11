@@ -23,7 +23,7 @@ while getopts 'b:c:s:' flag; do
 done
 
 # Exclude test files
-excluded_directories=${toplevel_dir}/test
+excluded_directories="${toplevel_dir}/test,${toplevel_dir}/third_party/go-mssqldb"
 
 # gosec => Scans go packages and flags security vulnerabilities
 # Run as a container locally

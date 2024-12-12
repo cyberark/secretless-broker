@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.25] - 2024-12-16
+
+### Security
+- Update golang.org/x/crypto to v0.31.0 to resolve CVE-2024-45337
+
 ## [1.7.24] - 2024-07-25
 
 ### Security

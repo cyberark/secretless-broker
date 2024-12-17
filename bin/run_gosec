@@ -45,6 +45,9 @@ while getopts 'b:e:c:s:h' flag; do
   esac
 done
 
+# Support multiple excluded dirs. Each one needs a separate `-exclude-dir` flag
+excluded_dirs=$(for dir in ${excluded_directories//,/ }; do echo -n "-exclude-dir=$dir "; done)
+
 # If we are on main, scan the entire repository
 modified_directories="./..."
 
@@ -64,12 +67,13 @@ rm -f "gosec.output"
 set +e && set +o pipefail
 
 # Run our scan, flagging only 'high' level issues with 'medium' or higher severity
+
 "$(go env GOPATH)"/bin/gosec -fmt=junit-xml \
-    -out=gosec.output \
-    -severity="${severity}" \
-    -confidence="${confidence}" \
-    -exclude-dir="${excluded_directories}" \
-    "${modified_directories[@]}"
+  -out=gosec.output \
+  -severity="${severity}" \
+  -confidence="${confidence}" \
+  ${excluded_dirs} \
+  "${modified_directories[@]}"
 
 # Display output of gosec
 cat gosec.output

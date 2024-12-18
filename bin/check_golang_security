@@ -7,7 +7,7 @@
 set -eo pipefail
 
 current_dir=$("$(dirname "$0")/abspath")
-toplevel_dir="$current_dir/.."
+toplevel_dir="$(cd "$current_dir/.." && pwd)"
 
 # Default values to pass to security_scan
 confidence='medium'
@@ -39,6 +39,7 @@ if [[ ! -v BRANCH_NAME ]]; then
 else
   # Running in Jenkins
   excluded_directories="${toplevel_dir}/test,${toplevel_dir}/third_party/go-mssqldb"
+  echo "Excluding directories: ${excluded_directories}"
   go install github.com/securego/gosec/v2/cmd/gosec@latest
   git config --global --add safe.directory "${WORKSPACE}"
   ./bin/run_gosec -c "${confidence}" -s "${severity}" -b "${current_branch}" -e "${excluded_directories}"

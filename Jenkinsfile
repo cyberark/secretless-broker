@@ -402,7 +402,7 @@ pipeline {
               infrapool.agentPut from: """${WORKSPACE}/pristine-checkout""", to: """$WORKSPACE/"""
               infrapool.agentSh 'git submodule update --init --recursive'
               // Create release packages without releasing to Github
-              infrapool.agentSh "./bin/build_release --skip-validate"
+              infrapool.agentSh "./bin/build_release --skip=validate"
               infrapool.agentArchiveArtifacts artifacts: 'dist/goreleaser/'
             }
           }

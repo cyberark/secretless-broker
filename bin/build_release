@@ -9,7 +9,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 GO_VERSION="v$(grep "^\bgo\b" "${REPO_ROOT}/go.mod" | awk '{print $2}')"
 
 # Determine where VERSION file is based on goreleaser argument
-if [[ "$1" == '--skip-validate' ]]; then
+if [[ "$1" == '--skip=validate' ]]; then
   VERSION=$(<"${REPO_ROOT}/../VERSION")
 else
   VERSION=$(<"${REPO_ROOT}/VERSION")

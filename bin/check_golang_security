@@ -22,22 +22,24 @@ while getopts 'b:c:s:' flag; do
   esac
 done
 
-# Exclude test files
-excluded_directories="${toplevel_dir}/test,${toplevel_dir}/third_party/go-mssqldb"
 
 # gosec => Scans go packages and flags security vulnerabilities
-# Run as a container locally
 if [[ ! -v BRANCH_NAME ]]; then
-docker run --rm \
-    -v "$toplevel_dir/:/secretless/" \
-    secretless-dev \
-    bash -exc "
-      go install github.com/securego/gosec/v2/cmd/gosec@latest
-      git config --global --add safe.directory /secretless
-      ./bin/run_gosec -c ${confidence} -s ${severity} -b ${current_branch} -e ${excluded_directories}
-    "
+  # Running locally. Use a docker container.
+  # Exclude test files and the third party go-mssqldb library
+  excluded_directories="/secretless/test,/secretless/third_party/go-mssqldb"
+  docker run --rm \
+      -v "$toplevel_dir/:/secretless/" \
+      secretless-dev \
+      bash -exc "
+        go install github.com/securego/gosec/v2/cmd/gosec@latest
+        git config --global --add safe.directory /secretless
+        ./bin/run_gosec -c ${confidence} -s ${severity} -b ${current_branch} -e ${excluded_directories}
+      "
 else
+  # Running in Jenkins
+  excluded_directories="${toplevel_dir}/test,${toplevel_dir}/third_party/go-mssqldb"
   go install github.com/securego/gosec/v2/cmd/gosec@latest
   git config --global --add safe.directory "${WORKSPACE}"
+  ./bin/run_gosec -c "${confidence}" -s "${severity}" -b "${current_branch}" -e "${excluded_directories}"
 fi
-./bin/run_gosec -c "${confidence}" -s "${severity}" -b "${current_branch}" -e "${excluded_directories}"

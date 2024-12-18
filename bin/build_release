@@ -48,6 +48,6 @@ docker run --rm -t \
   --env VERSION="${VERSION}" \
   --volume "${REPO_ROOT}:/secretless-broker" \
   --workdir /secretless-broker \
-  "${GORELEASER_IMAGE}:${GORELEASER_LATEST_TAG}" --rm-dist "$@"
+  "${GORELEASER_IMAGE}:${GORELEASER_LATEST_TAG}" --clean "$@"
 
 echo "Releases built. Archives can be found in dist/goreleaser"

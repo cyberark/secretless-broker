@@ -1,3 +1,4 @@
+version: 2
 before:
   hooks:
   - ./bin/go_mod_tidy # Get dependencies
@@ -156,7 +157,7 @@ brews:
       bin.install "secretless-broker"
     test: |
       system "#{bin}/secretless-broker", "-version"
-    tap:
+    repository:
       owner: cyberark
       name: homebrew-tools
     skip_upload: true

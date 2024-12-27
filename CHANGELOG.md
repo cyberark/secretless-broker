@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.26] - 2024-12-27
+
+### Security
+- Update golang.org/x/net to v0.33.0 to resolve CVE-2024-45338
+
 ## [1.7.25] - 2024-12-16
 
 ### Security
@@ -742,7 +747,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.24...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.26...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -792,3 +797,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.22]: https://github.com/cyberark/secretless-broker/compare/v1.7.21...v1.7.22
 [1.7.23]: https://github.com/cyberark/secretless-broker/compare/v1.7.22...v1.7.23
 [1.7.24]: https://github.com/cyberark/secretless-broker/compare/v1.7.23...v1.7.24
+[1.7.25]: https://github.com/cyberark/secretless-broker/compare/v1.7.24...v1.7.25
+[1.7.26]: https://github.com/cyberark/secretless-broker/compare/v1.7.25...v1.7.26

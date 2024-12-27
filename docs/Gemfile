@@ -37,3 +37,7 @@ gem 'jekyll-redirect-from'
 gem 'kramdown', '>= 2.3.0'
 
 gem 'webrick', '~> 1.7'
+
+gem 'csv'
+gem 'base64'
+gem 'bigdecimal'

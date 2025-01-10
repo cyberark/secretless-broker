@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.27] - 2025-01-10
+
+### Security
+- Update multiple dependencies to latest versions
+
 ## [1.7.26] - 2024-12-27
 
 ### Security

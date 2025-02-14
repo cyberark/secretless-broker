@@ -1,6 +1,9 @@
 #!/usr/bin/env groovy
 @Library(['product-pipelines-shared-library', 'conjur-enterprise-sharedlib']) _
 
+def productName = 'Secretless Broker'
+def productTypeName = 'Conjur Enterprise'
+
 // Automated release, promotion and dependencies
 properties([
   // Include the automated release parameters for the build
@@ -21,6 +24,38 @@ if (params.MODE == "PROMOTE") {
     // Any version number updates from sourceVersion to targetVersion occur here
     // Any publishing of targetVersion artifacts occur here
     // Anything added to assetDirectory will be attached to the Github Release
+
+    env.INFRAPOOL_PRODUCT_NAME = "${productName}"
+    env.INFRAPOOL_DD_PRODUCT_TYPE_NAME = "${productTypeName}"
+
+    // Scan the images before promoting
+    def scans = [:]
+
+    scans["Scan main Docker image"] = {
+      runSecurityScans(infrapool,
+        image: "registry.tld/secretless-broker:${sourceVersion}",
+        buildMode: params.MODE,
+        branch: env.BRANCH_NAME,
+        arch: 'linux/amd64')
+    }
+
+    scans["Scan Quickstart Docker image"] = {
+      runSecurityScans(infrapool,
+        image: "registry.tld/secretless-broker-quickstart:${sourceVersion}",
+        buildMode: params.MODE,
+        branch: env.BRANCH_NAME,
+        arch: 'linux/amd64')
+    }
+
+    scans["Scan RedHat Docker image"] = {
+      runSecurityScans(infrapool,
+        image: "registry.tld/secretless-broker-redhat:${sourceVersion}",
+        buildMode: params.MODE,
+        branch: env.BRANCH_NAME,
+        arch: 'linux/amd64')
+    }
+
+    parallel scans
 
     // Pull existing images from internal registry in order to promote
     infrapool.agentSh """
@@ -53,6 +88,10 @@ pipeline {
   environment {
     // Sets the MODE to the specified or autocalculated value as appropriate
     MODE = release.canonicalizeMode()
+
+    // Values to direct scan results to the right place in DefectDojo
+    INFRAPOOL_PRODUCT_NAME = "${productName}"
+    INFRAPOOL_DD_PRODUCT_TYPE_NAME = "${productTypeName}"
   }
 
   stages {
@@ -168,65 +207,58 @@ pipeline {
       }
     }
 
+    stage('Push Images Internally') {
+      steps {
+        script {
+          infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
+            infrapool.agentSh'./bin/publish --internal'
+          }
+        }
+      }
+    }
+
     stage('Scan Secretless') {
       parallel {
-        stage('Scan Secretless Image for fixable issues') {
+        stage('Scan Secretless Image') {
           steps {
             script {
               infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                scanAndReport(infrapool, "secretless-broker:latest", "HIGH", false)
+                VERSION = infrapool.agentSh(returnStdout: true, script: 'cat VERSION')
+                runSecurityScans(infrapool,
+                  image: "registry.tld/secretless-broker:${VERSION}",
+                  buildMode: params.MODE,
+                  branch: env.BRANCH_NAME,
+                  arch: 'linux/amd64')
               }
             }
           }
         }
 
-        stage('Scan Secretless Image for all issues') {
-          steps {
-           script {
-              infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                scanAndReport(infrapool, "secretless-broker:latest", "NONE", true)
-              }
-            }
-          }
-        }
-
-        stage('Scan Secretless Quickstart for fixable issues') {
-          steps {
-           script {
-              infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                scanAndReport(infrapool, "secretless-broker-quickstart:latest", "HIGH", false)
-              }
-            }
-          }
-        }
-
-        stage('Scan Secretless Quickstart for all issues') {
-          steps {
-           script {
-              infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                scanAndReport(infrapool, "secretless-broker-quickstart:latest", "NONE", true)
-              }
-            }
-          }
-        }
-
-        stage('Scan Secretless RedHat for fixable issues') {
+        stage('Scan Secretless Quickstart Image') {
           steps {
             script {
               infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                TAG = infrapool.agentSh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
-                scanAndReport(infrapool, "secretless-broker-redhat:${TAG}", "HIGH", false)
+                VERSION = infrapool.agentSh(returnStdout: true, script: 'cat VERSION')
+                runSecurityScans(infrapool,
+                  image: "registry.tld/secretless-broker-quickstart:${VERSION}",
+                  buildMode: params.MODE,
+                  branch: env.BRANCH_NAME,
+                  arch: 'linux/amd64')
               }
             }
           }
         }
 
-        stage('Scan Secretless RedHat for all issues') {
+        stage('Scan Secretless RedHat Image') {
           steps {
             script {
               infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                TAG = infrapool.agentSh(returnStdout: true, script: '. bin/build_utils && full_version_tag')
-                scanAndReport(infrapool, "secretless-broker-redhat:${TAG}", "NONE", true)
+                VERSION = infrapool.agentSh(returnStdout: true, script: 'cat VERSION')
+                runSecurityScans(infrapool,
+                  image: "registry.tld/secretless-broker-redhat:${VERSION}",
+                  buildMode: params.MODE,
+                  branch: env.BRANCH_NAME,
+                  arch: 'linux/amd64')
               }
             }
           }
@@ -355,16 +387,6 @@ pipeline {
                 infrapool.agentSh 'summon -f ./k8s-ci/secrets.yml ./k8s-ci/test k8s-ci/k8s_crds'
               }
             }
-          }
-        }
-      }
-    }
-
-    stage('Push Images Internally') {
-      steps {
-        script {
-          infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-            infrapool.agentSh'./bin/publish --internal'
           }
         }
       }

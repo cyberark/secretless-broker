@@ -458,19 +458,27 @@ than main. Make sure your change to secretless considers this.
 ## Releasing
 
 ### Verify and update dependencies
-1. Review the changes to `go.mod` since the last release and make any needed
-   updates to [NOTICES.txt](./NOTICES.txt):
-   - Add any dependencies that have been added since the last tag, including
-     an entry for them alphabetically under the license type (make sure you
-     check the license type for the version of the project we use) and a copy
-     of the copyright later in the same file.
-   - Update any dependencies whose versions have changed - there are usually at
-     least two version entries that need to be modified, but if the license type
-     of the dependency has also changed, then you will need to remove the old
-     entries and add it as if it were a new dependency.
-   - Remove any dependencies we no longer include.
 
-   If no dependencies have changed, you can move on to the next step.
+1.  Review the changes to `go.mod` since the last release and make any needed
+    updates to [NOTICES.txt](./NOTICES.txt):
+    *   Verify that dependencies fit into supported licenses types:
+        ```shell
+         go-licenses check ./... --allowed_licenses="MIT,ISC,Apache-2.0,BSD-3-Clause,MPL-2.0,BSD-2-Clause" \
+            --ignore github.com/cyberark/secretless-broker \
+            --ignore $(go list std | awk 'NR > 1 { printf(",") } { printf("%s",$0) } END { print "" }')
+        ```
+        If there is new dependency having unsupported license, such license should be included to [notices.tpl](./notices.tpl)
+        file in order to get generated in NOTICES.txt.  
+
+        NOTE: The second ignore flag tells the command to ignore standard library packages, which
+        may or may not be necessary depending on your local Go installation and toolchain.
+
+    *   If no errors occur, proceed to generate updated NOTICES.txt:
+        ```shell
+         go-licenses report ./... --template notices.tpl > NOTICES.txt \
+            --ignore github.com/cyberark/secretless-broker \
+            --ignore $(go list std | awk 'NR > 1 { printf(",") } { printf("%s",$0) } END { print "" }')
+         ```
 
 ### Update the version and changelog
 

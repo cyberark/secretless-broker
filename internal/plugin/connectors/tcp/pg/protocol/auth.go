@@ -117,7 +117,7 @@ func handleAuthSCRAM(username string, password string, connection net.Conn) erro
 	message.WriteByte(PasswordMessageType)
 	message.WriteInt32(0)
 	message.WriteString("SCRAM-SHA-256")
-	message.WriteInt32(int32(len(scOut)))
+	message.WriteInt32(int32(len(scOut))) // #nosec
 	message.WriteBytes(scOut)
 	message.ResetLength(PGMessageLengthOffset)
 

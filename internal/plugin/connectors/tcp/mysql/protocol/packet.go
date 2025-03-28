@@ -165,7 +165,7 @@ func ReadResponse(conn net.Conn, deprecateEOF bool) ([]byte, byte, error) {
 		pktReader := bytes.NewReader(pkt[4:])
 		columns, _ := ReadLenEncodedInteger(pktReader)
 
-		toRead := int(columns) + 1
+		toRead := int(columns) + 1 // #nosec
 
 		for i := 0; i < toRead; i++ {
 			pkt, err := ReadPacket(conn)

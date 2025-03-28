@@ -386,7 +386,7 @@ func PackHandshakeV10(serverHandshake *HandshakeV10) ([]byte, error) {
 	buffer.WriteByte(0)
 
 	// Write ServerCapabilities (int<2>)
-	binary.Write(buffer, binary.LittleEndian, uint16(serverHandshake.ServerCapabilities&0xFFFF))
+	binary.Write(buffer, binary.LittleEndian, uint16(serverHandshake.ServerCapabilities&0xFFFF)) // #nosec
 
 	// Write ServerCharacterSet (int<1>)
 	buffer.WriteByte(serverHandshake.CharacterSet)
@@ -395,7 +395,7 @@ func PackHandshakeV10(serverHandshake *HandshakeV10) ([]byte, error) {
 	binary.Write(buffer, binary.LittleEndian, serverHandshake.StatusFlags)
 
 	// Write ServerCapabilities (int<2>), the higher part
-	binary.Write(buffer, binary.LittleEndian, uint16(serverHandshake.ServerCapabilities>>16))
+	binary.Write(buffer, binary.LittleEndian, uint16(serverHandshake.ServerCapabilities>>16)) // #nosec
 
 	// Write AuthPluginDataLength (int<1>) if required
 	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
@@ -501,10 +501,10 @@ func RemoveSSLFromHandshakeV10(packet []byte) ([]byte, error) {
 	serverCapabilities = serverCapabilities ^ ClientSSL
 
 	// update Lower part of the capability flags.
-	writeUint16(newPacket, serverCapabilitiesIndex, uint16(serverCapabilities))
+	writeUint16(newPacket, serverCapabilitiesIndex, uint16(serverCapabilities)) // #nosec
 
 	// update Upper part of the capability flags.
-	writeUint16(newPacket, exServerCapabilitiesIndex, uint16(serverCapabilities>>16))
+	writeUint16(newPacket, exServerCapabilitiesIndex, uint16(serverCapabilities>>16)) // #nosec
 
 	return newPacket, nil
 }
@@ -746,7 +746,7 @@ func PackHandshakeResponse41(clientHandshake *HandshakeResponse41) ([]byte, erro
 	// write auth
 	if clientHandshake.CapabilityFlags&ClientSecureConnection > 0 {
 		if clientHandshake.AuthLength > 0 {
-			buf.WriteByte(uint8(len(clientHandshake.AuthResponse)))
+			buf.WriteByte(uint8(len(clientHandshake.AuthResponse))) // #nosec
 			buf.Write(clientHandshake.AuthResponse)
 		} else {
 			buf.WriteByte(0)

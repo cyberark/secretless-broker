@@ -32,7 +32,7 @@ function finish {
   announce 'Wrapping up and removing test environment'
 
   # Delete registry images that were used
-  deleteRegistryImage "${SECRETLESS_IMAGE_NAME}" "${SECRETLESS_IMAGE_TAG}"
+  deleteRegistryImage "${SECRETLESS_IMAGE_NAME}" "${SECRETLESS_IMAGE_TAG}" || true
 
   # Delete test namespace
   runDockerCommand "

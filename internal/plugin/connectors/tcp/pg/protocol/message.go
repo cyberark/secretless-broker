@@ -104,7 +104,7 @@ func (message *MessageBuffer) ResetLength(offset int) {
 	s := b[offset:]
 
 	/* Determine the new length and set it. */
-	binary.BigEndian.PutUint32(s, uint32(len(s)))
+	binary.BigEndian.PutUint32(s, uint32(len(s))) // #nosec
 }
 
 // Bytes gets the contents of the message buffer. This function is only

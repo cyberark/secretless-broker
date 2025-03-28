@@ -153,16 +153,16 @@ exclude github.com/emicklei/go-restful v2.9.5+incompatible
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-api-go => github.com/cyberark/conjur-api-go v0.12.14
+replace github.com/cyberark/conjur-api-go => github.com/cyberark/conjur-api-go latest
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-authn-k8s-client => github.com/cyberark/conjur-authn-k8s-client v0.26.5
+replace github.com/cyberark/conjur-authn-k8s-client => github.com/cyberark/conjur-authn-k8s-client latest
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/conjur-opentelemetry-tracer v0.0.2
+replace github.com/cyberark/conjur-opentelemetry-tracer => github.com/cyberark/conjur-opentelemetry-tracer latest
 
 // DO NOT EDIT: CHANGES TO THE BELOW LINE WILL BREAK AUTOMATED RELEASES
-replace github.com/cyberark/summon => github.com/cyberark/summon v0.10.3
+replace github.com/cyberark/summon => github.com/cyberark/summon latest
 
 // Security fixes to ensure we don't have old vulnerable packages in ou1571 0-36327r
 // dependency tree. We're often not vulnerable, but removing them to ensure

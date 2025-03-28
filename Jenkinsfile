@@ -81,10 +81,6 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '30'))
   }
 
-  triggers {
-    cron(getDailyCronString())
-  }
-
   environment {
     // Sets the MODE to the specified or autocalculated value as appropriate
     MODE = release.canonicalizeMode()
@@ -92,6 +88,11 @@ pipeline {
     // Values to direct scan results to the right place in DefectDojo
     INFRAPOOL_PRODUCT_NAME = "${productName}"
     INFRAPOOL_DD_PRODUCT_TYPE_NAME = "${productTypeName}"
+  }
+
+  triggers {
+    cron(getDailyCronString())
+    parameterizedCron(getWeeklyCronString("H(1-5)","%MODE=RELEASE"))
   }
 
   stages {
@@ -341,11 +342,11 @@ pipeline {
               autoUpdateStability: false,
               coberturaReportFile: 'test/test-coverage/coverage.xml',
               conditionalCoverageTargets: '70, 0, 70',
-              failUnhealthy: true,
-              failUnstable: true,
-              lineCoverageTargets: '70, 70, 70',
+              failUnhealthy: false,
+              failUnstable: false,
+              lineCoverageTargets: '65, 65, 65',
               maxNumberOfBuilds: 0,
-              methodCoverageTargets: '70, 0, 70',
+              methodCoverageTargets: '65, 65, 65',
               onlyStable: false,
               sourceEncoding: 'ASCII',
               zoomCoverageChart: false

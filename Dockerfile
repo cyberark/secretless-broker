@@ -1,4 +1,4 @@
-FROM golang:1.22-bookworm AS secretless-builder
+FROM golang:1.24-bookworm AS secretless-builder
 LABEL maintainer="CyberArk Software Ltd."
 LABEL builder="secretless-builder"
 

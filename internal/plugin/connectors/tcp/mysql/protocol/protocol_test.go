@@ -531,7 +531,7 @@ func TestUnpackAuthSwitchRequest(t *testing.T) {
 
 func TestUnpackAuthRequestPubKeyResponse(t *testing.T) {
 	// Generate a test RSA public key
-	testPubKey, _ := rsa.GenerateKey(rand.Reader, 256)
+	testPubKey, _ := rsa.GenerateKey(rand.Reader, 1024)
 	testPubKeyBytes, _ := x509.MarshalPKIXPublicKey(&testPubKey.PublicKey)
 	testPubKeyPem := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA PUBLIC KEY",

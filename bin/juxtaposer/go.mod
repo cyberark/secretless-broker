@@ -1,21 +1,22 @@
 module github.com/cyberark/secretless-broker/bin/juxtaposer
 
-go 1.22.2
+go 1.24.1
 
 require (
 	github.com/denisenkom/go-mssqldb v0.12.3
-	github.com/go-sql-driver/mysql v1.7.1
-	github.com/lib/pq v1.10.6
+	github.com/go-sql-driver/mysql v1.9.1
+	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.7.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
 )
 
 // Security fixes to ensure we don't have old vulnerable packages in our

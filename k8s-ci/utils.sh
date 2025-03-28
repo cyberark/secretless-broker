@@ -25,9 +25,11 @@ function deleteRegistryImage() {
   local tag=$2
 
   runDockerCommand "
+    set -x
+    set +e
     image_digest=\$(gcloud container images list-tags --filter='tags[]=${tag}' --format='get(digest)' '${image}')
 
-    gcloud container images untag -q '${image}:${tag}'
+    gcloud container images delete -q '${image}:${tag}' --force-delete-tags
 
     image_tags=\$(gcloud container images list-tags --filter=digest=\${image_digest} --format='get(tags)' '${image}' | awk -F';' '{print NF}')
     if [ \${image_tags} -eq 0 ]; then

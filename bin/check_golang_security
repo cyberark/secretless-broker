@@ -38,7 +38,7 @@ if [[ ! -v BRANCH_NAME ]]; then
       "
 else
   # Running in Jenkins
-  excluded_directories="${toplevel_dir}/test,${toplevel_dir}/third_party/go-mssqldb"
+  excluded_directories="$(pwd)/test,$(pwd)/third_party/go-mssqldb"
   echo "Excluding directories: ${excluded_directories}"
   # TODO: Somehow this still fails to exclude them.
   # Excluding directories: /home/jenkins/agent/workspace/secretless-broker-main-full_main/test,/home/jenkins/agent/workspace/secretless-broker-main-full_main/third_party/go-mssqldb

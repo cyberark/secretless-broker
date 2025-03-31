@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -exo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 # Get the version of Go specified by the "go directive" in go.mod
-# Grep it to avoid Go binary dependency
-GO_VERSION="v$(grep "^\bgo\b" "${REPO_ROOT}/go.mod" | awk '{print $2}')"
+# Grep it to avoid Go binary dependency and trim the patch version (if it exists)
+GO_VERSION="v$(grep "^\bgo\b" "${REPO_ROOT}/go.mod" | awk '{print $2}' | sed 's/\.[0-9]*$//')"
 
 # Determine where VERSION file is based on goreleaser argument
 if [[ "$1" == '--skip=validate' ]]; then

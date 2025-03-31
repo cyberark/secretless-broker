@@ -57,7 +57,7 @@ goreleaser_assets() {
         *.deb
         secretless-broker-linux_amd64_v1
         secretless-broker-darwin_amd64_v1
-        secretless-broker-darwin_arm64
+        secretless-broker-darwin_arm64_v8.0
     )
     local complete_assets
 
@@ -96,6 +96,9 @@ function main() {
 # Goreleaser's release section would remove _v1 from packages
 # during a release but is disabled in favor of the automated
 # release process.
+#
+# A similar process should be done for the arm64 packages now, as it appends
+# the suffix `v8.0` to the filename. See: https://pkg.go.dev/cmd/go#hdr-Environment_variables
 ###################################
 function rename_assets() {
     # Find all assets ending with _v1
@@ -103,6 +106,13 @@ function rename_assets() {
         # Rename file, removing _v1 from asset
         echo "RENAMING ${file} to ${file/_v1/}"
         mv "$file" "${file/_v1/}"
+    done
+
+    # Find all assets ending with v8.0
+    for file in "${asset_dir}"/*_v8.0; do
+        # Rename file, removing v8.0 from asset
+        echo "RENAMING ${file} to ${file/_v8.0/}"
+        mv "$file" "${file/_v8.0/}"
     done
 }
 

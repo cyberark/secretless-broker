@@ -38,12 +38,14 @@ if [[ ! -v BRANCH_NAME ]]; then
       "
 else
   # Running in Jenkins
-  excluded_directories="$(pwd)/test,$(pwd)/third_party/go-mssqldb"
+  # For some reason the third_party directory is not being excluded properly on main branch builds. It appears in two forms:
+  # /home/jenkins/agent/workspace/secretless-broker-main-full_main/third_party/go-mssqldb
+  # /home/jenkins/agent/workspace/secretless-broker-main-full_main/secretless-broker-main-full_main/third_party/go-mssqldb
+  # To accomodate the second case, we duplicate the name of the working directory to build the full path
+  third_party_import_dir="$(pwd)/$(basename "$(pwd)")/third_party/go-mssqldb"
+  excluded_directories="$(pwd)/test,$(pwd)/third_party/go-mssqldb,$third_party_import_dir"
   echo "Excluding directories: ${excluded_directories}"
-  # TODO: Somehow this still fails to exclude them.
-  # Excluding directories: /home/jenkins/agent/workspace/secretless-broker-main-full_main/test,/home/jenkins/agent/workspace/secretless-broker-main-full_main/third_party/go-mssqldb
-  # later...
-  # Import directory: /home/jenkins/agent/workspace/secretless-broker-main-full_main/secretless-broker-main-full_main/third_party/go-mssqldb/examples/tsql
+
   go install github.com/securego/gosec/v2/cmd/gosec@latest
   git config --global --add safe.directory "${WORKSPACE}"
   ./bin/run_gosec -c "${confidence}" -s "${severity}" -b "${current_branch}" -e "${excluded_directories}"

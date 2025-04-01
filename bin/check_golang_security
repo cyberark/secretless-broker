@@ -42,6 +42,7 @@ else
   # /home/jenkins/agent/workspace/secretless-broker-main-full_main/third_party/go-mssqldb
   # /home/jenkins/agent/workspace/secretless-broker-main-full_main/secretless-broker-main-full_main/third_party/go-mssqldb
   # To accomodate the second case, we duplicate the name of the working directory to build the full path
+  # Note this still doesn't work even though we exclude both paths.
   third_party_import_dir="$(pwd)/$(basename "$(pwd)")/third_party/go-mssqldb"
   excluded_directories="$(pwd)/test,$(pwd)/third_party/go-mssqldb,$third_party_import_dir"
   echo "Excluding directories: ${excluded_directories}"

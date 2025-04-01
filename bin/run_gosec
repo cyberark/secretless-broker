@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -exo pipefail
 
 # This script can run independently of secretless
 # i.e. in any given local repository

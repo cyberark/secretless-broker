@@ -66,6 +66,10 @@ if (params.MODE == "PROMOTE") {
       #Promote source version to target version.
       summon -e common ./bin/publish --promote --source ${sourceVersion} --target ${targetVersion}
     """
+
+    // Ensure the working directory is a safe git directory for the subsequent
+    // promotion operations after this block.
+    sh 'git config --global --add safe.directory "$(pwd)"'
   }
 
   // Copy Github Enterprise release to Github

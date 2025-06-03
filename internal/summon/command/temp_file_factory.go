@@ -11,28 +11,28 @@ import (
 // the filesystem.
 const defaultSharedMemoryDir = "/dev/shm"
 
-// TempFactory creates new temp files, using heuristics to choose as secure a location
+// TempFileFactory creates new temp files, using heuristics to choose as secure a location
 // as possible.
-type TempFactory struct {
+type TempFileFactory struct {
 	path  string
 	files []string
 }
 
-// NewTempFactory creates a new temporary file factory.
+// NewTempFileFactory creates a new temporary file factory.
 // defer Cleanup() if you want the files removed.
-func NewTempFactory(path string) TempFactory {
-	return NewCustomTempFactory(path, "")
+func NewTempFileFactory(path string) TempFileFactory {
+	return NewCustomTempFileFactory(path, "")
 }
 
-// NewCustomTempFactory creates a new temporary file factory with specified
+// NewCustomTempFileFactory creates a new temporary file factory with specified
 // sharedMemoryDir. If sharedMemoryDir is empty, we use the default path for it.
 // defer Cleanup() if you want the files removed.
-func NewCustomTempFactory(path string, sharedMemoryDir string) TempFactory {
+func NewCustomTempFileFactory(path string, sharedMemoryDir string) TempFileFactory {
 	if path == "" {
 		path = defaultTempPath(sharedMemoryDir)
 	}
 
-	return TempFactory{
+	return TempFileFactory{
 		path: path,
 	}
 }
@@ -62,7 +62,7 @@ func defaultTempPath(sharedMemoryDir string) string {
 }
 
 // Push creates a temp file with given value. Returns the path.
-func (tf *TempFactory) Push(value string) (string, error) {
+func (tf *TempFileFactory) Push(value string) (string, error) {
 	f, err := os.CreateTemp(tf.path, ".summon")
 	if err != nil {
 		return "", err
@@ -81,7 +81,7 @@ func (tf *TempFactory) Push(value string) (string, error) {
 }
 
 // Cleanup removes the temporary files created with this factory.
-func (tf *TempFactory) Cleanup() {
+func (tf *TempFileFactory) Cleanup() {
 	for _, file := range tf.files {
 		_ = os.Remove(file)
 	}

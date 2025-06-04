@@ -17,7 +17,7 @@ import (
 type Subcommand struct {
 	Args        []string
 	SecretsMap  secretsyml.SecretsMap
-	TempFactory *TempFactory
+	TempFileFactory *TempFileFactory
 	Provider    plugin_v1.Provider
 
 	// Set this to an io.Writer to capture stdout from the child process.
@@ -30,7 +30,7 @@ type Subcommand struct {
 func buildEnvironment(
 	secrets map[string]string,
 	secretsMap secretsyml.SecretsMap,
-	tempFactory *TempFactory,
+	tempFactory *TempFileFactory,
 ) ([]string, error) {
 	env := make([]string, 0, len(secrets))
 	keys := make([]string, 0, len(secrets))
@@ -135,7 +135,7 @@ func formatForEnv(
 	key string,
 	value string,
 	spec secretsyml.SecretSpec,
-	tempFactory *TempFactory,
+	tempFactory *TempFileFactory,
 ) (string, error) {
 	if spec.IsFile() {
 		fname, err := tempFactory.Push(value)
@@ -154,16 +154,16 @@ func (sc *Subcommand) Run() (err error) {
 	var env []string
 	var secrets map[string]string
 
-	if sc.TempFactory == nil {
-		tempFactory := NewTempFactory("")
-		sc.TempFactory = &tempFactory
+	if sc.TempFileFactory == nil {
+		tempFactory := NewTempFileFactory("")
+		sc.TempFileFactory = &tempFactory
 	}
-	defer sc.TempFactory.Cleanup()
+	defer sc.TempFileFactory.Cleanup()
 
 	if secrets, err = resolveSecrets(sc.Provider, sc.SecretsMap); err != nil {
 		return
 	}
-	if env, err = buildEnvironment(secrets, sc.SecretsMap, sc.TempFactory); err != nil {
+	if env, err = buildEnvironment(secrets, sc.SecretsMap, sc.TempFileFactory); err != nil {
 		return
 	}
 

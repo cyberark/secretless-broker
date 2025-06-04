@@ -71,7 +71,7 @@ func Test_resolveSecrets(t *testing.T) {
 }
 
 func Test_buildEnvironment(t *testing.T) {
-	tempFactory := NewTempFactory("")
+	tempFactory := NewTempFileFactory("")
 
 	defer tempFactory.Cleanup()
 

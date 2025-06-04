@@ -47,9 +47,9 @@ func assertFileContents(f string, expectedValue string, t *testing.T) {
 	assert.Equal(t, expectedValue, string(actualContent))
 }
 
-func TestTempFactory_Cleanup(t *testing.T) {
+func TestTempFileFactory_Cleanup(t *testing.T) {
 	t.Run("Cleanup deletes all temp files", func(t *testing.T) {
-		tempFactory := NewCustomTempFactory("", "non-existent")
+		tempFactory := NewCustomTempFileFactory("", "non-existent")
 
 		f1, err := tempFactory.Push("meow")
 		assert.NoError(t, err)
@@ -66,9 +66,9 @@ func TestTempFactory_Cleanup(t *testing.T) {
 	})
 }
 
-func TestTempFactory_Push(t *testing.T) {
+func TestTempFileFactory_Push(t *testing.T) {
 	t.Run("Push creates temp file", func(t *testing.T) {
-		tempFactory := NewTempFactory("")
+		tempFactory := NewTempFileFactory("")
 		defer tempFactory.Cleanup()
 
 		f, err := tempFactory.Push("moo")
@@ -77,7 +77,7 @@ func TestTempFactory_Push(t *testing.T) {
 	})
 
 	t.Run("Push reports errors", func(t *testing.T) {
-		tempFactory := NewTempFactory("dir-not-found")
+		tempFactory := NewTempFileFactory("dir-not-found")
 		defer tempFactory.Cleanup()
 
 		_, err := tempFactory.Push("moo")
@@ -86,12 +86,12 @@ func TestTempFactory_Push(t *testing.T) {
 	})
 }
 
-func TestTempFactory_NewTempFactory(t *testing.T) {
+func TestTempFileFactory_NewTempFileFactory(t *testing.T) {
 	t.Run("Uses constructor arg path if provided", func(t *testing.T) {
-		tempFactory := NewTempFactory("somedir")
+		tempFactory := NewTempFileFactory("somedir")
 		defer tempFactory.Cleanup()
 
-		assert.ObjectsAreEqualValues(TempFactory{
+		assert.ObjectsAreEqualValues(TempFileFactory{
 			files: []string(nil),
 			path:  "somedir",
 		}, tempFactory)
@@ -102,14 +102,14 @@ func TestTempFactory_NewTempFactory(t *testing.T) {
 		defer env.restoreEnv()
 
 		t.Run("tries using shared memory path first", func(t *testing.T) {
-			tempFactory := NewTempFactory("")
+			tempFactory := NewTempFileFactory("")
 
 			_, err := os.Stat("/dev/shm")
 			if os.IsNotExist(err) {
 				return
 			}
 
-			assert.ObjectsAreEqualValues(TempFactory{
+			assert.ObjectsAreEqualValues(TempFileFactory{
 				files: []string(nil),
 				path:  "/dev/shm",
 			}, tempFactory)
@@ -127,13 +127,13 @@ func TestTempFactory_NewTempFactory(t *testing.T) {
 			os.Setenv("HOME", home)
 
 			// Override shared memory path
-			tempFactory := NewCustomTempFactory("", "doesnotexist")
+			tempFactory := NewCustomTempFileFactory("", "doesnotexist")
 			assert.Contains(t, tempFactory.path, home)
 		})
 
 		t.Run("tries using os.TempDir as last resort", func(t *testing.T) {
 			// Override shared memory path
-			tempFactory := NewCustomTempFactory("", "doesnotexist")
+			tempFactory := NewCustomTempFileFactory("", "doesnotexist")
 
 			assert.Equal(t, os.TempDir(), tempFactory.path)
 		})

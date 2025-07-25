@@ -1,6 +1,8 @@
 module github.com/cyberark/secretless-broker
 
-go 1.24.1
+go 1.24.2
+
+toolchain go1.24.3
 
 // TODO: github.com/docker/docker can't be updated to latest yet (v27.4.1 at time of writing).
 // Doing so causes the proxyservice tests to fail giving errors saying that the
@@ -34,7 +36,7 @@ require (
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0 // indirect
-	github.com/Masterminds/semver/v3 v3.3.1 // indirect
+	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
@@ -73,7 +75,7 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	// Version number used here is ignored
-	github.com/cyberark/conjur-api-go v1.55.55
+	github.com/cyberark/conjur-api-go v0.13.2
 	// Version number used here is ignored
 	github.com/cyberark/conjur-authn-k8s-client v1.55.55
 	// Version number used here is ignored
@@ -123,7 +125,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/oauth2 v0.28.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.30.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.11.0 // indirect

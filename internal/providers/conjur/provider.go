@@ -53,6 +53,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: Conjur provider could not load configuration: %s", err)
 	}
+	config.CredentialStorage = conjurapi.CredentialStorageNone
 
 	var apiKey, authnURL, tokenFile, username, version string
 	var conjurAuthenticator authenticator.Authenticator

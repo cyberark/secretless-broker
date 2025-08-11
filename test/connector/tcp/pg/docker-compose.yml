@@ -1,5 +1,3 @@
-version: '3.0'
-
 services:
   pg_no_tls: &pg_no_tls
     build:

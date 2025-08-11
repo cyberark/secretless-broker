@@ -279,11 +279,16 @@ pipeline {
           steps {
             script {
               infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                infrapool.agentGet from: "${WORKSPACE}", to: "${WORKSPACE}"
+                infrapool.agentSh "./bin/check_golang_security -s high -c medium -b ${env.BRANCH_NAME}"
+                infrapool.agentStash name: 'gosec-scan-report', includes: 'gosec-scan-result.xml'
               }
-              sh "./bin/check_golang_security -s High -c Medium -b ${env.BRANCH_NAME}"
             }
-            junit(allowEmptyResults: true, testResults: 'gosec.output')
+          }
+          post {
+            always {
+              unstash 'gosec-scan-report'
+              junit(allowEmptyResults: true, testResults: 'gosec-scan-result.xml')
+            }
           }
         }
       }

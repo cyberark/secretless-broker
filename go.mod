@@ -1,8 +1,8 @@
 module github.com/cyberark/secretless-broker
 
-go 1.24.2
+go 1.24
 
-toolchain go1.24.3
+toolchain go1.24
 
 // TODO: github.com/docker/docker can't be updated to latest yet (v27.4.1 at time of writing).
 // Doing so causes the proxyservice tests to fail giving errors saying that the

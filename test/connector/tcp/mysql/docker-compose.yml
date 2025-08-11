@@ -1,8 +1,6 @@
-version: '3.0'
-
 services:
   mysql_no_tls: &mysql_no_tls
-    image: mysql:8.1
+    image: mysql:lts
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin -psecurerootpass status"]
       interval: 1s

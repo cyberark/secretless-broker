@@ -52,7 +52,7 @@ excluded_dirs=$(for dir in ${excluded_directories//,/ }; do echo -n "-exclude-di
 modified_directories="./..."
 
 # Get an array of directories containing modified files
-if [[ ${current_branch} != 'main' ]]; then 
+if [[ ${current_branch} != 'main' ]]; then
     echo 'Current branch is not main - running gosec on modified packages for this branch only'
     # Jenkins already fetches the main refs so only run locally
     if [[ ! -v BRANCH_NAME ]]; then
@@ -62,18 +62,20 @@ if [[ ${current_branch} != 'main' ]]; then
 fi
 
 # Remove output file just in case it exists
-rm -f "gosec.output" 
+output_file="gosec-scan-result.xml"
+rm -f $output_file
 
 set +e && set +o pipefail
 
 # Run our scan, flagging only 'high' level issues with 'medium' or higher severity
-
-"$(go env GOPATH)"/bin/gosec -fmt=junit-xml \
-  -out=gosec.output \
-  -severity="${severity}" \
-  -confidence="${confidence}" \
+docker run --rm \
+  -v "$(pwd):/secretless-broker/" \
+  -w "/secretless-broker/" \
+  securego/gosec:latest " -fmt=junit-xml \
+  -out=${output_file} \
+  -stdout \
+  -verbose=text \
+  -severity=${severity} \
+  -confidence=${confidence} \
   ${excluded_dirs} \
-  "${modified_directories[@]}"
-
-# Display output of gosec
-cat gosec.output
+  ${modified_directories}"

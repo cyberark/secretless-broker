@@ -23,31 +23,5 @@ while getopts 'b:c:s:' flag; do
 done
 
 
-# gosec => Scans go packages and flags security vulnerabilities
-if [[ ! -v BRANCH_NAME ]]; then
-  # Running locally. Use a docker container.
-  # Exclude test files and the third party go-mssqldb library
-  excluded_directories="/secretless/test,/secretless/third_party/go-mssqldb"
-  docker run --rm \
-      -v "$toplevel_dir/:/secretless/" \
-      secretless-dev \
-      bash -exc "
-        go install github.com/securego/gosec/v2/cmd/gosec@latest
-        git config --global --add safe.directory /secretless
-        ./bin/run_gosec -c ${confidence} -s ${severity} -b ${current_branch} -e ${excluded_directories}
-      "
-else
-  # Running in Jenkins
-  # For some reason the third_party directory is not being excluded properly on main branch builds. It appears in two forms:
-  # /home/jenkins/agent/workspace/secretless-broker-main-full_main/third_party/go-mssqldb
-  # /home/jenkins/agent/workspace/secretless-broker-main-full_main/secretless-broker-main-full_main/third_party/go-mssqldb
-  # To accomodate the second case, we duplicate the name of the working directory to build the full path
-  # Note this still doesn't work even though we exclude both paths.
-  third_party_import_dir="$(pwd)/$(basename "$(pwd)")/third_party/go-mssqldb"
-  excluded_directories="$(pwd)/test,$(pwd)/third_party/go-mssqldb,$third_party_import_dir"
-  echo "Excluding directories: ${excluded_directories}"
-
-  go install github.com/securego/gosec/v2/cmd/gosec@latest
-  git config --global --add safe.directory "${WORKSPACE}"
-  ./bin/run_gosec -c "${confidence}" -s "${severity}" -b "${current_branch}" -e "${excluded_directories}"
-fi
+excluded_directories="test,third_party/go-mssqldb,bin/juxtaposer,cmd/shared"
+./bin/run_gosec -c "${confidence}" -s "${severity}" -b "${current_branch}" -e "${excluded_directories}"

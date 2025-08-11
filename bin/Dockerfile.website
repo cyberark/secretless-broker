@@ -1,4 +1,4 @@
-FROM ruby:3-slim-bullseye
+FROM ruby:3-slim-bookworm
 
 RUN apt-get -y update && \
     apt-get -y install build-essential && \

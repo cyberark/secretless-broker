@@ -2,3 +2,4 @@
 ssl-ca=/etc/mysql-ssl/ca.pem
 ssl-cert=/etc/mysql-ssl/server.pem
 ssl-key=/etc/mysql-ssl/server-key.pem
+mysql_native_password=ON

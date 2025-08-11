@@ -104,3 +104,10 @@ vulnerabilities:
   - id: CVE-2024-34156
     paths:
       - "usr/local/bin/gosu"
+  # CVE-2025-47907 is a vulnerability affecting Go's `database/sql` package.
+  # See: https://nvd.nist.gov/vuln/detail/CVE-2025-47907 and https://pkg.go.dev/vuln/GO-2025-3849
+  # Gosu (https://github.com/tianon/gosu) handles setuid, setgid, setgroups, and exec syscalls,
+  # and does not use the `database/sql` package. See: https://github.com/tianon/gosu/blob/master/SECURITY.md
+  - id: CVE-2025-47907
+    paths:
+      - "usr/local/bin/gosu"

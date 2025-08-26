@@ -2,20 +2,21 @@ FROM secretless-dev
 
 # apt-get and system utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
-	curl apt-transport-https debconf-utils \
+	apt-transport-https debconf-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Add custom MS repository
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-RUN curl --fail \
-	--retry 5 \
-	--retry-max-time 10 \
-	https://packages.microsoft.com/config/debian/10/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | \
+    gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+
+RUN wget -q --tries=5 --timeout=10 --retry-connrefused \
+    -O /etc/apt/sources.list.d/mssql-release.list \
+	https://packages.microsoft.com/config/debian/12/prod.list
 
 # Install SQL Server drivers and tools
 RUN apt-get update && ACCEPT_EULA=Y apt-get install -y --no-install-recommends \
-                                                    libodbc1 unixodbc msodbcsql17 mssql-tools unixodbc-dev
-ENV PATH $PATH:/opt/mssql-tools/bin
+                                                    unixodbc msodbcsql17 mssql-tools unixodbc-dev
+ENV PATH=$PATH:/opt/mssql-tools/bin
 
 # Install and set locale to en_US.UTF-8
 #
@@ -51,20 +52,16 @@ RUN rm -rf /etc/apt/sources.list.d/mssql-release.list && \
 
 # Add python 3 and pyodbc
 RUN apt-get install -y --no-install-recommends python3 python3-pip
-RUN pip3 install --no-cache-dir pyodbc
+RUN pip3 install --break-system-packages --no-cache-dir pyodbc
 
-# Add java8 and add to $PATH
+# Add java17 and add to $PATH
 # Fix cert issues
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ant \
-                       software-properties-common \
                        ca-certificates-java && \
-    apt-add-repository 'deb http://archive.debian.org/debian-security stretch/updates main' && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jdk && \
+    apt-get install -y --no-install-recommends openjdk-17-jdk && \
     apt-get clean && \
     update-ca-certificates -f
 
-
 # Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/

@@ -1,4 +1,4 @@
-FROM secretless-broker:latest as secretless-broker
+FROM secretless-broker:latest AS secretless-broker
 
 FROM postgres:15-alpine
 

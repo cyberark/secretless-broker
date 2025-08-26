@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.29] - 2025-08-08
+## [1.7.29] - 2025-08-26
+
+### Changed
+- Upgrade base docker images from Debian Bullseye to Bookworm.
+- Migrate from MySQL 8.1 to MySQL LTS and enable `mysql_native_password` plugin in the configuration files.
+- Remove deprecated docker compose version declarations
+- Update gosec security scanning configuration to use `securego/gosec:latest` docker image.
 
 ## [1.7.28] - 2025-04-01
 
@@ -759,7 +765,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.28...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.29...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -813,3 +819,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.26]: https://github.com/cyberark/secretless-broker/compare/v1.7.25...v1.7.26
 [1.7.27]: https://github.com/cyberark/secretless-broker/compare/v1.7.26...v1.7.27
 [1.7.28]: https://github.com/cyberark/secretless-broker/compare/v1.7.27...v1.7.28
+[1.7.29]: https://github.com/cyberark/secretless-broker/compare/v1.7.28...v1.7.29

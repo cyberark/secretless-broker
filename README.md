@@ -41,7 +41,7 @@ When the client connects to a target service through the Secretless Broker:
 
   Secretless is responsible for establishing connections to the backend, and can handle secret rotation in a way that’s transparent to the client.
 
-To provide Secretless access to a target service, a [Service Connector](#service-connectors) implements the protocol of the service, replacing the authentication handshake. The client does not need to know or use a real password to the service. Instead, it proxies its connection to the service through a local connection to Secretless. Secretless obtains credentials to the target service from a secrets vault (such as Conjur, a keychain service, text files, or other sources) via a [Credential Provider](#credential-providers). The credentials are used to establish a connection to the actual service, and Secretless then rapidly shuttles data back and forth between the client and the service.
+To provide Secretless access to a target service, a [Service Connector](#service-connectors) implements the protocol of the service, replacing the authentication handshake. The client does not need to know or use a real password to the service. Instead, it proxies its connection to the service through a local connection to Secretless. Secretless obtains credentials to the target service from a secrets vault (such as CyberArk Secrets Manager, a keychain service, text files, or other sources) via a [Credential Provider](#credential-providers). The credentials are used to establish a connection to the actual service, and Secretless then rapidly shuttles data back and forth between the client and the service.
 
 Secretless Broker is currently licensed under [ASL 2.0](#license)
 
@@ -52,7 +52,7 @@ Secretless supports several target services out of the box, and these include:
 - MySQL (Socket and TCP)
 - PostgreSQL (Socket and TCP)
 - SSH / SSH-Agent (Beta)
-- HTTP with Basic auth, Conjur, and AWS authorization strategies (Beta)
+- HTTP with Basic auth, CyberArk Secrets Manager or Conjur OSS, and AWS authorization strategies (Beta)
 
 Support for these services is provided via internal plugins (also referred to as "Service Connectors") that are part
 of the Secretless binary distribution.

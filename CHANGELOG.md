@@ -10,9 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.29] - 2025-08-26
+## [1.7.29] - 2025-09-03
 
 ### Changed
+- Update README to align with Conjur's name change to CyberArk Secrets Manager and update SECURITY.md. CNJR-10966
 - Upgrade base docker images from Debian Bullseye to Bookworm.
 - Migrate from MySQL 8.1 to MySQL LTS and enable `mysql_native_password` plugin in the configuration files.
 - Remove deprecated docker compose version declarations

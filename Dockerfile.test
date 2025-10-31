@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine
+FROM golang:1.25-alpine
 LABEL maintainer="CyberArk Software Ltd."
 LABEL id="secretless-test-runner"
 
@@ -30,5 +30,5 @@ RUN go mod download
 # gocov => converts native coverage output to gocov's JSON interchange format
 # gocov-xml => converts gocov format to XML for use with Jenkins/Cobertura
 RUN go install github.com/jstemmer/go-junit-report@latest && \
-    go install github.com/axw/gocov/gocov@latest && \
+    go install github.com/afunix/gocov/gocov@latest && \
     go install github.com/AlekSi/gocov-xml@latest

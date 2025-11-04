@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
 	api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
@@ -21,17 +22,23 @@ type ResourceEventHandler interface {
 	CRDUpdated(*api_v1.Configuration, *api_v1.Configuration)
 }
 
+// Make external dependencies overridable for tests.
+var newKubernetesConfig = NewKubernetesConfig
+var newSecretlessClientForConfig = func(cfg *rest.Config) (secretlessClientset.Interface, error) {
+	return secretlessClientset.NewForConfig(cfg)
+}
+
 // RegisterCRDListener registers a CRD push-notification handler to the available
 // k8s cluster
-func RegisterCRDListener(namespace string, configSpec string, resourceEventHandler ResourceEventHandler) error {
+var RegisterCRDListener = func(namespace string, configSpec string, resourceEventHandler ResourceEventHandler) error {
 	log.Printf("%s: Registering CRD watcher...", PluginName)
 
-	clientConfig, err := NewKubernetesConfig()
+	clientConfig, err := newKubernetesConfig()
 	if err != nil {
 		return err
 	}
 
-	clientset, err := secretlessClientset.NewForConfig(clientConfig)
+	clientset, err := newSecretlessClientForConfig(clientConfig)
 	if err != nil {
 		return err
 	}

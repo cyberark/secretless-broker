@@ -130,7 +130,7 @@ var secretlessCRD = &apiextensionsv1.CustomResourceDefinition{
 	},
 }
 
-func createCRD(apiExtClient *apiextensionsclientset.Clientset) error {
+func createCRD(apiExtClient apiextensionsclientset.Interface) error {
 	res, err := apiExtClient.ApiextensionsV1().CustomResourceDefinitions().Create(
 		context.TODO(), secretlessCRD, meta_v1.CreateOptions{})
 
@@ -147,7 +147,7 @@ func createCRD(apiExtClient *apiextensionsclientset.Clientset) error {
 }
 
 // InjectCRD adds our CRD to K8s if it is missing
-func InjectCRD() error {
+var InjectCRD = func() error {
 	config, err := NewKubernetesConfig()
 	if err != nil {
 		return err

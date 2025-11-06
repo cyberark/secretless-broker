@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Upgrade Go to 1.25 (CONJSE-2067)
+- Update Go dependencies
 
 ## [1.7.29] - 2025-09-03
 

@@ -464,7 +464,6 @@ pipeline {
               infrapool.agentSh """export PATH="${toolsDirectory}/bin:${PATH}" && go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --main "cmd/secretless-broker/" --output "${billOfMaterialsDirectory}/go-app-bom.json" """
               // Create Go module SBOM
               infrapool.agentSh """export PATH="${toolsDirectory}/bin:${PATH}" && go-bom --tools "${toolsDirectory}" --go-mod ./go.mod --image "golang" --output "${billOfMaterialsDirectory}/go-mod-bom.json" """
-              infrapool.agentSh """export PATH="${toolsDirectory}/bin:${PATH}" && summon -e production ./bin/publish --edge"""
             }
           }
         }

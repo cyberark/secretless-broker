@@ -39,13 +39,13 @@ if (params.MODE == "PROMOTE") {
         arch: 'linux/amd64')
     }
 
-    scans["Scan Quickstart Docker image"] = {
-      runSecurityScans(infrapool,
-        image: "registry.tld/secretless-broker-quickstart:${sourceVersion}",
-        buildMode: params.MODE,
-        branch: env.BRANCH_NAME,
-        arch: 'linux/amd64')
-    }
+    // scans["Scan Quickstart Docker image"] = {
+    //   runSecurityScans(infrapool,
+    //     image: "registry.tld/secretless-broker-quickstart:${sourceVersion}",
+    //     buildMode: params.MODE,
+    //     branch: env.BRANCH_NAME,
+    //     arch: 'linux/amd64')
+    // }
 
     scans["Scan RedHat Docker image"] = {
       runSecurityScans(infrapool,
@@ -241,20 +241,20 @@ pipeline {
           }
         }
 
-        stage('Scan Secretless Quickstart Image') {
-          steps {
-            script {
-              infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                VERSION = infrapool.agentSh(returnStdout: true, script: 'cat VERSION')
-                runSecurityScans(infrapool,
-                  image: "registry.tld/secretless-broker-quickstart:${VERSION}",
-                  buildMode: params.MODE,
-                  branch: env.BRANCH_NAME,
-                  arch: 'linux/amd64')
-              }
-            }
-          }
-        }
+        // stage('Scan Secretless Quickstart Image') {
+        //   steps {
+        //     script {
+        //       infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
+        //         VERSION = infrapool.agentSh(returnStdout: true, script: 'cat VERSION')
+        //         runSecurityScans(infrapool,
+        //           image: "registry.tld/secretless-broker-quickstart:${VERSION}",
+        //           buildMode: params.MODE,
+        //           branch: env.BRANCH_NAME,
+        //           arch: 'linux/amd64')
+        //       }
+        //     }
+        //   }
+        // }
 
         stage('Scan Secretless RedHat Image') {
           steps {

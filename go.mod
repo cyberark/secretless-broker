@@ -153,13 +153,6 @@ require (
 
 replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
 
-// The next 2 lines resolve CVE-2022-1996 until k8s.io/client-go v0.25.0+ is released
-replace k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 => k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8
-
-// We can't use a replace here because the import path changed with go-restful v3
-// Instead, just exclude it from the tree.
-exclude github.com/emicklei/go-restful v2.9.5+incompatible
-
 // 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
 // This is our fix:
 replace honnef.co/go/tools => github.com/dominikh/go-tools v0.0.1-2019.2.3

@@ -410,23 +410,6 @@ pipeline {
           MODE == "RELEASE"
         }
       }
-
-      steps {
-        script {
-          infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-            infrapool.agentSh './bin/build_release --snapshot'
-            infrapool.agentArchiveArtifacts artifacts: 'dist/goreleaser/'
-          }
-        }
-      }
-    }
-
-    stage('Create Release Assets') {
-      when {
-        expression {
-          MODE == "RELEASE"
-        }
-      }
       steps {
         script {
           infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->

@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.30] - 2025-10-31
+## [1.7.30] - 2025-11-06
 
 ### Changed
 - Upgrade Go to 1.25 (CONJSE-2067)
+- Update Go dependencies
 
 ## [1.7.29] - 2025-09-03
 
@@ -771,7 +772,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - The first tagged version.
 
-[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.29...HEAD
+[Unreleased]: https://github.com/cyberark/secretless-broker/compare/v1.7.30...HEAD
 [0.2.0]: https://github.com/cyberark/secretless-broker/compare/v0.1.0...v0.2.0
 [0.3.0]: https://github.com/cyberark/secretless-broker/compare/v0.2.0...v0.3.0
 [0.4.0]: https://github.com/cyberark/secretless-broker/compare/v0.3.0...v0.4.0
@@ -826,3 +827,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.27]: https://github.com/cyberark/secretless-broker/compare/v1.7.26...v1.7.27
 [1.7.28]: https://github.com/cyberark/secretless-broker/compare/v1.7.27...v1.7.28
 [1.7.29]: https://github.com/cyberark/secretless-broker/compare/v1.7.28...v1.7.29
+[1.7.30]: https://github.com/cyberark/secretless-broker/compare/v1.7.29...v1.7.30

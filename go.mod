@@ -9,13 +9,13 @@ go 1.25.3
 // with errors as well. See CNJR-7655 for more details.
 
 require (
-	github.com/aws/aws-sdk-go v1.55.6
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/docker/docker v20.10.17+incompatible
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
-	github.com/hashicorp/vault/api v1.16.0
+	github.com/hashicorp/vault/api v1.22.0
 	github.com/heptiolabs/healthcheck v0.0.0-20211123025425-613501dd5deb
 	github.com/joho/godotenv v1.5.1
 	github.com/keybase/go-keychain v0.0.1
@@ -26,57 +26,69 @@ require (
 	github.com/urfave/cli v1.22.17
 	golang.org/x/crypto v0.43.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.32.3
-	k8s.io/apiextensions-apiserver v0.32.3
-	k8s.io/apimachinery v0.32.3
-	k8s.io/client-go v0.32.3
+	k8s.io/api v0.34.1
+	k8s.io/apiextensions-apiserver v0.34.1
+	k8s.io/apimachinery v0.34.1
+	k8s.io/client-go v0.34.1
 )
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.39.1 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.31.10 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.18.14 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.8 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.8 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.8 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.8 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.29.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.38.5 // indirect
-	github.com/aws/smithy-go v1.23.0 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.39.6 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.31.17 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.18.21 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.13 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.13 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.13 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.13 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.30.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.39.1 // indirect
+	github.com/aws/smithy-go v1.23.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
-	github.com/danieljoos/wincred v1.2.2 // indirect
+	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
-	github.com/emicklei/go-restful/v3 v3.12.2 // indirect
+	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/felixge/fgprof v0.9.5 // indirect
-	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
-	github.com/go-openapi/jsonpointer v0.21.1 // indirect
-	github.com/go-openapi/jsonreference v0.21.0 // indirect
-	github.com/go-openapi/swag v0.23.1 // indirect
+	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-openapi/jsonpointer v0.22.1 // indirect
+	github.com/go-openapi/jsonreference v0.21.2 // indirect
+	github.com/go-openapi/swag v0.25.1 // indirect
+	github.com/go-openapi/swag/cmdutils v0.25.1 // indirect
+	github.com/go-openapi/swag/conv v0.25.1 // indirect
+	github.com/go-openapi/swag/fileutils v0.25.1 // indirect
+	github.com/go-openapi/swag/jsonname v0.25.1 // indirect
+	github.com/go-openapi/swag/jsonutils v0.25.1 // indirect
+	github.com/go-openapi/swag/loading v0.25.1 // indirect
+	github.com/go-openapi/swag/mangling v0.25.1 // indirect
+	github.com/go-openapi/swag/netutils v0.25.1 // indirect
+	github.com/go-openapi/swag/stringutils v0.25.1 // indirect
+	github.com/go-openapi/swag/typeutils v0.25.1 // indirect
+	github.com/go-openapi/swag/yamlutils v0.25.1 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/google/gnostic-models v0.6.9 // indirect
-	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
+	github.com/google/gnostic-models v0.7.0 // indirect
+	github.com/google/pprof v0.0.0-20251007162407-5df77e3f7d1d // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/go-secure-stdlib/parseutil v0.2.0 // indirect
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
-	github.com/josharian/intern v1.0.0 // indirect
-	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/zalando/go-keyring v0.2.6 // indirect
-	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/otel/metric v1.35.0 // indirect
-	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
+	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/otel/metric v1.38.0 // indirect
+	go.yaml.in/yaml/v2 v2.4.3 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
+	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 )
 
 require (
@@ -86,7 +98,7 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	// Version number used here is ignored
-	github.com/cyberark/conjur-api-go v0.13.2
+	github.com/cyberark/conjur-api-go v0.13.8
 	// Version number used here is ignored
 	github.com/cyberark/conjur-authn-k8s-client v1.55.55
 	// Version number used here is ignored
@@ -96,69 +108,59 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/go-logr/logr v1.4.2 // indirect
+	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.7 // indirect
-	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/hashicorp/hcl v1.0.1-vault-7 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_golang v1.21.1 // indirect
-	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.63.0 // indirect
-	github.com/prometheus/procfs v0.16.0 // indirect
+	github.com/prometheus/client_golang v1.23.2 // indirect
+	github.com/prometheus/client_model v0.6.2 // indirect
+	github.com/prometheus/common v0.67.2 // indirect
+	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
-	go.opentelemetry.io/otel v1.35.0 // indirect
+	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/stretchr/objx v0.5.3 // indirect
+	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0 // indirect
-	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.35.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.35.0 // indirect
-	go.opentelemetry.io/otel/trace v1.35.0 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.38.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.38.0 // indirect
+	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/oauth2 v0.28.0 // indirect
+	golang.org/x/oauth2 v0.32.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.36.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
-	golang.org/x/time v0.11.0 // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
+	golang.org/x/time v0.14.0 // indirect
+	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff // indirect
-	k8s.io/utils v0.0.0-20241210054802-24370beab758 // indirect
-	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.6.0 // indirect
-	sigs.k8s.io/yaml v1.4.0 // indirect
+	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
+	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4 // indirect
+	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
+	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
 replace github.com/denisenkom/go-mssqldb => ./third_party/go-mssqldb
-
-// The next 2 lines resolve CVE-2022-1996 until k8s.io/client-go v0.25.0+ is released
-replace k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 => k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8
-
-// We can't use a replace here because the import path changed with go-restful v3
-// Instead, just exclude it from the tree.
-exclude github.com/emicklei/go-restful v2.9.5+incompatible
 
 // 2/19/2019: cert on honnef.co -- one of grpc's dependencies -- expired.
 // This is our fix:
@@ -182,217 +184,3 @@ replace github.com/cyberark/summon => github.com/cyberark/summon latest
 
 // Only put specific versions on the left side of the =>
 // so we don't downgrade future versions unintentionally.
-
-replace github.com/aws/aws-sdk-go v1.15.79 => github.com/aws/aws-sdk-go v1.34.2
-
-replace github.com/dgrijalva/jwt-go v3.2.0+incompatible => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
-
-replace github.com/emicklei/go-restful/v3 v3.8.0 => github.com/emicklei/go-restful/v3 v3.10.0
-
-replace github.com/gogo/protobuf v1.1.1 => github.com/gogo/protobuf v1.3.2
-
-replace github.com/gogo/protobuf v1.2.1 => github.com/gogo/protobuf v1.3.2
-
-replace github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
-
-replace github.com/prometheus/client_golang v0.9.1 => github.com/prometheus/client_golang v1.12.1
-
-replace github.com/prometheus/client_golang v0.9.3 => github.com/prometheus/client_golang v1.12.1
-
-replace github.com/prometheus/client_golang v1.0.0 => github.com/prometheus/client_golang v1.12.1
-
-replace github.com/prometheus/client_golang v1.4.0 => github.com/prometheus/client_golang v1.12.1
-
-replace github.com/prometheus/client_golang v1.7.1 => github.com/prometheus/client_golang v1.12.1
-
-replace github.com/prometheus/client_golang v1.11.0 => github.com/prometheus/client_golang v1.12.1
-
-replace golang.org/x/crypto v0.0.0-20180904163835-0709b304e793 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20181029021203-45a5f77698d3 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/crypto v0.0.0-20220214200702-86341886e292 => golang.org/x/crypto v0.2.0
-
-replace golang.org/x/net v0.0.0-20180530234432-1e491301e022 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20180724234803-3673e40ba225 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20180826012351-8a410e7b638d => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20180906233101-161cd47e91fd => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20181023162649-9b4f9f5ad519 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20181114220301-adae6a3d119a => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20181201002055-351d144fa1fc => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20181220203305-927f97764cc3 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190108225652-1e06a53dbb7e => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190213061140-3a22650c66bd => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190311183353-d8887717615a => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190501004415-9ce7a6920f09 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190603091049-60506f45cf65 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190613194153-d28f0bde5980 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190620200207-3b0461eec859 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190628185345-da137c7871d7 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200202094626-16171245cfb2 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200222125558-5a598a2470a0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200226121028-0de0cce0169b => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200301022130-244492dfa37a => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200506145744-7e3656a0809f => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200513185701-a91f0712d120 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200520004742-59133d7f0dd7 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200625001655-4c5254603344 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200707034311-ab3426394381 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20200822124328-c89045814202 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20201021035429-f5854403a974 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20201110031124-69a78807bb2b => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20201209123823-ac852fbbde11 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20210119194325-5f4716e94777 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20210428140749-89ef3d95e781 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20210525063256-abc453219eb5 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20210825183410-e898025ed96a => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20211216030914-fe4d6282115f => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20220225172249-27dd8689420f => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20220722155237-a158d28d115b => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.0.0-20220923203811-8be639271d50 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.2.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.5.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.6.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.8.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.10.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.15.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.21.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/net v0.25.0 => golang.org/x/net v0.33.0
-
-replace golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.0 => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2 => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.2 => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.3 => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.4 => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.5 => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.6 => golang.org/x/text v0.3.8
-
-replace golang.org/x/text v0.3.7 => golang.org/x/text v0.3.8
-
-replace gopkg.in/yaml.v2 v2.0.0-20170812160011-eb3733d160e7 => gopkg.in/yaml.v2 v2.2.8
-
-replace gopkg.in/yaml.v2 v2.2.1 => gopkg.in/yaml.v2 v2.2.8
-
-replace gopkg.in/yaml.v2 v2.2.2 => gopkg.in/yaml.v2 v2.2.8
-
-replace gopkg.in/yaml.v2 v2.2.3 => gopkg.in/yaml.v2 v2.2.8
-
-replace gopkg.in/yaml.v2 v2.2.4 => gopkg.in/yaml.v2 v2.2.8
-
-replace gopkg.in/yaml.v2 v2.2.5 => gopkg.in/yaml.v2 v2.2.8
-
-replace gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c => gopkg.in/yaml.v3 v3.0.1
-
-replace gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 => gopkg.in/yaml.v3 v3.0.1
-
-replace gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b => gopkg.in/yaml.v3 v3.0.1

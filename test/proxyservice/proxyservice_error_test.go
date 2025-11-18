@@ -15,7 +15,10 @@ const SecretlessImageName = "secretless-broker"
 
 func dockerContainer(imageName string) (types.Container, error) {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+	)
 	if err != nil {
 		return types.Container{}, err
 	}
@@ -27,7 +30,7 @@ func dockerContainer(imageName string) (types.Container, error) {
 		Latest: true,
 	}
 
-	containers, err := cli.ContainerList(context.Background(), containerListOptions)
+	containers, err := cli.ContainerList(ctx, containerListOptions)
 	if err != nil {
 		return types.Container{}, err
 	}
@@ -50,7 +53,10 @@ func dockerContainer(imageName string) (types.Container, error) {
 
 func dockerLog(container types.Container) (string, error) {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+	)
 	if err != nil {
 		return "", err
 	}

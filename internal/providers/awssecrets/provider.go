@@ -1,37 +1,34 @@
 package awssecrets
 
 import (
+	"context"
 	"fmt"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
-
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	secretsmanager "github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
 
 // Provider provides data values from AWS Secrets Manager.
 type Provider struct {
 	Name   string
-	Client *secretsmanager.SecretsManager
+	Client *secretsmanager.Client
 }
 
 // ProviderFactory constructs a Provider. The API client is configured from
 // in-cluster environment variables and files.
 func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 
-	// All clients require a Session. The Session provides the client with
-	// shared configuration such as region, endpoint, and credentials. A
-	// Session should be shared where possible to take advantage of
-	// configuration and credential caching.
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
+	// v2: load default config (honors AWS_REGION/AWS_DEFAULT_REGION, shared config & creds)
+	ctx := context.Background()
+	cfg, err := config.LoadDefaultConfig(ctx)
+
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: Could not create AWS Secrets provider: %s", err)
 	}
-	// Create a new instance of the service's client with a Session.
-	client := secretsmanager.New(sess)
+
+	// v2: build service client from config
+	client := secretsmanager.NewFromConfig(cfg)
 
 	provider := &Provider{
 		Name:   options.Name,
@@ -56,18 +53,14 @@ func (p *Provider) GetValues(ids ...string) (map[string]plugin_v1.ProviderRespon
 func (p *Provider) GetValue(id string) ([]byte, error) {
 	client := p.Client
 
-	req, resp := client.GetSecretValueRequest(&secretsmanager.GetSecretValueInput{
+	out, err := client.GetSecretValue(context.Background(), &secretsmanager.GetSecretValueInput{
 		SecretId: aws.String(id),
 	})
-
-	err := req.Send()
-	if err != nil { // resp is now filled
+	if err != nil {
 		return nil, err
 	}
-
-	if resp.SecretString != nil {
-		return []byte(*resp.SecretString), nil
+	if out.SecretString != nil {
+		return []byte(*out.SecretString), nil
 	}
-
-	return resp.SecretBinary, nil
+	return out.SecretBinary, nil
 }

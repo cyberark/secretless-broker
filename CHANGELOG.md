@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.7.31] - 2025-11-08
+## [1.7.31] - 2026-01-07
+
+### Changed
+- Migrate AWS SDK for Go from v1 to **v2** in:
+  - `internal/providers/awssecrets/provider.go`
+  - `internal/plugin/connectors/http/aws/aws.go` (HTTP v4 signing)
 
 ## [1.7.30] - 2025-11-06
 

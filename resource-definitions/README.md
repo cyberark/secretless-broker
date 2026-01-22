@@ -96,7 +96,7 @@ Spec:
     Name:  http_config_1_handler
     Type:  basic_auth
   Listeners:
-    Address:   0.0.0.0:8080
+    Address:   localhost:8080
     Name:      http_config_1_listener
     Protocol:  http
 ```
@@ -124,7 +124,7 @@ Spec:
     Name:  http_config_1_handler
     Type:  basic_auth
   Listeners:
-    Address:   0.0.0.0:9090
+    Address:   localhost:9090
     Name:      http_config_1_listener
     Protocol:  http
 ```
@@ -228,7 +228,7 @@ metadata:
 ...
 spec:
   listeners:
-  - address: 0.0.0.0:8080
+  - address: localhost:8080
     name: http_config_1_listener
 ...
 
@@ -240,7 +240,7 @@ metadata:
 ...
 spec:
   listeners:
-  - address: 0.0.0.0:9090
+  - address: localhost:9090
     name: http_config_1_listen
 ...
 
@@ -252,7 +252,7 @@ metadata:
 ...
 spec:
   listeners:
-  - address: 0.0.0.0:8080
+  - address: localhost:8080
     name: http_config_1_listener
 ...
 ```

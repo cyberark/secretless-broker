@@ -11,7 +11,7 @@ services:
   pg_tcp:
     protocol: pg
     connector: pg
-    listenOn: tcp://0.0.0.0:15432
+    listenOn: tcp://localhost:15432
     credentials:
       username: test
       password:
@@ -50,7 +50,7 @@ services:
 				"pg_tcp": {
 					Protocol:  "pg",
 					Connector: "pg",
-					ListenOn:  "tcp://0.0.0.0:15432",
+					ListenOn:  "tcp://localhost:15432",
 					Credentials: credentialsYAML{
 						"username": "test",
 						"password": map[interface{}]interface{}{

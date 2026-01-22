@@ -159,7 +159,7 @@ services:
 
   mssql-tcp:
     connector: mssql
-    listenOn: tcp://0.0.0.0:1433
+    listenOn: tcp://localhost:1433
     credentials:
       username: sa
       password: MYp4ssword1

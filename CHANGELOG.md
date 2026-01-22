@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Migrate AWS SDK for Go from v1 to **v2** in:
   - `internal/providers/awssecrets/provider.go`
   - `internal/plugin/connectors/http/aws/aws.go` (HTTP v4 signing)
+- Use localhost instead of 0.0.0.0 for listening addresses in k8s examples (CONJSE-2078)
 
 ## [1.7.30] - 2025-11-06
 

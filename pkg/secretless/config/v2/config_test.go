@@ -11,7 +11,7 @@ version: 2
 services:
   postgres-db:
     protocol: pg
-    listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
+    listenOn: tcp://localhost:5432 # can be a socket as well (same name for both)
     credentials:
       host: postgres.my-service.internal
       password:
@@ -24,7 +24,7 @@ services:
       optionalStuff: blah
   aws-proxy:
     protocol: http
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       accessKeyId:
         from: env
@@ -43,7 +43,7 @@ version: 2
 services:
   postgres-db:
     connector: pg
-    listenOn: tcp://0.0.0.0:5432 # can be a socket as well (same name for both)
+    listenOn: tcp://localhost:5432 # can be a socket as well (same name for both)
     credentials:
       host: postgres.my-service.internal
       password:
@@ -56,7 +56,7 @@ services:
       optionalStuff: blah
   aws-proxy:
     connector: aws
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       accessKeyId:
         from: env
@@ -101,7 +101,7 @@ func RunNewConfigTestCases(t *testing.T, label string, sampleContents string) {
 
 		assert.Equal(t, "postgres-db", cfg.Services[1].Name)
 		assert.Equal(t, "pg", cfg.Services[1].Connector)
-		assert.Equal(t, NetworkAddress("tcp://0.0.0.0:5432"), cfg.Services[1].ListenOn)
+		assert.Equal(t, NetworkAddress("tcp://localhost:5432"), cfg.Services[1].ListenOn)
 	})
 
 	t.Run(label+": config hydration", func(t *testing.T) {
@@ -124,7 +124,7 @@ func RunNewConfigTestCases(t *testing.T, label string, sampleContents string) {
 
 		assert.Equal(t, "aws-proxy", cfg.Services[0].Name)
 		assert.Equal(t, "aws", cfg.Services[0].Connector)
-		assert.Equal(t, NetworkAddress("tcp://0.0.0.0:8080"), cfg.Services[0].ListenOn)
+		assert.Equal(t, NetworkAddress("tcp://localhost:8080"), cfg.Services[0].ListenOn)
 	})
 
 	t.Run(label+": credential hydration", func(t *testing.T) {

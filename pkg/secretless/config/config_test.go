@@ -24,7 +24,7 @@ func Test_Config(t *testing.T) {
 listeners:
 - name: http_default
   protocol: http
-  address: 0.0.0.0:1080
+  address: localhost:1080
 
 handlers:
 - name: conjur
@@ -46,7 +46,7 @@ listeners:
 - name: http_default
   protocol: http
   debug: true
-  address: 0.0.0.0:1080
+  address: localhost:1080
 
 handlers:
 - name: conjur
@@ -85,7 +85,7 @@ listeners:
 listeners:
   - name: http_default
     protocol: http
-    address: 0.0.0.0:1080
+    address: localhost:1080
 
 handlers:
   - name: myhandler
@@ -126,7 +126,7 @@ handlers:
 listeners:
   - name: http_default
     protocol: http
-    address: 0.0.0.0:1080
+    address: localhost:1080
 
 handlers:
   - name: http_default
@@ -148,7 +148,7 @@ handlers:
 listeners:
   - name: http_default
     protocol: http
-    address: 0.0.0.0:1080
+    address: localhost:1080
 
 handlers:
   - name: http_default_handler
@@ -188,7 +188,7 @@ handlers:
 					crd_api_v1.Listener{
 						Name:     "http_default",
 						Protocol: "http",
-						Address:  "0.0.0.0:1080",
+						Address:  "localhost:1080",
 					},
 				},
 			},

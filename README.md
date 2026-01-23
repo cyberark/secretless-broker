@@ -254,7 +254,7 @@ version: "2"
 services:
   pg-db:
     connector: pg
-    listenOn: tcp://0.0.0.0:4321
+    listenOn: tcp://localhost:4321
     credentials:
       host: localhost
       username: postgres

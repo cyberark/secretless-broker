@@ -318,7 +318,7 @@ replace `<GOOS>/<GOARCH>` with your particular operating system and compilation 
    services:
      pg_tcp:
        connector: pg
-       listenOn: tcp://0.0.0.0:15432
+       listenOn: tcp://localhost:15432
        credentials:
          host:
            from: env

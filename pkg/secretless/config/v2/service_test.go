@@ -18,7 +18,7 @@ func TestConfig_MarshalYAML(t *testing.T) {
 				From: "from",
 				Get:  "get",
 			}},
-			ListenOn: "tcp://0.0.0.0:8080",
+			ListenOn: "tcp://localhost:8080",
 			Name:     "name",
 		}},
 	})
@@ -33,7 +33,7 @@ services:
   name:
     protocol: ""
     connector: connector
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       name:
         from: from

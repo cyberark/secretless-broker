@@ -41,7 +41,7 @@ version: 2
 services:
   my_example_service:
     connector: generic_http
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       apikey:
         from: vault
@@ -58,7 +58,7 @@ version: 2
 services:
   my_example_service:
     connector: generic_http
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       apikey:
         from: vault
@@ -77,7 +77,7 @@ version: 2
 services:
   my_example_service:
     connector: generic_http
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       apikey:
         from: vault

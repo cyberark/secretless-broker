@@ -15,7 +15,7 @@ spec:
   listeners:
     - name: http_config_1_listener
       protocol: http
-      address: 0.0.0.0:8000
+      address: localhost:8000
 
   handlers:
     - name: http_config_1_handler

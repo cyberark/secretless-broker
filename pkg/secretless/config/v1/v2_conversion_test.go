@@ -12,7 +12,7 @@ func v1DbExample() *Config {
 	return &Config{
 		Listeners: []Listener{
 			{
-				Address:  "0.0.0.0:2345",
+				Address:  "localhost:2345",
 				Name:     "test-db-listener",
 				Protocol: "pg",
 			},
@@ -42,7 +42,7 @@ func v1HttpExample() *Config {
 	return &Config{
 		Listeners: []Listener{
 			{
-				Address:  "0.0.0.0:2345",
+				Address:  "localhost:2345",
 				Name:     "test-http-listener",
 				Protocol: "http",
 			},
@@ -123,12 +123,12 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 		// ListenOn
 		assert.Equal(
 			t,
-			config_v2.NetworkAddress("tcp://0.0.0.0:2345"),
+			config_v2.NetworkAddress("tcp://localhost:2345"),
 			v2Cfg.Services[0].ListenOn,
 		)
 		assert.Equal(
 			t,
-			config_v2.NetworkAddress("tcp://0.0.0.0:2345"),
+			config_v2.NetworkAddress("tcp://localhost:2345"),
 			v2Cfg.Services[1].ListenOn,
 		)
 
@@ -192,7 +192,7 @@ func TestV1AddressSocketConversion(t *testing.T) {
 
 		assert.Equal(
 			t,
-			config_v2.NetworkAddress("tcp://0.0.0.0:2345"),
+			config_v2.NetworkAddress("tcp://localhost:2345"),
 			v2.Services[0].ListenOn,
 		)
 
@@ -225,7 +225,7 @@ func TestV1AddressSocketConversion(t *testing.T) {
 
 	t.Run("Both Socket and Address returns error", func(t *testing.T) {
 		v1Cfg := v1DbExample()
-		v1Cfg.Listeners[0].Socket = "0.0.0.0:5432"
+		v1Cfg.Listeners[0].Socket = "localhost:5432"
 		v1Cfg.Listeners[0].Address = "/some/socket/path"
 		_, err := NewV2Config(v1Cfg)
 		assert.Error(t, err)

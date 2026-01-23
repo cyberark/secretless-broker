@@ -27,7 +27,7 @@ edit the example below:
 services:
   my_example_service:
     connector: # Add your custom connector ID
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       credential1:
         from: conjur

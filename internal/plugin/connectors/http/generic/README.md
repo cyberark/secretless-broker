@@ -32,7 +32,7 @@ version: 2
 services:
   my_example_service:
     connector: generic_http
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       apikey:
         from: conjur
@@ -59,7 +59,7 @@ version: 2
 services:
   service_requiring_basic_auth:
     connector: generic_http
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       username:
         from: conjur
@@ -181,7 +181,7 @@ version: 2
 services:
   oauth1-service:
     connector: generic_http
-    listenOn: tcp://0.0.0.0:8080
+    listenOn: tcp://localhost:8080
     credentials:
       consumer_key:
         from: conjur

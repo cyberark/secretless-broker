@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.32] - 2026-02-04
+
+### Security
+- Add message length limits to PostgreSQL protocol handler to prevent potential
+  denial-of-service via memory exhaustion. Startup messages are limited to 10KB
+  (matching PostgreSQL's MAX_STARTUP_PACKET_LENGTH) and authentication messages
+  are limited to 64KB (matching PostgreSQL's PG_MAX_AUTH_TOKEN_LENGTH).
+
 ## [1.7.31] - 2026-01-07
 
 ### Changed
@@ -837,3 +845,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [1.7.29]: https://github.com/cyberark/secretless-broker/compare/v1.7.28...v1.7.29
 [1.7.30]: https://github.com/cyberark/secretless-broker/compare/v1.7.29...v1.7.30
 [1.7.31]: https://github.com/cyberark/secretless-broker/compare/v1.7.30...v1.7.31
+[1.7.32]: https://github.com/cyberark/secretless-broker/compare/v1.7.31...v1.7.32

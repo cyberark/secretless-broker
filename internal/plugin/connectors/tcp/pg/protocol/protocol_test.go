@@ -126,6 +126,108 @@ func TestReadStartupMessage(t *testing.T) {
 	})
 }
 
+func TestReadMessage_ExceedsMaxLength(t *testing.T) {
+	t.Run("rejects message exceeding MaxAuthMessageLength", func(t *testing.T) {
+		r, w := net.Pipe()
+		messageType := byte('R')
+		// Claim a message length that exceeds MaxAuthMessageLength (65535)
+		oversizedLength := int32(MaxAuthMessageLength + 100 + 4)
+
+		go func() {
+			err := binary.Write(w, binary.BigEndian, messageType)
+			if err != nil {
+				panic(err)
+			}
+			err = binary.Write(w, binary.BigEndian, oversizedLength)
+			if err != nil {
+				panic(err)
+			}
+			w.Close()
+		}()
+
+		_, _, err := ReadMessage(r)
+
+		if !assert.Error(t, err) {
+			return
+		}
+		assert.Contains(t, err.Error(), "exceeds maximum allowed size")
+	})
+
+	t.Run("accepts message at MaxAuthMessageLength boundary", func(t *testing.T) {
+		r, w := net.Pipe()
+		messageType := byte('R')
+		// Use a small message that's within limits
+		message := make([]byte, 100)
+		messageLength := int32(len(message) + 4)
+
+		go func() {
+			err := binary.Write(w, binary.BigEndian, messageType)
+			if err != nil {
+				panic(err)
+			}
+			err = binary.Write(w, binary.BigEndian, messageLength)
+			if err != nil {
+				panic(err)
+			}
+			_, err = w.Write(message)
+			if err != nil {
+				panic(err)
+			}
+		}()
+
+		_, msg, err := ReadMessage(r)
+
+		assert.NoError(t, err)
+		assert.Equal(t, len(message), len(msg))
+	})
+}
+
+func TestReadStartupMessage_ExceedsMaxLength(t *testing.T) {
+	t.Run("rejects startup message exceeding MaxStartupMessageLength", func(t *testing.T) {
+		r, w := net.Pipe()
+		// Claim a message length that exceeds MaxStartupMessageLength (10000)
+		oversizedLength := int32(MaxStartupMessageLength + 100 + 4)
+
+		go func() {
+			err := binary.Write(w, binary.BigEndian, oversizedLength)
+			if err != nil {
+				panic(err)
+			}
+			w.Close()
+		}()
+
+		_, err := ReadStartupMessage(r)
+
+		if !assert.Error(t, err) {
+			return
+		}
+		assert.Contains(t, err.Error(), "exceeds maximum allowed size")
+	})
+
+	t.Run("accepts startup message at MaxStartupMessageLength boundary", func(t *testing.T) {
+		r, w := net.Pipe()
+		// Use a small message that's within limits
+		message := make([]byte, 100)
+		messageLength := int32(len(message) + 4)
+
+		go func() {
+			err := binary.Write(w, binary.BigEndian, messageLength)
+			if err != nil {
+				panic(err)
+			}
+			_, err = w.Write(message)
+			if err != nil {
+				panic(err)
+			}
+		}()
+
+		msg, err := ReadStartupMessage(r)
+
+		assert.NoError(t, err)
+		assert.Equal(t, len(message), len(msg))
+	})
+}
+
 func TestReadMessage_Errors(t *testing.T) {
 	t.Run("handles error reading message type", func(t *testing.T) {
 		r, w := net.Pipe()

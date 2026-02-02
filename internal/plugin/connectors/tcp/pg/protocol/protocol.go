@@ -28,6 +28,16 @@ const (
 	/* SSL Responses */
 	SSLAllowed    byte = 'S'
 	SSLNotAllowed byte = 'N'
+
+	// MaxStartupMessageLength is the maximum allowed startup message body length.
+	// PostgreSQL uses MAX_STARTUP_PACKET_LENGTH = 10000 (10KB) for startup packets
+	// to prevent denial-of-service attacks via memory exhaustion.
+	MaxStartupMessageLength int32 = 10000 // 10KB, matches PostgreSQL
+
+	// MaxAuthMessageLength is the maximum allowed authentication message body length.
+	// PostgreSQL uses PG_MAX_AUTH_TOKEN_LENGTH = 65535 (64KB) for GSS/SSPI tokens
+	// and password packets. This accommodates Kerberos PAC fields which can be large.
+	MaxAuthMessageLength int32 = 65535 // 64KB, matches PostgreSQL's PG_MAX_AUTH_TOKEN_LENGTH
 )
 
 /* PostgreSQL Message Type constants. */
@@ -64,7 +74,7 @@ const (
 // ReadStartupMessage reads the startup message. The startup message is the same as a regular
 // message except it does not begin with a message type byte.
 func ReadStartupMessage(client io.Reader) ([]byte, error) {
-	return readMessage(client)
+	return readMessageWithLimit(client, MaxStartupMessageLength)
 }
 
 // ReadMessage accepts an incoming message. The first byte is the message type, the second int32
@@ -76,12 +86,12 @@ func ReadMessage(client io.Reader) (messageType byte, message []byte, err error)
 	}
 	messageType = messageTypeBytes[0]
 
-	message, err = readMessage(client)
+	message, err = readMessageWithLimit(client, MaxAuthMessageLength)
 
 	return
 }
 
-func readMessage(client io.Reader) (message []byte, err error) {
+func readMessageWithLimit(client io.Reader, maxBodyLength int32) (message []byte, err error) {
 	var messageLength int32
 
 	if err = binary.Read(client, binary.BigEndian, &messageLength); err != nil {
@@ -90,6 +100,11 @@ func readMessage(client io.Reader) (message []byte, err error) {
 
 	if messageLength < 4 {
 		err = errors.New("invalid message length < 4")
+		return
+	}
+
+	if messageLength-4 > maxBodyLength {
+		err = errors.New("message length exceeds maximum allowed size")
 		return
 	}
 	// Build a buffer of the appropriate size and fill it

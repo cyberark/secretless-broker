@@ -1,4 +1,4 @@
-FROM ruby:3-slim-bookworm
+FROM ruby:3-slim-trixie
 RUN gem update --system
 RUN gem install bundler jekyll
 RUN mkdir /src

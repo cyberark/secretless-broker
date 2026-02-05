@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.7.32] - 2026-02-04
 
+### Changed
+- Upgrade base docker images from Debian Bookworm to Trixie.
+
 ### Security
 - Add message length limits to PostgreSQL protocol handler to prevent potential
   denial-of-service via memory exhaustion. Startup messages are limited to 10KB

@@ -54,14 +54,14 @@ RUN rm -rf /etc/apt/sources.list.d/mssql-release.list && \
 RUN apt-get install -y --no-install-recommends python3 python3-pip
 RUN pip3 install --break-system-packages --no-cache-dir pyodbc
 
-# Add java17 and add to $PATH
+# Add java25 and add to $PATH
 # Fix cert issues
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ant \
                        ca-certificates-java && \
-    apt-get install -y --no-install-recommends openjdk-17-jdk && \
+    apt-get install -y --no-install-recommends openjdk-25-jdk && \
     apt-get clean && \
     update-ca-certificates -f
 
 # Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-25-openjdk-amd64/

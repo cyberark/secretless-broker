@@ -6,14 +6,14 @@ RUN apt-get update && \
 RUN go install github.com/ajstarks/svgo/benchviz@latest && \
     go install golang.org/x/tools/cmd/benchcmp@latest
 
-# Add java17 and add to $PATH
+# Add java25 and add to $PATH
 # Fix certificate issues
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ant \
                        ca-certificates-java && \
-    apt-get install -y --no-install-recommends openjdk-17-jdk && \
+    apt-get install -y --no-install-recommends openjdk-25-jdk && \
     apt-get clean && \
     update-ca-certificates -f
 
 # Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-25-openjdk-amd64/

@@ -91,33 +91,35 @@ func main() {
 
 	// Watch for changes in Example objects and fire Add, Delete, Update callbacks
 	log.Println("Watching for changes...")
-	_, controller := cache.NewInformer(
+	informer := cache.NewSharedIndexInformer(
 		watchList,
 		&api_v1.Configuration{},
 		10*time.Minute,
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				log.Println("Add")
-				yamlContent, _ := yaml.Marshal(&obj)
-				log.Printf("Add event: \n%v\n", string(yamlContent))
-			},
-			DeleteFunc: func(obj interface{}) {
-				log.Println("Delete")
-				yamlContent, _ := yaml.Marshal(&obj)
-				log.Printf("Delete event: \n%v\n", string(yamlContent))
-			},
-			UpdateFunc: func(oldObj, newObj interface{}) {
-				log.Println("Update")
-				oldYamlContent, _ := yaml.Marshal(&oldObj)
-				newYamlContent, _ := yaml.Marshal(&newObj)
-				log.Println("Update event:")
-				log.Printf("Old:\n%v\nNew:\n%v\n", string(oldYamlContent),
-					string(newYamlContent))
-			},
-		},
+		cache.Indexers{},
 	)
 
-	go controller.Run(wait.NeverStop)
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			log.Println("Add")
+			yamlContent, _ := yaml.Marshal(&obj)
+			log.Printf("Add event: \n%v\n", string(yamlContent))
+		},
+		DeleteFunc: func(obj interface{}) {
+			log.Println("Delete")
+			yamlContent, _ := yaml.Marshal(&obj)
+			log.Printf("Delete event: \n%v\n", string(yamlContent))
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			log.Println("Update")
+			oldYamlContent, _ := yaml.Marshal(&oldObj)
+			newYamlContent, _ := yaml.Marshal(&newObj)
+			log.Println("Update event:")
+			log.Printf("Old:\n%v\nNew:\n%v\n", string(oldYamlContent),
+				string(newYamlContent))
+		},
+	})
+
+	go informer.Run(wait.NeverStop)
 
 	// Wait forever
 	select {}

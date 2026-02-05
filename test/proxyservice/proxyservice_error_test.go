@@ -6,36 +6,36 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/stretchr/testify/assert"
 )
 
 const SecretlessImageName = "secretless-broker"
 
-func dockerContainer(imageName string) (types.Container, error) {
+func dockerContainer(imageName string) (container.Summary, error) {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(
 		client.FromEnv,
 		client.WithAPIVersionNegotiation(),
 	)
 	if err != nil {
-		return types.Container{}, err
+		return container.Summary{}, err
 	}
 
 	cli.NegotiateAPIVersion(ctx)
 
-	containerListOptions := types.ContainerListOptions{
+	containerListOptions := container.ListOptions{
 		All:    true,
 		Latest: true,
 	}
 
 	containers, err := cli.ContainerList(ctx, containerListOptions)
 	if err != nil {
-		return types.Container{}, err
+		return container.Summary{}, err
 	}
 
-	var brokerContainer types.Container
+	var brokerContainer container.Summary
 	for _, container := range containers {
 		if container.Image != imageName {
 			continue
@@ -44,14 +44,14 @@ func dockerContainer(imageName string) (types.Container, error) {
 	}
 
 	if brokerContainer.ID == "" {
-		return types.Container{},
+		return container.Summary{},
 			fmt.Errorf("Could not find matching container for image '%s'", imageName)
 	}
 
 	return brokerContainer, nil
 }
 
-func dockerLog(container types.Container) (string, error) {
+func dockerLog(ctr container.Summary) (string, error) {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(
 		client.FromEnv,
@@ -63,12 +63,12 @@ func dockerLog(container types.Container) (string, error) {
 
 	cli.NegotiateAPIVersion(ctx)
 
-	logOptions := types.ContainerLogsOptions{
+	logOptions := container.LogsOptions{
 		Timestamps: false,
 		ShowStdout: true,
 	}
 
-	out, err := cli.ContainerLogs(ctx, container.ID, logOptions)
+	out, err := cli.ContainerLogs(ctx, ctr.ID, logOptions)
 	if err != nil {
 		return "", err
 	}

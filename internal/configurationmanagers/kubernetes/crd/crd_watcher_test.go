@@ -6,7 +6,9 @@ import (
 	"time"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
+	k8stesting "k8s.io/client-go/testing"
 
 	api_v1 "github.com/cyberark/secretless-broker/pkg/apis/secretless.io/v1"
 	secretlessClientset "github.com/cyberark/secretless-broker/pkg/k8sclient/clientset/versioned"
@@ -64,6 +66,40 @@ func Test_RegisterCRDListener_AddUpdateDelete(t *testing.T) {
 
 	// create fake client and wire the factory to return it
 	fakeClient := secretlessClientsetfake.NewSimpleClientset()
+
+	// Add a custom watch reactor that sends bookmark events to satisfy newer k8s client-go expectations
+	fakeClient.PrependWatchReactor("configurations", func(action k8stesting.Action) (handled bool, ret watch.Interface, err error) {
+		gvr := action.GetResource()
+		ns := action.GetNamespace()
+		w, err := fakeClient.Tracker().Watch(gvr, ns)
+		if err != nil {
+			return false, nil, err
+		}
+		// Wrap the watch to send an initial bookmark event
+		fw := watch.NewFake()
+		go func() {
+			defer fw.Stop()
+			defer w.Stop()
+
+			// Send a Bookmark event with the required annotation to signal end of initial list
+			bookmarkEvent := &api_v1.Configuration{
+				ObjectMeta: meta_v1.ObjectMeta{
+					ResourceVersion: "1",
+					Annotations: map[string]string{
+						"k8s.io/initial-events-end": "true",
+					},
+				},
+			}
+			fw.Action(watch.Bookmark, bookmarkEvent)
+
+			// Forward all real events from the tracker
+			for event := range w.ResultChan() {
+				fw.Action(event.Type, event.Object)
+			}
+		}()
+		return true, fw, nil
+	})
+
 	newSecretlessClientForConfig = func(cfg *rest.Config) (secretlessClientset.Interface, error) {
 		return fakeClient, nil
 	}
@@ -77,8 +113,8 @@ func Test_RegisterCRDListener_AddUpdateDelete(t *testing.T) {
 		t.Fatalf("RegisterCRDListener returned error: %v", err)
 	}
 
-	// allow informer to start
-	time.Sleep(100 * time.Millisecond)
+	// Give informer time to start and process the initial bookmark
+	time.Sleep(500 * time.Millisecond)
 
 	created, err := fakeClient.SecretlessV1().Configurations(namespace).Create(context.TODO(),
 		&api_v1.Configuration{

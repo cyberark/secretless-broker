@@ -1,4 +1,4 @@
-FROM golang:1.25-bookworm
+FROM golang:1.25-trixie
 LABEL maintainer="CyberArk Software Ltd."
 
 # On CyberArk dev laptops, golang module dependencies are downloaded with a

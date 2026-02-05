@@ -55,44 +55,47 @@ var RegisterCRDListener = func(namespace string, configSpec string, resourceEven
 		},
 	}
 
-	_, controller := cache.NewInformer(
+	informer := cache.NewSharedIndexInformer(
 		watchList,
 		&api_v1.Configuration{},
 		CRDForcedRefreshInterval,
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				configObj := obj.(*api_v1.Configuration)
-				if configObj.ObjectMeta.Name != configSpec {
-					return
-				}
-
-				log.Printf("%s: Add configuration event", PluginName)
-				log.Println(configObj.ObjectMeta.Name)
-				resourceEventHandler.CRDAdded(configObj)
-			},
-			DeleteFunc: func(obj interface{}) {
-				configObj := obj.(*api_v1.Configuration)
-				if configObj.ObjectMeta.Name != configSpec {
-					return
-				}
-
-				log.Printf("%s: Delete configuration event", PluginName)
-				resourceEventHandler.CRDDeleted(configObj)
-			},
-			UpdateFunc: func(oldObj, newObj interface{}) {
-				oldConfigObj := oldObj.(*api_v1.Configuration)
-				if oldConfigObj.ObjectMeta.Name != configSpec {
-					return
-				}
-
-				log.Printf("%s: Update/refresh configuration event", PluginName)
-				newConfigObj := newObj.(*api_v1.Configuration)
-				resourceEventHandler.CRDUpdated(oldConfigObj, newConfigObj)
-			},
-		},
+		cache.Indexers{},
 	)
 
-	go controller.Run(wait.NeverStop)
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			configObj := obj.(*api_v1.Configuration)
+			if configObj.ObjectMeta.Name != configSpec {
+				return
+			}
+
+			log.Printf("%s: Add configuration event", PluginName)
+			log.Println(configObj.ObjectMeta.Name)
+			resourceEventHandler.CRDAdded(configObj)
+		},
+		DeleteFunc: func(obj interface{}) {
+			configObj := obj.(*api_v1.Configuration)
+			if configObj.ObjectMeta.Name != configSpec {
+				return
+			}
+
+			log.Printf("%s: Delete configuration event", PluginName)
+			resourceEventHandler.CRDDeleted(configObj)
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			oldConfigObj := oldObj.(*api_v1.Configuration)
+			if oldConfigObj.ObjectMeta.Name != configSpec {
+				return
+			}
+
+			log.Printf("%s: Update/refresh configuration event", PluginName)
+			newConfigObj := newObj.(*api_v1.Configuration)
+			resourceEventHandler.CRDUpdated(oldConfigObj, newConfigObj)
+		},
+	},
+	)
+
+	go informer.Run(wait.NeverStop)
 
 	return nil
 }

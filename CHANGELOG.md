@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Upgrade base docker images from Debian Bookworm to Trixie.
 - Upgrade Go packages. (CNJR-7655)
+- Upgrade Go to 1.26
 
 ### Security
 - Add message length limits to PostgreSQL protocol handler to prevent potential

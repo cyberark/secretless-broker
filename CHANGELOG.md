@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   denial-of-service via memory exhaustion. Startup messages are limited to 10KB
   (matching PostgreSQL's MAX_STARTUP_PACKET_LENGTH) and authentication messages
   are limited to 64KB (matching PostgreSQL's PG_MAX_AUTH_TOKEN_LENGTH). (CONJSE-2078)
+- Bump x/crypto, otel and go-jose modules to resolve CVE-2026-39883, CVE-2026-39882, CVE-2026-29181, CVE-2025-47913, CVE-2026-34986. CNJR-13647  
 
 ## [1.7.31] - 2026-01-07
 

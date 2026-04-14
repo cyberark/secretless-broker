@@ -97,20 +97,20 @@ func parseCommandArgsToSubcommand(options *Options) (subcommand *Subcommand, err
 		return
 	}
 
-	var secrets secretsyml.SecretsMap
+	var config *secretsyml.ParsedConfig
 
 	switch options.YamlInline {
 	case "":
-		secrets, err = secretsyml.ParseFromFile(options.Filepath, options.Environment, options.Subs)
+		config, err = secretsyml.ParseFromFile(options.Filepath, options.Environment, options.Subs)
 	default:
-		secrets, err = secretsyml.ParseFromString(options.YamlInline, options.Environment, options.Subs)
+		config, err = secretsyml.ParseFromString(options.YamlInline, options.Environment, options.Subs)
 	}
 
 	if err != nil {
 		return
 	}
 
-	subcommand.SecretsMap = secrets
+	subcommand.SecretsMap = config.EnvSecrets
 
 	return
 }

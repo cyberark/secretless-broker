@@ -348,19 +348,15 @@ pipeline {
       steps {
         script {
           infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-            cobertura(
-              autoUpdateHealth: false,
-              autoUpdateStability: false,
-              coberturaReportFile: 'test/test-coverage/coverage.xml',
-              conditionalCoverageTargets: '70, 0, 70',
-              failUnhealthy: false,
-              failUnstable: false,
-              lineCoverageTargets: '65, 65, 65',
-              maxNumberOfBuilds: 0,
-              methodCoverageTargets: '65, 65, 65',
-              onlyStable: false,
-              sourceEncoding: 'ASCII',
-              zoomCoverageChart: false
+            recordCoverage(
+              tools: [[parser: 'COBERTURA', pattern: 'test/test-coverage/coverage.xml']],
+              sourceCodeEncoding: 'ASCII',
+              qualityGates: [
+                [threshold: 65.0, metric: 'LINE', baseline: 'PROJECT', unstable: true],
+                [threshold: 70.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true],
+                [threshold: 65.0, metric: 'METHOD', baseline: 'PROJECT', unstable: true]
+              ],
+              skipPublishingChecks: false
             )
             infrapool.agentSh 'cp test/test-coverage/integ-and-ut-cover.out ./c.out'
             infrapool.agentStash name: 'coverage-report', includes: 'test/test-coverage/coverage.xml'

@@ -1,4 +1,3 @@
-version: '2'
 services:
   dev:
     command: [ "bundle", "exec", "jekyll", "serve", "--host", "0.0.0.0" ]

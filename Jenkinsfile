@@ -279,7 +279,7 @@ pipeline {
           steps {
             script {
               infraPoolConnect(INFRAPOOL_EXECUTORV2_AGENT_0) { infrapool ->
-                infrapool.agentSh "./bin/check_golang_security -s high -c medium -b ${env.BRANCH_NAME}"
+                infrapool.agentSh "./bin/check_golang_security -s high -c medium"
                 infrapool.agentStash name: 'gosec-scan-report', includes: 'gosec-scan-result.xml'
               }
             }

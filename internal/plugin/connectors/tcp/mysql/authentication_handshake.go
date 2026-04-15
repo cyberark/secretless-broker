@@ -281,9 +281,13 @@ func (h *AuthenticationHandshake) handleClientSSLRequest() {
 	// This sets the payload_length bytes in the header portion of the packet
 	// to reflect the new length of the truncated packet.
 	pktLen := len(sslPacket) - 4
-	sslPacket[0] = byte(pktLen)
-	sslPacket[1] = byte(pktLen >> 8)
-	sslPacket[2] = byte(pktLen >> 16)
+	if pktLen > 0xFFFFFF {
+		h.err = protocol.ErrInvalidPacketLength
+		return
+	}
+	sslPacket[0] = byte(pktLen & 0xFF)
+	sslPacket[1] = byte((pktLen >> 8) & 0xFF)
+	sslPacket[2] = byte((pktLen >> 16) & 0xFF)
 
 	// Send TLS / SSL request packet
 	h.writeBackendPacket(sslPacket)

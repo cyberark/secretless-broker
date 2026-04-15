@@ -16,10 +16,10 @@ RUN update-ca-certificates
 WORKDIR /secretless
 
 RUN apk add -u --no-cache curl \
-                          gcc \
+                          build-base \
                           git \
                           mercurial \
-                          musl-dev
+                          binutils-gold
 
 COPY go.mod go.sum /secretless/
 COPY third_party/ /secretless/third_party

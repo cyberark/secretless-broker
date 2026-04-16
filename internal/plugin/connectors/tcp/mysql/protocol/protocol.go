@@ -399,25 +399,26 @@ func PackHandshakeV10(serverHandshake *HandshakeV10) ([]byte, error) {
 
 	// Write AuthPluginDataLength (int<1>) if required
 	if serverHandshake.ServerCapabilities&ClientPluginAuth > 0 {
-		buffer.WriteByte(byte(len(serverHandshake.Salt) + 1))
+		authPluginDataLen := len(serverHandshake.Salt) + 1
+		if authPluginDataLen > 0xFF {
+			return nil, fmt.Errorf("invalid auth plugin data length: %d", authPluginDataLen)
+		}
+		buffer.WriteByte(byte(authPluginDataLen))
 	}
 
 	// Write Reserved (string<10>)
 	buffer.Write(make([]byte, 10))
 
 	// Calculate the length of AuthPluginDataPart2
-	var authPluginDataLength byte
 	if serverHandshake.ServerCapabilities&ClientSecureConnection != 0 {
 		numBytes := len(serverHandshake.Salt) - 8
+		if numBytes < 0 {
+			numBytes = 0
+		}
 		if numBytes > 13 {
 			numBytes = 13
 		}
-		authPluginDataLength = byte(numBytes)
-	}
-
-	// Write AuthPluginDataPart2 (string[$len]) if required
-	if serverHandshake.ServerCapabilities&ClientSecureConnection != 0 {
-		buffer.Write(serverHandshake.Salt[8 : 8+int(authPluginDataLength)])
+		buffer.Write(serverHandshake.Salt[8 : 8+numBytes])
 		buffer.WriteByte(0)
 	}
 
@@ -511,8 +512,7 @@ func RemoveSSLFromHandshakeV10(packet []byte) ([]byte, error) {
 
 // writes Uint16 starting from a given position in a byte slice
 func writeUint16(data []byte, pos int, value uint16) {
-	data[pos] = byte(value)
-	data[pos+1] = byte(value >> 8)
+	binary.LittleEndian.PutUint16(data[pos:pos+2], value)
 }
 
 // HandshakeResponse41 represents handshake response packet sent by 4.1+ clients supporting clientProtocol41 capability,

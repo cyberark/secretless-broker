@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"encoding/binary"
 	"fmt"
 )
 
@@ -65,7 +66,9 @@ func (e Error) Error() string {
 func (e Error) GetPacket() []byte {
 	data := make([]byte, 4, 4+1+2+1+5+len(e.Message))
 	data = append(data, 0xff)
-	data = append(data, byte(e.Code), byte(e.Code>>8))
+	var errorCode [2]byte
+	binary.LittleEndian.PutUint16(errorCode[:], e.Code)
+	data = append(data, errorCode[0], errorCode[1])
 
 	// TODO: for client41
 	data = append(data, '#')
@@ -74,9 +77,9 @@ func (e Error) GetPacket() []byte {
 
 	// prepare message
 	length := len(data) - 4
-	data[0] = byte(length)
-	data[1] = byte(length >> 8)
-	data[2] = byte(length >> 16)
+	data[0] = byte(length & 0xFF)
+	data[1] = byte((length >> 8) & 0xFF)
+	data[2] = byte((length >> 16) & 0xFF)
 	//sequenceID defaults to 0
 	//expected to be overwritten by writer
 	data[3] = byte(0)

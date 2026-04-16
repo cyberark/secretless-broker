@@ -1,5 +1,3 @@
-version: '3.0'
-
 services:
   # TODO: add a service for the platform you want secretless to connect with
 

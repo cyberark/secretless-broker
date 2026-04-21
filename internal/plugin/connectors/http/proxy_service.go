@@ -9,6 +9,7 @@ import (
 	gohttp "net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -254,9 +255,37 @@ func (proxy *proxyService) handleRequest(
 
 	w.WriteHeader(resp.StatusCode)
 
-	_, err = io.Copy(w, resp.Body)
-	if err != nil {
-		logger.Errorf("Can't write response to body: %s\n", err)
+	// For streaming responses (e.g. Server-Sent Events), flush after
+	// each write to ensure data is delivered to the client incrementally
+	// rather than buffered in Go's default ~4KB ResponseWriter buffer.
+	contentType := resp.Header.Get("Content-Type")
+	isStreaming := strings.Contains(contentType, "text/event-stream") ||
+		strings.Contains(contentType, "text/stream")
+
+	if flusher, ok := w.(gohttp.Flusher); ok && isStreaming {
+		buf := make([]byte, 32*1024)
+		for {
+			n, readErr := resp.Body.Read(buf)
+			if n > 0 {
+				_, writeErr := w.Write(buf[:n])
+				if writeErr != nil {
+					logger.Errorf("Can't write response to body: %s\n", writeErr)
+					break
+				}
+				flusher.Flush()
+			}
+			if readErr != nil {
+				if readErr != io.EOF {
+					logger.Errorf("Error reading response body: %s\n", readErr)
+				}
+				break
+			}
+		}
+	} else {
+		_, err = io.Copy(w, resp.Body)
+		if err != nil {
+			logger.Errorf("Can't write response to body: %s\n", err)
+		}
 	}
 
 	err = resp.Body.Close()

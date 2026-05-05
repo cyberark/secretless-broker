@@ -1,6 +1,6 @@
 FROM secretless-dev
 
-COPY --from=mysql:lts /usr/bin/mysql /usr/bin/mysql
+COPY --from=mysql:8.4 /usr/bin/mysql /usr/bin/mysql
 
 # Install MySQL dependencies
 RUN apt-get update && \

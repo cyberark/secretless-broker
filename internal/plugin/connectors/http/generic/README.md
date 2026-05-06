@@ -222,7 +222,7 @@ tells us that we expect the `apikey` to consist solely of uppercase letters and
 digits.  If this rule is violated at runtime, Secretless will log an
 appropriate error.
 
-### `upstreamURL` (recommended)
+### `upstreamURL` (**Strongly Recommended**)
 
 `upstreamURL` is a security control that pins the destination of all
 credentialed requests to a single, operator-configured upstream host. When set,

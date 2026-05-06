@@ -61,10 +61,13 @@ kubectl run --rm -i \
  --image="postgres:15" -- \
     psql \
     --username "${DB_ADMIN_USER}" \
-    "postgres://$db_url" \
+  "postgres://$db_url/quick_start_db" \
     <<EOSQL
 /* Create Application User */
 CREATE USER ${DB_USER} PASSWORD '${DB_INITIAL_PASSWORD}';
+
+/* PostgreSQL 15+ no longer grants CREATE on public schema to all roles */
+GRANT USAGE, CREATE ON SCHEMA public TO ${DB_USER};
 
 /* Create Table */
 CREATE TABLE pets (

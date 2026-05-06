@@ -18,6 +18,6 @@ docker run \
   -w /secretless/test/summon2/ \
   $docker_args \
   secretless-dev \
-  bash -ecx "
+  sh -ecx "
     go test -v .
   "

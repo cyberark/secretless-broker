@@ -4,7 +4,7 @@ echo "Waiting for Secretless to start"
 
 # single quotes are intentional:
 # shellcheck disable=SC2016
-docker compose exec -T test bash -ec '
+docker compose exec -T test sh -ec '
 counter=0
 while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/null 2>&1; do
     if expr $counter = 5 > /dev/null; then
@@ -12,7 +12,7 @@ while ! wget --quiet --output-document - http://secretless:5335/ready > /dev/nul
       echo "Timed out waiting for Secretless"
       exit 1
     fi
-    let "counter = $counter + 1"
+    counter=$((counter + 1))
     >&2 printf ". "
     sleep 1
 done

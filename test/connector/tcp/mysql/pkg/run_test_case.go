@@ -18,7 +18,11 @@ func RunQuery(
 	args := []string{"-e", "select count(*) from testdb.test"}
 
 	if clientConfig.SSL {
-		args = append(args, "--ssl-mode", "VERIFY_CA")
+		// Alpine's mysql-client is MariaDB; it does not support --ssl-mode.
+		args = append(args, "--ssl")
+	} else {
+		// Keep non-SSL test semantics explicit across mysql/mariadb variants.
+		args = append(args, "--skip-ssl")
 	}
 	if clientConfig.Username != "" {
 		args = append(args, fmt.Sprintf("--user=%s", clientConfig.Username))

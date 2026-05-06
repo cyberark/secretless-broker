@@ -34,7 +34,7 @@ if [[ "$devmode" != true ]]; then
   # since we use secretless.dev.yml instead of generating them on the fly.
 
   docker compose run --rm test \
-    bash -c "go run ./test/util/testutil/cmd/generate_secretless_yml.go"
+    sh -c "go run ./test/util/testutil/cmd/generate_secretless_yml.go"
 fi
 
 # start secretless once mysql is running

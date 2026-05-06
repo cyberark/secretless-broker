@@ -75,7 +75,7 @@ func TestEssentials(t *testing.T) {
 					Password: "wrongpassword",
 					SSL:      true,
 				},
-				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
+				CmdOutput: StringPointer("SSL is required"),
 			},
 		}, t)
 
@@ -94,7 +94,7 @@ func TestEssentials(t *testing.T) {
 					Password: "wrongpassword",
 					SSL:      true,
 				},
-				CmdOutput: StringPointer("SSL is required but the server doesn't support it"),
+				CmdOutput: StringPointer("SSL is required"),
 			},
 		}, t)
 

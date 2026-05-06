@@ -1,7 +1,11 @@
 #!/bin/bash -e
 
+ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+
 docker compose run \
   --rm \
   --no-deps \
-  test
-  bash -c "go test -v ./test/template_connector"
+  --volume "$ROOT_DIR:/secretless" \
+  --workdir /secretless \
+  test \
+  sh -c "go test -v ./examples/connector_templates/template_connector_test"

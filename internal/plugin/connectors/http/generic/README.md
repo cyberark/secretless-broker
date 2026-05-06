@@ -226,10 +226,20 @@ appropriate error.
 
 `upstreamURL` is a security control that pins the destination of all
 credentialed requests to a single, operator-configured upstream host. When set,
-Secretless validates the host of every incoming request against the configured
-upstream **before** retrieving credentials. Requests targeting any other host
-are rejected with HTTP 403 - no credentials are fetched, injected, or
-forwarded.
+Secretless validates the scheme and host of every incoming request against the
+configured upstream **before** retrieving credentials. Requests where either the
+scheme or host does not match are rejected with HTTP 403 — no credentials are
+fetched, injected, or forwarded.
+
+**Without this control**, a client that can reach the Secretless listener can
+set an attacker-controlled host in the request URL. Secretless will inject
+credentials into that request and forward it, delivering the backend
+credential verbatim to the attacker. This is possible even when
+`authenticateURLsMatching` is configured, because many regex patterns can be
+bypassed via subdomain suffix or anchor omission.
+
+A startup warning is emitted when an HTTP connector is configured without
+`upstreamURL`. This option will be **required** in a future release.
 
 ```yaml
 config:

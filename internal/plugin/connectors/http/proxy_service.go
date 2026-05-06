@@ -51,6 +51,24 @@ func (sub *Subservice) Matches(url string) bool {
 	return false
 }
 
+// normalizeHost returns "host:port", filling in the scheme's default port if
+// the port is absent, so that "api.example.com" and "api.example.com:443"
+// compare equal when the scheme is https.
+func normalizeHost(host, scheme string) string {
+	if _, _, err := net.SplitHostPort(host); err == nil {
+		// port already explicit
+		return host
+	}
+	switch scheme {
+	case "https":
+		return host + ":443"
+	case "http":
+		return host + ":80"
+	default:
+		return host
+	}
+}
+
 // NewProxyService create a new HTTP proxy service.
 func NewProxyService(
 	subservices []Subservice,
@@ -204,7 +222,7 @@ func (proxy *proxyService) ServeHTTP(w gohttp.ResponseWriter, r *gohttp.Request)
 			gohttp.Error(w, "forbidden: request scheme does not match configured upstream", 403)
 			return
 		}
-		if r.URL.Host != subservice.UpstreamURL.Host {
+		if normalizeHost(r.URL.Host, r.URL.Scheme) != normalizeHost(subservice.UpstreamURL.Host, subservice.UpstreamURL.Scheme) {
 			logger.Warnf(
 				"Blocked request to '%s://%s': upstreamURL only allows host '%s'",
 				r.URL.Scheme,

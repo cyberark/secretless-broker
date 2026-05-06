@@ -15,9 +15,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - New `upstreamURL` configuration option for HTTP connectors. When set, the
   proxy validates the request's destination host against the configured
-  upstream and rejects any request targeting a different host. This
-  prevents credential exfiltration to attacker-controlled hosts when the
-  `authenticateURLsMatching` regex is bypassable. The option is not required but recommended.
+  upstream and rejects any request targeting a different host with HTTP 403,
+  before credentials are fetched or injected. This prevents credential
+  exfiltration: without this control, a client that can reach the Secretless
+  listener can direct credentialed requests to an attacker-controlled host and
+  receive the backend credential verbatim in the `Authorization` header.
+  **Strongly recommended for all HTTP connector deployments; will be required
+  in a future release.** Deployments without `upstreamURL` remain exposed to
+  credential exfiltration via client-controlled request routing. A startup
+  warning is emitted when an HTTP connector is configured without it.
+  See example configurations in
+  [examples/generic_connector_configs/](./examples/generic_connector_configs)
+  and the full field reference in
+  [internal/plugin/connectors/http/generic/README.md](./internal/plugin/connectors/http/generic/README.md#upstreamurl-strongly-recommended). CNJR-13755.
 
 ## [1.7.33] - 2026-04-16
 

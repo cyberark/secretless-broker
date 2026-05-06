@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [1.7.34] - 2026-05-06
+
+### Added
+- New `upstreamURL` configuration option for HTTP connectors. When set, the
+  proxy validates the request's destination host against the configured
+  upstream and rejects any request targeting a different host. This
+  prevents credential exfiltration to attacker-controlled hosts when the
+  `authenticateURLsMatching` regex is bypassable. The option is not required but recommended.
+
 ## [1.7.33] - 2026-04-16
 
 ### Changed

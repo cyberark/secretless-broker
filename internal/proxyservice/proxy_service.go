@@ -192,6 +192,7 @@ func (s *proxyServices) createHTTPService(
 			Connector:                curConnector,
 			RetrieveCredentials:      credsRetriever,
 			AuthenticateURLsMatching: httpCfg.AuthenticateURLsMatching,
+			UpstreamURL:              httpCfg.UpstreamURL,
 		})
 	}
 

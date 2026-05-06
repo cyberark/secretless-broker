@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	gohttp "net/http"
+	"net/url"
 	"os"
 	"regexp"
 
@@ -32,6 +33,11 @@ type Subservice struct {
 	ConnectorID              string
 	RetrieveCredentials      internal.CredentialsRetriever
 	AuthenticateURLsMatching []*regexp.Regexp
+	// UpstreamURL, when set, pins all credentialed requests to this upstream
+	// host. Requests targeting any other host are rejected with HTTP 403 before
+	// credentials are fetched or injected. This prevents credential exfiltration
+	// to attacker-controlled hosts.
+	UpstreamURL *url.URL
 }
 
 // Matches returns true if any of the patterns in the Subservice's
@@ -181,6 +187,33 @@ func (proxy *proxyService) ServeHTTP(w gohttp.ResponseWriter, r *gohttp.Request)
 	if subservice == nil {
 		proxy.handleRequest(w, r)
 		return
+	}
+
+	// Validate upstream destination: if upstreamURL is configured, reject
+	// requests targeting any other host. This prevents credential exfiltration
+	// by ensuring credentials are never injected into requests destined for
+	// untrusted hosts.
+	if subservice.UpstreamURL != nil {
+		if r.URL.Scheme != subservice.UpstreamURL.Scheme {
+			logger.Warnf(
+				"Blocked request to '%s://%s': upstreamURL only allows scheme '%s'",
+				r.URL.Scheme,
+				r.URL.Host,
+				subservice.UpstreamURL.Scheme,
+			)
+			gohttp.Error(w, "forbidden: request scheme does not match configured upstream", 403)
+			return
+		}
+		if r.URL.Host != subservice.UpstreamURL.Host {
+			logger.Warnf(
+				"Blocked request to '%s://%s': upstreamURL only allows host '%s'",
+				r.URL.Scheme,
+				r.URL.Host,
+				subservice.UpstreamURL.Host,
+			)
+			gohttp.Error(w, "forbidden: request host does not match configured upstream", 403)
+			return
+		}
 	}
 
 	// Get current credential values

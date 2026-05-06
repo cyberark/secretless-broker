@@ -43,6 +43,7 @@ services:
       headers:                    # and digits only
         "X-ApiKey": "{{ .apikey }}"
       forceSSL: true
+      upstreamURL: "https://api.example.com"  # pin the upstream destination
       authenticateURLsMatching:
         - ^http                   # apply this connector to all requests
 ```
@@ -220,6 +221,27 @@ apikey: '^[A-Z0-9]+$'
 tells us that we expect the `apikey` to consist solely of uppercase letters and
 digits.  If this rule is violated at runtime, Secretless will log an
 appropriate error.
+
+### `upstreamURL` (recommended)
+
+`upstreamURL` is a security control that pins the destination of all
+credentialed requests to a single, operator-configured upstream host. When set,
+Secretless validates the host of every incoming request against the configured
+upstream **before** retrieving credentials. Requests targeting any other host
+are rejected with HTTP 403 - no credentials are fetched, injected, or
+forwarded.
+
+```yaml
+config:
+  upstreamURL: "https://api.example.com"
+  authenticateURLsMatching:
+    - ^http
+```
+
+**Format:** A full URL string including scheme and host, e.g.
+`https://api.stripe.com` or `https://api.example.com:8443`. The scheme is
+required. Configs with a missing scheme or host are rejected at
+startup.
 
 ### Limitations
 

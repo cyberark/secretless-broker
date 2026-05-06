@@ -1,4 +1,4 @@
-FROM google/cloud-sdk:latest
+FROM google/cloud-sdk:566.0.0-alpine
 
 RUN mkdir -p /src
 WORKDIR /src

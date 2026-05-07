@@ -187,11 +187,24 @@ func (s *proxyServices) createHTTPService(
 
 		s.logger.Infof("Starting HTTP subservice %s...", subCfg.Connector)
 
+		if httpCfg.UpstreamURL == nil {
+			s.logger.Warnf(
+				"[SECURITY] HTTP connector '%s' has no upstreamURL configured. "+
+					"A client that can send requests through this proxy may set an "+
+					"attacker-controlled host in the request URL; credentials injected "+
+					"by this connector will be forwarded to that host. "+
+					"Set upstreamURL to pin credential injection to a specific upstream host. "+
+					"This will be required in a future version.",
+				subCfg.Connector,
+			)
+		}
+
 		subservices = append(subservices, httpproxy.Subservice{
 			ConnectorID:              subCfg.Connector, // TODO: Rename connectorID
 			Connector:                curConnector,
 			RetrieveCredentials:      credsRetriever,
 			AuthenticateURLsMatching: httpCfg.AuthenticateURLsMatching,
+			UpstreamURL:              httpCfg.UpstreamURL,
 		})
 	}
 

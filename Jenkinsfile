@@ -73,7 +73,8 @@ if (params.MODE == "PROMOTE") {
   }
 
   // Copy Github Enterprise release to Github
-  release.copyEnterpriseRelease(params.VERSION_TO_PROMOTE)
+  // CNJR-13863: Do not promote to github.com until coordinated customer notification is complete.
+  // release.copyEnterpriseRelease(params.VERSION_TO_PROMOTE)
   return
 }
 

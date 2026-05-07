@@ -2,20 +2,27 @@ package v2
 
 import (
 	"errors"
+	"fmt"
+	"net/url"
 	"regexp"
 
-	"github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation"
 	"gopkg.in/yaml.v2"
 )
 
 type httpConfigYAML struct {
 	AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
+	UpstreamURL              string   `yaml:"upstreamURL"`
 }
 
 // HTTPConfig represents service-specific configuration for service connectors
 // built on top of the http protocol
 type HTTPConfig struct {
 	AuthenticateURLsMatching []*regexp.Regexp
+	// UpstreamURL, when set, pins all credentialed requests to this upstream
+	// host. This prevents credential exfiltration by ensuring that injected
+	// credentials are never sent to a client-controlled destination.
+	UpstreamURL *url.URL
 }
 
 // HTTPAuthenticationStrategies are the different ways an http service
@@ -69,8 +76,20 @@ func NewHTTPConfig(cfgBytes []byte) (*HTTPConfig, error) {
 		}
 	}
 
+	var upstreamURL *url.URL
+	if cfg.UpstreamURL != "" {
+		upstreamURL, err = url.Parse(cfg.UpstreamURL)
+		if err != nil {
+			return nil, fmt.Errorf("invalid upstreamURL URL '%s': %v", cfg.UpstreamURL, err)
+		}
+		if upstreamURL.Scheme == "" || upstreamURL.Host == "" {
+			return nil, fmt.Errorf("upstreamURL must include scheme and host, got '%s'", cfg.UpstreamURL)
+		}
+	}
+
 	return &HTTPConfig{
 		AuthenticateURLsMatching: AuthenticateURLsMatching,
+		UpstreamURL:              upstreamURL,
 	}, nil
 }
 
@@ -81,6 +100,7 @@ func (cfg *httpConfigYAML) UnmarshalYAML(bytes []byte) error {
 	// string or []string
 	tempCfg := &struct {
 		AuthenticateURLsMatching interface{} `yaml:"authenticateURLsMatching"`
+		UpstreamURL              string      `yaml:"upstreamURL"`
 	}{}
 	err := yaml.Unmarshal(bytes, tempCfg)
 	if err != nil {
@@ -105,6 +125,8 @@ func (cfg *httpConfigYAML) UnmarshalYAML(bytes []byte) error {
 	default:
 		return errors.New("'authenticateURLsMatching' key has incorrect type, must be a string or list of strings")
 	}
+
+	cfg.UpstreamURL = tempCfg.UpstreamURL
 
 	return nil
 }

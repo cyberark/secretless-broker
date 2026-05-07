@@ -86,7 +86,7 @@ function run_in_docker() {
   docker run --rm \
     --volume "$OUTPUT_DIR/:/secretless/test/test-coverage/" \
     secretless-dev \
-    bash -c "$1"
+    sh -c "$1"
 }
 
 main

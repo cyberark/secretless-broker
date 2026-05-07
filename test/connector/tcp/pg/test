@@ -65,7 +65,7 @@ if $benchmark; then
   echo "working with $SECRETLESS_HOST"
 
   docker compose run --rm --no-deps \
-    test bash -c "
+    test sh -c "
       echo '--- QUERYING POSTGRES DIRECTLY ---' && \
       BENCH_ADDRESS=$PG_ADDRESS go test -v -bench=. -test.benchtime=10s ./test/pg_handler/bench_test.go | tee bench.old && \
 
@@ -78,5 +78,5 @@ if $benchmark; then
 else
   docker compose run --rm --no-deps \
     -e SECRETLESS_HOST="$SECRETLESS_HOST" \
-    test bash -c "go test -v ./test/connector/tcp/pg/tests"
+    test sh -c "go test -v ./test/connector/tcp/pg/tests"
 fi

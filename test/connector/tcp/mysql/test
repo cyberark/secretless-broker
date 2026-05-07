@@ -41,4 +41,4 @@ fi
 
 docker compose run --rm --no-deps \
   -e SECRETLESS_HOST="secretless" \
-  test bash -c "go test -v ./test/connector/tcp/mysql/tests"
+  test sh -c "go test -v ./test/connector/tcp/mysql/tests"

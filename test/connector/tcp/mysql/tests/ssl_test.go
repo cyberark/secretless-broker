@@ -119,7 +119,7 @@ func TestSSL(t *testing.T) {
 			Definition: Definition{
 				Description: "server_no_tls, sslmode=default",
 				ShouldPass:  false,
-				CmdOutput:   StringPointer("ERROR 2026 (HY000): SSL connection error: SSL is required but the server doesn't support it"),
+				CmdOutput:   StringPointer("ERROR 2027 (HY000): Received malformed packet"),
 			},
 			AbstractConfiguration: AbstractConfiguration{
 				SocketType:     TCP,

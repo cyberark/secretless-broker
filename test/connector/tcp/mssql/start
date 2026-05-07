@@ -35,8 +35,29 @@ report_dir="./test-coverage"
 mkdir -p "$report_dir"
 chmod 777 "$report_dir"
 
+compose_up_with_retry() {
+  local service="$1"
+  local attempts=3
+  local i=1
+
+  while [ "$i" -le "$attempts" ]; do
+    if docker compose up -d "$service"; then
+      return 0
+    fi
+
+    if [ "$i" -eq "$attempts" ]; then
+      echo "Failed to start '$service' after ${attempts} attempts"
+      return 1
+    fi
+
+    echo "docker compose up failed for '$service' (attempt ${i}/${attempts}); retrying..."
+    i=$((i + 1))
+    sleep 5
+  done
+}
+
 # the order of the services is important. mssql must be up before we start secretless
-docker compose up -d $mssql_host
+compose_up_with_retry "$mssql_host"
 
 time ./wait_for_mssql -m $mssql_host
 docker compose logs $mssql_host

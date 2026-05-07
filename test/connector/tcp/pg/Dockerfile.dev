@@ -1,19 +1,14 @@
 FROM secretless-dev
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends postgresql-client postgresql-contrib
+RUN apk add --no-cache postgresql-client
 
 RUN go install github.com/ajstarks/svgo/benchviz@latest && \
     go install golang.org/x/tools/cmd/benchcmp@latest
 
 # Add java25 and add to $PATH
 # Fix certificate issues
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ant \
-                       ca-certificates-java && \
-    apt-get install -y --no-install-recommends openjdk-25-jdk && \
-    apt-get clean && \
+RUN apk add --no-cache apache-ant openjdk21-jdk ca-certificates && \
     update-ca-certificates -f
 
 # Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-25-openjdk-amd64/
+ENV JAVA_HOME /usr/lib/jvm/java-21-openjdk/

@@ -1,8 +1,8 @@
-FROM secretless-dev
+FROM --platform=linux/amd64 golang:1.26-trixie
 
 # apt-get and system utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
-	apt-transport-https debconf-utils \
+    apt-transport-https debconf-utils curl wget bash \
     && rm -rf /var/lib/apt/lists/*
 
 # Add custom MS repository

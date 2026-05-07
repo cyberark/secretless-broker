@@ -1,21 +1,13 @@
-FROM google/cloud-sdk:latest
+FROM google/cloud-sdk:566.0.0-alpine
 
 RUN mkdir -p /src
 WORKDIR /src
 
 # Install Docker client
-RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends apt-transport-https ca-certificates \
-      curl gnupg2 software-properties-common wget && \
-    curl -fsSL \
-      https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg \
-      | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] \
-      https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
-      $(lsb_release -cs) stable" && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends docker-ce && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache ca-certificates curl wget docker-cli
+
+# Required for kubectl auth against GKE clusters
+RUN gcloud components install gke-gcloud-auth-plugin --quiet
 
 # Install kubectl CLI
 RUN wget -q -O /usr/local/bin/kubectl \

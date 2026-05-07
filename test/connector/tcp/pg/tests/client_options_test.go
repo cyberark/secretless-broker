@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -81,7 +82,7 @@ func genQueryRunner(host string, port string) func(envs []string, options []stri
 		}
 
 		c := exec.Command("psql", args...)
-		c.Env = append(c.Env, envs...)
+		c.Env = append(os.Environ(), envs...)
 		cmdOut, err := c.CombinedOutput()
 
 		return string(cmdOut), err

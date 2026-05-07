@@ -54,7 +54,7 @@ function runDockerCommand() {
     -v "$PWD/..":/src \
     -w /src \
     "gke-utils:latest" \
-    bash -exc "
+    sh -ec "
       ./k8s-ci/platform_login > /dev/null
       $1
     "

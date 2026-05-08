@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   and the full field reference in
   [internal/plugin/connectors/http/generic/README.md](./internal/plugin/connectors/http/generic/README.md#upstreamurl-strongly-recommended). CNJR-13755.
 
+### Security
+- Bump `golang.org/x/net` to resolve CVE-2026-33814. CNJR-13926.
+
 ## [1.7.33] - 2026-04-16
 
 ### Changed

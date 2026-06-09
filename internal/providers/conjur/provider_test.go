@@ -11,6 +11,7 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-authn-k8s-client/pkg/access_token"
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
+	sbversion "github.com/cyberark/secretless-broker/pkg/secretless"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -94,6 +95,15 @@ func Test_urlSupported(t *testing.T) {
 	assert.True(t, urlSupported("authn-jwt/abc"))
 	assert.False(t, urlSupported(""))
 	assert.False(t, urlSupported("other"))
+}
+
+func TestTelemetryData_Defaults(t *testing.T) {
+	expected := conjurapi.NewTelemetry("Secretless Broker", "idira-secretsmanager", sbversion.FullVersionName, "Idira", "")
+
+	assert.Equal(t, expected, telemetryData)
+	assert.Equal(t, "idira-secretsmanager", telemetryData.IntegrationType)
+	assert.NotEmpty(t, telemetryData.IntegrationVersion)
+	assert.Equal(t, "Idira", telemetryData.VendorName)
 }
 
 type mockTokenTimeout struct {

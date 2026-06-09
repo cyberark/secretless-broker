@@ -14,9 +14,12 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 	"github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator"
 	authnConfig "github.com/cyberark/conjur-authn-k8s-client/pkg/authenticator/config"
+	sbversion "github.com/cyberark/secretless-broker/pkg/secretless"
 
 	plugin_v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 )
+
+var telemetryData = conjurapi.NewTelemetry("Secretless Broker", "idira-secretsmanager", sbversion.FullVersionName, "Idira", "")
 
 const authenticatorTokenFile = "/run/conjur/access-token"
 
@@ -44,10 +47,10 @@ type Provider struct {
 // ProviderFactory constructs a Conjur Provider. The API client is configured from
 // environment variables.
 // To authenticate with Conjur, you can provide Secretless with:
-// - A Conjur username and API key
-// - A path to a file where a Conjur access token is stored
-// - Config info to use the Conjur k8s authenticator client to retrieve an access token
-//   from Conjur (i.e. Conjur version, account, authn url, username, and SSL cert)
+//   - A Conjur username and API key
+//   - A path to a file where a Conjur access token is stored
+//   - Config info to use the Conjur k8s authenticator client to retrieve an access token
+//     from Conjur (i.e. Conjur version, account, authn url, username, and SSL cert)
 func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, error) {
 	config, err := conjurapi.LoadConfig()
 	if err != nil {
@@ -88,13 +91,13 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 	case provider.Username != "" && provider.APIKey != "":
 		// Conjur provider using API key
 		log.Printf("Info: Conjur provider using API key-based authentication")
-		if conjur, err = conjurapi.NewClientFromKey(provider.Config, authn.LoginPair{provider.Username, provider.APIKey}); err != nil {
+		if conjur, err = conjurapi.NewClientFromKey(provider.Config, authn.LoginPair{provider.Username, provider.APIKey}, telemetryData); err != nil {
 			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
 	case tokenFile != "":
 		// Conjur provider using access token
 		log.Printf("Info: Conjur provider using access token-based authentication")
-		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, tokenFile); err != nil {
+		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, tokenFile, telemetryData); err != nil {
 			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
 	case urlSupported(provider.AuthnURL):
@@ -133,7 +136,7 @@ func ProviderFactory(options plugin_v1.ProviderOptions) (plugin_v1.Provider, err
 		}()
 
 		// Once the token file has been loaded, create a new instance of the Conjur client
-		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, authenticatorTokenFile); err != nil {
+		if conjur, err = conjurapi.NewClientFromTokenFile(provider.Config, authenticatorTokenFile, telemetryData); err != nil {
 			return nil, fmt.Errorf("ERROR: Could not create new Conjur provider: %s", err)
 		}
 	default:
@@ -157,8 +160,8 @@ func (p *Provider) GetValues(ids ...string) (map[string]plugin_v1.ProviderRespon
 }
 
 // GetValue obtains a value by ID. The recognized IDs are:
-//	* "accessToken"
-// 	* Any Conjur variable ID
+//   - "accessToken"
+//   - Any Conjur variable ID
 func (p *Provider) GetValue(id string) ([]byte, error) {
 	var err error
 
@@ -176,7 +179,7 @@ func (p *Provider) GetValue(id string) ([]byte, error) {
 	// If using the Conjur Kubernetes authenticator, ensure that the
 	// Conjur API is using the current access token
 	if p.AuthnURL != "" {
-		if p.Conjur, err = conjurapi.NewClientFromTokenFile(p.Config, authenticatorTokenFile); err != nil {
+		if p.Conjur, err = conjurapi.NewClientFromTokenFile(p.Config, authenticatorTokenFile, telemetryData); err != nil {
 			log.Fatalf("ERROR: Could not create new Conjur provider: %s", err)
 		}
 	}

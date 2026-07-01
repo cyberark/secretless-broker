@@ -5,6 +5,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
+	"github.com/cyberark/secretless-broker/pkg/secretless/log"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 )
@@ -12,26 +13,30 @@ import (
 // ConfigYAML is an almost-literal representation of the YAML config section
 // of a generic HTTP connector.  It has two purposes:
 //
-//     1.  It allows other internal connectors to configure a generic connector
-//         to which they are delegating their implementation.  That is, it's
-//         a code-level interface equivalent of a .yml file config section.
-//     2.  Technically, it acts as an intermediate form when parsing an actual
-//         .yml file.  That is, we convert from .yml --> ConfigYAML --> config.
+//  1. It allows other internal connectors to configure a generic connector
+//     to which they are delegating their implementation.  That is, it's
+//     a code-level interface equivalent of a .yml file config section.
+//  2. Technically, it acts as an intermediate form when parsing an actual
+//     .yml file.  That is, we convert from .yml --> ConfigYAML --> config.
 type ConfigYAML struct {
 	CredentialValidations map[string]string `yaml:"credentialValidations"`
-	ForceSSL              bool              `yaml:"forceSSL"`
-	Headers               map[string]string `yaml:"headers"`
-	OAuth1Secrets         map[string]string `yaml:"oauth1"`
-	QueryParams           map[string]string `yaml:"queryParams"`
+	// ForceSSL is a *bool so we can distinguish "operator never set forceSSL"
+	// (nil -> secure default: enforce TLS) from an explicit opt-out
+	// (forceSSL: false -> allow plaintext, with a [SECURITY] warning).
+	ForceSSL      *bool             `yaml:"forceSSL"`
+	Headers       map[string]string `yaml:"headers"`
+	OAuth1Secrets map[string]string `yaml:"oauth1"`
+	QueryParams   map[string]string `yaml:"queryParams"`
 }
 
 // NewConfigYAML takes the raw cfgBytes and unmarshals them into a ConfigYAML
 // struct.
+//
+// ForceSSL is intentionally left unset here. The secure default
+// is applied in newConfig when the field is unset. Leaving it nil lets us
+// distinguish an unset value from an explicit `forceSSL: false` opt-out.
 func NewConfigYAML(cfgBytes []byte) (*ConfigYAML, error) {
-	cfgYAML := &ConfigYAML{
-		// TODO: Fix CRDs so we can make the default true
-		ForceSSL: false, // Default should be false
-	}
+	cfgYAML := &ConfigYAML{}
 
 	err := yaml.Unmarshal(cfgBytes, cfgYAML)
 	if err != nil {
@@ -67,11 +72,32 @@ func NewConnectorConstructor(staticCfgYAML *ConfigYAML) (http.NewConnectorFunc, 
 
 		// Don't have to worry about nil condition because of the panic:
 		//noinspection GoNilness
-		staticCfg.ForceSSL = runtimeCfgYAML.ForceSSL
+		cfg := *staticCfg
+
+		// Only override ForceSSL when the operator explicitly set it in the .yml file.
+		if runtimeCfgYAML.ForceSSL != nil {
+			cfg.ForceSSL = *runtimeCfgYAML.ForceSSL
+		}
+
+		warnIfForceSSLDisabled(logger, cfg.ForceSSL)
 
 		return &Connector{
 			logger: logger,
-			config: staticCfg,
+			config: &cfg,
 		}
 	}, nil
+}
+
+// warnIfForceSSLDisabled emits a [SECURITY] warning when TLS enforcement is
+// disabled for an HTTP connector
+func warnIfForceSSLDisabled(logger log.Logger, forceSSL bool) {
+	if forceSSL {
+		return
+	}
+	logger.Warnf(
+		"[SECURITY] HTTP connector has forceSSL disabled (forceSSL: false). " +
+			"Injected credentials may be sent to the upstream over plaintext " +
+			"http and can be captured by any observer on the broker->upstream " +
+			"network path. Remove 'forceSSL: false' to enforce TLS.",
+	)
 }

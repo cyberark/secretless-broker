@@ -17,3 +17,5 @@ const serverResponseUnauthorized = "Unauthorized."
 
 const proxyHTTP = "http://secretless:8080"
 const proxyHTTPS = "http://secretless:8081"
+
+const proxyDefault = "http://secretless:8082"

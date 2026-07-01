@@ -73,9 +73,16 @@ func renderTemplates(
 func newConfig(cfgYAML *ConfigYAML) (*config, error) {
 	errs := validation.Errors{}
 
+	// Resolve the secure default for ForceSSL: when unset (nil), enforce TLS.
+	// An explicit `forceSSL: false` is honored as an opt-out.
+	forceSSL := true
+	if cfgYAML.ForceSSL != nil {
+		forceSSL = *cfgYAML.ForceSSL
+	}
+
 	cfg := &config{
 		CredentialPatterns: make(map[string]*regexp.Regexp),
-		ForceSSL:           cfgYAML.ForceSSL,
+		ForceSSL:           forceSSL,
 	}
 
 	// Validate and save regexps

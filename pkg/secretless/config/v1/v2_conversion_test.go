@@ -87,6 +87,55 @@ func TestV1HttpHandlerConversion(t *testing.T) {
 `, string(v2Cfg.Services[0].ConnectorConfig))
 	})
 
+	t.Run("forceSSL is omitted from connectorConfig when unset", func(t *testing.T) {
+		v1Cfg := v1HttpExample()
+		v2Cfg, err := NewV2Config(v1Cfg)
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		assert.NotContains(t, string(v2Cfg.Services[0].ConnectorConfig), "forceSSL")
+	})
+
+	t.Run("forceSSL: false is passed through to connectorConfig", func(t *testing.T) {
+		v1Cfg := v1HttpExample()
+		optOut := false
+		v1Cfg.Handlers[0].ForceSSL = &optOut
+
+		v2Cfg, err := NewV2Config(v1Cfg)
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		assert.Equal(t,
+			`authenticateURLsMatching:
+- ^http://aws*
+- amzn.com
+forceSSL: false
+`, string(v2Cfg.Services[0].ConnectorConfig))
+	})
+
+	t.Run("forceSSL: true is passed through to connectorConfig", func(t *testing.T) {
+		v1Cfg := v1HttpExample()
+		enforce := true
+		v1Cfg.Handlers[0].ForceSSL = &enforce
+
+		v2Cfg, err := NewV2Config(v1Cfg)
+		assert.NoError(t, err)
+		if err != nil {
+			return
+		}
+
+		assert.Equal(t,
+			`authenticateURLsMatching:
+- ^http://aws*
+- amzn.com
+forceSSL: true
+`, string(v2Cfg.Services[0].ConnectorConfig))
+	})
+
 	t.Run("Connector field maps correctly", func(t *testing.T) {
 		v1Cfg := v1HttpExample()
 		v2Cfg, err := NewV2Config(v1Cfg)

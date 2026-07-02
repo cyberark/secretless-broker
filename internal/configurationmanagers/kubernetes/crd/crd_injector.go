@@ -96,6 +96,9 @@ var secretlessCRD = &apiextensionsv1.CustomResourceDefinition{
 															},
 														},
 													},
+													"forceSSL": {
+														Type: "boolean",
+													},
 													"credentials": {
 														Type: "array",
 														Items: &apiextensionsv1.JSONSchemaPropsOrArray{

@@ -281,6 +281,10 @@ so that intentional cleartext credential transmission is visible in logs.
 CRD (`kind: Configuration`) resources, so those deployments have the same
 opt-out (`forceSSL: false`) as v2 file configs.
 
+`forceSSL` is also supported on HTTP handlers in v1 file configs and Kubernetes
+CRD (`kind: Configuration`) resources, so those deployments have the same
+opt-out (`forceSSL: false`) as v2 file configs.
+
 ### Limitations
 
 Some HTTP APIs require more involved authentication.  For example, they might

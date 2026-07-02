@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [1.8.0] - 2026-07-01
+## [2.0.0] - 2026-07-01
 
 ### Changed
 - **Breaking: HTTP connectors now enforce TLS by default (`forceSSL: true`).**
@@ -27,7 +27,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `forceSSL` can now also be set on HTTP handlers in v1 file configs and
   Kubernetes CRD  resources, so those deployments have
   the same `forceSSL: false` opt-out as v2 file configs. Previously the v1/CRD
-  path could not express `forceSSL` at all. CNJR-13759.
+  path could not express `forceSSL` at all.
+  Operators must re-apply the updated definition `kubectl apply -f resource-definitions/secretless-resource-definition.yaml` CNJR-13759.
 
 ## [1.7.34] - 2026-05-06
 

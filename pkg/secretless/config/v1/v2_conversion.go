@@ -24,8 +24,10 @@ func newV2ServiceFromListenerAndHandler(listener Listener, linkedHandler Handler
 
 		tempCfg := &struct {
 			AuthenticateURLsMatching []string `yaml:"authenticateURLsMatching"`
+			ForceSSL                 *bool    `yaml:"forceSSL,omitempty"`
 		}{
 			AuthenticateURLsMatching: linkedHandler.Match,
+			ForceSSL:                 linkedHandler.ForceSSL,
 		}
 
 		connectorConfig, err = yaml.Marshal(tempCfg)

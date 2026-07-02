@@ -47,6 +47,9 @@ type Handler struct {
 	Match        []string         `yaml:"match"`
 	Patterns     []*regexp.Regexp `yaml:"-"`
 	Credentials  []StoredSecret
+	// ForceSSL, when set, is passed through to the HTTP connector so
+	// v1/CRD deployments can opt out of TLS enforcement
+	ForceSSL *bool `yaml:"forceSSL"`
 }
 
 // Config is the main configuration structure for Secretless.

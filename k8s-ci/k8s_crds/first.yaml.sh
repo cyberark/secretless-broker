@@ -21,6 +21,9 @@ spec:
     - name: http_config_1_handler
       type: basic_auth
       listener: http_config_1_listener
+      # The echo-server upstream is plaintext http, so opt out of the
+      # forceSSL default (true) to avoid a TLS handshake against it.
+      forceSSL: false
       match:
         - ^http.*
       credentials:

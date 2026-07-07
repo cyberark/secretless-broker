@@ -52,7 +52,7 @@ set +e && set +o pipefail
 # Run our scan, flagging only 'high' level issues with 'medium' or higher severity
 docker run --rm \
   -v "$(pwd):/secretless-broker/" \
-  -e "GOTOOLCHAIN=go1.26.2+auto" \
+  -e "GOTOOLCHAIN=go1.26.4+auto" \
   -w "/secretless-broker/" \
   securego/gosec:latest " -fmt=junit-xml \
   -out=${output_file} \

@@ -1,6 +1,7 @@
 FROM secretless-dev
 
+COPY requirements.txt /tmp/requirements.txt
 RUN apt-get update && \
     apt-get install -y --no-install-recommends groff python-pip && \
     apt-get clean && \
-    pip install --no-cache-dir awscli
+    pip install --no-cache-dir --require-hashes -r /tmp/requirements.txt

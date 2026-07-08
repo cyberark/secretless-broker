@@ -52,7 +52,8 @@ RUN rm -rf /etc/apt/sources.list.d/mssql-release.list && \
 
 # Add python 3 and pyodbc
 RUN apt-get install -y --no-install-recommends python3 python3-pip
-RUN pip3 install --break-system-packages --no-cache-dir pyodbc
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install --break-system-packages --no-cache-dir --require-hashes -r /tmp/requirements.txt
 
 # Add java25 and add to $PATH
 # Fix cert issues

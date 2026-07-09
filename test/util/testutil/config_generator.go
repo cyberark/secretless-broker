@@ -4,6 +4,11 @@ import (
 	config_v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
 )
 
+// PinnedDatabaseServicePort is the TCP port of the "pinned-database" service
+// added by GenerateConfigurations. Tests that verify database pinning should
+// connect to this port.
+const PinnedDatabaseServicePort = "8500"
+
 // GenerateConfigurations returns a Secretless Config along with a comprehensive
 // list of LiveConfigurations for use in tests.
 // TODO: consider parametrising ConnectPort generator
@@ -63,6 +68,21 @@ func GenerateConfigurations() (config_v2.Config, LiveConfigurations) {
 				},
 				ListenOn: "tcp://0.0.0.0:5432",
 				Name:     "pg-bench",
+			},
+			{
+				Debug:           true,
+				Connector:       sampleDbConfig.Protocol,
+				ConnectorConfig: nil,
+				ListenOn:        config_v2.NetworkAddress("tcp://0.0.0.0:" + PinnedDatabaseServicePort),
+				Name:            "pinned-database",
+				Credentials: []*config_v2.Credential{
+					{Name: "host", From: "literal", Get: sampleDbConfig.HostWithTLS},
+					{Name: "port", From: "literal", Get: sampleDbConfig.Port},
+					{Name: "username", From: "literal", Get: sampleDbConfig.User},
+					{Name: "password", From: "literal", Get: sampleDbConfig.Password},
+					{Name: "sslmode", From: "literal", Get: "disable"},
+					{Name: "database", From: "literal", Get: sampleDbConfig.Database},
+				},
 			},
 		},
 	}

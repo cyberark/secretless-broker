@@ -23,6 +23,7 @@ type ConnectionDetails struct {
 	Port       string
 	Username   string
 	Password   string
+	Database   string
 	Options    map[string]string
 	SSLOptions map[string]string
 }
@@ -75,6 +76,10 @@ func NewConnectionDetails(options map[string][]byte) (*ConnectionDetails, error)
 		connectionDetails.Password = string(options["password"])
 	}
 
+	if len(options["database"]) > 0 {
+		connectionDetails.Database = string(options["database"])
+	}
+
 	for _, sslOption := range sslOptions {
 		if len(options[sslOption]) > 0 {
 			connectionDetails.SSLOptions[sslOption] = string(options[sslOption])
@@ -87,6 +92,7 @@ func NewConnectionDetails(options map[string][]byte) (*ConnectionDetails, error)
 	delete(options, "address")
 	delete(options, "username")
 	delete(options, "password")
+	delete(options, "database")
 
 	for k, v := range options {
 		connectionDetails.Options[k] = string(v)

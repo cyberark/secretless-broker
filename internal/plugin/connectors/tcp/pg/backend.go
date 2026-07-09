@@ -96,10 +96,15 @@ func (s *SingleUseConnector) ConnectToBackend() error {
 		options[k] = v
 	}
 
+	databaseName := s.databaseName
+	if s.connectionDetails.Database != "" {
+		databaseName = s.connectionDetails.Database
+	}
+
 	startupMessage := protocol.CreateStartupMessage(
 		protocol.ProtocolVersion,
 		s.connectionDetails.Username,
-		s.databaseName,
+		databaseName,
 		options,
 	)
 

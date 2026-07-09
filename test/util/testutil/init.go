@@ -25,6 +25,7 @@ type DBConfig struct {
 	User           string
 	Password       string
 	Protocol       string
+	Database       string
 }
 
 // NewDbConfigFromEnv creates a new DbConfig from ENV variables.  The variables
@@ -37,6 +38,7 @@ type DBConfig struct {
 //     DB_PASSWORD
 //     DB_PROTOCOL
 //
+// DB_DATABASE is optional; it is used by database pinning tests.
 func NewDbConfigFromEnv() DBConfig {
 
 	requiredEnvVars := []string{
@@ -63,6 +65,7 @@ func NewDbConfigFromEnv() DBConfig {
 		User:           os.Getenv("DB_USER"),
 		Password:       os.Getenv("DB_PASSWORD"),
 		Protocol:       os.Getenv("DB_PROTOCOL"),
+		Database:       os.Getenv("DB_DATABASE"),
 	}
 }
 

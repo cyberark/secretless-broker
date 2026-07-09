@@ -163,3 +163,48 @@ func TestAddress(t *testing.T) {
 		assert.EqualValues(t, "myhost2:12345", (*actualConnectionDetails).Address())
 	}
 }
+
+func TestDatabaseCredentialPopulatesField(t *testing.T) {
+	options := map[string][]byte{
+		"host":     []byte("myhost"),
+		"username": []byte("myuser"),
+		"password": []byte("mypass"),
+		"database": []byte("appdb"),
+	}
+
+	cd, err := NewConnectionDetails(options)
+	assert.Nil(t, err)
+	if err == nil {
+		assert.Equal(t, "appdb", cd.Database)
+	}
+}
+
+func TestDatabaseCredentialNotLeakedIntoOptions(t *testing.T) {
+	options := map[string][]byte{
+		"host":     []byte("myhost"),
+		"username": []byte("myuser"),
+		"password": []byte("mypass"),
+		"database": []byte("appdb"),
+	}
+
+	cd, err := NewConnectionDetails(options)
+	assert.Nil(t, err)
+	if err == nil {
+		_, inOptions := cd.Options["database"]
+		assert.False(t, inOptions, "database should not appear in Options map")
+	}
+}
+
+func TestNoDatabaseCredentialLeavesFieldEmpty(t *testing.T) {
+	options := map[string][]byte{
+		"host":     []byte("myhost"),
+		"username": []byte("myuser"),
+		"password": []byte("mypass"),
+	}
+
+	cd, err := NewConnectionDetails(options)
+	assert.Nil(t, err)
+	if err == nil {
+		assert.Empty(t, cd.Database)
+	}
+}

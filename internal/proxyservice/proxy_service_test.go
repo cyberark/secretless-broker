@@ -1,15 +1,16 @@
 package proxyservice
 
 import (
+	"errors"
+	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"testing"
-	"errors"
-	"net/http"
 
-	"github.com/go-ozzo/ozzo-validation"
 	"github.com/cyberark/secretless-broker/internal"
 	v1 "github.com/cyberark/secretless-broker/internal/plugin/v1"
 	v2 "github.com/cyberark/secretless-broker/pkg/secretless/config/v2"
@@ -17,7 +18,9 @@ import (
 	"github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector"
 	httpplugin "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/http"
 	tcpplugin "github.com/cyberark/secretless-broker/pkg/secretless/plugin/connector/tcp"
+	"github.com/go-ozzo/ozzo-validation"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // --- Unit Tests ---
@@ -109,7 +112,7 @@ func TestCreateServiceFailures(t *testing.T) {
 			ps.availPlugins = &fakeAvailablePlugins{}
 		case "http":
 			ps.configsByType = v2.ConfigsByType{HTTP: []v2.HTTPServiceConfig{{
-				SharedListenOn: v2.NetworkAddress("tcp://bad:0"),
+				SharedListenOn:    v2.NetworkAddress("tcp://bad:0"),
 				SubserviceConfigs: []v2.Service{{Name: "svc", Connector: "mock", ConnectorConfig: []byte("{}")}},
 			}}}
 			ps.availPlugins = &fakeAvailablePlugins{}
@@ -124,8 +127,8 @@ func TestCreateServiceFailures(t *testing.T) {
 		return
 	}
 	types := []struct {
-		name      string
-		env       string
+		name string
+		env  string
 	}{
 		{"TCP listener fail", "tcp"},
 		{"HTTP listener fail", "http"},
@@ -147,11 +150,11 @@ func TestCreateServiceFailures(t *testing.T) {
 
 func TestCreateHTTPService_ConfigParseFail(t *testing.T) {
 	ps := &proxyServices{
-		logger:        &testLogger{},
-		resolver:      &mockResolver{},
+		logger:   &testLogger{},
+		resolver: &mockResolver{},
 	}
 	badCfg := v2.HTTPServiceConfig{
-		SharedListenOn: v2.NetworkAddress("tcp://localhost:0"),
+		SharedListenOn:    v2.NetworkAddress("tcp://localhost:0"),
 		SubserviceConfigs: []v2.Service{{Connector: "mock", ConnectorConfig: []byte("bad: [!!!]")}},
 	}
 	ps.availPlugins = &fakeAvailablePluginsWithHTTPMock{}
@@ -192,6 +195,45 @@ func TestCreateSSHAndSSHAgentService_SuccessAndListenerFail(t *testing.T) {
 					assert.NotNil(t, svc)
 				}
 			}
+		})
+	}
+}
+
+func TestCreateTCPService_NonLoopbackWarning(t *testing.T) {
+	cases := []struct {
+		name        string
+		listenOn    string
+		wantWarning bool
+	}{
+		{"loopback IPv4", "tcp://127.0.0.1:0", false},
+		{"localhost name", "tcp://localhost:0", false},
+		{"all interfaces", "tcp://0.0.0.0:0", true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			logger := &capturingLogger{}
+			ps := &proxyServices{
+				logger:   logger,
+				resolver: &mockResolver{},
+			}
+			cfg := v2.Service{
+				Name:      "test-svc",
+				Connector: "mock",
+				ListenOn:  v2.NetworkAddress(tc.listenOn),
+			}
+			svc, err := ps.createTCPService(cfg, &fakeTCPPlugin{})
+			require.NoError(t, err)
+			defer svc.Stop()
+
+			hasWarning := false
+			for _, msg := range logger.warnings {
+				if strings.Contains(msg, "[SECURITY]") {
+					hasWarning = true
+					break
+				}
+			}
+			assert.Equal(t, tc.wantWarning, hasWarning)
 		})
 	}
 }
@@ -262,6 +304,16 @@ func (f *fakeAvailablePluginsWithHTTPMock) HTTPPlugins() map[string]httpplugin.P
 	return map[string]httpplugin.Plugin{"mock": &httpPluginParseFail{}}
 }
 func (f *fakeAvailablePluginsWithHTTPMock) TCPPlugins() map[string]tcpplugin.Plugin { return nil }
+
+type capturingLogger struct {
+	testLogger
+	warnings []string
+}
+
+func (l *capturingLogger) CopyWith(name string, debug bool) logapi.Logger { return l }
+func (l *capturingLogger) Warnf(format string, args ...interface{}) {
+	l.warnings = append(l.warnings, fmt.Sprintf(format, args...))
+}
 
 type httpPluginParseFail struct{}
 

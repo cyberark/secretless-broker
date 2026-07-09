@@ -242,6 +242,16 @@ func TestConnectionDetails_NewSSLOptions_Recursion(t *testing.T) {
 	assert.Equal(t, secondaryCredentials["sslmode"], []byte(defaultSSLMode))
 }
 
+func TestDatabaseCredentialPopulatesField(t *testing.T) {
+	connDetails := NewConnectionDetails(map[string][]byte{
+		"host":     []byte("myhost"),
+		"username": []byte("myuser"),
+		"password": []byte("mypass"),
+		"database": []byte("mydb"),
+	})
+	assert.Equal(t, "mydb", connDetails.Database)
+}
+
 func TestConnectionDetails_URL(t *testing.T) {
 	tests := []struct {
 		description string

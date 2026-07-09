@@ -12,6 +12,7 @@ type ConnectionDetails struct {
 	Port      uint
 	Username  string
 	Password  string
+	Database  string
 	SSLParams map[string]string
 }
 
@@ -68,6 +69,10 @@ func NewConnectionDetails(credentials map[string][]byte) *ConnectionDetails {
 
 	if len(credentials["password"]) > 0 {
 		connDetails.Password = string(credentials["password"])
+	}
+
+	if len(credentials["database"]) > 0 {
+		connDetails.Database = string(credentials["database"])
 	}
 
 	connDetails.SSLParams = newSSLParams(credentials)

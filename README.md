@@ -7,6 +7,7 @@
 - [Using Secretless](#using-secretless)
   - [Using This Project With Conjur-OSS](#using-secretless-broker-with-conjur-open-source)
   - [About our releases](#about-our-releases)
+- [Security hardening](#security-hardening)
 - [Community](#community)
 - [Performance](#performance)
 - [Development](#development)
@@ -191,6 +192,71 @@ In addition, the following must be true for any stable release:
   -	Secretless handles connections transparently, so that requests from the client are appropriately transmitted to the server and messages from the server are propagated back to the client
 -	Secretless is easy to set up, and adding the configured Secretless Broker sidecar to your application takes less than 30 minutes
 -	Secretless is clear about known limitations
+
+# Security hardening
+
+Secretless Broker grants any client that can open a TCP connection to its listen port a fully-authenticated session to the backend service. The broker performs no client authentication by design — keeping applications credential-free is its core purpose. This makes network isolation a **hard deployment requirement**, not an optional hardening step.
+
+## Required: restrict network access to the broker port
+
+In Kubernetes, apply a `NetworkPolicy` that limits ingress to the broker's listen port to only the intended application container. Without this, any co-tenant container or node-local process can obtain a backend session.
+
+Example `NetworkPolicy` (adjust labels and port to match your deployment):
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restrict-secretless-port
+spec:
+  podSelector:
+    matchLabels:
+      app: your-app
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: your-app
+      ports:
+        - protocol: TCP
+          port: 5432
+```
+
+## Required: set listenOn — prefer loopback or a Unix socket
+
+`listenOn` is required for every service. For sidecar deployments, bind to `127.0.0.1` or a Unix socket so the port is unreachable outside the pod:
+
+```yaml
+services:
+  pg-db:
+    connector: pg
+    listenOn: tcp://127.0.0.1:5432   # loopback — not reachable from other pods
+    # or: listenOn: unix:///sock/pg.sock
+```
+
+When using a Unix socket, ensure the socket path is in a directory that is only accessible by the intended application container. A socket with world-readable permissions is reachable by any process on the node.
+
+## Optional: pin the backend database
+
+If your service config includes a `database` credential, Secretless will use that value and ignore the database name supplied by the connecting client:
+
+```yaml
+credentials:
+  - name: database
+    from: literal
+    get: "appdb"
+```
+
+When `credentials.database` is not set, the client-supplied database name is forwarded to the backend (original behavior).
+
+The effectiveness of database pinning depends on the backend engine:
+
+- **PostgreSQL** — fully effective. There is no in-session database switch, so the client is confined to the configured database for the lifetime of the connection.
+- **MySQL and MSSQL** — reduces blast radius but does not provide full isolation. A client that reaches the broker can still access other databases via `USE other_db` (MySQL) or fully-qualified object names such as `other_db.dbo.table` (MSSQL), subject to the service account's grants. Treat database pinning as a defense-in-depth measure for these engines; the primary isolation control remains the network policy and user privileges.
+
+## Recommendation: use a least-privilege database account
+
+The configured database user should have the least privileges required by the application. Any client that reaches the broker inherits that account's permissions, so a tightly scoped account limits the impact of unauthorized access.
 
 # Community
 

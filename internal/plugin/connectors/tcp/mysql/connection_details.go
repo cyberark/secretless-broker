@@ -24,6 +24,7 @@ type ConnectionDetails struct {
 	Port       uint
 	SSLOptions map[string]string
 	Username   string
+	Database   string
 }
 
 // NewConnectionDetails is a constructor of ConnectionDetails structure from a
@@ -54,6 +55,10 @@ func NewConnectionDetails(credentials map[string][]byte) (
 		connDetails.Password = string(credentials["password"])
 	}
 
+	if len(credentials["database"]) > 0 {
+		connDetails.Database = string(credentials["database"])
+	}
+
 	for _, sslOption := range sslOptions {
 		if len(credentials[sslOption]) > 0 {
 			connDetails.SSLOptions[sslOption] = string(credentials[sslOption])
@@ -65,6 +70,7 @@ func NewConnectionDetails(credentials map[string][]byte) (
 	delete(credentials, "port")
 	delete(credentials, "username")
 	delete(credentials, "password")
+	delete(credentials, "database")
 
 	for k, v := range credentials {
 		connDetails.Options[k] = string(v)

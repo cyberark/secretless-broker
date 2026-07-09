@@ -86,6 +86,32 @@ func TestUnexpectedFieldsAreSavedAsOptions(t *testing.T) {
 	}
 }
 
+func TestDatabaseCredentialPopulatesField(t *testing.T) {
+	credentials := map[string][]byte{
+		"host":     []byte("myhost"),
+		"username": []byte("myusername"),
+		"password": []byte("mypassword"),
+		"database": []byte("mydb"),
+	}
+
+	connDetails, err := NewConnectionDetails(credentials)
+	assert.Nil(t, err)
+	assert.Equal(t, "mydb", connDetails.Database)
+}
+
+func TestDatabaseCredentialNotLeakedIntoOptions(t *testing.T) {
+	credentials := map[string][]byte{
+		"host":     []byte("myhost"),
+		"username": []byte("myusername"),
+		"password": []byte("mypassword"),
+		"database": []byte("mydb"),
+	}
+
+	connDetails, err := NewConnectionDetails(credentials)
+	assert.Nil(t, err)
+	assert.NotContains(t, connDetails.Options, "database")
+}
+
 func TestAddress(t *testing.T) {
 	credentials := map[string][]byte{
 		"host": []byte("myhost2"),

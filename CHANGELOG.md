@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
+## [2.0.0] - 2026-07-01
+
+### Changed
+- **Breaking: HTTP connectors now enforce TLS by default (`forceSSL: true`).**
+  The generic HTTP connector and the `basic_auth` and `conjur` connectors
+  built on it previously defaulted `forceSSL` to `false`, which allowed the
+  injected backend credential (e.g. the `Authorization` header) to be sent to
+  the upstream over plaintext `http`. Deployments that intentionally rely on a plaintext `http`
+  upstream must now explicitly set `forceSSL: false` in the connector `config`
+  to keep working; otherwise the upstream must support TLS (recommended). When
+  `forceSSL: false` is set, a `[SECURITY]` startup warning is emitted so that
+  intentional cleartext credential transmission is visible in logs.
+  See the field reference in
+  [internal/plugin/connectors/http/generic/README.md](./internal/plugin/connectors/http/generic/README.md#forcessl-defaults-to-true).
+- `forceSSL` can now also be set on HTTP handlers in v1 file configs and
+  Kubernetes CRD  resources, so those deployments have
+  the same `forceSSL: false` opt-out as v2 file configs. Previously the v1/CRD
+  path could not express `forceSSL` at all.
+  Operators must re-apply the updated definition `kubectl apply -f resource-definitions/secretless-resource-definition.yaml` CNJR-13759.
+
 ## [1.7.34] - 2026-05-06
 
 ### Added

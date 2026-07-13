@@ -101,3 +101,30 @@ func TestForceSSL(t *testing.T) {
 		})
 	}
 }
+
+// TestForceSSLDefaultRejectsPlaintext verifies that a connector which does not
+// set forceSSL uses the secure default (forceSSL: true) and therefore rejects
+// requests to a plaintext http upstream instead of forwarding the injected
+// credentials in cleartext. The connector upgrades the scheme to https, so the
+// plaintext upstream fails the TLS handshake and the proxy returns an error
+// rather than a successful, credentialed response.
+func TestForceSSLDefaultRejectsPlaintext(t *testing.T) {
+	srv, err := httpServer(fromProxyUsername, fromProxyPassword)
+	if !assert.NoError(t, err) {
+		return
+	}
+	defer srv.Close()
+
+	res, err := proxyGet("http://"+targetEndpoint(srv), proxyDefault)
+	if err != nil {
+		return
+	}
+
+	assert.NotEqual(t, 200, res.StatusCode)
+
+	body, err := io.ReadAll(res.Body)
+	if !assert.NoError(t, err) {
+		return
+	}
+	assert.NotContains(t, string(body), serverResponseOK)
+}

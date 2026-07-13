@@ -51,6 +51,10 @@ type Handler struct {
 	Debug        bool       `json:"debug,omitempty" yaml:",omitempty"`
 	Match        []string   `json:"match,omitempty" yaml:",omitempty"`
 	Credentials  []Variable `json:"credentials,omitempty" yaml:",omitempty"`
+	// ForceSSL lets CRD deployments opt out of TLS enforcement for HTTP
+	// connectors (forceSSL: false). It is a *bool so an unset value (nil) can be
+	// distinguished from an explicit false
+	ForceSSL *bool `json:"forceSSL,omitempty" yaml:"forceSSL,omitempty"`
 }
 
 // ConfigurationSpec is the main configuration structure for Secretless.

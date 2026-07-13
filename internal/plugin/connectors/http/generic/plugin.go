@@ -31,6 +31,9 @@ func NewConnector(conRes connector.Resources) http.Connector {
 		logger.Panicf("can't create connector: can't validate YAML.")
 	}
 
+	// Warn when TLS enforcement has been explicitly disabled (forceSSL: false).
+	warnIfForceSSLDisabled(logger, cfg.ForceSSL)
+
 	return &Connector{
 		logger: logger,
 		config: cfg,

@@ -93,6 +93,52 @@ func Test_newConfig(t *testing.T) {
 	})
 }
 
+func Test_newConfig_ForceSSLDefault(t *testing.T) {
+	testCases := []struct {
+		description string
+		yaml        string
+		expForceSSL bool
+	}{
+		{
+			description: "defaults to true when forceSSL is unset",
+			yaml: `
+  headers:
+    Authorization: 'Bearer {{ .token }}'
+`,
+			expForceSSL: true,
+		},
+		{
+			description: "honors explicit forceSSL: true",
+			yaml: `
+  headers:
+    Authorization: 'Bearer {{ .token }}'
+  forceSSL: true
+`,
+			expForceSSL: true,
+		},
+		{
+			description: "honors explicit forceSSL: false opt-out",
+			yaml: `
+  headers:
+    Authorization: 'Bearer {{ .token }}'
+  forceSSL: false
+`,
+			expForceSSL: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			cfgYAML, err := NewConfigYAML([]byte(tc.yaml))
+			assert.NoError(t, err)
+
+			cfg, err := newConfig(cfgYAML)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expForceSSL, cfg.ForceSSL)
+		})
+	}
+}
+
 func Test_validate(t *testing.T) {
 	testCases := []struct {
 		description string

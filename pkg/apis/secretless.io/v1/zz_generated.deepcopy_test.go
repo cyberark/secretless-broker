@@ -98,12 +98,14 @@ func TestConfigurationListDeepCopy(t *testing.T) {
 }
 
 func TestHandlerListenerVariableDeepCopy(t *testing.T) {
+	forceSSL := false
 	h := &Handler{
 		TypeMeta: metav1.TypeMeta{Kind: "Handler"},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "h1",
 		},
-		Match: []string{"a", "b"},
+		Match:    []string{"a", "b"},
+		ForceSSL: &forceSSL,
 		Credentials: []Variable{
 			{
 				TypeMeta: metav1.TypeMeta{Kind: "Variable"},
@@ -120,6 +122,14 @@ func TestHandlerListenerVariableDeepCopy(t *testing.T) {
 	h.Match[0] = "changed"
 	if hCpy.Match[0] != "a" {
 		t.Fatalf("Handler DeepCopy is not deep")
+	}
+	// ForceSSL must be deep-copied (distinct pointer, same value).
+	if hCpy.ForceSSL == h.ForceSSL {
+		t.Fatalf("Handler DeepCopy shares ForceSSL pointer with original")
+	}
+	*h.ForceSSL = true
+	if *hCpy.ForceSSL != false {
+		t.Fatalf("Handler DeepCopy ForceSSL is not deep")
 	}
 
 	l := &Listener{

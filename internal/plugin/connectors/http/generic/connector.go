@@ -68,7 +68,12 @@ func (c *Connector) Connect(
 		return err
 	}
 
-	// Fulfill SSL requests
+	// Enforce TLS for the upstream request.
+	//
+	// ForceSSL defaults to true (see newConfig). When enabled we rewrite the
+	// scheme to https so the injected credentials are only ever transmitted over
+	// a TLS connection. If the upstream lacks TLS the transport's handshake
+	// fails and the request is rejected (503)
 	if c.config.ForceSSL {
 		r.URL.Scheme = "https"
 	}

@@ -253,6 +253,38 @@ config:
 required. Configs with a missing scheme or host are rejected at
 startup.
 
+### `forceSSL` (defaults to `true`)
+
+`forceSSL` enforces TLS on the broker → upstream connection. When enabled,
+Secretless upgrades the request scheme to `https` before
+injecting credentials, so the injected `Authorization` header is only ever transmitted over an encrypted connection.
+If the upstream does not support TLS, the connection fails and the request is
+rejected.
+
+> **Breaking change:** `forceSSL` now defaults to `true`. Previously it defaulted
+> to `false`, which allowed the backend credential to be sent to the upstream
+> over plaintext `http`, where any passive observer on the broker → upstream
+> network path could capture it.
+
+If you intentionally need to talk to a plaintext `http` upstream, you must now
+explicitly opt out:
+
+```yaml
+config:
+  forceSSL: false
+```
+
+When `forceSSL: false` is set, Secretless emits a `[SECURITY]` startup warning
+so that intentional cleartext credential transmission is visible in logs.
+
+`forceSSL` is also supported on HTTP handlers in v1 file configs and Kubernetes
+CRD (`kind: Configuration`) resources, so those deployments have the same
+opt-out (`forceSSL: false`) as v2 file configs.
+
+`forceSSL` is also supported on HTTP handlers in v1 file configs and Kubernetes
+CRD (`kind: Configuration`) resources, so those deployments have the same
+opt-out (`forceSSL: false`) as v2 file configs.
+
 ### Limitations
 
 Some HTTP APIs require more involved authentication.  For example, they might

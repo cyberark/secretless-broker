@@ -28,6 +28,55 @@ func (f *fakeConnector) Connect(r *gohttp.Request, _ connector.CredentialValuesB
 	return nil
 }
 
+// TestUnmatchedRequest_RejectedWith403 verifies that requests which do not
+// match any subservice's authenticateURLsMatching pattern are rejected with
+// HTTP 403 and are not forwarded to the client-supplied destination.
+func TestUnmatchedRequest_RejectedWith403(t *testing.T) {
+	targetGotRequest := false
+	target := httptest.NewServer(gohttp.HandlerFunc(func(w gohttp.ResponseWriter, r *gohttp.Request) {
+		targetGotRequest = true
+		w.WriteHeader(200)
+	}))
+	defer target.Close()
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+
+	logger := log.New(false)
+
+	subservices := []Subservice{
+		{
+			ConnectorID: "basic_auth",
+			Connector:   &fakeConnector{},
+			RetrieveCredentials: func() (map[string][]byte, error) {
+				return map[string][]byte{"username": []byte("user"), "password": []byte("pass")}, nil
+			},
+			AuthenticateURLsMatching: []*regexp.Regexp{
+				regexp.MustCompile(`^https://api\.legitimate\.com`),
+			},
+		},
+	}
+
+	svc, err := NewProxyService(subservices, listener, logger)
+	require.NoError(t, err)
+	require.NoError(t, svc.Start())
+	defer svc.Stop()
+
+	proxyURL, _ := url.Parse("http://" + listener.Addr().String())
+	client := &gohttp.Client{
+		Transport: &gohttp.Transport{
+			Proxy: gohttp.ProxyURL(proxyURL),
+		},
+	}
+
+	resp, err := client.Get(target.URL + "/ssrf-pivot")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	assert.Equal(t, 403, resp.StatusCode)
+	assert.False(t, targetGotRequest, "unmatched request must not be forwarded")
+}
+
 // TestUpstreamURL_BlocksRequestToWrongHost verifies that when upstreamURL is
 // configured, requests to a non-matching host are rejected with 403 and
 // credentials are never injected or forwarded.

@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   non-loopback address. See [Security hardening](./README.md#security-hardening).
 
 ### Changed
+- **Breaking: HTTP connector requests that match no configured service are now
+  rejected with HTTP 403.** Previously, requests whose URL did not match any
+  `authenticateURLsMatching` pattern were forwarded as an unauthenticated open
+  proxy to the client-supplied destination, allowing network-adjacent attackers
+  to pivot through the broker into backend networks (SSRF). Only requests that
+  match a configured subservice are now forwarded. CNJR-13754.
 - **Breaking: HTTP connectors now enforce TLS by default (`forceSSL: true`).**
   The generic HTTP connector and the `basic_auth` and `conjur` connectors
   built on it previously defaulted `forceSSL` to `false`, which allowed the

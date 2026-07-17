@@ -201,9 +201,10 @@ func (proxy *proxyService) ServeHTTP(w gohttp.ResponseWriter, r *gohttp.Request)
 
 	subservice := proxy.selectSubservice(r)
 
-	// No match: Send request with no authentication.
+	// No match: reject the request. Previously unmatched requests were forwarded
+	// as an unauthenticated open proxy, enabling SSRF pivots into backend networks.
 	if subservice == nil {
-		proxy.handleRequest(w, r)
+		gohttp.Error(w, "forbidden: no configured service matches this request", 403)
 		return
 	}
 

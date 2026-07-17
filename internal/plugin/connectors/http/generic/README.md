@@ -222,6 +222,19 @@ tells us that we expect the `apikey` to consist solely of uppercase letters and
 digits.  If this rule is violated at runtime, Secretless will log an
 appropriate error.
 
+### `authenticateURLsMatching`
+
+Each HTTP connector service defines one or more regular expressions that
+identify which request URLs the service should handle. A request is only
+processed when its full URL string matches at least one pattern on a configured
+service.
+
+**Requests that match no configured pattern are rejected with HTTP 403** and
+are not forwarded.
+
+Regular expressions used with this setting should be **as specific as possible**
+in order to avoid forwarding requests to unintended backends.
+
 ### `upstreamURL` (**Strongly Recommended**)
 
 `upstreamURL` is a security control that pins the destination of all

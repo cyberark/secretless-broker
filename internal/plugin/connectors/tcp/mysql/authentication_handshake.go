@@ -118,6 +118,7 @@ func (h *AuthenticationHandshake) Run() error {
 	h.overrideClientCapabilities()
 	// Inject credentials into the client handshake response
 	h.injectCredentials()
+	h.pinDatabase()
 
 	h.handleClientSSLRequest()
 
@@ -233,6 +234,16 @@ func (h *AuthenticationHandshake) injectCredentials() {
 		h.connectionDetails.Username,
 		h.connectionDetails.Password,
 	)
+}
+
+func (h *AuthenticationHandshake) pinDatabase() {
+	if h.err != nil {
+		return
+	}
+
+	if h.connectionDetails.Database != "" {
+		h.clientHandshakeResponse.Database = h.connectionDetails.Database
+	}
 }
 
 func (h *AuthenticationHandshake) handleClientSSLRequest() {

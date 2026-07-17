@@ -151,19 +151,19 @@ type connectResult struct {
 // Connect implements the tcp.Connector func signature
 //
 // It is the main method of the SingleUseConnector. It:
-//   1. Reads the client PreLogin request
-//   2. Constructs connection details from the provided credentials map
-//   3. Adds a ConnectInterceptor to the context to exchange data with the driver via
-//   	channels
-//   4. Initiates authentication and connection to MSSQL through the third-party driver
-//   5. Injects client's PreLogin request to the driver, which the driver incorporates
-//   	into its PreLogin request to server
-//   6. Intercepts PreLogin response or error from the driver
-//	 7. Customizes the PreLogin response to meet Secretless standards and sends it to
-//		client
-//   8. Intercepts Login response or error from the driver, and simultaneously extracts
-//   	net.Conn to server from the driver
-//   9. Sends Login response or error to client
+//  1. Reads the client PreLogin request
+//  2. Constructs connection details from the provided credentials map
+//  3. Adds a ConnectInterceptor to the context to exchange data with the driver via
+//     channels
+//  4. Initiates authentication and connection to MSSQL through the third-party driver
+//  5. Injects client's PreLogin request to the driver, which the driver incorporates
+//     into its PreLogin request to server
+//  6. Intercepts PreLogin response or error from the driver
+//  7. Customizes the PreLogin response to meet Secretless standards and sends it to
+//     client
+//  8. Intercepts Login response or error from the driver, and simultaneously extracts
+//     net.Conn to server from the driver
+//  9. Sends Login response or error to client
 //
 // Connect requires "host", "port", "username" and "password" credentials.
 func (connector *SingleUseConnector) Connect(
@@ -229,7 +229,8 @@ func (connector *SingleUseConnector) Connect(
 	connector.Logger.Debug("Waiting for target server connection")
 	backendConn, err := connector.waitForServerConnection(
 		connInterceptor,
-		connectionResultChan)
+		connectionResultChan,
+		connDetails.Database)
 
 	if err != nil {
 		connector.writeErrorToClient(err)
@@ -264,6 +265,7 @@ func protocolError(err error) mssql.Error {
 func (connector *SingleUseConnector) waitForServerConnection(
 	interceptor *mssql.ConnectInterceptor,
 	connResChan chan connectResult,
+	pinnedDatabase string,
 ) (net.Conn, error) {
 
 	// SECTION: wait for prelogin response
@@ -299,6 +301,9 @@ func (connector *SingleUseConnector) waitForServerConnection(
 		// Send the client login to the mssql driver which it can use to pass client
 		// params to the server. This channel is set as a value on the context passed to
 		// the mssql driver on construction.
+		if pinnedDatabase != "" {
+			clientLoginRequest.Database = pinnedDatabase
+		}
 		interceptor.ClientLoginRequest <- clientLoginRequest
 		break
 

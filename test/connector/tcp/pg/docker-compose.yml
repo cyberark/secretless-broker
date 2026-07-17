@@ -57,6 +57,7 @@ services:
       DB_PORT: 5432
       DB_USER: test
       DB_PASSWORD: test
+      DB_DATABASE: postgres
       SECRETLESS_HOST:
       VERBOSE:
 # env vars required for benchmarking

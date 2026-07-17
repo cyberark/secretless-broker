@@ -305,6 +305,21 @@ func (s *proxyServices) createTCPService(
 
 	s.logger.Infof("Starting TCP listener on %s...", netAddr.Address())
 
+	host, _, splitErr := net.SplitHostPort(netAddr.Address())
+	if splitErr == nil {
+		ip := net.ParseIP(host)
+		if (ip == nil || !ip.IsLoopback()) && host != "localhost" {
+			s.logger.Warnf(
+				"[SECURITY] Service '%s' is listening on non-loopback address '%s'. "+
+					"Any process that can reach this port obtains a proxied backend session. "+
+					"Restrict access with a Kubernetes NetworkPolicy or bind listenOn to "+
+					"127.0.0.1 or a Unix socket.",
+				config.Name,
+				netAddr.Address(),
+			)
+		}
+	}
+
 	connResources := s.connectorResources(config)
 	svcConnector := pluginInst.NewConnector(connResources)
 	credsRetriever := s.credsRetriever(config.Credentials)

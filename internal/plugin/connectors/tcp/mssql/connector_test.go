@@ -149,6 +149,32 @@ func TestSingleUseConnector_Connect(t *testing.T) {
 		assert.Equal(t, expectedClient, actualClient)
 	})
 
+	t.Run("singleUseConnector#PinnedDatabase overrides client-supplied database", func(t *testing.T) {
+		clientLoginRequest := &mssql.LoginRequest{}
+		clientLoginRequest.Database = "attacker_db"
+
+		var actualLoginRequest *mssql.LoginRequest
+
+		customCtor := mock.DefaultMSSQLConnectorCtor
+		customCtor.ClientLoginRequestPtr = &actualLoginRequest
+
+		connector := newSingleUseConnectorWithOptions(
+			mock.DefaultConnectorOptions,
+			mock.CustomNewMSSQLConnectorOption(customCtor),
+			func(connectorOptions *types.ConnectorOptions) {
+				connectorOptions.ReadLoginRequest = func(r io.ReadWriteCloser) (*mssql.LoginRequest, error) {
+					return clientLoginRequest, nil
+				}
+			},
+		)
+
+		_, _ = connector.Connect(mock.NewNetConn(nil), pluginconnector.CredentialValuesByID{
+			"database": []byte("pinned_db"),
+		})
+
+		assert.Equal(t, "pinned_db", actualLoginRequest.Database)
+	})
+
 	t.Run("singleUseConnector#ReadLoginRequest fail", func(t *testing.T) {
 		var methodFailsExpectedErr = errors.New("failed to handle login from client")
 

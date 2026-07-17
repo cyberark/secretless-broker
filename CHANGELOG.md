@@ -10,7 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Nothing should go in this section, please add to the latest unreleased version
   (and update the corresponding date), or add a new version.
 
-## [2.0.0] - 2026-07-01
+## [2.0.0] - 2026-07-15
+
+### Added
+- TCP connectors (pg, mysql, mssql) now support a `database` credential that
+  pins the backend session to the operator-configured database. 
+  See [Security hardening](./README.md#security-hardening). CNJR-13756.
+- A `[SECURITY]` warning is emitted at startup when a TCP service binds to a
+  non-loopback address. See [Security hardening](./README.md#security-hardening).
 
 ### Changed
 - **Breaking: HTTP connectors now enforce TLS by default (`forceSSL: true`).**

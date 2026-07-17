@@ -61,6 +61,7 @@ services:
       DB_PORT: 3306
       DB_USER: testuser
       DB_PASSWORD: testpass
+      DB_DATABASE: testdb
       SECRETLESS_HOST:
       VERBOSE:
     volumes:

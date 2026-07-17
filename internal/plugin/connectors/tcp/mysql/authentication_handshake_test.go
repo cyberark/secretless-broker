@@ -370,3 +370,31 @@ func TestAuthenticationHandshake_readPacket_Error(t *testing.T) {
 	assert.Error(t, handshake.err)
 	assert.Nil(t, result)
 }
+
+func TestPinDatabase_OverridesClientSupplied(t *testing.T) {
+	handshake := AuthenticationHandshake{
+		connectionDetails: &ConnectionDetails{Database: "pinned_db"},
+		clientHandshakeResponse: &protocol.HandshakeResponse41{
+			Database: "attacker_db",
+		},
+	}
+
+	handshake.pinDatabase()
+
+	assert.NoError(t, handshake.err)
+	assert.Equal(t, "pinned_db", handshake.clientHandshakeResponse.Database)
+}
+
+func TestPinDatabase_NoopWhenNotConfigured(t *testing.T) {
+	handshake := AuthenticationHandshake{
+		connectionDetails: &ConnectionDetails{Database: ""},
+		clientHandshakeResponse: &protocol.HandshakeResponse41{
+			Database: "client_db",
+		},
+	}
+
+	handshake.pinDatabase()
+
+	assert.NoError(t, handshake.err)
+	assert.Equal(t, "client_db", handshake.clientHandshakeResponse.Database)
+}

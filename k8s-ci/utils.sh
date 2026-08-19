@@ -29,12 +29,15 @@ function deleteRegistryImage() {
     set +e
     image_digest=\$(gcloud container images list-tags --filter='tags[]=${tag}' --format='get(digest)' '${image}')
 
+    # Already gone (e.g. deleted by a parallel job racing on the same tag) - nothing left to do
     gcloud container images delete -q '${image}:${tag}' --force-delete-tags
 
-    image_tags=\$(gcloud container images list-tags --filter=digest=\${image_digest} --format='get(tags)' '${image}' | awk -F';' '{print NF}')
-    if [ \${image_tags} -eq 0 ]; then
-      echo 'No tags left - completely deleting the image...'
-      gcloud container images delete -q ${image}@\${image_digest}
+    if [ -n \"\${image_digest}\" ]; then
+      image_tags=\$(gcloud container images list-tags --filter=\"digest=\${image_digest}\" --format='get(tags)' '${image}' | awk -F';' '{print NF}')
+      if [ \"\${image_tags:-0}\" -eq 0 ]; then
+        echo 'No tags left - completely deleting the image...'
+        gcloud container images delete -q ${image}@\${image_digest}
+      fi
     fi
   " > /dev/null
 }

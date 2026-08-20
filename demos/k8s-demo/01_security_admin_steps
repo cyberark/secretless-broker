@@ -54,9 +54,9 @@ echo "Using DB endpoint: $db_url"
 
 kubectl run --rm -i \
  --env PGPASSWORD="${DB_ADMIN_PASSWORD}" \
- --generator=run-pod/v1 \
  --namespace "${BACKEND_NAMESPACE}" \
  --wait \
+ --restart=Never \
  postgres-cli \
  --image="postgres:15" -- \
     psql \

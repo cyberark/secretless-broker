@@ -58,7 +58,7 @@ docker push '${SECRETLESS_IMAGE}' > /dev/null;
 kubectl create namespace '${TEST_NAMESPACE}';
 
 # switch to test namespace
-kubens '${TEST_NAMESPACE}';
+kubectl config set-context --current --namespace='${TEST_NAMESPACE}';
 
 # run tests
 cd '$test_path';

@@ -42,9 +42,9 @@ echo 'Waiting for application to boot up'
 echo '(This may take more than 1 minute)...'
 
 kubectl run --rm -i \
-  --generator=run-pod/v1 \
   --namespace "${APP_NAMESPACE}" \
   --wait \
+  --restart=Never \
   --image "alpine:3.20" \
   alpine-curl << EOF
   set -e

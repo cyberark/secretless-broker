@@ -124,7 +124,7 @@ func newConfigChangeChan(
 	fsWatchEnabled bool,
 ) (<-chan v2.Config, error) {
 
-	// Split the configuration spec string into the manager
+	// Split the configuration spec string into the manager and the
 	// manager's configuration spec string
 	splitCfgSpec := strings.SplitN(cfgManagerSpec, "#", 2)
 	cfgManager := splitCfgSpec[0]
@@ -150,9 +150,9 @@ func newConfigChangeChan(
 	return nil, fmt.Errorf("'%s' configuration manager not supported", cfgManagerSpec)
 }
 
-// handlePerformanceProfiling starts a performance profiling, and sets up an
+// handlePerformanceProfiling starts performance profiling, and sets up an
 // os.Signal listener that will automatically call Stop() on the profile
-// when an system halt is raised.
+// when a system halt is raised.
 func handlePerformanceProfiling(profileType string, exitSignals signal.ExitListener) {
 	// No profiling was requested
 	if profileType == "" {
@@ -222,7 +222,7 @@ func exitHandler(allServices internal.Service, params *SecretlessOptions) {
 
 	err := allServices.Stop()
 	if err != nil {
-		// Log but but allow cleanup of other subscribers to continue.
+		// Log but allow cleanup of other subscribers to continue.
 		log.Println(err)
 	}
 

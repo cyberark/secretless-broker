@@ -41,7 +41,7 @@ func HandleAuthenticationRequest(username string, password string, connection ne
 	}
 
 	if messageType != AuthenticationMessageType {
-		err = fmt.Errorf("Expected %d message type, got %d", AuthenticationMessageType, messageType)
+		err = fmt.Errorf("expected %d message type, got %d", AuthenticationMessageType, messageType)
 		return
 	}
 
@@ -206,7 +206,7 @@ func verifyAuthentication(connection net.Conn) error {
 	}
 
 	if messageType != AuthenticationMessageType {
-		return fmt.Errorf("Expected %d message type, got %d", AuthenticationMessageType, messageType)
+		return fmt.Errorf("expected %d message type, got %d", AuthenticationMessageType, messageType)
 	}
 
 	var messageValue int32
@@ -215,7 +215,7 @@ func verifyAuthentication(connection net.Conn) error {
 	}
 
 	if messageValue != AuthenticationOk {
-		return fmt.Errorf("Expected %d (AuthenticationOk), got %d", AuthenticationOk, messageValue)
+		return fmt.Errorf("expected %d (AuthenticationOk), got %d", AuthenticationOk, messageValue)
 	}
 
 	return nil

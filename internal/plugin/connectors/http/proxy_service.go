@@ -21,7 +21,7 @@ import (
 // traffic filtering rules and a devoted Connector.
 type Subservice struct {
 
-	// NOTE: This existence of both "ConnectorID" and "Authenticate" here
+	// NOTE: The existence of both "ConnectorID" and "Authenticate" here
 	// indicates a deeper problem: The concept of "connector" probably should
 	// have included both ID and "connector function" together, as a single
 	// entity.  That feels like the right abstraction, though the costs of not
@@ -45,7 +45,7 @@ func (sub *Subservice) Matches(url string) bool {
 	return false
 }
 
-// NewProxyService create a new HTTP proxy service.
+// NewProxyService creates a new HTTP proxy service.
 func NewProxyService(
 	subservices []Subservice,
 	sharedListener net.Listener,
@@ -275,7 +275,7 @@ func (proxy *proxyService) Start() error {
 		return fmt.Errorf("cannot call Start on stopped ProxyService")
 	}
 
-	// We need a Go routine here because http.Serve() is blocking, but this
+	// We need a goroutine here because http.Serve() is blocking, but this
 	// Start() method shouldn't be.
 	go func() {
 		err := gohttp.Serve(proxy.listener, proxy)

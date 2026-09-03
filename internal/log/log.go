@@ -32,7 +32,7 @@ const (
 	WarnSeverity
 	// ErrorSeverity indicates a critical severity logging message
 	ErrorSeverity
-	// PanicSeverity indicates a severity logging message that is unliekly to be
+	// PanicSeverity indicates a severity logging message that is unlikely to be
 	// recovered from
 	PanicSeverity
 )
@@ -208,7 +208,7 @@ func (logger *Logger) Debugln(args ...interface{}) {
 	logger.logln(DebugSeverity, args...)
 }
 
-// Infoln prints to stdout a info-level logging message
+// Infoln prints to stdout an info-level logging message
 func (logger *Logger) Infoln(args ...interface{}) {
 	logger.logln(InfoSeverity, args...)
 }
@@ -218,7 +218,7 @@ func (logger *Logger) Warnln(args ...interface{}) {
 	logger.logln(WarnSeverity, args...)
 }
 
-// Errorln prints to stdout a error-level logging message
+// Errorln prints to stdout an error-level logging message
 func (logger *Logger) Errorln(args ...interface{}) {
 	logger.logln(ErrorSeverity, args...)
 }
@@ -234,7 +234,7 @@ func (logger *Logger) Debug(args ...interface{}) {
 	logger.log(DebugSeverity, args...)
 }
 
-// Info prints to stdout a info-level logging message. Alias of
+// Info prints to stdout an info-level logging message. Alias of
 // Infoln method.
 func (logger *Logger) Info(args ...interface{}) {
 	logger.log(InfoSeverity, args...)
@@ -246,8 +246,8 @@ func (logger *Logger) Warn(args ...interface{}) {
 	logger.log(WarnSeverity, args...)
 }
 
-// Error prints to stdout a error-level logging message. Alias of
-// Errorn method.
+// Error prints to stdout an error-level logging message. Alias of
+// Errorln method.
 func (logger *Logger) Error(args ...interface{}) {
 	logger.log(ErrorSeverity, args...)
 }
